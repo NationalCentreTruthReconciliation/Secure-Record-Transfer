@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mockup.apps.MockupConfig'
 ]
 
 MIDDLEWARE = [
@@ -129,7 +130,7 @@ FILE_UPLOAD_HANDLERS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'CST'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
