@@ -99,7 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Logging
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -115,6 +115,11 @@ LOGGING = {
         }
     }
 }
+
+
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
 
 
 # Internationalization
