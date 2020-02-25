@@ -87,5 +87,8 @@ target/
 __pycache__/
 local_settings.py
 
+# Collected static files
+bagitobjecttransfer/static/
+
 .env
 db.sqlite3
