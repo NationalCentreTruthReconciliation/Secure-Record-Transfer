@@ -8,7 +8,9 @@
 <body>
     <header class="header">
         <div class="main-header-content">
-            <img id="logo" src="{% static 'mockup/img/nctrlogo_flame_150x150px.png'%}">
+            <a href="{% url 'mockup:index' %}" title="Go to home page">
+                <img id="logo" src="{% static 'mockup/img/nctrlogo_flame_150x150px.png'%}">
+            </a>
             <div class="header-title">
                 NCTR Record Transfer
             </div>

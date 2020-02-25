@@ -9,7 +9,6 @@
 {% endif %}
 
 <h1>Transfer Records</h1>
-<a href="{% url 'mockup:index' %}">Go Back</a>
 <form action="{% url 'mockup:sendtransfer' %}" method="post">
 {% csrf_token %}
     <label for="first_name">First Name</label>
