@@ -3,7 +3,9 @@
 {% block title %}Transfer Complete!{% endblock %}
 
 {% block content %}
-<h1>Thank you for your transfer.</h1>
+<div class="title-text">Thank you for your transfer.</div>
+<br>
 <a href="{% url 'mockup:transfer' %}">Start another Transfer</a>
+<br>
 <a href="{% url 'mockup:index' %}">Home</a>
 {% endblock %}
