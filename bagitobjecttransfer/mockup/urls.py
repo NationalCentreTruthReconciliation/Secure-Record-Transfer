@@ -4,8 +4,8 @@ from . import views
 
 app_name = 'mockup'
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('transfer/', views.transfer, name='transfer'),
+    path('', views.Index.as_view(), name='index'),
+    path('transfer/', views.Transfer.as_view(), name='transfer'),
     path('transfer/send/', views.sendtransfer, name='sendtransfer'),
-    path('transfer/sent/', views.transfersent, name='transfersent'),
+    path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
 ]

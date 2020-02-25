@@ -3,7 +3,12 @@
 {% block title %}Transfer Records to the NCTR{% endblock %}
 
 {% block content %}
-<h1>This is the transfer page.</h1>
+
+{% if error_msg %}
+    <p>{{ error_msg }}</p>
+{% endif %}
+
+<h1>Transfer Records</h1>
 <a href="{% url 'mockup:index' %}">Go Back</a>
 <form action="{% url 'mockup:sendtransfer' %}" method="post">
 {% csrf_token %}
