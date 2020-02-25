@@ -14,20 +14,38 @@ header {
     box-shadow: 0 4px 3px -3px #bbbbbb;
 }
 
+.logo-title-section {
+    flex-grow: 2;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+
+#logo {
+    height: 70px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 70px;
+}
+
+.header-title {
+    color: #333333;
+    font-size: 20pt;
+    padding-left: 10px;
+    padding-right: 10px;
+    flex-grow: 2;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+
 .main-header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.header-title {
-    font-size: 16pt;
-    flex-grow: 2;
-    flex-shrink: 0;
-    flex-basis: auto;
-}
 
 .navigation {
+    color: #333333;
     flex-grow: 4;
     flex-shrink: 0;
     flex-basis: auto;
@@ -45,7 +63,7 @@ header {
     font-size: 11pt;
     border: none;
     border-radius: 3px;
-    padding: 4px 10px 4px 10px;
+    padding: 6px 12px 6px 12px;
     margin: 0;
     text-decoration: none;
     background: #4e2d11;
@@ -70,6 +88,9 @@ header {
     margin: 12px;
 }
 
+/**
+ * Responsive design section
+ */
 @media (min-width: 1200px) {
     .main-header-content,
     .main-content {
