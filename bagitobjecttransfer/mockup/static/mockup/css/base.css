@@ -1,0 +1,89 @@
+html {
+    font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+}
+
+header {
+    background-color: #eeeeee;
+    width: 100%;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    box-shadow: 0 4px 3px -3px #bbbbbb;
+}
+
+.main-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-title {
+    font-size: 16pt;
+    flex-grow: 2;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+
+.navigation {
+    flex-grow: 4;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+
+.login {
+    text-align: center;
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: 80px;
+}
+
+.login-button {
+    margin: auto;
+    font-size: 11pt;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 10px 4px 10px;
+    margin: 0;
+    text-decoration: none;
+    background: #4e2d11;
+    color: #fefefe;
+    transition: background 150ms ease;
+    -webkit-appearance: none;
+}
+
+.login-button:hover,
+.login-button:focus {
+    background: #f07622;
+    color: #ffffff;
+}
+
+.solid-bar {
+    height: 20px;
+    width: 100%;
+    color: #4e2d11;
+}
+
+.main-content {
+    margin: 12px;
+}
+
+@media (min-width: 1200px) {
+    .main-header-content,
+    .main-content {
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 1199px) {
+    .main-header-content,
+    .main-content {
+        width: 95%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
