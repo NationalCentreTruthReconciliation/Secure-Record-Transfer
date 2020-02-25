@@ -6,6 +6,11 @@ body {
     margin: 0;
 }
 
+.title-text {
+    color: #333333;
+    font-size: 20pt;
+}
+
 header {
     background-color: #eeeeee;
     width: 100%;
@@ -28,11 +33,9 @@ header {
 }
 
 .header-title {
-    color: #333333;
-    font-size: 20pt;
     padding-left: 10px;
     padding-right: 10px;
-    flex-grow: 2;
+    flex-grow: 1;
     flex-shrink: 0;
     flex-basis: auto;
 }
@@ -58,7 +61,7 @@ header {
     flex-basis: 80px;
 }
 
-.login-button {
+.brown-button {
     margin: auto;
     font-size: 11pt;
     border: none;
@@ -72,20 +75,14 @@ header {
     -webkit-appearance: none;
 }
 
-.login-button:hover,
-.login-button:focus {
+.brown-button:hover,
+.brown-button:focus {
     background: #f07622;
     color: #ffffff;
 }
 
-.solid-bar {
-    height: 20px;
-    width: 100%;
-    color: #4e2d11;
-}
-
 .main-content {
-    margin: 12px;
+    padding: 18px 12px 18px 12px;
 }
 
 /**
