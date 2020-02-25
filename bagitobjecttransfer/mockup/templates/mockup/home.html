@@ -3,5 +3,13 @@
 {% block title %}NCTR Record Transfer Portal{% endblock %}
 
 {% block content %}
-<a href="{% url 'mockup:transfer' %}">Start a Transfer</a>
+<p>
+    Welcome to the National Centre for Truth and Reconciliation's digital record transfer utility.
+    This application is used to securely and safely give digital files to the NCTR's archives. If
+    you or someone you know would like to send digital files to the NCTR, create a login account
+    to start transferring records.
+</p>
+<button class="brown-button" type="submit" onclick="location.href='{% url 'mockup:transfer' %}'">
+    Start a New Transfer
+</button>
 {% endblock %}
