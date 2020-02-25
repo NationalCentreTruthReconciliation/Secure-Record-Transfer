@@ -8,15 +8,42 @@
     <p>{{ error_msg }}</p>
 {% endif %}
 
-<h1>Transfer Records</h1>
+<div class="form-title title-text">Transfer Records</div>
 <form action="{% url 'mockup:sendtransfer' %}" method="post">
-{% csrf_token %}
-    <label for="first_name">First Name</label>
-    <input type="text" name="first_name" id="first_name">
-    <br>
-    <label for="last_name">Last Name</label>
-    <input type="text" name="last_name" id="last_name">
-    <br>
-    <input type="submit" value="Send">
+    {% csrf_token %}
+    <div class="flex-item">
+        <label class="flex-label" for="first_name">First Name</label>
+        <input class="flex-field" id="first-name" type="text" name="first_name" placeholder="Enter your first name">
+    </div>
+    <div class="flex-item">
+        <label class="flex-label" for="last_name">Last Name</label>
+        <input class="flex-field" id="last-name" type="text" name="last_name" placeholder="Enter your last name">
+    </div>
+    <div class="flex-item">
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" name="phone" placeholder="Enter your phone number">
+    </div>
+    <div class="flex-item">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" placeholder="Enter your email address">
+    </div>
+    <div class="flex-item">
+        <label for="organization">Organization</label>
+        <input id="organization" type="text" name="organization" placeholder="Enter your organization">
+    </div>
+    <div class="flex-item">
+        <label for="organization_address">Organization Address</label>
+        <input id="organization-address" type="text" name="organization_address" placeholder="Enter your organization's address">
+    </div>
+    <div class="flex-item">
+        <label for="description">Description</label>
+        <textarea id="description" rows="4" placeholder="Enter a brief description of your uploaded files"></textarea>
+    </div>
+    <div class="flex-item row-reverse">
+        <label for="dummy_label"></label>
+        <div>
+            <button type="submit" class="brown-button">Send</button>
+        </div>
+    </div>
 </form>
 {% endblock %}
