@@ -11,34 +11,20 @@
 <div class="form-title title-text">Transfer Records</div>
 <form action="{% url 'mockup:sendtransfer' %}" method="post">
     {% csrf_token %}
-    <div class="flex-item">
-        <label class="flex-label" for="first_name">First Name</label>
-        <input class="flex-field" id="first-name" type="text" name="first_name" placeholder="Enter your first name">
-    </div>
-    <div class="flex-item">
-        <label class="flex-label" for="last_name">Last Name</label>
-        <input class="flex-field" id="last-name" type="text" name="last_name" placeholder="Enter your last name">
-    </div>
-    <div class="flex-item">
-        <label for="phone">Phone Number</label>
-        <input id="phone" type="tel" name="phone" placeholder="Enter your phone number">
-    </div>
-    <div class="flex-item">
-        <label for="email">Email</label>
-        <input id="email" type="email" name="email" placeholder="Enter your email address">
-    </div>
-    <div class="flex-item">
-        <label for="organization">Organization</label>
-        <input id="organization" type="text" name="organization" placeholder="Enter your organization">
-    </div>
-    <div class="flex-item">
-        <label for="organization_address">Organization Address</label>
-        <input id="organization-address" type="text" name="organization_address" placeholder="Enter your organization's address">
-    </div>
-    <div class="flex-item">
-        <label for="description">Description</label>
-        <textarea id="description" rows="4" placeholder="Enter a brief description of your uploaded files"></textarea>
-    </div>
+    {% for field in form %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+            <div class="flex-item">
+                <label for="nothing"></label>
+                <div class="field-error">{{ error }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        <div class="flex-item">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        </div>
+    {% endfor %}
     <div class="flex-item row-reverse">
         <label for="dummy_label"></label>
         <div>

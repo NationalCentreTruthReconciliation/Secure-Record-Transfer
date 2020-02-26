@@ -68,7 +68,7 @@ header {
     padding: 6px 12px 6px 12px;
     margin: 0;
     text-decoration: none;
-    background: #4e2d11;
+    background: #2d30d4;
     color: #fefefe;
     transition: background 150ms ease;
     -webkit-appearance: none;
@@ -76,7 +76,7 @@ header {
 
 .brown-button:hover,
 .brown-button:focus {
-    background: #f07622;
+    background: #316dee;
     color: #ffffff;
 }
 
