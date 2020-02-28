@@ -4,31 +4,45 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
+
 class FolderNotFoundError(Exception):
     pass
 
+
 class Bagger:
-    def __init__(self, bag_storage_folder):
-        self.parent_folder = Path(bag_storage_folder)
-        if not self.parent_folder.exists():
-            raise FolderNotFoundError(f'Could not find folder "{bag_storage_folder}"')
+    @staticmethod
+    def create_bag(storage_folder: str, files: list, metadata: dict):
+        """ Creates a bag from a list of file paths and a dictionary of bag metadata.
 
+        Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
+        files, data files, and manifest files. The bagit-py library is used, which has been developed
+        by the Library of Congress.
 
-    def create_bag(self, files, metadata):
-        new_bag_folder = self._get_bagging_folder()
+        Args:
+            storage_folder (str): Path to folder to store the bag in
+            files (list): A list of dictionaries containing the path and the name of the files to be
+                put in the bag. Each dictionary must have a 'filepath' field and a 'name' field.
+            metadata (dict): A dictionary of bag metadata to be applied to bag tag files
+        """
+        if not Path(storage_folder).exists():
+            raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
+
+        new_bag_folder = Bagger._get_bagging_folder(storage_folder)
         if not new_bag_folder.exists():
             os.mkdir(new_bag_folder)
 
         missing_files = []
         copied_files = []
-        for f in files:
-            source_path = Path(f)
+
+        for file_info in files:
+            source_path = Path(file_info['filepath'])
+
             if not source_path.exists():
-                print (f'ERROR: File "{f}" does not exist!')
+                print (f'ERROR: File "{source_path}" does not exist!')
                 missing_files.append(str(source_path))
+
             elif not missing_files:
-                source_name = source_path.name
-                destination_path = new_bag_folder / source_name
+                destination_path = new_bag_folder / file_info['name']
                 print (f'INFO: copying {source_path} to {destination_path}')
                 shutil.copy(source_path, destination_path)
                 copied_files.append(destination_path)
@@ -53,20 +67,42 @@ class Bagger:
         }
 
 
-    def delete_bag(self, bag_folder):
+    @staticmethod
+    def delete_bag(self, bag_folder: str):
+        """ Deletes a bag folder and all of its contents
+
+        Args:
+            bag_folder (str): The bag folder to be deleted
+        """
+        if not Path(bag_folder).exists():
+            raise FolderNotFoundError(f'Could not find folder "{bag_folder}"')
         shutil.rmtree(bag_folder)
 
 
-    def _get_bagging_folder(self):
+    @staticmethod
+    def _get_bagging_folder(storage_folder: str) -> Path:
+        """ Creates a unique, date-based folder path to store bag contents in
+
+        Args:
+            storage_folder (str): The parent folder to create a bagging folder in
+
+        Returns:
+            pathlib.Path: A path to new, unique folder name containing the current date
+        """
+        storage_folder_path = Path(storage_folder)
+
+        if not Path(storage_folder_path).exists():
+            raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
+
         current_date = datetime.today()
         time = datetime.strftime(current_date, r'%Y%m%d_%H%M%S')
 
-        new_folder = self.parent_folder / f'Bag_{time}'
+        new_folder = storage_folder_path / f'Bag_{time}'
         folder_OK = False
         increment = 1
         while not folder_OK:
             if new_folder.exists():
-                new_folder = self.parent_folder / f'Bag_{time}_{increment}'
+                new_folder = storage_folder_path / f'Bag_{time}_{increment}'
                 increment += 1
             else:
                 folder_OK = True
