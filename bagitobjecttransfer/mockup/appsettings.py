@@ -1,0 +1,1 @@
+bag_storage_folder = 'C:/Users/lovegrod/Desktop'
