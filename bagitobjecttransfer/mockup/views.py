@@ -27,9 +27,6 @@ def sendtransfer(request):
         try:
             form = TransferForm(request.POST, request.FILES)
             if form.is_valid():
-                first_name = form.cleaned_data['first_name']
-                last_name = form.cleaned_data['last_name']
-                print (f'First Name: {first_name} | Last Name: {last_name}')
                 files = request.FILES.getlist('upload_files')
                 file_list = []
                 for f in files:
@@ -38,7 +35,18 @@ def sendtransfer(request):
                         'name': f.name
                     })
 
-                Bagger.create_bag(bag_storage_folder, file_list, {})
+                first_name = form.cleaned_data['first_name']
+                last_name = form.cleaned_data['last_name']
+                metadata = {
+                    'Contact-Name': f'{first_name} {last_name}',
+                    'Contact-Phone': form.cleaned_data['phone_number'],
+                    'Contact-Email': form.cleaned_data['email'],
+                    'Source-Organization': form.cleaned_data['organization'],
+                    'Organization-Address': form.cleaned_data['organization_address'],
+                    'External-Description': form.cleaned_data['description'],
+                }
+
+                Bagger.create_bag(bag_storage_folder, file_list, metadata)
 
             else:
                 print ('Form was invalid...')
