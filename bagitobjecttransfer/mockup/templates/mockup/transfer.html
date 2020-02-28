@@ -9,7 +9,7 @@
 {% endif %}
 
 <div class="form-title title-text">Transfer Records</div>
-<form action="{% url 'mockup:sendtransfer' %}" method="post">
+<form action="{% url 'mockup:sendtransfer' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in form %}
         {% if field.errors %}
