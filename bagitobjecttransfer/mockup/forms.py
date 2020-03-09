@@ -15,12 +15,13 @@ class TransferForm(forms.Form):
     )
 
     phone_number = forms.RegexField(
-        regex=r'^\d{10}$',
+        regex=r'^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$',
         error_messages={
-            'invalid': 'Phone number must contain ten digits without spaces'
+            'required': 'Phone number is required',
+            'invalid': 'Phone number must look like "+1 (999) 999-9999"'
         },
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your phone number'}),
-    )
+        widget=forms.TextInput(attrs={'placeholder': '+1 (999) 999-9999'},
+    ))
 
     email = forms.EmailField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter your email'}),
