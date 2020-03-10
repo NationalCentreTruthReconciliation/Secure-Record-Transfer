@@ -21,14 +21,22 @@
             {% endfor %}
         {% endif %}
         <div class="flex-item">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.id_for_label == "id_upload_files" %}
+                <div name="upload_files" id="id_upload_files" class="dz-clickable dropzone clsbox">
+                    <div class="dz-default dz-message">
+                        <span>Drop files here to upload</span>
+                    </div>
+                </div>
+            {% else %}
+                {{ field }}
+            {% endif %}
         </div>
     {% endfor %}
     <div class="flex-item row-reverse">
         <label for="dummy_label"></label>
         <div>
-            <button type="submit" class="brown-button">Send</button>
+            <button id="submit-transfer-form" type="submit" class="brown-button">Send</button>
         </div>
     </div>
 </form>

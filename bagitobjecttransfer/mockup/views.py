@@ -49,7 +49,10 @@ def sendtransfer(request):
                 Bagger.create_bag(bag_storage_folder, file_list, metadata)
 
             else:
-                print ('Form was invalid...')
+                for err in form.errors:
+                    for message in form.errors[err]:
+                        print (f'{err} Error: {message}')
+
                 return render(request, 'mockup/transfer.html', {'form': form})
 
         except KeyError:
