@@ -9,7 +9,7 @@
 {% endif %}
 
 <div class="form-title title-text">Transfer Records</div>
-<form action="{% url 'mockup:sendtransfer' %}" method="post" enctype="multipart/form-data">
+<form id="transfer-form" action="{% url 'mockup:sendtransfer' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in form %}
         {% if field.errors %}
@@ -22,21 +22,21 @@
         {% endif %}
         <div class="flex-item">
             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {% if field.id_for_label == "id_upload_files" %}
-                <div name="upload_files" id="id_upload_files" class="dz-clickable dropzone clsbox">
-                    <div class="dz-default dz-message">
-                        <span>Drop files here to upload</span>
-                    </div>
-                </div>
-            {% else %}
-                {{ field }}
-            {% endif %}
+            {{ field }}
         </div>
     {% endfor %}
+    <div class="flex-item">
+        <label for="file_dropzone">Upload files</label>
+        <div id="file_dropzone" class="dz-clickable dropzone clsbox">
+            <div class="dz-default dz-message">
+                Drop files here to upload
+            </div>
+        </div>
+    </div>
     <div class="flex-item row-reverse">
         <label for="dummy_label"></label>
         <div>
-            <button id="submit-transfer-form" type="submit" class="brown-button">Send</button>
+            <button id="submit-form-btn" type="submit" class="brown-button">Send</button>
         </div>
     </div>
 </form>

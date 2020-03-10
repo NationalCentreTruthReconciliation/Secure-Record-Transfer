@@ -47,9 +47,3 @@ class TransferForm(forms.Form):
             'placeholder': 'Enter a brief description of your uploaded files',
         }),
     )
-
-    upload_files = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={
-            'multiple': True
-        })
-    )

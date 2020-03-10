@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 
@@ -22,11 +22,24 @@ class TransferSent(TemplateView):
     template_name = 'mockup/transfersent.html'
 
 
+def uploadfiles(request):
+    files_dictionary = request.FILES.dict()
+
+    for key in files_dictionary:
+        print ({
+            'filepath': files_dictionary[key].temporary_file_path(),
+            'name': files_dictionary[key].name
+        })
+
+    return JsonResponse({'success': True}, status=200)
+
+
 def sendtransfer(request):
     if request.method == 'POST':
         try:
-            form = TransferForm(request.POST, request.FILES)
+            form = TransferForm(request.POST)
             if form.is_valid():
+                '''
                 files = request.FILES.getlist('upload_files')
                 file_list = []
                 for f in files:
@@ -34,6 +47,7 @@ def sendtransfer(request):
                         'filepath': f.temporary_file_path(),
                         'name': f.name
                     })
+                '''
 
                 first_name = form.cleaned_data['first_name']
                 last_name = form.cleaned_data['last_name']
@@ -46,7 +60,7 @@ def sendtransfer(request):
                     'External-Description': form.cleaned_data['description'],
                 }
 
-                Bagger.create_bag(bag_storage_folder, file_list, metadata)
+                # Bagger.create_bag(bag_storage_folder, [], metadata)
 
             else:
                 for err in form.errors:
