@@ -15,15 +15,16 @@ function getCookie(name) {
 }
 
 Dropzone.autoDiscover = false
+fileList = []
 
 $(() => {
-    $("#file_dropzone").dropzone({
+    $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
         paramName: "upload_files",
         addRemoveLinks: true,
         autoProcessQueue: false,
         uploadMultiple: true,
-        parallelUploads: 5,
+        parallelUploads: 2,
         maxFiles: 80,
         headers: {
             "X-CSRFToken": getCookie("csrftoken")
@@ -36,23 +37,32 @@ $(() => {
                 e.preventDefault();
                 e.stopPropagation();
                 if (dropzoneClosure.getQueuedFiles().length > 0) {
+                    dropzoneClosure.options.autoProcessQueue = true
                     dropzoneClosure.processQueue();
                 } else {
                     alert("You cannot submit a form without any files.")
                 }
             });
 
-            this.on("successmultiple", function(files, response) {
-                setTimeout(function () {
-                    var hiddenJsonInput = document.getElementById("id_file_list_json")
-                    if (hiddenJsonInput != null) {
-                        hiddenJsonInput.setAttribute("value", JSON.stringify(response.files))
+            this.on("successmultiple", (files, response) => {
+                for (var i = 0; i < response.files.length; i++) {
+                    fileList.push(response.files[i])
+                }
+            })
+
+            this.on("queuecomplete", () => {
+                var hiddenJsonInput = document.getElementById("id_file_list_json")
+                if (hiddenJsonInput != null) {
+                    hiddenJsonInput.setAttribute("value", JSON.stringify(fileList))
+                    fileList = []
+                    // Show the end of the dropzone animation by delaying submission
+                    window.setTimeout(() => {
                         document.getElementById("transfer-form").submit()
-                    }
-                    else {
-                        console.error('Could not find the hidden JSON input field on the page!')
-                    }
-                }, 1000)
+                    }, 1000)
+                }
+                else {
+                    console.error('Could not find the hidden JSON input field on the page!')
+                }
             })
         }
     })
