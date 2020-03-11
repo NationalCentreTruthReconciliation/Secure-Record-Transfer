@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 
 from .forms import TransferForm
-from .appsettings import bag_storage_folder
+from .appsettings import BAG_STORAGE_FOLDER
 
 import json
 import os

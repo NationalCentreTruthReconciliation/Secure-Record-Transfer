@@ -1,1 +1,1 @@
-bag_storage_folder = 'C:/Users/lovegrod/Desktop'
+BAG_STORAGE_FOLDER = 'C:/Users/lovegrod/Desktop'
