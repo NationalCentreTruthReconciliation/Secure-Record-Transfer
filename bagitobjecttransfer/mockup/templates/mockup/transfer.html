@@ -20,10 +20,14 @@
             </div>
             {% endfor %}
         {% endif %}
-        <div class="flex-item">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.id_for_label != "id_file_list_json" %}
+            <div class="flex-item">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+            </div>
+        {% else %}
             {{ field }}
-        </div>
+        {% endif %}
     {% endfor %}
     <div class="flex-item">
         <label for="file_dropzone">Upload files</label>

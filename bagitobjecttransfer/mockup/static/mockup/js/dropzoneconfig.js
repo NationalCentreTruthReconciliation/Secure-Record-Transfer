@@ -44,7 +44,14 @@ $(() => {
 
             this.on("successmultiple", function(files, response) {
                 setTimeout(function () {
-                    document.getElementById("transfer-form").submit()
+                    var hiddenJsonInput = document.getElementById("id_file_list_json")
+                    if (hiddenJsonInput != null) {
+                        hiddenJsonInput.setAttribute("value", JSON.stringify(response.files))
+                        document.getElementById("transfer-form").submit()
+                    }
+                    else {
+                        console.error('Could not find the hidden JSON input field on the page!')
+                    }
                 }, 1000)
             })
         }
