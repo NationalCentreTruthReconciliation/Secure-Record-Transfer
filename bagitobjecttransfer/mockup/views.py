@@ -8,6 +8,7 @@ from .appsettings import BAG_STORAGE_FOLDER
 
 import json
 import os
+import  threading
 
 from .bagger import Bagger
 
@@ -59,18 +60,27 @@ def sendtransfer(request):
                     'External-Description': form.cleaned_data['description'],
                 }
 
-                Bagger.create_bag(bag_storage_folder, uploaded_files, metadata)
-
-                for f in uploaded_files:
-                    try:
-                        os.remove(f['filepath'])
-                    except FileNotFoundError:
-                        pass
+                bagging_thread = threading.Thread(
+                    target=create_bag_background,
+                    args=(BAG_STORAGE_FOLDER, uploaded_files, metadata)
+                )
+                bagging_thread.setDaemon(True)
+                bagging_thread.start()
 
             else:
                 for err in form.errors:
                     for message in form.errors[err]:
                         print (f'{err} Error: {message}')
+
+                # I'd like to re-populate the dropzone here instead but it may
+                # not be possible, so I'm removing the files instead
+                if form.data['file_list_json']:
+                    files = json.loads(form.data['file_list_json'])
+                    for f in files:
+                        try:
+                            os.remove(f['filepath'])
+                        except FileNotFoundError:
+                            pass
 
                 return render(request, 'mockup/transfer.html', {'form': form})
 
@@ -83,3 +93,13 @@ def sendtransfer(request):
     else:
         form = TransferForm()
         return render(request, 'mockup/transfer.html', {'form': form})
+
+
+def create_bag_background(storage_folder: str, files: list, metadata: dict):
+    Bagger.create_bag(storage_folder, files, metadata)
+
+    for f in files:
+        try:
+            os.remove(f['filepath'])
+        except FileNotFoundError:
+            pass
