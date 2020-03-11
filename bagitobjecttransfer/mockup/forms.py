@@ -47,3 +47,5 @@ class TransferForm(forms.Form):
             'placeholder': 'Enter a brief description of your uploaded files',
         }),
     )
+
+    file_list_json = forms.CharField(widget=forms.HiddenInput())

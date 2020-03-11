@@ -11,7 +11,7 @@ class FolderNotFoundError(Exception):
 
 class Bagger:
     @staticmethod
-    def create_bag(storage_folder: str, files: list, metadata: dict):
+    def create_bag(storage_folder: str, files: list, metadata: dict, deletefiles=False):
         """ Creates a bag from a list of file paths and a dictionary of bag metadata.
 
         Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
@@ -38,13 +38,16 @@ class Bagger:
             source_path = Path(file_info['filepath'])
 
             if not source_path.exists():
-                print (f'ERROR: File "{source_path}" does not exist!')
+                print (f'Bagging ERROR: File "{source_path}" does not exist!')
                 missing_files.append(str(source_path))
 
             elif not missing_files:
                 destination_path = new_bag_folder / file_info['name']
-                print (f'INFO: copying {source_path} to {destination_path}')
-                shutil.copy(source_path, destination_path)
+                print (f'Bagging INFO: copying {source_path} to {destination_path}')
+                if deletefiles:
+                    shutil.move(source_path, destination_path)
+                else:
+                    shutil.copy(source_path, destination_path)
                 copied_files.append(destination_path)
 
         bag_valid = False

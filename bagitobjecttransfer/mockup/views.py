@@ -6,6 +6,9 @@ from django.views.generic import TemplateView, FormView
 from .forms import TransferForm
 from .appsettings import bag_storage_folder
 
+import json
+import os
+
 from .bagger import Bagger
 
 
@@ -25,13 +28,17 @@ class TransferSent(TemplateView):
 def uploadfiles(request):
     files_dictionary = request.FILES.dict()
 
+    file_list = []
     for key in files_dictionary:
-        print ({
+        file_list.append({
             'filepath': files_dictionary[key].temporary_file_path(),
             'name': files_dictionary[key].name
         })
 
-    return JsonResponse({'success': True}, status=200)
+    return JsonResponse({
+        'success': True,
+        'files': file_list
+        }, status=200)
 
 
 def sendtransfer(request):
@@ -39,16 +46,8 @@ def sendtransfer(request):
         try:
             form = TransferForm(request.POST)
             if form.is_valid():
-                '''
-                files = request.FILES.getlist('upload_files')
-                file_list = []
-                for f in files:
-                    file_list.append({
-                        'filepath': f.temporary_file_path(),
-                        'name': f.name
-                    })
-                '''
-
+                file_list_json = form.cleaned_data['file_list_json']
+                uploaded_files = json.loads(file_list_json)
                 first_name = form.cleaned_data['first_name']
                 last_name = form.cleaned_data['last_name']
                 metadata = {
@@ -60,7 +59,13 @@ def sendtransfer(request):
                     'External-Description': form.cleaned_data['description'],
                 }
 
-                # Bagger.create_bag(bag_storage_folder, [], metadata)
+                Bagger.create_bag(bag_storage_folder, uploaded_files, metadata)
+
+                for f in uploaded_files:
+                    try:
+                        os.remove(f['filepath'])
+                    except FileNotFoundError:
+                        pass
 
             else:
                 for err in form.errors:
