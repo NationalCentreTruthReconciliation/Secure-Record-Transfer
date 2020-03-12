@@ -80,6 +80,11 @@ header {
     color: #ffffff;
 }
 
+.brown-button:disabled {
+    background: #747474;
+    color: #ffffff;
+}
+
 .main-content {
     padding: 18px 12px 18px 12px;
 }

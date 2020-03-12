@@ -51,19 +51,19 @@ $(() => {
             this.on("error", (file, response, xhr) => {
                 console.error(response.error)
                 issueFiles.push(file.name)
-
-                // Disable submit button and form submit
+                document.getElementById("submit-form-btn").disabled = true
+                dropzoneClosure.options.autoProcessQueue = false
             })
 
             this.on("removedfile", (file) => {
-                // If file caused issue and it was removed, remove it from issueFiles
+                // If this file previously caused an issue, remove it from issueFiles
                 issueIndex = issueFiles.indexOf(file.name)
                 if (issueIndex > -1) {
                     issueFiles.splice(issueIndex, 1)
                 }
 
                 if (issueFiles.length === 0) {
-                    // Enable submit button
+                    document.getElementById("submit-form-btn").disabled = false
                 }
             })
 
@@ -87,6 +87,9 @@ $(() => {
                     else {
                         console.error('Could not find the hidden JSON input field on the page!')
                     }
+                }
+                else {
+                    alert('There are one or more files that could not be uploaded. Remove these files and try again.')
                 }
             })
         }
