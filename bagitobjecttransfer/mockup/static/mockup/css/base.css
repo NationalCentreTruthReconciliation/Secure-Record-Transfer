@@ -60,7 +60,7 @@ header {
     flex-basis: 80px;
 }
 
-.brown-button {
+.blue-button {
     margin: auto;
     font-size: 11pt;
     border: none;
@@ -74,13 +74,13 @@ header {
     -webkit-appearance: none;
 }
 
-.brown-button:hover,
-.brown-button:focus {
+.blue-button:hover,
+.blue-button:focus {
     background: #316dee;
     color: #ffffff;
 }
 
-.brown-button:disabled {
+.blue-button:disabled {
     background: #747474;
     color: #ffffff;
 }
