@@ -63,7 +63,7 @@ $(() => {
                     dropzoneClosure.options.autoProcessQueue = true
                     dropzoneClosure.processQueue()
                 } else {
-                    addDropzoneError('You cannot submit a form with no files')
+                    addDropzoneError('You cannot submit a form without files.')
                 }
             });
 

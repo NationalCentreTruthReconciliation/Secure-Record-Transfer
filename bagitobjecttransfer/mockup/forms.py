@@ -17,7 +17,7 @@ class TransferForm(forms.Form):
     phone_number = forms.RegexField(
         regex=r'^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$',
         error_messages={
-            'required': 'Phone number is required',
+            'required': 'This field is required.',
             'invalid': 'Phone number must look like "+1 (999) 999-9999"'
         },
         widget=forms.TextInput(attrs={'placeholder': '+1 (999) 999-9999'},
