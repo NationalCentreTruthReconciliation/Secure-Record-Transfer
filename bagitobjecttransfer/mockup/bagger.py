@@ -3,6 +3,10 @@ import os
 import shutil
 from pathlib import Path
 from datetime import datetime
+import logging
+
+
+logger = logging.getLogger('mockup')
 
 
 class FolderNotFoundError(Exception):
@@ -25,6 +29,7 @@ class Bagger:
             metadata (dict): A dictionary of bag metadata to be applied to bag tag files
         """
         if not Path(storage_folder).exists():
+            logging.error(f'Bagger: Could not find storage folder "{storage_folder}"')
             raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
 
         new_bag_folder = Bagger._get_bagging_folder(storage_folder)
@@ -38,12 +43,12 @@ class Bagger:
             source_path = Path(file_info['filepath'])
 
             if not source_path.exists():
-                print (f'Bagging ERROR: File "{source_path}" does not exist!')
+                logging.error(f'Bagger: File "{source_path}" does not exist')
                 missing_files.append(str(source_path))
 
             elif not missing_files:
                 destination_path = new_bag_folder / file_info['name']
-                print (f'Bagging INFO: copying {source_path} to {destination_path}')
+                logging.info(f'Bagger: copying {source_path} to {destination_path}')
                 if deletefiles:
                     shutil.move(source_path, destination_path)
                 else:
@@ -61,6 +66,11 @@ class Bagger:
                 os.remove(copied_file)
             if new_bag_folder.exists():
                 os.rmdir(new_bag_folder)
+
+        if bag_valid and bag_created:
+            logging.info(f'Bagger: Bag created at {str(new_bag_folder)}')
+        else:
+            logging.info(f'Bagger: Bag was not created')
 
         return {
             'missing_files': missing_files,
