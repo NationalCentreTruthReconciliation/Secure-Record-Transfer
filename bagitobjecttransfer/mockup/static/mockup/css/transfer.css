@@ -42,9 +42,9 @@
     flex: 1 1 auto;
     max-width: 600px;
     border-radius: 3px;
-    border: 1px solid #333333;
+    border: 1px solid #919191;
     padding: 2px 2px 2px 2px;
-    background-color: #f8f8f8;
+    background-color: #f9f9f9;
 }
 
 .flex-item > textarea {
@@ -62,9 +62,9 @@
 
 #file-dropzone {
     min-height: 200px;
-    background-color: #f8f8f8;
+    background-color: #f9f9f9;
     border-radius: 3px;
-    border: 1.5px dashed #333333;
+    border: 1.5px dashed #919191;
 }
 
 .dz-progress {
