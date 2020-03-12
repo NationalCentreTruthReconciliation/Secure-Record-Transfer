@@ -3,14 +3,18 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 
-from .forms import TransferForm
-from .appsettings import BAG_STORAGE_FOLDER
-
 import json
 import os
 import  threading
+import logging
 
 from .bagger import Bagger
+from .forms import TransferForm
+from .appsettings import BAG_STORAGE_FOLDER
+from .persistentuploadhandler import PersistentUploadedFile
+
+
+logger = logging.getLogger('mockup')
 
 
 class Index(TemplateView):
@@ -27,19 +31,35 @@ class TransferSent(TemplateView):
 
 
 def uploadfiles(request):
-    files_dictionary = request.FILES.dict()
+    """ Upload one or more files to the server, and return a list of all the files uploaded. The
+    list contains the path to the uploaded file on the server, and the name of the file uploaded.
+    """
+    if not request.method == 'POST':
+        return JsonResponse({'error': 'Files can only be uploaded using POST.'}, status=500)
+    if not request.FILES:
+        return JsonResponse({'files': []}, status=200)
 
-    file_list = []
-    for key in files_dictionary:
-        file_list.append({
-            'filepath': files_dictionary[key].temporary_file_path(),
-            'name': files_dictionary[key].name
-        })
+    try:
+        files_dictionary = request.FILES.dict()
 
-    return JsonResponse({
-        'success': True,
-        'files': file_list
-        }, status=200)
+        file_list = []
+        for key in files_dictionary:
+            if not files_dictionary[key] is PersistentUploadedFile:
+                return JsonResponse({
+                    'error': "Development issue: Wrong file upload handler being used, check Django" \
+                   f" settings. Got file of type {type(files_dictionary[key]).__name__}, but" \
+                    " expected PersistentUploadedFile.",
+                }, status=500)
+
+            file_list.append({
+                'filepath': files_dictionary[key].temporary_file_path(),
+                'name': files_dictionary[key].name,
+            })
+
+        return JsonResponse({'files': file_list}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': f'Uncaught Exception:\n{str(e)}'}, status=500)
 
 
 def sendtransfer(request):
@@ -48,7 +68,13 @@ def sendtransfer(request):
             form = TransferForm(request.POST)
             if form.is_valid():
                 file_list_json = form.cleaned_data['file_list_json']
+
+                # TODO: Don't trust this file list, make sure all of the files are somewhere safe
+                # and someone isn't trying to access files somewhere else on disk.
+                # TODO: Also, check that there is more than one file and that it's a list and that
+                # all list items have filepath and name.
                 uploaded_files = json.loads(file_list_json)
+
                 first_name = form.cleaned_data['first_name']
                 last_name = form.cleaned_data['last_name']
                 metadata = {
@@ -60,6 +86,7 @@ def sendtransfer(request):
                     'External-Description': form.cleaned_data['description'],
                 }
 
+                logger.info('Views: Starting bag creation in the background')
                 bagging_thread = threading.Thread(
                     target=create_bag_background,
                     args=(BAG_STORAGE_FOLDER, uploaded_files, metadata)
@@ -102,4 +129,4 @@ def create_bag_background(storage_folder: str, files: list, metadata: dict):
         try:
             os.remove(f['filepath'])
         except FileNotFoundError:
-            pass
+            logging.warn(f'Views: It appears that file {f["filepath"]} has already been removed')
