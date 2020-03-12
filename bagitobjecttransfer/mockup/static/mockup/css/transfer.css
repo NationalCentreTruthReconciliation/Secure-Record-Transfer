@@ -15,6 +15,16 @@
     margin-bottom: 15px;
 }
 
+.flex-full-width-error,
+.flex-full-width-item {
+    flex: 1 1 auto;
+    max-width: 780px;
+}
+
+.flex-full-width-item {
+    margin-bottom: 15px;
+}
+
 .flex-item > label,
 .upload-file-label {
     font-style: italic;
@@ -35,12 +45,6 @@
     border: 1px solid #333333;
     padding: 2px 2px 2px 2px;
     background-color: #f8f8f8;
-}
-
-.flex-full-width {
-    flex: 1 1 auto;
-    max-width: 780px;
-    margin-bottom: 15px;
 }
 
 .flex-item > textarea {

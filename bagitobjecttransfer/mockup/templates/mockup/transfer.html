@@ -30,17 +30,19 @@
             {{ field }}
         {% endif %}
     {% endfor %}
-    <div class="flex-full-width upload-file-section">
+    <div class="flex-full-width-item upload-file-section">
         <span class="upload-file-label">Upload Files</span>
     </div>
-    <div class="flex-full-width">
+    <div id="dropzone-errors" class="flex-full-width-error">
+    </div>
+    <div class="flex-full-width-item">
         <div id="file-dropzone" class="dz-clickable custom-dropzone dropzone">
             <div class="dz-message">
                 Drop files here or click to upload
             </div>
         </div>
     </div>
-    <div class="flex-full-width">
+    <div class="flex-full-width-item">
         <label for="dummy_label"></label>
         <div>
             <button id="submit-form-btn" type="submit" class="blue-button">Send</button>

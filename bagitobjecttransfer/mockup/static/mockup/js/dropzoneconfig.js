@@ -14,6 +14,24 @@ function getCookie(name) {
     return cookieValue
 }
 
+
+function addDropzoneError(errorMessage) {
+    errorZone = document.getElementById('dropzone-errors')
+    newError = document.createElement('div')
+    newError.className = 'field-error'
+    newError.innerHTML = errorMessage
+    errorZone.appendChild(newError)
+}
+
+
+function clearDropzoneErrors() {
+    errorZone = document.getElementById('dropzone-errors')
+    while (errorZone.lastElementChild) {
+        errorZone.removeChild(errorZone.lastElementChild);
+    }
+}
+
+
 Dropzone.autoDiscover = false
 fileList = []
 issueFiles = []
@@ -36,15 +54,16 @@ $(() => {
             dropzoneClosure = this
             submitButton = document.getElementById("submit-form-btn")
 
-            submitButton.addEventListener("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+            submitButton.addEventListener("click", (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                clearDropzoneErrors()
+
                 if (dropzoneClosure.getQueuedFiles().length > 0) {
                     dropzoneClosure.options.autoProcessQueue = true
-                    dropzoneClosure.processQueue();
+                    dropzoneClosure.processQueue()
                 } else {
-                    // TODO: Don't use alert. Add error to webpage
-                    alert("You cannot submit a form without any files.")
+                    addDropzoneError('You cannot submit a form with no files')
                 }
             });
 
@@ -53,6 +72,10 @@ $(() => {
                 issueFiles.push(file.name)
                 document.getElementById("submit-form-btn").disabled = true
                 dropzoneClosure.options.autoProcessQueue = false
+            })
+
+            this.on("addedfile", (file) => {
+                clearDropzoneErrors()
             })
 
             this.on("removedfile", (file) => {
