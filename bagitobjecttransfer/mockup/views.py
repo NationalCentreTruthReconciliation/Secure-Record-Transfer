@@ -44,7 +44,7 @@ def uploadfiles(request):
 
         file_list = []
         for key in files_dictionary:
-            if not files_dictionary[key] is PersistentUploadedFile:
+            if not isinstance(files_dictionary[key], PersistentUploadedFile):
                 return JsonResponse({
                     'error': "Development issue: Wrong file upload handler being used, check Django" \
                    f" settings. Got file of type {type(files_dictionary[key]).__name__}, but" \
