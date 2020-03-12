@@ -16,6 +16,7 @@ function getCookie(name) {
 
 Dropzone.autoDiscover = false
 fileList = []
+issueFiles = []
 
 $(() => {
     $("#file-dropzone").dropzone({
@@ -30,6 +31,8 @@ $(() => {
             "X-CSRFToken": getCookie("csrftoken")
         },
         init: function() {
+            fileList = []
+            issueFiles = []
             dropzoneClosure = this
             submitButton = document.getElementById("submit-form-btn")
 
@@ -40,28 +43,50 @@ $(() => {
                     dropzoneClosure.options.autoProcessQueue = true
                     dropzoneClosure.processQueue();
                 } else {
+                    // TODO: Don't use alert. Add error to webpage
                     alert("You cannot submit a form without any files.")
                 }
             });
 
-            this.on("successmultiple", (files, response) => {
+            this.on("error", (file, response, xhr) => {
+                console.error(response.error)
+                issueFiles.push(file.name)
+
+                // Disable submit button and form submit
+            })
+
+            this.on("removedfile", (file) => {
+                // If file caused issue and it was removed, remove it from issueFiles
+                issueIndex = issueFiles.indexOf(file.name)
+                if (issueIndex > -1) {
+                    issueFiles.splice(issueIndex, 1)
+                }
+
+                if (issueFiles.length === 0) {
+                    // Enable submit button
+                }
+            })
+
+            this.on("successmultiple", (file, response) => {
                 for (var i = 0; i < response.files.length; i++) {
                     fileList.push(response.files[i])
                 }
             })
 
             this.on("queuecomplete", () => {
-                var hiddenJsonInput = document.getElementById("id_file_list_json")
-                if (hiddenJsonInput != null) {
-                    hiddenJsonInput.setAttribute("value", JSON.stringify(fileList))
-                    fileList = []
-                    // Show the end of the dropzone animation by delaying submission
-                    window.setTimeout(() => {
-                        document.getElementById("transfer-form").submit()
-                    }, 1000)
-                }
-                else {
-                    console.error('Could not find the hidden JSON input field on the page!')
+                if (issueFiles.length === 0) {
+                    var hiddenJsonInput = document.getElementById("id_file_list_json")
+                    if (hiddenJsonInput !== null) {
+                        hiddenJsonInput.setAttribute("value", JSON.stringify(fileList))
+                        fileList = []
+                        // Show the end of the dropzone animation by delaying submission
+                        window.setTimeout(() => {
+                            document.getElementById("transfer-form").submit()
+                        }, 1000)
+                    }
+                    else {
+                        console.error('Could not find the hidden JSON input field on the page!')
+                    }
                 }
             })
         }
