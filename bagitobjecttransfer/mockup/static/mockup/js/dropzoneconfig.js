@@ -33,8 +33,8 @@ function clearDropzoneErrors() {
 
 
 Dropzone.autoDiscover = false
-fileList = []
 issueFiles = []
+sessionToken = ''
 
 $(() => {
     $("#file-dropzone").dropzone({
@@ -49,7 +49,6 @@ $(() => {
             "X-CSRFToken": getCookie("csrftoken")
         },
         init: function() {
-            fileList = []
             issueFiles = []
             dropzoneClosure = this
             submitButton = document.getElementById("submit-form-btn")
@@ -90,18 +89,20 @@ $(() => {
                 }
             })
 
+            this.on("sendingmultiple", (file, xhr, formData) => {
+                xhr.setRequestHeader("Upload-Session-Token", sessionToken)
+            })
+
             this.on("successmultiple", (file, response) => {
-                for (var i = 0; i < response.files.length; i++) {
-                    fileList.push(response.files[i])
-                }
+                sessionToken = response['upload_session_token']
             })
 
             this.on("queuecomplete", () => {
                 if (issueFiles.length === 0) {
-                    var hiddenJsonInput = document.getElementById("id_file_list_json")
-                    if (hiddenJsonInput !== null) {
-                        hiddenJsonInput.setAttribute("value", JSON.stringify(fileList))
-                        fileList = []
+                    var hiddenTokenInput = document.getElementById("id_session_token")
+                    if (hiddenTokenInput !== null) {
+                        hiddenTokenInput.setAttribute("value", sessionToken)
+                        sessionToken = ''
                         // Show the end of the dropzone animation by delaying submission
                         window.setTimeout(() => {
                             document.getElementById("transfer-form").submit()
