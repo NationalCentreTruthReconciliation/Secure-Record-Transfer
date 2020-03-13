@@ -1,5 +1,18 @@
 from django.db import models
 
+class UploadedFile(models.Model):
+    name = models.CharField(max_length=256)
+    path = models.CharField(max_length=256)
+    date_uploaded = models.DateTimeField()
+    old_copy_removed = models.BooleanField()
+
+    def __str__(self):
+        if self.old_copy_removed:
+            return f'{self.path}, uploaded at {self.date_uploaded}. File has been deleted.'
+        else:
+            return f'{self.path}, uploaded at {self.date_uploaded}. File has NOT been deleted.'
+
+
 class AppUser(models.Model):
     name = models.CharField(max_length=256)
     email = models.CharField(max_length=256)
