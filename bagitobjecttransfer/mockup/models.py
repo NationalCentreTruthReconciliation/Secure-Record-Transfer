@@ -1,17 +1,21 @@
-from django.db import models
-from django.utils.crypto import get_random_string
 
 from datetime import datetime
 import os
+
+from django.db import models
+from django.utils.crypto import get_random_string
 
 
 class UploadSession(models.Model):
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
 
-    def __init__(self):
-        self.session_token = get_random_string(length=32)
-        self.session_started_at = datetime.now()
+    @classmethod
+    def new_session(cls):
+        return cls(token=get_random_string(length=32), started_at=datetime.now())
+
+    def __str__(self):
+        return f'{self.token} ({self.started_at})'
 
 
 class UploadedFile(models.Model):
@@ -31,8 +35,7 @@ class UploadedFile(models.Model):
     def __str__(self):
         if self.old_copy_removed:
             return f'{self.path}, session {self.session}, DELETED'
-        else:
-            return f'{self.path}, session {self.session}, NOT DELETED'
+        return f'{self.path}, session {self.session}, NOT DELETED'
 
 
 class AppUser(models.Model):
@@ -41,6 +44,7 @@ class AppUser(models.Model):
 
     def __str__(self):
         return f'{self.name}, {self.email}'
+
 
 class Bag(models.Model):
     bagging_date = models.DateTimeField()
