@@ -5,6 +5,8 @@ from pathlib import Path
 from datetime import datetime
 import logging
 
+from mockup.models import UploadedFile
+
 
 logger = logging.getLogger('mockup')
 
@@ -15,12 +17,12 @@ class FolderNotFoundError(Exception):
 
 class Bagger:
     @staticmethod
-    def create_bag(storage_folder: str, files: list, metadata: dict, deletefiles=False):
+    def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefiles=False):
         """ Creates a bag from a list of file paths and a dictionary of bag metadata.
 
         Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
-        files, data files, and manifest files. The bagit-py library is used, which has been developed
-        by the Library of Congress.
+        files, data files, and manifest files. The bagit-py library is used, which has been
+        developed by the Library of Congress.
 
         Args:
             storage_folder (str): Path to folder to store the bag in
@@ -39,20 +41,20 @@ class Bagger:
         missing_files = []
         copied_files = []
 
-        for file_info in files:
-            source_path = Path(file_info['filepath'])
+        files = UploadedFile.objects.filter(session__token=session_token)
+        for uploaded_file in files:
+            source_path = Path(uploaded_file.path)
 
             if not source_path.exists():
                 logging.error(f'Bagger: File "{source_path}" does not exist')
                 missing_files.append(str(source_path))
 
             elif not missing_files:
-                destination_path = new_bag_folder / file_info['name']
+                destination_path = new_bag_folder / uploaded_file.name
                 logging.info(f'Bagger: copying {source_path} to {destination_path}')
+                shutil.copy(source_path, destination_path)
                 if deletefiles:
-                    shutil.move(source_path, destination_path)
-                else:
-                    shutil.copy(source_path, destination_path)
+                    uploaded_file.delete_file()
                 copied_files.append(destination_path)
 
         bag_valid = False
