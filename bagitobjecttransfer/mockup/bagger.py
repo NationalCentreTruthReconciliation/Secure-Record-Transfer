@@ -1,9 +1,9 @@
-import bagit
 import os
 import shutil
 from pathlib import Path
 from datetime import datetime
 import logging
+import bagit
 
 from mockup.models import UploadedFile
 
