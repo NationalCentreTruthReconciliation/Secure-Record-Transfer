@@ -31,6 +31,7 @@ class UploadedFile(models.Model):
             pass
         finally:
             self.old_copy_removed = True
+            self.save()
 
     def __str__(self):
         if self.old_copy_removed:
