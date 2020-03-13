@@ -76,6 +76,8 @@ def uploadfiles(request):
 
 
 def sendtransfer(request):
+    """ Send a completed transfer form to the server.
+    """
     if request.method == 'POST':
         try:
             form = TransferForm(request.POST)
@@ -93,7 +95,7 @@ def sendtransfer(request):
                 }
                 logger.info('Views: Starting bag creation in the background')
                 bagging_thread = threading.Thread(
-                    target=create_bag_background,
+                    target=Bagger.create_bag,
                     args=(BAG_STORAGE_FOLDER, session_token, metadata)
                 )
                 bagging_thread.setDaemon(True)
@@ -122,15 +124,3 @@ def sendtransfer(request):
     else:
         form = TransferForm()
         return render(request, 'mockup/transfer.html', {'form': form})
-
-
-def remove_file_list(file_list: list):
-    for f in file_list:
-        try:
-            os.remove(f['filepath'])
-        except FileNotFoundError:
-            pass
-
-
-def create_bag_background(storage_folder: str, upload_session_token: list, metadata: dict):
-    Bagger.create_bag(storage_folder, upload_session_token, metadata, deletefiles=True)
