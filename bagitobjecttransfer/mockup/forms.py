@@ -20,8 +20,8 @@ class TransferForm(forms.Form):
             'required': 'This field is required.',
             'invalid': 'Phone number must look like "+1 (999) 999-9999"'
         },
-        widget=forms.TextInput(attrs={'placeholder': '+1 (999) 999-9999'},
-    ))
+        widget=forms.TextInput(attrs={'placeholder': '+1 (999) 999-9999'},)
+    )
 
     email = forms.EmailField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter your email'}),
@@ -38,7 +38,9 @@ class TransferForm(forms.Form):
         max_length=256,
         min_length=8,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your organization\'s address (optional)'}),
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your organization\'s address (optional)'
+        }),
     )
 
     description = forms.CharField(
@@ -48,4 +50,4 @@ class TransferForm(forms.Form):
         }),
     )
 
-    file_list_json = forms.CharField(widget=forms.HiddenInput())
+    session_token = forms.CharField(widget=forms.HiddenInput())
