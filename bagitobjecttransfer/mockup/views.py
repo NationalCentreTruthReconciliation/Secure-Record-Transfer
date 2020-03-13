@@ -2,13 +2,12 @@
 """
 
 from json.decoder import JSONDecodeError
-import json
 import logging
 import os
 import threading
 
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 
