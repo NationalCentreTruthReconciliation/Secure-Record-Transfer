@@ -1,16 +1,38 @@
 from django.db import models
+from django.utils.crypto import get_random_string
+
+from datetime import datetime
+import os
+
+
+class UploadSession(models.Model):
+    token = models.CharField(max_length=32)
+    started_at = models.DateTimeField()
+
+    def __init__(self):
+        self.session_token = get_random_string(length=32)
+        self.session_started_at = datetime.now()
+
 
 class UploadedFile(models.Model):
     name = models.CharField(max_length=256)
     path = models.CharField(max_length=256)
-    date_uploaded = models.DateTimeField()
     old_copy_removed = models.BooleanField()
+    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=True)
+
+    def delete_file(self):
+        try:
+            os.remove(str(self.path))
+        except FileNotFoundError:
+            pass
+        finally:
+            self.old_copy_removed = True
 
     def __str__(self):
         if self.old_copy_removed:
-            return f'{self.path}, uploaded at {self.date_uploaded}. File has been deleted.'
+            return f'{self.path}, session {self.session}, DELETED'
         else:
-            return f'{self.path}, uploaded at {self.date_uploaded}. File has NOT been deleted.'
+            return f'{self.path}, session {self.session}, NOT DELETED'
 
 
 class AppUser(models.Model):
