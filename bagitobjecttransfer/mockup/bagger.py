@@ -41,7 +41,12 @@ class Bagger:
         missing_files = []
         copied_files = []
 
-        files = UploadedFile.objects.filter(session__token=session_token)
+        files = UploadedFile.objects.filter(
+            session__token=session_token
+        ).filter(
+            old_copy_removed=False
+        )
+
         for uploaded_file in files:
             source_path = Path(uploaded_file.path)
 
