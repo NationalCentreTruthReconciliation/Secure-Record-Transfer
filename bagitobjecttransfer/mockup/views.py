@@ -3,15 +3,17 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 
+from json.decoder import JSONDecodeError
 import json
-import os
-import  threading
 import logging
+import os
+import threading
 
-from .bagger import Bagger
-from .forms import TransferForm
-from .appsettings import BAG_STORAGE_FOLDER
-from .persistentuploadhandler import PersistentUploadedFile
+from mockup.appsettings import BAG_STORAGE_FOLDER
+from mockup.bagger import Bagger
+from mockup.forms import TransferForm
+from mockup.models import UploadedFile, UploadSession
+from mockup.persistentuploadhandler import PersistentUploadedFile
 
 
 logger = logging.getLogger('mockup')
@@ -42,7 +44,9 @@ def uploadfiles(request):
     try:
         files_dictionary = request.FILES.dict()
 
-        file_list = []
+        session = UploadSession()
+        session.save()
+
         for key in files_dictionary:
             if not isinstance(files_dictionary[key], PersistentUploadedFile):
                 return JsonResponse({
@@ -51,12 +55,12 @@ def uploadfiles(request):
                     " expected PersistentUploadedFile.",
                 }, status=500)
 
-            file_list.append({
-                'filepath': files_dictionary[key].temporary_file_path(),
-                'name': files_dictionary[key].name,
-            })
+            file_path = files_dictionary[key].temporary_file_path()
+            file_name = files_dictionary[key].name
+            new_file = UploadedFile(name=file_name, path=file_path, old_copy_removed=False, session=session)
+            new_file.save()
 
-        return JsonResponse({'files': file_list}, status=200)
+        return JsonResponse({'upload_session_token': session.token}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': f'Uncaught Exception:\n{str(e)}'}, status=500)
@@ -68,13 +72,7 @@ def sendtransfer(request):
             form = TransferForm(request.POST)
             if form.is_valid():
                 file_list_json = form.cleaned_data['file_list_json']
-
-                # TODO: Don't trust this file list, make sure all of the files are somewhere safe
-                # and someone isn't trying to access files somewhere else on disk.
-                # TODO: Also, check that there is more than one file and that it's a list and that
-                # all list items have filepath and name.
                 uploaded_files = json.loads(file_list_json)
-
                 first_name = form.cleaned_data['first_name']
                 last_name = form.cleaned_data['last_name']
                 metadata = {
@@ -85,7 +83,6 @@ def sendtransfer(request):
                     'Organization-Address': form.cleaned_data['organization_address'],
                     'External-Description': form.cleaned_data['description'],
                 }
-
                 logger.info('Views: Starting bag creation in the background')
                 bagging_thread = threading.Thread(
                     target=create_bag_background,
@@ -99,27 +96,30 @@ def sendtransfer(request):
                     for message in form.errors[err]:
                         print (f'{err} Error: {message}')
 
-                # I'd like to re-populate the dropzone here instead but it may
-                # not be possible, so I'm removing the files instead
                 if form.data['file_list_json']:
                     files = json.loads(form.data['file_list_json'])
-                    for f in files:
-                        try:
-                            os.remove(f['filepath'])
-                        except FileNotFoundError:
-                            pass
+                    remove_file_list(files)
 
                 return render(request, 'mockup/transfer.html', {'form': form})
-
-        except KeyError:
-            return render(request, 'mockup/transfer.html', {
-                'error_msg': 'Transfer Failed, could not find form data in POST.'
-            })
+        except JSONDecodeError as e:
+            print(f'JSONDecodeError: {e}')
+            return render(request, 'mockup/transfer.html', {'form': form})
+        except KeyError as e:
+            print(f'KeyError: {e}')
+            return render(request, 'mockup/transfer.html', {'form': form})
         else:
             return HttpResponseRedirect(reverse('mockup:transfersent'))
     else:
         form = TransferForm()
         return render(request, 'mockup/transfer.html', {'form': form})
+
+
+def remove_file_list(file_list: list):
+    for f in file_list:
+        try:
+            os.remove(f['filepath'])
+        except FileNotFoundError:
+            pass
 
 
 def create_bag_background(storage_folder: str, files: list, metadata: dict):
