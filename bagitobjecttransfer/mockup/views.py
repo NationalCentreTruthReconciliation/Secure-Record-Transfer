@@ -96,7 +96,7 @@ def sendtransfer(request):
                 logger.info('Views: Starting bag creation in the background')
                 bagging_thread = threading.Thread(
                     target=Bagger.create_bag,
-                    args=(BAG_STORAGE_FOLDER, session_token, metadata)
+                    args=(BAG_STORAGE_FOLDER, session_token, metadata, True)
                 )
                 bagging_thread.setDaemon(True)
                 bagging_thread.start()
