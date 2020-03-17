@@ -38,29 +38,8 @@ class Bagger:
         if not new_bag_folder.exists():
             os.mkdir(new_bag_folder)
 
-        missing_files = []
-        copied_files = []
-
-        files = UploadedFile.objects.filter(
-            session__token=session_token
-        ).filter(
-            old_copy_removed=False
-        )
-
-        for uploaded_file in files:
-            source_path = Path(uploaded_file.path)
-
-            if not source_path.exists():
-                LOGGER.error(msg=('File "%s" does not exist' % source_path))
-                missing_files.append(str(source_path))
-
-            elif not missing_files:
-                destination_path = new_bag_folder / uploaded_file.name
-                LOGGER.info(msg=('Copying %s to %s' % (source_path, destination_path)))
-                shutil.copy(source_path, destination_path)
-                if deletefiles:
-                    uploaded_file.delete_file()
-                copied_files.append(destination_path)
+        (copied_files, missing_files) = Bagger.\
+            _copy_session_uploads_to_dir(session_token, new_bag_folder)
 
         bag_valid = False
         bag_created = False
@@ -97,6 +76,34 @@ class Bagger:
         if not Path(bag_folder).exists():
             raise FolderNotFoundError(f'Could not find folder "{bag_folder}"')
         shutil.rmtree(bag_folder)
+
+
+    @staticmethod
+    def _copy_session_uploads_to_dir(session_token, directory, delete=True):
+        files = UploadedFile.objects.filter(
+            session__token=session_token
+        ).filter(
+            old_copy_removed=False
+        )
+
+        copied_files = []
+        missing_files = []
+        for uploaded_file in files:
+            source_path = Path(uploaded_file.path)
+
+            if not source_path.exists():
+                LOGGER.error(msg=('file "%s" does not exist' % source_path))
+                missing_files.append(str(source_path))
+
+            elif not missing_files:
+                destination_path = directory / uploaded_file.name
+                LOGGER.info(msg=('copying %s to %s' % (source_path, destination_path)))
+                shutil.copy(source_path, destination_path)
+                if delete:
+                    uploaded_file.delete_file()
+                copied_files.append(str(destination_path))
+
+        return (copied_files, missing_files)
 
 
     @staticmethod
