@@ -17,7 +17,7 @@ class FolderNotFoundError(Exception):
 
 class Bagger:
     @staticmethod
-    def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefiles=False):
+    def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefiles=True):
         """ Creates a bag from a list of file paths and a dictionary of bag metadata.
 
         Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
@@ -39,7 +39,7 @@ class Bagger:
             os.mkdir(new_bag_folder)
 
         (copied_files, missing_files) = Bagger.\
-            _copy_session_uploads_to_dir(session_token, new_bag_folder)
+            _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
 
         bag_valid = False
         bag_created = False
