@@ -3,7 +3,6 @@
 
 from json.decoder import JSONDecodeError
 import logging
-import os
 import threading
 
 from django.shortcuts import render
@@ -18,7 +17,7 @@ from mockup.models import UploadedFile, UploadSession
 from mockup.persistentuploadhandler import PersistentUploadedFile
 
 
-logger = logging.getLogger('mockup')
+LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
@@ -71,8 +70,8 @@ def uploadfiles(request):
 
         return JsonResponse({'upload_session_token': session.token}, status=200)
 
-    except Exception as e:
-        return JsonResponse({'error': f'Uncaught Exception:\n{str(e)}'}, status=500)
+    except Exception as exc:
+        return JsonResponse({'error': f'Uncaught Exception:\n{str(exc)}'}, status=500)
 
 
 def sendtransfer(request):
@@ -93,7 +92,7 @@ def sendtransfer(request):
                     'Organization-Address': form.cleaned_data['organization_address'],
                     'External-Description': form.cleaned_data['description'],
                 }
-                logger.info('Views: Starting bag creation in the background')
+                LOGGER.info('Starting bag creation in the background')
                 bagging_thread = threading.Thread(
                     target=Bagger.create_bag,
                     args=(BAG_STORAGE_FOLDER, session_token, metadata, True)

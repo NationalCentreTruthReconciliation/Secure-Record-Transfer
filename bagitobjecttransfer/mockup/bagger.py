@@ -8,7 +8,7 @@ import bagit
 from mockup.models import UploadedFile
 
 
-logger = logging.getLogger('mockup')
+LOGGER = logging.getLogger(__name__)
 
 
 class FolderNotFoundError(Exception):
@@ -31,7 +31,7 @@ class Bagger:
             metadata (dict): A dictionary of bag metadata to be applied to bag tag files
         """
         if not Path(storage_folder).exists():
-            logging.error(f'Bagger: Could not find storage folder "{storage_folder}"')
+            LOGGER.error(msg=('Bagger: Could not find storage folder "%s"' % storage_folder))
             raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
 
         new_bag_folder = Bagger._get_bagging_folder(storage_folder)
@@ -51,12 +51,12 @@ class Bagger:
             source_path = Path(uploaded_file.path)
 
             if not source_path.exists():
-                logging.error(f'Bagger: File "{source_path}" does not exist')
+                LOGGER.error(msg=('File "%s" does not exist' % source_path))
                 missing_files.append(str(source_path))
 
             elif not missing_files:
                 destination_path = new_bag_folder / uploaded_file.name
-                logging.info(f'Bagger: copying {source_path} to {destination_path}')
+                LOGGER.info(msg=('Copying %s to %s' % (source_path, destination_path)))
                 shutil.copy(source_path, destination_path)
                 if deletefiles:
                     uploaded_file.delete_file()
@@ -75,9 +75,9 @@ class Bagger:
                 os.rmdir(new_bag_folder)
 
         if bag_valid and bag_created:
-            logging.info(f'Bagger: Bag created at {str(new_bag_folder)}')
+            LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
         else:
-            logging.info(f'Bagger: Bag was not created')
+            LOGGER.info(msg=('Bag "%s" was not created' % new_bag_folder))
 
         return {
             'missing_files': missing_files,
@@ -88,7 +88,7 @@ class Bagger:
 
 
     @staticmethod
-    def delete_bag(self, bag_folder: str):
+    def delete_bag(bag_folder: str):
         """ Deletes a bag folder and all of its contents
 
         Args:
