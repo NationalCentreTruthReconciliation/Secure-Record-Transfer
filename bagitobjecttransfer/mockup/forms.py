@@ -1,4 +1,5 @@
 from django import forms
+from django_countries.fields import CountryField
 
 
 class SourceForm(forms.Form):
@@ -49,6 +50,7 @@ class SourceForm(forms.Form):
         }),
     )
 
+
 class ContactInfoForm(forms.Form):
     contact_name = forms.CharField(
         max_length=64,
@@ -80,6 +82,9 @@ class ContactInfoForm(forms.Form):
     email = forms.EmailField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter your email'}),
     )
+
+    country = CountryField(blank_label='Select your Country').formfield()
+
 
 class TransferForm(forms.Form):
     first_name = forms.CharField(
