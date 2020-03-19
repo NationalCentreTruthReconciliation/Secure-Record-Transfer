@@ -68,7 +68,7 @@ header {
     margin: auto;
     font-size: 11pt;
     border: none;
-    border-radius: 3px;
+    border-radius: 5px;
     padding: 6px 12px 6px 12px;
     margin: 0;
     text-decoration: none;
@@ -91,6 +91,10 @@ header {
 
 .main-content {
     padding: 18px 12px 18px 12px;
+}
+
+.margin-right-20px {
+    margin-right: 20px;
 }
 
 /**
