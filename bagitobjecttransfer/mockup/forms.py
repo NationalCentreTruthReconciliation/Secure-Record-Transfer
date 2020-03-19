@@ -2,7 +2,7 @@ from django import forms
 from django_countries.fields import CountryField
 
 
-class SourceForm(forms.Form):
+class SourceInfoForm(forms.Form):
     source_name = forms.CharField(
         max_length=64,
         min_length=2,
@@ -24,10 +24,12 @@ class SourceForm(forms.Form):
     source_role = forms.ChoiceField(
         required=True,
         choices=[
-            'Creator',
-            'Donor',
-            'Custodian',
-            'Unknown',
+            (c, c) for c in [
+                'Creator',
+                'Donor',
+                'Custodian',
+                'Unknown',
+            ]
         ],
         widget=forms.Select,
     )
@@ -81,6 +83,47 @@ class ContactInfoForm(forms.Form):
 
     email = forms.EmailField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter your email'}),
+    )
+
+    address_line_1 = forms.CharField(
+        max_length=100,
+        min_length=10,
+        required=True,
+        widget=forms.TextInput(
+            attrs={'placeholder': 'Street, and street number'}
+        )
+    )
+
+    address_line_2 = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'placeholder': 'Unit Number, RPO, PO BOX... (optional)'}
+        )
+    )
+
+    province_or_state = forms.ChoiceField(
+        required=True,
+        choices=[
+            (c, c) for c in [
+                # For non-Canadian or non-US addresses
+                "Other",
+                # Canadian Provinces
+                "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC",
+                "SK", "YT",
+                # US States
+                "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+                "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA",
+                "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY",
+                "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX",
+                "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+            ]
+        ],
+        widget=forms.Select
+    )
+
+    postal_or_zip_code = forms.CharField(
+        min_length=4
     )
 
     country = CountryField(blank_label='Select your Country').formfield()
