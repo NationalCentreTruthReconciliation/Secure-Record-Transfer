@@ -37,11 +37,11 @@ class TransferSent(TemplateView):
 class TransferFormWizard(SessionWizardView):
     TEMPLATES = {
         "sourceinfo": {
-            "templateref": "mockup/standardwizardform.html",
+            "templateref": "mockup/standardform.html",
             "formtitle": "Source Information",
         },
         "contactinfo": {
-            "templateref": "mockup/standardwizardform.html",
+            "templateref": "mockup/standardform.html",
             "formtitle": "Contact Information",
         }
     }

@@ -8,7 +8,7 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
 <p>
     Transfer step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
 </p>
-<form id="source-info-form" action="" method="post">
+<form action="" method="post">
     {% csrf_token %}
     {{ wizard.management_form }}
     {% for field in wizard.form %}
