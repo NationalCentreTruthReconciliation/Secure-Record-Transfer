@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView, FormView
+from formtools.wizard.views import SessionWizardView
 
 from mockup.appsettings import BAG_STORAGE_FOLDER
 from mockup.bagger import Bagger
@@ -31,6 +32,33 @@ class Transfer(FormView):
 
 class TransferSent(TemplateView):
     template_name = 'mockup/transfersent.html'
+
+
+class TransferFormWizard(SessionWizardView):
+    TEMPLATES = {
+        "sourceinfo": {
+            "templateref": "mockup/standardwizardform.html",
+            "formtitle": "Source Information",
+        },
+        "contactinfo": {
+            "templateref": "mockup/standardwizardform.html",
+            "formtitle": "Contact Information",
+        }
+    }
+
+    def get_template_names(self):
+        step_name = self.steps.current
+        return [self.TEMPLATES[step_name]["templateref"]]
+
+    def get_context_data(self, form, **kwargs):
+        context = super(TransferFormWizard, self).get_context_data(form, **kwargs)
+        step_name = self.steps.current
+        context.update({'form_title': self.TEMPLATES[step_name]["formtitle"]})
+        return context
+
+    def done(self, form_list, **kwargs):
+        data = self.get_all_cleaned_data()
+        return HttpResponseRedirect(reverse('mockup:transfersent'))
 
 
 def uploadfiles(request):
