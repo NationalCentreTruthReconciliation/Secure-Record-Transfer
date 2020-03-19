@@ -99,9 +99,9 @@ $(() => {
 
             this.on("queuecomplete", () => {
                 if (issueFiles.length === 0) {
-                    var hiddenTokenInput = document.getElementById("id_session_token")
-                    if (hiddenTokenInput !== null) {
-                        hiddenTokenInput.setAttribute("value", sessionToken)
+                    var sessionTokenElement = document.querySelector('[id$="session_token"]')
+                    if (sessionTokenElement) {
+                        sessionTokenElement.setAttribute("value", sessionToken)
                         sessionToken = ''
                         // Show the end of the dropzone animation by delaying submission
                         window.setTimeout(() => {
@@ -109,7 +109,7 @@ $(() => {
                         }, 1000)
                     }
                     else {
-                        console.error('Could not find the hidden JSON input field on the page!')
+                        console.error('Could not find any input id matching "session_token" on the page!')
                     }
                 }
                 else {
