@@ -43,6 +43,10 @@ class TransferFormWizard(SessionWizardView):
         "contactinfo": {
             "templateref": "mockup/standardform.html",
             "formtitle": "Contact Information",
+        },
+        "uploadfiles": {
+            "templateref": "mockup/dropzoneform.html",
+            "formtitle": "Upload Files"
         }
     }
 
@@ -58,6 +62,16 @@ class TransferFormWizard(SessionWizardView):
 
     def done(self, form_list, **kwargs):
         data = self.get_all_cleaned_data()
+
+        files = UploadedFile.objects.filter(
+            session__token=data['session_token']
+        ).filter(
+            old_copy_removed=False
+        )
+
+        for upload in files:
+            upload.delete_file()
+
         return HttpResponseRedirect(reverse('mockup:transfersent'))
 
 
