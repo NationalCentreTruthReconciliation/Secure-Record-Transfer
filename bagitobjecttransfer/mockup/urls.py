@@ -12,6 +12,7 @@ urlpatterns = [
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
     path('wizardtransfer/', views.TransferFormWizard.as_view([
         ("sourceinfo", forms.SourceInfoForm),
-        ("contactinfo", forms.ContactInfoForm)
+        ("contactinfo", forms.ContactInfoForm),
+        ("uploadfiles", forms.UploadFilesForm),
     ]), name="wizardtransfer"),
 ]
