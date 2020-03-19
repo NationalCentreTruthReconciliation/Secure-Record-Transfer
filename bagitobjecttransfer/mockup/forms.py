@@ -129,6 +129,10 @@ class ContactInfoForm(forms.Form):
     country = CountryField(blank_label='Select your Country').formfield()
 
 
+class UploadFilesForm(forms.Form):
+    session_token = forms.CharField(widget=forms.HiddenInput())
+
+
 class TransferForm(forms.Form):
     first_name = forms.CharField(
         max_length=32,
