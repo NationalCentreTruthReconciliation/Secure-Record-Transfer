@@ -1,4 +1,6 @@
 {% extends 'mockup/base.html' %}
+{% load static %}
+
 {% block title %}
 Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
 {% endblock %}
@@ -23,6 +25,12 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
         <div class="flex-item">
             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
+            {# Help tooltip #}
+            {% if field.help_text %}
+                <div data-tippy-content="{{ field.help_text }}" class="help-icon">
+                    <img height="20" src="{% static 'mockup/img/help_40x40px.png' %}">
+                </div>
+            {% endif %}
         </div>
     {% endfor %}
     <div class="flex-item">

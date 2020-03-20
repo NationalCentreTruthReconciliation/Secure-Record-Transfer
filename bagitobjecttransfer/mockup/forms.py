@@ -78,7 +78,10 @@ class ContactInfoForm(forms.Form):
             'required': 'This field is required.',
             'invalid': 'Phone number must look like "+1 (999) 999-9999"'
         },
-        widget=forms.TextInput(attrs={'placeholder': '+1 (999) 999-9999'},)
+        widget=forms.TextInput(attrs={
+            'placeholder': '+1 (999) 999-9999'
+        }),
+        help_text='Phone number should look like "+1 (123) 456-7890"'
     )
 
     email = forms.EmailField(
