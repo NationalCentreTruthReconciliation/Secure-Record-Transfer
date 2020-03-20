@@ -1,3 +1,5 @@
-$(function(){
-    $('#id_phone_number').mask('+0 (000) 000-0000')
+$(function() {
+    $('input[id$="phone_number"').each(function() {
+        $(this).mask('+0 (000) 000-0000')
+    })
 })
