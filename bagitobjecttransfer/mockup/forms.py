@@ -58,18 +58,18 @@ class ContactInfoForm(forms.Form):
         max_length=64,
         min_length=2,
         required=True,
-        widget=forms.TextInput(
-            attrs={'placeholder': 'Enter your name'}
-        ),
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your name'
+        }),
     )
 
     job_title = forms.CharField(
         max_length=64,
         min_length=2,
         required=True,
-        widget=forms.TextInput(
-            attrs={'placeholder': 'Enter your job title'}
-        )
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your job title'
+        }),
     )
 
     phone_number = forms.RegexField(
@@ -82,24 +82,25 @@ class ContactInfoForm(forms.Form):
     )
 
     email = forms.EmailField(
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your email'}),
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter your email'
+        }),
     )
 
     address_line_1 = forms.CharField(
         max_length=100,
-        min_length=10,
         required=True,
-        widget=forms.TextInput(
-            attrs={'placeholder': 'Street, and street number'}
-        )
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Street, and street number'
+        }),
     )
 
     address_line_2 = forms.CharField(
         max_length=100,
         required=False,
-        widget=forms.TextInput(
-            attrs={'placeholder': 'Unit Number, RPO, PO BOX... (optional)'}
-        )
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Unit Number, RPO, PO BOX... (optional)'
+        }),
     )
 
     province_or_state = forms.ChoiceField(
