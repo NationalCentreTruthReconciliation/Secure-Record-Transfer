@@ -44,6 +44,10 @@ class TransferFormWizard(SessionWizardView):
             "templateref": "mockup/standardform.html",
             "formtitle": "Contact Information",
         },
+        "recorddescription": {
+            "templateref": "mockup/standardform.html",
+            "formtitle": "Record Description",
+        },
         "uploadfiles": {
             "templateref": "mockup/dropzoneform.html",
             "formtitle": "Upload Files"
