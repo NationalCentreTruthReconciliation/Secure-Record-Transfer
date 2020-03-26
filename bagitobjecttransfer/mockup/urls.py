@@ -6,13 +6,13 @@ from . import forms
 app_name = 'mockup'
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
-    path('transfer/', views.Transfer.as_view(), name='transfer'),
+    path('transfer/', views.TransferFormWizard.as_view([
+        ('sourceinfo', forms.SourceInfoForm),
+        ('contactinfo', forms.ContactInfoForm),
+        ('recorddescription', forms.RecordDescriptionForm),
+        ('uploadfiles', forms.UploadFilesForm),
+    ]), name='transfer'),
     path('transfer/send/', views.sendtransfer, name='sendtransfer'),
     path('transfer/uploadfile/', views.uploadfiles, name='uploadfile'),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
-    path('wizardtransfer/', views.TransferFormWizard.as_view([
-        ("sourceinfo", forms.SourceInfoForm),
-        ("contactinfo", forms.ContactInfoForm),
-        ("uploadfiles", forms.UploadFilesForm),
-    ]), name="wizardtransfer"),
 ]
