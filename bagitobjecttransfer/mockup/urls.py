@@ -12,7 +12,6 @@ urlpatterns = [
         ('recorddescription', forms.RecordDescriptionForm),
         ('uploadfiles', forms.UploadFilesForm),
     ]), name='transfer'),
-    path('transfer/send/', views.sendtransfer, name='sendtransfer'),
     path('transfer/uploadfile/', views.uploadfiles, name='uploadfile'),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
 ]
