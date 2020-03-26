@@ -13,7 +13,6 @@ from formtools.wizard.views import SessionWizardView
 
 from mockup.appsettings import BAG_STORAGE_FOLDER
 from mockup.bagger import Bagger
-from mockup.forms import TransferForm
 from mockup.models import UploadedFile, UploadSession
 from mockup.persistentuploadhandler import PersistentUploadedFile
 
@@ -23,11 +22,6 @@ LOGGER = logging.getLogger(__name__)
 
 class Index(TemplateView):
     template_name = 'mockup/home.html'
-
-
-class Transfer(FormView):
-    template_name = 'mockup/transfer.html'
-    form_class = TransferForm
 
 
 class TransferSent(TemplateView):
@@ -120,6 +114,7 @@ def uploadfiles(request):
         return JsonResponse({'error': f'Uncaught Exception:\n{str(exc)}'}, status=500)
 
 
+'''
 def sendtransfer(request):
     """ Send a completed transfer form to the server.
     """
@@ -169,3 +164,4 @@ def sendtransfer(request):
     else:
         form = TransferForm()
         return render(request, 'mockup/transfer.html', {'form': form})
+'''
