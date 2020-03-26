@@ -18,7 +18,7 @@
 .flex-full-width-error,
 .flex-full-width-item {
     flex: 1 1 auto;
-    max-width: 780px;
+    max-width: 790px;
 }
 
 .flex-full-width-item {
@@ -32,12 +32,12 @@
 
 .flex-error > label,
 .flex-item > label {
-    flex: 0 1 170px;
+    flex: 0 1 180px;
     text-align: right;
     padding-right: 10px;
 }
 
-.flex-item > input,
+.flex-item > input:not([type='checkbox']),
 .flex-item > textarea {
     flex: 1 1 auto;
     max-width: 600px;
@@ -45,6 +45,12 @@
     border: 1px solid #919191;
     padding: 2px 2px 2px 2px;
     background-color: #f9f9f9;
+}
+
+.flex-item > input[type='checkbox'] {
+    flex: 0 0 auto;
+    max-width: 600px;
+    padding: 2px 2px 2px 2px;
 }
 
 .flex-item > textarea {
