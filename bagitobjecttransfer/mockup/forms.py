@@ -133,6 +133,21 @@ class ContactInfoForm(forms.Form):
     country = CountryField(blank_label='Select your Country').formfield()
 
 
+class RecordDescriptionForm(forms.Form):
+    collection_title = forms.CharField(
+        min_length=2,
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Create a title for this collection of records'
+        }),
+    )
+
+    date_of_material = forms.DateField(
+        required=True
+    )
+
+
 class UploadFilesForm(forms.Form):
     session_token = forms.CharField(widget=forms.HiddenInput())
 
