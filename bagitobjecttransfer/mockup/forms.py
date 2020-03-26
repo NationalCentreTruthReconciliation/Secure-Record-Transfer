@@ -1,6 +1,8 @@
 from django import forms
 from django_countries.fields import CountryField
 
+from mockup.validators import validate_date
+
 
 class SourceInfoForm(forms.Form):
     source_name = forms.CharField(
@@ -143,8 +145,19 @@ class RecordDescriptionForm(forms.Form):
         }),
     )
 
-    date_of_material = forms.DateField(
-        required=True
+    start_date_of_material = forms.RegexField(
+        # Date regex is a little lax, but this is on purpose since I want the more verbose errors
+        # that the validate_date validator sends back.
+        regex=r'^(?:\d{4})|(?:\d{4})-(?:\d{2})-(?:\d{2})$',
+        required=True,
+        error_messages={
+            'required': 'This field is required.',
+        },
+        widget=forms.TextInput(attrs={
+            'placeholder': '2000-01-01'
+        }),
+        validators=[validate_date],
+        help_text='Enter either a single year or a yyyy-mm-dd formatted date'
     )
 
 
