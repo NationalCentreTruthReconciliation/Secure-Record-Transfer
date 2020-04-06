@@ -24,7 +24,7 @@ def validate_date(value):
     # Validating yyyy-mm-dd
     match_obj = FULL_DATE.match(value)
     if not match_obj:
-        raise ValidationError('Date did not match yyyy-mm-dd format')
+        raise ValidationError('Date does not match yyyy-mm-dd format')
 
     year = int(match_obj.group('year'))
     month = int(match_obj.group('month'))
