@@ -237,6 +237,24 @@ class RecordDescriptionForm(forms.Form):
         help_text='Check the box if the end date is an estimate or a guess'
     )
 
+    language_of_material = forms.CharField(
+        required=True,
+        min_length=2,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'English, French'
+        }),
+        help_text='Enter all relevant languages here'
+    )
+
+    description = forms.CharField(
+        required=True,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': 'Briefly describe the scope and content of the files to be transferred'
+        }),
+    )
+
 
 class UploadFilesForm(forms.Form):
     session_token = forms.CharField(widget=forms.HiddenInput())
