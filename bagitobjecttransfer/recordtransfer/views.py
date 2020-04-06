@@ -11,39 +11,39 @@ from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 from formtools.wizard.views import SessionWizardView
 
-from mockup.appsettings import BAG_STORAGE_FOLDER
-from mockup.bagger import Bagger
-from mockup.models import UploadedFile, UploadSession
-from mockup.persistentuploadhandler import PersistentUploadedFile
+from recordtransfer.appsettings import BAG_STORAGE_FOLDER
+from recordtransfer.bagger import Bagger
+from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.persistentuploadhandler import PersistentUploadedFile
 
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
-    template_name = 'mockup/home.html'
+    template_name = 'recordtransfer/home.html'
 
 
 class TransferSent(TemplateView):
-    template_name = 'mockup/transfersent.html'
+    template_name = 'recordtransfer/transfersent.html'
 
 
 class TransferFormWizard(SessionWizardView):
     TEMPLATES = {
         "sourceinfo": {
-            "templateref": "mockup/standardform.html",
+            "templateref": "recordtransfer/standardform.html",
             "formtitle": "Source Information",
         },
         "contactinfo": {
-            "templateref": "mockup/standardform.html",
+            "templateref": "recordtransfer/standardform.html",
             "formtitle": "Contact Information",
         },
         "recorddescription": {
-            "templateref": "mockup/standardform.html",
+            "templateref": "recordtransfer/standardform.html",
             "formtitle": "Record Description",
         },
         "uploadfiles": {
-            "templateref": "mockup/dropzoneform.html",
+            "templateref": "recordtransfer/dropzoneform.html",
             "formtitle": "Upload Files"
         }
     }
@@ -70,7 +70,7 @@ class TransferFormWizard(SessionWizardView):
         for upload in files:
             upload.delete_file()
 
-        return HttpResponseRedirect(reverse('mockup:transfersent'))
+        return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 
 def uploadfiles(request):
@@ -152,16 +152,16 @@ def sendtransfer(request):
                     for upload in uploaded_files:
                         upload.delete_file()
 
-                return render(request, 'mockup/transfer.html', {'form': form})
+                return render(request, 'recordtransfer/transfer.html', {'form': form})
         except JSONDecodeError as exc:
             print(f'JSONDecodeError: {exc}')
-            return render(request, 'mockup/transfer.html', {'form': form})
+            return render(request, 'recordtransfer/transfer.html', {'form': form})
         except KeyError as exc:
             print(f'KeyError: {exc}')
-            return render(request, 'mockup/transfer.html', {'form': form})
+            return render(request, 'recordtransfer/transfer.html', {'form': form})
         else:
-            return HttpResponseRedirect(reverse('mockup:transfersent'))
+            return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
     else:
         form = TransferForm()
-        return render(request, 'mockup/transfer.html', {'form': form})
+        return render(request, 'recordtransfer/transfer.html', {'form': form})
 '''

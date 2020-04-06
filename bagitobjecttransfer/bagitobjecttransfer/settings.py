@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_countries',
     'formtools',
-    'mockup.apps.MockupConfig'
+    'recordtransfer.apps.RecordTransferConfig',
 ]
 
 MIDDLEWARE = [
@@ -135,7 +135,7 @@ LOGGING = {
 
 
 FILE_UPLOAD_HANDLERS = [
-    'mockup.persistentuploadhandler.PersistentFileUploadHandler'
+    'recordtransfer.persistentuploadhandler.PersistentFileUploadHandler'
 ]
 
 

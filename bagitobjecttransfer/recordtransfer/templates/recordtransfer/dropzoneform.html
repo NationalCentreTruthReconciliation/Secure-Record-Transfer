@@ -1,4 +1,4 @@
-{% extends 'mockup/base.html' %}
+{% extends 'recordtransfer/base.html' %}
 {% block title %}
 Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
 {% endblock %}
@@ -27,7 +27,7 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
                 <table class="dz-message-table">
                     <tr>
                         <td>
-                            <img src="{% static 'mockup/img/file-upload.png' %}">
+                            <img src="{% static 'recordtransfer/img/file-upload.png' %}">
                         </td>
                         <td>
                             Drop files here or click to upload

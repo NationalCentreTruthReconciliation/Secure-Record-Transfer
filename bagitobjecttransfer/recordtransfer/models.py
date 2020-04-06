@@ -1,4 +1,3 @@
-
 from datetime import datetime
 import os
 
@@ -54,3 +53,4 @@ class Bag(models.Model):
 
     def __str__(self):
         return f'"{self.bag_location}" bagged at {self.bagging_date} by {self.user.name}'
+

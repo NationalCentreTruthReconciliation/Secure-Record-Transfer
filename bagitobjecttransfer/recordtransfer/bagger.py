@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 import bagit
 
-from mockup.models import UploadedFile
+from recordtransfer.models import UploadedFile
 
 
 LOGGER = logging.getLogger(__name__)

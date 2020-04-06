@@ -1,7 +1,7 @@
 """ Functions for cleaning up old files, etc. """
 
 from datetime import datetime, timedelta
-from mockup.models import UploadedFile
+from recordtransfer.models import UploadedFile
 
 class Cleaner:
     @staticmethod

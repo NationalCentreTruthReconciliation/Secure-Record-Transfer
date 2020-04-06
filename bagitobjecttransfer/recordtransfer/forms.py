@@ -3,7 +3,7 @@ from datetime import datetime
 from django import forms
 from django_countries.fields import CountryField
 
-from mockup.validators import validate_date, FULL_DATE, SINGLE_YEAR
+from recordtransfer.validators import validate_date, FULL_DATE, SINGLE_YEAR
 
 
 class SourceInfoForm(forms.Form):
@@ -138,10 +138,10 @@ class ContactInfoForm(forms.Form):
 
 
 class RecordDescriptionForm(forms.Form):
-    def get_year_month_day(value):
-        year_match = SINGLE_YEAR.match(start_date)
+    def get_year_month_day(self, value):
+        year_match = SINGLE_YEAR.match(value)
         if year_match:
-            start_year = int(start_date_year_match.group('year'))
+            year = int(year_match.group('year'))
             month = date = 0
         else:
             full_match = FULL_DATE.match()

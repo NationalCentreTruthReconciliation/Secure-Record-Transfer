@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 from . import forms
 
-app_name = 'mockup'
+app_name = 'recordtransfer'
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
     path('transfer/', views.TransferFormWizard.as_view([

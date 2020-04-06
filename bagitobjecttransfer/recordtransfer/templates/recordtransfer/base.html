@@ -8,24 +8,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/dropzone.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
-    <script src="{% static 'mockup/js/inputmasks.js'%}"></script>
-    <script src="{% static 'mockup/js/dropzoneconfig.js'%}"></script>
-    <script src="{% static 'mockup/js/tippyconfig.js'%}"></script>
+    <script src="{% static 'recordtransfer/js/inputmasks.js'%}"></script>
+    <script src="{% static 'recordtransfer/js/dropzoneconfig.js'%}"></script>
+    <script src="{% static 'recordtransfer/js/tippyconfig.js'%}"></script>
     {% endblock %}
 
-    <link rel="stylesheet" type="text/css" href="{% static 'mockup/css/base.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'mockup/css/transfer.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'mockup/css/dropzone.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transfer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
 
-    <link rel="shortcut icon" type="image/png" href="{% static 'mockup/img/favicon.ico' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}"/>
 
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
     <header class="header">
         <div class="main-header-content">
-            <a href="{% url 'mockup:index' %}" title="Go to home page">
-                <img id="logo" src="{% static 'mockup/img/nctrlogo_flame_150x150px.png'%}">
+            <a href="{% url 'recordtransfer:index' %}" title="Go to home page">
+                <img id="logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
             </a>
             <div class="header-title title-text">
                 NCTR Record Transfer

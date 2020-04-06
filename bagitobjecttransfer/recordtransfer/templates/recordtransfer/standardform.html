@@ -1,4 +1,4 @@
-{% extends 'mockup/base.html' %}
+{% extends 'recordtransfer/base.html' %}
 {% load static %}
 
 {% block title %}
@@ -28,7 +28,7 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
             {# Help tooltip #}
             {% if field.help_text %}
                 <div data-tippy-content="{{ field.help_text }}" class="help-icon">
-                    <img height="20" src="{% static 'mockup/img/help_40x40px.png' %}">
+                    <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
                 </div>
             {% endif %}
         </div>
