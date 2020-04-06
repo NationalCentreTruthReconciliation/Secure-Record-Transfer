@@ -138,39 +138,35 @@ class ContactInfoForm(forms.Form):
 
 
 class RecordDescriptionForm(forms.Form):
+    def get_year_month_day(value):
+        year_match = SINGLE_YEAR.match(start_date)
+        if year_match:
+            start_year = int(start_date_year_match.group('year'))
+            month = date = 0
+        else:
+            full_match = FULL_DATE.match()
+            year = int(full_match.group('year'))
+            month = int(full_match.group('month'))
+            date = int(full_match.group('date'))
+        return (year, month, date)
+
     def clean(self):
         cleaned_data = super().clean()
 
-        start_date = cleaned_data.get('start_date_of_material')
-        end_date = cleaned_data.get('end_date_of_material')
+        start_date_of_material = cleaned_data.get('start_date_of_material')
+        end_date_of_material = cleaned_data.get('end_date_of_material')
 
         # Check end date after start date
-        if start_date and end_date:
+        if start_date_of_material and end_date_of_material:
             start_year_only = False
-            start_date_year_match = SINGLE_YEAR.match(start_date)
-            if start_date_year_match:
+            start_year, start_month, start_date = self.get_year_month_day(start_date_of_material)
+            if start_month == 0 or start_date == 0:
                 start_year_only = True
-                start_year = int(start_date_year_match.group('year'))
-                start_month = 0
-                start_date = 0
-            else:
-                start_date_full_match = FULL_DATE.match(start_date)
-                start_year = int(start_date_full_match.group('year'))
-                start_month = int(start_date_full_match.group('month'))
-                start_date = int(start_date_full_match.group('date'))
 
             end_year_only = False
-            end_date_year_match = SINGLE_YEAR.match(end_date)
-            if end_date_year_match:
+            end_year, end_month, end_date = self.get_year_month_day(end_date_of_material)
+            if end_month == 0 or end_date == 0:
                 end_year_only = True
-                end_year = int(end_date_year_match)
-                end_month = 0
-                end_date = 0
-            else:
-                end_date_full_match = FULL_DATE.match(end_date)
-                end_year = int(end_date_full_match.group('year'))
-                end_month = int(end_date_full_match.group('month'))
-                end_date = int(end_date_full_match.group('date'))
 
             # Fix zero-ed months and dates
             if start_year_only and end_year_only:
