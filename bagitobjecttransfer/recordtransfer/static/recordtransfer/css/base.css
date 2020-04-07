@@ -64,6 +64,8 @@ header {
     flex-basis: 80px;
 }
 
+.red-button,
+.green-button,
 .blue-button {
     margin: auto;
     font-size: 11pt;
@@ -72,10 +74,35 @@ header {
     padding: 6px 12px 6px 12px;
     margin: 0;
     text-decoration: none;
-    background: #2d30d4;
-    color: #fefefe;
     transition: background 150ms ease;
     -webkit-appearance: none;
+}
+
+.red-button {
+    background: #ce2929;
+    color: #fefefe;
+}
+
+.green-button {
+    background: #0ba124;
+    color: #fefefe;
+}
+
+.blue-button {
+    background: #2d30d4;
+    color: #fefefe;
+}
+
+.red-button:hover,
+.red-button:focus {
+    background: #ff7070;
+    color: #ffffff;
+}
+
+.green-button:hover,
+.green-button:focus {
+    background: #3fb953;
+    color: #ffffff;
 }
 
 .blue-button:hover,
@@ -84,6 +111,8 @@ header {
     color: #ffffff;
 }
 
+.red-button:disabled,
+.green-button:disabled,
 .blue-button:disabled {
     background: #747474;
     color: #ffffff;
