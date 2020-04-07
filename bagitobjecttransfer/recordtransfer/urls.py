@@ -12,7 +12,7 @@ urlpatterns = [
             ('contactinfo', forms.ContactInfoForm),
             ('recorddescription', forms.RecordDescriptionForm),
             ('rights', formset_factory(forms.RightsForm, extra=1)),
-            ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=0)),
+            ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=1)),
             ('uploadfiles', forms.UploadFilesForm),
         ]
     ), name='transfer'),
