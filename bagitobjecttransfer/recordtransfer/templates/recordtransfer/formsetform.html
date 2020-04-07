@@ -43,7 +43,15 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
         </div>
     {% endfor %}
     <div class="flex-item">
-        <label for="nothing"></label>
+        <label></label>
+        <div class="button-array">
+            <button class="green-button add-form-row margin-right-20px">Add Another Item</button>
+            <button class="red-button remove-form-row">Remove Last Item</button>
+        </div>
+    </div>
+    <br>
+    <div class="flex-item">
+        <label></label>
         <div class="button-array">
             {% if wizard.steps.prev %}
                 {# Without formnovalidate, you can't go to the previous step without valid data #}
