@@ -285,16 +285,37 @@ class RightsForm(forms.Form):
 
 
 class OtherIdentifiersForm(forms.Form):
+    def clean(self):
+        cleaned_data = super().clean()
+
+        id_type = cleaned_data.get('other_identifier_type')
+        id_value = cleaned_data.get('identifier_value')
+        id_note = cleaned_data.get('identifier_note')
+
+        if id_type and not id_value:
+            value_msg = 'Must enter a value for this identifier'
+            self.add_error('identifier_value', value_msg)
+        elif not id_type and id_value:
+            type_msg = 'Must enter a type for this identifier'
+            self.add_error('other_identifier_type', type_msg)
+        elif not id_type and id_note:
+            type_msg = 'Must enter a type for this identifier'
+            self.add_error('other_identifier_type', type_msg)
+            value_msg = 'Must enter a value for this identifier'
+            self.add_error('identifier_value', value_msg)
+            note_msg = 'Cannot enter a note without entering a value and type'
+            self.add_error('identifier_note', note_msg)
+
     other_identifier_type = forms.CharField(
-        required=True,
+        required=False,
         widget=forms.TextInput(attrs={
-            'placeholder': 'The kind of identifier',
+            'placeholder': 'The type of the identifier',
         }),
-        help_text='e.g., may be a receipt number, an ID from another records system, etc.',
+        help_text='For example: "Receipt number", "LAC Record ID", etc.',
     )
 
     identifier_value = forms.CharField(
-        required=True,
+        required=False,
         widget=forms.TextInput(attrs={
             'placeholder': 'Identifier value',
         }),
@@ -304,7 +325,7 @@ class OtherIdentifiersForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
-            'placeholder': 'Any notes on this identifier (optional).',
+            'placeholder': 'Any notes on this identifier (optional)',
         }),
     )
 
