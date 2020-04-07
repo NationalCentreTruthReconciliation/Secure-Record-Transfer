@@ -42,13 +42,17 @@ class TransferFormWizard(SessionWizardView):
             "templateref": "recordtransfer/standardform.html",
             "formtitle": "Record Description",
         },
-        "rightsandotheridentifiers": {
+        "rights": {
             "templateref": "recordtransfer/formsetform.html",
-            "formtitle": "Rights and Other Identifiers",
+            "formtitle": "Record Rights",
+        },
+        "otheridentifiers": {
+            "templateref": "recordtransfer/formsetform.html",
+            "formtitle": "Other Identifiers",
         },
         "uploadfiles": {
             "templateref": "recordtransfer/dropzoneform.html",
-            "formtitle": "Upload Files"
+            "formtitle": "Upload Files",
         },
     }
 

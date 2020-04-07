@@ -11,7 +11,8 @@ urlpatterns = [
             ('sourceinfo', forms.SourceInfoForm),
             ('contactinfo', forms.ContactInfoForm),
             ('recorddescription', forms.RecordDescriptionForm),
-            ('rightsandotheridentifiers', formset_factory(forms.RightsForm, extra=2)),
+            ('rights', formset_factory(forms.RightsForm, extra=1)),
+            ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=0)),
             ('uploadfiles', forms.UploadFilesForm),
         ]
     ), name='transfer'),

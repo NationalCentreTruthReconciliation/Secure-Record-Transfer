@@ -256,31 +256,6 @@ class RecordDescriptionForm(forms.Form):
     )
 
 
-class OtherIdentifiersForm(forms.Form):
-    other_identifier_type = forms.CharField(
-        required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'The kind of identifier',
-        }),
-        help_text='e.g., may be a receipt number, an ID from another records system, etc.',
-    )
-
-    identifier_value = forms.CharField(
-        required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Identifier value',
-        }),
-    )
-
-    identifier_note = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': '2',
-            'placeholder': 'Any notes on this identifier (optional).',
-        }),
-    )
-
-
 class RightsForm(forms.Form):
     rights_type = forms.CharField(
         required=True,
@@ -306,6 +281,30 @@ class RightsForm(forms.Form):
         }),
     )
 
+
+class OtherIdentifiersForm(forms.Form):
+    other_identifier_type = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'The kind of identifier',
+        }),
+        help_text='e.g., may be a receipt number, an ID from another records system, etc.',
+    )
+
+    identifier_value = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Identifier value',
+        }),
+    )
+
+    identifier_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': '2',
+            'placeholder': 'Any notes on this identifier (optional).',
+        }),
+    )
 
 
 class UploadFilesForm(forms.Form):
