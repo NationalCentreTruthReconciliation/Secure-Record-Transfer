@@ -144,7 +144,7 @@ class RecordDescriptionForm(forms.Form):
             year = int(year_match.group('year'))
             month = date = 0
         else:
-            full_match = FULL_DATE.match()
+            full_match = FULL_DATE.match(value)
             year = int(full_match.group('year'))
             month = int(full_match.group('month'))
             date = int(full_match.group('date'))
@@ -254,6 +254,58 @@ class RecordDescriptionForm(forms.Form):
             'placeholder': 'Briefly describe the scope and content of the files to be transferred'
         }),
     )
+
+
+class OtherIdentifiersForm(forms.Form):
+    other_identifier_type = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'The kind of identifier',
+        }),
+        help_text='e.g., may be a receipt number, an ID from another records system, etc.',
+    )
+
+    identifier_value = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Identifier value',
+        }),
+    )
+
+    identifier_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': '2',
+            'placeholder': 'Any notes on this identifier (optional).',
+        }),
+    )
+
+
+class RightsForm(forms.Form):
+    rights_type = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Enter the type of rights govern the records',
+        }),
+        help_text='e.g., Copyright, cultural rights, etc. If public domain, put Copyright.',
+    )
+
+    rights_statement = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Nature and duration of permission or restrictions',
+        }),
+        help_text='e.g., Public domain, Records subject to Province of Manitoba\'s FIPPA, etc.',
+    )
+
+    rights_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': '2',
+            'placeholder': 'Any notes on these rights (optional).',
+        }),
+    )
+
 
 
 class UploadFilesForm(forms.Form):

@@ -42,10 +42,14 @@ class TransferFormWizard(SessionWizardView):
             "templateref": "recordtransfer/standardform.html",
             "formtitle": "Record Description",
         },
+        "rightsandotheridentifiers": {
+            "templateref": "recordtransfer/formsetform.html",
+            "formtitle": "Rights and Other Identifiers",
+        },
         "uploadfiles": {
             "templateref": "recordtransfer/dropzoneform.html",
             "formtitle": "Upload Files"
-        }
+        },
     }
 
     def get_template_names(self):
