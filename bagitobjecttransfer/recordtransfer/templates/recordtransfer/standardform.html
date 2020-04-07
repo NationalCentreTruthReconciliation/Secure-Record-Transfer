@@ -6,10 +6,11 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
 {% endblock %}
 
 {% block content %}
-<div class="form-title title-text">{{ form_title }}</div>
-<p>
-    Transfer step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
-</p>
+<div class="form-title title-text">
+    {{ form_title }} - Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
+</div>
+{% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
+
 <form action="" method="post">
     {% csrf_token %}
     {{ wizard.management_form }}
