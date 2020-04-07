@@ -6,15 +6,41 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
 {% endblock %}
 
 {% block content %}
-<div class="form-title title-text">{{ form_title }}</div>
-<p>
-    Transfer step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
-</p>
+<div class="form-title title-text">
+    {{ form_title }} - Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
+</div>
+{% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
+
 <form action="" method="post">
     {% csrf_token %}
+    {# Wizard management form and formset management form are both required #}
     {{ wizard.management_form }}
-    {% for form in wizard.form %}
-        {{ form }}
+    {{ wizard.form.management_form }}
+    {% for form in wizard.form.forms %}
+        {# Row to duplicate to add more forms #}
+        <div class="form-row">
+        {% for field in form %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                <div class="flex-error">
+                    <label for="nothing"></label>
+                    <div class="field-error">{{ error }}</div>
+                </div>
+                {% endfor %}
+            {% endif %}
+            <div class="flex-item">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {# Help tooltip #}
+                {% if field.help_text %}
+                    <div data-tippy-content="{{ field.help_text }}" class="help-icon">
+                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <br>
+        </div>
     {% endfor %}
     <div class="flex-item">
         <label for="nothing"></label>
