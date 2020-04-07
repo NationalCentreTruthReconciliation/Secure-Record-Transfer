@@ -261,6 +261,7 @@ class RightsForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={
             'placeholder': 'Enter the type of rights govern the records',
+            'required': 'required',
         }),
         help_text='e.g., Copyright, cultural rights, etc. If public domain, put Copyright.',
     )
@@ -269,6 +270,7 @@ class RightsForm(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={
             'placeholder': 'Nature and duration of permission or restrictions',
+            'required': 'required',
         }),
         help_text='e.g., Public domain, Records subject to Province of Manitoba\'s FIPPA, etc.',
     )
