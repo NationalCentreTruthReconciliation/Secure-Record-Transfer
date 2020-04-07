@@ -49,6 +49,10 @@ class TransferFormWizard(SessionWizardView):
         "otheridentifiers": {
             "templateref": "recordtransfer/formsetform.html",
             "formtitle": "Other Identifiers",
+            "infomessage": (
+                "This step is optional, if you do not have any other IDs associated with the "
+                "records, go to the next step"
+            )
         },
         "uploadfiles": {
             "templateref": "recordtransfer/dropzoneform.html",
@@ -63,7 +67,9 @@ class TransferFormWizard(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super(TransferFormWizard, self).get_context_data(form, **kwargs)
         step_name = self.steps.current
-        context.update({'form_title': self.TEMPLATES[step_name]["formtitle"]})
+        context.update({'form_title': self.TEMPLATES[step_name]['formtitle']})
+        if 'infomessage' in self.TEMPLATES[step_name]:
+            context.update({'info_message': self.TEMPLATES[step_name]['infomessage']})
         return context
 
     def done(self, form_list, **kwargs):
