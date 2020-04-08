@@ -260,10 +260,10 @@ class RightsForm(forms.Form):
     rights_type = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={
-            'placeholder': 'Enter the type of rights govern the records',
+            'placeholder': 'Enter the type of rights governing the records',
             'required': 'required',
         }),
-        help_text='e.g., Copyright, cultural rights, etc. If public domain, put Copyright.',
+        help_text='For example: "Copyright," "Cultural rights," etc.',
     )
 
     rights_statement = forms.CharField(
@@ -272,14 +272,14 @@ class RightsForm(forms.Form):
             'placeholder': 'Nature and duration of permission or restrictions',
             'required': 'required',
         }),
-        help_text='e.g., Public domain, Records subject to Province of Manitoba\'s FIPPA, etc.',
+        help_text='For example: "Public domain," "FIPPA," "Copyright lasts until 2050," etc.',
     )
 
     rights_note = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
-            'placeholder': 'Any notes on these rights (optional).',
+            'placeholder': 'Any notes on these rights or which files they may apply to (optional).',
         }),
     )
 
@@ -325,7 +325,7 @@ class OtherIdentifiersForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
-            'placeholder': 'Any notes on this identifier (optional)',
+            'placeholder': 'Any notes on this identifier or which files it may apply to (optional).',
         }),
     )
 
