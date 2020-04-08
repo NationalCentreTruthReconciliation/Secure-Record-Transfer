@@ -78,6 +78,10 @@ header {
     -webkit-appearance: none;
 }
 
+.less-padding {
+    padding: 4px 6px 4px 6px !important;
+}
+
 .red-button {
     background: #ce2929;
     color: #fefefe;
@@ -124,6 +128,10 @@ header {
 
 .margin-right-20px {
     margin-right: 20px;
+}
+
+.margin-top-25px {
+    margin-top: 25px;
 }
 
 /**
