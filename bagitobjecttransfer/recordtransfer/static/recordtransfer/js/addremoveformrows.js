@@ -1,19 +1,28 @@
+// JavaScript code adapted from this article:
+// https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
+
+const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea'
+
 function appendNewForm(cloneFormSelector, prefix) {
-    var newElement = $(cloneFormSelector).clone(true)
-
-    // TOTAL_FORMS is a 1-based number
+    // TOTAL_FORMS and MAX_NUM_FORMS are 1-based totals
     var totalOne = parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
+    var maxNumForms = parseInt($(`#id_${prefix}-MAX_NUM_FORMS`).val())
 
-    // TODO: Check in the future if totalOne + 1 is greater than maximum number of forms allowed
+    if (totalOne + 1 > maxNumForms) {
+        alert(`You may not exceed ${maxNumForms} form sections.`)
+        return
+    }
 
-    // Element IDs are 0-based numbers
+    var newForm = $(cloneFormSelector).clone(true)
+    newForm.addClass('margin-top-25px')
+
+    // Element IDs are 0-based totals
     var totalZero = totalOne - 1
 
     oldFormNumber = `-${totalZero}-`
     newFormNumber = `-${totalZero + 1}-`
 
-    validInputs = 'input:not([type=button]):not([type=submit]):not([type=reset])'
-    $(newElement).find(validInputs).each((_, element) => {
+    $(newForm).find(VALID_INPUTS).each((_, element) => {
         var newName = $(element).attr('name').replace(oldFormNumber, newFormNumber)
         var newId = `id_${newName}`
         $(element).attr({
@@ -24,7 +33,7 @@ function appendNewForm(cloneFormSelector, prefix) {
         .removeAttr('checked')
     })
 
-    $(newElement).find('label').each((_, element) => {
+    $(newForm).find('label').each((_, element) => {
         var forValue = $(element).attr('for')
         if (forValue) {
             var newForValue = forValue.replace(oldFormNumber, newFormNumber)
@@ -35,7 +44,7 @@ function appendNewForm(cloneFormSelector, prefix) {
     })
 
     $(`#id_${prefix}-TOTAL_FORMS`).val(totalOne + 1);
-    $(cloneFormSelector).after(newElement);
+    $(cloneFormSelector).after(newForm);
 }
 
 function deleteLastForm(deleteFormSelector, prefix) {
