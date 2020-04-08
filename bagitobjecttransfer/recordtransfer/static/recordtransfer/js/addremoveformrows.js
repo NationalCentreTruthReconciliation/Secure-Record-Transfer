@@ -125,6 +125,7 @@ $(() => {
         else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
             appendNewForm('.form-row:last', 'otheridentifiers')
         }
+        tippy('[data-tippy-content]')
     })
 
     $('.remove-form-row').on('click', (event) => {
