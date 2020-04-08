@@ -2,29 +2,43 @@
 // https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
 
 const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea'
+const ID_NUM_REGEX = new RegExp('-(\\d+)-')
 
 function appendNewForm(cloneFormSelector, prefix) {
-    // TOTAL_FORMS and MAX_NUM_FORMS are 1-based totals
-    var totalOne = parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
+    var totalForms = parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
     var maxNumForms = parseInt($(`#id_${prefix}-MAX_NUM_FORMS`).val())
 
-    if (totalOne + 1 > maxNumForms) {
+    if (totalForms + 1 > maxNumForms) {
         alert(`You may not exceed ${maxNumForms} form sections.`)
         return
     }
 
     var newForm = $(cloneFormSelector).clone(true)
     newForm.addClass('margin-top-25px')
+    incrementInputAttributes(newForm)
+    incrementLabelAttributes(newForm)
+    $(`#id_${prefix}-TOTAL_FORMS`).val(totalForms + 1);
+    $(cloneFormSelector).after(newForm);
+}
 
-    // Element IDs are 0-based totals
-    var totalZero = totalOne - 1
+function incrementInputAttributes(form) {
+    var formIdNumber = -1
+    var oldNumber = null
+    var newNumber = null
 
-    oldFormNumber = `-${totalZero}-`
-    newFormNumber = `-${totalZero + 1}-`
+    $(form).find(VALID_INPUTS).each((_, element) => {
+        var name = $(element).attr('name')
 
-    $(newForm).find(VALID_INPUTS).each((_, element) => {
-        var newName = $(element).attr('name').replace(oldFormNumber, newFormNumber)
+        if (formIdNumber === -1) {
+            var match = ID_NUM_REGEX.exec(name)
+            formIdNumber = parseInt(match[1])
+            oldNumber = `-${formIdNumber}-`
+            newNumber = `-${formIdNumber + 1}-`
+        }
+
+        var newName = name.replace(oldNumber, newNumber)
         var newId = `id_${newName}`
+
         $(element).attr({
             'name': newName,
             'id': newId
@@ -32,19 +46,30 @@ function appendNewForm(cloneFormSelector, prefix) {
         .val('')
         .removeAttr('checked')
     })
+}
 
-    $(newForm).find('label').each((_, element) => {
+function incrementLabelAttributes(form) {
+    var formIdNumber = -1
+    var oldNumber = null
+    var newNumber = null
+
+    $(form).find('label').each((_, element) => {
         var forValue = $(element).attr('for')
+
         if (forValue) {
-            var newForValue = forValue.replace(oldFormNumber, newFormNumber)
+            if (formIdNumber === -1) {
+                var match = ID_NUM_REGEX.exec(forValue)
+                formIdNumber = parseInt(match[1])
+                oldNumber = `-${formIdNumber}-`
+                newNumber = `-${formIdNumber + 1}-`
+            }
+
+            var newForValue = forValue.replace(oldNumber, newNumber)
             $(element).attr({
                 'for': newForValue
             })
         }
     })
-
-    $(`#id_${prefix}-TOTAL_FORMS`).val(totalOne + 1);
-    $(cloneFormSelector).after(newForm);
 }
 
 function deleteForm(deleteFormSelector, prefix) {
