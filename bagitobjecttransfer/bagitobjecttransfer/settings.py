@@ -127,7 +127,7 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
         },
-        'mockup': {
+        'recordtransfer': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
