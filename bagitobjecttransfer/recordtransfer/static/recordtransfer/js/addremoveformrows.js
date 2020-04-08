@@ -47,7 +47,7 @@ function appendNewForm(cloneFormSelector, prefix) {
     $(cloneFormSelector).after(newForm);
 }
 
-function deleteLastForm(deleteFormSelector, prefix) {
+function deleteForm(deleteFormSelector, prefix) {
     var total = parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
 
     if (total > 1) {
@@ -86,25 +86,65 @@ function updateElementIndex(element, prefix, index) {
     }
 }
 
+function elementExists(selector) {
+    return $(selector).length === 0 ? false : true
+}
+
 $(() => {
-    if ($('#id_rights-TOTAL_FORMS')) {
-        $('.add-form-row').on('click', (event) => {
-            event.preventDefault()
+    $('.add-form-row').on('click', (event) => {
+        event.preventDefault()
+        $('.remove-form-row').prop('disabled', false)
+        if (elementExists('#id_rights-TOTAL_FORMS')) {
             appendNewForm('.form-row:last', 'rights')
-        })
-        $('.remove-form-row').on('click', (event) => {
-            event.preventDefault()
-            deleteLastForm('.form-row:last', 'rights')
-        })
-    }
-    else if ($('#id_otheridentifiers-TOTAL_FORMS')) {
-        $('.add-form-row').on('click', (event) => {
-            event.preventDefault()
+        }
+        else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
             appendNewForm('.form-row:last', 'otheridentifiers')
+        }
+    })
+
+    $('.remove-form-row').on('click', (event) => {
+        event.preventDefault()
+
+        if (elementExists('#id_rights-TOTAL_FORMS')) {
+            deleteForm('.form-row:last', 'rights')
+            total = parseInt($('#id_rights-TOTAL_FORMS').val())
+            if (total <= 1) {
+                $('.remove-form-row').prop('disabled', true)
+            }
+        }
+        else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
+            deleteForm('.form-row:last', 'otheridentifiers')
+            total = parseInt($('#id_otheridentifiers-TOTAL_FORMS').val())
+            if (total <= 1) {
+                $('.remove-form-row').prop('disabled', true)
+            }
+        }
+    })
+
+    $('.remove-form-row').hover(() => {
+        var total = 0
+        if (elementExists('#id_rights-TOTAL_FORMS')) {
+            total = parseInt($('#id_rights-TOTAL_FORMS').val())
+        }
+        else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
+            total = parseInt($('#id_otheridentifiers-TOTAL_FORMS').val())
+        }
+        if (total > 1) {
+            $('.form-row:last').find('label').each((_, element) => {
+                $(element).addClass('red-text-strikethrough')
+            })
+            $('.form-row:last').find(VALID_INPUTS).each((_, element) => {
+                $(element).addClass('red-border')
+                $(element).addClass('red-text-strikethrough')
+            })
+        }
+    }, () => {
+        $('.form-row:last').find('label').each((_, element) => {
+            $(element).removeClass('red-text-strikethrough')
         })
-        $('.remove-form-row').on('click', (event) => {
-            event.preventDefault()
-            deleteLastForm('.form-row:last', 'otheridentifiers')
+        $('.form-row:last').find(VALID_INPUTS).each((_, element) => {
+            $(element).removeClass('red-border')
+            $(element).removeClass('red-text-strikethrough')
         })
-    }
+    })
 })
