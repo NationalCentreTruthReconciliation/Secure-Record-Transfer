@@ -1,8 +1,12 @@
+from collections import OrderedDict
+from datetime import datetime
+from pathlib import Path
+import logging
 import os
 import shutil
-from pathlib import Path
-from datetime import datetime
-import logging
+import yaml
+import yamlordereddictloader
+
 import bagit
 
 from recordtransfer.models import UploadedFile
@@ -17,18 +21,26 @@ class FolderNotFoundError(Exception):
 
 class Bagger:
     @staticmethod
-    def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefiles=True):
-        """ Creates a bag from a list of file paths and a dictionary of bag metadata.
+    def create_bag(storage_folder: str, session_token: str, default_metadata: dict,
+        caais_metadata: OrderedDict, deletefiles=True):
+        """ Creates a bag from a list of file paths and two sets of metadata.
 
         Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
         files, data files, and manifest files. The bagit-py library is used, which has been
         developed by the Library of Congress.
 
+        This function adheres to the Canadian Archival Accession Infomation Standard (CAAIS) by
+        writing a separate tag file according to the CAAIS metadata received by this function. The
+        tag file is written in YAML format to make it easier for archivists to read (as opposed to
+        JSON).
+
         Args:
-            storage_folder (str): Path to folder to store the bag in
-            files (list): A list of dictionaries containing the path and the name of the files to be
-                put in the bag. Each dictionary must have a 'filepath' field and a 'name' field.
-            metadata (dict): A dictionary of bag metadata to be applied to bag tag files
+            storage_folder (str): Path to folder to store the bag in.
+            session_token (str): The UploadSession token corresponding to the uploaded files.
+            default_metadata (dict): A dictionary of metadata fields accepted by the BagIt standard.
+            caais_metadata (OrderedDict): A dictionary of CAAIS-compliant metadata. This dictionary
+                is not verified, it is just dumped into a YAML tag file.
+            deletefiles (bool): Delete files in upload session after bagging if True.
         """
         if not Path(storage_folder).exists():
             LOGGER.error(msg=('Bagger: Could not find storage folder "%s"' % storage_folder))
@@ -44,7 +56,10 @@ class Bagger:
         bag_valid = False
         bag_created = False
         if not missing_files:
-            bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha256'])
+            bag = bagit.make_bag(new_bag_folder, default_metadata, checksums=['sha256'])
+            if caais_metadata:
+                Bagger._write_caais_tags_to_bag(new_bag_folder, caais_metadata)
+                bag.save()
             bag_valid = bag.is_valid()
             bag_created = True
         else:
@@ -105,6 +120,16 @@ class Bagger:
 
         return (copied_files, missing_files)
 
+    @staticmethod
+    def _write_caais_tags_to_bag(bag_directory: Path, caais_tags: OrderedDict):
+        tag_directory = bag_directory / 'tags'
+        if not tag_directory.exists():
+            os.mkdir(tag_directory)
+        caais_file = tag_directory / 'CAAIS_Metadata.yaml'
+        with open(caais_file, 'w', encoding='utf-8') as fd:
+            # yaml can't handle OrderedDicts natively, have to use special Dumper
+            yaml.dump(caais_tags, fd, Dumper=yamlordereddictloader.Dumper, indent=4,
+                default_flow_style=False)
 
     @staticmethod
     def _get_bagging_folder(storage_folder: str) -> Path:
