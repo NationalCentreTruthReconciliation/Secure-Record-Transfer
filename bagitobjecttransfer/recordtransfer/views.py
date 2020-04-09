@@ -13,6 +13,7 @@ from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.appsettings import BAG_STORAGE_FOLDER
 from recordtransfer.bagger import Bagger
+from recordtransfer.caaistag import CaaisTagger
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.persistentuploadhandler import PersistentUploadedFile
 
@@ -75,14 +76,23 @@ class TransferFormWizard(SessionWizardView):
     def done(self, form_list, **kwargs):
         data = self.get_all_cleaned_data()
 
+        upload_session_token = data['session_token']
+
         files = UploadedFile.objects.filter(
-            session__token=data['session_token']
+            session__token=upload_session_token
         ).filter(
             old_copy_removed=False
         )
 
-        for upload in files:
-            upload.delete_file()
+        caais_tags = CaaisTagger.convert_form_to_tags(data)
+
+        LOGGER.info('Starting bag creation in the background')
+        bagging_thread = threading.Thread(
+            target=Bagger.create_bag,
+            args=(BAG_STORAGE_FOLDER, upload_session_token, {}, caais_tags, True)
+        )
+        bagging_thread.setDaemon(True)
+        bagging_thread.start()
 
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
