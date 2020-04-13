@@ -64,6 +64,23 @@ header {
     flex-basis: 80px;
 }
 
+.footer {
+    text-align: center;
+    color: black;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    font-size: 11pt;
+    background-color: #dddddd;
+}
+
+.flex-wrapper {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 .red-button,
 .green-button,
 .blue-button {

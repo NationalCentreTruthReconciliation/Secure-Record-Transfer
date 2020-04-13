@@ -23,27 +23,32 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-    <header class="header">
-        <div class="main-header-content">
-            <a href="{% url 'recordtransfer:index' %}" title="Go to home page">
-                <img id="logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
-            </a>
-            <div class="header-title title-text">
-                NCTR Record Transfer
-            </div>
-            <div class="navigation">
-                Navigation Section
-            </div>
-            <div class="login">
-                <button class="blue-button" type="submit"
-                        onclick="location.href='{% url 'login' %}'">
-                    Login
-                </button>
+    <div class="flex-wrapper">
+        <div>
+            <header class="header">
+                <div class="main-header-content">
+                    <a href="{% url 'recordtransfer:index' %}" title="Go to home page">
+                        <img id="logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
+                    </a>
+                    <div class="header-title title-text">
+                        NCTR Record Transfer
+                    </div>
+                    <div class="login">
+                        <button class="blue-button" type="submit"
+                                onclick="location.href='{% url 'login' %}'">
+                            Login
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <div class="main-content">
+                {% block content %}{% endblock %}
             </div>
         </div>
-    </header>
-    <div class="main-content">
-        {% block content %}{% endblock %}
+        <div class="footer">
+            Built with Django&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="https://nctr.ca/map.php">National Centre for Truth and Reconciliation</a>
+        </div>
     </div>
 </body>
 </html>
