@@ -1,13 +1,15 @@
 from datetime import datetime
 from collections import OrderedDict
+from bs4 import BeautifulSoup
 import logging
 
 LOGGER = logging.getLogger(__name__)
 DEFAULT_REPOSITORY = 'NCTR'
 
-class CaaisTagger:
+
+class TagGenerator:
     @staticmethod
-    def convert_form_to_tags(cleaned_form_data: dict):
+    def generate_tags_from_form(cleaned_form_data: dict):
         # TODO: Maybe we should catch KeyErrors here and log those
         section_1 = get_section_1_identity_information(cleaned_form_data)
         section_2 = get_section_2_source_information(cleaned_form_data)
@@ -135,3 +137,102 @@ def get_section_7_control_information(cleaned_form_data: dict):
     creation_date['actionNote'] = 'Created with NCTR Record Transfer Portal'
     control_info['dateOfCreationOrRevision'].append(creation_date)
     return control_info
+
+
+class DocumentGenerator:
+    DEFAULT_CSS = '\n'.join([
+    '  html {',
+    '    font-family: "Segoe UI", Frutiger, "Frutiger Linotype" "Dejavu Sans", "Helvetica Neue", Arial, sans-serif !important;',
+    '  }',
+    '  .title {',
+    '    font-size: 16pt;',
+    '  }',
+    '  @page {',
+    '    size: A4;',
+    '    margin: 0.5in 0.5in 0.5in 0.5in;',
+    '  }',
+    '  table {',
+    '    min-width: 100%;',
+    '  }',
+    ])
+
+    DEFAULT_HEADER = '<head><style type="text/css"></style></head>'
+
+    def __init__(self, caais_tags: OrderedDict):
+        self.caais_tags = caais_tags
+        self.document = []
+
+    def generate_html_document(self):
+        self.document = []
+        self.document.append('<!DOCTYPE html>')
+        self.document.append('<head><style type="text/css"></style></head>')
+        self._generate_body()
+        self.document.append('</html>')
+        document_soup = BeautifulSoup('\n'.join(self.document), 'html.parser')
+        document_soup.find('style').string = self.DEFAULT_CSS
+        return document_soup.prettify()
+
+    def _generate_body(self):
+        self.document.append('<body>')
+        self._generate_section_1_markup()
+        self.document.append('<br>')
+        self._generate_section_2_markup()
+        self.document.append('<br>')
+        self._generate_section_3_markup()
+        self.document.append('<br>')
+        self._generate_section_4_markup()
+        self.document.append('<br>')
+        self._generate_section_5_markup()
+        self.document.append('<br>')
+        self._generate_section_6_markup()
+        self.document.append('<br>')
+        self._generate_section_7_markup()
+        self.document.append('</body>')
+
+    def _append_title_row(self, title: str):
+        self.document.append(f'<tr><td colspan="2"><div class="title">{title}</div></td></tr>')
+
+    def _append_normal_row(self, left_column: str, right_column: str):
+        self.document.append(f'<tr><td>{left_column}</td><td>{right_column}</td></tr>')
+
+    def _generate_section_1_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 1: Identity Information')
+        self._append_normal_row('1.1 Repository', 'NCTR')
+        self.document.append('</table>')
+
+    def _generate_section_2_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 2: Source Information')
+        self._append_normal_row('1.1 Repository', 'NCTR')
+        self.document.append('</table>')
+
+    def _generate_section_3_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 3: Materials Information')
+        self._append_normal_row('3.1 Repository', 'NCTR')
+        self.document.append('</table>')
+
+    def _generate_section_4_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 4: Management Information')
+        self._append_normal_row('4.1 Repository', 'NCTR')
+        self.document.append('</table>')
+
+    def _generate_section_5_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 5: Event Information')
+        self._append_normal_row('5.1 Repository', 'NCTR')
+        self.document.append('</table>')
+
+    def _generate_section_6_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 6: General Information')
+        self._append_normal_row('6.1 Repository', 'NCTR')
+        self.document.append('</table>')
+
+    def _generate_section_7_markup(self):
+        self.document.append('<table border="1" cellspacing="0">')
+        self._append_title_row('Section 7: Control Information')
+        self._append_normal_row('7.1 Repository', 'NCTR')
+        self.document.append('</table>')

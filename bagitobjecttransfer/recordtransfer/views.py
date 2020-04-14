@@ -13,7 +13,7 @@ from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.appsettings import BAG_STORAGE_FOLDER
 from recordtransfer.bagger import Bagger
-from recordtransfer.caaistag import CaaisTagger
+from recordtransfer.caais import TagGenerator, DocumentGenerator
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.persistentuploadhandler import PersistentUploadedFile
 
@@ -84,7 +84,9 @@ class TransferFormWizard(SessionWizardView):
             old_copy_removed=False
         )
 
-        caais_tags = CaaisTagger.convert_form_to_tags(data)
+        caais_tags = TagGenerator.generate_tags_from_form(data)
+        doc_generator = DocumentGenerator(caais_tags)
+        html_document = doc_generator.generate_html_document()
 
         LOGGER.info('Starting bag creation in the background')
         bagging_thread = threading.Thread(
