@@ -29,6 +29,10 @@ class TransferSent(TemplateView):
     template_name = 'recordtransfer/transfersent.html'
 
 
+class FormPreparation(TemplateView):
+    template_name = 'recordtransfer/formpreparation.html'
+
+
 class TransferFormWizard(SessionWizardView):
     TEMPLATES = {
         "sourceinfo": {

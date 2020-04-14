@@ -1,0 +1,17 @@
+{% extends 'recordtransfer/base.html' %}
+
+{% block content %}
+<p>Before transferring files to us, make sure you have the following:<p>
+<ul>
+    <li>Information on the source of the files</li>
+    <li>Contact information in case you must be contacted by our archivists in regards to your transfer</li>
+    <li>Information on the content and the dates of the files</li>
+    <li>Any information on the rights governing the files</li>
+    <li>Any other IDs that may be associated with the files</li>
+    <li>The files themselves</li>
+</ul>
+<br>
+<button class="blue-button" type="submit" onclick="location.href='{% url 'recordtransfer:transfer' %}'">
+    I'm Ready to Start
+</button>
+{% endblock %}

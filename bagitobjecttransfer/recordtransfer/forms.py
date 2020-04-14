@@ -32,6 +32,7 @@ class SourceInfoForm(forms.Form):
                 'Creator',
                 'Donor',
                 'Custodian',
+                'Other',
                 'Unknown',
             ]
         ],
@@ -51,7 +52,7 @@ class SourceInfoForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '4',
-            'placeholder': 'Enter any notes you have on how the custodial history of the records'
+            'placeholder': 'Enter any notes you have on the custodial history of the records'
                            ' (optional)'
         }),
     )

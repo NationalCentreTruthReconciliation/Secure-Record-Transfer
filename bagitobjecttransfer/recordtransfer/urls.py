@@ -7,6 +7,7 @@ from django.forms import formset_factory
 app_name = 'recordtransfer'
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
+    path('pretransfer', views.FormPreparation.as_view(), name='formpreparation'),
     path('transfer/', views.TransferFormWizard.as_view([
             ('sourceinfo', forms.SourceInfoForm),
             ('contactinfo', forms.ContactInfoForm),
