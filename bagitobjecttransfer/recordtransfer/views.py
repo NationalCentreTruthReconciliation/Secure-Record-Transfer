@@ -91,14 +91,19 @@ class TransferFormWizard(SessionWizardView):
         caais_tags = TagGenerator.generate_tags_from_form(data)
         doc_generator = DocumentGenerator(caais_tags)
         html_document = doc_generator.generate_html_document()
+        tag_objects = [
+            (caais_tags, 'yaml'),
+            (html_document, 'html'),
+        ]
+        LOGGER.info('Generated yaml metadata and html document')
 
-        LOGGER.info('Starting bag creation in the background')
         bagging_thread = threading.Thread(
             target=Bagger.create_bag,
-            args=(BAG_STORAGE_FOLDER, upload_session_token, {}, caais_tags, True)
+            args=(BAG_STORAGE_FOLDER, upload_session_token, {}, tag_objects, True)
         )
         bagging_thread.setDaemon(True)
         bagging_thread.start()
+        LOGGER.info('Starting bag creation in the background')
 
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 

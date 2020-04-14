@@ -156,8 +156,6 @@ class DocumentGenerator:
     '  }',
     ])
 
-    DEFAULT_HEADER = '<head><style type="text/css"></style></head>'
-
     def __init__(self, caais_tags: OrderedDict):
         self.caais_tags = caais_tags
         self.document = []
@@ -195,10 +193,24 @@ class DocumentGenerator:
     def _append_normal_row(self, left_column: str, right_column: str):
         self.document.append(f'<tr><td>{left_column}</td><td>{right_column}</td></tr>')
 
+    def _append_full_span_row(self, contents: str):
+        self.document.append(f'<tr><td colspan="2"><b>{contents}</b></td></tr>')
+
     def _generate_section_1_markup(self):
         self.document.append('<table border="1" cellspacing="0">')
         self._append_title_row('Section 1: Identity Information')
-        self._append_normal_row('1.1 Repository', 'NCTR')
+        self._append_normal_row('1.1 Repository',
+            self.caais_tags['identityInformation']['repository'])
+        self._append_normal_row('1.2 Accession Identifier',
+            self.caais_tags['identityInformation']['accessionIdentifier'])
+
+        num_other_identifiers = len(self.caais_tags['identityInformation']['otherIdentifiers'])
+        for num, other_identifier in enumerate(self.caais_tags['identityInformation']['otherIdentifiers'], start=1):
+            self._append_full_span_row(f'1.3 Other Identifier ({num} of {num_other_identifiers})')
+            self._append_normal_row('1.3.1 Other Identifier Type', other_identifier['otherIdentifierType'])
+            self._append_normal_row('1.3.2 Other Identifier Value', other_identifier['otherIdentifierValue'])
+            if 'otherIdentifierNote' in other_identifier:
+                self._append_normal_row('1.3.3 Other Identifier Note', other_identifier['otherIdentifierNote'])
         self.document.append('</table>')
 
     def _generate_section_2_markup(self):
