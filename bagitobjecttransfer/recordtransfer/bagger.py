@@ -22,24 +22,20 @@ class FolderNotFoundError(Exception):
 class Bagger:
     @staticmethod
     def create_bag(storage_folder: str, session_token: str, default_metadata: dict,
-        caais_metadata: OrderedDict, deletefiles=True):
+        tag_objects: list, deletefiles=True):
         """ Creates a bag from a list of file paths and two sets of metadata.
 
         Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
         files, data files, and manifest files. The bagit-py library is used, which has been
         developed by the Library of Congress.
 
-        This function adheres to the Canadian Archival Accession Infomation Standard (CAAIS) by
-        writing a separate tag file according to the CAAIS metadata received by this function. The
-        tag file is written in YAML format to make it easier for archivists to read (as opposed to
-        JSON).
-
         Args:
             storage_folder (str): Path to folder to store the bag in.
             session_token (str): The UploadSession token corresponding to the uploaded files.
             default_metadata (dict): A dictionary of metadata fields accepted by the BagIt standard.
-            caais_metadata (OrderedDict): A dictionary of CAAIS-compliant metadata. This dictionary
-                is not verified, it is just dumped into a YAML tag file.
+            tag_objects (list): A list of tag objects to be written to file. Each list item must be
+                a tuple of the object, and the type of file to write it to. This class accepts only
+                'yaml' and 'html' file formats at this point.
             deletefiles (bool): Delete files in upload session after bagging if True.
         """
         if not Path(storage_folder).exists():
@@ -57,8 +53,15 @@ class Bagger:
         bag_created = False
         if not missing_files:
             bag = bagit.make_bag(new_bag_folder, default_metadata, checksums=['sha256'])
-            if caais_metadata:
-                Bagger._write_caais_tags_to_bag(new_bag_folder, caais_metadata)
+            if tag_objects:
+                for tag in tag_objects:
+                    if tag[1] == 'yaml':
+                        Bagger._write_yaml_caais_tag_file(new_bag_folder, tag[0])
+                    elif tag[1] == 'html':
+                        Bagger._write_html_caais_tag_file(new_bag_folder, tag[0])
+                    else:
+                        LOGGER.warn('Bagger was passed invalid tag file format "%s"' % tag[1])
+                        raise ValueError(f'Bagger does not support "{tag[1]}" tag files')
                 bag.save()
             bag_valid = bag.is_valid()
             bag_created = True
@@ -121,15 +124,26 @@ class Bagger:
         return (copied_files, missing_files)
 
     @staticmethod
-    def _write_caais_tags_to_bag(bag_directory: Path, caais_tags: OrderedDict):
+    def _write_yaml_caais_tag_file(bag_directory: Path, metadata, contains_ordered_dicts=True):
         tag_directory = bag_directory / 'tags'
         if not tag_directory.exists():
             os.mkdir(tag_directory)
-        caais_file = tag_directory / 'CAAIS_Metadata.yaml'
-        with open(caais_file, 'w', encoding='utf-8') as fd:
-            # yaml can't handle OrderedDicts natively, have to use special Dumper
-            yaml.dump(caais_tags, fd, Dumper=yamlordereddictloader.Dumper, indent=4,
-                default_flow_style=False)
+        yaml_file = tag_directory / 'CAAIS_Metadata.yaml'
+        with open(yaml_file, 'w', encoding='utf-8') as fd:
+            if contains_ordered_dicts:
+                yaml.dump(metadata, fd, Dumper=yamlordereddictloader.Dumper, indent=4,
+                    default_flow_style=False)
+            else:
+                yaml.dump(metadata, fd, indent=4, default_flow_style=False)
+    
+    @staticmethod
+    def _write_html_caais_tag_file(bag_directory: Path, html_string: str):
+        tag_directory = bag_directory / 'tags'
+        if not tag_directory.exists():
+            os.mkdir(tag_directory)
+        html_file = tag_directory / 'CAAIS_Metadata.html'
+        with open(html_file, 'w', encoding='utf-8') as fd:
+            fd.write(html_string)
 
     @staticmethod
     def _get_bagging_folder(storage_folder: str) -> Path:
