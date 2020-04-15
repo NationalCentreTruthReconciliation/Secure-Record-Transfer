@@ -12,7 +12,7 @@ from django.views.generic import TemplateView, FormView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.appsettings import BAG_STORAGE_FOLDER
-from recordtransfer.bagger import Bagger
+from recordtransfer.bagger import create_bag
 from recordtransfer.caais import TagGenerator, DocumentGenerator
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.persistentuploadhandler import PersistentUploadedFile
@@ -98,7 +98,7 @@ class TransferFormWizard(SessionWizardView):
         LOGGER.info('Generated yaml metadata and html document')
 
         bagging_thread = threading.Thread(
-            target=Bagger.create_bag,
+            target=create_bag,
             args=(BAG_STORAGE_FOLDER, upload_session_token, {}, tag_objects, True)
         )
         bagging_thread.setDaemon(True)
