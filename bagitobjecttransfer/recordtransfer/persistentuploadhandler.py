@@ -15,7 +15,8 @@ class PersistentUploadedFile(UploadedFile):
         temporaryfile = tempfile.NamedTemporaryFile(suffix='.upload' + ext, dir=settings.FILE_UPLOAD_TEMP_DIR, delete=False)
         super().__init__(temporaryfile, name, content_type, size, charset, content_type_extra)
 
-    def temporary_file_path(self):
+    @property
+    def path(self):
         return self.file.name
 
     def close(self):
