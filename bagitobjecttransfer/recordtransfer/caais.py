@@ -141,11 +141,12 @@ def get_section_7_control_information(cleaned_form_data: dict):
 
 class DocumentGenerator:
     DEFAULT_CSS = '\n'.join([
-    '  html {',
-    '    font-family: "Segoe UI", Frutiger, "Frutiger Linotype" "Dejavu Sans", "Helvetica Neue", Arial, sans-serif !important;',
-    '  }',
     '  .title {',
     '    font-size: 16pt;',
+    '    font-weight: bold;',
+    '  }',
+    '  .left-col {',
+    '    width: 33%;',
     '  }',
     '  @page {',
     '    size: A4;',
@@ -153,6 +154,7 @@ class DocumentGenerator:
     '  }',
     '  table {',
     '    min-width: 100%;',
+    '    margin-top: 25px;',
     '  }',
     ])
 
@@ -172,18 +174,13 @@ class DocumentGenerator:
 
     def _generate_body(self):
         self.document.append('<body>')
+        self.document.append('<h2>Record Transfer Document</h2>')
         self._generate_section_1_markup()
-        self.document.append('<br>')
         self._generate_section_2_markup()
-        self.document.append('<br>')
         self._generate_section_3_markup()
-        self.document.append('<br>')
         self._generate_section_4_markup()
-        self.document.append('<br>')
         self._generate_section_5_markup()
-        self.document.append('<br>')
         self._generate_section_6_markup()
-        self.document.append('<br>')
         self._generate_section_7_markup()
         self.document.append('</body>')
 
