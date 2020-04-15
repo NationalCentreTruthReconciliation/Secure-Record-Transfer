@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 import yaml
-import yamlordereddictloader
+from recordtransfer.customyaml import OrderedDictDumper
 
 import bagit
 
@@ -125,7 +125,7 @@ def _write_yaml_caais_tag_file(bag_directory: Path, metadata, contains_ordered_d
     yaml_file = tag_directory / 'CAAIS_Metadata.yaml'
     with open(yaml_file, 'w', encoding='utf-8') as fd:
         if contains_ordered_dicts:
-            yaml.dump(metadata, fd, Dumper=yamlordereddictloader.Dumper, indent=4,
+            yaml.dump(metadata, fd, Dumper=OrderedDictDumper, indent=4,
                 default_flow_style=False)
         else:
             yaml.dump(metadata, fd, indent=4, default_flow_style=False)
