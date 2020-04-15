@@ -7,27 +7,17 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_REPOSITORY = 'NCTR'
 
 
-class TagGenerator:
-    @staticmethod
-    def generate_tags_from_form(cleaned_form_data: dict):
-        # TODO: Maybe we should catch KeyErrors here and log those
-        section_1 = get_section_1_identity_information(cleaned_form_data)
-        section_2 = get_section_2_source_information(cleaned_form_data)
-        section_3 = get_section_3_materials_information(cleaned_form_data)
-        section_4 = get_section_4_management_information(cleaned_form_data)
-        section_5 = get_section_5_event_information(cleaned_form_data)
-        section_6 = get_section_6_general_information(cleaned_form_data)
-        section_7 = get_section_7_control_information(cleaned_form_data)
-
-        caais_tags = OrderedDict()
-        caais_tags['identityInformation'] = section_1
-        caais_tags['sourceInformation'] = section_2
-        caais_tags['materialsInformation'] = section_3
-        caais_tags['managementInformation'] = section_4
-        caais_tags['eventInformation'] = section_5
-        caais_tags['generalInformation'] = section_6
-        caais_tags['controlInformation'] = section_7
-        return caais_tags
+def generate_caais_tags_from_form(cleaned_form_data: dict):
+    # TODO: Maybe we should catch KeyErrors here and log those
+    tags = OrderedDict()
+    tags['identityInformation'] = get_section_1_identity_information(cleaned_form_data)
+    tags['sourceInformation'] = get_section_2_source_information(cleaned_form_data)
+    tags['materialsInformation'] = get_section_3_materials_information(cleaned_form_data)
+    tags['managementInformation'] = get_section_4_management_information(cleaned_form_data)
+    tags['eventInformation'] = get_section_5_event_information(cleaned_form_data)
+    tags['generalInformation'] = get_section_6_general_information(cleaned_form_data)
+    tags['controlInformation'] = get_section_7_control_information(cleaned_form_data)
+    return tags
 
 def get_section_1_identity_information(cleaned_form_data: dict):
     identity_info = OrderedDict()
