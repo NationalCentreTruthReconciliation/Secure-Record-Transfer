@@ -84,7 +84,8 @@ def get_section_3_materials_information(cleaned_form_data: dict):
     materials_info['dateOfMaterial'] = f'{start_date} - {end_date}'
     materials_info['extentStatement'] = OrderedDict()
     materials_info['extentStatement']['extentStatementType'] = 'Extent received'
-    materials_info['extentStatement']['quantityAndTypeOfUnits'] = 'WORK IN PROGRESS!'
+    materials_info['extentStatement']['quantityAndTypeOfUnits'] = 'WIP: Count files automatically'
+    materials_info['extentStatement']['extentStatementNote'] = 'Files counted automatically by application'
     materials_info['scopeAndContent'] = cleaned_form_data['description']
     materials_info['languageOfMaterial'] = cleaned_form_data['language_of_material']
     return materials_info
@@ -213,55 +214,146 @@ class DocumentGenerator:
         row.append('</td></tr>')
         self.document.append(''.join(row))
 
-    def _generate_section_1_markup(self):
+    def _start_new_table(self):
         self.document.append('<table border="1" cellspacing="0">')
+
+    def _close_table(self):
+        self.document.append('</table>')
+
+    def _generate_section_1_markup(self):
+        # TODO: Add checking for non-mandatory fields
+        self._start_new_table()
         self._append_title_row('Section 1: Identity Information')
         self._append_normal_row('1.1 Repository',
-            self.caais_tags['identityInformation']['repository'])
+            self.caais_tags['identityInformation']['repository'], level=1)
         self._append_normal_row('1.2 Accession Identifier',
-            self.caais_tags['identityInformation']['accessionIdentifier'])
-
+            self.caais_tags['identityInformation']['accessionIdentifier'], level=1)
+        # Other identifier list
         num_other_identifiers = len(self.caais_tags['identityInformation']['otherIdentifiers'])
         for num, other_identifier in enumerate(self.caais_tags['identityInformation']['otherIdentifiers'], start=1):
-            self._append_full_span_row(f'1.3 Other Identifier ({num} of {num_other_identifiers})')
-            self._append_normal_row('1.3.1 Other Identifier Type', other_identifier['otherIdentifierType'])
-            self._append_normal_row('1.3.2 Other Identifier Value', other_identifier['otherIdentifierValue'])
+            self._append_full_span_row(f'1.3 Other Identifier ({num} of {num_other_identifiers})', level=1)
+            self._append_normal_row('1.3.1 Other Identifier Type', other_identifier['otherIdentifierType'], level=2)
+            self._append_normal_row('1.3.2 Other Identifier Value', other_identifier['otherIdentifierValue'], level=2)
             if 'otherIdentifierNote' in other_identifier:
-                self._append_normal_row('1.3.3 Other Identifier Note', other_identifier['otherIdentifierNote'])
-        self.document.append('</table>')
+                self._append_normal_row('1.3.3 Other Identifier Note', other_identifier['otherIdentifierNote'], level=2)
+        if not num_other_identifiers:
+            self._append_full_span_row('1.3 Other Identifiers: N/A', level=1)
+        self._append_normal_row('1.4 Accession Title',
+            self.caais_tags['identityInformation']['accessionTitle'], level=1)
+        self._append_normal_row('1.5 Archival Unit',
+            self.caais_tags['identityInformation']['archivalUnit'], level=1)
+        self._append_normal_row('1.6 Acqusition Method',
+            self.caais_tags['identityInformation']['acquisitionMethod'], level=1)
+        self._close_table()
 
     def _generate_section_2_markup(self):
-        self.document.append('<table border="1" cellspacing="0">')
+        # TODO: Add checking for non-mandatory fields
+        self._start_new_table()
         self._append_title_row('Section 2: Source Information')
-        self._append_normal_row('1.1 Repository', 'NCTR')
-        self.document.append('</table>')
+        self._append_full_span_row('2.1 Source of Material', level=1)
+        self._append_normal_row('2.1.1 Source Type',
+            self.caais_tags['sourceInformation']['sourceOfMaterial']['sourceType'], level=2)
+        self._append_normal_row('2.1.2 Source Name',
+            self.caais_tags['sourceInformation']['sourceOfMaterial']['sourceName'], level=2)
+        self._append_full_span_row('2.1.3 Source Contact Information', level=2)
+        self._append_normal_row('Contact Name', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['contactName'], level=3)
+        self._append_normal_row('Job Title', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['jobTitle'], level=3)
+        self._append_normal_row('Phone Number', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['phoneNumber'], level=3)
+        self._append_normal_row('Email Address', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['emailAddress'], level=3)
+        self._append_normal_row('Address Line 1', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['addressLine1'], level=3)
+        self._append_normal_row('Address Line 2', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['addressLine2'], level=3)
+        self._append_normal_row('Province or State', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['provinceOrState'], level=3)
+        self._append_normal_row('Postal/Zip Code', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['postalOrZipCode'], level=3)
+        self._append_normal_row('Country', self.caais_tags['sourceInformation']\
+            ['sourceOfMaterial']['sourceContactInformation']['country'], level=3)
+        self._append_normal_row('2.1.4 Source Role',
+        self.caais_tags['sourceInformation']['sourceOfMaterial']['sourceRole'], level=2)
+        self._append_normal_row('2.1.5 Source Note',
+            self.caais_tags['sourceInformation']['sourceOfMaterial']['sourceNote'], level=2)
+        self._append_normal_row('2.2 Custodial History',
+            self.caais_tags['sourceInformation']['custodialHistory'], level=1)
+        self._close_table()
 
     def _generate_section_3_markup(self):
-        self.document.append('<table border="1" cellspacing="0">')
+        # TODO: Add checking for non-mandatory fields
+        self._start_new_table()
         self._append_title_row('Section 3: Materials Information')
-        self._append_normal_row('3.1 Repository', 'NCTR')
-        self.document.append('</table>')
+        self._append_normal_row('3.1 Date of Material',
+            self.caais_tags['materialsInformation']['dateOfMaterial'], level=1)
+        self._append_full_span_row('3.2 Extent Statement', level=1)
+        self._append_normal_row('3.2.1 Extent Statement Type',
+            self.caais_tags['materialsInformation']['extentStatement']['extentStatementType'], level=2)
+        self._append_normal_row('3.2.2 Quantity and Type of Units',
+            self.caais_tags['materialsInformation']['extentStatement']['quantityAndTypeOfUnits'], level=2)
+        self._append_normal_row('3.2.3 Extent Statement Note',
+            self.caais_tags['materialsInformation']['extentStatement']['extentStatementNote'], level=2)
+        self._append_normal_row('3.3 Scope and Content',
+            self.caais_tags['materialsInformation']['scopeAndContent'], level=1)
+        self._append_normal_row('3.4 Language of Material',
+            self.caais_tags['materialsInformation']['languageOfMaterial'], level=1)
+        self._close_table()
 
     def _generate_section_4_markup(self):
-        self.document.append('<table border="1" cellspacing="0">')
+        # TODO: Add checking for non-mandatory fields
+        self._start_new_table()
         self._append_title_row('Section 4: Management Information')
-        self._append_normal_row('4.1 Repository', 'NCTR')
-        self.document.append('</table>')
+        self._append_normal_row('4.1 Storage Location',
+            self.caais_tags['managementInformation']['storageLocation'], level=1)
+        total_num_rights = len(self.caais_tags['managementInformation']['rightsStatement'])
+        for num, rights in enumerate(self.caais_tags['managementInformation']['rightsStatement'], start=1):
+            self._append_full_span_row(f'4.2 Rights Statement ({num} of {total_num_rights})', level=1)
+            self._append_normal_row('4.2.1 Rights Statement Type', rights['rightsStatementType'], level=2)
+            self._append_normal_row('4.2.2 Rights Statement Value', rights['rightsStatementValue'], level=2)
+            if 'rightsStatementNote' in rights:
+                self._append_normal_row('4.2.3 Rights Statement Note', rights['rightsStatementNote'], level=2)
+        self._append_full_span_row('4.3 Material Assessment Statement: N/A', level=1)
+        self._append_full_span_row('4.4 Appraisal Statement: N/A', level=1)
+        self._append_full_span_row('4.5 Associated Documentation: N/A', level=1)
+        self._close_table()
 
     def _generate_section_5_markup(self):
-        self.document.append('<table border="1" cellspacing="0">')
+        self._start_new_table()
         self._append_title_row('Section 5: Event Information')
-        self._append_normal_row('5.1 Repository', 'NCTR')
-        self.document.append('</table>')
+        total_events = len(self.caais_tags['eventInformation']['eventStatement'])
+        for num, event in enumerate(self.caais_tags['eventInformation']['eventStatement'], start=1):
+            self._append_full_span_row(f'5.1 Event ({num} of {total_events})', level=1)
+            self._append_normal_row('5.1.1 Event Type', event['eventType'], level=2)
+            self._append_normal_row('5.1.2 Event Date', event['eventDate'], level=2)
+            self._append_normal_row('5.1.3 Event Agent', event['eventAgent'], level=2)
+            if 'eventNote' in event:
+                self._append_normal_row('5.1.4 Event Note', event['eventNote'], level=2)
+        self._close_table()
 
     def _generate_section_6_markup(self):
-        self.document.append('<table border="1" cellspacing="0">')
-        self._append_title_row('Section 6: General Information')
-        self._append_normal_row('6.1 Repository', 'NCTR')
-        self.document.append('</table>')
+        self._start_new_table()
+        if 'generalInformation' in self.caais_tags and 'generalNote' in self.caais_tags['generalInformation']:
+            self._append_title_row('Section 6: General Information')
+            self._append_normal_row('6.1 General Note',
+                self.caais_tags['generalInformation']['generalNote'])
+        else:
+            self._append_full_span_row('No general notes provided for Section 6')
+        self._close_table()
 
     def _generate_section_7_markup(self):
-        self.document.append('<table border="1" cellspacing="0">')
+        # TODO: Add checking for non-mandatory fields
+        self._start_new_table()
         self._append_title_row('Section 7: Control Information')
-        self._append_normal_row('7.1 Repository', 'NCTR')
-        self.document.append('</table>')
+        self._append_normal_row('7.1 Rules or Conventions',
+            self.caais_tags['controlInformation']['rulesOrConventions'], level=1)
+        total_dates = len(self.caais_tags['controlInformation']['dateOfCreationOrRevision'])
+        for num, date in enumerate(self.caais_tags['controlInformation']['dateOfCreationOrRevision'], start=1):
+            self._append_full_span_row(f'7.3 Date of Creation or Revision ({num} of {total_dates})', level=1)
+            self._append_normal_row('7.3.1 Action Type', date['actionType'], level=2)
+            self._append_normal_row('7.3.2 Action Date', date['actionDate'], level=2)
+            self._append_normal_row('7.3.3 Action Agent', date['actionAgent'], level=2)
+            if 'actionNote' in date:
+                self._append_normal_row('7.3.4 Action Note', date['actionNote'], level=2)
+        self._close_table()
