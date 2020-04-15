@@ -190,11 +190,31 @@ class DocumentGenerator:
     def _append_title_row(self, title: str):
         self.document.append(f'<tr><td colspan="2"><div class="title">{title}</div></td></tr>')
 
-    def _append_normal_row(self, left_column: str, right_column: str):
-        self.document.append(f'<tr><td>{left_column}</td><td>{right_column}</td></tr>')
+    def _append_normal_row(self, left_column: str, right_column: str, level=1):
+        row = ['<tr><td class="left-col">']
+        if level == 1:
+            row.append(f'<b>{left_column}</b></td>')
+        elif level == 2:
+            row.append(f'{left_column}</td>')
+        elif level == 3:
+            row.append(f'<i>{left_column}</i></td>')
+        else:
+            raise ValueError(f'Cannot create row with level {level}, can use 1, 2, or 3.')
+        row.append(f'<td>{right_column}</td></tr>')
+        self.document.append(''.join(row))
 
-    def _append_full_span_row(self, contents: str):
-        self.document.append(f'<tr><td colspan="2"><b>{contents}</b></td></tr>')
+    def _append_full_span_row(self, contents: str, level=1):
+        row = ['<tr><td colspan="2">']
+        if level == 1:
+            row.append(f'<b>{contents}</b>')
+        elif level == 2:
+            row.append(contents)
+        elif level == 3:
+            self.document.append(f'<i>{contents}</i>')
+        else:
+            raise ValueError(f'Cannot create row with level {level}, can use 1, 2, or 3.')
+        row.append('</td></tr>')
+        self.document.append(''.join(row))
 
     def _generate_section_1_markup(self):
         self.document.append('<table border="1" cellspacing="0">')
