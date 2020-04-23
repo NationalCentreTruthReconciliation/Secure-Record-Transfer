@@ -4,8 +4,6 @@ from pathlib import Path
 import logging
 import os
 import shutil
-import yaml
-from recordtransfer.customyaml import OrderedDictDumper
 
 import bagit
 
@@ -18,8 +16,7 @@ LOGGER = logging.getLogger(__name__)
 class FolderNotFoundError(Exception):
     pass
 
-def create_bag(storage_folder: str, session_token: str, default_metadata: dict,
-    tag_objects: list, deletefiles=True):
+def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefiles=True):
     """ Creates a bag from a list of file paths and two sets of metadata.
 
     Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
@@ -29,10 +26,7 @@ def create_bag(storage_folder: str, session_token: str, default_metadata: dict,
     Args:
         storage_folder (str): Path to folder to store the bag in.
         session_token (str): The UploadSession token corresponding to the uploaded files.
-        default_metadata (dict): A dictionary of metadata fields accepted by the BagIt standard.
-        tag_objects (list): A list of tag objects to be written to file. Each list item must be
-            a tuple of the object, and the type of file to write it to. This class accepts only
-            'yaml' and 'html' file formats at this point.
+        metadata (dict): A dictionary of metadata fields to be written to bag-info.txt.
         deletefiles (bool): Delete files in upload session after bagging if True.
     """
     if not Path(storage_folder).exists():
@@ -45,38 +39,21 @@ def create_bag(storage_folder: str, session_token: str, default_metadata: dict,
 
     (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
 
-    bag_valid = False
-    bag_created = False
     if not missing_files:
-        bag = bagit.make_bag(new_bag_folder, default_metadata, checksums=['sha256'])
-        if tag_objects:
-            for tag in tag_objects:
-                if tag[1] == 'yaml':
-                    _write_yaml_caais_tag_file(new_bag_folder, tag[0])
-                elif tag[1] == 'html':
-                    _write_html_caais_tag_file(new_bag_folder, tag[0])
-                else:
-                    LOGGER.warn('Bagger was passed invalid tag file format "%s"' % tag[1])
-                    raise ValueError(f'Bagger does not support "{tag[1]}" tag files')
-            bag.save()
+        bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'])
         bag_valid = bag.is_valid()
-        bag_created = True
+        LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
     else:
         for copied_file in copied_files:
             os.remove(copied_file)
         if new_bag_folder.exists():
             os.rmdir(new_bag_folder)
-
-    if bag_valid and bag_created:
-        LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
-    else:
-        LOGGER.info(msg=('Bag "%s" was not created' % new_bag_folder))
+        LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder, missing_files))
 
     return {
         'missing_files': missing_files,
-        'bag_valid': bag_valid,
-        'bag_created': bag_created,
-        'bag_location': str(new_bag_folder) if bag_created else None
+        'bag_created': bool(not missing_files),
+        'bag_location': str(new_bag_folder) if bool(not missing_files) else None
     }
 
 
@@ -118,29 +95,7 @@ def _copy_session_uploads_to_dir(session_token, directory, delete=True):
     return (copied_files, missing_files)
 
 
-def _write_yaml_caais_tag_file(bag_directory: Path, metadata, contains_ordered_dicts=True):
-    tag_directory = bag_directory / 'tags'
-    if not tag_directory.exists():
-        os.mkdir(tag_directory)
-    yaml_file = tag_directory / 'CAAIS_Metadata.yaml'
-    with open(yaml_file, 'w', encoding='utf-8') as fd:
-        if contains_ordered_dicts:
-            yaml.dump(metadata, fd, Dumper=OrderedDictDumper, indent=4,
-                default_flow_style=False)
-        else:
-            yaml.dump(metadata, fd, indent=4, default_flow_style=False)
-
-
-def _write_html_caais_tag_file(bag_directory: Path, html_string: str):
-    tag_directory = bag_directory / 'tags'
-    if not tag_directory.exists():
-        os.mkdir(tag_directory)
-    html_file = tag_directory / 'CAAIS_Metadata.html'
-    with open(html_file, 'w', encoding='utf-8') as fd:
-        fd.write(html_string)
-
-
-def _get_bagging_folder(storage_folder: str) -> Path:
+def _get_bagging_folder(storage_folder: str):
     """ Creates a unique, date-based folder path to store bag contents in
 
     Args:
