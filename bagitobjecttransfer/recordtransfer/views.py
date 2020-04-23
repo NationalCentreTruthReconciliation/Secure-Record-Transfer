@@ -93,13 +93,18 @@ class TransferFormWizard(SessionWizardView):
         with ThreadPoolExecutor() as executor:
             LOGGER.info('Starting bag creation in the background')
             future = executor.submit(create_bag, BAG_STORAGE_FOLDER, upload_session_token, tags, True)
-            result = future.result()
-            data['storage_location'] = result['bag_location']
-            doc_generator = HtmlDocument(data)
-            html_document = doc_generator.get_document()
-            with open('C:/Users/dlove/Desktop/output.html', 'w') as fd:
-                fd.write(html_document)
-            LOGGER.info('Generated html document')
+            bagging_result = future.result()
+            if bagging_result['bag_created']:
+                data['storage_location'] = bagging_result['bag_location']
+                data['creation_time'] = bagging_result['time_created']
+                doc_generator = HtmlDocument(data)
+                html_document = doc_generator.get_document()
+                # TODO: Fix this up!
+                with open('C:/Users/dlove/Desktop/output.html', 'w') as fd:
+                    fd.write(html_document)
+                LOGGER.info('Generated HTML document')
+            else:
+                LOGGER.warn('Could not generate HTML document since bag creation failed')
 
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
