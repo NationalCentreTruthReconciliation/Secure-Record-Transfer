@@ -3,7 +3,7 @@
 
 from json.decoder import JSONDecodeError
 import logging
-import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse
@@ -13,9 +13,10 @@ from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.appsettings import BAG_STORAGE_FOLDER
 from recordtransfer.bagger import create_bag
-from recordtransfer.caais import generate_caais_tags_from_form, DocumentGenerator
+from recordtransfer.documentgenerator import HtmlDocument
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.persistentuploadhandler import PersistentUploadedFile
+from recordtransfer.taggenerator import get_bag_tags
 
 
 LOGGER = logging.getLogger(__name__)
@@ -87,24 +88,18 @@ class TransferFormWizard(SessionWizardView):
             old_copy_removed=False
         )
 
-        # Use data to create tag objects
-        caais_tags = generate_caais_tags_from_form(data)
-        doc_generator = DocumentGenerator(caais_tags)
-        html_document = doc_generator.generate_html_document()
-        tag_objects = [
-            (caais_tags, 'yaml'),
-            (html_document, 'html'),
-        ]
-        LOGGER.info('Generated yaml metadata and html document')
+        tags = get_bag_tags(data)
 
-        # Create bag with uploaded files and generated tag objects
-        bagging_thread = threading.Thread(
-            target=create_bag,
-            args=(BAG_STORAGE_FOLDER, upload_session_token, {}, tag_objects, True)
-        )
-        bagging_thread.setDaemon(True)
-        bagging_thread.start()
-        LOGGER.info('Starting bag creation in the background')
+        with ThreadPoolExecutor() as executor:
+            LOGGER.info('Starting bag creation in the background')
+            future = executor.submit(create_bag, BAG_STORAGE_FOLDER, upload_session_token, tags, True)
+            result = future.result()
+            data['storage_location'] = result['bag_location']
+            doc_generator = HtmlDocument(data)
+            html_document = doc_generator.get_document()
+            with open('C:/Users/dlove/Desktop/output.html', 'w') as fd:
+                fd.write(html_document)
+            LOGGER.info('Generated html document')
 
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
