@@ -16,7 +16,8 @@ LOGGER = logging.getLogger(__name__)
 class FolderNotFoundError(Exception):
     pass
 
-def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefiles=True):
+def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_identifier=None,
+    deletefiles=True):
     """ Creates a bag from a list of file paths and two sets of metadata.
 
     Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
@@ -27,13 +28,18 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefi
         storage_folder (str): Path to folder to store the bag in.
         session_token (str): The UploadSession token corresponding to the uploaded files.
         metadata (dict): A dictionary of metadata fields to be written to bag-info.txt.
+        bag_identifier (str): A string to identify the bag. If None, the time is used to identify
+            the bag.
         deletefiles (bool): Delete files in upload session after bagging if True.
     """
     if not Path(storage_folder).exists():
         LOGGER.error(msg=('Bagger: Could not find storage folder "%s"' % storage_folder))
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
 
-    new_bag_folder = _get_bagging_folder(storage_folder)
+    time = datetime.strftime(datetime.today(), r'%Y%m%d_%H%M%S')
+    identifier = bag_identifier if bag_identifier else time
+
+    new_bag_folder = _get_bagging_folder(storage_folder, identifier)
     if not new_bag_folder.exists():
         os.mkdir(new_bag_folder)
 
@@ -50,10 +56,13 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, deletefi
             os.rmdir(new_bag_folder)
         LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder, missing_files))
 
+    bag_was_created = bool(not missing_files)
+
     return {
         'missing_files': missing_files,
-        'bag_created': bool(not missing_files),
-        'bag_location': str(new_bag_folder) if bool(not missing_files) else None
+        'bag_created': bag_was_created,
+        'time_created': time if bag_was_created else None,
+        'bag_location': str(new_bag_folder) if bag_was_created else None,
     }
 
 
@@ -95,29 +104,27 @@ def _copy_session_uploads_to_dir(session_token, directory, delete=True):
     return (copied_files, missing_files)
 
 
-def _get_bagging_folder(storage_folder: str):
-    """ Creates a unique, date-based folder path to store bag contents in
+def _get_bagging_folder(storage_folder: str, identifier: str):
+    """ Creates a unique folder path to store bag contents in, incorporating the identifier string.
 
     Args:
         storage_folder (str): The parent folder to create a bagging folder in
+        identifier (str): Identification string for bag
 
     Returns:
-        pathlib.Path: A path to new, unique folder name containing the current date
+        pathlib.Path: A path to new, unique folder name containing the identifier
     """
     storage_folder_path = Path(storage_folder)
 
     if not Path(storage_folder_path).exists():
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
 
-    current_date = datetime.today()
-    time = datetime.strftime(current_date, r'%Y%m%d_%H%M%S')
-
-    new_folder = storage_folder_path / f'Bag_{time}'
+    new_folder = storage_folder_path / f'Bag_{identifier}'
     folder_OK = False
     increment = 1
     while not folder_OK:
         if new_folder.exists():
-            new_folder = storage_folder_path / f'Bag_{time}_{increment}'
+            new_folder = storage_folder_path / f'Bag_{identifier}_{increment}'
             increment += 1
         else:
             folder_OK = True
