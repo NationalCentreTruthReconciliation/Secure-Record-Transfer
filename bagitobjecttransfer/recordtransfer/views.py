@@ -92,7 +92,7 @@ class TransferFormWizard(SessionWizardView):
 
         with ThreadPoolExecutor() as executor:
             LOGGER.info('Starting bag creation in the background')
-            future = executor.submit(create_bag, BAG_STORAGE_FOLDER, upload_session_token, tags, True)
+            future = executor.submit(create_bag, BAG_STORAGE_FOLDER, upload_session_token, tags, None, True)
             bagging_result = future.result()
             if bagging_result['bag_created']:
                 data['storage_location'] = bagging_result['bag_location']
