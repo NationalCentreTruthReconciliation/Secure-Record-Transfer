@@ -46,7 +46,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
 
     if not missing_files:
-        bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'])
+        bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'], sort_keys=False)
         bag_valid = bag.is_valid()
         LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
     else:
