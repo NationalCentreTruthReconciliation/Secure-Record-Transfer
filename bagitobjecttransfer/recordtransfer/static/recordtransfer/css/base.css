@@ -57,7 +57,7 @@ header {
     flex-basis: auto;
 }
 
-.login {
+.log-in-out {
     text-align: center;
     flex-grow: 0;
     flex-shrink: 1;
