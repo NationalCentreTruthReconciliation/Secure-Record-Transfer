@@ -3,6 +3,7 @@
 
 from json.decoder import JSONDecodeError
 import logging
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 from django.shortcuts import render
@@ -16,7 +17,7 @@ from recordtransfer.bagger import create_bag
 from recordtransfer.documentgenerator import HtmlDocument
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.persistentuploadhandler import PersistentUploadedFile
-from recordtransfer.taggenerator import get_bag_tags
+from recordtransfer.taggenerator import BagitTags
 
 
 LOGGER = logging.getLogger(__name__)
@@ -88,7 +89,8 @@ class TransferFormWizard(SessionWizardView):
             old_copy_removed=False
         )
 
-        tags = get_bag_tags(data)
+        tag_generator = BagitTags(data)
+        tags = tag_generator.generate()
 
         with ThreadPoolExecutor() as executor:
             LOGGER.info('Starting bag creation in the background')
@@ -96,10 +98,11 @@ class TransferFormWizard(SessionWizardView):
             bagging_result = future.result()
             if bagging_result['bag_created']:
                 data['storage_location'] = bagging_result['bag_location']
-                data['creation_time'] = bagging_result['time_created']
+                parsed_date = datetime.strptime(bagging_result['time_created'], r'%Y%m%d_%H%M%S')
+                data['creation_time'] = parsed_date.strftime(r'%Y-%m-%d %H:%M:%S')
                 doc_generator = HtmlDocument(data)
-                html_document = doc_generator.get_document()
-                # TODO: Fix this up!
+                html_document = doc_generator.generate()
+                # TODO: Fix this up!!!!
                 with open('C:/Users/dlove/Desktop/output.html', 'w') as fd:
                     fd.write(html_document)
                 LOGGER.info('Generated HTML document')
