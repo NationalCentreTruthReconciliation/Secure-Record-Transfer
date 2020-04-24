@@ -1,0 +1,15 @@
+{% extends 'recordtransfer/base.html' %}
+
+{% block title %}
+    Logged out
+{% endblock %}
+
+{% block content %}
+    <div class="title-text">Logged Out</div>
+    <p>
+        You have been successfully logged out.
+    </p>
+    <p>
+        <a href="{% url 'login' %}">Click here</a> to log back in.
+    </p>
+{% endblock %}
