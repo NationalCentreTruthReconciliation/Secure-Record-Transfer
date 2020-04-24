@@ -9,7 +9,13 @@
     you or someone you know would like to send digital files to the NCTR, create a login account
     to start transferring records.
 </p>
-<button class="blue-button" type="submit" onclick="location.href='{% url 'recordtransfer:formpreparation' %}'">
-    Start a New Transfer
-</button>
+{% if user.is_authenticated %}
+    <button class="blue-button" type="submit" onclick="location.href='{% url 'recordtransfer:formpreparation' %}'">
+        Start a New Transfer
+    </button>
+{% else %}
+    <p>
+        <b>Please <a href="{% url 'login' %}">log in</a> to start transferring records to the NCTR.</b>
+    </p>
+{% endif %}
 {% endblock %}

@@ -15,6 +15,7 @@
     {% endblock %}
 
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transfer.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
 
@@ -33,12 +34,21 @@
                     <div class="header-title title-text">
                         NCTR Record Transfer
                     </div>
-                    <div class="login">
-                        <button class="blue-button" type="submit"
-                                onclick="location.href='{% url 'login' %}'">
-                            Login
-                        </button>
-                    </div>
+                    {% if user.is_authenticated %}
+                        <div class="log-in-out">
+                            <button class="blue-button" type="submit"
+                                    onclick="location.href='{% url 'logout' %}'">
+                                Log out
+                            </button>
+                        </div>
+                    {% elif not user.is_authenticated and 'login' not in request.path %}
+                        <div class="log-in-out">
+                            <button class="blue-button" type="submit"
+                                    onclick="location.href='{% url 'login' %}'">
+                                Log in
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
             </header>
             <div class="main-content">
