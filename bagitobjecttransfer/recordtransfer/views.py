@@ -14,7 +14,7 @@ from recordtransfer.appsettings import BAG_STORAGE_FOLDER, REPORT_FOLDER
 from recordtransfer.bagger import create_bag
 from recordtransfer.reporter import write_report
 from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
-from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.models import UploadedFile, UploadSession, Bag
 
 
 LOGGER = logging.getLogger(__name__)
@@ -93,18 +93,31 @@ class TransferFormWizard(SessionWizardView):
                                      None, True)
             bagging_result = future.result()
             if bagging_result['bag_created']:
-                data['storage_location'] = bagging_result['bag_location']
+                bag_location = bagging_result['bag_location']
                 parsed_date = datetime.strptime(bagging_result['time_created'], r'%Y%m%d_%H%M%S')
-                data['creation_time'] = parsed_date.strftime(r'%Y-%m-%d %H:%M:%S')
+                bagging_date = parsed_date.strftime(r'%Y-%m-%d %H:%M:%S')
+                data['storage_location'] = bag_location
+                data['creation_time'] = bagging_date
                 doc_generator = HtmlDocument(data)
                 html_document = doc_generator.generate()
                 LOGGER.info('Starting report generation in the background')
                 future = executor.submit(write_report, REPORT_FOLDER, html_document, 'html', None)
                 report_result = future.result()
-                if report_result['report_created']:
+                report_location = report_result['report_location']
+                report_created = report_result['report_created']
+                if report_created:
                     LOGGER.info('Generated HTML document')
                 else:
                     LOGGER.info('HTML document generation failed')
+
+                # Create object to be viewed in admin app
+                new_bag = Bag(bagging_date=bagging_date, bag_location=bag_location,
+                              user=self.request.user)
+                if report_created:
+                    new_bag.report_location = report_location
+                else:
+                    new_bag.report_location = 'Report could not be created'
+                new_bag.save()
             else:
                 LOGGER.warning('Could not generate HTML document since bag creation failed')
 

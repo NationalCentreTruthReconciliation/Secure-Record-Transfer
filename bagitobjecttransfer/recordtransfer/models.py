@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.crypto import get_random_string
 
@@ -38,19 +39,11 @@ class UploadedFile(models.Model):
         return f'{self.path}, session {self.session}, NOT DELETED'
 
 
-class AppUser(models.Model):
-    name = models.CharField(max_length=256)
-    email = models.CharField(max_length=256)
-
-    def __str__(self):
-        return f'{self.name}, {self.email}'
-
-
 class Bag(models.Model):
     bagging_date = models.DateTimeField()
-    bag_location = models.CharField(max_length=256)
-    user = models.ForeignKey(AppUser, on_delete=models.SET_NULL, null=True)
+    bag_location = models.CharField(max_length=256, null=True)
+    report_location = models.CharField(max_length=256, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f'"{self.bag_location}" bagged at {self.bagging_date} by {self.user.name}'
-
+        return f"Bag created by {self.user} at {self.bagging_date}"
