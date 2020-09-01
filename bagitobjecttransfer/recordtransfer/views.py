@@ -12,12 +12,11 @@ from django.urls import reverse
 from django.views.generic import TemplateView, FormView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.appsettings import BAG_STORAGE_FOLDER
+from recordtransfer.appsettings import BAG_STORAGE_FOLDER, REPORT_FOLDER
 from recordtransfer.bagger import create_bag
-from recordtransfer.documentgenerator import HtmlDocument
+from recordtransfer.reporter import write_report
+from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
 from recordtransfer.models import UploadedFile, UploadSession
-from recordtransfer.persistentuploadhandler import PersistentUploadedFile
-from recordtransfer.taggenerator import BagitTags
 
 
 LOGGER = logging.getLogger(__name__)
@@ -102,12 +101,15 @@ class TransferFormWizard(SessionWizardView):
                 data['creation_time'] = parsed_date.strftime(r'%Y-%m-%d %H:%M:%S')
                 doc_generator = HtmlDocument(data)
                 html_document = doc_generator.generate()
-                # TODO: Fix this up!!!!
-                with open('C:/Users/dlove/Desktop/output.html', 'w') as fd:
-                    fd.write(html_document)
-                LOGGER.info('Generated HTML document')
+                LOGGER.info('Starting report generation in the background')
+                future = executor.submit(write_report, REPORT_FOLDER, html_document, 'html', None)
+                report_result = future.result()
+                if report_result['report_created']:
+                    LOGGER.info('Generated HTML document')
+                else:
+                    LOGGER.info('HTML document generation failed')
             else:
-                LOGGER.warn('Could not generate HTML document since bag creation failed')
+                LOGGER.warning('Could not generate HTML document since bag creation failed')
 
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
@@ -121,7 +123,7 @@ def uploadfiles(request):
     if not request.method == 'POST':
         return JsonResponse({'error': 'Files can only be uploaded using POST.'}, status=500)
     if not request.FILES:
-        return JsonRespons({'upload_session_token': ''}, status=200)
+        return JsonResponse({'upload_session_token': ''}, status=200)
 
     try:
         headers = request.headers
@@ -142,5 +144,5 @@ def uploadfiles(request):
         return JsonResponse({'upload_session_token': session.token}, status=200)
 
     except Exception as exc:
-        LOGGING.error('Uncaught exception in upload_file: %s' % str(exc))
+        LOGGER.error('Uncaught exception in upload_file: %s' % str(exc))
         return JsonResponse({'error': f'Uncaught Exception:\n{str(exc)}'}, status=500)
