@@ -1,15 +1,13 @@
 """ Views
 """
 
-from json.decoder import JSONDecodeError
 import logging
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
-from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.appsettings import BAG_STORAGE_FOLDER, REPORT_FOLDER
@@ -35,6 +33,8 @@ class FormPreparation(TemplateView):
 
 
 class TransferFormWizard(SessionWizardView):
+    ''' A form for collecting user metadata and uploading files '''
+
     TEMPLATES = {
         "sourceinfo": {
             "templateref": "recordtransfer/standardform.html",
@@ -71,6 +71,7 @@ class TransferFormWizard(SessionWizardView):
         return [self.TEMPLATES[step_name]["templateref"]]
 
     def get_context_data(self, form, **kwargs):
+        ''' Send extra data variables to form templates '''
         context = super(TransferFormWizard, self).get_context_data(form, **kwargs)
         step_name = self.steps.current
         context.update({'form_title': self.TEMPLATES[step_name]['formtitle']})
@@ -79,21 +80,17 @@ class TransferFormWizard(SessionWizardView):
         return context
 
     def done(self, form_list, **kwargs):
-        # Retrieve all of the data and files
+        ''' Retrieves all of the form data, and writes the user's uploaded files and their metadata
+        to a new Bag. If the Bag generation succeeds, a human-readable report is written with all of
+        the metadata and the location of the bag.
+        '''
         data = self.get_all_cleaned_data()
-        upload_session_token = data['session_token']
-        files = UploadedFile.objects.filter(
-            session__token=upload_session_token
-        ).filter(
-            old_copy_removed=False
-        )
-
-        tag_generator = BagitTags(data)
-        tags = tag_generator.generate()
-
         with ThreadPoolExecutor() as executor:
+            tag_generator = BagitTags(data)
+            tags = tag_generator.generate()
             LOGGER.info('Starting bag creation in the background')
-            future = executor.submit(create_bag, BAG_STORAGE_FOLDER, upload_session_token, tags, None, True)
+            future = executor.submit(create_bag, BAG_STORAGE_FOLDER, data['session_token'], tags,
+                                     None, True)
             bagging_result = future.result()
             if bagging_result['bag_created']:
                 data['storage_location'] = bagging_result['bag_location']
