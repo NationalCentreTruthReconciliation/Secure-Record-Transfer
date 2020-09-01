@@ -1,4 +1,4 @@
-from collections import OrderedDict
+''' Facilitates creating BagIt bags and writing them to disk '''
 from datetime import datetime
 from pathlib import Path
 import logging
@@ -8,16 +8,14 @@ import shutil
 import bagit
 
 from recordtransfer.models import UploadedFile
+from recordtransfer.exceptions import FolderNotFoundError
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class FolderNotFoundError(Exception):
-    pass
-
 def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_identifier=None,
-    deletefiles=True):
+               deletefiles=True):
     """ Creates a bag from a list of file paths and two sets of metadata.
 
     Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
@@ -54,7 +52,8 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
             os.remove(copied_file)
         if new_bag_folder.exists():
             os.rmdir(new_bag_folder)
-        LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder, missing_files))
+        LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder,
+                         missing_files))
 
     bag_was_created = bool(not missing_files)
 
