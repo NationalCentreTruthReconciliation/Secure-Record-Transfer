@@ -23,4 +23,5 @@ urlpatterns = [
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
 
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
+    path('about/', login_required(views.About.as_view()), name='about'),
 ]
