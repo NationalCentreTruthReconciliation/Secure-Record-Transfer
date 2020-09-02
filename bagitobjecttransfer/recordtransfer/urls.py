@@ -8,6 +8,7 @@ from . import forms
 app_name = 'recordtransfer'
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
+
     path('pretransfer/', login_required(views.FormPreparation.as_view()),
          name='formpreparation'),
     path('transfer/', login_required(views.TransferFormWizard.as_view([
@@ -20,4 +21,6 @@ urlpatterns = [
         ])), name='transfer'),
     path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
+
+    path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
 ]

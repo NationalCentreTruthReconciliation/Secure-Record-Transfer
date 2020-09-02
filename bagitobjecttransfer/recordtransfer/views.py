@@ -32,6 +32,10 @@ class FormPreparation(TemplateView):
     template_name = 'recordtransfer/formpreparation.html'
 
 
+class UserProfile(TemplateView):
+    template_name = 'recordtransfer/profile.html'
+
+
 class TransferFormWizard(SessionWizardView):
     ''' A form for collecting user metadata and uploading files '''
 

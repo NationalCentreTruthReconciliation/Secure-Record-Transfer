@@ -1,0 +1,16 @@
+{% extends 'recordtransfer/base.html' %}
+{% block title %}
+User Profile
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    <div class="title-text">Your profile</div>
+    <p>First name: {{ user.first_name }}</p>
+    <p>Last name: {{ user.last_name }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Username: {{ user.username }}</p>
+{% else %}
+    <p><a href="{% url 'login' %}">Log</a> in to see your profile.</p>
+{% endif %}
+{% endblock %}
