@@ -1,0 +1,100 @@
+/**
+ * Navigation bar styling adapted from:
+ * https://webdesign.tutsplus.com/tutorials/how-to-build-a-responsive-navigation-bar-with-flexbox--cms-33535
+ * Credit to: Anna Monus
+ * Modifications made by: Daniel Lovegrove
+ */
+
+header {
+    background-color: #eeeeee;
+    width: 100%;
+    box-shadow: 0 4px 3px -3px #bbbbbb;
+}
+
+.main-navbar {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    list-style-type: none;
+    list-style: none;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333333;
+    display: block;
+    line-height: 50px;
+}
+
+.nav-link:hover,
+.nav-link:hover::after {
+    color: #ccc;
+}
+
+.nav-logo {
+    order: 0;
+    flex: 1;
+}
+
+.nav-toggle-open {
+    order: 1;
+    flex: 1;
+    text-align: right;
+}
+
+.nav-toggle-close {
+    display: none; /* Hide initially */
+    order: 1;
+    flex: 1;
+    text-align: right;
+}
+
+.nav-item {
+    order: 2;
+    margin-left: 20px;
+    width: 100%;
+    text-align: center;
+    display: none;
+}
+
+.active .nav-item {
+    display: block;
+}
+
+#app-logo {
+    height: 70px;
+}
+
+#app-title {
+    line-height: 70px;
+    position: absolute;
+    margin-left: 10px;
+}
+
+/* Desktop menu (design is mobile-first) */
+@media all and (min-width: 700px) {
+    .main-navbar {
+        align-items: flex-start;
+        flex-wrap: nowrap;
+        background: none;
+    }
+    .nav-logo {
+        order: 0;
+    }
+    .nav-item {
+        order: 1;
+        position: relative;
+        display: block;
+        width: auto;
+    }
+    .nav-link {
+        line-height: 70px;
+    }
+    .nav-toggle-open,
+    .nav-toggle-close {
+        display: none !important;
+    }
+}
