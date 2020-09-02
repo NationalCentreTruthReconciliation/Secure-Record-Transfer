@@ -1,8 +1,9 @@
 from datetime import datetime
 import os
 
-from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
 
 
@@ -40,10 +41,17 @@ class UploadedFile(models.Model):
 
 
 class Bag(models.Model):
+    class ReviewStatus(models.TextChoices):
+        NOT_REVIEWED = 'NR', _('Not Reviewed')
+        REVIEW_STARTED = 'RS', _('Review Started')
+        REVIEW_COMPLETE = 'RC', _('Review Complete')
+
     bagging_date = models.DateTimeField()
     bag_location = models.CharField(max_length=256, null=True)
     report_location = models.CharField(max_length=256, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
+                                     default=ReviewStatus.NOT_REVIEWED)
 
     def __str__(self):
         return f"Bag created by {self.user} at {self.bagging_date}"
