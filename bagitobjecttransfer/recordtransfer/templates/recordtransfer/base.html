@@ -38,25 +38,42 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'recordtransfer:index' %}">Home</a>
+                            <a class="nav-link" href="{% url 'recordtransfer:index' %}">
+                                Home
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">About</a>
+                            <a class="nav-link" href="{% url 'recordtransfer:about' %}">
+                                About
+                            </a>
                         </li>
                         {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">Profile</a>
+                                <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
+                                    Profile
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link main" href="{% url 'logout' %}">Logout</a>
+                                <a class="nav-link main" href="{% url 'recordtransfer:formpreparation' %}">
+                                    Transfer
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link main" href="{% url 'logout' %}">
+                                    Logout
+                                </a>
                             </li>
                         {% elif not user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Sign Up</a>
+                                <a class="nav-link" href="#">
+                                    Sign Up
+                                </a>
                             </li>
                             {% if 'login' not in request.path %}
                                 <li class="nav-item">
-                                    <a class="nav-link main" href="{% url 'login' %}">Log In</a>
+                                    <a class="nav-link main" href="{% url 'login' %}">
+                                        Log In
+                                    </a>
                                 </li>
                             {% endif %}
                         {% endif %}
