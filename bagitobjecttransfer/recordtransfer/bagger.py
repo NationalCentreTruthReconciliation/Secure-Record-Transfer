@@ -46,7 +46,10 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     if not missing_files:
         bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'], sort_keys=False)
         bag_valid = bag.is_valid()
-        LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
+        if bag_valid:
+            LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
+        else:
+            LOGGER.warning(msg=('Bag created at "%s" is invalid!' % new_bag_folder))
     else:
         for copied_file in copied_files:
             os.remove(copied_file)
@@ -117,15 +120,9 @@ def _get_bagging_folder(storage_folder: str, identifier: str):
 
     if not Path(storage_folder_path).exists():
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
-
     new_folder = storage_folder_path / f'Bag_{identifier}'
-    folder_OK = False
     increment = 1
-    while not folder_OK:
-        if new_folder.exists():
-            new_folder = storage_folder_path / f'Bag_{identifier}_{increment}'
-            increment += 1
-        else:
-            folder_OK = True
-
+    while new_folder.exists():
+        new_folder = storage_folder_path / f'Bag_{identifier}_{increment}'
+        increment += 1
     return new_folder
