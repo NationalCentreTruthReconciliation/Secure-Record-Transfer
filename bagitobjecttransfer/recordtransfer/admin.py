@@ -1,20 +1,24 @@
 from io import StringIO
 import csv
+from pathlib import Path
 
 from django.contrib import admin
 from django.http import HttpResponse
 
+from recordtransfer.appsettings import BAG_STORAGE_FOLDER, REPORT_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile
 
 
 class BagAdmin(admin.ModelAdmin):
     actions = ['export_selected_bags', 'mark_not_started', 'mark_in_progress', 'mark_complete']
-    list_display = ['user', 'bagging_date', 'bag_location', 'review_status']
+    list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
     ordering = ['bagging_date']
 
     def export_selected_bags(self, request, queryset):
-        string_file = StringIO()
+        bag_folder = Path(BAG_STORAGE_FOLDER)
+        report_folder = Path(REPORT_FOLDER)
 
+        string_file = StringIO()
         writer = csv.writer(string_file)
         writer.writerow(["Username", "Bagging Date", "Bag Location", "Report Location"])
 
@@ -23,8 +27,8 @@ class BagAdmin(admin.ModelAdmin):
                 [
                     bag.user.username,
                     bag.bagging_date,
-                    bag.bag_location,
-                    bag.report_location,
+                    str(bag_folder / bag.bag_name),
+                    str(report_folder / bag.report_name),
                 ]
             )
 
