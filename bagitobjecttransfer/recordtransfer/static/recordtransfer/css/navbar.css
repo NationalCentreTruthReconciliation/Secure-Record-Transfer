@@ -60,6 +60,10 @@ header {
     display: none;
 }
 
+.nav-link.main {
+    font-weight: bold;
+}
+
 .active .nav-item {
     display: block;
 }

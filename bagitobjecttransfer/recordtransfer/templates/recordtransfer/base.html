@@ -48,17 +48,17 @@
                                 <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">Profile</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                                <a class="nav-link main" href="{% url 'logout' %}">Logout</a>
                             </li>
                         {% elif not user.is_authenticated %}
-                            {% if 'login' not in request.path %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                                </li>
-                            {% endif %}
                             <li class="nav-item">
                                 <a class="nav-link" href="#">Sign Up</a>
                             </li>
+                            {% if 'login' not in request.path %}
+                                <li class="nav-item">
+                                    <a class="nav-link main" href="{% url 'login' %}">Log In</a>
+                                </li>
+                            {% endif %}
                         {% endif %}
                         <span class="toggle-container">
                             <li class="nav-toggle-open">
