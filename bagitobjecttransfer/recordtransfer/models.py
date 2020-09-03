@@ -49,6 +49,7 @@ class Bag(models.Model):
     bagging_date = models.DateTimeField()
     bag_name = models.CharField(max_length=256, null=True)
     report_name = models.CharField(max_length=256, null=True)
+    report_contents = models.TextField(default='<p>This report does not exist.</p>')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
                                      default=ReviewStatus.NOT_REVIEWED)

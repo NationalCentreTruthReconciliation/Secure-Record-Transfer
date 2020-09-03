@@ -2,7 +2,7 @@
 """
 
 import logging
-from datetime import datetime
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from django.http import HttpResponseRedirect, JsonResponse
@@ -102,10 +102,9 @@ class TransferFormWizard(SessionWizardView):
             bagging_result = future.result()
             if bagging_result['bag_created']:
                 bag_location = bagging_result['bag_location']
-                parsed_date = datetime.strptime(bagging_result['time_created'], r'%Y%m%d_%H%M%S')
-                bagging_date = parsed_date.strftime(r'%Y-%m-%d %H:%M:%S')
+                bagging_time = bagging_result['time_created']
                 data['storage_location'] = bag_location
-                data['creation_time'] = bagging_date
+                data['creation_time'] = str(bagging_time)
                 doc_generator = HtmlDocument(data)
                 html_document = doc_generator.generate()
                 LOGGER.info('Starting report generation in the background')
@@ -119,12 +118,11 @@ class TransferFormWizard(SessionWizardView):
                     LOGGER.info('HTML document generation failed')
 
                 # Create object to be viewed in admin app
-                new_bag = Bag(bagging_date=bagging_date, bag_location=bag_location,
+                new_bag = Bag(bagging_date=bagging_time, bag_name=Path(bag_location).name,
                               user=self.request.user)
                 if report_created:
-                    new_bag.report_location = report_location
-                else:
-                    new_bag.report_location = 'Report could not be created'
+                    new_bag.report_name = Path(report_location).name
+                    new_bag.report_contents = html_document
                 new_bag.save()
             else:
                 LOGGER.warning('Could not generate HTML document since bag creation failed')
