@@ -1,11 +1,12 @@
 ''' Facilitates creating BagIt bags and writing them to disk '''
-from datetime import datetime
 from pathlib import Path
 import logging
 import os
 import shutil
 
 import bagit
+
+from django.utils import timezone
 
 from recordtransfer.models import UploadedFile
 from recordtransfer.exceptions import FolderNotFoundError
@@ -34,8 +35,8 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
         LOGGER.error(msg=('Bagger: Could not find storage folder "%s"' % storage_folder))
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
 
-    time = datetime.strftime(datetime.today(), r'%Y%m%d_%H%M%S')
-    identifier = bag_identifier if bag_identifier else time
+    current_time = timezone.now()
+    identifier = bag_identifier or current_time.strftime(r'%Y%m%d_%H%M%S')
 
     new_bag_folder = _get_bagging_folder(storage_folder, identifier)
     if not new_bag_folder.exists():
@@ -63,7 +64,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     return {
         'missing_files': missing_files,
         'bag_created': bag_was_created,
-        'time_created': time if bag_was_created else None,
+        'time_created': current_time if bag_was_created else None,
         'bag_location': str(new_bag_folder) if bag_was_created else None,
     }
 

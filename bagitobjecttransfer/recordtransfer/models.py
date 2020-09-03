@@ -1,10 +1,10 @@
-from datetime import datetime
 import os
 
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
+from django.utils import timezone
 
 
 class UploadSession(models.Model):
@@ -13,7 +13,7 @@ class UploadSession(models.Model):
 
     @classmethod
     def new_session(cls):
-        return cls(token=get_random_string(length=32), started_at=datetime.now())
+        return cls(token=get_random_string(length=32), started_at=timezone.now())
 
     def __str__(self):
         return f'{self.token} ({self.started_at})'

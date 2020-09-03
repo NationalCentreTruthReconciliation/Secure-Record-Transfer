@@ -3,6 +3,8 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+from django.utils import timezone
+
 from recordtransfer.exceptions import FolderNotFoundError
 
 
@@ -27,8 +29,10 @@ def write_report(storage_folder: str, document: str, doc_extension: str, doc_ide
     if not Path(storage_folder).exists():
         LOGGER.error(msg=('Reporter: Could not find report storage folder "%s"' % storage_folder))
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
-    time = datetime.strftime(datetime.today(), r'%Y%m%d_%H%M%S')
-    identifier = doc_identifier or time
+
+    current_time = timezone.now()
+    identifier = doc_identifier or current_time.strftime(r'%Y%m%d_%H%M%S')
+
     report_path = _get_new_report_path(storage_folder, identifier, doc_extension)
     report_created = False
     try:
@@ -41,7 +45,7 @@ def write_report(storage_folder: str, document: str, doc_extension: str, doc_ide
     return {
         'report_created': report_created,
         'report_location': str(report_path) if report_created else None,
-        'time_created': time if report_created else None,
+        'time_created': current_time if report_created else None,
     }
 
 def _get_new_report_path(storage_folder: str, identifier: str, extension: str):

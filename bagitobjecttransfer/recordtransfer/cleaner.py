@@ -1,6 +1,7 @@
 """ Functions for cleaning up old files, etc. """
 
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 from recordtransfer.models import UploadedFile
 
 class Cleaner:
@@ -11,7 +12,7 @@ class Cleaner:
         Args:
             hours (int): The threshold number of hours in the past required to delete a file
         """
-        time_threshold = datetime.now() - timedelta(hours=hours)
+        time_threshold = timezone.now() - timedelta(hours=hours)
 
         old_undeleted_files = UploadedFile.objects.filter(
             old_copy_removed=False

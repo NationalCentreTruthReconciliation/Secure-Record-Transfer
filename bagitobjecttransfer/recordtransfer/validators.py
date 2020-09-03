@@ -3,6 +3,7 @@ from calendar import monthrange, month_name
 import re
 
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 
 FULL_DATE = re.compile(r'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<date>\d{2})$')
@@ -29,7 +30,7 @@ def validate_date(value):
     year = int(match_obj.group('year'))
     month = int(match_obj.group('month'))
     date = int(match_obj.group('date'))
-    today = datetime.now()
+    today = timezone.now()
 
     if year < 1000:
         raise ValidationError(
@@ -69,7 +70,7 @@ def validate_date(value):
                 f'{date} is too high'
             )
 
-    date_obj = datetime(year, month, date, 0, 0, 0)
+    date_obj = datetime(year, month, date, 0, 0, 0, tzinfo=timezone.get_current_timezone())
 
     if date_obj > today:
         raise ValidationError(

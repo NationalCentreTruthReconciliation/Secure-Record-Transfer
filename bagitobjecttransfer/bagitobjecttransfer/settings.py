@@ -148,7 +148,7 @@ FILE_UPLOAD_HANDLERS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Winnipeg'
 
 USE_I18N = True
 
@@ -160,7 +160,6 @@ COUNTRIES_FIRST = [
     'CA',
     'US',
 ]
-
 
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')

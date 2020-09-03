@@ -4,6 +4,8 @@ from collections import OrderedDict
 
 from bs4 import BeautifulSoup
 
+from django.utils import timezone
+
 from recordtransfer.defaultdata import DEFAULT_DATA
 
 
@@ -95,8 +97,7 @@ class ObjectFromForm(ABC):
         if 'creation_time' in form_data and form_data['creation_time']:
             self.date = form_data['creation_time']
         else:
-            from datetime import datetime
-            self.date = datetime.strftime(datetime.today(), r'%Y-%m-%d %H:%M:%S')
+            self.date = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S')
         self.object = None
 
     def generate(self):
