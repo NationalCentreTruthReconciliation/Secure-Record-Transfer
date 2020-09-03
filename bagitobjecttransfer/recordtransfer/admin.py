@@ -10,6 +10,8 @@ from recordtransfer.models import Bag, UploadSession, UploadedFile
 
 
 class BagAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/bag_change_form.html'
+
     actions = ['export_selected_bags', 'mark_not_started', 'mark_in_progress', 'mark_complete']
     list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
     ordering = ['bagging_date']
@@ -53,6 +55,10 @@ class BagAdmin(admin.ModelAdmin):
     mark_in_progress.short_description = f'Mark bags as "{Bag.ReviewStatus.REVIEW_STARTED.label}"'
     mark_complete.short_description = f'Mark bags as "{Bag.ReviewStatus.REVIEW_COMPLETE.label}"'
 
+    def response_change(self, request, obj):
+        if "_view_report" in request.POST:
+            return HttpResponse(obj.report_contents, content_type='text/html')
+        return super().response_change(request, obj)
 
 
 admin.site.register(Bag, BagAdmin)
