@@ -6,13 +6,17 @@ from bs4 import BeautifulSoup
 
 from django.utils import timezone
 
-from recordtransfer.defaultdata import DEFAULT_DATA
+from recordtransfer.settings import DEFAULT_DATA
 
 
 LOGGER = logging.getLogger(__name__)
 
 
 class ObjectFromForm(ABC):
+    ''' Abstract class used to generate an object of any sort from the filled transfer form. The
+    only public function is the generate() function, which returns the generated object.
+    '''
+
     approximate_date_format = '[ca. {date}]'
 
     section_titles = {
@@ -112,26 +116,87 @@ class ObjectFromForm(ABC):
         self._post_generation()
         return self.object
 
+    ################################################################################################
+    ### START OF OVERRIDABLE METHODS
+    ### Use the following methods to control how self.object is created from the form fields
+
     def _pre_generation(self):
-        pass
-    def _pre_section_generation(self, **kwargs):
-        pass
+        ''' Hook into function if you want to any processing before section generation starts '''
+
     def _post_generation(self):
-        pass
-    def _post_section_generation(self, **kwargs):
-        pass
-    def _new_section(self, title):
-        pass
-    def _new_item_collection(self, title, **kwargs):
-        pass
+        ''' Hook into function if you want to do any processing after generation ends '''
+
+    def _pre_section_generation(self, section_num: int):
+        ''' Hook into function if you want to set up anything before generating a section.
+
+        Args:
+            section_num (int): The number of the CAAIS section being generated.
+        '''
+
+    def _post_section_generation(self, section_num: int):
+        ''' Hook into function if you want to set up anything after generating a section.
+
+        Args:
+            section_num (int): The number of the CAAIS section that just finished generating.
+        '''
+
+    def _new_section(self, title: str):
+        ''' Hook into function to access section title before section generates
+
+        Args:
+            title (str): The title of the current CAAIS section. The section_titles variable can be
+                overridden to change the titles used.
+        '''
+
+    def _new_item_collection(self, title, level, is_array_title=False, index0=0, index1=1, total=1):
+        ''' Hook into function to access the title for a collection of items
+
+        Args:
+            title (str): The title of the current item collection. The item_titles variable can be
+                overriden to change the titles used.
+            level (int): The level of the item collection. This depends on how many decimals appear
+                for the metadata field in CAAIS. (5.1.1 would be level 2, 5.1.1.1 would be level 3).
+            is_array_title (bool): True if the following items are part of a list, False if not.
+            index0 (int): The 0-based index of which list item the title is for
+            index1 (int): The 1-based index of which list item the title is for
+            total (int): The total number of items in this collection
+        '''
 
     @abstractmethod
-    def _new_item(self, title, data, **kwargs):
-        pass
+    def _new_item(self, title, data, level, is_array_item=False, index0=0, index1=1, total=1):
+        ''' Hook into function to access each metadata item
+
+        Args:
+            title (str): The title of the current item. The item_titles variable can be overriden to
+                change the titles used.
+            level (int): The level of the item collection. This depends on how many decimals appear
+                for the metadata field in CAAIS. (5.1.1 would be level 2, 5.1.1.1 would be level 3).
+            is_array_title (bool): True if the item is part of a list, False if not.
+            index0 (int): The 0-based index of the collection the list item is in
+            index1 (int): The 1-based index of the collection the list item is in
+            total (int): The total number of items in this collection
+        '''
+
+    ### END OF OVERRIDABLE METHODS
+    ################################################################################################
 
     def _generate_section_1(self):
+        '''
+        Generates the following structure:
+
+        Section 1 Title
+            |_ 1.1 Repository
+            |_ 1.2 Accession Identifier
+            |_ 1.3 Other Identifiers (repeatable item collection)
+                |_ 1.3.1 Other Identifier
+                |_ 1.3.2 Other Identifier Type
+                |_ 1.3.3 Other Identifier Note
+            |_ 1.4 Accession Title
+            |_ 1.5 Archival Unit
+            |_ 1.6 Acquisition Method
+        '''
         # TODO: Add checking for non-mandatory fields
-        self._pre_section_generation(section=1)
+        self._pre_section_generation(section_num=1)
         self._new_section(self.section_titles['section_1'])
         self._new_item(self.item_titles['repository'],
                        DEFAULT_DATA['section_1']['repository'],
@@ -175,11 +240,32 @@ class ObjectFromForm(ABC):
         self._new_item(self.item_titles['acquisition_method'],
                        DEFAULT_DATA['section_1']['acqusition_method'],
                        level=1)
-        self._post_section_generation(section=1)
+        self._post_section_generation(section_num=1)
 
     def _generate_section_2(self):
+        '''
+        Generates the following structure:
+
+        Section 2 Title
+            |_ 2.1 Source of Material
+                |_ 2.1.1 Source Type
+                |_ 2.1.2 Source Name
+                |_ 2.1.3 Source Contact Information
+                    |_ 2.1.3.1 Contact Name
+                    |_ 2.1.3.2 Job Title
+                    |_ 2.1.3.3 Phone Number
+                    |_ 2.1.3.4 Email
+                    |_ 2.1.3.5 Address Line 1
+                    |_ 2.1.3.6 Address Line 2
+                    |_ 2.1.3.7 Province/State
+                    |_ 2.1.3.8 Postal/Zip Code
+                    |_ 2.1.3.9 Country
+                |_ 2.1.4 Source Role
+                |_ 2.1.5 Source Note
+            |_ 2.2 Custodial History
+        '''
         # TODO: Add checking for non-mandatory fields
-        self._pre_section_generation(section=2)
+        self._pre_section_generation(section_num=2)
         self._new_section(self.section_titles['section_2'])
         self._new_item_collection(self.item_titles['source_of_material'],
                                   level=1,
@@ -229,10 +315,24 @@ class ObjectFromForm(ABC):
         self._new_item(self.item_titles['custodial_history'],
                        self.form_data['custodial_history'],
                        level=1)
-        self._post_section_generation(section=2)
+        self._post_section_generation(section_num=2)
 
     def _generate_section_3(self):
+        '''
+        Generates the following structure:
+
+        Section 3 Title
+            |_ 3.1 Date of Material
+            |_ 3.2 Extent Statement
+                |_ 3.2.1 Extent Statement Type
+                |_ 3.2.2 Quantity and Type of Units
+                |_ 3.2.3 Extent Statement Note
+            |_ 3.3 Scope and Content
+            |_ 3.4 Language of Material
+        '''
         # TODO: Add checking for non-mandatory fields
+        self._pre_section_generation(section_num=3)
+
         if self.form_data['start_date_is_approximate']:
             start_date = self.approximate_date_format.format(\
             date=self.form_data["start_date_of_material"])
@@ -245,7 +345,6 @@ class ObjectFromForm(ABC):
             end_date = self.form_data['end_date_of_material']
         date_of_material = f'{start_date} - {end_date}'
 
-        self._pre_section_generation(section=3)
         self._new_section(self.section_titles['section_3'])
         self._new_item(self.item_titles['date_of_material'],
                        date_of_material,
@@ -267,11 +366,24 @@ class ObjectFromForm(ABC):
         self._new_item(self.item_titles['language_of_material'],
                        self.form_data['language_of_material'],
                        level=1)
-        self._post_section_generation(section=3)
+        self._post_section_generation(section_num=3)
 
     def _generate_section_4(self):
+        '''
+        Generates the following structure:
+
+        Section 4 Title
+            |_ 4.1 Storage Location
+            |_ 4.2 Rights Statement (repeatable item collection)
+                |_ 4.2.1 Rights Statement Type
+                |_ 4.2.2 Rights Statement Value
+                |_ 4.2.3 Rights Statement Note
+            |_ 4.3 Material Assessment Statement
+            |_ 4.4 Appraisal Statement
+            |_ 4.5 Associated Documentation
+        '''
         # TODO: Add checking for non-mandatory fields
-        self._pre_section_generation(section=4)
+        self._pre_section_generation(section_num=4)
         self._new_section(self.section_titles['section_4'])
         if 'storage_location' in self.form_data and self.form_data['storage_location']:
             storage_location = self.form_data['storage_location']
@@ -317,10 +429,19 @@ class ObjectFromForm(ABC):
         self._new_item(self.item_titles['associated_documentation'],
                        DEFAULT_DATA['section_4']['associated_documentation'],
                        level=1)
-        self._post_section_generation(section=4)
+        self._post_section_generation(section_num=4)
 
     def _generate_section_5(self):
-        self._pre_section_generation(section=5)
+        '''
+        Generates the following structure:
+
+        Section 5 Title
+            |_ 5.1 Event Statement
+                |_ 5.1.1 Event Type
+                |_ 5.1.2 Event Date
+                |_ 5.1.3 Event Agent
+        '''
+        self._pre_section_generation(section_num=5)
         self._new_section(self.section_titles['section_5'])
         self._new_item_collection(self.item_titles['event_statement'],
                                   level=1,
@@ -337,10 +458,16 @@ class ObjectFromForm(ABC):
                        DEFAULT_DATA['section_5']['event_agent'],
                        level=2,
                        is_array_item=True, index0=0, index1=1, total=1)
-        self._post_section_generation(section=5)
+        self._post_section_generation(section_num=5)
 
     def _generate_section_6(self):
-        self._pre_section_generation(section=6)
+        '''
+        Generates the following structure:
+
+        Section 6 Title
+            |_ 6.1 General Notes
+        '''
+        self._pre_section_generation(section_num=6)
         self._new_section(self.section_titles['section_6'])
         if 'general_notes' in self.form_data and self.form_data['general_notes']:
             notes = self.form_data['general_notes']
@@ -349,11 +476,21 @@ class ObjectFromForm(ABC):
         self._new_item(self.item_titles['general_notes'],
                        notes,
                        level=1)
-        self._post_section_generation(section=6)
+        self._post_section_generation(section_num=6)
 
     def _generate_section_7(self):
-        # TODO: Add checking for non-mandatory fields
-        self._pre_section_generation(section=7)
+        '''
+        Generates the following structure:
+
+        Section 7 Title
+            |_ 7.1 Rules or Conventions
+            |_ 7.3 Date of Creation or Revision
+                |_ 7.3.1 Action Type
+                |_ 7.3.2 Action Date
+                |_ 7.3.3 Action Agent
+                |_ 7.3.4 Action Note
+        '''
+        self._pre_section_generation(section_num=7)
         self._new_section(self.section_titles['section_7'])
         self._new_item(self.item_titles['rules_or_conventions'],
                        DEFAULT_DATA['section_7']['rules_or_conventions'],
@@ -382,7 +519,7 @@ class ObjectFromForm(ABC):
                        is_array_item=True,
                        level=2,
                        index0=0, index1=1, total=1)
-        self._post_section_generation(section=7)
+        self._post_section_generation(section_num=7)
 
 
 class HtmlDocument(ObjectFromForm):
@@ -483,9 +620,8 @@ class HtmlDocument(ObjectFromForm):
         self.document.append('<body>')
         self.document.append('<h2>Record Transfer Document</h2>')
 
-    def _pre_section_generation(self, **kwargs):
-        section = kwargs.get('section')
-        self.document.append(f'<table border="1" cellspacing="0" id="section_{section}">')
+    def _pre_section_generation(self, section_num: int):
+        self.document.append(f'<table border="1" cellspacing="0" id="section_{section_num}">')
 
     def _post_generation(self):
         self.document.append('</body>')
@@ -494,18 +630,13 @@ class HtmlDocument(ObjectFromForm):
         document_soup.find('style').string = self.DEFAULT_CSS
         self.object = document_soup.prettify()
 
-    def _post_section_generation(self, **kwargs):
+    def _post_section_generation(self, section_num: int):
         self.document.append('</table>')
 
     def _new_section(self, title):
         self.document.append(f'<tr><td colspan="2"><div class="title">{title}</div></td></tr>')
 
-    def _new_item_collection(self, title, **kwargs):
-        level = kwargs.get('level') if 'level' in kwargs else 1
-        is_array_title = kwargs.get('is_array_title') if 'is_array_title' in kwargs else False
-        index1 = kwargs.get('index1') if 'index1' in kwargs else -1
-        total = kwargs.get('total') if 'total' in kwargs else -1
-
+    def _new_item_collection(self, title, level, is_array_title=False, index0=0, index1=1, total=1):
         row_title = f'{title} ({index1} of {total})' if is_array_title else title
 
         row = ['<tr><td colspan="2">']
@@ -520,9 +651,7 @@ class HtmlDocument(ObjectFromForm):
         row.append('</td></tr>')
         self.document.append(''.join(row))
 
-    def _new_item(self, title, data, **kwargs):
-        level = kwargs.get('level') if 'level' in kwargs else 1
-
+    def _new_item(self, title, data, level, is_array_item=False, index0=0, index1=1, total=1):
         row = ['<tr><td class="left-col">']
         if level == 1:
             row.append(f'<b>{title}</b></td>')
@@ -544,11 +673,7 @@ class BagitTags(ObjectFromForm):
     def _post_generation(self):
         self.object = self.tags
 
-    def _new_item(self, title, data, **kwargs):
-        is_array_item = kwargs.get('is_array_item') if 'is_array_item' in kwargs else False
-        index1 = kwargs.get('index1') if 'index1' in kwargs else -1
-
+    def _new_item(self, title, data, level, is_array_item=False, index0=0, index1=1, total=1):
         key = f'{title}_{index1}' if is_array_item else title
         value = data
-
         self.tags[key] = value
