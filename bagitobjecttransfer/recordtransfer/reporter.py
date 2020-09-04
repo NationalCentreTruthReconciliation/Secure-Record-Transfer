@@ -1,6 +1,5 @@
 ''' Facilitates writing reports to disk '''
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from django.utils import timezone

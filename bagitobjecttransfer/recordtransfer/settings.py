@@ -1,4 +1,12 @@
-# Default data for BagIt tags and accession document generation
+''' recordtransfer application specific settings '''
+
+# The folder where bags will be stored
+BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+
+# The folder where reports will be output
+REPORT_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags/Reports'
+
+# Default data to inject into metadata, after the user enters their own metadata
 DEFAULT_DATA = {
     'section_1': {
         'repository': 'NCTR',

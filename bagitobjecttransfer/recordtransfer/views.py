@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.appsettings import BAG_STORAGE_FOLDER, REPORT_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER
 from recordtransfer.bagger import create_bag
 from recordtransfer.reporter import write_report
 from recordtransfer.metadatagenerator import HtmlDocument, BagitTags

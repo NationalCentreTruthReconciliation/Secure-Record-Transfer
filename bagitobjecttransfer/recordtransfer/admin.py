@@ -6,7 +6,7 @@ from pathlib import Path
 from django.contrib import admin
 from django.http import HttpResponse
 
-from recordtransfer.appsettings import BAG_STORAGE_FOLDER, REPORT_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile
 
 
