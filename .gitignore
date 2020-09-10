@@ -1,5 +1,3 @@
-# Created by https://www.gitignore.io
-
 # VSCODE
 .vscode
 
@@ -37,6 +35,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+linuxenv/
 build/
 develop-eggs/
 dist/
