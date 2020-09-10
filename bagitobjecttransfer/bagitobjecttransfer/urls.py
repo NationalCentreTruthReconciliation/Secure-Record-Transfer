@@ -18,6 +18,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('django-rq/', include('django_rq.urls')),
     path('', include('recordtransfer.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
