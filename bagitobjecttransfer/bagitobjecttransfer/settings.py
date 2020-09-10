@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_countries',
     'formtools',
+    'django_rq',
     'recordtransfer.apps.RecordTransferConfig',
 ]
 
@@ -88,6 +89,20 @@ DATABASES = {
 }
 
 
+# Redis-based Queue
+# https://github.com/rq/django-rq
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': '',
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -130,6 +145,11 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
         },
         'recordtransfer': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'rq.worker': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
