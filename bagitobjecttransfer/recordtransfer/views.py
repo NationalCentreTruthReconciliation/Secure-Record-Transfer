@@ -1,6 +1,3 @@
-""" Views
-"""
-
 import logging
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
@@ -10,11 +7,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER
-from recordtransfer.bagger import create_bag
-from recordtransfer.reporter import write_report
-from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
 from recordtransfer.models import UploadedFile, UploadSession, Bag
+from recordtransfer.jobs import bag_user_metadata_and_files
 
 
 LOGGER = logging.getLogger(__name__)
@@ -88,45 +82,9 @@ class TransferFormWizard(SessionWizardView):
         return context
 
     def done(self, form_list, **kwargs):
-        ''' Retrieves all of the form data, and writes the user's uploaded files and their metadata
-        to a new Bag. If the Bag generation succeeds, a human-readable report is written with all of
-        the metadata and the location of the bag.
-        '''
-        data = self.get_all_cleaned_data()
-        with ThreadPoolExecutor() as executor:
-            tag_generator = BagitTags(data)
-            tags = tag_generator.generate()
-            LOGGER.info('Starting bag creation in the background')
-            future = executor.submit(create_bag, BAG_STORAGE_FOLDER, data['session_token'], tags,
-                                     None, True)
-            bagging_result = future.result()
-            if bagging_result['bag_created']:
-                bag_location = bagging_result['bag_location']
-                bagging_time = bagging_result['time_created']
-                data['storage_location'] = bag_location
-                data['creation_time'] = str(bagging_time)
-                doc_generator = HtmlDocument(data)
-                html_document = doc_generator.generate()
-                LOGGER.info('Starting report generation in the background')
-                future = executor.submit(write_report, REPORT_FOLDER, html_document, 'html', None)
-                report_result = future.result()
-                report_location = report_result['report_location']
-                report_created = report_result['report_created']
-                if report_created:
-                    LOGGER.info('Generated HTML document')
-                else:
-                    LOGGER.info('HTML document generation failed')
-
-                # Create object to be viewed in admin app
-                new_bag = Bag(bagging_date=bagging_time, bag_name=Path(bag_location).name,
-                              user=self.request.user)
-                if report_created:
-                    new_bag.report_name = Path(report_location).name
-                    new_bag.report_contents = html_document
-                new_bag.save()
-            else:
-                LOGGER.warning('Could not generate HTML document since bag creation failed')
-
+        ''' Retrieves all of the form data, and creates a bag from it '''
+        form_data = self.get_all_cleaned_data()
+        bag_user_metadata_and_files.delay(form_data, self.request.user)
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 
