@@ -45,6 +45,8 @@ $(() => {
         uploadMultiple: true,
         parallelUploads: 2,
         maxFiles: 80,
+        maxFilesize: 1024,
+        timeout: 180000,
         headers: {
             "X-CSRFToken": getCookie("csrftoken")
         },
