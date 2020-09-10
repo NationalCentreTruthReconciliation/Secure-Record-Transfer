@@ -1,10 +1,18 @@
 ''' recordtransfer application specific settings '''
+import platform
 
 # The folder where bags will be stored
-BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+if platform.system() == 'Windows':
+    BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+else:
+    BAG_STORAGE_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR/Bags'
+
 
 # The folder where reports will be output
-REPORT_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags/Reports'
+if platform.system() == 'Windows':
+    REPORT_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags/Reports'
+else:
+    REPORT_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR/Bags/Reports'
 
 # Default data to inject into metadata, after the user enters their own metadata
 DEFAULT_DATA = {
@@ -39,3 +47,5 @@ DEFAULT_DATA = {
         'action_note': 'Created with NCTR Record Transfer Portal',
     }
 }
+
+ARCHIVIST_EMAILS = ['test@example.com']
