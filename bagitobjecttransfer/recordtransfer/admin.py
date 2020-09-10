@@ -10,6 +10,15 @@ from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile
 
 
+class UploadedFileAdmin(admin.ModelAdmin):
+    actions = ['clean_temp_files']
+
+    def clean_temp_files(self, request, queryset):
+        for uploaded_file in queryset:
+            uploaded_file.delete_file()
+    clean_temp_files.short_description = 'Remove temp files on filesystem'
+
+
 class BagAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bag_change_form.html'
 
@@ -78,5 +87,5 @@ class BagAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Bag, BagAdmin)
-admin.site.register(UploadedFile)
+admin.site.register(UploadedFile, UploadedFileAdmin)
 admin.site.register(UploadSession)
