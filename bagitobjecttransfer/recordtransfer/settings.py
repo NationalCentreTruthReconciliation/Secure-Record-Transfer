@@ -53,7 +53,8 @@ ARCHIVIST_EMAILS = [
 ]
 
 
-# File types allowed to be uploaded to the backend. Do not use periods before the extension.
+# File types allowed to be uploaded to the backend. Do not use periods before the extension, and
+# ensure that all file extensions are lowercase.
 
 ACCEPTED_FILE_FORMATS = {
     'Archive': [

@@ -1,14 +1,14 @@
 import logging
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, Bag
+from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.jobs import bag_user_metadata_and_files
+from recordtransfer.settings import ACCEPTED_FILE_FORMATS
 
 
 LOGGER = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ def uploadfiles(request):
     multiple times for a large batch upload of files.
     """
     if not request.method == 'POST':
-        return JsonResponse({'error': 'Files can only be uploaded using POST.'}, status=500)
+        return JsonResponse({'error': 'Files can only be uploaded using POST.'}, status=403)
     if not request.FILES:
         return JsonResponse({'upload_session_token': ''}, status=200)
 
@@ -111,6 +111,22 @@ def uploadfiles(request):
                 session.save()
 
         for _, temp_file in request.FILES.dict().items():
+            file_accepted = False
+            temp_file_extension = Path(temp_file.name).suffix.lower().replace('.', '')
+            for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
+                if temp_file_extension in accepted_extensions:
+                    file_accepted = True
+                    break
+
+            if not file_accepted:
+                terse_error = f'{temp_file_extension} files are not allowed'
+                verbose_error = (f'{temp_file.name} file has an unaccepted format '
+                                 f'({temp_file_extension}).')
+                return JsonResponse({
+                        'error': terse_error,
+                        'verboseError': verbose_error,
+                    }, status=403)
+
             new_file = UploadedFile(name=temp_file.name, path=temp_file.path,
                 old_copy_removed=False, session=session)
             new_file.save()
@@ -118,5 +134,5 @@ def uploadfiles(request):
         return JsonResponse({'upload_session_token': session.token}, status=200)
 
     except Exception as exc:
-        LOGGER.error('Uncaught exception in upload_file: %s' % str(exc))
-        return JsonResponse({'error': f'Uncaught Exception:\n{str(exc)}'}, status=500)
+        LOGGER.error(msg=('Uncaught exception in upload_file: %s' % str(exc)))
+        return JsonResponse({'error': f'Server Error:\n{str(exc)}'}, status=500)
