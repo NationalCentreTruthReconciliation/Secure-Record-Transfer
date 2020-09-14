@@ -74,14 +74,18 @@ def count_file_types(file_names: list):
         return counted_extensions_per_group
 
     # Tabulate number of files in each file type group
-    for file_group_name, extensions_for_group in ACCEPTED_FILE_FORMATS.items():
-        for extension_name in extensions_for_group:
-            extension_name_lower = extension_name.lower()
-            if extension_name_lower in counted_extensions:
-                num_counted_with_extension = counted_extensions[extension_name_lower]
+    del_keys = []
+    for file_group_name, extensions_for_file_group in ACCEPTED_FILE_FORMATS.items():
+        for counted_extension_name, num_counted in counted_extensions.items():
+            if counted_extension_name in extensions_for_file_group:
                 if file_group_name not in counted_extensions_per_group:
-                    counted_extensions_per_group[file_group_name] = num_counted_with_extension
+                    counted_extensions_per_group[file_group_name] = num_counted
                 else:
-                    counted_extensions_per_group[file_group_name] += num_counted_with_extension
+                    counted_extensions_per_group[file_group_name] += num_counted
+                del_keys.append(counted_extension_name)
+        # Remove counted extensions
+        for key in del_keys:
+            del counted_extensions[key]
+        del_keys.clear()
 
     return counted_extensions_per_group
