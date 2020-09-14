@@ -354,9 +354,16 @@ class ObjectFromForm(ABC):
         self._new_item(self.item_titles['extent_statement_type'],
                        DEFAULT_DATA['section_3']['extent_statement_type'],
                        level=2)
-        self._new_item(self.item_titles['quantity_and_type_of_units'],
-                       'Work in Progress!!',
-                       level=2)
+
+        if 'file_count_message' not in self.form_data:
+            self._new_item(self.item_titles['quantity_and_type_of_units'],
+                        DEFAULT_DATA['section_3']['quantity_and_type_of_units'],
+                        level=2)
+        else:
+            self._new_item(self.item_titles['quantity_and_type_of_units'],
+                        self.form_data['file_count_message'],
+                        level=2)
+
         self._new_item(self.item_titles['extent_statement_note'],
                        DEFAULT_DATA['section_3']['extent_statement_note'],
                        level=2)

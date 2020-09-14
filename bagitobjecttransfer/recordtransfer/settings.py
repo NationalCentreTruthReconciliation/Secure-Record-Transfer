@@ -21,6 +21,7 @@ DEFAULT_DATA = {
     },
     'section_3': {
         'extent_statement_type': 'Extent received',
+        'quantity_and_type_of_units': 'N/A',
         'extent_statement_note': 'Files counted automatically by application',
     },
     'section_4': {
@@ -44,4 +45,62 @@ DEFAULT_DATA = {
     }
 }
 
-ARCHIVIST_EMAILS = ['test@example.com']
+
+#TODO: This should be in the database as a part of a User object
+
+ARCHIVIST_EMAILS = [
+    'test@example.com'
+]
+
+
+# File types allowed to be uploaded to the backend. Do not use periods before the extension.
+
+ACCEPTED_FILE_FORMATS = {
+    'Archive': [
+        'zip',
+    ],
+    'Document': [
+        'doc',
+        'docx',
+        'odt',
+        'pdf',
+        'rtf',
+        'txt',
+        'html',
+    ],
+    'Presentation': [
+        'ppt',
+        'pptx',
+        'pps',
+        'ppsx',
+    ],
+    'Spreadsheet': [
+        'xls',
+        'xlsx',
+        'csv',
+    ],
+    'Image': [
+        'jpg',
+        'jpeg',
+        'gif',
+        'png',
+    ],
+    'Video': [
+        'avi',
+        'mkv',
+        'mov',
+        'mp4',
+        'mpeg4',
+        'mpg',
+        'wmv',
+    ],
+    'Audio': [
+        'acc',
+        'flac',
+        'm4a',
+        'mp3',
+        'ogg',
+        'wav',
+        'wma',
+    ],
+}
