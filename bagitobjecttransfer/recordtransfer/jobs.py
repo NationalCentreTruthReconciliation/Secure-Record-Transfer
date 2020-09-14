@@ -31,8 +31,16 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted):
 
     LOGGER.info('Starting bag creation')
 
-    folder = str(BAG_STORAGE_FOLDER)
-    bagging_result = create_bag(folder, form_data['session_token'], tags, None, True)
+    folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
+    if not folder.exists():
+        folder.mkdir()
+
+    bagging_result = create_bag(
+        storage_folder=str(folder),
+        session_token=form_data['session_token'],
+        metadata=tags,
+        bag_identifier=None,
+        deletefiles=True)
 
     if bagging_result['bag_created']:
         bag_location = bagging_result['bag_location']
