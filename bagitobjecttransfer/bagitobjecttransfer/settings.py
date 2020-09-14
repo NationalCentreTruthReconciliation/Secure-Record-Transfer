@@ -103,6 +103,18 @@ RQ_QUEUES = {
 }
 
 
+# Emailing
+
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.yourserver.com'
+EMAIL_PORT = '<your-server-port>'
+EMAIL_HOST_USER = 'your@djangoapp.com'
+EMAIL_HOST_PASSWORD = 'your-email account-password'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 

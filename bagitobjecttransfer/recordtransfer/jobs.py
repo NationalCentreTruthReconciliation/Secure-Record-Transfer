@@ -1,9 +1,10 @@
 import logging
+import smtplib
 from pathlib import Path
 from datetime import timedelta
 
 import django_rq
-from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.utils import timezone
 
 from recordtransfer.bagger import create_bag
@@ -57,14 +58,42 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted):
         new_bag = Bag(bagging_date=bagging_time, bag_name=bag_name, user=user_submitted)
         new_bag.report_contents = html_document
         new_bag.save()
-        send_success_email_to_archivist()
+        send_bag_creation_success.delay(form_data, user_submitted)
     else:
         LOGGER.warning('Could not generate HTML document since bag creation failed')
+        send_bag_creation_failure.delay(form_data, user_submitted)
 
 @django_rq.job
-def send_success_email_to_archivist():
-    for archivist in settings.ARCHIVIST_EMAILS:
-        LOGGER.info(f'Sending success email to {archivist}')
+def send_bag_creation_success(form_data: dict, user_submitted):
+    LOGGER.info(msg=('Sending "bag ready" email to %s' % ARCHIVIST_EMAILS))
+    message = (f'User {user_submitted.username} submitted files that are ready for review.'
+               f'\nThe title of the records is {form_data["collection_title"]}.')
+    try:
+        send_mail(
+            subject='New Bag Ready For Review',
+            message=message,
+            from_email='donotreply@127.0.0.1:8000',
+            recipient_list=ARCHIVIST_EMAILS,
+            fail_silently=False,
+        )
+    except smtplib.SMTPException as exc:
+        LOGGER.warning(msg=('Error when sending emails to archivist(s): %s' % str(exc)))
+
+
+@django_rq.job
+def send_bag_creation_failure(form_data: dict, user_submitted):
+    LOGGER.info(msg=('Sending "bag failure" email to %s' % ARCHIVIST_EMAILS))
+    message = (f'Bag creation failed for the file submitted by user {user_submitted.username}')
+    try:
+        send_mail(
+            subject='Bag Creation Failed',
+            message=message,
+            from_email='donotreply@127.0.0.1:8000',
+            recipient_list=ARCHIVIST_EMAILS,
+            fail_silently=False,
+        )
+    except smtplib.SMTPException as exc:
+        LOGGER.warning(msg=('Error when sending emails to archivist(s): %s' % str(exc)))
 
 @django_rq.job
 def clean_undeleted_temp_files(hours=12):
@@ -85,4 +114,3 @@ def clean_undeleted_temp_files(hours=12):
 
     for upload in old_undeleted_files:
         upload.delete_file()
-
