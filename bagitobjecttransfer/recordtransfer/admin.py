@@ -6,7 +6,7 @@ from pathlib import Path
 from django.contrib import admin
 from django.http import HttpResponse
 
-from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile
 
 
@@ -29,11 +29,10 @@ class BagAdmin(admin.ModelAdmin):
 
     def export_selected_bags(self, request, queryset):
         bag_folder = Path(BAG_STORAGE_FOLDER)
-        report_folder = Path(REPORT_FOLDER)
 
         csv_file = StringIO()
         writer = csv.writer(csv_file)
-        writer.writerow(["Username", "Bagging Date", "Bag Location", "Report Location"])
+        writer.writerow(["Username", "Bagging Date", "Bag Location", "Review Status"])
 
         for bag in queryset:
             writer.writerow(
@@ -41,7 +40,7 @@ class BagAdmin(admin.ModelAdmin):
                     bag.user.username,
                     bag.bagging_date,
                     str(bag_folder / bag.bag_name),
-                    str(report_folder / bag.report_name),
+                    bag.get_review_status_display(),
                 ]
             )
 

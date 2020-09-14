@@ -11,7 +11,7 @@ from recordtransfer.bagger import create_bag
 from recordtransfer.reporter import write_report
 from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
 from recordtransfer.models import Bag, UploadedFile
-from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER, ARCHIVIST_EMAILS
+from recordtransfer.settings import BAG_STORAGE_FOLDER, ARCHIVIST_EMAILS
 
 
 LOGGER = logging.getLogger(__name__)
