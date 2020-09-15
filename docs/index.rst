@@ -9,13 +9,14 @@ NCTR Record Transfer Portal
 
    modules/introduction/why.rst
    modules/introduction/about.rst
+   modules/introduction/buildthedocs.rst
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Installing and Running the App:
 
-   modules/startup/prerequisites.rst
+   modules/install/prerequisites.rst
 
 
 .. toctree::
