@@ -7,7 +7,8 @@ getting redis and django rq to work on Windows.
 Pre-requisites:
 
 * Python
+* requirements.txt
+* virtualenv
 * Redis Server
 * Email SMTP Server
 * Database
-* requirements.txt
