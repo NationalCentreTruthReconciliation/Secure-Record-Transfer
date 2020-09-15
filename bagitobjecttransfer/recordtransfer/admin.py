@@ -5,9 +5,24 @@ from pathlib import Path
 
 from django.contrib import admin
 from django.http import HttpResponse
+from django.contrib.auth.admin import UserAdmin
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
-from recordtransfer.models import Bag, UploadSession, UploadedFile
+from recordtransfer.models import Bag, UploadSession, UploadedFile, User
+
+
+class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        *UserAdmin.fieldsets, # original form fieldsets, expanded
+        (                     # New fieldset added on to the bottom
+            'Email Updates',  # Group heading of your choice. set to None for a blank space
+            {
+                'fields': (
+                    'gets_bag_email_updates',
+                ),
+            },
+        ),
+    )
 
 
 class UploadedFileAdmin(admin.ModelAdmin):
@@ -87,4 +102,5 @@ class BagAdmin(admin.ModelAdmin):
 
 admin.site.register(Bag, BagAdmin)
 admin.site.register(UploadedFile, UploadedFileAdmin)
+admin.site.register(User, CustomUserAdmin)
 admin.site.register(UploadSession)
