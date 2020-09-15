@@ -21,6 +21,16 @@ LOGGER = logging.getLogger(__name__)
 
 @django_rq.job
 def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
+    ''' This job does three things. First, it converts the form data the user submitted into BagIt \
+    tags and an easy-to-read HTML report. Second, it creates a bag in the user's folder under the \
+    BAG_STORAGE_FOLDER with all of the user's submitted files and the BagIt tag metadata. \
+    Finally, it sends an email out on whether the new bag was submitted without errors or with \
+    errors.
+
+    Args:
+        form_data (dict): A dictionary of the cleaned form data from the transfer form.
+        user_submitted (User): The user who submitted the data and files.
+    '''
     file_names = list(map(str, UploadedFile.objects.filter(
         session__token=form_data['session_token']
     ).filter(
@@ -68,6 +78,13 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
 
 @django_rq.job
 def send_bag_creation_success(form_data: dict, user_submitted: User):
+    ''' Send an email to users who get bag email updates that a user submitted a new bag and there
+    were no errors.
+
+    Args:
+        form_data (dict): A dictionary of the cleaned form data from the transfer form.
+        user_submitted (User): The user who submitted the data and files.
+    '''
     recipients = User.objects.filter(gets_bag_email_updates=True)
     if not recipients:
         LOGGER.info(msg=('There are no users configured to receive bag info update emails.'))
@@ -96,6 +113,13 @@ def send_bag_creation_success(form_data: dict, user_submitted: User):
 
 @django_rq.job
 def send_bag_creation_failure(form_data: dict, user_submitted: User):
+    ''' Send an email to users who get bag email updates that a user submitted a new bag and there
+    WERE errors.
+
+    Args:
+        form_data (dict): A dictionary of the cleaned form data from the transfer form.
+        user_submitted (User): The user who submitted the data and files.
+    '''
     recipients = User.objects.filter(gets_bag_email_updates=True)
     if not recipients:
         LOGGER.info(msg=('There are no users configured to receive bag failure update emails.'))

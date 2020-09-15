@@ -1,4 +1,4 @@
-''' recordtransfer application specific settings '''
+''' Application-specific settings for the recordtransfer app '''
 import platform
 
 # The location where bags will be stored

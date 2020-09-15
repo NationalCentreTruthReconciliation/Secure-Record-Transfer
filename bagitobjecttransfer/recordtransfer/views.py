@@ -15,29 +15,36 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
+    ''' The homepage '''
     template_name = 'recordtransfer/home.html'
 
 
 class TransferSent(TemplateView):
+    ''' The page a user sees when they finish a transfer '''
     template_name = 'recordtransfer/transfersent.html'
 
 
 class FormPreparation(TemplateView):
+    ''' The page a user sees before they start a transfer '''
     template_name = 'recordtransfer/formpreparation.html'
 
 
 class UserProfile(TemplateView):
+    ''' A page for a user to see and edit their information '''
     template_name = 'recordtransfer/profile.html'
 
 
 class About(TemplateView):
+    ''' About the application '''
     template_name = 'recordtransfer/about.html'
 
 
 class TransferFormWizard(SessionWizardView):
-    ''' A form for collecting user metadata and uploading files '''
+    ''' A multi-page form for collecting user metadata and uploading files. Uses a form wizard. For
+    more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html
+    '''
 
-    TEMPLATES = {
+    _TEMPLATES = {
         "sourceinfo": {
             "templateref": "recordtransfer/standardform.html",
             "formtitle": "Source Information",
@@ -69,35 +76,68 @@ class TransferFormWizard(SessionWizardView):
     }
 
     def get_template_names(self):
+        ''' Retrieve the name of the template for the current step '''
         step_name = self.steps.current
-        return [self.TEMPLATES[step_name]["templateref"]]
+        return [self._TEMPLATES[step_name]["templateref"]]
 
     def get_context_data(self, form, **kwargs):
-        ''' Send extra data variables to form templates '''
-        context = super(TransferFormWizard, self).get_context_data(form, **kwargs)
+        ''' Retrieve context data for the current form template.
+
+        Args:
+            form: The form to display to the user.
+
+        Returns:
+            dict: A dictionary of context data to be used to render the form template.
+        '''
+        context = super().get_context_data(form, **kwargs)
         step_name = self.steps.current
-        context.update({'form_title': self.TEMPLATES[step_name]['formtitle']})
-        if 'infomessage' in self.TEMPLATES[step_name]:
-            context.update({'info_message': self.TEMPLATES[step_name]['infomessage']})
+        context.update({'form_title': self._TEMPLATES[step_name]['formtitle']})
+        if 'infomessage' in self._TEMPLATES[step_name]:
+            context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
         return context
 
     def done(self, form_list, **kwargs):
-        ''' Retrieves all of the form data, and creates a bag from it '''
+        ''' Retrieves all of the form data, and creates a bag from it asynchronously.
+
+        Args:
+            form_list: The list of forms the user filled out.
+
+        Returns:
+            HttpResponseRedirect: Redirects the user to the Transfer Sent page.
+        '''
         form_data = self.get_all_cleaned_data()
         bag_user_metadata_and_files.delay(form_data, self.request.user)
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 
 def uploadfiles(request):
-    """ Upload one or more files to the server, and return a token representing the file upload
-    session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded files will be added to the corresponding session, meaning this endpoint can be hit
-    multiple times for a large batch upload of files.
-    """
+    ''' Upload one or more files to the server, and return a token representing the file upload \
+    session. If a token is passed in the request header using the Upload-Session-Token header, the \
+    uploaded files will be added to the corresponding session, meaning this endpoint can be hit \
+    multiple times for a large batch upload of files. \
+
+    Each file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if any \
+    file is not an accepted type, a 403 status is returned.
+
+    Args:
+        request: The request sent by the user.
+
+    Returns:
+        JsonResponse: If the upload was successful, the session token is returned in \
+        upload_session_token. If not successful, the error description is returned in 'error', \
+        and a more verbose error is returned in 'verboseError'.
+    '''
     if not request.method == 'POST':
-        return JsonResponse({'error': 'Files can only be uploaded using POST.'}, status=403)
+        return JsonResponse({
+            'error': 'Files can only be uploaded using POST.',
+            'verboseError': (f'Files were attempted to be uploaded using the {request.method} HTTP '
+                             'method, but only POST is allowed.'),
+        }, status=403)
     if not request.FILES:
-        return JsonResponse({'upload_session_token': ''}, status=200)
+        return JsonResponse({
+            'error': 'No files were uploaded',
+            'verboseError': 'No files were uploaded',
+        }, status=403)
 
     try:
         headers = request.headers
@@ -135,4 +175,7 @@ def uploadfiles(request):
 
     except Exception as exc:
         LOGGER.error(msg=('Uncaught exception in upload_file: %s' % str(exc)))
-        return JsonResponse({'error': f'Server Error:\n{str(exc)}'}, status=500)
+        return JsonResponse({
+            'error': f'Server Error:\n{str(exc)}',
+            'verboseError': f'The following exception was not caught:\n{str(exc)}',
+        }, status=500)
