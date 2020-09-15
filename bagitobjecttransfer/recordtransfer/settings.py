@@ -46,13 +46,6 @@ DEFAULT_DATA = {
 }
 
 
-#TODO: This should be in the database as a part of a User object
-
-ARCHIVIST_EMAILS = [
-    'test@example.com'
-]
-
-
 # File types allowed to be uploaded to the backend. Do not use periods before the extension, and
 # ensure that all file extensions are lowercase.
 

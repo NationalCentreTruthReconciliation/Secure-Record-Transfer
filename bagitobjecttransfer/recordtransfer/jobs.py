@@ -6,19 +6,21 @@ from datetime import timedelta
 import django_rq
 from django.core.mail import send_mail
 from django.utils import timezone
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
 from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
 from recordtransfer.filecounter import get_human_readable_file_count
-from recordtransfer.models import Bag, UploadedFile
-from recordtransfer.settings import BAG_STORAGE_FOLDER, ARCHIVIST_EMAILS
+from recordtransfer.models import Bag, UploadedFile, User
+from recordtransfer.settings import BAG_STORAGE_FOLDER
 
 
 LOGGER = logging.getLogger(__name__)
 
 
 @django_rq.job
-def bag_user_metadata_and_files(form_data: dict, user_submitted):
+def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     file_names = list(map(str, UploadedFile.objects.filter(
         session__token=form_data['session_token']
     ).filter(
@@ -63,37 +65,62 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted):
         LOGGER.warning('Could not generate HTML document since bag creation failed')
         send_bag_creation_failure.delay(form_data, user_submitted)
 
+
 @django_rq.job
-def send_bag_creation_success(form_data: dict, user_submitted):
-    LOGGER.info(msg=('Sending "bag ready" email to %s' % ARCHIVIST_EMAILS))
-    message = (f'User {user_submitted.username} submitted files that are ready for review.'
-               f'\nThe title of the records is {form_data["collection_title"]}.')
+def send_bag_creation_success(form_data: dict, user_submitted: User):
+    recipients = User.objects.filter(gets_bag_email_updates=True)
+    if not recipients:
+        LOGGER.info(msg=('There are no users configured to receive bag info update emails.'))
+        return
+
+    LOGGER.info(msg=('Sending "bag ready" email to: %s' % list(recipients)))
+    recipient_emails = list(map(str, recipients.values_list('email', flat=True) ))
     try:
+        msg_html = render_to_string('recordtransfer/email/bag_submit_success.html', context={
+            'user': user_submitted,
+            'form_data': form_data,
+        })
+        msg_plain = strip_tags(msg_html)
+
         send_mail(
-            subject='New Bag Ready For Review',
-            message=message,
+            subject='New Bag Ready for Review',
+            message=msg_plain,
             from_email='donotreply@127.0.0.1:8000',
-            recipient_list=ARCHIVIST_EMAILS,
+            recipient_list=recipient_emails,
+            html_message=msg_html,
             fail_silently=False,
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending emails to archivist(s): %s' % str(exc)))
+        LOGGER.warning(msg=('Error when sending emails to users: %s' % str(exc)))
 
 
 @django_rq.job
-def send_bag_creation_failure(form_data: dict, user_submitted):
-    LOGGER.info(msg=('Sending "bag failure" email to %s' % ARCHIVIST_EMAILS))
-    message = (f'Bag creation failed for the file submitted by user {user_submitted.username}')
+def send_bag_creation_failure(form_data: dict, user_submitted: User):
+    recipients = User.objects.filter(gets_bag_email_updates=True)
+    if not recipients:
+        LOGGER.info(msg=('There are no users configured to receive bag failure update emails.'))
+        return
+
+    LOGGER.info(msg=('Sending "bag failure" email to: %s' % list(recipients)))
+    recipient_emails = list(map(str, recipients.values_list('email', flat=True) ))
     try:
+        msg_html = render_to_string('recordtransfer/email/bag_submit_success.html', context={
+            'user': user_submitted,
+            'form_data': form_data,
+        })
+        msg_plain = strip_tags(msg_html)
+
         send_mail(
             subject='Bag Creation Failed',
-            message=message,
+            message=msg_plain,
             from_email='donotreply@127.0.0.1:8000',
-            recipient_list=ARCHIVIST_EMAILS,
+            recipient_list=recipient_emails,
+            html_message=msg_html,
             fail_silently=False,
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending emails to archivist(s): %s' % str(exc)))
+        LOGGER.warning(msg=('Error when sending emails to users: %s' % str(exc)))
+
 
 @django_rq.job
 def clean_undeleted_temp_files(hours=12):
