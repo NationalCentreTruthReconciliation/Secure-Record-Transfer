@@ -190,12 +190,18 @@ USE_L10N = True
 
 USE_TZ = True
 
+# django-countries configuration
+# https://github.com/SmileyChris/django-countries
+
 COUNTRIES_FIRST = [
     'CA',
     'US',
 ]
 
+COUNTRIES_FLAG_URL = 'flags/{code}.gif'
+
 # Static files (CSS, JavaScript, Images)
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'
