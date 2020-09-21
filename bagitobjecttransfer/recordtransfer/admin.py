@@ -5,9 +5,33 @@ from pathlib import Path
 
 from django.contrib import admin
 from django.http import HttpResponse
+from django.contrib.auth.admin import UserAdmin
 
-from recordtransfer.settings import BAG_STORAGE_FOLDER, REPORT_FOLDER
-from recordtransfer.models import Bag, UploadSession, UploadedFile
+from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.models import Bag, UploadSession, UploadedFile, User
+
+
+class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        *UserAdmin.fieldsets, # original form fieldsets, expanded
+        (                     # New fieldset added on to the bottom
+            'Email Updates',  # Group heading of your choice. set to None for a blank space
+            {
+                'fields': (
+                    'gets_bag_email_updates',
+                ),
+            },
+        ),
+    )
+
+
+class UploadedFileAdmin(admin.ModelAdmin):
+    actions = ['clean_temp_files']
+
+    def clean_temp_files(self, request, queryset):
+        for uploaded_file in queryset:
+            uploaded_file.delete_file()
+    clean_temp_files.short_description = 'Remove temp files on filesystem'
 
 
 class BagAdmin(admin.ModelAdmin):
@@ -20,11 +44,10 @@ class BagAdmin(admin.ModelAdmin):
 
     def export_selected_bags(self, request, queryset):
         bag_folder = Path(BAG_STORAGE_FOLDER)
-        report_folder = Path(REPORT_FOLDER)
 
         csv_file = StringIO()
         writer = csv.writer(csv_file)
-        writer.writerow(["Username", "Bagging Date", "Bag Location", "Report Location"])
+        writer.writerow(["Username", "Bagging Date", "Bag Location", "Review Status"])
 
         for bag in queryset:
             writer.writerow(
@@ -32,7 +55,7 @@ class BagAdmin(admin.ModelAdmin):
                     bag.user.username,
                     bag.bagging_date,
                     str(bag_folder / bag.bag_name),
-                    str(report_folder / bag.report_name),
+                    bag.get_review_status_display(),
                 ]
             )
 
@@ -78,5 +101,6 @@ class BagAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Bag, BagAdmin)
-admin.site.register(UploadedFile)
+admin.site.register(UploadedFile, UploadedFileAdmin)
+admin.site.register(User, CustomUserAdmin)
 admin.site.register(UploadSession)

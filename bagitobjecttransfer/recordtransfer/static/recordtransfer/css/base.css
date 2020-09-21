@@ -106,6 +106,14 @@ body {
     margin-top: 25px;
 }
 
+
+/**
+ * Fix dropzone error tooltip from obscuring the "Remove file" link
+ */
+.dropzone .dz-preview .dz-error-message {
+    top: 150px !important;
+}
+
 /**
  * Responsive design section
  */

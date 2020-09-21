@@ -1,12 +1,16 @@
-''' recordtransfer application specific settings '''
+''' Application-specific settings for the recordtransfer app '''
+import platform
 
-# The folder where bags will be stored
-BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+# The location where bags will be stored
 
-# The folder where reports will be output
-REPORT_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags/Reports'
+if platform.system() == 'Windows':
+    BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+else:
+    BAG_STORAGE_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR/Bags'
+
 
 # Default data to inject into metadata, after the user enters their own metadata
+
 DEFAULT_DATA = {
     'section_1': {
         'repository': 'NCTR',
@@ -17,6 +21,7 @@ DEFAULT_DATA = {
     },
     'section_3': {
         'extent_statement_type': 'Extent received',
+        'quantity_and_type_of_units': 'N/A',
         'extent_statement_note': 'Files counted automatically by application',
     },
     'section_4': {
@@ -38,4 +43,58 @@ DEFAULT_DATA = {
         'action_agent': 'N/A',
         'action_note': 'Created with NCTR Record Transfer Portal',
     }
+}
+
+
+# File types allowed to be uploaded to the backend. Do not use periods before the extension, and
+# ensure that all file extensions are lowercase.
+
+ACCEPTED_FILE_FORMATS = {
+    'Archive': [
+        'zip',
+    ],
+    'Document': [
+        'doc',
+        'docx',
+        'odt',
+        'pdf',
+        'rtf',
+        'txt',
+        'html',
+    ],
+    'Presentation': [
+        'ppt',
+        'pptx',
+        'pps',
+        'ppsx',
+    ],
+    'Spreadsheet': [
+        'xls',
+        'xlsx',
+        'csv',
+    ],
+    'Image': [
+        'jpg',
+        'jpeg',
+        'gif',
+        'png',
+    ],
+    'Video': [
+        'avi',
+        'mkv',
+        'mov',
+        'mp4',
+        'mpeg4',
+        'mpg',
+        'wmv',
+    ],
+    'Audio': [
+        'acc',
+        'flac',
+        'm4a',
+        'mp3',
+        'ogg',
+        'wav',
+        'wma',
+    ],
 }

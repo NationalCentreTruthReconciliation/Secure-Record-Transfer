@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'bptd+u&#4=rl^h^^_a$+zi8+(+@fur%^ge^y0_$fd%k7o)x+(r'
 
@@ -28,7 +29,6 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
-
 
 # Application definition
 
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_countries',
     'formtools',
+    'django_rq',
     'recordtransfer.apps.RecordTransferConfig',
 ]
 
@@ -88,6 +89,32 @@ DATABASES = {
 }
 
 
+# Redis-based Queue
+# https://github.com/rq/django-rq
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': '',
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
+
+
+# Emailing
+
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.yourserver.com'
+EMAIL_PORT = '<your-server-port>'
+EMAIL_HOST_USER = 'your@djangoapp.com'
+EMAIL_HOST_PASSWORD = 'your-email account-password'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -107,6 +134,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_REDIRECT_URL = '/'
+
+AUTH_USER_MODEL = 'recordtransfer.User'
 
 
 LOGGING = {
@@ -133,6 +162,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
+        },
+        'rq.worker': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
         }
     }
 }
@@ -156,12 +190,18 @@ USE_L10N = True
 
 USE_TZ = True
 
+# django-countries configuration
+# https://github.com/SmileyChris/django-countries
+
 COUNTRIES_FIRST = [
     'CA',
     'US',
 ]
 
+COUNTRIES_FLAG_URL = 'flags/{code}.gif'
+
 # Static files (CSS, JavaScript, Images)
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'

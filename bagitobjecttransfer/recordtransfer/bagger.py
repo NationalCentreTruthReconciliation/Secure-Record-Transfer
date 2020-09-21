@@ -17,11 +17,10 @@ LOGGER = logging.getLogger(__name__)
 
 def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_identifier=None,
                deletefiles=True):
-    """ Creates a bag from a list of file paths and two sets of metadata.
+    """ Creates a bag from a user upload session and any number of metadata fields.
 
     Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
-    files, data files, and manifest files. The bagit-py library is used, which has been
-    developed by the Library of Congress.
+    files, data files, and manifest files.
 
     Args:
         storage_folder (str): Path to folder to store the bag in.
@@ -45,7 +44,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
 
     if not missing_files:
-        bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'], sort_keys=False)
+        bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'])
         bag_valid = bag.is_valid()
         if bag_valid:
             LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
@@ -56,8 +55,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
             os.remove(copied_file)
         if new_bag_folder.exists():
             os.rmdir(new_bag_folder)
-        LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder,
-                         missing_files))
+        LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder, missing_files))
 
     bag_was_created = bool(not missing_files)
 

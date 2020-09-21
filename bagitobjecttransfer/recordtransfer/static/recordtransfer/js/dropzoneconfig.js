@@ -1,3 +1,9 @@
+// Controls for Dropzone form on transfer page.
+
+/**
+ * Get a cookie's value by its name.
+ * @param {*} name The name of the cookie to retrieve from the user
+ */
 function getCookie(name) {
     var cookieValue = null
     if (document.cookie && document.cookie !== '') {
@@ -14,7 +20,11 @@ function getCookie(name) {
     return cookieValue
 }
 
-
+/**
+ * Appends an error message to the page in the dropzone-errors element. Multiple error messages are
+ * allowed.
+ * @param {string} errorMessage The error message to show
+ */
 function addDropzoneError(errorMessage) {
     errorZone = document.getElementById('dropzone-errors')
     newError = document.createElement('div')
@@ -24,6 +34,9 @@ function addDropzoneError(errorMessage) {
 }
 
 
+/**
+ * Removes all errors shown in the dropzone-errors element.
+ */
 function clearDropzoneErrors() {
     errorZone = document.getElementById('dropzone-errors')
     while (errorZone.lastElementChild) {
@@ -31,20 +44,23 @@ function clearDropzoneErrors() {
     }
 }
 
-
 Dropzone.autoDiscover = false
 issueFiles = []
 sessionToken = ''
 
+// After page loads:
 $(() => {
     $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
         paramName: "upload_files",
         addRemoveLinks: true,
         autoProcessQueue: false,
+        autoQueue: true,
         uploadMultiple: true,
         parallelUploads: 2,
         maxFiles: 80,
+        maxFilesize: 1024,
+        timeout: 180000,
         headers: {
             "X-CSRFToken": getCookie("csrftoken")
         },
@@ -66,8 +82,14 @@ $(() => {
                 }
             });
 
+            // Triggers on non-200 status
             this.on("error", (file, response, xhr) => {
-                console.error(response.error)
+                if ("verboseError" in response) {
+                    addDropzoneError(response.verboseError)
+                }
+                else {
+                    addDropzoneError(response.error)
+                }
                 issueFiles.push(file.name)
                 document.getElementById("submit-form-btn").disabled = true
                 dropzoneClosure.options.autoProcessQueue = false
