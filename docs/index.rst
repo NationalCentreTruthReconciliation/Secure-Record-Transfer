@@ -7,26 +7,26 @@ NCTR Record Transfer Portal
    :maxdepth: 2
    :caption: Introduction:
 
-   modules/introduction/why.rst
-   modules/introduction/about.rst
-   modules/introduction/buildthedocs.rst
+   introduction/why.rst
+   introduction/about.rst
+   introduction/buildthedocs.rst
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Installing and Running the App:
 
-   modules/install/prerequisites.rst
+   installation/prerequisites.rst
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Code Documentation:
 
-   modules/code/models.rst
-   modules/code/views.rst
-   modules/code/settings.rst
-   modules/code/jobs.rst
+   code/models.rst
+   code/views.rst
+   code/settings.rst
+   code/jobs.rst
 
 
 Indices and tables
