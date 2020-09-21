@@ -8,8 +8,7 @@ NCTR Record Transfer Portal
    :caption: Introduction:
 
    introduction/why.rst
-   introduction/about.rst
-   introduction/buildthedocs.rst
+   introduction/what.rst
 
 
 .. toctree::
@@ -17,6 +16,7 @@ NCTR Record Transfer Portal
    :caption: Installing and Running the App:
 
    installation/prerequisites.rst
+   installation/buildthedocs.rst
 
 
 .. toctree::
