@@ -50,47 +50,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'bagitobjecttransfer.wsgi.application'
 
-<<<<<<< HEAD:bagitobjecttransfer/bagitobjecttransfer/settings.py
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-
-# Redis-based Queue
-# https://github.com/rq/django-rq
-
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': '',
-        'DEFAULT_TIMEOUT': 360,
-    },
-}
-
-
-# Emailing
-
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = 'smtp.yourserver.com'
-EMAIL_PORT = '<your-server-port>'
-EMAIL_HOST_USER = 'your@djangoapp.com'
-EMAIL_HOST_PASSWORD = 'your-email account-password'
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = False
-
-
-=======
->>>>>>> d733a098b3a4d2782720174f78a43e56b22e5859:bagitobjecttransfer/bagitobjecttransfer/settings/base.py
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -112,44 +71,6 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = '/'
 
 AUTH_USER_MODEL = 'recordtransfer.User'
-<<<<<<< HEAD:bagitobjecttransfer/bagitobjecttransfer/settings.py
-
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'standard': {
-            'format': '{levelname} {asctime} {module}: {message}',
-            'style': '{'
-        }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
-        },
-        'recordtransfer': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'rq.worker': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        }
-    }
-}
-
-=======
->>>>>>> d733a098b3a4d2782720174f78a43e56b22e5859:bagitobjecttransfer/bagitobjecttransfer/settings/base.py
 
 FILE_UPLOAD_HANDLERS = [
     'recordtransfer.persistentuploadhandler.PersistentFileUploadHandler'
