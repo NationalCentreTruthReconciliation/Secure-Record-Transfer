@@ -14,7 +14,7 @@ import sys
 import django
 
 sys.path.insert(0, os.path.abspath('../bagitobjecttransfer'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bagitobjecttransfer.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'bagitobjecttransfer.settings.development'
 django.setup()
 
 
