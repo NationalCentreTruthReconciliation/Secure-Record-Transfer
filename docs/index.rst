@@ -16,8 +16,15 @@ NCTR Record Transfer Portal
    :caption: Installing and Running the App:
 
    installation/prerequisites.rst
+   installation/running.rst
    installation/buildthedocs.rst
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Administration App:
+
+   admin/overview.rst
+   admin/bags.rst
 
 .. toctree::
    :maxdepth: 2
