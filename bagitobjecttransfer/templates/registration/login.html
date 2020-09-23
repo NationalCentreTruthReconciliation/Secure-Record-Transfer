@@ -20,10 +20,10 @@
             {% for field in form %}
                 {% if field.errors %}
                     {% for error in field.errors %}
-                    <div class="flex-error">
-                        <label></label>
-                        {{ error }}
-                    </div>
+                        <div class="flex-error">
+                            <label></label>
+                            <div class="field-error">{{ error }}</div>
+                        </div>
                     {% endfor %}
                 {% endif %}
                 <div class="flex-item">
