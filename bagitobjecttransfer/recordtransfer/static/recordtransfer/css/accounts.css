@@ -1,4 +1,4 @@
-.login-container {
+.account-form-container {
     margin-top: 30px;
     padding: 30px 30px 30px 30px;
     border-radius: 4px;
@@ -15,9 +15,13 @@
     margin-bottom: 20px;
 }
 
-.login-error {
-    color: red;
+.account-error,
+.account-info {
     text-align: center;
+}
+
+.account-error {
+    color: red;
 }
 
 #forgot-password {
@@ -25,7 +29,7 @@
 }
 
 @media(min-width: 1000px) {
-    .login-container {
+    .account-form-container {
         width: 50%;
     }
 }
