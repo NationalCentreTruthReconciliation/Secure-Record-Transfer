@@ -1,0 +1,50 @@
+{% extends 'recordtransfer/base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count %}
+        Transfer Step {{ currentstep }} (of {{ totalsteps }})
+    {% endblocktrans %}
+{% endblock %}
+
+{% block content %}
+    <div class="form-title title-text">
+        {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
+            {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
+        {% endblocktrans %}
+    </div>
+    {% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {{ wizard.form.management_form }}
+
+        {% block formfields %}
+        {# !!! Add the form fields here !!! #}
+        {% endblock %}
+
+        <div class="{% block buttonarrayclass %}{% endblock %}">
+            <label></label>
+            <div class="button-array">
+                {% if wizard.steps.prev %}
+                    {# Without formnovalidate, you can't go to the previous step without valid data #}
+                    {# Which kind of defeats the purpose of going back to the previous step! #}
+                    <button formnovalidate="formnovalidate"
+                            name="wizard_goto_step"
+                            value="{{ wizard.steps.prev }}"
+                            class="blue-button margin-right-20px">
+                        {% trans "Previous Step" %}
+                    </button>
+                {% endif %}
+                <button type="submit" class="blue-button">
+                    {% if wizard.steps.step1 == wizard.steps.count %}
+                        {% trans "Submit" %}
+                    {% else%}
+                        {% trans "Next Step" %}
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

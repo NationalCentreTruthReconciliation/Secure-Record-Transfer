@@ -1,19 +1,9 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends 'recordtransfer/basetransferform.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}
-Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
-{% endblock %}
-
-{% block content %}
-<div class="form-title title-text">
-    {{ form_title }} - Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
-</div>
-{% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
-
-<form action="" method="post">
-    {% csrf_token %}
-    {{ wizard.management_form }}
+{% block buttonarrayclass %}flex-item{% endblock %}
+{% block formfields %}
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
@@ -34,27 +24,4 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
             {% endif %}
         </div>
     {% endfor %}
-    <div class="flex-item">
-        <label for="nothing"></label>
-        <div class="button-array">
-            {% if wizard.steps.prev %}
-                {# Without formnovalidate, you can't go to the previous step without valid data #}
-                {# Which kind of defeats the purpose of going back to the previous step! #}
-                <button formnovalidate="formnovalidate"
-                        name="wizard_goto_step"
-                        value="{{ wizard.steps.prev }}"
-                        class="blue-button margin-right-20px">
-                    Previous Step
-                </button>
-            {% endif %}
-            <button type="submit" class="blue-button">
-                {% if wizard.steps.step1 == wizard.steps.count %}
-                    Submit
-                {% else%}
-                    Next Step
-                {% endif %}
-            </button>
-        </div>
-    </div>
-</form>
 {% endblock %}

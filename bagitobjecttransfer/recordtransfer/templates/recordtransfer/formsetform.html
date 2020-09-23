@@ -1,21 +1,9 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends 'recordtransfer/basetransferform.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}
-Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
-{% endblock %}
-
-{% block content %}
-<div class="form-title title-text">
-    {{ form_title }} - Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
-</div>
-{% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
-
-<form action="" method="post">
-    {% csrf_token %}
-    {# Wizard management form and formset management form are both required #}
-    {{ wizard.management_form }}
-    {{ wizard.form.management_form }}
+{% block buttonarrayclass %}flex-item{% endblock %}
+{% block formfields %}
     {% for form in wizard.form.forms %}
         {# Row to duplicate to add more forms #}
         <div class="form-row">
@@ -44,32 +32,9 @@ Transfer Step {{ wizard.steps.step1 }} (of {{ wizard.steps.count }})
     <div class="flex-item">
         <label></label>
         <div class="button-array">
-            <button class="green-button less-padding add-form-row">+ More</button>
-            <button disabled class="red-button less-padding remove-form-row">- Remove</button>
+            <button class="green-button less-padding add-form-row">{% trans "+ More" %}</button>
+            <button disabled class="red-button less-padding remove-form-row">{% trans "- Remove" %}</button>
         </div>
     </div>
     <br>
-    <div class="flex-item">
-        <label></label>
-        <div class="button-array">
-            {% if wizard.steps.prev %}
-                {# Without formnovalidate, you can't go to the previous step without valid data #}
-                {# Which kind of defeats the purpose of going back to the previous step! #}
-                <button formnovalidate="formnovalidate"
-                        name="wizard_goto_step"
-                        value="{{ wizard.steps.prev }}"
-                        class="blue-button margin-right-20px">
-                    Previous Step
-                </button>
-            {% endif %}
-            <button type="submit" class="blue-button">
-                {% if wizard.steps.step1 == wizard.steps.count %}
-                    Submit
-                {% else%}
-                    Next Step
-                {% endif %}
-            </button>
-        </div>
-    </div>
-</form>
 {% endblock %}
