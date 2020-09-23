@@ -36,6 +36,13 @@ facilitates the process of using sending records with metadata to the NCTR's arc
    code/settings.rst
    code/jobs.rst
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Customization
+
+   customization/cosmetic.rst
+   customization/translation.rst
+
 
 Indices and tables
 ==================
