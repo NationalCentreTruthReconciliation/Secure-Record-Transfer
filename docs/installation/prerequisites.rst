@@ -11,9 +11,10 @@ Git
 ***
 
 If you are planning on doing any sort of development on this application, it is highly recommended
-to install the git command line tool. If you do not want to install git, you may download the source
-code rather than cloning to repository. The instruction for that are in the :ref:`Without git clone`
-section.
+to install the git command line tool. To install Git, use this guide:
+https://git-scm.com/download/linux. If you do not want to install git, you may download the source
+code rather than cloning the repository. The instructions for that are in the
+:ref:`Without git clone` section below.
 
 ***********
 Source Code
@@ -24,32 +25,40 @@ You may get the source code for this app using the git command line tool or with
 Using git clone
 ###############
 
-Using the git command line, cd to the directory you want the repo in, and
+Using your favourite command shell, :code:`cd` to the directory you want the source code repository
+to download to. Run the following command to clone the code into your current directory:
+
+.. code-block:: console
+
+    $ git clone https://github.com/danloveg/NCTR-Bagit-Record-Transfer.git
 
 Without git clone
 #################
 
-Without git clone!
+In your favourite browser, go to https://github.com/danloveg/NCTR-Bagit-Record-Transfer. Click the
+**Code** button and select **Download ZIP**. Choose whichever folder you want the code to go into.
+Extract the ZIP once it has downloaded.
 
 ******
 Python
 ******
 
-First and foremost, you will need Python. Install Python 3.6.x using this guide:
+Since the app is built using Django, a Python-based web framework, you will need to install Python
+to run the app. Install Python 3.6.x using this guide:
 https://docs.python-guide.org/starting/install3/linux/.
 
-Once you are sure Python 3.6 is installed, navigate to the top level of the cloned repository using
-your favourite command shell.
-
-First, create a virtual environment to run the app out of. Using a virtual environment ensures that
-all of your python packages are the correct version. To create the environment, use:
+Once you are sure Python 3.6 is installed, navigate to the top level of the cloned or downloaded
+repository using your favourite command shell. You will need to create a virtual environment to run
+the app out of. Using a virtual environment ensures that all of your python packages are the correct
+version. To create a new environment, use:
 
 .. code-block:: console
 
-    $ python -m venv env/
+    $ python3 -m venv env/
 
-Once your environment is created, make sure it is active. You will know if its active if your
-command prompt now starts with **(env)**. The following activates the environment if it not already:
+Once your environment is created, make sure it is active. You can tell if the environment is active
+if your command prompt now starts with **(env)**. The following activates the environment if it is
+not already:
 
 .. code-block:: console
 
@@ -60,7 +69,7 @@ requirements.txt file at the top level of the repository. To do so:
 
 .. code-block:: console
 
-    $ python -m pip install -r requirements.txt
+    $ python3 -m pip install -r requirements.txt
 
 This will install every Python package you could need, including Django.
 
@@ -95,5 +104,5 @@ Database
 ********
 
 We recommend using MySQL as a database for production, but for development, SQLite works fine. You
-can find installation info for MySQL here https://dev.mysql.com/doc/refman/8.0/en/installing.html.
+can find installation info for MySQL here: https://dev.mysql.com/doc/refman/8.0/en/installing.html.
 Note that Django only supports MySQL 5.6 and up, so make sure you install at least version 5.6.

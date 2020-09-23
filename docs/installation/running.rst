@@ -5,12 +5,28 @@ The following two sections indicate how you can get the app up and running in ei
 Development/Debug environment, or in a Production environment. Running the production app can get
 very involved, so be prepared to read.
 
+In both cases, ensure you have followed the prerequisites section to make sure everything is
+installed and that you have a virtual Python environment ready to go.
+
 *******************
 Development (Local)
 *******************
 
-To run the app locally, we can use the development server bundled with Django. But first, we have to
-start up Redis locally and create a Redis worker. To start up Redis:
+To run the app locally, we can use the development server bundled with Django, but there is a small
+amount of setup to do first.
+
+First, :code:`cd` to the app directory. You should be in the same directory as the :code:`README.md`
+file. Then, :code:`cd` into the :code:`bagitobjecttransfer` folder. Create a new SQLite database
+using the manage script. Then create a new superuser, following the prompts. Make sure you remember
+the username and password you use.
+
+.. code-block:: console
+
+    $ python3 manage.py migrate
+    $ python3 manage.py createsuperuser
+
+Now that's set up, you can spin up Redis. To do so, change to whichever directory contains your
+Redis configuration file, and run:
 
 .. code-block:: console
 
@@ -26,34 +42,28 @@ for example the ID is 1, run this command to stop the server:
 
     $ kill %1
 
-Once Redis is running, we can create a worker that will attach to that Redis server. From the top of
-the repository, :code:`cd` into the bagitobjecttransfer folder:
-
-.. code-block:: console
-
-    $ cd bagitobjecttransfer
-
-Then, use the manage script to create one worker:
+Once Redis is running, we can create a worker that will attach to that Redis server. :code:`cd` back
+into the :code:`bagitobjecttransfer` folder and use the manage script to create one worker:
 
 .. code-block:: console
 
     $ python3 manage.py rqworker default &
 
-To stop the worker at any point, use the method above with the :code:`jobs` command.
-
-Set environment SECRET_KEY:
+To stop the worker at any point, use the method above with the :code:`jobs` command. Once the worker
+is started up and running in the background, you can feel free to run the development server:
 
 .. code-block:: console
 
-    $ SECRET=$(python3 -c "from django.management.utils import get_random_secret_key as gsk; print(gsk());")
-    $ echo -e "SECRET_KEY=${SECRET}\n" > .env
+    $ python3 manage.py runserver
 
+You should now be able to access the app at http://127.0.0.1:8000 or https://localhost:8000 in your
+favourite browser.
 
 **********
 Production
 **********
 
-Under construction
+TBD.
 
 .. code-block::
 
@@ -67,3 +77,9 @@ Under construction
     EMAIL_PORT=
     EMAIL_HOST_USER=
     EMAIL_HOST_PASSWORD=
+
+To get a new secret key, run the following command:
+
+.. code-block::
+
+    python3 -c "from django.core.management.utils import get_random_secret_key as gsk; print(gsk())"
