@@ -2,9 +2,8 @@
     margin-bottom: 25px;
 }
 
-.flex-error,
-.flex-item {
-    color: #333333;
+.flex-item,
+.flex-error {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -12,7 +11,12 @@
 }
 
 .flex-item {
+    color: #333333;
     margin-bottom: 15px;
+}
+
+.flex-error {
+    color: red;
 }
 
 .flex-full-width-error,
