@@ -12,6 +12,7 @@
 import os
 import sys
 import django
+import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../bagitobjecttransfer'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bagitobjecttransfer.settings.development'
@@ -34,6 +35,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosectionlabel',
+    'sphinx_rtd_theme',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,7 +53,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 
-html_theme = 'sphinxdoc'
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
