@@ -1,11 +1,12 @@
 {% extends 'recordtransfer/base.html' %}
+{% load i18n %}
 
-{% block title %}Transfer Complete!{% endblock %}
+{% block title %}{% trans "Transfer Complete!" %}{% endblock %}
 
 {% block content %}
-<div class="title-text">Thank you for your transfer.</div>
+<div class="title-text">{% trans "Thank you for your transfer." %}</div>
 <br>
-<a href="{% url 'recordtransfer:transfer' %}">Start another Transfer</a>
+<a href="{% url 'recordtransfer:transfer' %}">{% trans "Start another Transfer" %}</a>
 <br>
-<a href="{% url 'recordtransfer:index' %}">Home</a>
+<a href="{% url 'recordtransfer:index' %}">{% trans "Home" %}</a>
 {% endblock %}

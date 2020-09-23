@@ -1,7 +1,9 @@
 NCTR Record Transfer Portal
 ===========================
 
-**Welcome to NCTR Bagit Record Transfer's documentation!**
+Welcome to NCTR Bagit Record Transfer's documentation! This he documentation for the NCTR's
+custom built BagIt/CAAIS record transfer portal built with Django. The app facilitates the process
+of sending records with metadata to the NCTR's archives.
 
 .. toctree::
    :maxdepth: 2
@@ -33,6 +35,13 @@ NCTR Record Transfer Portal
    code/views.rst
    code/settings.rst
    code/jobs.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Customization
+
+   customization/cosmetic.rst
+   customization/translation.rst
 
 
 Indices and tables

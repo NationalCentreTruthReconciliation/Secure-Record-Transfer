@@ -2,8 +2,8 @@
     margin-bottom: 25px;
 }
 
-.flex-error,
-.flex-item {
+.flex-item,
+.flex-error {
     color: #333333;
     width: 100%;
     display: flex;
@@ -55,7 +55,11 @@
 
 .flex-item > textarea {
     resize: none;
-    border-radius: 3px;
+}
+
+.flex-error > div {
+    flex: 1 1 0;
+    max-width: 600px;
 }
 
 .button-array {
@@ -104,13 +108,15 @@
 }
 
 @media (max-width: 600px) {
-    .flex-item > label {
+    .flex-item > label,
+    .flex-error > label {
         flex: 1 1 100%;
         text-align: left;
         margin-bottom: 5px;
     }
 
-    .flex-item > input {
+    .flex-item > input,
+    .flex-error > div {
         flex: 1 1 100%;
     }
 }

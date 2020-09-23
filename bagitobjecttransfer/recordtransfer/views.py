@@ -4,6 +4,7 @@ from pathlib import Path
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.utils.translation import gettext
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.models import UploadedFile, UploadSession
@@ -47,31 +48,31 @@ class TransferFormWizard(SessionWizardView):
     _TEMPLATES = {
         "sourceinfo": {
             "templateref": "recordtransfer/standardform.html",
-            "formtitle": "Source Information",
+            "formtitle": gettext("Source Information"),
         },
         "contactinfo": {
             "templateref": "recordtransfer/standardform.html",
-            "formtitle": "Contact Information",
+            "formtitle": gettext("Contact Information"),
         },
         "recorddescription": {
             "templateref": "recordtransfer/standardform.html",
-            "formtitle": "Record Description",
+            "formtitle": gettext("Record Description"),
         },
         "rights": {
             "templateref": "recordtransfer/formsetform.html",
-            "formtitle": "Record Rights",
+            "formtitle": gettext("Record Rights"),
         },
         "otheridentifiers": {
             "templateref": "recordtransfer/formsetform.html",
-            "formtitle": "Other Identifiers",
-            "infomessage": (
+            "formtitle": gettext("Other Identifiers"),
+            "infomessage": gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             )
         },
         "uploadfiles": {
             "templateref": "recordtransfer/dropzoneform.html",
-            "formtitle": "Upload Files",
+            "formtitle": gettext("Upload Files"),
         },
     }
 
@@ -128,15 +129,18 @@ def uploadfiles(request):
         and a more verbose error is returned in 'verboseError'.
     '''
     if not request.method == 'POST':
+        terse_error = gettext('Files can only be uploaded using POST.')
+        verbose_error =  gettext('Attempted to uploaded files using the {method} HTTP method, but '
+                                 'only POST is allowed.') % {'method': request.method}
         return JsonResponse({
-            'error': 'Files can only be uploaded using POST.',
-            'verboseError': (f'Files were attempted to be uploaded using the {request.method} HTTP '
-                             'method, but only POST is allowed.'),
+            'error': terse_error,
+            'verboseError': verbose_error,
         }, status=403)
+
     if not request.FILES:
         return JsonResponse({
-            'error': 'No files were uploaded',
-            'verboseError': 'No files were uploaded',
+            'error': gettext('No files were uploaded'),
+            'verboseError': gettext('No files were uploaded'),
         }, status=403)
 
     try:
@@ -159,9 +163,10 @@ def uploadfiles(request):
                     break
 
             if not file_accepted:
-                terse_error = f'{temp_file_extension} files are not allowed'
-                verbose_error = (f'{temp_file.name} file has an unaccepted format '
-                                 f'({temp_file_extension}).')
+                terse_error = gettext('{extension} files are not allowed') % \
+                    {'extension': temp_file_extension}
+                verbose_error = gettext('{name} file has an unaccepted format ({extension}).') % \
+                    {'extension': temp_file_extension, 'name': temp_file.name}
                 return JsonResponse({
                         'error': terse_error,
                         'verboseError': verbose_error,
@@ -175,7 +180,8 @@ def uploadfiles(request):
 
     except Exception as exc:
         LOGGER.error(msg=('Uncaught exception in upload_file: %s' % str(exc)))
+        exc_msg = {'exc': str(exc)}
         return JsonResponse({
-            'error': f'Server Error:\n{str(exc)}',
-            'verboseError': f'The following exception was not caught:\n{str(exc)}',
+            'error': gettext('Server Error:\n{exc}') % exc_msg,
+            'verboseError': gettext('The following exception was not caught:\n{exc}') % exc_msg,
         }, status=500)

@@ -5,8 +5,8 @@ The following two sections indicate how you can get the app up and running in ei
 Development/Debug environment, or in a Production environment. Running the production app can get
 very involved, so be prepared to read.
 
-In both cases, ensure you have followed the prerequisites section to make sure everything is
-installed and that you have a virtual Python environment ready to go.
+In both cases, ensure you have followed the :ref:`Pre-Requisites to running` section to make sure
+everything is installed and that you have a virtual Python environment ready to go.
 
 *******************
 Development (Local)
@@ -32,8 +32,8 @@ Redis configuration file, and run:
 
     $ redis-server redis.conf &
 
-If you do not have a redis configuration file, you can visit this link to download a sample config:
-https://download.redis.io/redis-stable/redis.conf.
+If you do not have a redis configuration file, you can visit `this link
+<https://download.redis.io/redis-stable/redis.conf>`_ to download a sample config.
 
 To stop the server at any point, use the :code:`jobs` command to find the ID of the Redis job. If
 for example the ID is 1, run this command to stop the server:

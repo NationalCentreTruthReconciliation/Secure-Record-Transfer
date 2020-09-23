@@ -11,9 +11,9 @@ Git
 ***
 
 If you are planning on doing any sort of development on this application, it is highly recommended
-to install the git command line tool. To install Git, use this guide:
-https://git-scm.com/download/linux. If you do not want to install git, you may download the source
-code rather than cloning the repository. The instructions for that are in the
+to install the git command line tool. To install Git, follow `these instructions
+<https://git-scm.com/download/linux>`_. If you do not want to install git, you may download the
+source code rather than cloning the repository. The instructions for that are in the
 :ref:`Without git clone` section below.
 
 ***********
@@ -44,8 +44,8 @@ Python
 ******
 
 Since the app is built using Django, a Python-based web framework, you will need to install Python
-to run the app. Install Python 3.6.x using this guide:
-https://docs.python-guide.org/starting/install3/linux/.
+to run the app. Install Python 3.6.x using `this guide
+<https://docs.python-guide.org/starting/install3/linux/>`_.
 
 Once you are sure Python 3.6 is installed, navigate to the top level of the cloned or downloaded
 repository using your favourite command shell. You will need to create a virtual environment to run
@@ -81,8 +81,8 @@ This app uses a Redis server for logging background task information, along with
 broker to the Redis server. Provided you installed all of the required packages in the
 requirements.txt file, you will already have Django-RQ installed in your virtual environment. All
 that's left to do is install Redis itself. You can download redis from the download page on the
-Redis website here https://redis.io/download. Note that Django-RQ only supports Redis version 3.0
-and up, so make sure you install at least version 3.0.
+`Redis website <https://redis.io/download>`_. Note that Django-RQ only supports Redis version
+3.0 and up, so make sure you install at least version 3.0.
 
 *****
 Nginx
@@ -104,5 +104,6 @@ Database
 ********
 
 We recommend using MySQL as a database for production, but for development, SQLite works fine. You
-can find installation info for MySQL here: https://dev.mysql.com/doc/refman/8.0/en/installing.html.
+can find installation info for MySQL on the `MySQL website
+<https://dev.mysql.com/doc/refman/8.0/en/installing.html>`_.
 Note that Django only supports MySQL 5.6 and up, so make sure you install at least version 5.6.
