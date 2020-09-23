@@ -5,15 +5,14 @@ NCTR Record Transfer Portal
 
 .. toctree::
    :maxdepth: 2
-   :caption: Introduction:
+   :caption: Introduction
 
    introduction/why.rst
    introduction/what.rst
 
-
 .. toctree::
    :maxdepth: 2
-   :caption: Installing and Running the App:
+   :caption: Installing and Running the App
 
    installation/prerequisites.rst
    installation/running.rst
@@ -21,14 +20,14 @@ NCTR Record Transfer Portal
 
 .. toctree::
    :maxdepth: 2
-   :caption: Administration App:
+   :caption: Administration App
 
    admin/overview.rst
    admin/bags.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Code Documentation:
+   :caption: Code Documentation
 
    code/models.rst
    code/views.rst
