@@ -15,7 +15,7 @@
     </div>
     {% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
 
-    <form action="" method="post">
+    <form id="transfer-form" action="" method="post">
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ wizard.form.management_form }}
@@ -37,7 +37,7 @@
                         {% trans "Previous Step" %}
                     </button>
                 {% endif %}
-                <button type="submit" class="blue-button">
+                <button {% block submitbuttonid %}{% endblock %} type="submit" class="blue-button">
                     {% if wizard.steps.step1 == wizard.steps.count %}
                         {% trans "Submit" %}
                     {% else%}

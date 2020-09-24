@@ -3,6 +3,7 @@
 {% load i18n %}
 
 {% block buttonarrayclass %}flex-full-width-item{% endblock %}
+{% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block formfields %}
     {% for field in form %}
         {{ field }}
