@@ -49,18 +49,33 @@ class TransferFormWizard(SessionWizardView):
         "sourceinfo": {
             "templateref": "recordtransfer/standardform.html",
             "formtitle": gettext("Source Information"),
+            "infomessage": gettext(
+                "Enter the info for the source of the records"
+            )
         },
         "contactinfo": {
             "templateref": "recordtransfer/standardform.html",
             "formtitle": gettext("Contact Information"),
+            "infomessage": gettext(
+                "Enter your contact information in case you need to be contacted by one of our "
+                "archivists regarding your transfer"
+            )
         },
         "recorddescription": {
             "templateref": "recordtransfer/standardform.html",
             "formtitle": gettext("Record Description"),
+            "infomessage": gettext(
+                "Provide a brief description of the records you're transferring"
+            )
         },
         "rights": {
             "templateref": "recordtransfer/formsetform.html",
             "formtitle": gettext("Record Rights"),
+            "infomessage": gettext(
+                "Enter any associated rights that apply to the records. They can be copyright, "
+                "intellectual property, cultural rights, etc. Add as many rights sections as you "
+                "like using the + More button"
+            )
         },
         "otheridentifiers": {
             "templateref": "recordtransfer/formsetform.html",
@@ -73,6 +88,9 @@ class TransferFormWizard(SessionWizardView):
         "uploadfiles": {
             "templateref": "recordtransfer/dropzoneform.html",
             "formtitle": gettext("Upload Files"),
+            "infomessage": gettext(
+                "Upload the files you intend to transfer to the NCTR"
+            )
         },
     }
 
