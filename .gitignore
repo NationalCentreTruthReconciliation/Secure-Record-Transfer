@@ -9,6 +9,9 @@
 # Icon must end with two \r
 Icon
 
+# Custom redis folder where I put logs, database, etc. for development
+redis/
+
 # Thumbnails
 ._*
 
