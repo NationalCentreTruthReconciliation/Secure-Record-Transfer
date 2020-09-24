@@ -1,22 +1,22 @@
 import logging
 
-from recordtransfer.settings import ACCEPTED_FILE_FORMATS
-
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get_human_readable_file_count(file_names: list):
+def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     ''' Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
     English) the number of files in each group.
 
     Args:
         file_names (list): A list of file paths or names with extension intact
+        accepted_file_groups (dict): A dictionary of file group names mapping to a list of \
+        lowercase file extensions without periods.
 
     Returns:
         (str): A string reporting the number of files in each group
     '''
-    counted_types = count_file_types(file_names)
+    counted_types = count_file_types(file_names, accepted_file_groups)
     if not counted_types:
         return 'No file types could be identified'
 
@@ -41,15 +41,17 @@ def get_human_readable_file_count(file_names: list):
     return string_statement
 
 
-def count_file_types(file_names: list):
-    ''' Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
+def count_file_types(file_names: list, accepted_file_groups: dict):
+    ''' Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS \
     dictionary.
 
-    If a file's extension does not match any of the accepted file extensions, it is ignored. For
+    If a file's extension does not match any of the accepted file extensions, it is ignored. For \
     that reason, it is important to ensure that the files are accepted before trying to count them.
 
     Args:
         file_names (list): A list of file paths or names with extension intact
+        accepted_file_groups (dict): A dictionary of file group names mapping to a list of \
+        lowercase file extensions without periods.
 
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group. For example:
@@ -75,7 +77,7 @@ def count_file_types(file_names: list):
 
     # Tabulate number of files in each file type group
     del_keys = []
-    for file_group_name, extensions_for_file_group in ACCEPTED_FILE_FORMATS.items():
+    for file_group_name, extensions_for_file_group in accepted_file_groups.items():
         for counted_extension_name, num_counted in counted_extensions.items():
             if counted_extension_name in extensions_for_file_group:
                 if file_group_name not in counted_extensions_per_group:

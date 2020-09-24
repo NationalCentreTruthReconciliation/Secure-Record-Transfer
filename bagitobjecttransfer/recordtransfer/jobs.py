@@ -13,7 +13,7 @@ from recordtransfer.bagger import create_bag
 from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
 from recordtransfer.filecounter import get_human_readable_file_count
 from recordtransfer.models import Bag, UploadedFile, User
-from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, ACCEPTED_FILE_FORMATS
 
 
 LOGGER = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         old_copy_removed=False
     ).values_list('name', flat=True)))
 
-    form_data['file_count_message'] = get_human_readable_file_count(file_names)
+    form_data['file_count_message'] = get_human_readable_file_count(file_names, ACCEPTED_FILE_FORMATS)
 
     tag_generator = BagitTags(form_data)
     tags = tag_generator.generate()
