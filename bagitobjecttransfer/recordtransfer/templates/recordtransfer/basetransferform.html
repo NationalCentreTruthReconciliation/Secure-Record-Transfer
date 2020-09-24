@@ -37,7 +37,7 @@
                         {% trans "Previous Step" %}
                     </button>
                 {% endif %}
-                <button {% block submitbuttonid %}{% endblock %} type="submit" class="blue-button">
+                <button {% block submitbuttonattributes %}{% endblock %} type="submit" class="blue-button">
                     {% if wizard.steps.step1 == wizard.steps.count %}
                         {% trans "Submit" %}
                     {% else%}
