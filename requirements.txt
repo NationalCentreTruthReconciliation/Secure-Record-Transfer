@@ -38,7 +38,6 @@ pylint==2.6.0
 pylint-django==2.3.0
 pylint-plugin-utils==0.6
 pyparsing==2.4.7
-pytest==6.0.1
 python-decouple==3.3
 pytz==2020.1
 redis==3.5.3
