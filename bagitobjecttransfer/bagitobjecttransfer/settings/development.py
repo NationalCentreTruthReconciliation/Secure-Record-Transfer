@@ -1,4 +1,5 @@
 # pylint: disable=wildcard-import
+from pathlib import Path
 from decouple import config
 from .base import *
 
@@ -47,6 +48,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
+        'rqworker_file': {
+            'class': 'logging.FileHandler',
+            'filename': Path(BASE_DIR).parent / 'redis' / 'rqworker.log'
+        }
     },
     'loggers': {
         'django': {
@@ -59,7 +64,7 @@ LOGGING = {
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['console'],
+            'handlers': ['rqworker_file'],
             'level': 'INFO',
             'propagate': True,
         }
