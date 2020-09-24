@@ -46,11 +46,12 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'standard'
+            'formatter': 'standard',
         },
         'rqworker_file': {
             'class': 'logging.FileHandler',
-            'filename': Path(BASE_DIR).parent / 'redis' / 'rqworker.log'
+            'filename': Path(BASE_DIR).parent / 'redis' / 'rqworker.log',
+            'formatter': 'standard',
         }
     },
     'loggers': {
