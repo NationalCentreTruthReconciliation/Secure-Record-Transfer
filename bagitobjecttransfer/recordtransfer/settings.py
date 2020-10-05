@@ -1,12 +1,13 @@
 ''' Application-specific settings for the recordtransfer app '''
 import platform
+from decouple import config
 
 # The location where bags will be stored
 
 if platform.system() == 'Windows':
-    BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR Code/Bags'
+    BAG_STORAGE_FOLDER = config('BAG_FOLDER_WINDOWS')
 else:
-    BAG_STORAGE_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR Code/Bags'
+    BAG_STORAGE_FOLDER = config('BAG_FOLDER_LINUX')
 
 
 # Default data to inject into metadata, after the user enters their own metadata
