@@ -1,5 +1,6 @@
 from django import forms
 from django_countries.fields import CountryField
+from django_countries.widgets import CountrySelectWidget
 from django.utils.translation import gettext
 
 
@@ -154,7 +155,13 @@ class ContactInfoForm(forms.Form):
         label=gettext('Postal / Zip code'),
     )
 
-    country = CountryField(blank_label=gettext('Select your Country')).formfield()
+    country = CountryField(blank_label=gettext('Select your Country')).formfield(
+        widget=CountrySelectWidget(
+            attrs={
+                'class': 'reduce-form-field-width',
+            }
+        )
+    )
 
 
 class RecordDescriptionForm(forms.Form):
