@@ -26,6 +26,7 @@ class SourceInfoForm(forms.Form):
             'placeholder': gettext('The kind of entity the source is (optional)')
         }),
         label=gettext('Source type'),
+        help_text=gettext('For example: Individual, Company, Corporation, etc.'),
     )
 
     source_role = forms.ChoiceField(
@@ -280,7 +281,7 @@ class RecordDescriptionForm(forms.Form):
 
 
 class RightsForm(forms.Form):
-    rights_type = forms.CharField(
+    rights_statement_type = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={
             'placeholder': gettext('Enter the type of rights governing the records'),
@@ -290,7 +291,7 @@ class RightsForm(forms.Form):
         label=gettext('Type of rights'),
     )
 
-    rights_statement = forms.CharField(
+    rights_statement_value = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={
             'placeholder': gettext('Nature and duration of permission or restrictions'),
@@ -300,7 +301,7 @@ class RightsForm(forms.Form):
         label=gettext('Description of rights'),
     )
 
-    rights_note = forms.CharField(
+    rights_statement_note = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
