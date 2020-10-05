@@ -3,13 +3,15 @@ from pathlib import Path
 
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.utils import timezone
 from django.utils.translation import gettext
+from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.jobs import bag_user_metadata_and_files
-from recordtransfer.settings import ACCEPTED_FILE_FORMATS
+from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
+from recordtransfer.filecounter import get_human_readable_file_count
 
 
 LOGGER = logging.getLogger(__name__)
@@ -114,6 +116,44 @@ class TransferFormWizard(SessionWizardView):
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
         return context
+
+    def get_all_cleaned_data(self):
+        cleaned_data = super().get_all_cleaned_data()
+
+        # Get quantity and type of files for extent
+        file_names = list(map(str, UploadedFile.objects.filter(
+            session__token=cleaned_data['session_token']
+        ).filter(
+            old_copy_removed=False
+        ).values_list('name', flat=True)))
+
+        cleaned_data['quantity_and_type_of_units'] = get_human_readable_file_count(file_names,
+            ACCEPTED_FILE_FORMATS)
+
+        # Convert the four date-related fields to a single date
+        start_date = APPROXIMATE_DATE_FORMAT.format(date=cleaned_data['start_date_of_material']) \
+            if cleaned_data['start_date_is_approximate'] else \
+                cleaned_data['start_date_of_material']
+
+        end_date = APPROXIMATE_DATE_FORMAT.format(date=cleaned_data['end_date_of_material']) \
+            if cleaned_data['end_date_is_approximate'] else \
+                cleaned_data['end_date_of_material']
+
+        date_of_material = start_date if start_date == end_date else f'{start_date} - {end_date}'
+        cleaned_data['date_of_material'] = date_of_material
+
+        # Remove old fields
+        del cleaned_data['start_date_is_approximate']
+        del cleaned_data['start_date_of_material']
+        del cleaned_data['end_date_is_approximate']
+        del cleaned_data['end_date_of_material']
+
+        # Add dates for events
+        current_time = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
+        cleaned_data['action_date'] = current_time
+        cleaned_data['event_date'] = current_time
+
+        return cleaned_data
 
     def done(self, form_list, **kwargs):
         ''' Retrieves all of the form data, and creates a bag from it asynchronously.
