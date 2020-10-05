@@ -6,11 +6,13 @@ from pathlib import Path
 
 from django.contrib import admin
 from django.http import HttpResponse
+from django.utils import timezone
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
+from recordtransfer.caais import convert_meta_tree_to_csv_row
 
 
 class CustomUserAdmin(UserAdmin):
@@ -39,8 +41,15 @@ class UploadedFileAdmin(admin.ModelAdmin):
 class BagAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bag_change_form.html'
 
-    actions = ['export_selected_bags', 'export_selected_reports', 'mark_not_started',
-               'mark_in_progress', 'mark_complete']
+    actions = [
+        'export_selected_bags',
+        'export_selected_reports',
+        'mark_not_started',
+        'mark_in_progress',
+        'mark_complete'
+    ]
+
+    # Display in Admin GUI
     list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
     ordering = ['bagging_date']
 
@@ -49,34 +58,36 @@ class BagAdmin(admin.ModelAdmin):
 
         csv_file = StringIO()
         writer = csv.writer(csv_file)
-        writer.writerow([
-            "Username",
-            "Bagging Date",
-            "Bag Location",
-            "Review Status",
-            "Accession Title",
-            "Scope and Content",
-            "Quantity and Type of Units",
-        ])
 
-
-        for bag in queryset:
+        for i, bag in enumerate(queryset, 0):
             bag_metadata = json.loads(bag.caais_metadata)
+            metadata_as_csv = convert_meta_tree_to_csv_row(bag_metadata)
+
+            # Write the headers on the first loop
+            if i == 0:
+                writer.writerow([
+                    'Username',
+                    'Bagging Date',
+                    'Bag Location',
+                    'Review Status',
+                    *metadata_as_csv.keys(),
+                ])
+
             writer.writerow(
                 [
                     bag.user.username,
                     bag.bagging_date,
-                    str(bag_folder / bag.bag_name),
+                    str(bag_folder / bag.user.username / bag.bag_name),
                     bag.get_review_status_display(),
-                    bag_metadata['section_1']['accession_title'],
-                    bag_metadata['section_3']['scope_and_content'],
-                    bag_metadata['section_3']['extent_statement'][0]['quantity_and_type_of_units'],
+                    *metadata_as_csv.values(),
                 ]
             )
 
         csv_file.seek(0)
         response = HttpResponse(csv_file, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=exported-bag-info.csv'
+        local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
+        filename = f"exported_bag_info_{local_time}.csv"
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         csv_file.close()
         return response
     export_selected_bags.short_description = 'Export CSV information for selected Bags'

@@ -1,6 +1,7 @@
 import json
 import logging
 import smtplib
+import urllib.parse
 from pathlib import Path
 from datetime import timedelta
 
@@ -13,7 +14,7 @@ from django.template.loader import render_to_string
 from recordtransfer.bagger import create_bag
 from recordtransfer.caais import convert_transfer_form_to_meta_tree, convert_meta_tree_to_bagit_tags
 from recordtransfer.models import Bag, UploadedFile, User
-from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_EMAIL, BASE_URL
 
 
 LOGGER = logging.getLogger(__name__)
@@ -61,19 +62,23 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         new_bag = Bag(bagging_date=bagging_time, bag_name=bag_name, user=user_submitted)
         new_bag.caais_metadata = json.dumps(caais_metadata)
         new_bag.save()
-        send_bag_creation_success.delay(form_data, user_submitted)
+        # TODO: I'm not sure this is a good approach to getting the object change URL
+        bag_url = urllib.parse.urljoin(BASE_URL, f'/admin/recordtransfer/bag/{new_bag.id}')
+        send_bag_creation_success.delay(form_data, bag_url, user_submitted)
     else:
         LOGGER.warning('Could not generate HTML document since bag creation failed')
         send_bag_creation_failure.delay(form_data, user_submitted)
 
 
 @django_rq.job
-def send_bag_creation_success(form_data: dict, user_submitted: User):
+def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: User):
     ''' Send an email to users who get bag email updates that a user submitted a new bag and there
     were no errors.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form.
+        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
+        the CAAIS version of the form.
+        bag_url (str): An absolute link that links to the bag in the administrator site.
         user_submitted (User): The user who submitted the data and files.
     '''
     recipients = User.objects.filter(gets_bag_email_updates=True)
@@ -87,13 +92,14 @@ def send_bag_creation_success(form_data: dict, user_submitted: User):
         msg_html = render_to_string('recordtransfer/email/bag_submit_success.html', context={
             'user': user_submitted,
             'form_data': form_data,
+            'bag_url': bag_url,
         })
         msg_plain = strip_tags(msg_html)
 
         send_mail(
             subject='New Bag Ready for Review',
             message=msg_plain,
-            from_email='donotreply@127.0.0.1:8000',
+            from_email=DO_NOT_REPLY_EMAIL,
             recipient_list=recipient_emails,
             html_message=msg_html,
             fail_silently=False,
@@ -108,7 +114,8 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
     WERE errors.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form.
+        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
+        the CAAIS version of the form.
         user_submitted (User): The user who submitted the data and files.
     '''
     recipients = User.objects.filter(gets_bag_email_updates=True)
@@ -128,7 +135,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
         send_mail(
             subject='Bag Creation Failed',
             message=msg_plain,
-            from_email='donotreply@127.0.0.1:8000',
+            from_email=DO_NOT_REPLY_EMAIL,
             recipient_list=recipient_emails,
             html_message=msg_html,
             fail_silently=False,
