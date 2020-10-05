@@ -88,7 +88,8 @@ class ContactInfoForm(forms.Form):
             'invalid': gettext('Phone number must look like "+1 (999) 999-9999"')
         },
         widget=forms.TextInput(attrs={
-            'placeholder': '+1 (999) 999-9999'
+            'placeholder': '+1 (999) 999-9999',
+            'class': 'reduce-form-field-width',
         }),
         help_text=gettext('Phone number should look like "+1 (123) 456-7890"'),
         label=gettext('Phone number'),
@@ -147,7 +148,8 @@ class ContactInfoForm(forms.Form):
                                '"12345" or "12345-1234"')
         },
         widget=forms.TextInput(attrs={
-            'placeholder': 'Z0Z 0Z0'
+            'placeholder': 'Z0Z 0Z0',
+            'class': 'reduce-form-field-width',
         }),
         label=gettext('Postal / Zip code'),
     )
@@ -184,7 +186,7 @@ class RecordDescriptionForm(forms.Form):
         input_formats=[r'%Y-%m-%d'],
         required=True,
         widget=forms.DateInput(attrs={
-            'class': 'start_date_picker',
+            'class': 'start_date_picker reduce-form-field-width',
             'autocomplete': 'off',
         }),
         label=gettext('Start date of material'),
@@ -201,7 +203,7 @@ class RecordDescriptionForm(forms.Form):
         input_formats=[r'%Y-%m-%d'],
         required=True,
         widget=forms.DateInput(attrs={
-            'class': 'end_date_picker',
+            'class': 'end_date_picker reduce-form-field-width',
             'autocomplete': 'off',
         }),
         label=gettext('End date of files'),
