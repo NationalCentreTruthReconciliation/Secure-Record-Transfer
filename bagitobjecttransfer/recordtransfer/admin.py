@@ -1,11 +1,13 @@
-from io import StringIO, BytesIO
+import json
 import zipfile
 import csv
+from io import StringIO, BytesIO
 from pathlib import Path
 
 from django.contrib import admin
 from django.http import HttpResponse
 from django.contrib.auth.admin import UserAdmin
+from django.template.loader import render_to_string
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
@@ -47,15 +49,28 @@ class BagAdmin(admin.ModelAdmin):
 
         csv_file = StringIO()
         writer = csv.writer(csv_file)
-        writer.writerow(["Username", "Bagging Date", "Bag Location", "Review Status"])
+        writer.writerow([
+            "Username",
+            "Bagging Date",
+            "Bag Location",
+            "Review Status",
+            "Accession Title",
+            "Scope and Content",
+            "Quantity and Type of Units",
+        ])
+
 
         for bag in queryset:
+            bag_metadata = json.loads(bag.caais_metadata)
             writer.writerow(
                 [
                     bag.user.username,
                     bag.bagging_date,
                     str(bag_folder / bag.bag_name),
                     bag.get_review_status_display(),
+                    bag_metadata['section_1']['accession_title'],
+                    bag_metadata['section_3']['scope_and_content'],
+                    bag_metadata['section_3']['extent_statement'][0]['quantity_and_type_of_units'],
                 ]
             )
 
@@ -70,7 +85,8 @@ class BagAdmin(admin.ModelAdmin):
         zipf = BytesIO()
         zipped_reports = zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False)
         for bag in queryset:
-            zipped_reports.writestr(bag.report_name, bag.report_contents)
+            report = self.render_html_report(bag)
+            zipped_reports.writestr(f'{bag.bag_name}.html', report)
         zipped_reports.close()
         zipf.seek(0)
         response = HttpResponse(zipf, content_type='application/x-zip-compressed')
@@ -94,9 +110,15 @@ class BagAdmin(admin.ModelAdmin):
     # pylint: disable=no-member
     mark_complete.short_description = f'Mark bags as "{Bag.ReviewStatus.REVIEW_COMPLETE.label}"'
 
+    def render_html_report(self, bag: Bag):
+        return render_to_string('recordtransfer/report/metadata_report.html', context={
+            'user': bag.user,
+            'metadata': json.loads(bag.caais_metadata),
+        })
+
     def response_change(self, request, obj):
         if "_view_report" in request.POST:
-            return HttpResponse(obj.report_contents, content_type='text/html')
+            return HttpResponse(self.render_html_report(obj), content_type='text/html')
         return super().response_change(request, obj)
 
 
