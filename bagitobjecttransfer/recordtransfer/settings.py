@@ -15,7 +15,7 @@ DEFAULT_DATA = {
     'section_1': {
         'repository': 'NCTR',
         'archival_unit': 'NCTR Archives',
-        'acqusition_method': 'Digital Transfer',
+        'acquisition_method': 'Digital Transfer',
     },
     'section_2': {
     },
@@ -29,13 +29,14 @@ DEFAULT_DATA = {
         'material_assessment_statement': 'N/A',
         'appraisal_statement': 'N/A',
         'associated_documentation': 'N/A',
+        'material_assessment_statement_type': 'Physical Condition',
+        'material_assessment_statement_value': 'Record is digital, physical assessment is not possible'
     },
     'section_5': {
         'event_type': 'Digital Object Transfer',
         'event_agent': 'NCTR Digital Object Transfer Application',
     },
     'section_6': {
-        'general_notes': 'N/A',
     },
     'section_7': {
         'rules_or_conventions': 'Canadian Archival Accession Information Standards v1.0',
@@ -45,6 +46,8 @@ DEFAULT_DATA = {
     }
 }
 
+
+APPROXIMATE_DATE_FORMAT = '[ca. {date}]'
 
 # File types allowed to be uploaded to the backend. Do not use periods before the extension, and
 # ensure that all file extensions are lowercase.
