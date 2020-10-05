@@ -56,6 +56,26 @@ def _snake_to_camel_case(string: str):
     string_split = string.split('_')
     return string_split[0] + ''.join([x.capitalize() for x in string_split[1:]])
 
+def convert_meta_tree_to_csv_row(meta_tree: OrderedDict):
+    row = OrderedDict()
+    row['repository'] = meta_tree['section_1']['repository']
+    row['accessionIdentifier'] = meta_tree['section_1']['accession_identifier']
+    other_id_types = []
+    other_id_values = []
+    other_id_notes = []
+    for other_id in meta_tree['section_1']['other_identifier']:
+        other_id_types.append(other_id['other_identifier_type'])
+        other_id_values.append(other_id['other_identifier_value'])
+        other_id_notes.append(other_id['other_identifier_note'] or 'NULL')
+    row['otherIdentifierTypes'] = '|'.join(other_id_types)
+    row['otherIdentifierValues'] = '|'.join(other_id_values)
+    row['otherIdentifierNotes'] = '|'.join(other_id_notes)
+    row['accessionTitle'] = meta_tree['section_1']['accession_title']
+    row['archivalUnit'] = meta_tree['section_1']['archival_unit']
+    row['acquisitionMethod'] = meta_tree['section_1']['acquisition_method']
+    row['dispositionAuthority'] = meta_tree['section_1']['disposition_authority']
+    return row
+
 def _get_section_1_tree(form_data: dict):
     curr_tree = OrderedDict()
     curr_section = 'section_1'
