@@ -131,18 +131,15 @@ class TransferFormWizard(SessionWizardView):
             ACCEPTED_FILE_FORMATS)
 
         # Convert the four date-related fields to a single date
-        start_date = APPROXIMATE_DATE_FORMAT.format(date=cleaned_data['start_date_of_material']) \
-            if cleaned_data['start_date_is_approximate'] else \
-                cleaned_data['start_date_of_material']
-
-        end_date = APPROXIMATE_DATE_FORMAT.format(date=cleaned_data['end_date_of_material']) \
-            if cleaned_data['end_date_is_approximate'] else \
-                cleaned_data['end_date_of_material']
+        start_date = cleaned_data['start_date_of_material'].strftime(r'%Y-%m-%d')
+        end_date = cleaned_data['end_date_of_material'].strftime(r'%Y-%m-%d')
+        if cleaned_data['start_date_is_approximate']:
+            start_date = APPROXIMATE_DATE_FORMAT.format(date=start_date)
+        if cleaned_data['end_date_is_approximate']:
+            end_date = APPROXIMATE_DATE_FORMAT.format(date=end_date)
 
         date_of_material = start_date if start_date == end_date else f'{start_date} - {end_date}'
         cleaned_data['date_of_material'] = date_of_material
-
-        # Remove old fields
         del cleaned_data['start_date_is_approximate']
         del cleaned_data['start_date_of_material']
         del cleaned_data['end_date_is_approximate']

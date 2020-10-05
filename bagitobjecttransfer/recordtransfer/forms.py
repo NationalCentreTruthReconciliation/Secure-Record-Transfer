@@ -1,10 +1,6 @@
-from datetime import datetime
-
 from django import forms
 from django_countries.fields import CountryField
 from django.utils.translation import gettext
-
-from recordtransfer.validators import validate_date, FULL_DATE, SINGLE_YEAR
 
 
 class SourceInfoForm(forms.Form):
@@ -160,48 +156,17 @@ class ContactInfoForm(forms.Form):
 
 
 class RecordDescriptionForm(forms.Form):
-    def get_year_month_day(self, value):
-        year_match = SINGLE_YEAR.match(value)
-        if year_match:
-            year = int(year_match.group('year'))
-            month = date = 0
-        else:
-            full_match = FULL_DATE.match(value)
-            year = int(full_match.group('year'))
-            month = int(full_match.group('month'))
-            date = int(full_match.group('date'))
-        return (year, month, date)
-
     def clean(self):
         cleaned_data = super().clean()
 
         start_date_of_material = cleaned_data.get('start_date_of_material')
         end_date_of_material = cleaned_data.get('end_date_of_material')
-
-        # Check end date after start date
+        if not start_date_of_material:
+            self.add_error('start_date_of_material', 'Start date was not valid')
+        if not end_date_of_material:
+            self.add_error('end_date_of_material', 'End date was not valid')
         if start_date_of_material and end_date_of_material:
-            start_year_only = False
-            start_year, start_month, start_date = self.get_year_month_day(start_date_of_material)
-            if start_month == 0 or start_date == 0:
-                start_year_only = True
-
-            end_year_only = False
-            end_year, end_month, end_date = self.get_year_month_day(end_date_of_material)
-            if end_month == 0 or end_date == 0:
-                end_year_only = True
-
-            # Fix zero-ed months and dates
-            if start_year_only and end_year_only:
-                start_month = start_date = end_month = end_date = 1
-            elif start_year_only and not end_year_only:
-                start_month, start_date = end_month, end_date
-            elif not start_year_only and end_year_only:
-                end_month, end_date = start_month, start_date
-
-            start_datetime = datetime(start_year, start_month, start_date)
-            end_datetime = datetime(end_year, end_month, end_date)
-
-            if end_datetime < start_datetime:
+            if end_date_of_material < start_date_of_material:
                 msg = 'End date cannot be before start date'
                 self.add_error('end_date_of_material', msg)
 
@@ -215,20 +180,14 @@ class RecordDescriptionForm(forms.Form):
         label=gettext('Collection title')
     )
 
-    start_date_of_material = forms.RegexField(
-        # Date regex is a little lax, but this is on purpose since I want the more verbose errors
-        # that the validate_date validator sends back.
-        regex=r'^(?:\d{4})|(?:\d{4})-(?:\d{2})-(?:\d{2})$',
+    start_date_of_material = forms.DateField(
+        input_formats=[r'%Y-%m-%d'],
         required=True,
-        error_messages={
-            'required': gettext('This field is required.'),
-        },
-        widget=forms.TextInput(attrs={
-            'placeholder': '2000-01-01'
+        widget=forms.DateInput(attrs={
+            'class': 'start_date_picker',
+            'autocomplete': 'off',
         }),
-        validators=[validate_date],
-        help_text=gettext('Enter either a single year (yyyy) or a yyyy-mm-dd formatted date'),
-        label=gettext('Start date of files'),
+        label=gettext('Start date of material'),
     )
 
     start_date_is_approximate = forms.BooleanField(
@@ -238,17 +197,13 @@ class RecordDescriptionForm(forms.Form):
         label=gettext('Start date estimated'),
     )
 
-    end_date_of_material = forms.RegexField(
-        regex=r'^(?:\d{4})|(?:\d{4})-(?:\d{2})-(?:\d{2})$',
+    end_date_of_material = forms.DateField(
+        input_formats=[r'%Y-%m-%d'],
         required=True,
-        error_messages={
-            'required': gettext('This field is required.'),
-        },
-        widget=forms.TextInput(attrs={
-            'placeholder': '2000-12-31'
+        widget=forms.DateInput(attrs={
+            'class': 'end_date_picker',
+            'autocomplete': 'off',
         }),
-        validators=[validate_date],
-        help_text=gettext('Enter either a single year or a yyyy-mm-dd formatted date'),
         label=gettext('End date of files'),
     )
 
