@@ -4,3 +4,9 @@
     color: white;
     border: 5px;
 }
+
+@media(max-width: 700px) {
+    .form-tooltip {
+        width: 200px;
+    }
+}
