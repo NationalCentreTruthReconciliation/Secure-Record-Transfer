@@ -4,9 +4,9 @@ import platform
 # The location where bags will be stored
 
 if platform.system() == 'Windows':
-    BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+    BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR Code/Bags'
 else:
-    BAG_STORAGE_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR/Bags'
+    BAG_STORAGE_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR Code/Bags'
 
 
 # Default data to inject into metadata, after the user enters their own metadata
