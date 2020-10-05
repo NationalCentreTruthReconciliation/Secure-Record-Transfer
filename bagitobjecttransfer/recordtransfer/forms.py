@@ -233,7 +233,18 @@ class RecordDescriptionForm(forms.Form):
             'rows': '6',
             'placeholder': gettext('Briefly describe the content of the files you are transferring')
         }),
-        label=gettext('Description'),
+        label=gettext('Description of files'),
+    )
+
+    general_note = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Put any other notes you would like to add for this transfer '
+                                   'here (optional)')
+        }),
+        label=gettext('Other notes'),
     )
 
 
@@ -321,14 +332,3 @@ class OtherIdentifiersForm(forms.Form):
 
 class UploadFilesForm(forms.Form):
     session_token = forms.CharField(widget=forms.HiddenInput())
-
-    general_note = forms.CharField(
-        required=False,
-        min_length=4,
-        widget=forms.Textarea(attrs={
-            'rows': '6',
-            'placeholder': gettext('Put any other notes you would like to add for this transfer '
-                                   'here (optional)')
-        }),
-        label=gettext('Other notes'),
-    )
