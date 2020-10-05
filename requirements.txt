@@ -6,7 +6,6 @@ atomicwrites==1.4.0
 attrs==20.2.0
 Babel==2.8.0
 bagit==1.7.0
-beautifulsoup4==4.9.1
 billiard==3.6.3.0
 certifi==2020.6.20
 chardet==3.0.4
