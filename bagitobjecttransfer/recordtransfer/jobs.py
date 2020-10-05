@@ -1,3 +1,4 @@
+import json
 import logging
 import smtplib
 from pathlib import Path
@@ -10,10 +11,9 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
-from recordtransfer.metadatagenerator import HtmlDocument, BagitTags
-from recordtransfer.filecounter import get_human_readable_file_count
+from recordtransfer.caais import convert_transfer_form_to_meta_tree, convert_meta_tree_to_bagit_tags
 from recordtransfer.models import Bag, UploadedFile, User
-from recordtransfer.settings import BAG_STORAGE_FOLDER, ACCEPTED_FILE_FORMATS
+from recordtransfer.settings import BAG_STORAGE_FOLDER
 
 
 LOGGER = logging.getLogger(__name__)
@@ -31,18 +31,13 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
         user_submitted (User): The user who submitted the data and files.
     '''
-    file_names = list(map(str, UploadedFile.objects.filter(
-        session__token=form_data['session_token']
-    ).filter(
-        old_copy_removed=False
-    ).values_list('name', flat=True)))
-
-    form_data['file_count_message'] = get_human_readable_file_count(file_names, ACCEPTED_FILE_FORMATS)
-
-    tag_generator = BagitTags(form_data)
-    tags = tag_generator.generate()
-
     LOGGER.info('Starting bag creation')
+
+    # TODO: Fix placeholders
+    form_data['accession_identifier'] = 'Not implemented'
+
+    caais_metadata = convert_transfer_form_to_meta_tree(form_data)
+    bagit_tags = convert_meta_tree_to_bagit_tags(caais_metadata)
 
     folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
     if not folder.exists():
@@ -51,7 +46,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     bagging_result = create_bag(
         storage_folder=str(folder),
         session_token=form_data['session_token'],
-        metadata=tags,
+        metadata=bagit_tags,
         bag_identifier=None,
         deletefiles=True)
 
@@ -61,14 +56,10 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         form_data['storage_location'] = bag_location
         form_data['creation_time'] = str(bagging_time)
 
-        LOGGER.info('Starting report generation')
-        doc_generator = HtmlDocument(form_data)
-        html_document = doc_generator.generate()
-
         # Create object to be viewed in admin app
         bag_name = Path(bag_location).name
         new_bag = Bag(bagging_date=bagging_time, bag_name=bag_name, user=user_submitted)
-        new_bag.report_contents = html_document
+        new_bag.caais_metadata = json.dumps(caais_metadata)
         new_bag.save()
         send_bag_creation_success.delay(form_data, user_submitted)
     else:
