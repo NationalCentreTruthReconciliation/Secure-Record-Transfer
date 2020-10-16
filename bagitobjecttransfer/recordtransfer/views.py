@@ -48,19 +48,21 @@ class TransferFormWizard(SessionWizardView):
     '''
 
     _TEMPLATES = {
-        "sourceinfo": {
-            "templateref": "recordtransfer/standardform.html",
-            "formtitle": gettext("Source Information"),
-            "infomessage": gettext(
-                "Enter the info for the source of the records"
-            )
-        },
         "contactinfo": {
             "templateref": "recordtransfer/standardform.html",
             "formtitle": gettext("Contact Information"),
             "infomessage": gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your transfer"
+            )
+        },
+        "sourceinfo": {
+            "templateref": "recordtransfer/standardform.html",
+            "formtitle": gettext("Source Information"),
+            "infomessage": gettext(
+                "Enter the info for the source of the records. The source is the person or entity "
+                "that created the records or is holding the records at the moment. If this is you, "
+                "put your own information in"
             )
         },
         "recorddescription": {
@@ -85,6 +87,14 @@ class TransferFormWizard(SessionWizardView):
             "infomessage": gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
+            )
+        },
+        "generalnotes": {
+            "templateref": "recordtransfer/standardform.html",
+            "formtitle": gettext("General Notes"),
+            "infomessage": gettext(
+                "This step is optional. If you have any other notes that did not fit anywhere else "
+                "in the transfer form, put them here"
             )
         },
         "uploadfiles": {
