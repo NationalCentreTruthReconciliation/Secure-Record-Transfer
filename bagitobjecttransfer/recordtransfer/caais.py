@@ -12,6 +12,7 @@ empty string is used for the content.
 from collections import OrderedDict
 
 from recordtransfer.settings import DEFAULT_DATA
+from recordtransfer.utils import snake_to_camel_case
 
 
 class MetadataConversionError(Exception):
@@ -45,16 +46,12 @@ def _create_tags_recursively(curr_tree: OrderedDict, bagit_tags: OrderedDict):
             for i, entry in enumerate(value, 1):
                 string_index = str(i)
                 for list_item_key, list_item_value in entry.items():
-                    camel_case_key = _snake_to_camel_case(list_item_key)
+                    camel_case_key = snake_to_camel_case(list_item_key)
                     camel_case_key += string_index
                     bagit_tags[camel_case_key] = list_item_value
         else:
-            camel_case_key = _snake_to_camel_case(key)
+            camel_case_key = snake_to_camel_case(key)
             bagit_tags[camel_case_key] = value
-
-def _snake_to_camel_case(string: str):
-    string_split = string.split('_')
-    return string_split[0] + ''.join([x.capitalize() for x in string_split[1:]])
 
 def convert_meta_tree_to_csv_row(meta_tree: OrderedDict):
     row = OrderedDict()
