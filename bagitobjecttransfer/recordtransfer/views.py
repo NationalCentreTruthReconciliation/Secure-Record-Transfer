@@ -11,7 +11,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.jobs import bag_user_metadata_and_files
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
-from recordtransfer.filecounter import get_human_readable_file_count
+from recordtransfer.utils import get_human_readable_file_count
 
 
 LOGGER = logging.getLogger(__name__)

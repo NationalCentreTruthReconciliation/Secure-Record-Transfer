@@ -1,7 +1,8 @@
 from django.test import TestCase
-from recordtransfer.filecounter import get_human_readable_file_count, count_file_types
+from recordtransfer.utils import get_human_readable_file_count, count_file_types, \
+    snake_to_camel_case
 
-class FileCounterTests(TestCase):
+class FileCountingUtilityTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.accepted_formats = {

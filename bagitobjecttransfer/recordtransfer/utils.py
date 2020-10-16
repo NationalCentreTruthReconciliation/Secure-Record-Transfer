@@ -4,6 +4,11 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 
+def snake_to_camel_case(string: str):
+    string_split = string.split('_')
+    return string_split[0] + ''.join([x.capitalize() for x in string_split[1:]])
+
+
 def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     ''' Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
     English) the number of files in each group.
