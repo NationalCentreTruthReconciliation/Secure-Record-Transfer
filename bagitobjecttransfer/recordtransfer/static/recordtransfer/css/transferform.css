@@ -54,6 +54,7 @@
 }
 
 .reduce-form-field-width {
+    width: 200px !important;
     max-width: 200px !important;
 }
 

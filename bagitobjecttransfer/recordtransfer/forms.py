@@ -4,63 +4,6 @@ from django_countries.widgets import CountrySelectWidget
 from django.utils.translation import gettext
 
 
-class SourceInfoForm(forms.Form):
-    source_name = forms.CharField(
-        max_length=64,
-        min_length=2,
-        required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('The organization or entity submitting the records')
-        }),
-        label=gettext('Source name'),
-    )
-
-    source_type = forms.CharField(
-        max_length=64,
-        min_length=2,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('The kind of entity the source is (optional)')
-        }),
-        label=gettext('Source type'),
-        help_text=gettext('For example: Individual, Company, Corporation, etc.'),
-    )
-
-    source_role = forms.ChoiceField(
-        required=True,
-        choices=[
-            (c, c) for c in [
-                gettext('Creator'),
-                gettext('Donor'),
-                gettext('Custodian'),
-                gettext('Other'),
-                gettext('Unknown'),
-            ]
-        ],
-        widget=forms.Select,
-        label=gettext('Source role'),
-    )
-
-    source_note = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': '4',
-            'placeholder': gettext('Enter any notes you have on how the source relates to the '
-                                   'records (optional)')
-        }),
-        label=gettext('Source note'),
-    )
-
-    custodial_history = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': '4',
-            'placeholder': gettext('Enter any notes you have on the custodial history of the '
-                                   'records (optional)')
-        }),
-    )
-
-
 class ContactInfoForm(forms.Form):
     contact_name = forms.CharField(
         max_length=64,
@@ -138,7 +81,11 @@ class ContactInfoForm(forms.Form):
                 "UT", "VT", "VA", "WA", "WV", "WI", "WY"
             ]
         ],
-        widget=forms.Select,
+        widget=forms.Select(
+            attrs={
+                'class': 'reduce-form-field-width',
+            }
+        ),
     )
 
     postal_or_zip_code = forms.RegexField(
@@ -161,6 +108,86 @@ class ContactInfoForm(forms.Form):
                 'class': 'reduce-form-field-width',
             }
         )
+    )
+
+
+class SourceInfoForm(forms.Form):
+    source_name = forms.CharField(
+        max_length=64,
+        min_length=2,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': gettext('The organization or entity submitting the records')
+        }),
+        label=gettext('Name of source'),
+    )
+
+    source_type = forms.ChoiceField(
+        required=True,
+        choices=[
+            (c, c) for c in [
+                gettext('Person'),
+                gettext('Family'),
+                gettext('Band'),
+                gettext('Company'),
+                gettext('Corporation'),
+                gettext('Organization'),
+                gettext('Educational Institution'),
+                gettext('Government Office'),
+                gettext('Other'),
+                gettext('Unknown'),
+            ]
+        ],
+        widget=forms.Select(
+            attrs={
+                'class': 'reduce-form-field-width',
+            }
+        ),
+        label=gettext('The source is a(n)'),
+        help_text=gettext('How would you describe <b>what</b> the source entity is?'),
+    )
+
+    source_role = forms.ChoiceField(
+        required=True,
+        choices=[
+            (c, c) for c in [
+                gettext('Creator'),
+                gettext('Donor'),
+                gettext('Custodian'),
+                gettext('Other'),
+                gettext('Unknown'),
+            ]
+        ],
+        widget=forms.Select(
+            attrs={
+                'class': 'reduce-form-field-width',
+            }
+        ),
+        label=gettext('The source\'s relationship to the records'),
+        help_text=gettext('How would you describe <b>how</b> th source relates to the records?'),
+    )
+
+    source_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': '4',
+            'placeholder': gettext('Enter any notes you think may be useful for the archives to '
+                                   'have about this entity (optional)')
+        }),
+        label=gettext('Notes'),
+        help_text=gettext('e.g., The donor wishes to remain anonymous')
+    )
+
+    custodial_history = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': '4',
+            'placeholder': gettext('Enter any information you have on the history of who has had '
+                                   'custody of the records or who has kept the records in the past '
+                                   '(optional)')
+        }),
+        label=gettext('Custodial history'),
+        help_text=gettext('e.g., John Doe held these records before donating them in 1960'),
     )
 
 
@@ -238,20 +265,10 @@ class RecordDescriptionForm(forms.Form):
         min_length=4,
         widget=forms.Textarea(attrs={
             'rows': '6',
-            'placeholder': gettext('Briefly describe the content of the files you are transferring')
+            'placeholder': gettext('Briefly describe the content of the files you are '
+                                   'transferring. What do the files contain?')
         }),
         label=gettext('Description of files'),
-    )
-
-    general_note = forms.CharField(
-        required=False,
-        min_length=4,
-        widget=forms.Textarea(attrs={
-            'rows': '6',
-            'placeholder': gettext('Put any other notes you would like to add for this transfer '
-                                   'here (optional)')
-        }),
-        label=gettext('Other notes'),
     )
 
 
@@ -334,6 +351,21 @@ class OtherIdentifiersForm(forms.Form):
                                    '(optional).')
         }),
         label=gettext('Notes for identifier')
+    )
+
+
+class GeneralNotesForm(forms.Form):
+    general_note = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record any general notes you have about the records here '
+                                   '(optional)')
+        }),
+        help_text=gettext('These should be notes that did not fit in any of the previous steps of '
+                          'this form'),
+        label=gettext('Other notes'),
     )
 
 
