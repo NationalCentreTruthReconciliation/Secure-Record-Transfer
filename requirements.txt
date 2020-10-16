@@ -8,7 +8,6 @@ Babel==2.8.0
 bagit==1.7.0
 billiard==3.6.3.0
 certifi==2020.6.20
-chardet==3.0.4
 click==7.1.2
 colorama==0.4.3
 Django==3.1.1
@@ -42,7 +41,6 @@ requests==2.24.0
 rq==1.5.2
 six==1.15.0
 snowballstemmer==2.0.0
-soupsieve==2.0.1
 Sphinx==3.2.1
 sphinx-autobuild==2020.9.1
 sphinx-rtd-theme==0.5.0
