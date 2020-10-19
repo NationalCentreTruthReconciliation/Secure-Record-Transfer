@@ -40,6 +40,13 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+redis_folder = Path(BASE_DIR).parent / 'redis'
+if not redis_folder.exists():
+    redis_folder.mkdir()
+rq_worker_file = redis_folder / 'rqworker.log'
+if not rq_worker_file.exists():
+    rq_worker_file.touch()
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -56,7 +63,7 @@ LOGGING = {
         },
         'rqworker_file': {
             'class': 'logging.FileHandler',
-            'filename': Path(BASE_DIR).parent / 'redis' / 'rqworker.log',
+            'filename': rq_worker_file,
             'formatter': 'standard',
         }
     },
