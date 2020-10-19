@@ -49,6 +49,7 @@ DEFAULT_DATA = {
         'action_type': 'Created',
         'action_agent': 'N/A',
         'action_note': 'Created with NCTR Record Transfer Portal',
+        'language_of_accession_record': 'en',
     }
 }
 

@@ -55,6 +55,8 @@ def _create_tags_recursively(curr_tree: OrderedDict, bagit_tags: OrderedDict):
 
 def convert_meta_tree_to_csv_row(meta_tree: OrderedDict):
     row = OrderedDict()
+
+    # Section 1
     row['repository'] = meta_tree['section_1']['repository']
     row['accessionIdentifier'] = meta_tree['section_1']['accession_identifier']
     other_id_types = []
@@ -71,6 +73,117 @@ def convert_meta_tree_to_csv_row(meta_tree: OrderedDict):
     row['archivalUnit'] = meta_tree['section_1']['archival_unit']
     row['acquisitionMethod'] = meta_tree['section_1']['acquisition_method']
     row['dispositionAuthority'] = meta_tree['section_1']['disposition_authority']
+
+    # Section 2
+    row['sourceType'] = meta_tree['section_2']['source_of_information']['source_type']
+    row['sourceName'] = meta_tree['section_2']['source_of_information']['source_name']
+
+    contact_info = meta_tree['section_2']['source_of_information']['source_contact_information']
+    contact_address = (
+        '{line1and2}, {province}  {postal} ({country})'
+    ).format(
+        line1and2=contact_info['address_line_1'] if not contact_info['address_line_2'] else \
+            f"{contact_info['address_line_1']} {contact_info['address_line_2']}",
+        province=contact_info['province_or_state'],
+        postal=contact_info['postal_or_zip_code'],
+        country=contact_info['country'],
+    )
+
+    row['sourceContactInformation'] = (
+        'NAME: {name}|JOB: {job}|PHONE: {phone}|EMAIL: {email}|ADDRESS: {address}'
+    ).format(
+        name=contact_info['contact_name'],
+        job=contact_info['job_title'],
+        phone=contact_info['phone_number'],
+        email=contact_info['email'],
+        address=contact_address,
+    )
+
+    row['sourceRole'] = meta_tree['section_2']['source_of_information']['source_role']
+    row['sourceNote'] = meta_tree['section_2']['source_of_information']['source_note']
+    row['custodialHistory'] = meta_tree['section_2']['custodial_history']
+
+    # Section 3
+    row['dateOfMaterial'] = meta_tree['section_3']['date_of_material']
+    extent_types = []
+    quantity_and_type_of_units = []
+    extent_note = []
+    for extent in meta_tree['section_3']['extent_statement']:
+        extent_types.append(extent['extent_statement_type'])
+        quantity_and_type_of_units.append(extent['quantity_and_type_of_units'])
+        other_id_notes.append(extent['extent_statement_note'] or 'NULL')
+    row['extentStatementType'] = '|'.join(extent_types)
+    row['quantityAndTypeOfUnits'] = '|'.join(quantity_and_type_of_units)
+    row['extentStatementNote'] = '|'.join(extent_note)
+    row['scopeAndContent'] = meta_tree['section_3']['scope_and_content']
+    row['languageOfMaterial'] = meta_tree['section_3']['language_of_material']
+
+    # Section 4
+    row['storageLocation'] = meta_tree['section_4']['storage_location']
+    rights_types = []
+    rights_values = []
+    rights_notes = []
+    for rights in meta_tree['section_4']['rights_statement']:
+        rights_types.append(rights['rights_statement_type'])
+        rights_values.append(rights['rights_statement_value'])
+        rights_notes.append(rights['rights_statement_note'] or 'NULL')
+    row['rightsStatementType'] = '|'.join(rights_types)
+    row['rightsStatementValue'] = '|'.join(rights_values)
+    row['rightsStatementNote'] = '|'.join(rights_notes)
+    material_types = []
+    material_values = []
+    action_plans = []
+    material_notes = []
+    for statement in meta_tree['section_4']['material_assessment_statement']:
+        material_types.append(statement['material_assessment_statement_type'])
+        material_values.append(statement['material_assessment_statement_value'])
+        action_plans.append(statement['material_assessment_action_plan'] or 'NULL')
+        material_notes.append(statement['material_assessment_statement_note'] or 'NULL')
+    row['materialAssessmentStatementType'] = '|'.join(material_types)
+    row['materialAssessmentStatementValue'] = '|'.join(material_values)
+    row['materialAssessmentActionPlan'] = '|'.join(action_plans)
+    row['materialAssessmentStatementNote'] = '|'.join(material_notes)
+    # TODO: Not implemented
+    row['appraisalStatement'] = ''
+    # TODO: Not implemented
+    row['associatedDocumentation'] = ''
+
+    # Section 5
+    event_types = []
+    event_dates = []
+    event_agents = []
+    event_notes = []
+    for event in meta_tree['section_5']['event_statement']:
+        event_types.append(event['event_type'])
+        event_dates.append(event['event_date'])
+        event_agents.append(event['event_agent'])
+        event_notes.append(event['event_note'] or 'NULL')
+    row['eventType'] = '|'.join(event_types)
+    row['eventDate'] = '|'.join(event_dates)
+    row['eventAgent'] = '|'.join(event_agents)
+    row['eventNote'] = '|'.join(event_notes)
+
+    # Section 6
+    row['generalNote'] = meta_tree['section_6']['general_note']
+
+    # Section 7
+    row['rulesOrConventions'] = meta_tree['section_7']['rules_or_conventions']
+    row['levelOfDetail'] = meta_tree['section_7']['level_of_detail']
+    action_types = []
+    action_dates = []
+    action_agents = []
+    action_notes = []
+    for action in meta_tree['section_7']['date_of_creation_or_revision']:
+        action_types.append(action['action_type'])
+        action_dates.append(action['action_date'])
+        action_agents.append(action['action_agent'])
+        action_notes.append(action['action_note'] or 'NULL')
+    row['actionType'] = '|'.join(action_types)
+    row['actionDate'] = '|'.join(action_dates)
+    row['actionAgent'] = '|'.join(action_agents)
+    row['actionNote'] = '|'.join(action_notes)
+    row['languageOfAccessionRecord'] = meta_tree['section_7']['language_of_accession_record']
+
     return row
 
 def _get_section_1_tree(form_data: dict):
