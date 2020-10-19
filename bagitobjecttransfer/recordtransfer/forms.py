@@ -1,10 +1,20 @@
+''' These are the forms that users will fill to transfer records to your institution. Each of these
+are based on the CAAIS fields, but have been rearranged to fit a more natural form entry experience.
+
+The form is split into multiple related pieces. The reason a single form is not used is because it
+would be too long, and might create a negative experience, especially on mobile.
+
+Remember that each form must be specified in the wizard in :code:`urls.py`.
+'''
 from django import forms
+from django.utils.translation import gettext
+
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
-from django.utils.translation import gettext
 
 
 class ContactInfoForm(forms.Form):
+    ''' The Contact Information portion of the form. Contains fields from Section 2 of CAAIS '''
     contact_name = forms.CharField(
         max_length=64,
         min_length=2,
@@ -112,6 +122,7 @@ class ContactInfoForm(forms.Form):
 
 
 class SourceInfoForm(forms.Form):
+    ''' The Source Information portion of the form. Contains fields from Section 2 of CAAIS '''
     source_name = forms.CharField(
         max_length=64,
         min_length=2,
@@ -164,7 +175,7 @@ class SourceInfoForm(forms.Form):
             }
         ),
         label=gettext('The source\'s relationship to the records'),
-        help_text=gettext('How would you describe <b>how</b> th source relates to the records?'),
+        help_text=gettext('How would you describe <b>how</b> the source relates to the records?'),
     )
 
     source_note = forms.CharField(
@@ -192,6 +203,7 @@ class SourceInfoForm(forms.Form):
 
 
 class RecordDescriptionForm(forms.Form):
+    ''' The Description Information portion of the form. Contains fields from Section 3 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
 
@@ -273,6 +285,7 @@ class RecordDescriptionForm(forms.Form):
 
 
 class RightsForm(forms.Form):
+    ''' The Rights portion of the form. Contains fields from Section 4 of CAAIS '''
     rights_statement_type = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={
@@ -305,6 +318,7 @@ class RightsForm(forms.Form):
 
 
 class OtherIdentifiersForm(forms.Form):
+    ''' The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
 
@@ -355,6 +369,7 @@ class OtherIdentifiersForm(forms.Form):
 
 
 class GeneralNotesForm(forms.Form):
+    ''' The Other Identifiers portion of the form. Contains fields from Section 6 of CAAIS '''
     general_note = forms.CharField(
         required=False,
         min_length=4,
@@ -370,4 +385,5 @@ class GeneralNotesForm(forms.Form):
 
 
 class UploadFilesForm(forms.Form):
+    ''' The form where users upload their files '''
     session_token = forms.CharField(widget=forms.HiddenInput())

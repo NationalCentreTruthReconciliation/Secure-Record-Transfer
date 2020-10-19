@@ -1,13 +1,15 @@
-''' Tools to help convert a form from a flat data structure into a nested structure representing
-the different heading levels in the CAAIS document.
+''' This file contains functions to assist in converting the cleaned transfer form into different
+data structures. The following hierarchy shows what data can be transformed into what. You may only
+go down in the hierarchy, so for example it is not possible to create the transfer form from a CSV
+row.
 
-If a field is mandatory and the data is in the form, the form data is used. If the form data is not
-present, the default data is used. If the default data and the form data are both not present, an
-exception is raised.
+.. code-block::
 
-If a field is optional, and the data is in the form, the form data is used. If the form data is not
-present, the default data is used. If the default data and the form data are both not present, the
-empty string is used for the content.
+    |__ Cleaned Transfer Form
+        |__ CAAIS Metadata Tree
+            |__ CAAIS CSV Row
+            |__ CAAIS Bagit Tags
+
 '''
 from collections import OrderedDict
 
@@ -16,12 +18,26 @@ from recordtransfer.utils import snake_to_camel_case
 
 
 class MetadataConversionError(Exception):
-    pass
+    ''' Raised if an error occurs in the conversion of the metadata between different forms '''
 
 
 def convert_transfer_form_to_meta_tree(form_data: dict):
-    ''' Converts the (mostly) flat form data dictionary into a tree representation of the CAAIS
+    ''' Converts the cleaned transfer form data dictionary into a tree representation of the CAAIS
     metadata.
+
+    If a field is mandatory and the data is in the form, the form data is used. If the form data is
+    not present, the default data is used. If the default data and the form data are both not
+    present, an exception is raised.
+
+    If a field is optional, and the data is in the form, the form data is used. If the form data is
+    not present, the default data is used. If the default data and the form data are both not
+    present, the empty string is used for the content.
+
+    Args:
+        form_data (dict): The cleaned form data that a user submitted from their transfer.
+
+    Returns:
+        (OrderedDict): An ordered dictionary with an expanded structure based on the CAAIS fields.
     '''
     tree = OrderedDict()
     tree['section_1'] = _get_section_1_tree(form_data)
@@ -34,6 +50,15 @@ def convert_transfer_form_to_meta_tree(form_data: dict):
     return tree
 
 def convert_meta_tree_to_bagit_tags(meta_tree: OrderedDict):
+    ''' Converts the CAAIS metadata tree into a flat dictionary intended to be used in the
+    bag-info.txt file in a Bagit Bag. Repeating fields are appended with their index in the array.
+
+    Args:
+        meta_tree (OrderedDict): The CAAIS structure created from a user's transfer form.
+
+    Returns:
+        (OrderedDict): A flat dictionary with camelCase tag names.
+    '''
     bagit_tags = OrderedDict()
     _create_tags_recursively(meta_tree, bagit_tags)
     return dict(bagit_tags)
@@ -54,6 +79,15 @@ def _create_tags_recursively(curr_tree: OrderedDict, bagit_tags: OrderedDict):
             bagit_tags[camel_case_key] = value
 
 def convert_meta_tree_to_csv_row(meta_tree: OrderedDict):
+    ''' Converts the CAAIS metadata tree into a CSV row. Repeating fields are separated by pipe |
+    characters in a single cell.
+
+    Args:
+        meta_tree (OrderedDict): The CAAIS structure created from a user's transfer form.
+
+    Returns:
+        (OrderedDict): A flat dictionary with camelCase column names.
+    '''
     row = OrderedDict()
 
     # Section 1
@@ -501,7 +535,7 @@ def _get_section_7_tree(form_data):
 
 def get_mandatory_field(form_data: dict, caais_key: str, section: str):
     try:
-        return get_item_or_empty_string(form_data, caais_key) or \
+        return _get_item_or_empty_string(form_data, caais_key) or \
             DEFAULT_DATA[section][caais_key]
     except KeyError as exc:
         friendly_name = caais_key.replace('_', ' ')
@@ -510,10 +544,10 @@ def get_mandatory_field(form_data: dict, caais_key: str, section: str):
             f'and "{caais_key}" in "{section}" of the DEFAULT_DATA dictionary.') from exc
 
 def get_optional_field(form_data: dict, caais_key: str, section: str):
-    return get_item_or_empty_string(form_data, caais_key) or \
-        get_item_or_empty_string(DEFAULT_DATA, section, caais_key)
+    return _get_item_or_empty_string(form_data, caais_key) or \
+        _get_item_or_empty_string(DEFAULT_DATA, section, caais_key)
 
-def get_item_or_empty_string(dictionary, *keys):
+def _get_item_or_empty_string(dictionary, *keys):
     try:
         if len(keys) == 0:
             return ''

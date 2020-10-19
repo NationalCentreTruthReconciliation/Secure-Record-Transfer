@@ -15,11 +15,11 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
 
     Args:
         file_names (list): A list of file paths or names with extension intact
-        accepted_file_groups (dict): A dictionary of file group names mapping to a list of \
-        lowercase file extensions without periods.
+        accepted_file_groups (dict): A dictionary of file group names mapping to a list of
+            lowercase file extensions without periods.
 
     Returns:
-        (str): A string reporting the number of files in each group
+        (str): A string reporting the number of files in each group.
     '''
     counted_types = count_file_types(file_names, accepted_file_groups)
     if not counted_types:
@@ -47,20 +47,19 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
 
 
 def count_file_types(file_names: list, accepted_file_groups: dict):
-    ''' Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS \
+    ''' Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
-    If a file's extension does not match any of the accepted file extensions, it is ignored. For \
+    If a file's extension does not match any of the accepted file extensions, it is ignored. For
     that reason, it is important to ensure that the files are accepted before trying to count them.
 
     Args:
         file_names (list): A list of file paths or names with extension intact
-        accepted_file_groups (dict): A dictionary of file group names mapping to a list of \
-        lowercase file extensions without periods.
+        accepted_file_groups (dict): A dictionary of file group names mapping to a list of
+            lowercase file extensions without periods.
 
     Returns:
-        (dict): A dictionary mapping from group name to number of files in that group. For example:
-            {'Document': 3, 'Video': 12}
+        (dict): A dictionary mapping from group name to number of files in that group.
     '''
     counted_extensions = {}
 

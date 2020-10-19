@@ -73,7 +73,7 @@ def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: Use
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
-        the CAAIS version of the form.
+            the CAAIS tree version of the form.
         bag_url (str): An absolute link that links to the bag in the administrator site.
         user_submitted (User): The user who submitted the data and files.
     '''
@@ -111,7 +111,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
-        the CAAIS version of the form.
+            the CAAIS tree version of the form.
         user_submitted (User): The user who submitted the data and files.
     '''
     recipients = User.objects.filter(gets_bag_email_updates=True)
