@@ -33,9 +33,6 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     '''
     LOGGER.info('Starting bag creation')
 
-    # TODO: Fix placeholders
-    form_data['accession_identifier'] = 'Not implemented'
-
     caais_metadata = convert_transfer_form_to_meta_tree(form_data)
     bagit_tags = convert_meta_tree_to_bagit_tags(caais_metadata)
 

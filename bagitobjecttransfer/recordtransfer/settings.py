@@ -19,6 +19,7 @@ BASE_URL = 'http://127.0.0.1:8000'
 
 DEFAULT_DATA = {
     'section_1': {
+        'accession_identifier': 'Not assigned',
         'repository': 'NCTR',
         'archival_unit': 'NCTR Archives',
         'acquisition_method': 'Digital Transfer',
