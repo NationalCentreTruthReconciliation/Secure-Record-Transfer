@@ -1,4 +1,5 @@
 # pylint: disable=wildcard-import
+from pathlib import Path
 from decouple import config
 from .base import *
 
@@ -31,7 +32,13 @@ RQ_QUEUES = {
     },
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = '127.0.0.1'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
 
 LOGGING = {
     'version': 1,
@@ -45,8 +52,13 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'standard'
+            'formatter': 'standard',
         },
+        'rqworker_file': {
+            'class': 'logging.FileHandler',
+            'filename': Path(BASE_DIR).parent / 'redis' / 'rqworker.log',
+            'formatter': 'standard',
+        }
     },
     'loggers': {
         'django': {
@@ -59,7 +71,7 @@ LOGGING = {
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['console'],
+            'handlers': ['rqworker_file'],
             'level': 'INFO',
             'propagate': True,
         }

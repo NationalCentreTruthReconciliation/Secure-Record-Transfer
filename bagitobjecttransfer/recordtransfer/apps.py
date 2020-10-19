@@ -1,8 +1,13 @@
+import logging
 from pathlib import Path
 
 from django.apps import AppConfig
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
+
+
+LOGGER = logging.getLogger(__name__)
+
 
 class RecordTransferConfig(AppConfig):
     name = 'recordtransfer'
@@ -10,4 +15,4 @@ class RecordTransferConfig(AppConfig):
     def ready(self):
         bagging_area = Path(BAG_STORAGE_FOLDER)
         if not bagging_area.exists():
-            print(f'warning: bag storage folder "{BAG_STORAGE_FOLDER}" does not exist!')
+            LOGGER.warning(msg=('Bag storage folder %s does not exist!' % str(BAG_STORAGE_FOLDER)))

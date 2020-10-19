@@ -1,21 +1,28 @@
 ''' Application-specific settings for the recordtransfer app '''
 import platform
+from decouple import config
 
 # The location where bags will be stored
 
 if platform.system() == 'Windows':
-    BAG_STORAGE_FOLDER = 'C:/Users/dlove/Documents/NCTR/Bags'
+    BAG_STORAGE_FOLDER = config('BAG_FOLDER_WINDOWS')
 else:
-    BAG_STORAGE_FOLDER = '/mnt/c/Users/dlove/Documents/NCTR/Bags'
+    BAG_STORAGE_FOLDER = config('BAG_FOLDER_LINUX')
 
+# Email address for automated emails
+
+DO_NOT_REPLY_EMAIL = 'do-not-reply@nctrrecordtransfer.ca'
+
+BASE_URL = 'http://127.0.0.1:8000'
 
 # Default data to inject into metadata, after the user enters their own metadata
 
 DEFAULT_DATA = {
     'section_1': {
+        'accession_identifier': 'Not assigned',
         'repository': 'NCTR',
         'archival_unit': 'NCTR Archives',
-        'acqusition_method': 'Digital Transfer',
+        'acquisition_method': 'Digital Transfer',
     },
     'section_2': {
     },
@@ -29,22 +36,26 @@ DEFAULT_DATA = {
         'material_assessment_statement': 'N/A',
         'appraisal_statement': 'N/A',
         'associated_documentation': 'N/A',
+        'material_assessment_statement_type': 'Physical Condition',
+        'material_assessment_statement_value': 'Record is digital, physical assessment is not possible'
     },
     'section_5': {
         'event_type': 'Digital Object Transfer',
         'event_agent': 'NCTR Digital Object Transfer Application',
     },
     'section_6': {
-        'general_notes': 'N/A',
     },
     'section_7': {
         'rules_or_conventions': 'Canadian Archival Accession Information Standards v1.0',
         'action_type': 'Created',
         'action_agent': 'N/A',
         'action_note': 'Created with NCTR Record Transfer Portal',
+        'language_of_accession_record': 'en',
     }
 }
 
+
+APPROXIMATE_DATE_FORMAT = '[ca. {date}]'
 
 # File types allowed to be uploaded to the backend. Do not use periods before the extension, and
 # ensure that all file extensions are lowercase.

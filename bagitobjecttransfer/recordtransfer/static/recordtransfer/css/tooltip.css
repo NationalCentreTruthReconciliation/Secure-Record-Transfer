@@ -1,0 +1,12 @@
+.form-tooltip {
+    font-size: 11pt;
+    background-color: #333333;
+    color: white;
+    border: 5px;
+}
+
+@media(max-width: 700px) {
+    .form-tooltip {
+        width: 200px;
+    }
+}

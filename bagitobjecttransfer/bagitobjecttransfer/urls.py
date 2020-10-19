@@ -14,11 +14,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.contrib.auth.views import PasswordResetView
+from django.urls import include, path, reverse
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),
     path('', include('recordtransfer.urls')),
+    # HTML email is set to None by default, so we set html_email_template_name here
+    path('accounts/password_reset/', PasswordResetView.as_view(
+        email_template_name='registration/password_reset_email.txt',
+        html_email_template_name='registration/password_reset_email.html',
+    )),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

@@ -1,9 +1,46 @@
-<h1>Transfer Successfully Submitted by {{ user.username }}</h1>
-<hr>
-<p>
-    The bag with title {{ form_data.collection_title }} is ready for review.
-</p>
-<br>
-<p>
-    <i>This email address is not monitored, do not reply to this message.</i>
-</p>
+<!DOCTYPE html>
+<html style="
+    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;">
+    <body style="
+        margin: 0;">
+        <div style="
+            color: #333333;
+            font-size: 20pt;
+            width: 100%;
+            padding: 6px 20px;
+            background-color: #eeeeee;
+            margin-bottom: 15px;">
+            New Transfer Submitted by {{ user.username }}
+        </div>
+        <div style="
+            padding: 0px 20px;">
+            <div>
+                {{ user.first_name }} {{ user.last_name }} ({{ user.username }}) submitted a new
+                transfer at {{ form_data.action_date }} with the NCTR Record Transfer Portal. To
+                view their new submission, use the button below.
+            </div>
+            <a href="{{ bag_url }}" style="text-decoration: none; -webkit-appearance: none;">
+                <button style="
+                    background: #2d30d4;
+                    color: #fefefe;
+                    font-size: 11pt;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 6px 12px;
+                    margin-top: 30px;
+                    margin-bottom: 30px;">
+                    View {{ user.username }}'s New Submission
+                </button>
+            </a>
+            <div style="
+                font-size: 10pt;">
+                <i>This email address is not monitored, do not reply to this message.</i>
+            </div>
+            <div style="
+                font-size: 10pt;">
+                <i>If you do not want to receive these emails anymore, click this link.</i>
+            </div>
+        </div>
+    </body>
+</html>

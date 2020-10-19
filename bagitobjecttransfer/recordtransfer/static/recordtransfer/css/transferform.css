@@ -53,6 +53,11 @@
     padding: 2px 2px 2px 2px;
 }
 
+.reduce-form-field-width {
+    width: 200px !important;
+    max-width: 200px !important;
+}
+
 .flex-item > textarea {
     resize: none;
 }

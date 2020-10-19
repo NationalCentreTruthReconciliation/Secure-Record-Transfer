@@ -1,14 +1,21 @@
-from io import StringIO, BytesIO
+import json
 import zipfile
 import csv
+from io import StringIO, BytesIO
 from pathlib import Path
+from collections import OrderedDict
 
+from django import forms
 from django.contrib import admin
 from django.http import HttpResponse
+from django.utils import timezone
+from django.utils.translation import gettext
 from django.contrib.auth.admin import UserAdmin
+from django.template.loader import render_to_string
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
+from recordtransfer.caais import convert_meta_tree_to_csv_row
 
 
 class CustomUserAdmin(UserAdmin):
@@ -34,50 +41,134 @@ class UploadedFileAdmin(admin.ModelAdmin):
     clean_temp_files.short_description = 'Remove temp files on filesystem'
 
 
+class BagForm(forms.ModelForm):
+    # Extra form field
+    accession_identifier = forms.CharField(
+        max_length=128,
+        min_length=2,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': gettext('Update Accession ID')
+        }),
+        label=gettext('Accession identifier'),
+    )
+
+    disabled_fields = ['bagging_date', 'bag_name', 'caais_metadata', 'user']
+
+    class Meta:
+        model = Bag
+        fields = (
+            'bagging_date',
+            'bag_name',
+            'caais_metadata',
+            'user',
+            'review_status',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            # Disable fields
+            for field in self.disabled_fields:
+                self.fields[field].disabled = True
+
+            # Load string metadata as object
+            self._bag_metadata = json.loads(instance.caais_metadata)
+
+            # Populate Accession ID in form
+            accession_id = self._bag_metadata['section_1']['accession_identifier']
+            self.fields['accession_identifier'].initial = accession_id
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        new_accession_id = cleaned_data['accession_identifier']
+        curr_accession_id = self._bag_metadata['section_1']['accession_identifier']
+        if curr_accession_id != new_accession_id:
+            self._bag_metadata['section_1']['accession_identifier'] = new_accession_id
+            new_event = OrderedDict()
+            new_event['event_type'] = 'Accession ID Modified'
+            new_event['event_date'] = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
+            new_event['event_agent'] = 'Transfer Portal User'
+            new_event['event_note'] = (
+                f'Accession ID changed from "{curr_accession_id}" to "{new_accession_id}"'
+            )
+            self._bag_metadata['section_5']['event_statement'].append(new_event)
+            cleaned_data['caais_metadata'] = json.dumps(self._bag_metadata)
+
+        return cleaned_data
+
+
 class BagAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bag_change_form.html'
 
-    actions = ['export_selected_bags', 'export_selected_reports', 'mark_not_started',
-               'mark_in_progress', 'mark_complete']
+    form = BagForm
+
+    actions = [
+        'export_caais_csv',
+        'export_caais_reports',
+        'mark_not_started',
+        'mark_in_progress',
+        'mark_complete'
+    ]
+
+    # Display in Admin GUI
     list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
     ordering = ['bagging_date']
 
-    def export_selected_bags(self, request, queryset):
+    def export_caais_csv(self, request, queryset):
         bag_folder = Path(BAG_STORAGE_FOLDER)
 
         csv_file = StringIO()
         writer = csv.writer(csv_file)
-        writer.writerow(["Username", "Bagging Date", "Bag Location", "Review Status"])
 
-        for bag in queryset:
+        for i, bag in enumerate(queryset, 0):
+            bag_metadata = json.loads(bag.caais_metadata)
+            metadata_as_csv = convert_meta_tree_to_csv_row(bag_metadata)
+
+            # Write the headers on the first loop
+            if i == 0:
+                writer.writerow([
+                    'Username',
+                    'Bagging Date',
+                    'Bag Location',
+                    'Review Status',
+                    *metadata_as_csv.keys(),
+                ])
+
             writer.writerow(
                 [
                     bag.user.username,
                     bag.bagging_date,
-                    str(bag_folder / bag.bag_name),
+                    str(bag_folder / bag.user.username / bag.bag_name),
                     bag.get_review_status_display(),
+                    *metadata_as_csv.values(),
                 ]
             )
 
         csv_file.seek(0)
         response = HttpResponse(csv_file, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=exported-bag-info.csv'
+        local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
+        filename = f"exported_bag_info_{local_time}.csv"
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         csv_file.close()
         return response
-    export_selected_bags.short_description = 'Export CSV information for selected Bags'
+    export_caais_csv.short_description = 'Export CAAIS v1.0 CSV data for selected Bags'
 
-    def export_selected_reports(self, request, queryset):
+    def export_caais_reports(self, request, queryset):
         zipf = BytesIO()
         zipped_reports = zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False)
         for bag in queryset:
-            zipped_reports.writestr(bag.report_name, bag.report_contents)
+            report = self.render_html_report(bag)
+            zipped_reports.writestr(f'{bag.bag_name}.html', report)
         zipped_reports.close()
         zipf.seek(0)
         response = HttpResponse(zipf, content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=exported-bag-reports.zip'
         zipf.close()
         return response
-    export_selected_reports.short_description = 'Export HTML reports for selected Bags'
+    export_caais_reports.short_description = 'Export CAAIS v1.0 HTML reports for selected Bags'
 
     def mark_not_started(self, request, queryset):
         queryset.update(review_status=Bag.ReviewStatus.NOT_REVIEWED)
@@ -94,9 +185,15 @@ class BagAdmin(admin.ModelAdmin):
     # pylint: disable=no-member
     mark_complete.short_description = f'Mark bags as "{Bag.ReviewStatus.REVIEW_COMPLETE.label}"'
 
+    def render_html_report(self, bag: Bag):
+        return render_to_string('recordtransfer/report/metadata_report.html', context={
+            'user': bag.user,
+            'metadata': json.loads(bag.caais_metadata),
+        })
+
     def response_change(self, request, obj):
         if "_view_report" in request.POST:
-            return HttpResponse(obj.report_contents, content_type='text/html')
+            return HttpResponse(self.render_html_report(obj), content_type='text/html')
         return super().response_change(request, obj)
 
 
