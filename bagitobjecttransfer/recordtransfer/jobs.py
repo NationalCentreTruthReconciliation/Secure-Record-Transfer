@@ -23,10 +23,9 @@ LOGGER = logging.getLogger(__name__)
 @django_rq.job
 def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     ''' This job does three things. First, it converts the form data the user submitted into BagIt \
-    tags and an easy-to-read HTML report. Second, it creates a bag in the user's folder under the \
-    BAG_STORAGE_FOLDER with all of the user's submitted files and the BagIt tag metadata. \
-    Finally, it sends an email out on whether the new bag was submitted without errors or with \
-    errors.
+    tags. Second, it creates a bag in the user's folder under the BAG_STORAGE_FOLDER with all of \
+    the user's submitted files and the BagIt tag metadata. Finally, it sends an email out on \
+    whether the new bag was submitted without errors or with errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
