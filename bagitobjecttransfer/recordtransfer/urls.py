@@ -12,8 +12,8 @@ urlpatterns = [
     path('pretransfer/', login_required(views.FormPreparation.as_view()),
          name='formpreparation'),
     path('transfer/', login_required(views.TransferFormWizard.as_view([
-        ('sourceinfo', forms.SourceInfoForm),
         ('contactinfo', forms.ContactInfoForm),
+        ('sourceinfo', forms.SourceInfoForm),
         ('recorddescription', forms.RecordDescriptionForm),
         ('rights', formset_factory(forms.RightsForm, extra=1)),
         ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=1)),
