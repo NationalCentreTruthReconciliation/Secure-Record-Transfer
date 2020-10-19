@@ -1,9 +1,9 @@
+import os
+import tempfile
+
 from django.core.files.uploadhandler import FileUploadHandler
 from django.core.files.uploadedfile import UploadedFile
 from django.conf import settings
-
-import os
-import tempfile
 
 
 class PersistentUploadedFile(UploadedFile):

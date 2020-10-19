@@ -1,4 +1,4 @@
-''' Facilitates creating BagIt bags and writing them to disk '''
+''' Facilitates creating BagIt bags and writing them to disk. '''
 from pathlib import Path
 import logging
 import os
