@@ -77,7 +77,7 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_USER_MODEL = 'recordtransfer.User'
 
 FILE_UPLOAD_HANDLERS = [
-    'recordtransfer.persistentuploadhandler.PersistentFileUploadHandler'
+    'bagitobjecttransfer.persistentuploadhandler.PersistentFileUploadHandler'
 ]
 
 # Internationalization
