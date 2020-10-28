@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from django import forms
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.contrib.auth.admin import UserAdmin
@@ -191,9 +191,15 @@ class BagAdmin(admin.ModelAdmin):
             'metadata': json.loads(bag.caais_metadata),
         })
 
+    def locate_bag(self, bag: Bag):
+        return str(Path(BAG_STORAGE_FOLDER) / bag.user.username / bag.bag_name)
+
     def response_change(self, request, obj):
         if "_view_report" in request.POST:
             return HttpResponse(self.render_html_report(obj), content_type='text/html')
+        if "_get_bag_location" in request.POST:
+            self.message_user(request, f'This bag is located at: {self.locate_bag(obj)}')
+            return HttpResponseRedirect('../')
         return super().response_change(request, obj)
 
 
