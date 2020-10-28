@@ -12,7 +12,7 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
-from recordtransfer.caais import convert_transfer_form_to_meta_tree, convert_meta_tree_to_bagit_tags
+from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
 from recordtransfer.models import Bag, UploadedFile, User
 from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_EMAIL, BASE_URL
 
@@ -22,9 +22,9 @@ LOGGER = logging.getLogger(__name__)
 
 @django_rq.job
 def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
-    ''' This job does three things. First, it converts the form data the user submitted into BagIt \
-    tags. Second, it creates a bag in the user's folder under the BAG_STORAGE_FOLDER with all of \
-    the user's submitted files and the BagIt tag metadata. Finally, it sends an email out on \
+    ''' This job does three things. First, it converts the form data the user submitted into BagIt
+    tags. Second, it creates a bag in the user's folder under the BAG_STORAGE_FOLDER with all of
+    the user's submitted files and the BagIt tag metadata. Finally, it sends an email out on
     whether the new bag was submitted without errors or with errors.
 
     Args:
@@ -34,7 +34,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     LOGGER.info('Starting bag creation')
 
     caais_metadata = convert_transfer_form_to_meta_tree(form_data)
-    bagit_tags = convert_meta_tree_to_bagit_tags(caais_metadata)
+    bagit_tags = flatten_meta_tree(caais_metadata)
 
     folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
     if not folder.exists():

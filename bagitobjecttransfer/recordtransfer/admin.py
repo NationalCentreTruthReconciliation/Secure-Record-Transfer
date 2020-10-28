@@ -15,7 +15,7 @@ from django.template.loader import render_to_string
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
-from recordtransfer.caais import convert_meta_tree_to_csv_row
+from recordtransfer.caais import flatten_meta_tree
 
 
 class CustomUserAdmin(UserAdmin):
@@ -125,7 +125,7 @@ class BagAdmin(admin.ModelAdmin):
 
         for i, bag in enumerate(queryset, 0):
             bag_metadata = json.loads(bag.caais_metadata)
-            metadata_as_csv = convert_meta_tree_to_csv_row(bag_metadata)
+            metadata_as_csv = flatten_meta_tree(bag_metadata)
 
             # Write the headers on the first loop
             if i == 0:
