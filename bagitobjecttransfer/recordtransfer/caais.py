@@ -404,9 +404,9 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
         caais_key='material_assessment_statement_note',
         section=curr_section)
     curr_tree['material_assessment_statement'].append(new_assessment)
-    # 4.4 Appraisal Statement TODO: Not implemented
+    # 4.4 Appraisal Statement
     curr_tree['appraisal_statement'] = []
-    # 4.5 Associated Documentation TODO: Not implemented
+    # 4.5 Associated Documentation
     curr_tree['associated_documentation'] = []
     return curr_tree
 
@@ -441,10 +441,26 @@ def _flatten_section_4_tree(section_4: OrderedDict, flat: OrderedDict):
     flat['materialAssessmentStatementValue'] = '|'.join(material_values)
     flat['materialAssessmentActionPlan'] = '|'.join(action_plans)
     flat['materialAssessmentStatementNote'] = '|'.join(material_notes)
-    # TODO: Not implemented
-    flat['appraisalStatement'] = ''
-    # TODO: Not implemented
-    flat['associatedDocumentation'] = ''
+    appraisal_types = []
+    appraisal_values = []
+    appraisal_notes = []
+    for appraisal in section_4['appraisal_statement']:
+        appraisal_types.append(appraisal['appraisal_statement_type'])
+        appraisal_values.append(appraisal['appraisal_statement_value'])
+        appraisal_notes.append(appraisal['appraisal_statement_note'] or 'NULL')
+    flat['appraisalStatementType'] = '|'.join(appraisal_types)
+    flat['appraisalStatementValue'] = '|'.join(appraisal_values)
+    flat['appraisalStatementNote'] = '|'.join(appraisal_notes)
+    doc_types = []
+    doc_titles = []
+    doc_notes = []
+    for document in section_4['associated_documentation']:
+        doc_types.append(document['associated_documentation_type'])
+        doc_titles.append(document['associated_documentation_title'])
+        doc_notes.append(document['associated_documentation_note'] or 'NULL')
+    flat['associatedDocumentationType'] = '|'.join(doc_types)
+    flat['associatedDocumentationTitle'] = '|'.join(doc_titles)
+    flat['associatedDocumentationNote'] = '|'.join(doc_notes)
 
 def _get_section_5_tree(form_data: dict) -> OrderedDict:
     ''' Convert a nested structure for section 5 of CAAIS from the form.
