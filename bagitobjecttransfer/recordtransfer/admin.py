@@ -50,7 +50,22 @@ class BagForm(forms.ModelForm):
             'placeholder': gettext('Update Accession ID')
         }),
         label=gettext('Accession identifier'),
-        help_text=gettext('Any change to this field will log a new event in the Caais metadata')
+        help_text=gettext('Saving any change to this field will log a new event in the Caais '
+                          'metadata'),
+    )
+
+    level_of_detail = forms.ChoiceField(
+        choices = [(c, c) for c in [
+            'Not Specified',
+            'Minimal',
+            'Partial',
+            'Full',
+        ]],
+        required=False,
+        widget=forms.Select(),
+        label=gettext('Level of detail'),
+        help_text=gettext('Saving any change to this field will log a new event in the Caais '
+                          'metadata'),
     )
 
     appraisal_statement_type = forms.ChoiceField(
@@ -111,9 +126,11 @@ class BagForm(forms.ModelForm):
                                                               'for a human-readable report')
             # Load string metadata as object
             self._bag_metadata = json.loads(instance.caais_metadata)
-            # Populate Accession ID in form
+
             accession_id = self._bag_metadata['section_1']['accession_identifier']
             self.fields['accession_identifier'].initial = accession_id
+            level_of_detail = self._bag_metadata['section_7']['level_of_detail']
+            self.fields['level_of_detail'].initial = level_of_detail or 'Not Specified'
 
     def log_new_event(self, event_type: str, event_note: str = ''):
         new_event = OrderedDict()
@@ -129,20 +146,18 @@ class BagForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        caais_metadata_changed = False
 
         new_accession_id = cleaned_data['accession_identifier']
         curr_accession_id = self._bag_metadata['section_1']['accession_identifier']
-        caais_metadata_changed = False
         if curr_accession_id != new_accession_id and new_accession_id:
             if not curr_accession_id or \
                 (curr_accession_id == DEFAULT_DATA['section_1'].get('accession_identifier')):
-                self.log_new_event(
-                    'Access ID Assigned',
-                    f'Accession ID was set to "{new_accession_id}"')
+                note = f'Accession ID was set to "{new_accession_id}"'
+                self.log_new_event('Accession ID Assigned', note)
             else:
-                self.log_new_event(
-                    'Accession ID Modified',
-                    f'Accession ID changed from "{curr_accession_id}" to "{new_accession_id}"')
+                note = f'Accession ID Changed from "{curr_accession_id}" to "{new_accession_id}"'
+                self.log_new_event('Accession ID Modified', note)
             self._bag_metadata['section_1']['accession_identifier'] = new_accession_id
             caais_metadata_changed = True
 
@@ -150,13 +165,26 @@ class BagForm(forms.ModelForm):
         if appraisal_value:
             appraisal = OrderedDict()
             appraisal_type = cleaned_data['appraisal_statement_type']
-            appraisal_note = cleaned_data['appraisal_statement_note'] or 'NULL'
+            appraisal_note = cleaned_data['appraisal_statement_note']
             appraisal['appraisal_statement_type'] = appraisal_type
             appraisal['appraisal_statement_value'] = appraisal_value
             appraisal['appraisal_statement_note'] = appraisal_note
-
             self.log_new_event(f'{appraisal_type} Added')
             self._bag_metadata['section_4']['appraisal_statement'].append(appraisal)
+            caais_metadata_changed = True
+
+        level_of_detail = cleaned_data['level_of_detail']
+        curr_level_of_detail = self._bag_metadata['section_7']['level_of_detail']
+        if curr_level_of_detail != level_of_detail and level_of_detail and \
+            level_of_detail != 'Not Specified':
+            if not curr_level_of_detail or \
+                (curr_level_of_detail == DEFAULT_DATA['section_7'].get('level_of_detail')):
+                note = f'Level of Detail was set to {level_of_detail}'
+                self.log_new_event('Level of Detail Assigned', note)
+            else:
+                note = f'Level of Detail Changed from {curr_level_of_detail} to {level_of_detail}'
+                self.log_new_event('Level of Detail Changed', note)
+            self._bag_metadata['section_7']['level_of_detail'] = level_of_detail
             caais_metadata_changed = True
 
         if caais_metadata_changed:
@@ -265,7 +293,8 @@ class BagAdmin(admin.ModelAdmin):
 
     def render_html_report(self, bag: Bag):
         return render_to_string('recordtransfer/report/metadata_report.html', context={
-            'user': bag.user,
+            'bag': bag,
+            'current_date': timezone.now(),
             'metadata': json.loads(bag.caais_metadata),
         })
 
