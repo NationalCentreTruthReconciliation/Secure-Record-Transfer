@@ -7,15 +7,15 @@ from collections import OrderedDict
 
 from django import forms
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
 
-from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, DEFAULT_DATA
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
-from recordtransfer.caais import convert_meta_tree_to_csv_row
+from recordtransfer.caais import flatten_meta_tree
 
 
 class CustomUserAdmin(UserAdmin):
@@ -42,7 +42,6 @@ class UploadedFileAdmin(admin.ModelAdmin):
 
 
 class BagForm(forms.ModelForm):
-    # Extra form field
     accession_identifier = forms.CharField(
         max_length=128,
         min_length=2,
@@ -51,6 +50,40 @@ class BagForm(forms.ModelForm):
             'placeholder': gettext('Update Accession ID')
         }),
         label=gettext('Accession identifier'),
+        help_text=gettext('Any change to this field will log a new event in the Caais metadata')
+    )
+
+    appraisal_statement_type = forms.ChoiceField(
+        choices = [(c, c) for c in [
+            'Archival Appraisal',
+            'Monetary Appraisal',
+        ]],
+        required=False,
+        widget=forms.Select(),
+        label=gettext('New Appraisal Type'),
+    )
+
+    appraisal_statement_value = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record a new appraisal statement here.'),
+        }),
+        label=gettext('New Appraisal Statement'),
+        help_text=gettext('Leave empty if you do not want to add an appraisal statement'),
+    )
+
+    appraisal_statement_note = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record any notes about the appraisal statement here '
+                                   '(optional).'),
+        }),
+        label=gettext('Notes About Appraisal Statement'),
+        help_text=gettext('Leave empty if you do not want to add an appraisal statement'),
     )
 
     disabled_fields = ['bagging_date', 'bag_name', 'caais_metadata', 'user']
@@ -73,6 +106,9 @@ class BagForm(forms.ModelForm):
             for field in self.disabled_fields:
                 self.fields[field].disabled = True
 
+            self.fields['caais_metadata'].help_text = gettext('Click View Metadata as HTML below '
+                                                              'for a human-readable report')
+
             # Load string metadata as object
             self._bag_metadata = json.loads(instance.caais_metadata)
 
@@ -80,21 +116,47 @@ class BagForm(forms.ModelForm):
             accession_id = self._bag_metadata['section_1']['accession_identifier']
             self.fields['accession_identifier'].initial = accession_id
 
+    def log_new_event(self, event_type: str, event_note: str = ''):
+        new_event = OrderedDict()
+        new_event['event_type'] = event_type
+        new_event['event_date'] = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
+        new_event['event_agent'] = 'Transfer Portal User'
+        new_event['event_note'] = event_note
+        self._bag_metadata['section_5']['event_statement'].append(new_event)
+
     def clean(self):
         cleaned_data = super().clean()
 
         new_accession_id = cleaned_data['accession_identifier']
         curr_accession_id = self._bag_metadata['section_1']['accession_identifier']
-        if curr_accession_id != new_accession_id:
+        caais_metadata_changed = False
+        if curr_accession_id != new_accession_id and new_accession_id:
+            if not curr_accession_id or \
+                (curr_accession_id == DEFAULT_DATA['section_1'].get('accession_identifier')):
+                self.log_new_event(
+                    'Access ID Assigned',
+                    f'Accession ID was set to "{new_accession_id}"')
+            else:
+                self.log_new_event(
+                    'Accession ID Modified',
+                    f'Accession ID changed from "{curr_accession_id}" to "{new_accession_id}"')
             self._bag_metadata['section_1']['accession_identifier'] = new_accession_id
-            new_event = OrderedDict()
-            new_event['event_type'] = 'Accession ID Modified'
-            new_event['event_date'] = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
-            new_event['event_agent'] = 'Transfer Portal User'
-            new_event['event_note'] = (
-                f'Accession ID changed from "{curr_accession_id}" to "{new_accession_id}"'
-            )
-            self._bag_metadata['section_5']['event_statement'].append(new_event)
+            caais_metadata_changed = True
+
+        appraisal_value = cleaned_data['appraisal_statement_value']
+        if appraisal_value:
+            appraisal = OrderedDict()
+            appraisal_type = cleaned_data['appraisal_statement_type']
+            appraisal_note = cleaned_data['appraisal_statement_note'] or 'NULL'
+            appraisal['appraisal_statement_type'] = appraisal_type
+            appraisal['appraisal_statement_value'] = appraisal_value
+            appraisal['appraisal_statement_note'] = appraisal_note
+
+            self.log_new_event(f'{appraisal_type} Added')
+            self._bag_metadata['section_4']['appraisal_statement'].append(appraisal)
+            caais_metadata_changed = True
+
+        if caais_metadata_changed:
             cleaned_data['caais_metadata'] = json.dumps(self._bag_metadata)
 
         return cleaned_data
@@ -125,7 +187,7 @@ class BagAdmin(admin.ModelAdmin):
 
         for i, bag in enumerate(queryset, 0):
             bag_metadata = json.loads(bag.caais_metadata)
-            metadata_as_csv = convert_meta_tree_to_csv_row(bag_metadata)
+            metadata_as_csv = flatten_meta_tree(bag_metadata)
 
             # Write the headers on the first loop
             if i == 0:
@@ -191,9 +253,15 @@ class BagAdmin(admin.ModelAdmin):
             'metadata': json.loads(bag.caais_metadata),
         })
 
+    def locate_bag(self, bag: Bag):
+        return str(Path(BAG_STORAGE_FOLDER) / bag.user.username / bag.bag_name)
+
     def response_change(self, request, obj):
         if "_view_report" in request.POST:
             return HttpResponse(self.render_html_report(obj), content_type='text/html')
+        if "_get_bag_location" in request.POST:
+            self.message_user(request, f'This bag is located at: {self.locate_bag(obj)}')
+            return HttpResponseRedirect('../')
         return super().response_change(request, obj)
 
 
