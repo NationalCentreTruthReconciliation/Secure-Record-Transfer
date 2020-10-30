@@ -99,19 +99,18 @@ class BagForm(forms.ModelForm):
         )
 
     def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user')
         super().__init__(*args, **kwargs)
+
         instance = getattr(self, 'instance', None)
         if instance and instance.pk:
             # Disable fields
             for field in self.disabled_fields:
                 self.fields[field].disabled = True
-
             self.fields['caais_metadata'].help_text = gettext('Click View Metadata as HTML below '
                                                               'for a human-readable report')
-
             # Load string metadata as object
             self._bag_metadata = json.loads(instance.caais_metadata)
-
             # Populate Accession ID in form
             accession_id = self._bag_metadata['section_1']['accession_identifier']
             self.fields['accession_identifier'].initial = accession_id
@@ -120,7 +119,11 @@ class BagForm(forms.ModelForm):
         new_event = OrderedDict()
         new_event['event_type'] = event_type
         new_event['event_date'] = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
-        new_event['event_agent'] = 'Transfer Portal User'
+        if self.current_user:
+            new_event['event_agent'] = (f'User {self.current_user.username} '
+                                        f'({self.current_user.email})')
+        else:
+            new_event['event_agent'] = 'Transfer Portal User'
         new_event['event_note'] = event_note
         self._bag_metadata['section_5']['event_statement'].append(new_event)
 
@@ -179,9 +182,22 @@ class BagAdmin(admin.ModelAdmin):
     list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
     ordering = ['bagging_date']
 
-    def export_caais_csv(self, request, queryset):
-        bag_folder = Path(BAG_STORAGE_FOLDER)
+    def __init__(self, t, obj):
+        super().__init__(t, obj)
+        self.bag_container = Path(BAG_STORAGE_FOLDER)
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        _class = super().get_form(request, obj, change, **kwargs)
+
+        class UserBagForm(_class):
+            def __new__(cls, *args, **kwargs):
+                ''' Add current user when the form is created '''
+                kwargs['current_user'] = request.user
+                return _class(*args, **kwargs)
+
+        return UserBagForm
+
+    def export_caais_csv(self, request, queryset):
         csv_file = StringIO()
         writer = csv.writer(csv_file)
 
@@ -203,7 +219,7 @@ class BagAdmin(admin.ModelAdmin):
                 [
                     bag.user.username,
                     bag.bagging_date,
-                    str(bag_folder / bag.user.username / bag.bag_name),
+                    str(self.bag_container / bag.user.username / bag.bag_name),
                     bag.get_review_status_display(),
                     *metadata_as_csv.values(),
                 ]
@@ -254,7 +270,7 @@ class BagAdmin(admin.ModelAdmin):
         })
 
     def locate_bag(self, bag: Bag):
-        return str(Path(BAG_STORAGE_FOLDER) / bag.user.username / bag.bag_name)
+        return str(self.bag_container / bag.user.username / bag.bag_name)
 
     def response_change(self, request, obj):
         if "_view_report" in request.POST:
