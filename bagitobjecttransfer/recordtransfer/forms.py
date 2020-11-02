@@ -8,9 +8,27 @@ Remember that each form must be specified in the wizard in :code:`urls.py`.
 '''
 from django import forms
 from django.utils.translation import gettext
+from django.contrib.auth.forms import UserCreationForm
 
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
+
+from recordtransfer.models import User
+
+
+class SignUpForm(UserCreationForm):
+    ''' Form for a user to create a new account '''
+    email = forms.EmailField(max_length=256,
+        widget=forms.TextInput(),
+        label=gettext('Email'))
+
+    username = forms.CharField(max_length=256,
+        widget=forms.TextInput(),
+        label=gettext('Username'))
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
 
 class ContactInfoForm(forms.Form):
