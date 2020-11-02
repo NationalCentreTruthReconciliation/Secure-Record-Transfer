@@ -1,18 +1,22 @@
 import logging
 from pathlib import Path
 
+from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
 from django.views.generic import TemplateView, FormView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.models import UploadedFile, UploadSession, User
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
 from recordtransfer.forms import SignUpForm
+from recordtransfer.tokens import account_activation_token
 
 
 LOGGER = logging.getLogger(__name__)
@@ -48,6 +52,11 @@ class ActivationSent(TemplateView):
     template_name = 'recordtransfer/activationsent.html'
 
 
+class ActivationInvalid(TemplateView):
+    ''' The page a user sees if their account could not be activated '''
+    template_name = 'recordtransfer/activationinvalid.html'
+
+
 class CreateAccount(FormView):
     ''' Allows a user to create a new account with the SignUpForm. When the form is submitted
     successfully, send an email to that user with a link that lets them activate their account.
@@ -63,6 +72,23 @@ class CreateAccount(FormView):
         new_user.save()
         send_user_activation_email.delay(new_user)
         return super().form_valid(form)
+
+
+def activate_account(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.confirmed_email = True
+        user.save()
+        login(request, user)
+        return HttpResponseRedirect(reverse('recordtransfer:accountcreated'))
+
+    return HttpResponseRedirect(reverse('recordtransfer:activationinvalid'))
 
 
 class TransferFormWizard(SessionWizardView):
