@@ -25,4 +25,7 @@ urlpatterns = [
 
     path('about/', views.About.as_view(), name='about'),
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
+
+    path('createaccount/', views.CreateAccount.as_view(), name='createaccount'),
+    path('createaccount/sent/', views.ActivationSent.as_view(), name='activationsent'),
 ]
