@@ -8,7 +8,8 @@ from datetime import timedelta
 import django_rq
 from django.core.mail import send_mail
 from django.utils import timezone
-from django.utils.html import strip_tags
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
@@ -169,7 +170,40 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
             fail_silently=False,
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending emails to users: %s' % str(exc)))
+        LOGGER.warning(msg=('Error when sending "bag failure" emails to users: %s' % str(exc)))
+
+
+@django_rq.job
+def send_user_activation_email(new_user: User):
+    ''' Send an activation email to the new user who is attempting to create an account. The user
+    must visit the link to activate their account.
+
+    Args:
+        new_user (User): The new user who requested an account
+    '''
+    recipient = [new_user.email]
+
+    LOGGER.info(msg=('Sending "account activation" email to: %s' % recipient[0]))
+    try:
+        msg_html = render_to_string('recordtransfer/email/activate_account.html', context={
+            'user': new_user,
+            'base_url': BASE_URL,
+            'uid': urlsafe_base64_encode(force_bytes(new_user.pk)),
+            'token': account_activation_token.make_token(new_user),
+        })
+        msg_plain = html_to_text(msg_html)
+
+        send_mail(
+            subject='Activate Your Account',
+            message=msg_plain,
+            from_email=DO_NOT_REPLY_EMAIL,
+            recipient_list=recipient,
+            html_message=msg_html,
+            fail_silently=False
+        )
+    except smtplib.SMTPException as exc:
+        LOGGER.warning(msg=('Error when sending "account activation" email to %s: %s'\
+            % recipient[0], str(exc)))
 
 
 @django_rq.job
