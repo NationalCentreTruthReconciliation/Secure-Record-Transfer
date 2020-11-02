@@ -32,13 +32,28 @@ class SignUpForm(UserCreationForm):
             self.add_error('email', f'The email {new_email} is already in use')
 
     email = forms.EmailField(max_length=256,
+        required=True,
         widget=forms.TextInput(),
         label=gettext('Email'))
 
     username = forms.CharField(max_length=256,
         min_length=6,
+        required=True,
         widget=forms.TextInput(),
-        label=gettext('Username'))
+        label=gettext('Username'),
+        help_text=gettext('This is the username you will use to log in to your account'))
+
+    first_name = forms.CharField(max_length=256,
+        min_length=2,
+        required=True,
+        widget=forms.TextInput(),
+        label=gettext('First name'))
+
+    last_name = forms.CharField(max_length=256,
+        min_length=2,
+        required=True,
+        widget=forms.TextInput(),
+        label=gettext('Last name'))
 
     class Meta:
         model = User

@@ -1,4 +1,5 @@
 {% extends 'recordtransfer/base.html' %}
+{% load static %}
 {% load i18n %}
 
 {% block title %}{% trans "Create Account" %}{% endblock %}
@@ -29,6 +30,14 @@
                 <div class="flex-item">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
+                    {% if field.help_text %}
+                        <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
+                            <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                        </div>
+                    {% else %}
+                        {# dummy element #}
+                        <span class="help-icon" style="width: 20px"></span>
+                    {% endif %}
                 </div>
             {% endfor %}
             <div class="flex-item">
