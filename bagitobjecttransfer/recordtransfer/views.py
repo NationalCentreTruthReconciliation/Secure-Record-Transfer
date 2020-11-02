@@ -160,6 +160,14 @@ class TransferFormWizard(SessionWizardView):
         step_name = self.steps.current
         return [self._TEMPLATES[step_name]["templateref"]]
 
+    def get_form_initial(self, step):
+        initial = self.initial_dict.get(step, {})
+        if step == 'contactinfo':
+            curr_user = self.request.user
+            initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
+            initial['email'] = str(curr_user.email)
+        return initial
+
     def get_context_data(self, form, **kwargs):
         ''' Retrieve context data for the current form template.
 
