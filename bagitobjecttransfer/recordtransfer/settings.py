@@ -39,14 +39,14 @@ DEFAULT_DATA = {
     },
     'section_5': {
         'event_type': 'Digital Object Transfer',
-        'event_agent': 'NCTR Digital Object Transfer Application',
+        'event_agent': 'NCTR Record Transfer Portal',
     },
     'section_6': {
     },
     'section_7': {
         'rules_or_conventions': 'Canadian Archival Accession Information Standards v1.0',
         'action_type': 'Creation',
-        'action_agent': 'Created with NCTR Record Transfer Portal',
+        'action_agent': 'NCTR Record Transfer Portal',
         'language_of_accession_record': 'en',
     }
 }
