@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html style="
+    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;">
+    <body style="
+        margin: 0;">
+        <div style="
+            color: #333333;
+            font-size: 20pt;
+            width: 100%;
+            padding: 6px 20px;
+            background-color: #eeeeee;
+            margin-bottom: 15px;">
+            Activate Your New Account, {{ user.username }}
+        </div>
+        <div style="
+            padding: 0px 20px;">
+            <div>
+                Someone created a new account for the NCTR Record Transfer Portal using this email.
+                To activate your account, click
+                <a href="{{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}">here</a>,
+                or copy and paste the following link into your favourite browser:
+            </div>
+            <p>
+                {{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}
+            </p>
+            <div style="
+                font-size: 10pt;">
+                <i>This email address is not monitored, do not reply to this message.</i>
+            </div>
+            <div style="
+                font-size: 10pt;">
+                <i>If you do not want to receive these emails anymore, click this link.</i>
+            </div>
+        </div>
+    </body>
+</html>

@@ -68,7 +68,7 @@
                             </li>
                         {% elif not user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
                                     Sign Up
                                 </a>
                             </li>
