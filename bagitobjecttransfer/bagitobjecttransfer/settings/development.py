@@ -4,6 +4,7 @@ from decouple import config
 from .base import *
 
 DEBUG = True
+TESTING = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -31,6 +32,10 @@ RQ_QUEUES = {
         'DEFAULT_TIMEOUT': 360,
     },
 }
+
+if TESTING:
+    for queue_config in RQ_QUEUES:
+        queue_config['ASYNC'] = False
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
