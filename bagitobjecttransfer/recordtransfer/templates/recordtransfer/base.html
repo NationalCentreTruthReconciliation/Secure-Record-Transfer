@@ -20,6 +20,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/footer.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transferform.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/tooltip.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
@@ -100,8 +101,41 @@
             </div>
         </div>
         <div class="footer">
-            Built with Django&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="https://nctr.ca/map.php">National Centre for Truth and Reconciliation</a>
+            <div class="footer-block">
+                <div class="footer-title">National Centre for Truth and Reconciliation</div>
+                <div class="footer-items">
+                    <div>About</div>
+                    <div>For Educators</div>
+                    <div>Archives</div>
+                    <div>Research</div>
+                    <div>Exhibitions</div>
+                    <div>Reports</div>
+                </div>
+            </div>
+            <div class="footer-block">
+                <div class="footer-title">NCTR Social Media</div>
+                <div class="footer-items">
+                    <div>YouTube</div>
+                    <div>Facebook</div>
+                    <div>Twitter</div>
+                </div>
+            </div>
+            <div class="footer-block">
+                <div class="footer-title">University of Manitoba</div>
+                <div class="footer-items">
+                    <img width="140" src="{% static 'recordtransfer/img/uofm_logo.svg' %}">
+                    <div>
+                        Notice Regarding Collection, Use, and Disclosure of Personal Information by the
+                        National Centre for Truth and Reconciliation
+                    </div>
+                    <div>
+                        &copy; National Centre for Truth and Reconciliation
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <img id="footer-image" src="{% static 'recordtransfer/img/footer-graphic.png' %}">
         </div>
     </div>
 </body>
