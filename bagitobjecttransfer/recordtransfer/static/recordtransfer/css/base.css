@@ -30,14 +30,17 @@ body {
     font-size: 20pt;
 }
 
-.footer {
-    text-align: center;
-    color: black;
-    padding-top: 10px;
-    padding-bottom: 10px;
+.medium-text {
+    color: #333333;
+    font-size: 14pt;
+}
+
+#main-graphic-container {
     width: 100%;
-    font-size: 11pt;
-    background-color: #dddddd;
+}
+
+#main-graphic {
+    width: 100%;
 }
 
 .red-button,
