@@ -2,16 +2,17 @@ import logging
 from pathlib import Path
 
 from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.models import UploadedFile, UploadSession
-from recordtransfer.jobs import bag_user_metadata_and_files
+from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
+from recordtransfer.forms import SignUpForm
 
 
 LOGGER = logging.getLogger(__name__)
@@ -40,6 +41,28 @@ class UserProfile(TemplateView):
 class About(TemplateView):
     ''' About the application '''
     template_name = 'recordtransfer/about.html'
+
+
+class ActivationSent(TemplateView):
+    ''' The page a user sees after creating an account '''
+    template_name = 'recordtransfer/activationsent.html'
+
+
+class CreateAccount(FormView):
+    ''' Allows a user to create a new account with the SignUpForm. When the form is submitted
+    successfully, send an email to that user with a link that lets them activate their account.
+    '''
+    template_name = 'recordtransfer/signupform.html'
+    form_class = SignUpForm
+    success_url = reverse_lazy('recordtransfer:activationsent')
+
+    def form_valid(self, form):
+        new_user = form.save(commit=False)
+        new_user.is_active = False
+        new_user.gets_bag_email_updates = False
+        new_user.save()
+        send_user_activation_email.delay(new_user)
+        return super().form_valid(form)
 
 
 class TransferFormWizard(SessionWizardView):
