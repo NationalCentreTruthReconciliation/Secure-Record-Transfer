@@ -21,6 +21,10 @@ body {
     padding: 0;
 }
 
+.main-container {
+    flex: 1 0 auto;
+}
+
 .main-content {
     padding: 18px 12px 18px 12px;
 }
