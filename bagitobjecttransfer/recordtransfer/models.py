@@ -10,6 +10,7 @@ from django.utils import timezone
 class User(AbstractUser):
     ''' The main User object used to authenticate users. '''
     gets_bag_email_updates = models.BooleanField(default=False)
+    confirmed_email = models.BooleanField(default=False)
 
 
 class UploadSession(models.Model):
