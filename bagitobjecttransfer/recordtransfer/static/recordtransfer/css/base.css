@@ -17,6 +17,10 @@ body {
     justify-content: space-between;
 }
 
+.focused-content {
+    padding: 0;
+}
+
 .main-content {
     padding: 18px 12px 18px 12px;
 }

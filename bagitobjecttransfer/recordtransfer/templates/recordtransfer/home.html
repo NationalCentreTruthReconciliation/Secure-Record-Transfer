@@ -4,12 +4,15 @@
 
 {% block title %}{% trans "NCTR Record Transfer Portal" %}{% endblock %}
 
-{% block content %}
+{% block focused_content %}
 <div id="main-graphic-container">
     <img id="main-graphic" src="{% static 'recordtransfer/img/filetransfer.png' %}">
 </div>
+{% endblock %}
+
+{% block content %}
 {% url 'recordtransfer:about' as about_page %}
-<p class="medium-text">
+<p>
     {% blocktrans %}
         Welcome to the National Centre for Truth and Reconciliation's digital record transfer app.
         View our <a href="{{ about_page }}">About page</a> for information about this website.
@@ -17,7 +20,7 @@
 </p>
 {% if user.is_authenticated %}
     {% url 'recordtransfer:formpreparation' as pre_transfer_page %}
-    <p class="medium-text">
+    <p>
         {% blocktrans %}
             Welcome back! To start a new transfer, <a href="{{ pre_transfer_page }}">click here</a>.
         {% endblocktrans %}
@@ -25,7 +28,7 @@
 {% else %}
     {% url 'login' as login %}
     {% url 'recordtransfer:createaccount' as create_account_page %}
-    <p class="medium-text">
+    <p>
         {% blocktrans %}
             Please <a href="{{ login }}">log in</a> to start transferring records to the NCTR.
             If you or someone you know would like to send digital files to the NCTR,

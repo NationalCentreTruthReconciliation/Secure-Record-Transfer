@@ -26,9 +26,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="507.66067"
-     inkscape:cy="957.38938"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="415.07734"
+     inkscape:cy="920.99164"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -55,34 +55,54 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#3d3d3d;fill-opacity:1;stroke:none;stroke-width:0.43431455;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#3d3d3d;fill-opacity:1;stroke:none;stroke-width:0.31651983;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect4518"
-       width="386.43393"
-       height="139.53647"
-       x="-70.506065"
-       y="-32.889927" />
+       width="333.13928"
+       height="85.96669"
+       x="-70.884041"
+       y="-10.211356"
+       inkscape:export-filename="C:\Users\dlove\rect4518.png"
+       inkscape:export-xdpi="131.42657"
+       inkscape:export-ydpi="131.42657" />
+    <rect
+       style="fill:#ededed;fill-opacity:1;stroke:none;stroke-width:0.87430686;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5060"
+       width="126.41849"
+       height="59.587269"
+       x="-61.745636"
+       y="3.1440718"
+       rx="8.7430687" />
+    <rect
+       style="fill:#ededed;fill-opacity:1;stroke:none;stroke-width:0.67348659;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5060-9"
+       width="75.013725"
+       height="59.587269"
+       x="174.39336"
+       y="3.1440718"
+       rx="5.1879292" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ededed;stroke-width:1.46696675;stroke-miterlimit:4;stroke-dasharray:5.8678676, 2.93393381;stroke-dashoffset:0;stroke-opacity:1"
+       id="path5082"
+       sodipodi:type="arc"
+       sodipodi:cx="121.31687"
+       sodipodi:cy="116.50086"
+       sodipodi:rx="90.145294"
+       sodipodi:ry="94.112762"
+       sodipodi:start="4.1887902"
+       sodipodi:end="5.2359878"
+       d="m 76.244224,34.996819 a 90.145294,94.112762 0 0 1 90.145296,2e-6"
+       sodipodi:open="true" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Layer 2">
-    <circle
-       style="fill:#ececec;fill-opacity:1;stroke:none;stroke-width:0.77312541;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="path4521"
-       cx="3.037853"
-       cy="34.744225"
-       r="55.81459" />
-    <circle
-       style="fill:#e8e8e8;fill-opacity:1;stroke:none;stroke-width:0.77312541;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="path4521-9"
-       cx="237.13083"
-       cy="34.744225"
-       r="55.81459" />
     <g
        id="g4543"
        transform="matrix(0.43431456,0,0,0.43431456,123.03125,37.223858)" />
     <g
-       id="g5058">
+       id="g5058"
+       transform="matrix(1.0027978,0,0,0.46970085,0.32443767,23.017523)">
       <rect
          rx="0.92099148"
          style="fill:#e8e8e8;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -112,8 +132,8 @@
          sodipodi:type="star" />
     </g>
     <image
-       y="4.571373"
-       x="206.95798"
+       y="9.1149549"
+       x="188.51637"
        id="image4558"
        xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAAgAElEQVR4nOVdCXgV1dn+7k1C2Nyi
 CCgKLoA7sgniTtVauiD/X63SVsFiVfyLda2/KHXBurS1ilbrirXghv5abStWa1GwoCwqARSxVlkk
@@ -269,8 +289,8 @@ TtcFYZbdNc/3/aTmkfO8V0Cy6PQorQY5P0EYaSa6Dhq3gdyR8FWSWCqsxWsOlybdBSGXfUCOvREg
 RU5ErkJggg==
 "
        preserveAspectRatio="none"
-       height="60.345703"
-       width="60.345703" />
+       height="46.18042"
+       width="46.18042" />
     <g
        id="g4592"
        transform="matrix(0.58415845,0,0,0.58415845,-24.240999,12.655016)">
@@ -310,7 +330,7 @@ RU5ErkJggg==
     </g>
     <g
        id="g4971"
-       transform="translate(-30.073665,24.02835)">
+       transform="matrix(0.71662627,0,0,0.71662627,12.701042,23.474554)">
       <g
          transform="translate(1.5591518,12.284226)"
          id="g4833">
