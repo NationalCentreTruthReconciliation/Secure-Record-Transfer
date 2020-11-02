@@ -18,21 +18,12 @@
             <div>
                 {{ user.first_name }} {{ user.last_name }} ({{ user.username }}) submitted a new
                 transfer at {{ form_data.action_date }} with the NCTR Record Transfer Portal. To
-                view their new submission, use the button below.
+                view their new submission, <a href="{{ bag_url }}">click here</a> or copy and paste
+                the link below into your favourite browser:
             </div>
-            <a href="{{ bag_url }}" style="text-decoration: none; -webkit-appearance: none;">
-                <button style="
-                    background: #2d30d4;
-                    color: #fefefe;
-                    font-size: 11pt;
-                    border: none;
-                    border-radius: 5px;
-                    padding: 6px 12px;
-                    margin-top: 30px;
-                    margin-bottom: 30px;">
-                    View {{ user.username }}'s New Submission
-                </button>
-            </a>
+            <p>
+                {{ bag_url }}
+            </p>
             <div style="
                 font-size: 10pt;">
                 <i>This email address is not monitored, do not reply to this message.</i>
