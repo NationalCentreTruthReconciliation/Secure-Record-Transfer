@@ -1,0 +1,87 @@
+/**
+ * Footer-specific styles. The footer contains one or more footer-blocks, which are flex items.
+ */
+
+.footer {
+    text-align: center;
+    color: black;
+    padding: 25px 0px 25px;
+    margin-top: 25px;
+    width: 100%;
+    font-size: 11pt;
+    background-color: #dddddd;
+
+    /* Flex-specific */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.footer-block {
+    padding: 0 30px;
+    margin: 0 5px 10px;
+    text-align: left;
+    max-width: 40%;
+    flex: auto;
+}
+
+.footer-items {
+    margin-top: 10px;
+}
+
+.footer-items > * {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.footer-item-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.footer-item-group > div {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+}
+
+.footer-item-group > img {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+
+.footer-item-group > * {
+    margin-right: 15px;
+}
+
+.footer-title {
+    width: 100%;
+    font-size: 12pt;
+    font-weight: bold;
+    border-bottom: 1px solid;
+    padding-bottom: 15px;
+}
+
+.footer-bottom {
+    position: relative;
+    height: 40px;
+    width: 100%;
+    background-color: #4e2c11;
+}
+
+#footer-image {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    height: 88px;
+}
+
+@media(max-width: 850px) {
+    .footer-block {
+        width: 100%;
+        max-width: 100%;
+    }
+}

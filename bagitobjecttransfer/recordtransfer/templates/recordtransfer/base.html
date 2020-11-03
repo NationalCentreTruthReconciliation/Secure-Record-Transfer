@@ -20,6 +20,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/footer.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transferform.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/tooltip.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
@@ -30,7 +31,7 @@
 </head>
 <body>
     <div class="flex-wrapper">
-        <div>
+        <div class="main-container">
             <header class="header">
                 <nav class="main-header-content">
                     <ul class="main-navbar">
@@ -68,7 +69,7 @@
                             </li>
                         {% elif not user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
                                     Sign Up
                                 </a>
                             </li>
@@ -95,13 +96,64 @@
                     </ul>
                 </nav>
             </header>
+            <div class="focused-content">
+                {% block focused_content %}{% endblock %}
+            </div>
             <div class="main-content">
                 {% block content %}{% endblock %}
             </div>
         </div>
         <div class="footer">
-            Built with Django&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="https://nctr.ca/map.php">National Centre for Truth and Reconciliation</a>
+            <div class="footer-block">
+                <div class="footer-title">National Centre for Truth and Reconciliation</div>
+                <div class="footer-items">
+                    <div class="footer-item-group">
+                        <div><b>About</b></div>
+                        <div><b>For Educators</b></div>
+                        <div><b>Archives</b></div>
+                    </div>
+                    <div class="footer-item-group">
+                        <div><b>Research</b></div>
+                        <div><b>Exhibitions</b></div>
+                        <div><b>Reports</b></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-block">
+                <div class="footer-title">NCTR Social Media</div>
+                <div class="footer-items">
+                    <div class="footer-item-group">
+                        <div><b>YouTube</b></div>
+                        <div><b>Facebook</b></div>
+                        <div><b>Twitter</b></div>
+                    </div>
+                    <div class="footer-item-group">
+                        <div>Icon</div>
+                        <div>Icon</div>
+                        <div>Icon</div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-block">
+                <div class="footer-title">University of Manitoba</div>
+                <div class="footer-items">
+                    <div class="footer-item-group">
+                        <img width="140" src="{% static 'recordtransfer/img/uofm_logo.svg' %}">
+                        <div>
+                            Notice Regarding Collection, Use, and Disclosure of Personal Information by the
+                            National Centre for Truth and Reconciliation
+                        </div>
+                    </div>
+                    <div class="footer-item-group">
+                        <div>
+                            &copy; National Centre for Truth and Reconciliation
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <img id="footer-image" src="{% static 'recordtransfer/img/footer_graphic_242x157px.png' %}">
         </div>
     </div>
 </body>

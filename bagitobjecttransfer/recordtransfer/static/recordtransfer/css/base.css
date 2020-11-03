@@ -17,6 +17,14 @@ body {
     justify-content: space-between;
 }
 
+.focused-content {
+    padding: 0;
+}
+
+.main-container {
+    flex: 1 0 auto;
+}
+
 .main-content {
     padding: 18px 12px 18px 12px;
 }
@@ -30,14 +38,17 @@ body {
     font-size: 20pt;
 }
 
-.footer {
-    text-align: center;
-    color: black;
-    padding-top: 10px;
-    padding-bottom: 10px;
+.medium-text {
+    color: #333333;
+    font-size: 14pt;
+}
+
+#main-graphic-container {
     width: 100%;
-    font-size: 11pt;
-    background-color: #dddddd;
+}
+
+#main-graphic {
+    width: 100%;
 }
 
 .red-button,

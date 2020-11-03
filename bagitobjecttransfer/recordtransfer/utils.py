@@ -1,5 +1,6 @@
 import logging
 
+from django.utils.html import strip_tags
 
 LOGGER = logging.getLogger(__name__)
 
@@ -7,6 +8,12 @@ LOGGER = logging.getLogger(__name__)
 def snake_to_camel_case(string: str):
     string_split = string.split('_')
     return string_split[0] + ''.join([x.capitalize() for x in string_split[1:]])
+
+
+def html_to_text(html: str):
+    no_tags_split = strip_tags(html).split('\n')
+    plain_text_split = [line.strip() for line in no_tags_split if line]
+    return '\n'.join(plain_text_split)
 
 
 def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):

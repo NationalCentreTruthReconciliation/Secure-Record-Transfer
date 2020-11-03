@@ -1,26 +1,39 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% trans "NCTR Record Transfer Portal" %}{% endblock %}
 
+{% block focused_content %}
+<div id="main-graphic-container">
+    <img id="main-graphic" src="{% static 'recordtransfer/img/file_transfer_1724x445px.png' %}">
+</div>
+{% endblock %}
+
 {% block content %}
+{% url 'recordtransfer:about' as about_page %}
 <p>
-{% blocktrans %}
-    Welcome to the National Centre for Truth and Reconciliation's digital record transfer utility.
-    This application is used to securely and safely give digital files to the NCTR's archives. If
-    you or someone you know would like to send digital files to the NCTR, create a login account
-    to start transferring records.
-{% endblocktrans %}
+    {% blocktrans %}
+        Welcome to the National Centre for Truth and Reconciliation's digital record transfer app.
+        View our <a href="{{ about_page }}">About page</a> for information about this website.
+    {% endblocktrans %}
 </p>
 {% if user.is_authenticated %}
-    <button class="blue-button" type="submit" onclick="location.href='{% url 'recordtransfer:formpreparation' %}'">
-        {% trans "Start a New Transfer" %}
-    </button>
-{% else %}
+    {% url 'recordtransfer:formpreparation' as pre_transfer_page %}
     <p>
-        {% url 'login' as login %}
         {% blocktrans %}
-            <b>Please <a href="{{ login }}">log in</a> to start transferring records to the NCTR.</b>
+            Welcome back! To start a new transfer, <a href="{{ pre_transfer_page }}">click here</a>.
+        {% endblocktrans %}
+    </p>
+{% else %}
+    {% url 'login' as login %}
+    {% url 'recordtransfer:createaccount' as create_account_page %}
+    <p>
+        {% blocktrans %}
+            Please <a href="{{ login }}">log in</a> to start transferring records to the NCTR.
+            If you or someone you know would like to send digital files to the NCTR,
+            <a href="{{ create_account_page }}">Sign up</a> for an account to start transferring
+            records.
         {% endblocktrans %}
     </p>
 {% endif %}

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from django.forms import formset_factory
 from django.contrib.auth.decorators import login_required
 
@@ -25,4 +25,14 @@ urlpatterns = [
 
     path('about/', views.About.as_view(), name='about'),
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
+
+    path('createaccount/', views.CreateAccount.as_view(), name='createaccount'),
+    path('createaccount/sent/', views.ActivationSent.as_view(), name='activationsent'),
+    path('createaccount/complete/', views.ActivationSent.as_view(), name='accountcreated'),
+    path('createaccount/invalid/', views.ActivationInvalid.as_view(), name='activationinvalid'),
+    re_path(('createaccount/'
+             'activate/'
+             r'(?P<uidb64>[0-9A-Za-z_\-]+)/'
+             r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$'),
+        views.activate_account, name='activateaccount')
 ]

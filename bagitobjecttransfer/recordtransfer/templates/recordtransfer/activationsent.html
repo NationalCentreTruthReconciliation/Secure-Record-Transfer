@@ -1,0 +1,15 @@
+{% extends 'recordtransfer/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Activation Sent" %}{% endblock %}
+
+{% block content %}
+    <div class="title-text">{% trans "Activation Email Sent." %}</div>
+    <p>
+    {% blocktrans %}
+        Thank you for creating a new account. You should receive an email shortly with an account
+        activation link.
+    {% endblocktrans %}
+    </p>
+    <a href="{% url 'recordtransfer:index' %}">{% trans "Home" %}</a>
+{% endblock %}

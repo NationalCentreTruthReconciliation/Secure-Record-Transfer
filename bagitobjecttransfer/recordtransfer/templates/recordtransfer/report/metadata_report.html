@@ -1,16 +1,57 @@
 <!DOCTYPE html>
 <head>
     <style type="text/css">
+        @page {
+            size: A4;
+            margin: 0.5in 0.5in 0.5in 0.5in;
+        }
+        body {
+            -webkit-print-color-adjust: exact !important;
+            font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            color: #111;
+        }
+        table {
+            min-width: 100%;
+            margin-top: 25px;
+            border: solid 1px #222;
+        }
+        td {
+            padding-right: 2px;
+            padding-left: 2px;
+            padding-bottom: 2px;
+            padding-top: 2px;
+        }
+        th {
+            background-color: #eee;
+            text-align: left;
+        }
+        .main-container {
+            padding: 8px;
+        }
+        .main-title {
+            font-size: 20pt;
+            font-weight: bold;
+            width: 100%;
+            background-color: #eee;
+            padding: 15px 8px;
+            box-shadow: 0 4px 3px -3px #bbbbbb;
+        }
         .title {
             font-size: 16pt;
             font-weight: bold;
+            margin-left: 6px;
+            margin-right: 6px;
+            margin-top: 2px;
+            margin-bottom: 2px;
         }
         .left-col {
             width: 33%;
         }
-        @page {
-            size: A4;
-            margin: 0.5in 0.5in 0.5in 0.5in;
+        .array-item-title {
+            font-weight: normal;
+            font-style: normal;
+            text-decoration: underline;
         }
         .level-1 {
             font-weight: bold;
@@ -24,307 +65,413 @@
             font-weight: normal;
             font-style: italic;
         }
-        table {
-            min-width: 100%;
-            margin-top: 25px;
-        }
     </style>
 </head>
 <body>
-    <h2>Record Transfer Report</h2>
-    <div class="level-1">Transfer name: {{ metadata.section_1.accession_title }}</div>
-    <div class="level-1">Submitted by: {{ user.username }} ({{ user.email }})</div>
-    <table border="1" cellspacing="0" id="section_1">
-        <tr>
-            <td colspan="2"><div class="title">Section 1: Identity Information</div></td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">1.1 Repository</td>
-            <td>{{ metadata.section_1.repository }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">1.2 Accession Identifier</td>
-            <td>{{ metadata.section_1.accession_identifier }}</td>
-        </tr>
-        {% if metadata.section_1.other_identifier %}
+    <div class="main-title">Transfer Report for "{{ metadata.section_1.accession_title }}"</div>
+    <div class="main-container">
+        <p>
+            The following is an automatically generated report for the transfer submitted by
+            {{ bag.user.username }} ({{ bag.user.email }}) at {{ bag.bagging_date }}, titled
+            {{ metadata.section_1.accession_title }}. To change this report, you must update the
+            information via the Bag administration page in the record transfer portal.
+        </p>
+        <table border="1" cellspacing="0">
             <tr>
-                <td colspan="2" class="level-1">1.3 Other Identifier</td>
+                <th colspan="2"><div class="title">Transfer Context</div></th>
             </tr>
-            {% for identifier in metadata.section_1.other_identifier %}
+            <tr>
+                <td class="left-col level-1">Review Status</td>
+                <td>{{ bag.get_review_status_display }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">Transfer Date</td>
+                <td>{{ bag.bagging_date }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">Submitted By</td>
+                <td>{{ bag.user.username }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">Report Generation Date</td>
+                <td>{{ current_date }}</td>
+            </tr>
+        </table>
+        <table border="1" cellspacing="0" id="section_1">
+            <tr>
+                <th colspan="2"><div class="title">Section 1: Identity Information</div></th>
+            </tr>
+            <tr>
+                <td class="left-col level-1">1.1 Repository</td>
+                <td>{{ metadata.section_1.repository }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">1.2 Accession Identifier</td>
+                <td>{{ metadata.section_1.accession_identifier }}</td>
+            </tr>
+            {% if metadata.section_1.other_identifier %}
                 <tr>
-                    <td class="left-col level-2">1.3.1 Other Identifier Type {{ forloop.counter }}</td>
-                    <td>{{ identifier.other_identifier_type }}</td>
+                    <td colspan="2" class="level-1">1.3 Other Identifier</td>
                 </tr>
-                <tr>
-                    <td class="left-col level-2">1.3.2 Other Identifier Value {{ forloop.counter }}</td>
-                    <td>{{ identifier.other_identifier_value }}</td>
-                </tr>
-                {% if identifier.other_identifier_note %}
+                {% for identifier in metadata.section_1.other_identifier %}
                     <tr>
-                        <td class="left-col level-2">1.3.3 Other Identifier Note {{ forloop.counter }}</td>
-                        <td>{{ identifier.other_identifier_note }}</td>
+                    <td colspan="2" class="array-item-title">
+                        Other Identifier
+                        ({{ forloop.counter }} of {{ metadata.section_1.other_identifier|length }})
+                    </td>
+                    <tr>
+                        <td class="left-col level-2">1.3.1 Other Identifier Type</td>
+                        <td>{{ identifier.other_identifier_type }}</td>
+                    </tr>
+                    <tr>
+                        <td class="left-col level-2">1.3.2 Other Identifier Value</td>
+                        <td>{{ identifier.other_identifier_value }}</td>
+                    </tr>
+                    {% if identifier.other_identifier_note %}
+                        <tr>
+                            <td class="left-col level-2">1.3.3 Other Identifier Note</td>
+                            <td>{{ identifier.other_identifier_note }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <tr>
+                <td class="left-col level-1">1.4 Accession Title</td>
+                <td>{{ metadata.section_1.accession_title }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">1.5 Archival Unit</td>
+                <td>{{ metadata.section_1.archival_unit }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">1.6 Acquisition Method</td>
+                <td>{{ metadata.section_1.acquisition_method }}</td>
+            </tr>
+            {% if metadata.section_1.disposition_authority %}
+                <tr>
+                    <td class="left-col level-1">1.7 Disposition Authority<td>
+                    <td>{{ metadata.section_1.disposition_authority }}</td>
+                </tr>
+            {% endif %}
+        </table>
+        <table border="1" cellspacing="0" id="section_2">
+            <tr>
+                <th colspan="2"><div class="title">Section 2: Source Information</div></th>
+            </tr>
+            <tr>
+                <td colspan="2" class="level-1">2.1 Source of Material</td>
+            </tr>
+            <tr>
+                <td class="left-col level-2">2.1.1 Source Type</td>
+                <td>{{ metadata.section_2.source_of_information.source_type }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-2">2.1.2 Source Name</td>
+                <td>{{ metadata.section_2.source_of_information.source_name }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="level-2">2.1.3 Source Contact Information</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Contact Name</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.contact_name }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Job Title</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.job_title }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Phone Number</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.phone_number }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Email</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.email }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Address Line 1</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.address_line_1 }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Address Line 2</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.address_line_2 }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Province or State</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.province_or_state }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Postal or Zip Code</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.postal_or_zip_code }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-3">Country</td>
+                <td>{{ metadata.section_2.source_of_information.source_contact_information.country }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-2">2.1.4 Source Role</td>
+                <td>{{ metadata.section_2.source_of_information.source_role}}</td>
+            </tr>
+            {% if metadata.section_2.source_of_information.source_note %}
+                <tr>
+                    <td class="left-col level-2">2.1.5 Source Note</td>
+                    <td>{{ metadata.section_2.source_of_information.source_note}}</td>
+                </tr>
+            {% endif %}
+            {% if metadata.section_2.custodial_history %}
+                <tr>
+                    <td class="left-col level-1">2.2 Custodial History</td>
+                    <td>{{ metadata.section_2.custodial_history }}</td>
+                </tr>
+            {% endif %}
+        </table>
+        <table border="1" cellspacing="0" id="section_3">
+            <tr>
+                <th colspan="2"><div class="title">Section 3: Materials Information</div></th>
+            </tr>
+            <tr>
+                <td class="left-col level-1">3.1 Date of Material</td>
+                <td>{{ metadata.section_3.date_of_material }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="level-1">3.2 Extent Statement</td>
+            </tr>
+            {% for extent in metadata.section_3.extent_statement %}
+                <tr>
+                    <td colspan="2" class="array-item-title">
+                        Extent Statement
+                        ({{ forloop.counter }} of {{ metadata.section_3.extent_statement|length }})
+                    </td>
+                <tr>
+                <tr>
+                    <td class="left-col level-2">3.2.1 Extent Statement Type</td>
+                    <td>{{ extent.extent_statement_type }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-2">3.2.2 Quantity and Type of Units</td>
+                    <td>{{ extent.quantity_and_type_of_units }}</td>
+                </tr>
+                {% if extent.extent_statement_note %}
+                    <tr>
+                        <td class="left-col level-2">3.3.3 Extent Statement Note</td>
+                        <td>{{ extent.extent_statement_note }}</td>
                     </tr>
                 {% endif %}
             {% endfor %}
-        {% endif %}
-        <tr>
-            <td class="left-col level-1">1.4 Accession Title</td>
-            <td>{{ metadata.section_1.accession_title }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">1.5 Archival Unit</td>
-            <td>{{ metadata.section_1.archival_unit }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">1.6 Acquisition Method</td>
-            <td>{{ metadata.section_1.acquisition_method }}</td>
-        </tr>
-        {% if metadata.section_1.disposition_authority %}
             <tr>
-                <td class="left-col level-1">1.7 Disposition Authority<td>
-                <td>{{ metadata.section_1.disposition_authority }}</td>
-            </tr>
-        {% endif %}
-    </table>
-    <table border="1" cellspacing="0" id="section_2">
-        <tr>
-            <td colspan="2"><div class="title">Section 2: Source Information</div></td>
-        </tr>
-        <tr>
-            <td colspan="2" class="level-1">2.1 Source of Material</td>
-        </tr>
-        <tr>
-            <td class="left-col level-2">2.1.1 Source Type</td>
-            <td>{{ metadata.section_2.source_of_information.source_type }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-2">2.1.2 Source Name</td>
-            <td>{{ metadata.section_2.source_of_information.source_name }}</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="level-2">2.1.3 Source Contact Information</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Contact Name</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.contact_name }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Job Title</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.job_title }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Phone Number</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.phone_number }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Email</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.email }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Address Line 1</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.address_line_1 }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Address Line 2</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.address_line_2 }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Province or State</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.province_or_state }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Postal or Zip Code</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.postal_or_zip_code }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-3">Country</td>
-            <td>{{ metadata.section_2.source_of_information.source_contact_information.country }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-2">2.1.4 Source Role</td>
-            <td>{{ metadata.section_2.source_of_information.source_role}}</td>
-        </tr>
-        {% if metadata.section_2.source_of_information.source_note %}
-            <tr>
-                <td class="left-col level-2">2.1.4 Source Role</td>
-                <td>{{ metadata.section_2.source_of_information.source_note}}</td>
-            </tr>
-        {% endif %}
-        {% if metadata.section_2.custodial_history %}
-            <tr>
-                <td class="left-col level-1">2.2 Custodial History</td>
-                <td>{{ metadata.section_2.custodial_history }}</td>
-            </tr>
-        {% endif %}
-    </table>
-    <table border="1" cellspacing="0" id="section_3">
-        <tr>
-            <td colspan="2"><div class="title">Section 3: Materials Information</div></td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">3.1 Date of Material</td>
-            <td>{{ metadata.section_3.date_of_material }}</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="level-1">3.2 Extent Statement</td>
-        </tr>
-        {% for extent in metadata.section_3.extent_statement %}
-            <tr>
-                <td class="left-col level-2">3.2.1 Extent Statement Type {{ forloop.counter }}</td>
-                <td>{{ extent.extent_statement_type }}</td>
+                <td class="left-col level-1">3.3 Scope and Content</td>
+                <td>{{ metadata.section_3.scope_and_content }}</td>
             </tr>
             <tr>
-                <td class="left-col level-2">3.2.2 Quantity and Type of Units {{ forloop.counter }}</td>
-                <td>{{ extent.quantity_and_type_of_units }}</td>
+                <td class="left-col level-1">3.4 Language of Material</td>
+                <td>{{ metadata.section_3.language_of_material }}</td>
             </tr>
-            {% if extent.extent_statement_note %}
+        </table>
+        <table border="1" cellspacing="0" id="section_4">
+            <tr>
+                <th colspan="2"><div class="title">Section 4: Management Information</div></th>
+            </tr>
+            <tr>
+                <td class="left-col level-1">4.1 Storage Location</td>
+                <td>{{ metadata.section_4.storage_location }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="level-1">4.2 Rights Statement</td>
+            </tr>
+            {% for rights in metadata.section_4.rights_statement %}
                 <tr>
-                    <td class="left-col level-2">3.3.3 Extent Statement Note {{ forloop.counter }}</td>
-                    <td>{{ extent.extent_statement_note }}</td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-        <tr>
-            <td class="left-col level-1">3.3 Scope and Content</td>
-            <td>{{ metadata.section_3.scope_and_content }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">3.4 Language of Material</td>
-            <td>{{ metadata.section_3.language_of_material }}</td>
-        </tr>
-    </table>
-    <table border="1" cellspacing="0" id="section_4">
-        <tr>
-            <td colspan="2"><div class="title">Section 4: Management Information</div></td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">4.1 Storage Location</td>
-            <td>{{ metadata.section_4.storage_location }}</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="level-1">4.2 Rights Statement</td>
-        </tr>
-        {% for rights in metadata.section_4.rights_statement %}
-            <tr>
-                <td class="left-col level-2">4.2.1 Rights Statement Type {{ forloop.counter }}</td>
-                <td>{{ rights.rights_statement_type }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-2">4.2.1 Rights Statement Value {{ forloop.counter }}</td>
-                <td>{{ rights.rights_statement_value }}</td>
-            </tr>
-            {% if rights.rights_statement_note %}
+                    <td colspan="2" class="array-item-title">
+                        Rights Statement
+                        ({{ forloop.counter }} of {{ metadata.section_4.rights_statement|length }})
+                    </td>
                 <tr>
-                    <td class="left-col level-2">4.2.3 Rights Statement Note {{ forloop.counter }}</td>
-                    <td>{{ rights.rights_statement_note }}</td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-        <tr>
-            <td colspan="2" class="level-1">4.3 Materials Assessment Statement</td>
-        </tr>
-        {% for assessment in metadata.section_4.material_assessment_statement %}
-            <tr>
-                <td class="left-col level-2">4.3.1 Material Assessment Statement Type {{ forloop.counter }}</td>
-                <td>{{ assessment.material_assessment_statement_type }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-2">4.3.2 Material Assessment Statement Value {{ forloop.counter }}</td>
-                <td>{{ assessment.material_assessment_statement_value }}</td>
-            </tr>
-            {% if assessment.material_assessment_action_plan %}
                 <tr>
-                    <td class="left-col level-2">4.3.3 Material Assessment Action Plan {{ forloop.counter }}</td>
-                    <td>{{ assessment.material_assessment_action_plan }}</td>
+                    <td class="left-col level-2">4.2.1 Rights Statement Type</td>
+                    <td>{{ rights.rights_statement_type }}</td>
                 </tr>
-            {% endif %}
-            {% if assessment.material_assessment_statement_note %}
                 <tr>
-                    <td class="left-col level-2">4.3.4 Material Assessment Statement Note {{ forloop.counter }}</td>
-                    <td>{{ assessment.material_assessment_statement_note }}</td>
+                    <td class="left-col level-2">4.2.1 Rights Statement Value</td>
+                    <td>{{ rights.rights_statement_value }}</td>
                 </tr>
-            {% endif %}
-        {% endfor %}
-        {% if metadata.section_4.appraisal_statement %}
+                {% if rights.rights_statement_note %}
+                    <tr>
+                        <td class="left-col level-2">4.2.3 Rights Statement Note</td>
+                        <td>{{ rights.rights_statement_note }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
             <tr>
-                <td colspan="2" class="level-1">4.4 Appraisal Statement (Incomplete Template)</td>
+                <td colspan="2" class="level-1">4.3 Materials Assessment Statement</td>
             </tr>
-        {% endif %}
-        {% if metadata.section_4.associated_documentation %}
-            <tr>
-                <td colspan="2" class="level-1">4.5 Associated Documentation (Incomplete Template)</td>
-            </tr>
-        {% endif %}
-    </table>
-    <table border="1" cellspacing="0" id="section_5">
-        <tr>
-            <td colspan="2"><div class="title">Section 5: Event Information</div></td>
-        </tr>
-        <tr>
-            <td colspan="2" class="level-1">5.1 Event Statement</td>
-        </tr>
-        {% for event in metadata.section_5.event_statement %}
-            <tr>
-                <td class="left-col level-2">5.1.1 Event Type {{ forloop.counter }}</td>
-                <td>{{ event.event_type }}</td>
-            </tr>
-                <td class="left-col level-2">5.1.2 Event Date {{ forloop.counter }}</td>
-                <td>{{ event.event_date }}</td>
-            </tr>
-                <td class="left-col level-2">5.1.3 Event Agent {{ forloop.counter }}</td>
-                <td>{{ event.event_agent }}</td>
-            {% if event.event_note %}
-                </tr>
-                    <td class="left-col level-2">5.1.4 Event Note {{ forloop.counter }}</td>
-                    <td>{{ event.event_note }}</td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-    </table>
-    <table border="1" cellspacing="0" id="section_6">
-        <tr>
-            <td colspan="2"><div class="title">Section 6: General Information</div></td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">6.1 General Note</td>
-            <td>{{ metadata.section_6.general_note }}</td>
-        </tr>
-    </table>
-    <table border="1" cellspacing="0" id="section_7">
-        <tr>
-            <td colspan="2"><div class="title">Section 7: Control Information</div></td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">7.1 Rules or Conventions</td>
-            <td>{{ metadata.section_7.rules_or_conventions }}</td>
-        </tr>
-        <tr>
-            <td class="left-col level-1">7.2 Level of Detail</td>
-            <td>{{ metadata.section_7.level_of_detail }}</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="level-1">7.3 Date of Creation or Revision</td>
-        </tr>
-        {% for date in metadata.section_7.date_of_creation_or_revision %}
-            <tr>
-                <td class="left-col level-2">7.3.1 Action Type {{ forloop.counter }}</td>
-                <td>{{ date.action_type }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-2">7.3.2 Action Date {{ forloop.counter }}</td>
-                <td>{{ date.action_date }} </td>
-            </tr>
-            <tr>
-                <td class="left-col level-2">7.3.3 Action Agent {{ forloop.counter }}</td>
-                <td>{{ date.action_agent }}</td>
-            </tr>
-            {% if date.action_note %}
+            {% for assessment in metadata.section_4.material_assessment_statement %}
                 <tr>
-                    <td class="left-col level-2">7.3.4 Action Note {{ forloop.counter }}</td>
-                    <td>{{ date.action_note }}</td>
+                    <td colspan="2" class="array-item-title">
+                        Material Assessment Statement
+                        ({{ forloop.counter }} of {{ metadata.section_4.material_assessment_statement|length }})
+                    </td>
+                <tr>
+                <tr>
+                    <td class="left-col level-2">4.3.1 Material Assessment Statement Type</td>
+                    <td>{{ assessment.material_assessment_statement_type }}</td>
                 </tr>
+                <tr>
+                    <td class="left-col level-2">4.3.2 Material Assessment Statement Value</td>
+                    <td>{{ assessment.material_assessment_statement_value }}</td>
+                </tr>
+                {% if assessment.material_assessment_action_plan %}
+                    <tr>
+                        <td class="left-col level-2">4.3.3 Material Assessment Action Plan</td>
+                        <td>{{ assessment.material_assessment_action_plan }}</td>
+                    </tr>
+                {% endif %}
+                {% if assessment.material_assessment_statement_note %}
+                    <tr>
+                        <td class="left-col level-2">4.3.4 Material Assessment Statement Note</td>
+                        <td>{{ assessment.material_assessment_statement_note }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            {% if metadata.section_4.appraisal_statement %}
+                <tr>
+                    <td colspan="2" class="level-1">4.4 Appraisal Statement</td>
+                </tr>
+                {% for appraisal in metadata.section_4.appraisal_statement %}
+                    <tr>
+                        <td colspan="2" class="array-item-title">
+                            Appraisal Statement
+                            ({{ forloop.counter }} of {{ metadata.section_4.appraisal_statement|length }})
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="left-col level-2">4.4.1 Appraisal Statement Type</td>
+                        <td>{{ appraisal.appraisal_statement_type }}</td>
+                    </tr>
+                    <tr>
+                        <td class="left-col level-2">4.4.2 Appraisal Statement Value</td>
+                        <td>{{ appraisal.appraisal_statement_value }}</td>
+                    </tr>
+                    {% if appraisal.appraisal_statement_note %}
+                        <tr>
+                            <td class="left-col level-2">4.4.3 Appraisal Statement Note</td>
+                            <td>{{ appraisal.appraisal_statement_note }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
-        {% endfor %}
-    </table>
+            {% if metadata.section_4.associated_documentation %}
+                <tr>
+                    <td colspan="2" class="level-1">4.5 Associated Documentation</td>
+                </tr>
+                {% for documentation in metadata.section_4.associated_documentation %}
+                    <tr>
+                        <td colspan="2" class="array-item-title">
+                            Associated Documentation
+                            ({{ forloop.counter }} of {{ metadata.section_4.associated_documentation|length }})
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="left-col level-2">4.5.1 Associated Documentation Type</td>
+                        <td>{{ documentation.associated_documentation_type }}</td>
+                    </tr>
+                    <tr>
+                        <td class="left-col level-2">4.5.2 Associated Documentation Title</td>
+                        <td>{{ documentation.associated_documentation_title }}</td>
+                    </tr>
+                    {% if documentation.associated_documentation_note %}
+                        <tr>
+                            <td class="left-col level-2">4.5.3 Associated Documentation Note</td>
+                            <td>{{ documentation.associated_documentation_note }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </table>
+        <table border="1" cellspacing="0" id="section_5">
+            <tr>
+                <th colspan="2"><div class="title">Section 5: Event Information</div></th>
+            </tr>
+            <tr>
+                <td colspan="2" class="level-1">5.1 Event Statement</td>
+            </tr>
+            {% for event in metadata.section_5.event_statement %}
+                <tr>
+                    <td colspan="2" class="array-item-title">
+                        Event Statement
+                        ({{ forloop.counter }} of {{ metadata.section_5.event_statement|length }})
+                    </td>
+                <tr>
+                <tr>
+                    <td class="left-col level-2">5.1.1 Event Type</td>
+                    <td>{{ event.event_type }}</td>
+                </tr>
+                    <td class="left-col level-2">5.1.2 Event Date</td>
+                    <td>{{ event.event_date }}</td>
+                </tr>
+                    <td class="left-col level-2">5.1.3 Event Agent</td>
+                    <td>{{ event.event_agent }}</td>
+                {% if event.event_note %}
+                    </tr>
+                        <td class="left-col level-2">5.1.4 Event Note</td>
+                        <td>{{ event.event_note }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        <table border="1" cellspacing="0" id="section_6">
+            <tr>
+                <th colspan="2"><div class="title">Section 6: General Information</div></th>
+            </tr>
+            <tr>
+                <td class="left-col level-1">6.1 General Note</td>
+                <td>{{ metadata.section_6.general_note }}</td>
+            </tr>
+        </table>
+        <table border="1" cellspacing="0" id="section_7">
+            <tr>
+                <th colspan="2"><div class="title">Section 7: Control Information</div></th>
+            </tr>
+            <tr>
+                <td class="left-col level-1">7.1 Rules or Conventions</td>
+                <td>{{ metadata.section_7.rules_or_conventions }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">7.2 Level of Detail</td>
+                <td>{{ metadata.section_7.level_of_detail }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="level-1">7.3 Date of Creation or Revision</td>
+            </tr>
+            {% for date in metadata.section_7.date_of_creation_or_revision %}
+                <tr>
+                    <td colspan="2" class="array-item-title">
+                        Date of Creation or Revision
+                        ({{ forloop.counter }} of {{ metadata.section_7.date_of_creation_or_revision|length }})
+                    </td>
+                <tr>
+                <tr>
+                    <td class="left-col level-2">7.3.1 Action Type</td>
+                    <td>{{ date.action_type }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-2">7.3.2 Action Date</td>
+                    <td>{{ date.action_date }} </td>
+                </tr>
+                <tr>
+                    <td class="left-col level-2">7.3.3 Action Agent</td>
+                    <td>{{ date.action_agent }}</td>
+                </tr>
+                {% if date.action_note %}
+                    <tr>
+                        <td class="left-col level-2">7.3.4 Action Note</td>
+                        <td>{{ date.action_note }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            <tr>
+                <td class="left-col level-1">7.4 Language of Accession Record</td>
+                <td>{{ metadata.section_7.language_of_accession_record }}</td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

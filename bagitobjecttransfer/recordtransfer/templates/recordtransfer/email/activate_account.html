@@ -11,18 +11,18 @@
             padding: 6px 20px;
             background-color: #eeeeee;
             margin-bottom: 15px;">
-            New Transfer Submitted by {{ user.username }}
+            Activate Your New Account, {{ user.username }}
         </div>
         <div style="
             padding: 0px 20px;">
             <div>
-                {{ user.first_name }} {{ user.last_name }} ({{ user.username }}) submitted a new
-                transfer at {{ form_data.action_date }} with the NCTR Record Transfer Portal. To
-                view their new submission, <a href="{{ bag_url }}">click here</a> or copy and paste
-                the link below into your favourite browser:
+                Someone created a new account for the NCTR Record Transfer Portal using this email.
+                To activate your account,
+                <a href="{{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}">click here</a>,
+                or copy and paste the following link into your favourite browser:
             </div>
             <p>
-                {{ bag_url }}
+                {{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}
             </p>
             <div style="
                 font-size: 10pt;">
