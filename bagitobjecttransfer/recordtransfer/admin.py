@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 from recordtransfer.settings import BAG_STORAGE_FOLDER, DEFAULT_DATA
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
 from recordtransfer.caais import flatten_meta_tree
+from recordtransfer.atom import flatten_meta_tree_atom_style
 
 
 class CustomUserAdmin(UserAdmin):
@@ -199,8 +200,12 @@ class BagAdmin(admin.ModelAdmin):
     form = BagForm
 
     actions = [
-        'export_caais_csv',
         'export_caais_reports',
+        'export_caais_csv',
+        'export_atom_2_6_csv',
+        'export_atom_2_3_csv',
+        'export_atom_2_2_csv',
+        'export_atom_2_1_csv',
         'mark_not_started',
         'mark_in_progress',
         'mark_complete'
@@ -226,41 +231,65 @@ class BagAdmin(admin.ModelAdmin):
         return UserBagForm
 
     def export_caais_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            new_row = OrderedDict()
+            new_row['Username'] = bag.user.username
+            new_row['Bagging Date'] = bag.bagging_date
+            new_row['Bag Location'] = str(self.bag_container / bag.user.username / bag.bag_name)
+            new_row['Review Status'] = bag.get_review_status_display()
+            bag_metadata = json.loads(bag.caais_metadata)
+            metadata_as_csv = flatten_meta_tree(bag_metadata)
+            new_row.update(metadata_as_csv)
+            return new_row
+        return self.export_generic_csv(queryset, convert_bag_to_row, 'caais_v1.0_')
+    export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
+
+    def export_atom_2_6_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 6))
+        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.6_')
+    export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
+
+    def export_atom_2_3_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 3))
+        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.3_')
+    export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
+
+    def export_atom_2_2_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 2))
+        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.2_')
+    export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
+
+    def export_atom_2_1_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 1))
+        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.1_')
+    export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
+
+    def export_generic_csv(self, queryset, convert_bag_to_row, filename_prefix: str):
         csv_file = StringIO()
         writer = csv.writer(csv_file)
 
         for i, bag in enumerate(queryset, 0):
-            bag_metadata = json.loads(bag.caais_metadata)
-            metadata_as_csv = flatten_meta_tree(bag_metadata)
-
+            new_row = convert_bag_to_row(bag)
             # Write the headers on the first loop
             if i == 0:
-                writer.writerow([
-                    'Username',
-                    'Bagging Date',
-                    'Bag Location',
-                    'Review Status',
-                    *metadata_as_csv.keys(),
-                ])
-
-            writer.writerow(
-                [
-                    bag.user.username,
-                    bag.bagging_date,
-                    str(self.bag_container / bag.user.username / bag.bag_name),
-                    bag.get_review_status_display(),
-                    *metadata_as_csv.values(),
-                ]
-            )
+                writer.writerow(new_row.keys())
+            writer.writerow(new_row.values())
 
         csv_file.seek(0)
         response = HttpResponse(csv_file, content_type='text/csv')
         local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
-        filename = f"exported_bag_info_{local_time}.csv"
+        filename = f"{filename_prefix}{local_time}.csv"
         response['Content-Disposition'] = f'attachment; filename={filename}'
         csv_file.close()
         return response
-    export_caais_csv.short_description = 'Export CAAIS v1.0 CSV data for selected Bags'
 
     def export_caais_reports(self, request, queryset):
         zipf = BytesIO()
@@ -274,7 +303,7 @@ class BagAdmin(admin.ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename=exported-bag-reports.zip'
         zipf.close()
         return response
-    export_caais_reports.short_description = 'Export CAAIS v1.0 HTML reports for selected Bags'
+    export_caais_reports.short_description = 'Export CAAIS 1.0 HTML reports for Selected'
 
     def mark_not_started(self, request, queryset):
         queryset.update(review_status=Bag.ReviewStatus.NOT_REVIEWED)
