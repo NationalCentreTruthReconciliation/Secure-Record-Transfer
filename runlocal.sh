@@ -7,19 +7,15 @@ check_prerequisites () {
 	if ! type python3 > /dev/null; then
 		echo 'python3 command not found. Install python 3 before continuing.'
 		return 1
-	fi
-	if ! type redis-server > /dev/null; then
+	elif ! type redis-server > /dev/null; then
 		echo 'redis-server command not found. Install redis before continuing.'
 		return 1
-	fi
-	if [[ ! -d ./env/ ]]; then
+	elif [[ ! -d ./env/ ]]; then
 		echo 'Create a virtual environment in the env folder and install requirements before continuing.'
 		return 1
-	fi
-	if [[ ! -d ./redis/ ]]; then
+	elif [[ ! -d ./redis/ ]]; then
 		mkdir redis
-	fi
-	if [[ ! -f ./redis/redis.conf ]]; then
+	elif [[ ! -f ./redis/redis.conf ]]; then
 		echo 'Create a redis.conf file in the redis folder before continuing.'
 		return 1
 	fi
