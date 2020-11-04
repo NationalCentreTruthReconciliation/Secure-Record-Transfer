@@ -66,9 +66,6 @@ class ContactInfoForm(forms.Form):
         max_length=64,
         min_length=2,
         required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('Enter your name')
-        }),
         label=gettext('Contact name'),
     )
 
@@ -76,9 +73,6 @@ class ContactInfoForm(forms.Form):
         max_length=64,
         min_length=2,
         required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('Enter your job title')
-        }),
         label=gettext('Job title'),
     )
 
@@ -97,9 +91,6 @@ class ContactInfoForm(forms.Form):
     )
 
     email = forms.EmailField(
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('Enter your email')
-        }),
         label=gettext('Email'),
     )
 
@@ -119,6 +110,12 @@ class ContactInfoForm(forms.Form):
             'placeholder': gettext('Unit Number, RPO, PO BOX... (optional)')
         }),
         label=gettext('Address line 2'),
+    )
+
+    city = forms.CharField(
+        max_length=100,
+        required=True,
+        label=gettext('City'),
     )
 
     province_or_state = forms.ChoiceField(
