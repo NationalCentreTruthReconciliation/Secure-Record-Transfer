@@ -1,7 +1,10 @@
 ''' This file contains functions to assist in converting the CAAIS metadata tree into a flat
 structure with the column names for an AtoM accession CSV.
 '''
+import re
 from collections import OrderedDict
+
+from recordtransfer.settings import APPROXIMATE_DATE_FORMAT
 
 accepted_versions = {
     (2, 6): [
@@ -157,7 +160,7 @@ def _map_section_1(section_1: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row (OrderedDict): The current working CSV row being mapped to
         version (tuple): The version of the AtoM CSV being generated
     '''
-    # 1.1 Repository --- MISSING
+    # 1.1 Repository -> (NO EQUIVALENT)
 
     # 1.2 Accession Identifier -> accessionNumber
     atom_row['accessionNumber'] = section_1['accession_identifier']
@@ -178,12 +181,12 @@ def _map_section_1(section_1: OrderedDict, atom_row: OrderedDict, version: tuple
     # 1.4 Accession Title -> title
     atom_row['title'] = section_1['accession_title']
 
-    # 1.5 Archival Unit --- MISSING
+    # 1.5 Archival Unit -> (NO EQUIVALENT)
 
     # 1.6 Acquisition Method -> acquisitionType
     atom_row['acquisitionType'] = section_1['acquisition_method']
 
-    # 1.7 Disposition Authority --- MISSING
+    # 1.7 Disposition Authority -> (NO EQUIVALENT)
 
 def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple):
     ''' Map section 2 of the CAAIS metadata to the atom CSV row
@@ -196,9 +199,9 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
     source_of_info = section_2['source_of_information']
     contact_info = source_of_info['source_contact_information']
 
-    # 2.1.1 Source Type -> donorNote (NOT IDEAL)
-    # 2.1.4 Source Role -> donorNote (NOT IDEAL)
-    # 2.1.5 Source Note -> donorNote (NOT IDEAL)
+    # 2.1.1 Source Type -> donorNote (v2.6, NOT IDEAL)
+    # 2.1.4 Source Role -> donorNote (v2.6, NOT IDEAL)
+    # 2.1.5 Source Note -> donorNote (v2.6, NOT IDEAL)
     if version >= (2, 6):
         donor_narrative = [
             f'The donor is a {source_of_info["source_type"]}',
@@ -212,8 +215,8 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
     # 2.1.2 Source Name -> donorName
     atom_row['donorName'] = source_of_info['source_name']
 
-    # Contact Name -> donorContactPerson
-    # Job Title -> donorContactPerson (NOT IDEAL)
+    # Contact Name -> donorContactPerson (v2.6)
+    # Job Title -> donorContactPerson (v2.6, NOT IDEAL)
     if version >= (2, 6):
         contact_person = f'{contact_info["contact_name"]} ({contact_info["job_title"]})'
         atom_row['donorContactPerson'] = contact_person
@@ -250,7 +253,57 @@ def _map_section_3(section_3: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row (OrderedDict): The current working CSV row being mapped to
         version (tuple): The version of the AtoM CSV being generated
     '''
-    pass
+    date_split = section_3['date_of_material'].split(' - ')
+    if len(date_split) == 1:
+        date_split.append(date_split[0])
+
+    # Used to pull the date from the approximate form
+    approx_header, approx_trailer = APPROXIMATE_DATE_FORMAT.split('{date}')
+    approximate_date = re.compile(
+        r'^' + re.escape(approx_header) + r'(?P<date>[\d\-]+)' + re.escape(approx_trailer) + r'$'
+    )
+    match_obj_start = approximate_date.match(date_split[0])
+    match_obj_end = approximate_date.match(date_split[1])
+
+    # Remove the start and end of the approximate date form, if the date is approximate
+    start_date = match_obj_start.group('date') if match_obj_start else date_split[0]
+    end_date = match_obj_end.group('date') if match_obj_end else date_split[1]
+
+    # 3.1 Date of Material -> creationDates, creationDatesStart, creationDatesEnd (v2.2)
+    # 3.1 Date of Material -> eventDates, eventStartDates, eventEndDates (v2.3+)
+    if version == (2, 2):
+        atom_row['creationDates'] = section_3['date_of_material']
+        atom_row['creationDatesStart'] = start_date
+        atom_row['creationDatesEnd'] = end_date
+    elif version >= (2, 3):
+        atom_row['eventDates'] = section_3['date_of_material']
+        atom_row['eventStartDates'] = start_date
+        atom_row['eventEndDates'] = end_date
+
+    # Event type -> creationDateTypes (v2.2)
+    # Event type -> eventTypes (v2.3+)
+    if version == (2, 2):
+        atom_row['creationDatesType'] = 'Creation'
+    elif version >= (2, 3):
+        atom_row['eventTypes'] = 'Creation'
+
+    # 3.2.1 Extent Statement Type -> (NO EQUIVALENT)
+    # 3.2.2 Quantity and Type of Units -> receivedExtentUnits
+    # 3.2.3 Extent Statement Note -> (NO EQUIVALENT)
+    quantities = []
+    for extent in section_3['extent_statement']:
+        quantities.append(extent['quantity_and_type_of_units'])
+    atom_row['receivedExtentUnits'] = '|'.join(quantities)
+
+    # 3.3 Scope and Content -> scopeAndContent
+    # 3.4 Language of Material -> scopeAndContent (NOT IDEAL)
+    scope = section_3['scope_and_content'].rstrip('. ')
+    language = section_3['language_of_material'].rstrip('. ')
+    scope_narrative = [
+        scope,
+        f'Language of material: {language}.'
+    ]
+    atom_row['scopeAndContent'] = '. '.join(scope_narrative)
 
 def _map_section_4(section_4: OrderedDict, atom_row: OrderedDict, version: tuple):
     ''' Map section 4 of the CAAIS metadata to the atom CSV row
