@@ -226,7 +226,7 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
 
     # Address Line 1 -> donorStreetAddress
     # Address Line 2 -> donorStreetAddress
-    # TODO: City -> donorCity
+    # City -> donorCity
     # Province or State -> donorRegion
     # Postal or Zip Code -> donorPostalCode
     # Country -> donorCountry
@@ -234,7 +234,7 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
     if contact_info['address_line_2']:
         street_address += f', {contact_info["address_line_2"]}'
     atom_row['donorStreetAddress'] = street_address
-    atom_row['donorCity'] = '' # TODO: contact_info['city']
+    atom_row['donorCity'] = contact_info['city']
     atom_row['donorRegion'] = contact_info['province_or_state']
     atom_row['donorPostalCode'] = contact_info['postal_or_zip_code']
     atom_row['donorCountry'] = contact_info['country']
