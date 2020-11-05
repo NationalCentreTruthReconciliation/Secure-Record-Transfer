@@ -67,4 +67,4 @@ class Bag(models.Model):
                                      default=ReviewStatus.NOT_REVIEWED)
 
     def __str__(self):
-        return f"Bag created by {self.user} at {self.bagging_date}"
+        return f'{self.bag_name} (Created by {self.user})'
