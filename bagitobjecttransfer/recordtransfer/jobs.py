@@ -2,10 +2,13 @@ import json
 import logging
 import smtplib
 import urllib.parse
+import zipfile
+from io import BytesIO
 from pathlib import Path
 from datetime import timedelta
 
 import django_rq
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.encoding import force_bytes
@@ -14,10 +17,10 @@ from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
 from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
-from recordtransfer.models import Bag, UploadedFile, User
+from recordtransfer.models import Bag, UploadedFile, User, Job
 from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_EMAIL, BASE_URL
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import html_to_text
+from recordtransfer.utils import html_to_text, zip_directory
 
 
 LOGGER = logging.getLogger(__name__)
@@ -72,6 +75,41 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         send_bag_creation_success.delay(form_data, bag_url, user_submitted)
     else:
         send_bag_creation_failure.delay(form_data, user_submitted)
+
+@django_rq.job
+def create_downloadable_bag(bag: Bag, user_triggered: User):
+    ''' Create a zipped bag that a user can download using a Job model.
+
+    Args:
+        bag (Bag): The bag to zip up for users to download
+        user (User): The user who triggered this new Job creation
+    '''
+    new_job = Job(
+        name=f'Generate Zipped Bag for {str(bag)}',
+        start_time=timezone.now(),
+        user_triggered=user_triggered,
+        job_status=Job.JobStatus.NOT_STARTED)
+    new_job.save()
+
+    zipf = None
+    try:
+        new_job.job_status = Job.JobStatus.IN_PROGRESS
+        new_job.save()
+        zipf = BytesIO()
+        zipped_bag = zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False)
+        zip_directory(bag.location, zipped_bag)
+        zipped_bag.close()
+        file_name = f'{bag.user.username}-{bag.bag_name}.zip'
+        new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
+        new_job.job_status = Job.JobStatus.COMPLETE
+        new_job.save()
+    except Exception as exc:
+        new_job.job_status = Job.JobStatus.FAILED
+        new_job.save()
+        LOGGER.error(msg=('Creating downloadable bag failed: {0}'.format(str(exc))))
+    finally:
+        if zipf is not None:
+            zipf.close()
 
 
 @django_rq.job

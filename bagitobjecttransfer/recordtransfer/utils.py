@@ -1,8 +1,27 @@
 import logging
+import os
+from zipfile import ZipFile
 
 from django.utils.html import strip_tags
 
 LOGGER = logging.getLogger(__name__)
+
+def zip_directory(directory: str, zipf: ZipFile):
+    ''' Zip a directory structure into a zip file.
+
+    Args:
+        directory (str): The folder to zip
+        zipf (ZipFile): A zipfile.ZipFile handle
+    '''
+    relroot = os.path.abspath(os.path.join(directory, os.pardir))
+    for root, _, files in os.walk(directory):
+        # add directory (needed for empty dirs)
+        zipf.write(root, os.path.relpath(root, relroot))
+        for file_ in files:
+            filename = os.path.join(root, file_)
+            if os.path.isfile(filename): # regular files only
+                arcname = os.path.join(os.path.relpath(root, relroot), file_)
+                zipf.write(filename, arcname)
 
 
 def snake_to_camel_case(string: str):
