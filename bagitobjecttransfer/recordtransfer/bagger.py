@@ -67,6 +67,59 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     }
 
 
+def update_bag(bag_folder: str, metadata: dict):
+    """ Updates the metadata for a bag located at the folder. The integrity of the bag is checked
+    before updating; if the bag is invalid, the bag will not be updated.
+
+    Args:
+        bag_folder (str): The bag folder to be updated
+        metadata (dict): The metadata fields to update in bag-info.txt
+
+    Returns:
+        (dict): A dictionary containing update information.
+    """
+    if not Path(bag_folder).exists():
+        LOGGER.error(msg=('There is no bag located at "{0}"!'.format(bag_folder)))
+        return {'bag_exists': False, 'bag_updated': False, 'num_fields_updated': 0}
+
+    bag = bagit.Bag(bag_folder)
+    if not bag.is_valid():
+        LOGGER.error(msg=('The bag located at "{0}" was found to be invalid!'.format(bag_folder)))
+        return {'bag_exists': True, 'bag_valid': False, 'num_fields_updated': 0}
+
+    if not metadata:
+        LOGGER.info(msg=('No updates were made to the bag-info.txt for the bag at '
+                         '"{0}"'.format(bag_folder)))
+        return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': 0}
+
+    LOGGER.info(msg=('Updating bag-info.txt for the bag at "{0}"'.format(bag_folder)))
+    fields_updated = 0
+    for key, new_value in metadata.items():
+        if key not in bag.info:
+            LOGGER.info(msg=('New fields cannot be added to a bag. Found invalid field '
+                             '"{0}"'.format(key)))
+        elif bag.info[key] != new_value:
+            bag.info[key] = new_value
+            fields_updated += 1
+
+    if fields_updated == 0:
+        LOGGER.info(msg=('No updates were made to the bag-info.txt file for the bag at '
+                         '"{0}"'.format(bag_folder)))
+        return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': fields_updated}
+
+    # Don't re-create manifest for files, only for bag-info
+    bag.save(manifests=False)
+
+    if not bag.is_valid():
+        LOGGER.error(msg=('Made {0} updates to the bag-info.txt file for the bag at "{1}", but '
+                          'the saved bag was invalid!'.format(fields_updated, bag_folder)))
+        return {'bag_exists': True, 'bag_valid': False, 'num_fields_updated': fields_updated}
+
+    LOGGER.info(msg=('Made {0} updates to the bag-info.txt file for the bag at '
+                     '"{1}"'.format(fields_updated, bag_folder)))
+    return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': fields_updated}
+
+
 def delete_bag(bag_folder: str):
     """ Deletes a bag folder and all of its contents
 
