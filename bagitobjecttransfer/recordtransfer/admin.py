@@ -8,15 +8,31 @@ from collections import OrderedDict
 from django.contrib import admin, messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
+from django.utils.translation import gettext
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
-from recordtransfer.models import Bag, UploadSession, UploadedFile, User
+from recordtransfer.models import *
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
 from recordtransfer.forms import BagForm
+
+
+class ReadOnlyAdmin(admin.ModelAdmin):
+    readonly_fields = []
+
+    def get_readonly_fields(self, request, obj=None):
+        return list(self.readonly_fields) + \
+               [field.name for field in obj._meta.fields] + \
+               [field.name for field in obj._meta.many_to_many]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class CustomUserAdmin(UserAdmin):
@@ -216,7 +232,19 @@ class BagAdmin(admin.ModelAdmin):
         return super().response_change(request, obj)
 
 
+class JobAdmin(ReadOnlyAdmin):
+    list_display = ('name', 'start_time', 'user_triggered', 'job_status', 'attached_file')
+
+    def attached_file(self, obj):
+        if obj.attached_file:
+            return f"<a href='{obj.attached_file.url}'>{gettext('Download')}</a>"
+        return gettext("No attachment")
+    attached_file.allow_tags = True
+    attached_file.short_description = 'Download Attachment'
+
+
 admin.site.register(Bag, BagAdmin)
 admin.site.register(UploadedFile, UploadedFileAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UploadSession)
+admin.site.register(Job, JobAdmin)

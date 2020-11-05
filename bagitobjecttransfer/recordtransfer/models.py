@@ -68,3 +68,22 @@ class Bag(models.Model):
 
     def __str__(self):
         return f'{self.bag_name} (Created by {self.user})'
+
+
+class Job(models.Model):
+    ''' A background job executed by an admin user '''
+    class JobStatus(models.TextChoices):
+        ''' The status of the bag's review '''
+        NOT_STARTED = 'NS', _('Not Started')
+        IN_PROGRESS = 'IP', _('In Progress')
+        COMPLETE = 'CP', _('Complete')
+
+    start_time = models.DateTimeField()
+    name = models.CharField(max_length=256, null=True)
+    user_triggered = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    job_status = models.CharField(max_length=2, choices=JobStatus.choices,
+                                  default=JobStatus.NOT_STARTED)
+    attached_file = models.FileField(upload_to='jobs', blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.name} (Created by {self.user_triggered})'
