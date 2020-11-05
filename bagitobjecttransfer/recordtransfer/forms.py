@@ -6,18 +6,181 @@ would be too long, and might create a negative experience, especially on mobile.
 
 Remember that each form must be specified in the wizard in :code:`urls.py`.
 '''
+import json
+from collections import OrderedDict
+
 from django import forms
+from django.utils import timezone
 from django.utils.translation import gettext
 from django.contrib.auth.forms import UserCreationForm
 
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
-from recordtransfer.models import User
+from recordtransfer.models import User, Bag
+from recordtransfer.settings import DEFAULT_DATA
+
+
+class BagForm(forms.ModelForm):
+    ''' Form used to edit a Bag in the admin '''
+
+    class Meta:
+        model = Bag
+        fields = (
+            'bagging_date',
+            'bag_name',
+            'caais_metadata',
+            'user',
+            'review_status',
+        )
+
+    disabled_fields = ['bagging_date', 'bag_name', 'caais_metadata', 'user']
+
+    def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user')
+        super().__init__(*args, **kwargs)
+
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            # Disable fields
+            for field in self.disabled_fields:
+                self.fields[field].disabled = True
+            self.fields['caais_metadata'].help_text = gettext('Click View Metadata as HTML below '
+                                                              'for a human-readable report')
+            # Load string metadata as object
+            self._bag_metadata = json.loads(instance.caais_metadata)
+
+            accession_id = self._bag_metadata['section_1']['accession_identifier']
+            self.fields['accession_identifier'].initial = accession_id
+            level_of_detail = self._bag_metadata['section_7']['level_of_detail']
+            self.fields['level_of_detail'].initial = level_of_detail or 'Not Specified'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        caais_metadata_changed = False
+
+        new_accession_id = cleaned_data['accession_identifier']
+        curr_accession_id = self._bag_metadata['section_1']['accession_identifier']
+        if curr_accession_id != new_accession_id and new_accession_id:
+            if not curr_accession_id or \
+                (curr_accession_id == DEFAULT_DATA['section_1'].get('accession_identifier')):
+                note = f'Accession ID was set to "{new_accession_id}"'
+                self.log_new_event('Accession ID Assigned', note)
+            else:
+                note = f'Accession ID Changed from "{curr_accession_id}" to "{new_accession_id}"'
+                self.log_new_event('Accession ID Modified', note)
+            self._bag_metadata['section_1']['accession_identifier'] = new_accession_id
+            caais_metadata_changed = True
+
+        appraisal_value = cleaned_data['appraisal_statement_value']
+        if appraisal_value:
+            appraisal = OrderedDict()
+            appraisal_type = cleaned_data['appraisal_statement_type']
+            appraisal_note = cleaned_data['appraisal_statement_note']
+            appraisal['appraisal_statement_type'] = appraisal_type
+            appraisal['appraisal_statement_value'] = appraisal_value
+            appraisal['appraisal_statement_note'] = appraisal_note
+            self.log_new_event(f'{appraisal_type} Added')
+            self._bag_metadata['section_4']['appraisal_statement'].append(appraisal)
+            caais_metadata_changed = True
+
+        level_of_detail = cleaned_data['level_of_detail']
+        curr_level_of_detail = self._bag_metadata['section_7']['level_of_detail']
+        if curr_level_of_detail != level_of_detail and level_of_detail and \
+            level_of_detail != 'Not Specified':
+            if not curr_level_of_detail or \
+                (curr_level_of_detail == DEFAULT_DATA['section_7'].get('level_of_detail')):
+                note = f'Level of Detail was set to {level_of_detail}'
+                self.log_new_event('Level of Detail Assigned', note)
+            else:
+                note = f'Level of Detail Changed from {curr_level_of_detail} to {level_of_detail}'
+                self.log_new_event('Level of Detail Changed', note)
+            self._bag_metadata['section_7']['level_of_detail'] = level_of_detail
+            caais_metadata_changed = True
+
+        if caais_metadata_changed:
+            cleaned_data['caais_metadata'] = json.dumps(self._bag_metadata)
+
+        return cleaned_data
+
+    def log_new_event(self, event_type: str, event_note: str = ''):
+        new_event = OrderedDict()
+        new_event['event_type'] = event_type
+        new_event['event_date'] = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
+        if self.current_user:
+            new_event['event_agent'] = (f'User {self.current_user.username} '
+                                        f'({self.current_user.email})')
+        else:
+            new_event['event_agent'] = 'Transfer Portal User'
+        new_event['event_note'] = event_note
+        self._bag_metadata['section_5']['event_statement'].append(new_event)
+
+    accession_identifier = forms.CharField(
+        max_length=128,
+        min_length=2,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': gettext('Update Accession ID')
+        }),
+        label=gettext('Accession identifier'),
+        help_text=gettext('Saving any change to this field will log a new event in the Caais '
+                          'metadata'),
+    )
+
+    level_of_detail = forms.ChoiceField(
+        choices = [(c, c) for c in [
+            'Not Specified',
+            'Minimal',
+            'Partial',
+            'Full',
+        ]],
+        required=False,
+        widget=forms.Select(),
+        label=gettext('Level of detail'),
+        help_text=gettext('Saving any change to this field will log a new event in the Caais '
+                          'metadata'),
+    )
+
+    appraisal_statement_type = forms.ChoiceField(
+        choices = [(c, c) for c in [
+            'Archival Appraisal',
+            'Monetary Appraisal',
+        ]],
+        required=False,
+        widget=forms.Select(),
+        label=gettext('New Appraisal Type'),
+    )
+
+    appraisal_statement_value = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record a new appraisal statement here.'),
+        }),
+        label=gettext('New Appraisal Statement'),
+        help_text=gettext('Leave empty if you do not want to add an appraisal statement'),
+    )
+
+    appraisal_statement_note = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record any notes about the appraisal statement here '
+                                   '(optional).'),
+        }),
+        label=gettext('Notes About Appraisal Statement'),
+        help_text=gettext('Leave empty if you do not want to add an appraisal statement'),
+    )
 
 
 class SignUpForm(UserCreationForm):
     ''' Form for a user to create a new account '''
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
     def clean(self):
         ''' Clean data, make sure username and email are not already in use. '''
@@ -54,10 +217,6 @@ class SignUpForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(),
         label=gettext('Last name'))
-
-    class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
 
 class ContactInfoForm(forms.Form):
