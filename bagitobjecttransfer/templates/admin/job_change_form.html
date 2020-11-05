@@ -1,0 +1,9 @@
+{% extends "admin/change_form.html" %}
+
+{% block submit_buttons_bottom %}
+    {% if original.job_status == 'CP' %}
+        <div class="submit-row">
+            <input type="submit" value="Download Attached File" name="_download_attached_file">
+        </div>
+    {% endif %}
+{% endblock %}

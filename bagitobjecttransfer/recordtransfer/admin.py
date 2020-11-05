@@ -8,16 +8,17 @@ from collections import OrderedDict
 from django.contrib import admin, messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
-from django.utils.translation import gettext
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
 
-from recordtransfer.settings import BAG_STORAGE_FOLDER
-from recordtransfer.models import *
+from recordtransfer.models import Bag, User, UploadedFile, UploadSession, Job
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
 from recordtransfer.forms import BagForm
+from recordtransfer.jobs import create_downloadable_bag
+
+from bagitobjecttransfer.settings.base import MEDIA_ROOT
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -79,10 +80,6 @@ class BagAdmin(admin.ModelAdmin):
     list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
     ordering = ['bagging_date']
 
-    def __init__(self, t, obj):
-        super().__init__(t, obj)
-        self.bag_container = Path(BAG_STORAGE_FOLDER)
-
     def get_form(self, request, obj=None, change=False, **kwargs):
         _class = super().get_form(request, obj, change, **kwargs)
 
@@ -99,7 +96,7 @@ class BagAdmin(admin.ModelAdmin):
             new_row = OrderedDict()
             new_row['Username'] = bag.user.username
             new_row['Bagging Date'] = bag.bagging_date
-            new_row['Bag Location'] = str(self.bag_container / bag.user.username / bag.bag_name)
+            new_row['Bag Location'] = bag.location
             new_row['Review Status'] = bag.get_review_status_display()
             bag_metadata = json.loads(bag.caais_metadata)
             metadata_as_csv = flatten_meta_tree(bag_metadata)
@@ -191,17 +188,15 @@ class BagAdmin(admin.ModelAdmin):
             'metadata': json.loads(bag.caais_metadata),
         })
 
-    def locate_bag(self, bag: Bag):
-        return str(self.bag_container / bag.user.username / bag.bag_name)
-
     def save_model(self, request, obj, form, change):
-        if '_view_report' not in request.POST and '_get_bag_location' not in request.POST:
+        if '_view_report' not in request.POST and '_get_bag_location' not in request.POST and \
+            '_download_bag' not in request.POST:
             super().save_model(request, obj, form, change)
             self.update_filesystem_bag(request, obj)
 
     def update_filesystem_bag(self, request, bag: Bag):
         bagit_tags = flatten_meta_tree(json.loads(bag.caais_metadata))
-        bag_location = self.locate_bag(bag)
+        bag_location = bag.location
         results = update_bag(bag_location, bagit_tags)
 
         if not results['bag_exists']:
@@ -224,23 +219,47 @@ class BagAdmin(admin.ModelAdmin):
             messages.success(request, msg)
 
     def response_change(self, request, obj):
-        if "_view_report" in request.POST:
+        if '_view_report' in request.POST:
             return HttpResponse(self.render_html_report(obj), content_type='text/html')
-        if "_get_bag_location" in request.POST:
-            self.message_user(request, f'This bag is located at: {self.locate_bag(obj)}')
+        if '_get_bag_location' in request.POST:
+            self.message_user(request, f'This bag is located at: {obj.location}')
+            return HttpResponseRedirect('../')
+        if '_download_bag' in request.POST:
+            create_downloadable_bag.delay(obj, request.user)
+            self.message_user(request, ('A downloadable bag is being generated. Check the Jobs '
+                                        'page for more information.'))
             return HttpResponseRedirect('../')
         return super().response_change(request, obj)
 
 
 class JobAdmin(ReadOnlyAdmin):
-    list_display = ('name', 'start_time', 'user_triggered', 'job_status', 'attached_file')
+    change_form_template = 'admin/job_change_form.html'
 
-    def attached_file(self, obj):
-        if obj.attached_file:
-            return f"<a href='{obj.attached_file.url}'>{gettext('Download')}</a>"
-        return gettext("No attachment")
-    attached_file.allow_tags = True
-    attached_file.short_description = 'Download Attachment'
+    list_display = ('name', 'start_time', 'user_triggered', 'job_status')
+    ordering = ('-start_time', )
+
+    def save_model(self, request, obj, form, change):
+        if '_download_attached_file' not in request.POST:
+            super().save_model(request, obj, form, change)
+
+    def get_fields(self, request, obj=None):
+        fields = list(super().get_fields(request, obj))
+        exclude_set = set()
+        if obj:
+            exclude_set.add('attached_file')
+        return [f for f in fields if f not in exclude_set]
+
+    def response_change(self, request, obj):
+        if '_download_attached_file' in request.POST:
+            try:
+                file_path = Path(MEDIA_ROOT) / obj.attached_file.name
+                file_handle = open(file_path, "rb")
+                response = HttpResponse(file_handle, content_type='application/x-zip-compressed')
+                response['Content-Disposition'] = f'attachment; filename="{file_path.name}"'
+                return response
+            except Exception:
+                messages.error(request, 'Could not download the file.')
+        return super().response_change(request, obj)
 
 
 admin.site.register(Bag, BagAdmin)
