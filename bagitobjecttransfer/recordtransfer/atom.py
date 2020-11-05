@@ -166,7 +166,9 @@ def _map_section_1(section_1: OrderedDict, atom_row: OrderedDict, version: tuple
     # 1.2 Accession Identifier -> accessionNumber
     atom_row['accessionNumber'] = section_1['accession_identifier']
 
-    # 1.3 Other Identifier -> alternativeIdentifiers
+    # 1.3.1 Other Identifier Type -> alternativeIdentifierTypes
+    # 1.3.1 Other Identifier Value -> alternativeIdentifiers
+    # 1.3.1 Other Identifier Note -> alternativeIdentifierNotes
     if version >= (2, 6):
         other_id_types = []
         other_id_values = []
@@ -274,16 +276,13 @@ def _map_section_3(section_3: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row['creationDates'] = section_3['date_of_material']
         atom_row['creationDatesStart'] = start_date
         atom_row['creationDatesEnd'] = end_date
+        atom_row['creators'] = 'NULL'
+        atom_row['creationDatesType'] = 'Creation'
     elif version >= (2, 3):
         atom_row['eventDates'] = section_3['date_of_material']
         atom_row['eventStartDates'] = start_date
         atom_row['eventEndDates'] = end_date
-
-    # Event type -> creationDateTypes (v2.2)
-    # Event type -> eventTypes (v2.3+)
-    if version == (2, 2):
-        atom_row['creationDatesType'] = 'Creation'
-    elif version >= (2, 3):
+        atom_row['creators'] = 'NULL'
         atom_row['eventTypes'] = 'Creation'
 
     # 3.2.1 Extent Statement Type -> (NO EQUIVALENT)
@@ -312,7 +311,51 @@ def _map_section_4(section_4: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row (OrderedDict): The current working CSV row being mapped to
         version (tuple): The version of the AtoM CSV being generated
     '''
-    pass
+    # 4.1 Storage Location -> locationInformation
+    atom_row['locationInformation'] = section_4['storage_location']
+
+    # 4.2.1 Rights Statement Type -> (NO EQUIVALENT)
+    # 4.2.2 Rights Statement Value -> (NO EQUIVALENT)
+    # 4.2.3 Rights Statement Note -> (NO EQUIVALENT)
+
+    # 4.3.1 Material Assessment Statement Type -> physicalCondition (NOT IDEAL)
+    # 4.3.2 Material Assessment Statement Value -> physicalCondition
+    # 4.3.3 Material Assessment Action Plan -> processingStatus
+    # 4.3.4 Material Assessment Statement Note -> processingNotes
+    statement_types = []
+    statement_values = []
+    action_plans = []
+    statement_notes = []
+    for statement in section_4['material_assessment_statement']:
+        statement_types.append(statement['material_assessment_statement_type'])
+        statement_values.append(statement['material_assessment_statement_value'])
+        action_plans.append(statement['material_assessment_action_plan'] or 'NULL')
+        statement_notes.append(statement['material_assessment_statement_note'] or 'NULL')
+    atom_row['physicalCondition'] = '|'.join([f'Assessment Type: {x}; Statement: {y}' for \
+        x, y in zip(statement_types, statement_values)
+    ])
+    atom_row['processingStatus'] = '|'.join(action_plans)
+    atom_row['processingNotes'] = '|'.join(statement_notes)
+
+    # 4.4.1 Appraisal Statement Type -> appraisal (NOT IDEAL)
+    # 4.4.2 Appraisal Statement Value -> appraisal (NOT IDEAL)
+    # 4.4.3 Appraisal Statement Note -> appraisal (NOT IDEAL)
+    appraisal_types = []
+    appraisal_values = []
+    appraisal_notes = []
+    for appraisal in section_4['appraisal_statement']:
+        appraisal_types.append(appraisal['appraisal_statement_type'])
+        appraisal_values.append(appraisal['appraisal_statement_value'])
+        appraisal_notes.append(appraisal['appraisal_statement_note'] or 'NULL')
+    atom_row['appraisal'] = '|'.join([
+        f'Appraisal Type: {x}; Statement: {y}; Notes: {z}' if z != 'NULL' else \
+        f'Appraisal Type: {x}; Statement: {y}' for \
+        x, y, z in zip(appraisal_types, appraisal_values, appraisal_notes)
+    ])
+
+    # 4.5.1 Associated Documentation Type -> (NO EQUIVALENT)
+    # 4.5.2 Associated Documentation Title -> (NO EQUIVALENT)
+    # 4.5.3 Associated Documentation Note -> (NO EQUIVALENT)
 
 def _map_section_5(section_5: OrderedDict, atom_row: OrderedDict, version: tuple):
     ''' Map section 5 of the CAAIS metadata to the atom CSV row
