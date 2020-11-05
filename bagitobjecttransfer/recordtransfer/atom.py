@@ -3,6 +3,7 @@ structure with the column names for an AtoM accession CSV.
 '''
 import re
 from collections import OrderedDict
+from datetime import datetime
 
 from recordtransfer.settings import APPROXIMATE_DATE_FORMAT
 
@@ -221,18 +222,14 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
         contact_person = f'{contact_info["contact_name"]} ({contact_info["job_title"]})'
         atom_row['donorContactPerson'] = contact_person
 
-    # Phone Number -> donorTelephone
-    atom_row['donorTelephone'] = contact_info['phone_number']
-
-    # Email -> donorEmail
-    atom_row['donorEmail'] = contact_info['email']
-
     # Address Line 1 -> donorStreetAddress
     # Address Line 2 -> donorStreetAddress
     # City -> donorCity
     # Province or State -> donorRegion
     # Postal or Zip Code -> donorPostalCode
     # Country -> donorCountry
+    # Phone Number -> donorTelephone
+    # Email -> donorEmail
     street_address = contact_info['address_line_1']
     if contact_info['address_line_2']:
         street_address += f', {contact_info["address_line_2"]}'
@@ -241,6 +238,8 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
     atom_row['donorRegion'] = contact_info['province_or_state']
     atom_row['donorPostalCode'] = contact_info['postal_or_zip_code']
     atom_row['donorCountry'] = contact_info['country']
+    atom_row['donorTelephone'] = contact_info['phone_number']
+    atom_row['donorEmail'] = contact_info['email']
 
     # 2.2 Custodial History -> archivalHistory
     atom_row['archivalHistory'] = section_2['custodial_history']
@@ -323,7 +322,10 @@ def _map_section_5(section_5: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row (OrderedDict): The current working CSV row being mapped to
         version (tuple): The version of the AtoM CSV being generated
     '''
-    pass
+    # 5.1.1 Event Type -> (NO EQUIVALENT)
+    # 5.1.2 Event Date -> (NO EQUIVALENT)
+    # 5.1.3 Event Agent -> (NO EQUIVALENT)
+    # 5.1.4 Event Note -> (NO EQUIVALENT)
 
 def _map_section_6(section_6: OrderedDict, atom_row: OrderedDict, version: tuple):
     ''' Map section 6 of the CAAIS metadata to the atom CSV row
@@ -333,7 +335,7 @@ def _map_section_6(section_6: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row (OrderedDict): The current working CSV row being mapped to
         version (tuple): The version of the AtoM CSV being generated
     '''
-    # 6.1 General Note --- MISSING
+    # 6.1 General Note -> (NO EQUIVALENT)
 
 def _map_section_7(section_7: OrderedDict, atom_row: OrderedDict, version: tuple):
     ''' Map section 7 of the CAAIS metadata to the atom CSV row
@@ -343,7 +345,62 @@ def _map_section_7(section_7: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row (OrderedDict): The current working CSV row being mapped to
         version (tuple): The version of the AtoM CSV being generated
     '''
-    pass
+    # 7.1 Rules or Conventions -> (NO EQUIVALENT)
+    # 7.2 Level of Detail -> (NO EQUIVALENT)
+
+    event_types = []
+    event_agents = []
+    event_dates = []
+    for action in section_7['date_of_creation_or_revision']:
+        event_agents.append(action['action_agent'])
+        if version > (2, 1):
+            event_types.append(action['action_type'])
+            parsed_date = datetime.strptime(action['action_date'], r'%Y-%m-%d %H:%M:%S %Z')
+            yyyy_mm_dd = parsed_date.strftime(r'%Y-%m-%d')
+            event_dates.append(yyyy_mm_dd)
+
+    # 7.3.1 Action Type -> eventTypes (v2.3+)
+    # 7.3.2 Action Date -> eventDates, eventStartDates, eventEndDates (v2.3+)
+    # 7.3.3 Action Agent -> creators (v2.3+, NOT IDEAL)
+    # 7.3.4 Action Note -> (v2.3+, NO EQUIVALENT)
+    if version >= (2, 3):
+        array_column_updates = [
+            ('creators', event_agents),
+            ('eventTypes', event_types),
+            ('eventDates', event_dates),
+            ('eventStartDates', event_dates),
+            ('eventEndDates', event_dates),
+        ]
+
+    # 7.3.1 Action Type -> creationDatesType (v2.2, NOT IDEAL)
+    # 7.3.2 Action Date -> creationDates, creationDatesStart, creationDatesEnd (v2.2, NOT IDEAL)
+    # 7.3.3 Action Agent -> creators (v2.2, NOT IDEAL)
+    # 7.3.4 Action Note -> (v2.2, NO EQUIVALENT)
+    if version == (2, 2):
+        array_column_updates = [
+            ('creators', event_agents),
+            ('creationDatesType', event_types),
+            ('creationDates', event_dates),
+            ('creationDatesStart', event_dates),
+            ('creationDatesEnd', event_dates),
+        ]
+
+    # 7.3.1 Action Type -> (v2.1, NO EQUIVALENT)
+    # 7.3.2 Action Date -> (v2.1, NO EQUIVALENT)
+    # 7.3.3 Action Agent -> creators (v2.1, NOT IDEAL)
+    # 7.3.4 Action Note -> (v2.1, NO EQUIVALENT)
+    if version == (2, 1):
+        array_column_updates = [
+            ('creators', event_agents),
+        ]
+
+    for col_name, new_elements in array_column_updates:
+        curr_elements = atom_row[col_name].split('|')
+        curr_elements.extend(new_elements)
+        atom_row[col_name] = '|'.join(curr_elements)
+
+    # 7.4 Language of Accession Record -> culture (v2.x, NOT IDEAL)
+    atom_row['culture'] = section_7['language_of_accession_record']
 
 def _check_version(version: tuple):
     if not isinstance(version, tuple):
