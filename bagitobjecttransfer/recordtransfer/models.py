@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 
+from recordtransfer.settings import BAG_STORAGE_FOLDER
+
 
 class User(AbstractUser):
     ''' The main User object used to authenticate users. '''
@@ -66,6 +68,10 @@ class Bag(models.Model):
     review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
                                      default=ReviewStatus.NOT_REVIEWED)
 
+    @property
+    def location(self):
+        return os.path.join(BAG_STORAGE_FOLDER, self.user.username, self.bag_name)
+
     def __str__(self):
         return f'{self.bag_name} (Created by {self.user})'
 
@@ -77,13 +83,14 @@ class Job(models.Model):
         NOT_STARTED = 'NS', _('Not Started')
         IN_PROGRESS = 'IP', _('In Progress')
         COMPLETE = 'CP', _('Complete')
+        FAILED = 'FD', _('Failed')
 
     start_time = models.DateTimeField()
     name = models.CharField(max_length=256, null=True)
     user_triggered = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     job_status = models.CharField(max_length=2, choices=JobStatus.choices,
                                   default=JobStatus.NOT_STARTED)
-    attached_file = models.FileField(upload_to='jobs', blank=True, null=True)
+    attached_file = models.FileField(upload_to='jobs/zipped_bags', blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} (Created by {self.user_triggered})'
