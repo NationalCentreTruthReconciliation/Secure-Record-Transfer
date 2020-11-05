@@ -36,12 +36,16 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     '''
     LOGGER.info('Starting bag creation')
 
-    caais_metadata = convert_transfer_form_to_meta_tree(form_data)
-    bagit_tags = flatten_meta_tree(caais_metadata)
-
+    # Get folder to store bag in, set the storage location in form
     folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
     if not folder.exists():
         folder.mkdir()
+        LOGGER.info(msg=('Created new bag folder for user "%s" at %s' % \
+            user_submitted.username, str(folder)))
+    form_data['storage_location'] = str(folder.resolve())
+
+    caais_metadata = convert_transfer_form_to_meta_tree(form_data)
+    bagit_tags = flatten_meta_tree(caais_metadata)
 
     bagging_result = create_bag(
         storage_folder=str(folder),
@@ -53,19 +57,20 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     if bagging_result['bag_created']:
         bag_location = bagging_result['bag_location']
         bagging_time = bagging_result['time_created']
-        form_data['storage_location'] = bag_location
-        form_data['creation_time'] = str(bagging_time)
 
         # Create object to be viewed in admin app
         bag_name = Path(bag_location).name
-        new_bag = Bag(bagging_date=bagging_time, bag_name=bag_name, user=user_submitted)
-        new_bag.caais_metadata = json.dumps(caais_metadata)
+        new_bag = Bag(
+            bagging_date=bagging_time,
+            bag_name=bag_name,
+            user=user_submitted,
+            caais_metadata=json.dumps(caais_metadata))
         new_bag.save()
+
         # TODO: I'm not sure this is a good approach to getting the object change URL
         bag_url = urllib.parse.urljoin(BASE_URL, f'/admin/recordtransfer/bag/{new_bag.id}')
         send_bag_creation_success.delay(form_data, bag_url, user_submitted)
     else:
-        LOGGER.warning('Could not generate HTML document since bag creation failed')
         send_bag_creation_failure.delay(form_data, user_submitted)
 
 
