@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import OrderedDict
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext
@@ -17,6 +17,7 @@ from recordtransfer.settings import BAG_STORAGE_FOLDER, DEFAULT_DATA
 from recordtransfer.models import Bag, UploadSession, UploadedFile, User
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.atom import flatten_meta_tree_atom_style
+from recordtransfer.bagger import update_bag
 
 
 class CustomUserAdmin(UserAdmin):
@@ -329,6 +330,35 @@ class BagAdmin(admin.ModelAdmin):
 
     def locate_bag(self, bag: Bag):
         return str(self.bag_container / bag.user.username / bag.bag_name)
+
+    def save_model(self, request, obj, form, change):
+        if '_view_report' not in request.POST and '_get_bag_location' not in request.POST:
+            super().save_model(request, obj, form, change)
+            self.update_filesystem_bag(request, obj)
+
+    def update_filesystem_bag(self, request, bag: Bag):
+        bagit_tags = flatten_meta_tree(json.loads(bag.caais_metadata))
+        bag_location = self.locate_bag(bag)
+        results = update_bag(bag_location, bagit_tags)
+
+        if not results['bag_exists']:
+            msg = f'The bag at "{bag_location}" was moved or deleted, so it could not be updated!'
+            messages.error(request, msg)
+        elif not results['bag_valid'] and results['num_fields_updated'] == 0:
+            msg = f'The bag at "{bag_location}" was found to be invalid!'
+            messages.error(request, msg)
+        elif not results['bag_valid'] and results['num_fields_updated'] > 0:
+            msg = (f'The bag-info.txt for the bag at "{bag_location}" was updated, but is now '
+                   'invalid!')
+            messages.error(request, msg)
+        elif results['bag_valid'] and results['num_fields_updated'] == 0:
+            msg = f'No updates were made to the bag-info.txt for the bag at "{bag_location}"'
+            messages.info(request, msg)
+        else:
+            num_updates = results['num_fields_updated']
+            msg = (f'{num_updates} fields were updated in the bag-info.txt for the bag at '
+                   f'"{bag_location}"')
+            messages.success(request, msg)
 
     def response_change(self, request, obj):
         if "_view_report" in request.POST:
