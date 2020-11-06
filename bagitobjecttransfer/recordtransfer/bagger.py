@@ -31,8 +31,10 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
         deletefiles (bool): Delete files in upload session after bagging if True.
     """
     if not Path(storage_folder).exists():
-        LOGGER.error(msg=('Bagger: Could not find storage folder "%s"' % storage_folder))
+        LOGGER.error(msg=('Could not find storage folder "{0}"'.format(storage_folder)))
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
+
+    LOGGER.info(msg=('Starting new bag creation for upload session "{0}"'.format(session_token)))
 
     current_time = timezone.now()
     identifier = bag_identifier or current_time.strftime(r'%Y%m%d_%H%M%S')
@@ -40,22 +42,27 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     new_bag_folder = _get_bagging_folder(storage_folder, identifier)
     if not new_bag_folder.exists():
         os.mkdir(new_bag_folder)
+        LOGGER.info(msg=('Created new empty folder for the bag at "{0}"'.format(new_bag_folder)))
 
     (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
 
     if not missing_files:
+        LOGGER.info(msg=('Generating sha512 checksums...'))
         bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'])
+        LOGGER.info(msg=('Checking validity of new bag...'))
         bag_valid = bag.is_valid()
         if bag_valid:
-            LOGGER.info(msg=('Bag created at "%s"' % new_bag_folder))
+            LOGGER.info(msg=('New bag successfully created at "{0}"'.format(new_bag_folder)))
         else:
-            LOGGER.warning(msg=('Bag created at "%s" is invalid!' % new_bag_folder))
+            LOGGER.error(msg=('New bag created at "{0}" is invalid!'.format(new_bag_folder)))
     else:
+        LOGGER.error(msg=('New bag "{0}" was not created due to these files missing: {1}'.format(
+            new_bag_folder, missing_files)))
+        LOGGER.info(msg=('Removing half-created bag at {0}'.format(new_bag_folder)))
         for copied_file in copied_files:
             os.remove(copied_file)
         if new_bag_folder.exists():
             os.rmdir(new_bag_folder)
-        LOGGER.info(msg=('Bag "%s" was not created due to files missing: %s' % new_bag_folder, missing_files))
 
     bag_was_created = bool(not missing_files)
 
@@ -67,6 +74,59 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     }
 
 
+def update_bag(bag_folder: str, metadata: dict):
+    """ Updates the metadata for a bag located at the folder. The integrity of the bag is checked
+    before updating; if the bag is invalid, the bag will not be updated.
+
+    Args:
+        bag_folder (str): The bag folder to be updated
+        metadata (dict): The metadata fields to update in bag-info.txt
+
+    Returns:
+        (dict): A dictionary containing update information.
+    """
+    if not Path(bag_folder).exists():
+        LOGGER.error(msg=('There is no bag located at "{0}"!'.format(bag_folder)))
+        return {'bag_exists': False, 'bag_updated': False, 'num_fields_updated': 0}
+
+    bag = bagit.Bag(bag_folder)
+    if not bag.is_valid():
+        LOGGER.error(msg=('The bag located at "{0}" was found to be invalid!'.format(bag_folder)))
+        return {'bag_exists': True, 'bag_valid': False, 'num_fields_updated': 0}
+
+    if not metadata:
+        LOGGER.info(msg=('No updates were made to the bag-info.txt for the bag at '
+                         '"{0}"'.format(bag_folder)))
+        return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': 0}
+
+    LOGGER.info(msg=('Updating bag-info.txt for the bag at "{0}"'.format(bag_folder)))
+    fields_updated = 0
+    for key, new_value in metadata.items():
+        if key not in bag.info:
+            LOGGER.info(msg=('New fields cannot be added to a bag. Found invalid field '
+                             '"{0}"'.format(key)))
+        elif bag.info[key] != new_value:
+            bag.info[key] = new_value
+            fields_updated += 1
+
+    if fields_updated == 0:
+        LOGGER.info(msg=('No updates were made to the bag-info.txt file for the bag at '
+                         '"{0}"'.format(bag_folder)))
+        return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': fields_updated}
+
+    # Don't re-create manifest for files, only for bag-info
+    bag.save(manifests=False)
+
+    if not bag.is_valid():
+        LOGGER.error(msg=('Made {0} updates to the bag-info.txt file for the bag at "{1}", but '
+                          'the saved bag was invalid!'.format(fields_updated, bag_folder)))
+        return {'bag_exists': True, 'bag_valid': False, 'num_fields_updated': fields_updated}
+
+    LOGGER.info(msg=('Made {0} updates to the bag-info.txt file for the bag at '
+                     '"{1}"'.format(fields_updated, bag_folder)))
+    return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': fields_updated}
+
+
 def delete_bag(bag_folder: str):
     """ Deletes a bag folder and all of its contents
 
@@ -75,6 +135,7 @@ def delete_bag(bag_folder: str):
     """
     if not Path(bag_folder).exists():
         raise FolderNotFoundError(f'Could not find folder "{bag_folder}"')
+    LOGGER.info(msg=('Deleting the bag at "{0}"'.format(bag_folder)))
     shutil.rmtree(bag_folder)
 
 
@@ -85,18 +146,20 @@ def _copy_session_uploads_to_dir(session_token, directory, delete=True):
         old_copy_removed=False
     )
 
+    LOGGER.info(msg=('Copying {0} temp files to {1}'.format(len(files), directory)))
     copied_files = []
     missing_files = []
+    verb = 'Moving' if delete else 'Copying'
     for uploaded_file in files:
         source_path = Path(uploaded_file.path)
 
         if not source_path.exists():
-            LOGGER.error(msg=('file "%s" does not exist' % source_path))
+            LOGGER.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
             missing_files.append(str(source_path))
 
         elif not missing_files:
             destination_path = directory / uploaded_file.name
-            LOGGER.info(msg=('copying %s to %s' % (source_path, destination_path)))
+            LOGGER.info(msg=('{0} {1} to {2}'.format(verb, source_path, destination_path)))
             shutil.copy(source_path, destination_path)
             if delete:
                 uploaded_file.delete_file()

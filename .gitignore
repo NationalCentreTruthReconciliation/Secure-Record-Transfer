@@ -12,6 +12,9 @@ Icon
 # Custom redis folder where I put logs, database, etc. for development
 redis/
 
+# Media folder
+bagitobjecttransfer/media/
+
 # Thumbnails
 ._*
 

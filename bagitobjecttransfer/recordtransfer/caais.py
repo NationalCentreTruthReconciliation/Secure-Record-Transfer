@@ -209,6 +209,10 @@ def _get_section_2_tree(form_data: dict) -> OrderedDict:
         form_data=form_data,
         caais_key='address_line_2',
         section=curr_section)
+    curr_tree['source_of_information'][contact_info_field]['city'] = get_mandatory_field(
+        form_data=form_data,
+        caais_key='city',
+        section=curr_section)
     curr_tree['source_of_information'][contact_info_field]['province_or_state'] = get_mandatory_field(
         form_data=form_data,
         caais_key='province_or_state',
@@ -249,25 +253,18 @@ def _flatten_section_2_tree(section_2: OrderedDict, flat: OrderedDict):
     flat['sourceName'] = section_2['source_of_information']['source_name']
 
     contact_info = section_2['source_of_information']['source_contact_information']
-    contact_address = (
-        '{line1and2}, {province}  {postal} ({country})'
-    ).format(
-        line1and2=contact_info['address_line_1'] if not contact_info['address_line_2'] else \
-            f"{contact_info['address_line_1']} {contact_info['address_line_2']}",
-        province=contact_info['province_or_state'],
-        postal=contact_info['postal_or_zip_code'],
-        country=contact_info['country'],
-    )
-
-    flat['sourceContactInformation'] = (
-        'NAME: {name}|JOB: {job}|PHONE: {phone}|EMAIL: {email}|ADDRESS: {address}'
-    ).format(
-        name=contact_info['contact_name'],
-        job=contact_info['job_title'],
-        phone=contact_info['phone_number'],
-        email=contact_info['email'],
-        address=contact_address,
-    )
+    flat['sourceContactPerson'] = contact_info['contact_name']
+    flat['sourceJobTitle'] = contact_info['job_title']
+    flat['sourceStreetAddress'] = ', '.join(filter(None, (
+        contact_info['address_line_1'],
+        contact_info['address_line_2'],
+    )))
+    flat['sourceCity'] = contact_info['city']
+    flat['sourceRegion'] = contact_info['province_or_state']
+    flat['sourcePostalCode'] = contact_info['postal_or_zip_code']
+    flat['sourceCountry'] = contact_info['country']
+    flat['sourcePhoneNumber'] = contact_info['phone_number']
+    flat['sourceEmail'] = contact_info['email']
 
     flat['sourceRole'] = section_2['source_of_information']['source_role']
     flat['sourceNote'] = section_2['source_of_information']['source_note']
