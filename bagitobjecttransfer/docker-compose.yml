@@ -3,11 +3,39 @@ version: "3.8"
 services:
   app:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    container_name: recordtransfer_django_app
+    command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - ./:/app
       - ./media/bags:/app/UploadedBags
     ports:
-      - "8000:8000"
+      - 8000:8000
     env_file:
       - ./.dockerenv
+    depends_on:
+      - rq
+
+  rq:
+    build: .
+    container_name: recordtransfer_rq_workers
+    command: python3 manage.py rqworker default
+    volumes:
+      - ./redis/logs/rqworker.log:/app/redis/logs/rqworker.log
+      - ./media/bags:/app/UploadedBags
+      - ./media/jobs:/app/media/jobs
+    env_file:
+      - ./.dockerenv
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:5.0.7-alpine
+    container_name: redis_server
+    command: sh -c "touch /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf"
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/logs/redis-server.log:/var/log/redis/redis-server.log
+    environment:
+      REDIS_REPLICATION_MODE: master

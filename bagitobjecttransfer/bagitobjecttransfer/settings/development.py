@@ -25,7 +25,7 @@ DATABASES = {
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': '',
@@ -45,12 +45,14 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
-redis_folder = Path(BASE_DIR).parent / 'redis'
+'''
+redis_folder = Path(BASE_DIR).parent / 'redis' / 'logs'
 if not redis_folder.exists():
-    redis_folder.mkdir()
+    redis_folder.mkdir(parents=True)
 rq_worker_file = redis_folder / 'rqworker.log'
 if not rq_worker_file.exists():
     rq_worker_file.touch()
+'''
 
 LOGGING = {
     'version': 1,
@@ -66,11 +68,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
-        'rqworker_file': {
-            'class': 'logging.FileHandler',
-            'filename': rq_worker_file,
-            'formatter': 'standard',
-        }
+        #'rqworker_file': {
+        #    'class': 'logging.FileHandler',
+        #    'filename': rq_worker_file,
+        #    'formatter': 'standard',
+        #}
     },
     'loggers': {
         'django': {
@@ -83,7 +85,8 @@ LOGGING = {
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['rqworker_file'],
+        #    'handlers': ['rqworker_file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         }
