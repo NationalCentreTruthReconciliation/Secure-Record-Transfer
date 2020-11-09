@@ -43,8 +43,8 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
     if not folder.exists():
         folder.mkdir()
-        LOGGER.info(msg=('Created new bag folder for user "%s" at %s' % \
-            user_submitted.username, str(folder)))
+        LOGGER.info(msg=('Created new bag folder for user "{0}" at {1}'.format(
+            user_submitted.username, str(folder))))
     form_data['storage_location'] = str(folder.resolve())
 
     caais_metadata = convert_transfer_form_to_meta_tree(form_data)

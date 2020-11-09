@@ -1,10 +1,24 @@
 version: "3.8"
 
 services:
+  db:
+    image: mysql
+    container_name: recordtransfer_mysqldb
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password --mysqlx=0
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_PORT: 3306
+    env_file:
+      - ./.dockerenv
+    volumes:
+      - ./mysql:/var/lib/mysql
+
   app:
     build: .
     container_name: recordtransfer_django_app
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: python3 manage.py runserver 0.0.0.0:8000 --settings=bagitobjecttransfer.settings.docker
     volumes:
       - ./:/app
       - ./media/bags:/app/UploadedBags
@@ -12,8 +26,11 @@ services:
       - 8000:8000
     env_file:
       - ./.dockerenv
+    environment:
+      DJANGO_SETTINGS_MODULE: bagitobjecttransfer.settings.docker
     depends_on:
       - rq
+      - db
 
   rq:
     build: .
@@ -25,6 +42,8 @@ services:
       - ./media/jobs:/app/media/jobs
     env_file:
       - ./.dockerenv
+    environment:
+      DJANGO_SETTINGS_MODULE: bagitobjecttransfer.settings.docker
     depends_on:
       - redis
 
