@@ -23,7 +23,7 @@ services:
     command: python3 manage.py runserver 0.0.0.0:8000 --settings=bagitobjecttransfer.settings.docker
     volumes:
       - ./:/app
-      - ./media/bags:/app/UploadedBags
+      - temp-directory:/tmp
     ports:
       - 8000:8000
     env_file:
@@ -39,9 +39,8 @@ services:
     container_name: recordtransfer_rq_workers
     command: python3 manage.py rqworker default
     volumes:
-      - ./redis/logs/rqworker.log:/app/redis/logs/rqworker.log
-      - ./media/bags:/app/UploadedBags
-      - ./media/jobs:/app/media/jobs
+      - ./:/app
+      - temp-directory:/tmp
     env_file:
       - ./.dockerenv
     environment:
@@ -60,3 +59,6 @@ services:
       - ./redis/logs/redis-server.log:/var/log/redis/redis-server.log
     environment:
       REDIS_REPLICATION_MODE: master
+
+volumes:
+  temp-directory:
