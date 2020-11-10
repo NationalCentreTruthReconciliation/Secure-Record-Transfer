@@ -56,7 +56,7 @@ services:
       - 6379:6379
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./redis/logs/redis-server.log:/var/log/redis/redis-server.log
+      - ./logs/redis-server.log:/var/log/redis/redis-server.log
     environment:
       REDIS_REPLICATION_MODE: master
 
