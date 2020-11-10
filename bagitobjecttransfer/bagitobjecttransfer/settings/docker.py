@@ -36,9 +36,8 @@ RQ_QUEUES = {
     },
 }
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = '127.0.0.1'
+EMAIL_HOST = 'localhost'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
@@ -58,6 +57,16 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
+        'rqworker_file': {
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django-rq/rqworker.log',
+            'formatter': 'standard',
+        },
+        'recordtransfer_file': {
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/recordtransfer.log',
+            'formatter': 'standard',
+        }
     },
     'loggers': {
         'django': {
@@ -65,12 +74,12 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
         },
         'recordtransfer': {
-            'handlers': ['console'],
+            'handlers': ['recordtransfer_file'],
             'level': 'INFO',
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['console'],
+            'handlers': ['rqworker_file'],
             'level': 'INFO',
             'propagate': True,
         }

@@ -24,6 +24,8 @@ services:
     volumes:
       - ./:/app
       - temp-directory:/tmp
+      - ./logs/rqworker.log:/var/log/django-rq/rqworker.log
+      - ./logs/recordtransfer.log:/var/log/django/recordtransfer.log
     ports:
       - 8000:8000
     env_file:
@@ -41,6 +43,8 @@ services:
     volumes:
       - ./:/app
       - temp-directory:/tmp
+      - ./logs/rqworker.log:/var/log/django-rq/rqworker.log
+      - ./logs/recordtransfer.log:/var/log/django/recordtransfer.log
     env_file:
       - ./.dockerenv
     environment:
