@@ -74,4 +74,4 @@ visiting http://localhost:8025 in your favourite browser.
 .. note::
 
     The logs are disabled for the mail server since they are too verbose. To re-enable them, remove
-    the :code:`logging` section for the email service.
+    the :code:`logging` section for the email service in the docker-compose.dev.yml file.

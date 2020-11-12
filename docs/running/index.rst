@@ -13,7 +13,7 @@ you want to do any sort of development on it.
 The final method outlines how we configured the application to run in a production environment.
 
 Both the Docker and local running configurations use a simple
-`MailHog <https://github.com/mailhog/MailHog>` server to intercept messages coming from the
+`MailHog <https://github.com/mailhog/MailHog>`_ server to intercept messages coming from the
 application. Visiting http://localhost:8025 when the app is running allows you to visit the
 MailHog dashboard, which lets you view all of the emails sent by the app. This is miles better than
 sending emails to the console!

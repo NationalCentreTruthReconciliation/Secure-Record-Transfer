@@ -38,5 +38,9 @@ You should now be able to access the app at http://127.0.0.1:8000 or http://loca
 favourite browser.
 
 Any emails that the app sends are intercepted by the MailHog server. You can see the emails by
-visiting http://localhost:8025 in your favourite browser. The logs are disabled for the mail server
-since they are too verbose.
+visiting http://localhost:8025 in your favourite browser.
+
+.. note::
+
+    The logs are disabled for the mail server since they are too verbose. To re-enable them, remove
+    the :code:`logging` section for the email service in the docker-compose.yml file.
