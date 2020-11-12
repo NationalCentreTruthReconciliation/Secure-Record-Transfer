@@ -234,26 +234,26 @@ class TransferFormWizard(SessionWizardView):
 
 
 def uploadfiles(request):
-    ''' Upload one or more files to the server, and return a token representing the file upload \
-    session. If a token is passed in the request header using the Upload-Session-Token header, the \
-    uploaded files will be added to the corresponding session, meaning this endpoint can be hit \
-    multiple times for a large batch upload of files. \
+    ''' Upload one or more files to the server, and return a token representing the file upload
+    session. If a token is passed in the request header using the Upload-Session-Token header, the
+    uploaded files will be added to the corresponding session, meaning this endpoint can be hit
+    multiple times for a large batch upload of files.
 
-    Each file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if any \
+    Each file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if any
     file is not an accepted type, a 403 status is returned.
 
     Args:
         request: The request sent by the user.
 
     Returns:
-        JsonResponse: If the upload was successful, the session token is returned in \
-        upload_session_token. If not successful, the error description is returned in 'error', \
-        and a more verbose error is returned in 'verboseError'.
+        JsonResponse: If the upload was successful, the session token is returned in
+        upload_session_token. If not successful, the error description is returned in 'error',
+            and a more verbose error is returned in 'verboseError'.
     '''
     if not request.method == 'POST':
         terse_error = gettext('Files can only be uploaded using POST.')
-        verbose_error =  gettext('Attempted to uploaded files using the {method} HTTP method, but '
-                                 'only POST is allowed.') % {'method': request.method}
+        verbose_error =  gettext(('Attempted to uploaded files using the {0} HTTP method, but '
+                                  'only POST is allowed.').format(request.method))
         return JsonResponse({
             'error': terse_error,
             'verboseError': verbose_error,
@@ -285,10 +285,9 @@ def uploadfiles(request):
                     break
 
             if not file_accepted:
-                terse_error = gettext('{extension} files are not allowed') % \
-                    {'extension': temp_file_extension}
-                verbose_error = gettext('{name} file has an unaccepted format ({extension}).') % \
-                    {'extension': temp_file_extension, 'name': temp_file.name}
+                terse_error = gettext('{0} files are not allowed'.format(temp_file_extension))
+                verbose_error = gettext('{0} file has an unaccepted format ({1}).'.format(
+                    temp_file_extension, temp_file.name))
                 return JsonResponse({
                         'error': terse_error,
                         'verboseError': verbose_error,
@@ -301,9 +300,8 @@ def uploadfiles(request):
         return JsonResponse({'upload_session_token': session.token}, status=200)
 
     except Exception as exc:
-        LOGGER.error(msg=('Uncaught exception in upload_file: %s' % str(exc)))
-        exc_msg = {'exc': str(exc)}
+        LOGGER.error(msg=('Uncaught exception in uploadfiles view: {0}'.format(str(exc))))
         return JsonResponse({
-            'error': gettext('Server Error:\n{exc}') % exc_msg,
-            'verboseError': gettext('The following exception was not caught:\n{exc}') % exc_msg,
+            'error': gettext('500 Internal Server Error'),
+            'verboseError': gettext('500 Internal Server Error'),
         }, status=500)

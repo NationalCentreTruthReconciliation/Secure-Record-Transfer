@@ -15,4 +15,5 @@ class RecordTransferConfig(AppConfig):
     def ready(self):
         bagging_area = Path(BAG_STORAGE_FOLDER)
         if not bagging_area.exists():
-            LOGGER.warning(msg=('Bag storage folder %s does not exist!' % str(BAG_STORAGE_FOLDER)))
+            LOGGER.warning(msg=('Bag storage folder {0} does not exist!'.format(
+                str(BAG_STORAGE_FOLDER))))
