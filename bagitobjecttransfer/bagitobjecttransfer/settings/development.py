@@ -55,6 +55,8 @@ EMAIL_USE_TLS = False
 # Logging
 
 log_folder = Path(BASE_DIR) / 'logs'
+if not log_folder.exists():
+    log_folder.mkdir()
 REDIS_LOG_FILE = log_folder / 'redis-server.log'
 if not REDIS_LOG_FILE.exists():
     REDIS_LOG_FILE.touch()
