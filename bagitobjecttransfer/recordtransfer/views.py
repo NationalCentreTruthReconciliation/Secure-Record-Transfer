@@ -52,6 +52,11 @@ class ActivationSent(TemplateView):
     template_name = 'recordtransfer/activationsent.html'
 
 
+class ActivationComplete(TemplateView):
+    ''' The page a user sees when their account has been activated '''
+    template_name = 'recordtransfer/activationcomplete.html'
+
+
 class ActivationInvalid(TemplateView):
     ''' The page a user sees if their account could not be activated '''
     template_name = 'recordtransfer/activationinvalid.html'
