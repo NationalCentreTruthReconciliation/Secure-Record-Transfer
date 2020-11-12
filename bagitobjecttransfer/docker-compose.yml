@@ -25,6 +25,11 @@ services:
     ports:
       - 1025:1025
       - 8025:8025
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: '/home/mailhog/mail'
+    volumes:
+      - mailhog:/home/mailhog/mail
 
   app:
     build: .
@@ -77,3 +82,4 @@ services:
 volumes:
   temp-directory:
   mysql-database:
+  mailhog:

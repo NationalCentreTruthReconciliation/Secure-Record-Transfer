@@ -3,13 +3,15 @@ version: "3.8"
 services:
   email:
     image: mailhog/mailhog
-    network_mode: host
     container_name: recordtransfer_mailhog_dev
-    logging:
-      driver: none
     ports:
       - 1025:1025
       - 8025:8025
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: '/home/mailhog/mail'
+    volumes:
+      - dev-mailhog:/home/mailhog/mail
 
   rq:
     build: .
@@ -39,3 +41,6 @@ services:
       - ./logs/redis-server.log:/var/log/redis/redis-server.log
     environment:
       REDIS_REPLICATION_MODE: master
+
+volumes:
+  dev-mailhog:
