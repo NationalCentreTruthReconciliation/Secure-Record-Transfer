@@ -1,6 +1,8 @@
 Pre-Requisites to Running
 =========================
 
+WORK IN PROGRESS!
+
 This page contains installation info on all of the software required to get the app up and running.
 Ideally, you will be running the application on Linux, since you will have a lot of difficulty
 getting Redis and Django-RQ to work on Windows.
@@ -92,6 +94,12 @@ If you want to deploy your application in a production environment, we recommend
 only want to run the application locally, the server bundled with Django is an excellent option, and
 if you installed all of the required packages using the instructions above, you already have the
 Django dev server.
+
+********
+Gunicorn
+********
+
+TBD
 
 ***********
 SMTP Server

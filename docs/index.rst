@@ -11,7 +11,7 @@ archivists to view and export information about transfers submitted by users.
    :caption: Contents:
 
    introduction/index
-   installation/index
+   running/index
    publicapp/index
    privateapp/index
    customization/index
