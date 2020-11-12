@@ -43,8 +43,8 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
     if not folder.exists():
         folder.mkdir()
-        LOGGER.info(msg=('Created new bag folder for user "%s" at %s' % \
-            user_submitted.username, str(folder)))
+        LOGGER.info(msg=('Created new bag folder for user "{0}" at {1}'.format(
+            user_submitted.username, str(folder))))
     form_data['storage_location'] = str(folder.resolve())
 
     caais_metadata = convert_transfer_form_to_meta_tree(form_data)
@@ -128,7 +128,7 @@ def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: Use
         LOGGER.info(msg=('There are no users configured to receive bag info update emails.'))
         return
 
-    LOGGER.info(msg=('Sending "bag ready" email to: %s' % list(recipients)))
+    LOGGER.info(msg=('Sending "bag ready" email to: {0}'.format(list(recipients))))
     recipient_emails = list(map(str, recipients.values_list('email', flat=True) ))
     try:
         msg_html = render_to_string('recordtransfer/email/bag_submit_success.html', context={
@@ -147,7 +147,7 @@ def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: Use
             fail_silently=False,
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending "bag ready" emails to users: %s' % str(exc)))
+        LOGGER.warning(msg=('Error when sending "bag ready" emails to users: {0}'.format(str(exc))))
 
 
 @django_rq.job
@@ -160,7 +160,7 @@ def send_accession_report_to_user(form_data: dict, user_submitted: User):
         user_submitted (User): The user who submitted the data and files.
     '''
     recipient = [user_submitted.email]
-    LOGGER.info(msg=('Sending "accession report" email to: %s' % recipient[0]))
+    LOGGER.info(msg=('Sending "accession report" email to: {0}'.format(recipient[0])))
     try:
         msg_html = render_to_string('recordtransfer/email/accession_report.html', context={
             'user': user_submitted,
@@ -177,7 +177,8 @@ def send_accession_report_to_user(form_data: dict, user_submitted: User):
             fail_silently=False,
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending "accession report" email to user: %s' % str(exc)))
+        LOGGER.warning(msg=('Error when sending "accession report" email to user: {0}'.format(
+            str(exc))))
 
 
 @django_rq.job
@@ -195,7 +196,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
         LOGGER.info(msg=('There are no users configured to receive bag failure update emails.'))
         return
 
-    LOGGER.info(msg=('Sending "bag failure" email to: %s' % list(recipients)))
+    LOGGER.info(msg=('Sending "bag failure" email to: {0}'.format(list(recipients))))
     recipient_emails = list(map(str, recipients.values_list('email', flat=True) ))
     try:
         msg_html = render_to_string('recordtransfer/email/bag_submit_success.html', context={
@@ -213,7 +214,8 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
             fail_silently=False,
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending "bag failure" emails to users: %s' % str(exc)))
+        LOGGER.warning(msg=('Error when sending "bag failure" emails to users: {0}'.format(
+            str(exc))))
 
 
 @django_rq.job
@@ -226,7 +228,7 @@ def send_user_activation_email(new_user: User):
     '''
     recipient = [new_user.email]
 
-    LOGGER.info(msg=('Sending "account activation" email to: %s' % recipient[0]))
+    LOGGER.info(msg=('Sending "account activation" email to: {0}'.format(recipient[0])))
     try:
         msg_html = render_to_string('recordtransfer/email/activate_account.html', context={
             'user': new_user,
@@ -245,8 +247,8 @@ def send_user_activation_email(new_user: User):
             fail_silently=False
         )
     except smtplib.SMTPException as exc:
-        LOGGER.warning(msg=('Error when sending "account activation" email to %s: %s'\
-            % recipient[0], str(exc)))
+        LOGGER.warning(msg=('Error when sending "account activation" email to {0}: {1}'.format(
+           recipient[0], str(exc))))
 
 
 @django_rq.job

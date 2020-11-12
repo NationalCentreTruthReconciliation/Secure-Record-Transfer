@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  email:
+    image: mailhog/mailhog
+    container_name: recordtransfer_mailhog_dev
+    ports:
+      - 1025:1025
+      - 8025:8025
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: '/home/mailhog/mail'
+    volumes:
+      - dev-mailhog:/home/mailhog/mail
+
+  rq:
+    build: .
+    network_mode: host
+    container_name: recordtransfer_rq_workers_dev
+    command: python3 manage.py rqworker default
+    volumes:
+      - ./:/app
+      - /tmp:/tmp
+      - ./logs/rqworker.log:/var/log/django-rq/rqworker.log
+      - ./logs/recordtransfer.log:/var/log/django/recordtransfer.log
+    env_file:
+      - ./.dockerenv
+    environment:
+      DJANGO_SETTINGS_MODULE: bagitobjecttransfer.settings.development
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:5.0.7-alpine
+    container_name: redis_server_dev
+    command: sh -c "touch /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf"
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./logs/redis-server.log:/var/log/redis/redis-server.log
+    environment:
+      REDIS_REPLICATION_MODE: master
+
+volumes:
+  dev-mailhog:

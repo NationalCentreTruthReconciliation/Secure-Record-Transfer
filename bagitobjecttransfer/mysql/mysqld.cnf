@@ -1,0 +1,13 @@
+[mysqld_safe]
+log_error=/var/log/mysql/mysql_error.log
+
+[mysqld]
+log_error=/var/log/mysql/mysql_error.log
+
+general_log = 'ON'
+general_log_file = /var/log/mysql/mysql.log
+
+slow_query_log = 'ON'
+long_query_time = 3
+slow_query_log_file = /var/log/mysql/mysql_slow_queries.log
+log-queries-not-using-indexes

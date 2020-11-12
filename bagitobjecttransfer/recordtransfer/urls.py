@@ -28,7 +28,7 @@ urlpatterns = [
 
     path('createaccount/', views.CreateAccount.as_view(), name='createaccount'),
     path('createaccount/sent/', views.ActivationSent.as_view(), name='activationsent'),
-    path('createaccount/complete/', views.ActivationSent.as_view(), name='accountcreated'),
+    path('createaccount/complete/', views.ActivationComplete.as_view(), name='accountcreated'),
     path('createaccount/invalid/', views.ActivationInvalid.as_view(), name='activationinvalid'),
     re_path(('createaccount/'
              'activate/'

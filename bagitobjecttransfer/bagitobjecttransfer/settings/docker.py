@@ -1,10 +1,10 @@
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
 from pathlib import Path
+from decouple import config
 from .base import *
 
 DEBUG = True
-TESTING = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -12,21 +12,26 @@ ALLOWED_HOSTS = [
 ]
 
 
-# SQLite 3 database is used for development (as opposed to MySQL)
+# MySQL Database
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'mysql.connector.django',
+        'HOST': 'db',
+        'PORT': 3306,
+        'USER': config('MYSQL_USER'),
+        'PASSWORD': config('MYSQL_PASSWORD'),
+        'NAME': config('MYSQL_DATABASE'),
     }
 }
 
 
 # Local Redis Task Queue
+# https://github.com/rq/django-rq
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '0.0.0.0',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': '',
@@ -34,18 +39,13 @@ RQ_QUEUES = {
     },
 }
 
-if TESTING:
-    for queue_config in RQ_QUEUES:
-        # Disable aynchronicity if running tests
-        queue_config['ASYNC'] = False
-
 
 # Emailing - Uses MailHog to intercept emails
 # MailHog web UI runs at localhost:8025
 # More information: https://github.com/mailhog/MailHog
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = '0.0.0.0'
+EMAIL_HOST = 'email'
 EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
@@ -56,8 +56,19 @@ EMAIL_USE_TLS = False
 
 log_folder = Path(BASE_DIR) / 'logs'
 REDIS_LOG_FILE = log_folder / 'redis-server.log'
-if not REDIS_LOG_FILE.exists():
-    REDIS_LOG_FILE.touch()
+RQ_WORKER_LOG_FILE = log_folder / 'rqworker.log'
+MY_SQL_ERROR_LOG_FILE = log_folder / 'mysql_error.log'
+MY_SQL_GENERAL_LOG_FILE = log_folder / 'mysql.log'
+MY_SQL_SLOW_QUERY_LOG_FILE = log_folder / 'mysql_slow_queries.log'
+
+for log_file in (
+    REDIS_LOG_FILE,
+    RQ_WORKER_LOG_FILE,
+    MY_SQL_ERROR_LOG_FILE,
+    MY_SQL_GENERAL_LOG_FILE,
+    MY_SQL_SLOW_QUERY_LOG_FILE):
+    if not log_file.exists():
+        log_file.touch()
 
 LOGGING = {
     'version': 1,
@@ -73,6 +84,16 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
+        'rqworker_file': {
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django-rq/rqworker.log',
+            'formatter': 'standard',
+        },
+        'recordtransfer_file': {
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/recordtransfer.log',
+            'formatter': 'standard',
+        }
     },
     'loggers': {
         'django': {
@@ -80,12 +101,12 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
         },
         'recordtransfer': {
-            'handlers': ['console'],
+            'handlers': ['recordtransfer_file'],
             'level': 'INFO',
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['console'],
+            'handlers': ['rqworker_file'],
             'level': 'INFO',
             'propagate': True,
         }

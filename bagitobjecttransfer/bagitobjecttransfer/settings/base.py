@@ -103,13 +103,9 @@ COUNTRIES_FIRST = [
 
 COUNTRIES_FLAG_URL = 'flags/{code}.gif'
 
-# Media
+# Media and Static files (CSS, JavaScript, Images)
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Static files (CSS, JavaScript, Images)
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
 STATIC_URL = '/static/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
