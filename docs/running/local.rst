@@ -23,9 +23,20 @@ purposes.
 First, make sure you've installed Docker. Create an environment file called :code:`.dockerenv` in
 the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not already created:
 
-.. code::
+.. code-block::
 
     BAG_FOLDER_LINUX = /app/media/bags
+
+
+Create a virtual environment to run the app out of if you haven't already. :code:`cd` to the root of
+the repository (the same directory as the :code:`README.md` file), create a new environment, and
+install the required packages:
+
+.. code-block::
+
+    $ python -m venv env/
+    $ source env/bin/activate
+    $ python -m pip install -r bagitobjecttransfer/requirements.txt
 
 
 To run the app, you will want to start the Redis and Email services before you start the development
@@ -33,7 +44,7 @@ web server, since the Django app depends on those. There is a docker-compose fil
 specifically for this purpose. First, :code:`cd` into the code:`bagitobjecttransfer` folder, then
 run the docker-compose command:
 
-.. code-block:: console
+.. code-block::
 
     $ cd bagitobjecttransfer
     $ docker-compose -f docker-compose.dev.yml up -d
@@ -55,6 +66,12 @@ the following two commands, and follow the prompts:
 
     $ python3 manage.py migrate
     $ python3 manage.py createsuperuser
+
+
+.. note::
+
+    Always make sure your virtual environment is activated when you use the :code:`python3` command
+    in the repository!
 
 
 Once your database has been created and a super user exists, run the development server with this

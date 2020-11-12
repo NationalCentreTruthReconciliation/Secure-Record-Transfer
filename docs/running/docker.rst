@@ -8,7 +8,7 @@ on the Django app's backend, refer to the section on :ref:`Running Locally for D
 First, make sure you've installed Docker. Create an environment file called :code:`.dockerenv` in
 the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not already created:
 
-.. code::
+.. code-block::
 
     BAG_FOLDER_LINUX = /app/media/bags
 
@@ -16,9 +16,9 @@ the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not alr
 After ensuring you have a minimal environment file set up, make sure you are in the
 :code:`bagitobjecttransfer` folder, and run all of the services with Docker:
 
-.. code:: console
+.. code-block::
 
-    docker-compose up -d
+    $ docker-compose up -d
 
 
 If this is your first time running the app in this configuration, you will first want to populate
@@ -43,4 +43,4 @@ visiting http://localhost:8025 in your favourite browser.
 .. note::
 
     The logs are disabled for the mail server since they are too verbose. To re-enable them, remove
-    the :code:`logging` section for the email service in the docker-compose.yml file.
+    the :code:`logging` section for the email service in the :code:`docker-compose.yml` file.
