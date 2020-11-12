@@ -13,8 +13,8 @@ services:
     env_file:
       - ./.dockerenv
     volumes:
+      - mysql-database:/var/lib/mysql
       - ./mysql/mysqld.cnf:/etc/mysql/mysqld.cnf
-      - ./mysql:/var/lib/mysql
       - ./logs:/var/log/mysql
 
   app:
@@ -55,7 +55,7 @@ services:
   redis:
     image: redis:5.0.7-alpine
     container_name: redis_server
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: sh -c "touch /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf"
     ports:
       - 6379:6379
     volumes:
@@ -66,3 +66,4 @@ services:
 
 volumes:
   temp-directory:
+  mysql-database:

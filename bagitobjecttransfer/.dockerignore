@@ -1,2 +1,1 @@
-media
-redis/logs
+db.sqlite3
