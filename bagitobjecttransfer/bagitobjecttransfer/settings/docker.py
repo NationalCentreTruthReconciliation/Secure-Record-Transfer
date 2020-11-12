@@ -1,4 +1,5 @@
 # pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from pathlib import Path
 from decouple import config
 from .base import *
@@ -9,6 +10,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
 ]
+
 
 # MySQL Database
 
@@ -23,6 +25,7 @@ DATABASES = {
     }
 }
 
+
 # Local Redis Task Queue
 # https://github.com/rq/django-rq
 
@@ -36,12 +39,34 @@ RQ_QUEUES = {
     },
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Emailing
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
+EMAIL_PORT = ''
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
+
+
+# Logging
+
+log_folder = Path(BASE_DIR) / 'logs'
+REDIS_LOG_FILE = log_folder / 'redis-server.log'
+RQ_WORKER_LOG_FILE = log_folder / 'rqworker.log'
+MY_SQL_ERROR_LOG_FILE = log_folder / 'mysql_error.log'
+MY_SQL_GENERAL_LOG_FILE = log_folder / 'mysql.log'
+MY_SQL_SLOW_QUERY_LOG_FILE = log_folder / 'mysql_slow_queries.log'
+
+for log_file in (
+    REDIS_LOG_FILE,
+    RQ_WORKER_LOG_FILE,
+    MY_SQL_ERROR_LOG_FILE,
+    MY_SQL_GENERAL_LOG_FILE,
+    MY_SQL_SLOW_QUERY_LOG_FILE):
+    if not log_file.exists():
+        log_file.touch()
 
 LOGGING = {
     'version': 1,

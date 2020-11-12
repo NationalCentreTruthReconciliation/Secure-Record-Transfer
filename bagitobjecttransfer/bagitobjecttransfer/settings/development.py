@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from pathlib import Path
-from decouple import config
 from .base import *
 
 DEBUG = True
@@ -11,7 +11,8 @@ ALLOWED_HOSTS = [
     'localhost',
 ]
 
-# Sqlite database for development
+
+# SQLite 3 database is used for development (as opposed to MySQL)
 
 DATABASES = {
     'default': {
@@ -20,12 +21,12 @@ DATABASES = {
     }
 }
 
+
 # Local Redis Task Queue
-# https://github.com/rq/django-rq
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'redis',
+        'HOST': '0.0.0.0',
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': '',
@@ -35,24 +36,29 @@ RQ_QUEUES = {
 
 if TESTING:
     for queue_config in RQ_QUEUES:
+        # Disable aynchronicity if running tests
         queue_config['ASYNC'] = False
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Emailing
+# Use PapercutSMTP for the best experience. https://github.com/ChangemakerStudios/Papercut-SMTP
+# PapercutSMTP catches any emails being sent in the localhost, so you don't have to log your emails
+# to the console.
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = '127.0.0.1'
-EMAIL_PORT = 25
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = ''
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
-'''
-redis_folder = Path(BASE_DIR).parent / 'redis' / 'logs'
-if not redis_folder.exists():
-    redis_folder.mkdir(parents=True)
-rq_worker_file = redis_folder / 'rqworker.log'
-if not rq_worker_file.exists():
-    rq_worker_file.touch()
-'''
+
+# Logging
+
+log_folder = Path(BASE_DIR) / 'logs'
+REDIS_LOG_FILE = log_folder / 'redis-server.log'
+if not REDIS_LOG_FILE.exists():
+    REDIS_LOG_FILE.touch()
 
 LOGGING = {
     'version': 1,
@@ -68,11 +74,6 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
-        #'rqworker_file': {
-        #    'class': 'logging.FileHandler',
-        #    'filename': rq_worker_file,
-        #    'formatter': 'standard',
-        #}
     },
     'loggers': {
         'django': {
@@ -85,7 +86,6 @@ LOGGING = {
             'propagate': True,
         },
         'rq.worker': {
-        #    'handlers': ['rqworker_file'],
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
