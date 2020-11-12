@@ -17,6 +17,15 @@ services:
       - ./mysql/mysqld.cnf:/etc/mysql/mysqld.cnf
       - ./logs:/var/log/mysql
 
+  email:
+    image: mailhog/mailhog
+    container_name: recordtransfer_mailhog
+    logging:
+      driver: none
+    ports:
+      - 1025:1025
+      - 8025:8025
+
   app:
     build: .
     container_name: recordtransfer_django_app
@@ -35,6 +44,7 @@ services:
     depends_on:
       - rq
       - db
+      - email
 
   rq:
     build: .

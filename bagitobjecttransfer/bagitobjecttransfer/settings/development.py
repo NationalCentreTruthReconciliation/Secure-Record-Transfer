@@ -40,14 +40,13 @@ if TESTING:
         queue_config['ASYNC'] = False
 
 
-# Emailing
-# Use PapercutSMTP for the best experience. https://github.com/ChangemakerStudios/Papercut-SMTP
-# PapercutSMTP catches any emails being sent in the localhost, so you don't have to log your emails
-# to the console.
+# Emailing - Uses MailHog to intercept emails
+# MailHog web UI runs at localhost:8025
+# More information: https://github.com/mailhog/MailHog
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = ''
+EMAIL_HOST = '0.0.0.0'
+EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False

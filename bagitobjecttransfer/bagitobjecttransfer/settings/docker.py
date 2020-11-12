@@ -40,11 +40,13 @@ RQ_QUEUES = {
 }
 
 
-# Emailing
+# Emailing - Uses MailHog to intercept emails
+# MailHog web UI runs at localhost:8025
+# More information: https://github.com/mailhog/MailHog
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = ''
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'email'
+EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
