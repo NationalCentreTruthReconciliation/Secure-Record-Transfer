@@ -16,7 +16,7 @@ the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not alr
 After ensuring you have a minimal environment file set up, make sure you are in the
 :code:`bagitobjecttransfer` folder, and run all of the services with Docker:
 
-.. code-block::
+.. code-block:: console
 
     $ docker-compose up -d
 
@@ -26,7 +26,7 @@ the database tables and create a super user before visiting the app in your brow
 execute the following commands to run a shell in the Django app container, migrate the database,
 and create a super user (before exiting):
 
-.. code-block::
+.. code-block:: console
 
     $ docker-compose exec app sh
     $ python3 manage.py migrate

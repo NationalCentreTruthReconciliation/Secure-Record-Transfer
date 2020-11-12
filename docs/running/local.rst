@@ -32,7 +32,7 @@ Create a virtual environment to run the app out of if you haven't already. :code
 the repository (the same directory as the :code:`README.md` file), create a new environment, and
 install the required packages:
 
-.. code-block::
+.. code-block:: console
 
     $ python -m venv env/
     $ source env/bin/activate
@@ -44,7 +44,7 @@ web server, since the Django app depends on those. There is a docker-compose fil
 specifically for this purpose. First, :code:`cd` into the code:`bagitobjecttransfer` folder, then
 run the docker-compose command:
 
-.. code-block::
+.. code-block:: console
 
     $ cd bagitobjecttransfer
     $ docker-compose -f docker-compose.dev.yml up -d
@@ -62,7 +62,7 @@ using one command. If this is your first time running the app, you will first wa
 database tables and create a super user before running the development server. To do so, execute
 the following two commands, and follow the prompts:
 
-.. code-block::
+.. code-block:: console
 
     $ python3 manage.py migrate
     $ python3 manage.py createsuperuser
