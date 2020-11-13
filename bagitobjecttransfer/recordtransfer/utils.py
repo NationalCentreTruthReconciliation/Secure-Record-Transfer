@@ -31,7 +31,7 @@ def snake_to_camel_case(string: str):
 
 def html_to_text(html: str):
     no_tags_split = strip_tags(html).split('\n')
-    plain_text_split = [line.strip() for line in no_tags_split if line]
+    plain_text_split = filter(None, map(str.strip, no_tags_split))
     return '\n'.join(plain_text_split)
 
 
