@@ -84,8 +84,14 @@ def create_downloadable_bag(bag: Bag, user_triggered: User):
         bag (Bag): The bag to zip up for users to download
         user (User): The user who triggered this new Job creation
     '''
+    description = (
+        '{user} triggered this job to generate a download link for a transfer submitted by '
+        '{bag_user}.'
+    ).format(user=user_triggered.get_full_name(), bag_user=bag.user.get_full_name())
+
     new_job = Job(
-        name=f'Generate Zipped Bag for {str(bag)}',
+        name=f'Generate Download Link for {str(bag)}',
+        description=description,
         start_time=timezone.now(),
         user_triggered=user_triggered,
         job_status=Job.JobStatus.NOT_STARTED)
@@ -102,6 +108,7 @@ def create_downloadable_bag(bag: Bag, user_triggered: User):
         file_name = f'{bag.user.username}-{bag.bag_name}.zip'
         new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
         new_job.job_status = Job.JobStatus.COMPLETE
+        new_job.end_time = timezone.now()
         new_job.save()
     except Exception as exc:
         new_job.job_status = Job.JobStatus.FAILED

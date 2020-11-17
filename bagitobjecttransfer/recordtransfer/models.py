@@ -7,12 +7,16 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.storage import OverwriteStorage
 
 
 class User(AbstractUser):
     ''' The main User object used to authenticate users. '''
     gets_bag_email_updates = models.BooleanField(default=False)
     confirmed_email = models.BooleanField(default=False)
+
+    def get_full_name(self):
+        return self.first_name + ' ' + self.last_name
 
 
 class UploadSession(models.Model):
@@ -86,11 +90,14 @@ class Job(models.Model):
         FAILED = 'FD', _('Failed')
 
     start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True)
     name = models.CharField(max_length=256, null=True)
+    description = models.TextField(null=True)
     user_triggered = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     job_status = models.CharField(max_length=2, choices=JobStatus.choices,
                                   default=JobStatus.NOT_STARTED)
-    attached_file = models.FileField(upload_to='jobs/zipped_bags', blank=True, null=True)
+    attached_file = models.FileField(upload_to='jobs/zipped_bags', storage=OverwriteStorage,
+                                     blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} (Created by {self.user_triggered})'
