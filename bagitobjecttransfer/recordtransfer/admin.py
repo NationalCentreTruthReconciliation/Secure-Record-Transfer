@@ -215,7 +215,7 @@ class BagAdmin(admin.ModelAdmin):
             messages.info(request, msg)
         else:
             num_updates = results['num_fields_updated']
-            msg = (f'{num_updates} fields were updated in the bag-info.txt for the bag at '
+            msg = (f'{num_updates} related fields were updated in the bag-info.txt for the bag at '
                    f'"{bag_location}"')
             messages.success(request, msg)
 

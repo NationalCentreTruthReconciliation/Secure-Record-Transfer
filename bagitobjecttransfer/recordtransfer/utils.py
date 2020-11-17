@@ -2,6 +2,8 @@ import logging
 import os
 from zipfile import ZipFile
 
+from recordtransfer.exceptions import FolderNotFoundError
+
 from django.utils.html import strip_tags
 
 LOGGER = logging.getLogger(__name__)
@@ -13,6 +15,11 @@ def zip_directory(directory: str, zipf: ZipFile):
         directory (str): The folder to zip
         zipf (ZipFile): A zipfile.ZipFile handle
     '''
+    if not os.path.isdir(directory):
+        raise FolderNotFoundError(f'Directory {directory} does not exist')
+    if not zipf:
+        raise ValueError('ZipFile does not exist')
+
     relroot = os.path.abspath(os.path.join(directory, os.pardir))
     for root, _, files in os.walk(directory):
         # add directory (needed for empty dirs)
