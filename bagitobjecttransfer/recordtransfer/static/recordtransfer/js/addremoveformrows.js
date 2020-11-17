@@ -1,12 +1,71 @@
-// JavaScript code adapted from this article:
-// https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
+/**
+ * Functions for adding and removing forms from a formset dynamically. Django does not natively
+ * support adding and removing forms from a formset, so it has to be done within JavaScript.
+ *
+ * Adding new forms is done by cloning a form and appending it after the cloned form.
+ *
+ * Code loosely adapted from this article:
+ * https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
+ */
+
 
 const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea'
 const ID_NUM_REGEX = new RegExp('-(\\d+)-')
 
-function appendNewForm(cloneFormSelector, prefix) {
-    var totalForms = parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
-    var maxNumForms = parseInt($(`#id_${prefix}-MAX_NUM_FORMS`).val())
+
+/**
+ * Get the current number of forms displayed on the page.
+ * @returns {Number} The current number of forms
+ */
+function getTotalForms() {
+    var prefix = getFormPrefix()
+    return parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
+}
+
+/**
+ * Get the maximum number of allowable forms set by the backend.
+ * @returns {Number} The maximum number of forms
+ */
+function getMaxForms() {
+    var prefix = getFormPrefix()
+    return parseInt($(`#id_${prefix}-MAX_NUM_FORMS`).val())
+}
+
+/**
+ * Get the prefix name of the currently activated formset.
+ * @returns {String} The name of the formset
+ */
+function getFormPrefix() {
+    if (elementExists('#id_rights-TOTAL_FORMS')) {
+        return 'rights'
+    }
+    else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
+        return 'otheridentifiers'
+    }
+    else {
+        return 'none'
+    }
+}
+
+/**
+ * Test if an element exists on the page.
+ * @param {String} selector A jQuery type selector string
+ * @returns {Boolean} true if element exists, false otherwise
+ */
+function elementExists(selector) {
+    return $(selector).length !== 0
+}
+
+/**
+ * Add a new form to the formset by cloning the selected form. The cloned form is inserted in the
+ * document tree directly below the form that was cloned. This function respects whether the
+ * max_num of formsets was set in the backend.
+ * @param {String} cloneFormSelector The form to clone to create a new form from
+ */
+function appendNewForm(cloneFormSelector) {
+    var prefix = getFormPrefix()
+    var totalForms = getTotalForms()
+    var maxNumForms = getMaxForms()
 
     if (totalForms + 1 > maxNumForms) {
         alert(`You may not exceed ${maxNumForms} form sections.`)
@@ -21,6 +80,10 @@ function appendNewForm(cloneFormSelector, prefix) {
     $(cloneFormSelector).after(newForm);
 }
 
+/**
+ * Increment all of the indices for the input elements of a formset form
+ * @param form The form row element selected by jQuery
+ */
 function incrementInputAttributes(form) {
     var formIdNumber = -1
     var oldNumber = null
@@ -48,6 +111,10 @@ function incrementInputAttributes(form) {
     })
 }
 
+/**
+ * Increment all of the indices for the label elements of a formset form
+ * @param form The form row element selected by jQuery
+ */
 function incrementLabelAttributes(form) {
     var formIdNumber = -1
     var oldNumber = null
@@ -72,8 +139,13 @@ function incrementLabelAttributes(form) {
     })
 }
 
-function deleteForm(deleteFormSelector, prefix) {
-    var total = parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
+/**
+ * Delete a specific form element from the formset
+ * @param {String} deleteFormSelector The selector for the form row
+ */
+function deleteForm(deleteFormSelector) {
+    var prefix = getFormPrefix()
+    var total = getTotalForms()
 
     if (total > 1) {
         $(deleteFormSelector).remove()
@@ -84,78 +156,60 @@ function deleteForm(deleteFormSelector, prefix) {
         // Update each input's index for the remaining forms
         for (var i = 0; i < forms.length; i++) {
             $(forms.get(i)).find(':input').each((_, element) => {
-                updateElementIndex(element, prefix, i);
+                updateElementIndex(element, i);
             });
         }
     }
 }
 
-function updateElementIndex(element, prefix, index) {
-    var id_regex = new RegExp(`(${prefix}-\\d+)`);
+/**
+ * Update a form element's index within the current form.
+ * @param element An element selected from the page with jQuery
+ * @param {Number} index The new index the element is to have
+ */
+function updateElementIndex(element, index) {
+    var prefix = getFormPrefix()
+    var idRegex = new RegExp(`(${prefix}-\\d+)`);
     var replacement = prefix + '-' + index;
 
     forValue = $(element).attr("for")
     if (forValue) {
-        const new_for = forValue.replace(id_regex, replacement)
+        const new_for = forValue.replace(idRegex, replacement)
         $(element).attr({
             "for": new_for
         })
     }
 
     if (element.id) {
-        element.id = element.id.replace(id_regex, replacement)
+        element.id = element.id.replace(idRegex, replacement)
     }
 
     if (element.name) {
-        element.name = element.name.replace(id_regex, replacement)
+        element.name = element.name.replace(idRegex, replacement)
     }
 }
 
-function elementExists(selector) {
-    return $(selector).length === 0 ? false : true
-}
-
 $(() => {
+    var totalForms = getTotalForms()
+    $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
+
     $('.add-form-row').on('click', (event) => {
         event.preventDefault()
-        $('.remove-form-row').prop('disabled', false)
-        if (elementExists('#id_rights-TOTAL_FORMS')) {
-            appendNewForm('.form-row:last', 'rights')
-        }
-        else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
-            appendNewForm('.form-row:last', 'otheridentifiers')
-        }
-        tippy('[data-tippy-content]')
+        appendNewForm('.form-row:last')
+        totalForms = getTotalForms()
+        $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
     })
 
     $('.remove-form-row').on('click', (event) => {
         event.preventDefault()
-
-        if (elementExists('#id_rights-TOTAL_FORMS')) {
-            deleteForm('.form-row:last', 'rights')
-            total = parseInt($('#id_rights-TOTAL_FORMS').val())
-            if (total <= 1) {
-                $('.remove-form-row').prop('disabled', true)
-            }
-        }
-        else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
-            deleteForm('.form-row:last', 'otheridentifiers')
-            total = parseInt($('#id_otheridentifiers-TOTAL_FORMS').val())
-            if (total <= 1) {
-                $('.remove-form-row').prop('disabled', true)
-            }
-        }
+        deleteForm('.form-row:last')
+        totalForms = getTotalForms()
+        $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
     })
 
     $('.remove-form-row').hover(() => {
-        var total = 0
-        if (elementExists('#id_rights-TOTAL_FORMS')) {
-            total = parseInt($('#id_rights-TOTAL_FORMS').val())
-        }
-        else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
-            total = parseInt($('#id_otheridentifiers-TOTAL_FORMS').val())
-        }
-        if (total > 1) {
+        totalForms = getTotalForms()
+        if (totalForms > 1) {
             $('.form-row:last').find('label').each((_, element) => {
                 $(element).addClass('red-text-strikethrough')
             })
