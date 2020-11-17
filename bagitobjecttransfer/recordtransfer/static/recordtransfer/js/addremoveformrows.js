@@ -15,20 +15,22 @@ const ID_NUM_REGEX = new RegExp('-(\\d+)-')
 
 /**
  * Get the current number of forms displayed on the page.
+ * @param {String} prefix The form prefix, if it is known
  * @returns {Number} The current number of forms
  */
-function getTotalForms() {
-    var prefix = getFormPrefix()
-    return parseInt($(`#id_${prefix}-TOTAL_FORMS`).val())
+function getTotalForms(prefix = null) {
+    var formPrefix = prefix === null ? getFormPrefix() : prefix
+    return parseInt($(`#id_${formPrefix}-TOTAL_FORMS`).val())
 }
 
 /**
  * Get the maximum number of allowable forms set by the backend.
+ * @param {String} prefix The form prefix, if it is known
  * @returns {Number} The maximum number of forms
  */
-function getMaxForms() {
-    var prefix = getFormPrefix()
-    return parseInt($(`#id_${prefix}-MAX_NUM_FORMS`).val())
+function getMaxForms(prefix = null) {
+    var formPrefix = prefix === null ? getFormPrefix() : prefix
+    return parseInt($(`#id_${formPrefix}-MAX_NUM_FORMS`).val())
 }
 
 /**
@@ -64,8 +66,8 @@ function elementExists(selector) {
  */
 function appendNewForm(cloneFormSelector) {
     var prefix = getFormPrefix()
-    var totalForms = getTotalForms()
-    var maxNumForms = getMaxForms()
+    var totalForms = getTotalForms(prefix)
+    var maxNumForms = getMaxForms(prefix)
 
     if (totalForms + 1 > maxNumForms) {
         alert(`You may not exceed ${maxNumForms} form sections.`)
@@ -145,7 +147,7 @@ function incrementLabelAttributes(form) {
  */
 function deleteForm(deleteFormSelector) {
     var prefix = getFormPrefix()
-    var total = getTotalForms()
+    var total = getTotalForms(prefix)
 
     if (total > 1) {
         $(deleteFormSelector).remove()
@@ -156,7 +158,7 @@ function deleteForm(deleteFormSelector) {
         // Update each input's index for the remaining forms
         for (var i = 0; i < forms.length; i++) {
             $(forms.get(i)).find(':input').each((_, element) => {
-                updateElementIndex(element, i);
+                updateElementIndex(element, i, prefix);
             });
         }
     }
@@ -167,8 +169,7 @@ function deleteForm(deleteFormSelector) {
  * @param element An element selected from the page with jQuery
  * @param {Number} index The new index the element is to have
  */
-function updateElementIndex(element, index) {
-    var prefix = getFormPrefix()
+function updateElementIndex(element, index, prefix) {
     var idRegex = new RegExp(`(${prefix}-\\d+)`);
     var replacement = prefix + '-' + index;
 
