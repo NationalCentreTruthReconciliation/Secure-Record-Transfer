@@ -8,6 +8,7 @@ from collections import OrderedDict
 from django.contrib import admin, messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
 
@@ -226,8 +227,9 @@ class BagAdmin(admin.ModelAdmin):
             return HttpResponseRedirect('../')
         if '_download_bag' in request.POST:
             create_downloadable_bag.delay(obj, request.user)
-            self.message_user(request, ('A downloadable bag is being generated. Check the Jobs '
-                                        'page for more information.'))
+            self.message_user(request, mark_safe('A downloadable bag is being generated. Check the '
+                                                 "<a href='/admin/recordtransfer/job'>Jobs</a> "
+                                                 'page for more information.'))
             return HttpResponseRedirect('../')
         return super().response_change(request, obj)
 
