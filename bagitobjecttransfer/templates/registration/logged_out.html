@@ -1,15 +1,16 @@
 {% extends 'recordtransfer/base.html' %}
 
-{% block title %}
-    Logged out
-{% endblock %}
+{% block title %}{% trans "Logged Out" %}{% endblock %}
 
 {% block content %}
-    <div class="title-text">Logged Out</div>
+    <div class="title-text">{% trans "Logged Out" %}</div>
     <p>
+        {% blocktrans %}
         You have been successfully logged out.
+        {% endblocktrans %}
     </p>
     <p>
-        <a href="{% url 'login' %}">Click here</a> to log back in.
+        <a href="{% url 'login' %}">{% trans "Click here" %}</a> 
+        {% trans "to log back in." %}
     </p>
 {% endblock %}

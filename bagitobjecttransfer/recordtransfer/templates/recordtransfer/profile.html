@@ -1,13 +1,11 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
 
-{% block title %}
-{% trans "User Profile" %}
-{% endblock %}
+{% block title %}{% trans "Your Profile" %}{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-    <div class="title-text">{% trans "Your profile" %}</div>
+    <div class="title-text">{% trans "Your Profile" %}</div>
     <div class="flex-item margin-top-25px">
         <label>{% trans "Name" %}</label>
         <input disabled value="{{ user.get_full_name }}">
@@ -27,10 +25,10 @@
         {% if transfers %}
             <table class="full-width-table standard-table" cellspacing="0">
                 <tr>
-                    <th>Date Transferred</th>
-                    <th>Transfer Title</th>
-                    <th>Transfer Files</th>
-                    <th>Review Status</th>
+                    <th>{% trans "Date Transferred" %}</th>
+                    <th>{% trans "Transfer Title" %}</th>
+                    <th>{% trans "Files Transferred" %}</th>
+                    <th>{% trans "Review Status" %}</th>
                 </tr>
                 {% for transfer in transfers %}
                     <tr>
@@ -43,16 +41,20 @@
             </table>
         {% else %}
             <span>
-                You have not sent any records to the NCTR.
-                <a href="{% url 'recordtransfer:formpreparation' %}">Start a new transfer</a>
-                to get started.
+                {% url 'recordtransfer:formpreparation' as transfer_url %}
+                {% blocktrans %}
+                    You have not sent any records to the NCTR.
+                    <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
+                {% endblocktrans %}
             </span>
         {% endif %}
     </div>
 {% else %}
     {% url 'login' as login %}
+    <p>
     {% blocktrans %}
-        <p><a href="{{ login }}">Log in</a> to see your profile.</p>
+        <a href="{{ login }}">Log in</a> to see your profile.
     {% endblocktrans %}
+    </p>
 {% endif %}
 {% endblock %}

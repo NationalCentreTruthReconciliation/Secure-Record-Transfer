@@ -38,45 +38,45 @@
                         <li class="nav-logo">
                             <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
                                 <img id="app-logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
-                                <span id="app-title" class="title-text">NCTR Record Transfer<span>
+                                <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}<span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'recordtransfer:index' %}">
-                                Home
+                                {% trans "Home" %}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'recordtransfer:about' %}">
-                                About
+                                {% trans "About" %}
                             </a>
                         </li>
                         {% if user.is_authenticated %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
-                                    Profile
+                                    {% trans "Profile" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link main" href="{% url 'recordtransfer:formpreparation' %}">
-                                    Transfer
+                                    {% trans "Transfer" %}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link main" href="{% url 'logout' %}">
-                                    Logout
+                                    {% trans "Logout" %}
                                 </a>
                             </li>
                         {% elif not user.is_authenticated %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
-                                    Sign Up
+                                    {% trans "Sign Up" %}
                                 </a>
                             </li>
                             {% if 'login' not in request.path %}
                                 <li class="nav-item">
                                     <a class="nav-link main" href="{% url 'login' %}">
-                                        Log In
+                                        {% trans "Log In" %}
                                     </a>
                                 </li>
                             {% endif %}
