@@ -1,4 +1,5 @@
 import os
+import json
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -75,6 +76,17 @@ class Bag(models.Model):
     @property
     def location(self):
         return os.path.join(BAG_STORAGE_FOLDER, self.user.username, self.bag_name)
+
+    @property
+    def transfer_info(self):
+        ''' Exposes a small amount of information from the transfer to be shown for a user '''
+        json_metadata = json.loads(self.caais_metadata)
+        title = json_metadata['section_1']['accession_title']
+        extent = json_metadata['section_3']['extent_statement'][0]['quantity_and_type_of_units']
+        return {
+            'title': title,
+            'extent': extent,
+        }
 
     def __str__(self):
         return f'{self.bag_name} (Created by {self.user})'

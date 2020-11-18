@@ -8,10 +8,32 @@
 {% block content %}
 {% if user.is_authenticated %}
     <div class="title-text">{% trans "Your profile" %}</div>
-    <p>{% trans "First name:" %} {{ user.first_name }}</p>
-    <p>{% trans "Last name:" %} {{ user.last_name }}</p>
+    <p>{% trans "Name:" %} {{ user.get_full_name }}</p>
     <p>{% trans "Email:" %} {{ user.email }}</p>
     <p>{% trans "Username:" %} {{ user.username }}</p>
+    <p>Past Transfers:</p>
+    {% if transfers %}
+        <table border="1">
+            <thead>
+                <th>Date Transferred</th>
+                <th>Transfer Title</th>
+                <th>Transfer Files</th>
+                <th>Review Status</th>
+            </thead>
+            <tbody>
+                {% for transfer in transfers %}
+                    <tr>
+                        <td>{{ transfer.bagging_date }}</td>
+                        <td>{{ transfer.transfer_title }}</td>
+                        <td>{{ transfer.transfer_extent }}</td>
+                        <td>{{ transfer.review_status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        No transfers made yet.
+    {% endif %}
 {% else %}
     {% url 'login' as login %}
     {% blocktrans %}

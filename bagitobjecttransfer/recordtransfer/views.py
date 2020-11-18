@@ -8,10 +8,10 @@ from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, DetailView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, User
+from recordtransfer.models import UploadedFile, UploadSession, User, Bag
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -38,8 +38,24 @@ class FormPreparation(TemplateView):
 
 
 class UserProfile(TemplateView):
-    ''' A page for a user to see and edit their information '''
+    ''' A page for a user to see their own information '''
     template_name = 'recordtransfer/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['transfers'] = [
+            {
+                'bagging_date': x.bagging_date,
+                'review_status': x.get_review_status_display,
+                'transfer_title': x.transfer_info['title'],
+                'transfer_extent': x.transfer_info['extent'],
+            } for x in Bag.objects.filter(
+                user=self.request.user
+            ).order_by(
+                '-bagging_date'
+            )
+        ]
+        return context
 
 
 class About(TemplateView):
