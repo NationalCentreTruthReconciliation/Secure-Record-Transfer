@@ -62,6 +62,11 @@ class About(TemplateView):
     ''' About the application '''
     template_name = 'recordtransfer/about.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['accepted_files'] = ACCEPTED_FILE_FORMATS
+        return context
+
 
 class ActivationSent(TemplateView):
     ''' The page a user sees after creating an account '''

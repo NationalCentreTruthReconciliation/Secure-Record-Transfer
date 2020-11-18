@@ -4,5 +4,28 @@
 {% block title %}{% trans "About" %}{% endblock %}
 
 {% block content %}
-<p>This page is a placeholder</p>
+<div class="title-text">{% trans "About" %}</div>
+<p>
+    {% blocktrans %}
+    The NCTR Record Transfer Portal allows people to send records to the National Centre for Truth
+    and Reconciliation (NCTR) Archives securely over the internet. For small record transfers, this
+    is the preferred method of sending records to the NCTR Archives.
+    {% endblocktrans %}
+</p>
+<div class="title-text margin-top-25px">{% trans "Accepted File Types" %}</div>
+<p>
+    {% blocktrans %}
+    The following are the types of files that donors can transfer using this application.
+    {% endblocktrans %}
+</p>
+{% for group, extensions in accepted_files.items %}
+    {% if extensions %}
+        <div class="medium-text">{{ group }} Files</div>
+        <ul>
+            {% for extension in extensions %}
+                <li>{{ extension }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endfor %}
 {% endblock %}

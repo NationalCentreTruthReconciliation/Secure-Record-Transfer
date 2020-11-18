@@ -61,6 +61,15 @@ ACCEPTED_FILE_FORMATS = {
     'Archive': [
         'zip',
     ],
+    'Audio': [
+        'acc',
+        'flac',
+        'm4a',
+        'mp3',
+        'ogg',
+        'wav',
+        'wma',
+    ],
     'Document': [
         'doc',
         'docx',
@@ -69,6 +78,12 @@ ACCEPTED_FILE_FORMATS = {
         'rtf',
         'txt',
         'html',
+    ],
+    'Image': [
+        'jpg',
+        'jpeg',
+        'gif',
+        'png',
     ],
     'Presentation': [
         'ppt',
@@ -81,12 +96,6 @@ ACCEPTED_FILE_FORMATS = {
         'xlsx',
         'csv',
     ],
-    'Image': [
-        'jpg',
-        'jpeg',
-        'gif',
-        'png',
-    ],
     'Video': [
         'avi',
         'mkv',
@@ -95,14 +104,5 @@ ACCEPTED_FILE_FORMATS = {
         'mpeg4',
         'mpg',
         'wmv',
-    ],
-    'Audio': [
-        'acc',
-        'flac',
-        'm4a',
-        'mp3',
-        'ogg',
-        'wav',
-        'wma',
     ],
 }
