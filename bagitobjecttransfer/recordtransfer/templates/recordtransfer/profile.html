@@ -8,19 +8,30 @@
 {% block content %}
 {% if user.is_authenticated %}
     <div class="title-text">{% trans "Your profile" %}</div>
-    <p>{% trans "Name:" %} {{ user.get_full_name }}</p>
-    <p>{% trans "Email:" %} {{ user.email }}</p>
-    <p>{% trans "Username:" %} {{ user.username }}</p>
-    <p>Past Transfers:</p>
-    {% if transfers %}
-        <table border="1">
-            <thead>
-                <th>Date Transferred</th>
-                <th>Transfer Title</th>
-                <th>Transfer Files</th>
-                <th>Review Status</th>
-            </thead>
-            <tbody>
+    <div class="flex-item margin-top-25px">
+        <label>{% trans "Name" %}</label>
+        <input disabled value="{{ user.get_full_name }}">
+    </div>
+    <div class="flex-item">
+        <label>{% trans "Email" %}</label>
+        <input disabled value="{{ user.email }}">
+    </div>
+    <div class="flex-item">
+        <label>{% trans "Username" %}</label>
+        <input disabled value="{{ user.username }}">
+    </div>
+    <div class="flex-full-width-item margin-top-25px">
+        <label class="past-transfer-label">{% trans "Past Transfers"%}</label>
+    </div>
+    <div class="flex-full-width-item">
+        {% if transfers %}
+            <table class="full-width-table standard-table" cellspacing="0">
+                <tr>
+                    <th>Date Transferred</th>
+                    <th>Transfer Title</th>
+                    <th>Transfer Files</th>
+                    <th>Review Status</th>
+                </tr>
                 {% for transfer in transfers %}
                     <tr>
                         <td>{{ transfer.bagging_date }}</td>
@@ -29,11 +40,15 @@
                         <td>{{ transfer.review_status }}</td>
                     </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        No transfers made yet.
-    {% endif %}
+            </table>
+        {% else %}
+            <span>
+                You have not sent any records to the NCTR.
+                <a href="{% url 'recordtransfer:formpreparation' %}">Start a new transfer</a>
+                to get started.
+            </span>
+        {% endif %}
+    </div>
 {% else %}
     {% url 'login' as login %}
     {% blocktrans %}

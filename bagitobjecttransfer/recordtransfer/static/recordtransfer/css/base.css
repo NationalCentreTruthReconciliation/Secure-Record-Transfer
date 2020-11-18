@@ -117,6 +117,20 @@ body {
     margin-top: 25px;
 }
 
+.standard-table {
+    text-align: left;
+    font-size: 11pt;
+}
+
+.standard-table th,
+.standard-table td {
+    padding: 5px;
+}
+
+.standard-table tr:nth-child(odd) {
+    background-color: #eee;
+}
+
 
 /**
  * Fix dropzone error tooltip from obscuring the "Remove file" link
