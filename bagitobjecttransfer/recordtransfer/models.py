@@ -3,6 +3,7 @@ import json
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
 from django.utils import timezone
@@ -87,6 +88,10 @@ class Bag(models.Model):
             'title': title,
             'extent': extent,
         }
+
+    def get_admin_change_url(self):
+        view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
 
     def __str__(self):
         return f'{self.bag_name} (Created by {self.user})'
