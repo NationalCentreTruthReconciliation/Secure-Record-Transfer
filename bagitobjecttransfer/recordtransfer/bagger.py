@@ -162,7 +162,7 @@ def _copy_session_uploads_to_dir(session_token, directory, delete=True):
         elif not missing_files:
             destination_path = directory / uploaded_file.name
             LOGGER.info(msg=('{0} {1} to {2}'.format(verb, source_path, destination_path)))
-            shutil.copy(source_path, destination_path)
+            shutil.copy2(source_path, destination_path)
             if delete:
                 uploaded_file.delete_file()
             copied_files.append(str(destination_path))
