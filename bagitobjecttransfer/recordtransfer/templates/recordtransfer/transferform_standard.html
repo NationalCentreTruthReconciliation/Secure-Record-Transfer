@@ -1,0 +1,32 @@
+{% extends 'recordtransfer/transferform_base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block buttonarrayclass %}flex-item{% endblock %}
+{% block formfields %}
+    {% for field in wizard.form %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+            <div class="flex-error">
+                <label for="nothing"></label>
+                <div class="field-error">{{ error }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% if field.label != 'hidden' %}
+            <div class="flex-item">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {# Help tooltip #}
+                {% if field.help_text %}
+                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
+                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            {# Render hidden field #}
+            {{ field }}
+        {% endif %}
+    {% endfor %}
+{% endblock %}

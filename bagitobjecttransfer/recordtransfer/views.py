@@ -124,7 +124,7 @@ class TransferFormWizard(SessionWizardView):
 
     _TEMPLATES = {
         "contactinfo": {
-            "templateref": "recordtransfer/standardform.html",
+            "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Contact Information"),
             "infomessage": gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
@@ -132,7 +132,7 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "sourceinfo": {
-            "templateref": "recordtransfer/form_sourceinfo.html",
+            "templateref": "recordtransfer/transferform_sourceinfo.html",
             "formtitle": gettext("Source Information"),
             "infomessage": gettext(
                 "Enter the info for the source of the records. The source is the person or entity "
@@ -141,14 +141,14 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "recorddescription": {
-            "templateref": "recordtransfer/standardform.html",
+            "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Record Description"),
             "infomessage": gettext(
                 "Provide a brief description of the records you're transferring"
             )
         },
         "rights": {
-            "templateref": "recordtransfer/formsetform.html",
+            "templateref": "recordtransfer/transferform_formset.html",
             "formtitle": gettext("Record Rights"),
             "infomessage": gettext(
                 "Enter any associated rights that apply to the records. They can be copyright, "
@@ -157,23 +157,23 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "otheridentifiers": {
-            "templateref": "recordtransfer/formsetform.html",
-            "formtitle": gettext("Other Identifiers"),
+            "templateref": "recordtransfer/transferform_formset.html",
+            "formtitle": gettext("Other Identifiers (Optional)"),
             "infomessage": gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             )
         },
         "generalnotes": {
-            "templateref": "recordtransfer/standardform.html",
-            "formtitle": gettext("General Notes"),
+            "templateref": "recordtransfer/transferform_standard.html",
+            "formtitle": gettext("General Notes (Optional)"),
             "infomessage": gettext(
                 "This step is optional. If you have any other notes that did not fit anywhere else "
                 "in the transfer form, put them here"
             )
         },
         "uploadfiles": {
-            "templateref": "recordtransfer/dropzoneform.html",
+            "templateref": "recordtransfer/transferform_dropzone.html",
             "formtitle": gettext("Upload Files"),
             "infomessage": gettext(
                 "Upload the files you intend to transfer to the NCTR"

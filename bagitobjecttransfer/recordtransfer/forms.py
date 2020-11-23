@@ -437,15 +437,18 @@ class RecordDescriptionForm(forms.Form):
         widget=forms.DateInput(attrs={
             'class': 'start_date_picker reduce-form-field-width',
             'autocomplete': 'off',
+            'placeholder': 'yyyy-mm-dd',
         }),
-        label=gettext('Start date of material'),
+        label=gettext('Earliest date of files'),
+        help_text=gettext('Enter the earliest date relevant to the files you\'re transferring.'),
     )
 
     start_date_is_approximate = forms.BooleanField(
         required=False,
-        widget=forms.CheckboxInput(),
-        help_text=gettext('Check the box if the start date is an estimate or a guess'),
-        label=gettext('Start date estimated'),
+        widget=forms.CheckboxInput(attrs={
+            'hidden': True,
+        }),
+        label='hidden',
     )
 
     end_date_of_material = forms.DateField(
@@ -454,15 +457,18 @@ class RecordDescriptionForm(forms.Form):
         widget=forms.DateInput(attrs={
             'class': 'end_date_picker reduce-form-field-width',
             'autocomplete': 'off',
+            'placeholder': 'yyyy-mm-dd',
         }),
-        label=gettext('End date of files'),
+        label=gettext('Latest date of files'),
+        help_text=gettext('Enter the latest date relevant to the files you\'re transferring.'),
     )
 
     end_date_is_approximate = forms.BooleanField(
         required=False,
-        widget=forms.CheckboxInput(),
-        help_text=gettext('Check the box if the end date is an estimate or a guess'),
-        label=gettext('End date estimated'),
+        widget=forms.CheckboxInput(attrs={
+            'hidden': True,
+        }),
+        label='hidden',
     )
 
     language_of_material = forms.CharField(
