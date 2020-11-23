@@ -388,7 +388,7 @@ class SourceInfoForm(forms.Form):
             'placeholder': gettext('Enter any notes you think may be useful for the archives to '
                                    'have about this entity (optional)')
         }),
-        label=gettext('Notes'),
+        label=gettext('Source notes'),
         help_text=gettext('e.g., The donor wishes to remain anonymous')
     )
 

@@ -22,7 +22,7 @@ class User(AbstractUser):
 
 
 class UploadSession(models.Model):
-    ''' Represents a file upload session, that may or may not be split into multiple parallel \
+    ''' Represents a file upload session, that may or may not be split into multiple parallel
     uploads.
     '''
     token = models.CharField(max_length=32)

@@ -132,7 +132,7 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "sourceinfo": {
-            "templateref": "recordtransfer/standardform.html",
+            "templateref": "recordtransfer/form_sourceinfo.html",
             "formtitle": gettext("Source Information"),
             "infomessage": gettext(
                 "Enter the info for the source of the records. The source is the person or entity "
