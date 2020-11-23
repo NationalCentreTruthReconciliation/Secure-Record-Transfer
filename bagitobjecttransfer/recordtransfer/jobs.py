@@ -1,7 +1,6 @@
 import json
 import logging
 import smtplib
-import urllib.parse
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -76,9 +75,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         new_bag.save()
 
         LOGGER.info('Sending transfer success email to administrators')
-        domain = Site.objects.get_current().domain
-        bag_url = urllib.parse.urljoin(domain, new_bag.get_admin_change_url())
-        send_bag_creation_success.delay(form_data, bag_url, user_submitted)
+        send_bag_creation_success.delay(form_data, new_bag, user_submitted)
         LOGGER.info('Sending thank you email to user')
         send_thank_you_for_your_transfer.delay(form_data, user_submitted)
     else:
@@ -142,19 +139,24 @@ def create_downloadable_bag(bag: Bag, user_triggered: User):
             zipf.close()
 
 @django_rq.job
-def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: User):
+def send_bag_creation_success(form_data: dict, bag: Bag, user_submitted: User):
     ''' Send an email to users who get bag email updates that a user submitted a new bag and there
     were no errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        bag_url (str): An absolute link that links to the bag in the administrator site.
+        bag (Bag): The new bag that was created.
         user_submitted (User): The user who submitted the data and files.
     '''
     subject = 'New Transfer Ready for Review'
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    bag_url = 'http://{domain}/{change_url}'.format(
+        domain=domain.rstrip(' /'),
+        change_url=bag.get_admin_change_url().lstrip(' /')
+    )
+    LOGGER.info(msg='Generated bag change URL: {0}'.format(bag_url))
 
     LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
     recipients = User.objects.filter(gets_bag_email_updates=True)
@@ -291,6 +293,12 @@ def send_user_activation_email(new_user: User):
 def send_mail_with_logs(recipients: list, from_email: str, subject, template_name: str,
                         context: dict):
     try:
+        if Site.objects.get_current().domain == '127.0.0.1:8000':
+            new_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, 'example.com')
+            msg = 'Changing FROM email for local development. Using {0} instead of {1}'
+            LOGGER.info(msg=msg.format(new_email, from_email))
+            from_email = new_email
+
         LOGGER.info('Setting up new email:')
         LOGGER.info(msg='SUBJECT: {0}'.format(subject))
         LOGGER.info(msg='TO: {0}'.format(recipients))
