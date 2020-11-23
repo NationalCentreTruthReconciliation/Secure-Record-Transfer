@@ -4,6 +4,7 @@ from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 DEBUG = False
+SITE_ID = 2
 
 ALLOWED_HOSTS = [
     # Add host domain(s) here

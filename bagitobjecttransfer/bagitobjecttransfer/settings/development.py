@@ -5,6 +5,7 @@ from .base import *
 
 DEBUG = True
 TESTING = False
+SITE_ID = 1
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -21,16 +22,16 @@ DATABASES = {
     }
 }
 
-
-# Local Redis Task Queue
+# Asynchronous Redis Task Queue Manager
+# https://github.com/rq/django-rq
 
 RQ_QUEUES = {
     'default': {
         'HOST': '0.0.0.0',
         'PORT': 6379,
-        'DB': 0,
+        'DB': 0, # Redis database index
         'PASSWORD': '',
-        'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_TIMEOUT': 500,
     },
 }
 
