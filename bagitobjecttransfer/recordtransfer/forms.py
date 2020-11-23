@@ -426,9 +426,9 @@ class RecordDescriptionForm(forms.Form):
         max_length=100,
         required=True,
         widget=forms.TextInput(attrs={
-            'placeholder': gettext('Create a title for this collection of records')
+            'placeholder': gettext('e.g., Committee Meeting Minutes')
         }),
-        label=gettext('Collection title')
+        label=gettext('Title')
     )
 
     start_date_of_material = forms.DateField(
@@ -439,7 +439,7 @@ class RecordDescriptionForm(forms.Form):
             'autocomplete': 'off',
             'placeholder': 'yyyy-mm-dd',
         }),
-        label=gettext('Earliest date of files'),
+        label=gettext('Earliest date'),
         help_text=gettext('Enter the earliest date relevant to the files you\'re transferring.'),
     )
 
@@ -459,7 +459,7 @@ class RecordDescriptionForm(forms.Form):
             'autocomplete': 'off',
             'placeholder': 'yyyy-mm-dd',
         }),
-        label=gettext('Latest date of files'),
+        label=gettext('Latest date'),
         help_text=gettext('Enter the latest date relevant to the files you\'re transferring.'),
     )
 
@@ -478,7 +478,7 @@ class RecordDescriptionForm(forms.Form):
             'placeholder': gettext('English, French')
         }),
         help_text=gettext('Enter all relevant languages here'),
-        label=gettext('Language of material')
+        label=gettext('Language(s)')
     )
 
     scope_and_content = forms.CharField(
@@ -486,10 +486,11 @@ class RecordDescriptionForm(forms.Form):
         min_length=4,
         widget=forms.Textarea(attrs={
             'rows': '6',
-            'placeholder': gettext('Briefly describe the content of the files you are '
-                                   'transferring. What do the files contain?')
+            'placeholder': 'e.g., These files contain images from ...'
         }),
-        label=gettext('Description of files'),
+        label=gettext('Description of contents'),
+        help_text=gettext('Briefly describe the content of the files you are transferring. '
+                          'What do the files contain?')
     )
 
 
