@@ -9,11 +9,10 @@ if platform.system() == 'Windows':
 else:
     BAG_STORAGE_FOLDER = config('BAG_FOLDER_LINUX')
 
-# Email address for automated emails
+# Email Usernames
 
-DO_NOT_REPLY_EMAIL = 'do-not-reply@nctrrecordtransfer.ca'
-
-BASE_URL = 'http://127.0.0.1:8000'
+DO_NOT_REPLY_USERNAME = 'do-not-reply'
+ARCHIVIST_USERNAME = 'Daniel.Lovegrove'
 
 # Default data to inject into metadata, after the user enters their own metadata
 

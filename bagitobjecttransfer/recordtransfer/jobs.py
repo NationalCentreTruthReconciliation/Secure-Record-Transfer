@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import timedelta
 
 import django_rq
+from django.contrib.sites.models import Site
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -18,7 +19,7 @@ from django.template.loader import render_to_string
 from recordtransfer.bagger import create_bag
 from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
 from recordtransfer.models import Bag, UploadedFile, User, Job
-from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_EMAIL, BASE_URL
+from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_USERNAME, ARCHIVIST_USERNAME
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -75,17 +76,17 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         new_bag.save()
 
         LOGGER.info('Sending transfer success email to administrators')
-        # TODO: I'm not sure this is a good approach to getting the object change URL
-        bag_url = urllib.parse.urljoin(BASE_URL, f'/admin/recordtransfer/bag/{new_bag.id}')
+        domain = Site.objects.get_current().domain
+        bag_url = urllib.parse.urljoin(domain, new_bag.get_admin_change_url())
         send_bag_creation_success.delay(form_data, bag_url, user_submitted)
-        # TODO: Implement
-        # TODO: LOGGER.info('Sending thank you email to user')
+        LOGGER.info('Sending thank you email to user')
+        send_thank_you_for_your_transfer.delay(form_data, user_submitted)
     else:
         LOGGER.error('bagger reported that the bag was NOT created successfully')
         LOGGER.info('Sending transfer failure email to administrators')
         send_bag_creation_failure.delay(form_data, user_submitted)
-        # TODO: Implement
-        # TODO: LOGGER.info('Sending transfer issue email to user')
+        LOGGER.info('Sending transfer issue email to user')
+        send_your_transfer_did_not_go_through.delay(form_data, user_submitted)
 
 @django_rq.job
 def create_downloadable_bag(bag: Bag, user_triggered: User):
@@ -140,7 +141,6 @@ def create_downloadable_bag(bag: Bag, user_triggered: User):
         if zipf is not None:
             zipf.close()
 
-
 @django_rq.job
 def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: User):
     ''' Send an email to users who get bag email updates that a user submitted a new bag and there
@@ -152,41 +152,30 @@ def send_bag_creation_success(form_data: dict, bag_url: str, user_submitted: Use
         bag_url (str): An absolute link that links to the bag in the administrator site.
         user_submitted (User): The user who submitted the data and files.
     '''
-    LOGGER.info('Finding Users to send "transfer ready" email to')
+    subject = 'New Transfer Ready for Review'
+    domain = Site.objects.get_current().domain
+    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+
+    LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
     recipients = User.objects.filter(gets_bag_email_updates=True)
     if not recipients:
-        LOGGER.warning(msg=('There are no users configured to receive "transfer ready" emails.'))
+        LOGGER.warning(msg=('There are no users configured to receive transfer update emails.'))
         return
-    recipient_list = list(recipients)
-    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(
-        len(recipient_list), recipient_list)))
+    user_list = list(recipients)
+    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
     recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
-    try:
-        LOGGER.info('Rendering HTML email from bag_submit_success.html')
-        msg_html = render_to_string('recordtransfer/email/bag_submit_success.html', context={
+
+    send_mail_with_logs(
+        recipients=recipient_emails,
+        from_email=from_email,
+        subject=subject,
+        template_name='recordtransfer/email/bag_submit_success.html',
+        context={
             'user': user_submitted,
             'form_data': form_data,
             'bag_url': bag_url,
-        })
-        LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
-        msg_plain = html_to_text(msg_html)
-
-        LOGGER.info('Sending mail:')
-        LOGGER.info('SUBJECT: New Transfer Ready for Review')
-        LOGGER.info(msg='TO: {0}'.format(recipient_emails))
-        LOGGER.info(msg='FROM: {0}'.format(DO_NOT_REPLY_EMAIL))
-        send_mail(
-            subject='New Transfer Ready for Review',
-            message=msg_plain,
-            from_email=DO_NOT_REPLY_EMAIL,
-            recipient_list=recipient_emails,
-            html_message=msg_html,
-            fail_silently=False,
-        )
-        LOGGER.info(msg='{0} email(s) sent'.format(len(recipient_emails)))
-    except smtplib.SMTPException as exc:
-        LOGGER.error(msg=('Error when sending email to users: {0}'.format(str(exc))))
-
+        }
+    )
 
 @django_rq.job
 def send_bag_creation_failure(form_data: dict, user_submitted: User):
@@ -198,77 +187,79 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
             the CAAIS tree version of the form.
         user_submitted (User): The user who submitted the data and files.
     '''
-    LOGGER.info('Finding Users to send "transfer failure" email to')
+    subject = 'Bag Creation Failed'
+    domain = Site.objects.get_current().domain
+    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+
+    LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
     recipients = User.objects.filter(gets_bag_email_updates=True)
     if not recipients:
-        LOGGER.warning(msg=('There are no users configured to receive "transfer failure" emails'))
+        LOGGER.warning(msg=('There are no users configured to receive transfer update emails.'))
         return
-    recipient_list = list(recipients)
-    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(
-        len(recipient_list), recipient_list)))
+    user_list = list(recipients)
+    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
     recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
-    try:
-        LOGGER.info('Rendering HTML email from bag_submit_failure.html')
-        msg_html = render_to_string('recordtransfer/email/bag_submit_failure.html', context={
+
+    send_mail_with_logs(
+        recipients=recipient_emails,
+        from_email=from_email,
+        subject=subject,
+        template_name='recordtransfer/email/bag_submit_failure.html',
+        context={
             'user': user_submitted,
             'form_data': form_data,
-        })
-        LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
-        msg_plain = html_to_text(msg_html)
-
-        LOGGER.info('Sending mail:')
-        LOGGER.info('SUBJECT: Bag Creation Failed')
-        LOGGER.info(msg='TO: {0}'.format(recipient_emails))
-        LOGGER.info(msg='FROM: {0}'.format(DO_NOT_REPLY_EMAIL))
-        send_mail(
-            subject='Bag Creation Failed',
-            message=msg_plain,
-            from_email=DO_NOT_REPLY_EMAIL,
-            recipient_list=recipient_emails,
-            html_message=msg_html,
-            fail_silently=False,
-        )
-        LOGGER.info(msg='{0} email(s) sent'.format(len(recipient_emails)))
-    except smtplib.SMTPException as exc:
-        LOGGER.error(msg=('Error when sending emails to users: {0}'.format(str(exc))))
-
+        }
+    )
 
 @django_rq.job
-def send_accession_report_to_user(form_data: dict, user_submitted: User):
-    ''' Send an accession report to the user who submitted the transfer.
+def send_thank_you_for_your_transfer(form_data: dict, user_submitted: User):
+    ''' Send a transfer success email to the user who submitted the transfer.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
         user_submitted (User): The user who submitted the data and files.
     '''
-    recipient = [user_submitted.email]
-    LOGGER.info(msg=('Sending "accession report" email to: {0}'.format(recipient[0])))
-    try:
-        LOGGER.info('Rendering HTML email from accession_report.html')
-        msg_html = render_to_string('recordtransfer/email/accession_report.html', context={
+    domain = Site.objects.get_current().domain
+    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    archivist_email = '{0}@{1}'.format(ARCHIVIST_USERNAME, domain)
+
+    send_mail_with_logs(
+        recipients=[user_submitted.email],
+        from_email=from_email,
+        subject='Thank You For Your Transfer',
+        template_name='recordtransfer/email/transfer_success.html',
+        context={
             'user': user_submitted,
             'form_data': form_data,
-        })
-        LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
-        msg_plain = html_to_text(msg_html)
+            'archivist_email': archivist_email,
+        }
+    )
 
-        LOGGER.info('Sending mail:')
-        LOGGER.info('SUBJECT: Thanks For Your Transfer')
-        LOGGER.info(msg='TO: {0}'.format(recipient))
-        LOGGER.info(msg='FROM: {0}'.format(DO_NOT_REPLY_EMAIL))
-        send_mail(
-            subject='Thanks For Your Transfer',
-            message=msg_plain,
-            from_email=DO_NOT_REPLY_EMAIL,
-            recipient_list=recipient,
-            html_message=msg_html,
-            fail_silently=False,
-        )
-        LOGGER.info('1 email sent')
-    except smtplib.SMTPException as exc:
-        LOGGER.error(msg=('Error when sending email to user: {0}'.format(str(exc))))
+@django_rq.job
+def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User):
+    ''' Send a transfer failure email to the user who submitted the transfer.
 
+    Args:
+        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
+            the CAAIS tree version of the form.
+        user_submitted (User): The user who submitted the data and files.
+    '''
+    domain = Site.objects.get_current().domain
+    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    archivist_email = '{0}@{1}'.format(ARCHIVIST_USERNAME, domain)
+
+    send_mail_with_logs(
+        recipients=[user_submitted.email],
+        from_email=from_email,
+        subject='Issue With Your Transfer',
+        template_name='recordtransfer/email/transfer_failure.html',
+        context={
+            'user': user_submitted,
+            'form_data': form_data,
+            'archivist_email': archivist_email,
+        }
+    )
 
 @django_rq.job
 def send_user_activation_email(new_user: User):
@@ -278,38 +269,52 @@ def send_user_activation_email(new_user: User):
     Args:
         new_user (User): The new user who requested an account
     '''
-    recipient = [new_user.email]
-    LOGGER.info(msg=('Sending "account activation" email to: {0}'.format(recipient[0])))
-    try:
-        token = account_activation_token.make_token(new_user)
-        LOGGER.info(msg='Generated token for activation link: {0}'.format(token))
+    domain = Site.objects.get_current().domain
+    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
-        LOGGER.info('Rendering HTML email from activate_account.html')
-        msg_html = render_to_string('recordtransfer/email/activate_account.html', context={
+    token = account_activation_token.make_token(new_user)
+    LOGGER.info(msg='Generated token for activation link: {0}'.format(token))
+
+    send_mail_with_logs(
+        recipients=[new_user.email],
+        from_email=from_email,
+        subject='Activate Your Account',
+        template_name='recordtransfer/email/activate_account.html',
+        context = {
             'user': new_user,
-            'base_url': BASE_URL,
+            'base_url': domain,
             'uid': urlsafe_base64_encode(force_bytes(new_user.pk)),
             'token': token,
-        })
+        }
+    )
+
+def send_mail_with_logs(recipients: list, from_email: str, subject, template_name: str,
+                        context: dict):
+    try:
+        LOGGER.info('Setting up new email:')
+        LOGGER.info(msg='SUBJECT: {0}'.format(subject))
+        LOGGER.info(msg='TO: {0}'.format(recipients))
+        LOGGER.info(msg='FROM: {0}'.format(from_email))
+        LOGGER.info(msg='Rendering HTML email from {0}'.format(template_name))
+        msg_html = render_to_string(template_name, context=context)
         LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
         msg_plain = html_to_text(msg_html)
-
-        LOGGER.info('Sending mail:')
-        LOGGER.info('SUBJECT: Activate Your Account')
-        LOGGER.info(msg='TO: {0}'.format(recipient))
-        LOGGER.info(msg='FROM: {0}'.format(DO_NOT_REPLY_EMAIL))
+        LOGGER.info('Sending...')
         send_mail(
-            subject='Activate Your Account',
+            subject=subject,
             message=msg_plain,
-            from_email=DO_NOT_REPLY_EMAIL,
-            recipient_list=recipient,
+            from_email=from_email,
+            recipient_list=recipients,
             html_message=msg_html,
             fail_silently=False
         )
-        LOGGER.info('1 email sent')
+        num_recipients = len(recipients)
+        if num_recipients == 1:
+            LOGGER.info('1 email sent')
+        else:
+            LOGGER.info(msg='{0} emails sent'.format(num_recipients))
     except smtplib.SMTPException as exc:
         LOGGER.error(msg=('Error when sending email to user: {0}'.format(str(exc))))
-
 
 @django_rq.job
 def clean_undeleted_temp_files(hours=12):
