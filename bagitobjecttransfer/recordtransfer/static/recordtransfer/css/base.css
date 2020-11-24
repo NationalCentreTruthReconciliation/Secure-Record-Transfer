@@ -86,18 +86,21 @@ body {
 
 .red-button:hover,
 .red-button:focus {
+    cursor: pointer;
     background: #ff7070;
     color: #ffffff;
 }
 
 .green-button:hover,
 .green-button:focus {
+    cursor: pointer;
     background: #3fb953;
     color: #ffffff;
 }
 
 .blue-button:hover,
 .blue-button:focus {
+    cursor: pointer;
     background: #316dee;
     color: #ffffff;
 }
@@ -107,6 +110,12 @@ body {
 .blue-button:disabled {
     background: #747474;
     color: #ffffff;
+    cursor: default;
+}
+
+.no-decoration {
+    text-decoration: inherit;
+    color: inherit;
 }
 
 .margin-right-20px {

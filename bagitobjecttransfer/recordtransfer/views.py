@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
-from django.views.generic import TemplateView, FormView, DetailView
+from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.models import UploadedFile, UploadSession, User, Bag
@@ -37,25 +37,19 @@ class FormPreparation(TemplateView):
     template_name = 'recordtransfer/formpreparation.html'
 
 
-class UserProfile(TemplateView):
-    ''' A page for a user to see their own information '''
-    template_name = 'recordtransfer/profile.html'
+class UserProfile(ListView):
+    ''' This view shows two things:
+    - The user's profile information
+    - A list of the Bags a user has created via transfer
+    '''
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['transfers'] = [
-            {
-                'bagging_date': x.bagging_date,
-                'review_status': x.get_review_status_display,
-                'transfer_title': x.transfer_info['title'],
-                'transfer_extent': x.transfer_info['extent'],
-            } for x in Bag.objects.filter(
-                user=self.request.user
-            ).order_by(
-                '-bagging_date'
-            )
-        ]
-        return context
+    template_name = 'recordtransfer/profile.html'
+    context_object_name = 'user_bags'
+    model = Bag
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Bag.objects.filter(user=self.request.user).order_by('-bagging_date')
 
 
 class About(TemplateView):
