@@ -43,8 +43,8 @@ Install Django and all other dependencies in the virtual environment.
     $ pip install -r requirements.txt
 
 
-Redis Setup
-###########
+Redis and RQ Worker Setup
+#########################
 
 .. note::
 
@@ -92,24 +92,202 @@ the :code:`redis.conf` file and change these settings:
     supervised systemd
 
 
-You should now be able to start the redis service with the following command:
+You should now be able to start and restart the redis service with the following command:
 
 .. code-block:: console
 
     $ sudo service redis start
+    $ sudo service redis restart
+
+
+To set up the asynchronous RQ workers, create a new environment file at
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` if it doesn't exist already. This file is used to store
+all of the secrets used for the record transfer application.
+
+Add these lines to the environment file:
+
+.. code-block::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    RQ_HOST_DEFAULT=localhost
+    RQ_PORT_DEFAULT=6379
+    RQ_DB_DEFAULT=0
+    RQ_PASSWORD_DEFAULT=
+    RQ_TIMEOUT_DEFAULT=500
+
+
+This is all that the RQ workers need to function correctly.
+
+
+MySQL Setup
+###########
+
+.. note::
+
+    We are using MySQL Community Server version **8.0.22**. Download
+    `MySQL Community Server here <https://dev.mysql.com/downloads/mysql/>`_.
+
+
+Create a systemd service initialization file for MySQL if it doesn't exist at
+:code:`/usr/lib/systemd/system/mysqld.service`
+
+.. code-block::
+
+    # file /usr/lib/systemd/system/mysqld.service
+    [Unit]
+    Description=MySQL Server
+    Documentation=man:mysqld(8)
+    Documentation=http://dev.mysql.com/doc/refman/en/using-systemd.html
+    After=network.target
+    After=syslog.target
+
+    [Install]
+    WantedBy=multi-user.target
+
+    [Service]
+    User=mysql
+    Group=mysql
+    Type=notify
+    TimeoutSec=0 # Disable service start and stop timeout logic of systemd for mysqld service.
+    PermissionsStartOnly=true # Execute pre and post scripts as root
+    ExecStartPre=/usr/bin/mysqld_pre_systemd # Needed to create system tables
+    ExecStart=/usr/sbin/mysqld $MYSQLD_OPTS # Start main service
+    EnvironmentFile=-/etc/sysconfig/mysql # Use this to switch malloc implementation
+    LimitNOFILE = 10000 # Sets open_files_limit
+    Restart=on-failure
+    RestartPreventExitStatus=1
+    PrivateTmp=false
+    # Set enviroment variable MYSQLD_PARENT_PID. This is required for restart.
+    Environment=MYSQLD_PARENT_PID=1
+
+
+You should now be able to start and restart the MySQL service with the following commands:
+
+.. code-block:: console
+
+    $ sudo service mysqld start
+    $ sudo service mysqld restart
+
+
+Once the MySQL server has started up, we will need to log in to MySQL and do two things:
+
+1. Create an empty database
+2. Create a user for the database
+
+
+*********************
+Create Empty Database
+*********************
+
+To create an empty database, log in to the running MySQL server:
+
+.. code-block:: console
+
+    $ sudo mysql -u root
+
+
+When you're logged in, check to make sure the database has not already been created. Execute a
+SHOW query to see all the databases. You'll see something like the below output if the database
+hasn't been created already. If you see a database named :code:`recordtransfer`, the database
+already exists.
+
+.. code-block::
+
+    mysql> SHOW DATABASES;
+    +--------------------+
+    | Database           |
+    +--------------------+
+    | information_schema |
+    | mysql              |
+    | performance_schema |
+    | sys                |
+    +--------------------+
+    4 rows in set (0.00 sec)
+
+
+Create the **recordtransfer** database if it hasn't been created already:
+
+.. code-block::
+
+    mysql> CREATE DATABASE recordtransfer;
+    Query OK, 1 row affected (0.00 sec)
+
+
+********************
+Create Database User
+********************
+
+Now that the database exists, we will create a new account for this database that the record
+transfer app will use to interact with the database. We will call the user **django**. Remember the
+password you use, you will need to enter it one more place later.
+
+.. code-block::
+
+    mysql> CREATE USER 'django'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+    Query OK, 0 rows affected (0.00 sec)
+
+    mysql> GRANT ALL ON recordtransfer.* TO 'django'@'%';
+    Query OK, 0 rows affected (0.00 sec)
+
+    mysql> FLUSH PRIVILEGES;
+    Query OK, 0 rows affected (0.00 sec)
+
+    mysql> EXIT;
+    Bye
+
+
+.. note::
+
+    If you get an error when creating the password that it doesn't meet the policy requirements, you
+    can check the requirements by running the MySQL query:
+
+    .. code-block::
+
+        SHOW VARIABLES LIKE 'validate_password%';
+
+
+    You can find more info on `MySQL password validation here
+    <https://dev.mysql.com/doc/refman/8.0/en/validate-password-options-variables.html>`_.
+
+
+***********************************
+Add MySQL Connection to Environment
+***********************************
+
+To tell the record transfer app to use the **recordtransfer** MySQL database as the **django** user,
+edit the environment file at :code:`/opt/NCTR-Bagit-Record-Transfer/.env`. Remember, this file is
+used to store all of the secrets used for the record transfer application.
+
+Add these lines to the environment file, substituting 'password' for the password you used above:
+
+.. code-block::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    MYSQL_HOST=localhost
+    MYSQL_DATABASE=recordtransfer
+    MYSQL_USER=django
+    MYSQL_PASSWORD='password'
 
 
 Environment Setup
 #################
 
+So far, your environment file :code:`/opt/NCTR-Bagit-Record-Transfer/.env` should look something
+like this:
+
 .. code-block::
 
-    # Secret settings that should not be committed or otherwise publically available
-    SECRET_KEY=
-    RQ_HOST=
-    RQ_PORT=
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    MYSQL_HOST=localhost
+    MYSQL_DATABASE=recordtransfer
+    MYSQL_USER=django
+    MYSQL_PASSWORD='password'
+
+    RQ_HOST=localhost
+    RQ_PORT=6379
     RQ_PASSWORD=
-    RQ_DB=
+    RQ_DB=0
+
     EMAIL_HOST=
     EMAIL_PORT=
     EMAIL_HOST_USER=

@@ -10,18 +10,14 @@ ALLOWED_HOSTS = [
     # Add host domain(s) here
 ]
 
-
-# MySQL database for production
-
 DATABASES = {
     'default': {
-        # Requires MySQL Connector/Python
         'ENGINE': 'mysql.connector.django',
-        'OPTIONS': {
-            # MySQL configuration files
-            # https://dev.mysql.com/doc/refman/8.0/en/option-files.html
-            'read_default_file': '/path/to/mysqld.cnf'
-        },
+        'PORT': 3306,
+        'HOST': config('MYSQL_HOST'),
+        'USER': config('MYSQL_USER'),
+        'PASSWORD': config('MYSQL_PASSWORD'),
+        'NAME': config('MYSQL_DATABASE'),
     }
 }
 
