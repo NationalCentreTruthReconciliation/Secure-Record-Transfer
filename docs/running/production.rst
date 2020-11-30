@@ -7,13 +7,49 @@ To manage services, systemd is used. The OS used for this guide is Red Hat Enter
 may be some differences if you intend to deploy the app on a different Linux distribution, but the
 basics should be the same.
 
+Transfer App Code
+#################
+
+.. note::
+
+    We are using Python version **3.6.8**. You can
+    `download Python 3.6.8 here <https://www.python.org/downloads/release/python-368/>`_.
+
+
+If you have not already done so, clone the application, and move the repo into the :code:`/opt/`
+directory.
+
+.. code-block:: console
+
+    $ cd ~
+    $ git clone https://github.com/danloveg/NCTR-Bagit-Record-Transfer.git
+    $ sudo mv NCTR-Bagit-Record-Transfer /opt/
+
+
+Create a virtual environment to install dependencies and to run the app from.
+
+.. code-block:: console
+
+    $ cd /opt/NCTR-Bagit-Record-Transfer
+    $ python3 -m venv env/
+
+
+Install Django and all other dependencies in the virtual environment.
+
+.. code-block:: console
+
+    $ source env/bin/activate
+    $ cd bagitobjecttransfer
+    $ pip install -r requirements.txt
+
+
 Redis Setup
 ###########
 
 .. note::
 
     We are using Redis version **3.2.12**. You can
-    `download version 3.2.12 here <http://download.redis.io/releases/redis-3.2.12.tar.gz>`_.
+    `download Redis 3.2.12 here <http://download.redis.io/releases/redis-3.2.12.tar.gz>`_.
 
 
 Create a systemd service initialization file for redis if it doesn't exist at
