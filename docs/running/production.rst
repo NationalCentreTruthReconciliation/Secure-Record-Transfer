@@ -7,8 +7,8 @@ To manage services, systemd is used. The OS used for this guide is Red Hat Enter
 may be some differences if you intend to deploy the app on a different Linux distribution, but the
 basics should be the same.
 
-Transfer App Code
-#################
+Clone Record Transfer App
+#########################
 
 .. note::
 
@@ -41,6 +41,50 @@ Install Django and all other dependencies in the virtual environment.
     $ source env/bin/activate
     $ cd bagitobjecttransfer
     $ pip install -r requirements.txt
+
+
+Set up a location to store BagIt bags inside:
+
+.. code-block::
+
+    $ sudo mkdir -p /srv/www/recordtransfer_bags
+
+
+.. note::
+
+    You do not have to use the :code:`/srv/www/recordtransfer_bags/` directory, you can use any
+    directory you like to store BagIt bags in.
+
+
+Create a secret environment variable file for the application at
+code:`/opt/NCTR-Bagit-Record-Transfer/.env` if it doesn't exist already.
+
+.. code-block::
+
+    $ touch /opt/NCTR-Bagit-Record-Transfer/.env
+
+
+We will be editing this file throughout this guide. For right now, we only need to add two lines,
+one giving the app the location of the bag storage folder, and the other specifying the settings
+module to use:
+
+.. code-block::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.production
+    BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
+
+
+Gunicorn Setup
+##############
+
+WSGI Setup.
+
+
+NGINX Setup
+###########
+
+Server Setup.
 
 
 Redis and RQ Worker Setup
@@ -100,11 +144,8 @@ You should now be able to start and restart the redis service with the following
     $ sudo service redis restart
 
 
-To set up the asynchronous RQ workers, create a new environment file at
-:code:`/opt/NCTR-Bagit-Record-Transfer/.env` if it doesn't exist already. This file is used to store
-all of the secrets used for the record transfer application.
-
-Add these lines to the environment file:
+To set up the asynchronous RQ workers, add the following lines to the
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
 
 .. code-block::
 
@@ -116,7 +157,7 @@ Add these lines to the environment file:
     RQ_TIMEOUT_DEFAULT=500
 
 
-This is all that the RQ workers need to function correctly.
+This is all the setup that the RQ workers need to function correctly.
 
 
 MySQL Setup
@@ -267,6 +308,13 @@ Add these lines to the environment file, substituting 'password' for the passwor
     MYSQL_DATABASE=recordtransfer
     MYSQL_USER=django
     MYSQL_PASSWORD='password'
+
+
+****************
+Migrate Database
+****************
+
+Work in progress!
 
 
 Environment Setup
