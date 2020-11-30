@@ -7,7 +7,7 @@ DEBUG = False
 SITE_ID = 2
 
 ALLOWED_HOSTS = [
-    # Add host domain(s) here
+    config('HOST_DOMAIN'),
 ]
 
 DATABASES = {
