@@ -45,7 +45,7 @@ Install Django and all other dependencies in the virtual environment.
 
 Set up a location to store BagIt bags inside:
 
-.. code-block::
+.. code-block:: console
 
     $ sudo mkdir -p /srv/www/recordtransfer_bags
 
@@ -56,10 +56,10 @@ Set up a location to store BagIt bags inside:
     directory you like to store BagIt bags in.
 
 
-Create a secret environment variable file for the application at
-code:`/opt/NCTR-Bagit-Record-Transfer/.env` if it doesn't exist already.
+Create an environment variable file for the application at
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` if it doesn't exist already:
 
-.. code-block::
+.. code-block:: console
 
     $ touch /opt/NCTR-Bagit-Record-Transfer/.env
 
@@ -296,10 +296,7 @@ Add MySQL Connection to Environment
 ***********************************
 
 To tell the record transfer app to use the **recordtransfer** MySQL database as the **django** user,
-edit the environment file at :code:`/opt/NCTR-Bagit-Record-Transfer/.env`. Remember, this file is
-used to store all of the secrets used for the record transfer application.
-
-Add these lines to the environment file, substituting 'password' for the password you used above:
+add these lines to the environment file at :code:`/opt/NCTR-Bagit-Record-Transfer/.env`:
 
 .. code-block::
 
@@ -386,15 +383,6 @@ Save and exit that file before applying this migration and all of the other migr
 .. code-block:: console
 
     $ python3 manage.py migrate
-
-
-You will also want to set the domain name in the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file
-while we're on the topic of the domain name:
-
-.. code-block::
-
-    # file /opt/NCTR-Bagit-Record-Transfer/.env
-    HOST_DOMAIN='YOUR_DOMAIN_HERE'
 
 
 ****************

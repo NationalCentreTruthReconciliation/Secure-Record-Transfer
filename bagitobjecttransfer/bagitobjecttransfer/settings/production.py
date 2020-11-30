@@ -1,5 +1,6 @@
 # pylint: disable=wildcard-import
 from decouple import config
+from django.contrib.sites.models import Site
 from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -7,7 +8,7 @@ DEBUG = False
 SITE_ID = 2
 
 ALLOWED_HOSTS = [
-    config('HOST_DOMAIN'),
+    Site.objects.get(pk=SITE_ID).domain,
 ]
 
 DATABASES = {
