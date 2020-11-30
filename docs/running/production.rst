@@ -385,6 +385,22 @@ Save and exit that file before applying this migration and all of the other migr
     $ python3 manage.py migrate
 
 
+You will also want to set the domain name in the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file
+while we're on the topic of the domain name:
+
+.. code-block::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    HOST_DOMAINS=YOUR_DOMAIN_HERE
+
+
+.. note::
+
+    The domains you put in HOST_DOMAINS will be used as Django's
+    `ALLOWED_HOSTS <https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts>`_. You can
+    add more than one domain by separating domain names with spaces.
+
+
 ****************
 Create Superuser
 ****************

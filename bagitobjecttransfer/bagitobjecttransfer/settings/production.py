@@ -1,15 +1,13 @@
 # pylint: disable=wildcard-import
+import re
 from decouple import config
-from django.contrib.sites.models import Site
 from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 DEBUG = False
 SITE_ID = 2
 
-ALLOWED_HOSTS = [
-    Site.objects.get(pk=SITE_ID).domain,
-]
+ALLOWED_HOSTS = re.split(r'\s+', config('HOST_DOMAINS'))
 
 DATABASES = {
     'default': {
