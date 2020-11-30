@@ -20,9 +20,8 @@ def update_local_site(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordtransfer', '0001_initial'),
+        ('recordtransfer', '0009_auto_20201116_2033'),
         ('sites', '0002_alter_domain_unique'),
-
     ]
 
     operations = [
