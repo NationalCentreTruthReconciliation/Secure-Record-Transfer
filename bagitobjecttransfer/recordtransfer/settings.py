@@ -4,10 +4,7 @@ from decouple import config
 
 # The location where bags will be stored
 
-if platform.system() == 'Windows':
-    BAG_STORAGE_FOLDER = config('BAG_FOLDER_WINDOWS')
-else:
-    BAG_STORAGE_FOLDER = config('BAG_FOLDER_LINUX')
+BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 
 # Email Usernames
 
