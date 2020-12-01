@@ -221,6 +221,13 @@ class SignUpForm(UserCreationForm):
 
 class ContactInfoForm(forms.Form):
     ''' The Contact Information portion of the form. Contains fields from Section 2 of CAAIS '''
+    def clean(self):
+        cleaned_data = super().clean()
+        region = cleaned_data['province_or_state']
+        if region.lower() == 'other' and not cleaned_data['other_province_or_state']:
+            self.add_error('other_province_or_state',
+                           'This field must be filled out if "Other" province or state is selected')
+
     contact_name = forms.CharField(
         max_length=64,
         min_length=2,
@@ -245,7 +252,6 @@ class ContactInfoForm(forms.Form):
             'placeholder': '+1 (999) 999-9999',
             'class': 'reduce-form-field-width',
         }),
-        help_text=gettext('Phone number should look like "+1 (123) 456-7890"'),
         label=gettext('Phone number'),
     )
 
@@ -279,26 +285,91 @@ class ContactInfoForm(forms.Form):
 
     province_or_state = forms.ChoiceField(
         required=True,
-        choices=[
-            (c, c) for c in [
-                # For non-Canadian or non-US addresses
-                gettext("Other"),
-                # Canadian Provinces
-                "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC",
-                "SK", "YT",
-                # US States
-                "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-                "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA",
-                "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY",
-                "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX",
-                "UT", "VT", "VA", "WA", "WV", "WI", "WY"
-            ]
-        ],
         widget=forms.Select(
             attrs={
                 'class': 'reduce-form-field-width',
             }
         ),
+        choices=[
+            # Canada
+            ('Other', gettext("Other")),
+            ('AB', 'Alberta'),
+            ('BC', 'British Columbia'),
+            ('MB', 'Manitoba'),
+            ('NL', 'Newfoundland and Labrador'),
+            ('NT', 'Northwest Territories'),
+            ('NS', 'Nova Scotia'),
+            ('NU', 'Nunavut'),
+            ('ON', 'Ontario'),
+            ('PE', 'Prince Edward Island'),
+            ('QC', 'Quebec'),
+            ('SK', 'Saskatchewan'),
+            ('YT', 'Yukon Territory'),
+            # United States of America
+            ('AL', 'Alabama'),
+            ('AK', 'Arkansas'),
+            ('AZ', 'Arizona'),
+            ('AR', 'Arkanasas'),
+            ('CA', 'California'),
+            ('CO', 'Colorado'),
+            ('CT', 'Connecticut'),
+            ('DE', 'Delaware'),
+            ('DC', 'District of Columbia'),
+            ('FL', 'Florida'),
+            ('GA', 'Georgia'),
+            ('HI', 'Hawaii'),
+            ('ID', 'Idaho'),
+            ('IL', 'Illinois'),
+            ('IN', 'Indiana'),
+            ('IA', 'Iowa'),
+            ('KS', 'Kansas'),
+            ('KY', 'Kentucky'),
+            ('LA', 'Louisiana'),
+            ('ME', 'Maine'),
+            ('MD', 'Maryland'),
+            ('MA', 'Massachusetts'),
+            ('MI', 'Michigan'),
+            ('MN', 'Minnesota'),
+            ('MS', 'Mississippi'),
+            ('MO', 'Missouri'),
+            ('MT', 'Montana'),
+            ('NE', 'Nebraska'),
+            ('NV', 'Nevada'),
+            ('NH', 'New Hampshire'),
+            ('NJ', 'New Jersey'),
+            ('NM', 'New Mexico'),
+            ('NY', 'New York'),
+            ('NC', 'North Carolina'),
+            ('ND', 'North Dakota'),
+            ('OH', 'Ohio'),
+            ('OK', 'Oklahoma'),
+            ('OR', 'Oregon'),
+            ('PA', 'Pennsylvania'),
+            ('RI', 'Rhode Island'),
+            ('SC', 'South Carolina'),
+            ('SD', 'South Dakota'),
+            ('TN', 'Tennessee'),
+            ('TX', 'Texas'),
+            ('UT', 'Utah'),
+            ('VT', 'Vermont'),
+            ('VA', 'Virginia'),
+            ('WA', 'Washington'),
+            ('WV', 'West Virginia'),
+            ('WI', 'Wisconsin'),
+            ('WY', 'Wyoming'),
+        ],
+    )
+
+    other_province_or_state = forms.CharField(
+        required=False,
+        min_length=2,
+        max_length=64,
+        widget=forms.TextInput(
+            attrs={
+                'class': 'reduce-form-field-width',
+            }
+        ),
+        label=gettext('Other province or state'),
     )
 
     postal_or_zip_code = forms.RegexField(
@@ -330,27 +401,24 @@ class SourceInfoForm(forms.Form):
         max_length=64,
         min_length=2,
         required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('The organization or entity submitting the records')
-        }),
+        widget=forms.TextInput(),
         label=gettext('Name of source'),
+        help_text=gettext('The organization or entity submitting the records')
     )
 
     source_type = forms.ChoiceField(
         required=True,
         choices=[
-            (c, c) for c in [
-                gettext('Person'),
-                gettext('Family'),
-                gettext('Band'),
-                gettext('Company'),
-                gettext('Corporation'),
-                gettext('Organization'),
-                gettext('Educational Institution'),
-                gettext('Government Office'),
-                gettext('Other'),
-                gettext('Unknown'),
-            ]
+            ('Person', gettext('Person')),
+            ('Family', gettext('Family')),
+            ('Band', gettext('Band')),
+            ('Company', gettext('Company')),
+            ('Corporation', gettext('Corporation')),
+            ('Organization', gettext('Organization')),
+            ('Educational Insitution', gettext('Educational Institution')),
+            ('Government Office', gettext('Government Office')),
+            ('Other', gettext('Other')),
+            ('Unknown', gettext('Unknown')),
         ],
         widget=forms.Select(
             attrs={
@@ -364,13 +432,11 @@ class SourceInfoForm(forms.Form):
     source_role = forms.ChoiceField(
         required=True,
         choices=[
-            (c, c) for c in [
-                gettext('Creator'),
-                gettext('Donor'),
-                gettext('Custodian'),
-                gettext('Other'),
-                gettext('Unknown'),
-            ]
+            ('Creator', gettext('Record Creator')),
+            ('Donor', gettext('Record Donor')),
+            ('Custodian', gettext('Record Holder')),
+            ('Other', gettext('Other')),
+            ('Unknown', gettext('Unknown')),
         ],
         widget=forms.Select(
             attrs={
@@ -443,6 +509,7 @@ class RecordDescriptionForm(forms.Form):
         help_text=gettext('Enter the earliest date relevant to the files you\'re transferring.'),
     )
 
+    # This field is intended to be tied to a button in a date picker for the start date
     start_date_is_approximate = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={
@@ -463,6 +530,7 @@ class RecordDescriptionForm(forms.Form):
         help_text=gettext('Enter the latest date relevant to the files you\'re transferring.'),
     )
 
+    # This field is intended to be tied to a button in a date picker for the end date
     end_date_is_approximate = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={

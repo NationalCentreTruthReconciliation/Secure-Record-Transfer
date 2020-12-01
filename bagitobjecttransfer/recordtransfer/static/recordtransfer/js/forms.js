@@ -244,14 +244,27 @@ function extraSourceInformationDirty() {
  */
 function toggleExtraSourceInformation(state) {
     if (state === 'on') {
-        $('#id_sourceinfo-source_note').closest('div.flex-item').show();
-        $('#id_sourceinfo-custodial_history').closest('div.flex-item').show();
-        $('.add-extra-source-info').closest('div.flex-item').hide();
+        $('#id_sourceinfo-source_note').closest('div.flex-item').show()
+        $('#id_sourceinfo-custodial_history').closest('div.flex-item').show()
+        $('.add-extra-source-info').closest('div.flex-item').hide()
     }
     else if (state === 'off') {
-        $('#id_sourceinfo-source_note').closest('div.flex-item').hide();
-        $('#id_sourceinfo-custodial_history').closest('div.flex-item').hide();
-        $('.add-extra-source-info').closest('div.flex-item').show();
+        $('#id_sourceinfo-source_note').closest('div.flex-item').hide()
+        $('#id_sourceinfo-custodial_history').closest('div.flex-item').hide()
+        $('.add-extra-source-info').closest('div.flex-item').show()
+    }
+}
+
+function provinceOrStateChosen() {
+    return $('#id_contactinfo-province_or_state').val().toLowerCase().trim()
+}
+
+function toggleOtherProvinceOrState(state) {
+    if (state === 'on') {
+        $('#id_contactinfo-other_province_or_state').closest('div.flex-item').show()
+    }
+    else if (state === 'off') {
+        $('#id_contactinfo-other_province_or_state').closest('div.flex-item').hide()
     }
 }
 
@@ -409,4 +422,16 @@ $(() => {
         event.preventDefault()
         toggleExtraSourceInformation('on')
     })
+
+
+    /***************************************************************************
+     * Other Choice Selection Setup
+     **************************************************************************/
+    if (elementExists('#id_contactinfo-province_or_state')) {
+        toggleOtherProvinceOrState(provinceOrStateChosen() === 'other' ? 'on' : 'off')
+        $('#id_contactinfo-province_or_state').change(function() {
+            let state = $(this).val().toLowerCase().trim() === 'other' ? 'on' : 'off'
+            toggleOtherProvinceOrState(state)
+        })
+    }
 })
