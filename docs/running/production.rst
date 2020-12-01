@@ -7,8 +7,39 @@ To manage services, systemd is used. The OS used for this guide is Red Hat Enter
 may be some differences if you intend to deploy the app on a different Linux distribution, but the
 basics should be the same.
 
-Clone Record Transfer App
-#########################
+At the end of the process, the most important files will be placed at the following locations in the
+file system:
+
+::
+
+    /
+    |_ etc/
+        |_ nginx/
+            |_ sites-available/
+                |_ recordtransfer.conf
+            |_ sites-enabled/
+                |_ recordtransfer.conf -> /etc/nginx/sites-available/recordtransfer.conf
+    |_ opt/
+        |_ NCTR-Bagit-Record-Transfer/
+            |_ gunicorn.sock        (Gunicorn UNIX socket)
+            |_ bagitobjecttransfer/ (Django App)
+            |_ .env                 (App Environment Variables)
+    |_ srv/
+        |_ www/
+            |_ recordtransfer_bags/ (Where BagIt bags are stored)
+    |_ usr/
+        |_ lib/
+            |_ systemd/
+                |_ system/
+                    |_ gunicorn.service
+                    |_ mysqld.service
+                    |_ nginx.service
+                    |_ redis.service
+                    |_ rqworker_default.service
+
+
+1. Clone Record Transfer App
+############################
 
 .. note::
 
@@ -16,8 +47,8 @@ Clone Record Transfer App
     `download Python 3.6.8 here <https://www.python.org/downloads/release/python-368/>`_.
 
 
-If you have not already done so, clone the application, and move the repo into the :code:`/opt/`
-directory.
+If you have not already done so, clone the application. Once it's cloned, move the repo into the
+:code:`/opt/` directory. We will be using the :code:`/opt/` folder to serve the application from.
 
 .. code-block:: console
 
