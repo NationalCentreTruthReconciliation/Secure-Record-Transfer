@@ -8,10 +8,10 @@ from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, User
+from recordtransfer.models import UploadedFile, UploadSession, User, Bag
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -37,14 +37,29 @@ class FormPreparation(TemplateView):
     template_name = 'recordtransfer/formpreparation.html'
 
 
-class UserProfile(TemplateView):
-    ''' A page for a user to see and edit their information '''
+class UserProfile(ListView):
+    ''' This view shows two things:
+    - The user's profile information
+    - A list of the Bags a user has created via transfer
+    '''
+
     template_name = 'recordtransfer/profile.html'
+    context_object_name = 'user_bags'
+    model = Bag
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Bag.objects.filter(user=self.request.user).order_by('-bagging_date')
 
 
 class About(TemplateView):
     ''' About the application '''
     template_name = 'recordtransfer/about.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['accepted_files'] = ACCEPTED_FILE_FORMATS
+        return context
 
 
 class ActivationSent(TemplateView):
@@ -103,7 +118,7 @@ class TransferFormWizard(SessionWizardView):
 
     _TEMPLATES = {
         "contactinfo": {
-            "templateref": "recordtransfer/standardform.html",
+            "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Contact Information"),
             "infomessage": gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
@@ -111,7 +126,7 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "sourceinfo": {
-            "templateref": "recordtransfer/standardform.html",
+            "templateref": "recordtransfer/transferform_sourceinfo.html",
             "formtitle": gettext("Source Information"),
             "infomessage": gettext(
                 "Enter the info for the source of the records. The source is the person or entity "
@@ -120,14 +135,14 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "recorddescription": {
-            "templateref": "recordtransfer/standardform.html",
+            "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Record Description"),
             "infomessage": gettext(
                 "Provide a brief description of the records you're transferring"
             )
         },
         "rights": {
-            "templateref": "recordtransfer/formsetform.html",
+            "templateref": "recordtransfer/transferform_formset.html",
             "formtitle": gettext("Record Rights"),
             "infomessage": gettext(
                 "Enter any associated rights that apply to the records. They can be copyright, "
@@ -136,23 +151,23 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "otheridentifiers": {
-            "templateref": "recordtransfer/formsetform.html",
-            "formtitle": gettext("Other Identifiers"),
+            "templateref": "recordtransfer/transferform_formset.html",
+            "formtitle": gettext("Other Identifiers (Optional)"),
             "infomessage": gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             )
         },
         "generalnotes": {
-            "templateref": "recordtransfer/standardform.html",
-            "formtitle": gettext("General Notes"),
+            "templateref": "recordtransfer/transferform_standard.html",
+            "formtitle": gettext("General Notes (Optional)"),
             "infomessage": gettext(
                 "This step is optional. If you have any other notes that did not fit anywhere else "
                 "in the transfer form, put them here"
             )
         },
         "uploadfiles": {
-            "templateref": "recordtransfer/dropzoneform.html",
+            "templateref": "recordtransfer/transferform_dropzone.html",
             "formtitle": gettext("Upload Files"),
             "infomessage": gettext(
                 "Upload the files you intend to transfer to the NCTR"

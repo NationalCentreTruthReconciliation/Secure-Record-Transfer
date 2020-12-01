@@ -4,16 +4,12 @@ from decouple import config
 
 # The location where bags will be stored
 
-if platform.system() == 'Windows':
-    BAG_STORAGE_FOLDER = config('BAG_FOLDER_WINDOWS')
-else:
-    BAG_STORAGE_FOLDER = config('BAG_FOLDER_LINUX')
+BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 
-# Email address for automated emails
+# Email Usernames
 
-DO_NOT_REPLY_EMAIL = 'do-not-reply@nctrrecordtransfer.ca'
-
-BASE_URL = 'http://127.0.0.1:8000'
+DO_NOT_REPLY_USERNAME = 'do-not-reply'
+ARCHIVIST_USERNAME = 'Daniel.Lovegrove'
 
 # Default data to inject into metadata, after the user enters their own metadata
 
@@ -61,6 +57,15 @@ ACCEPTED_FILE_FORMATS = {
     'Archive': [
         'zip',
     ],
+    'Audio': [
+        'acc',
+        'flac',
+        'm4a',
+        'mp3',
+        'ogg',
+        'wav',
+        'wma',
+    ],
     'Document': [
         'doc',
         'docx',
@@ -69,6 +74,12 @@ ACCEPTED_FILE_FORMATS = {
         'rtf',
         'txt',
         'html',
+    ],
+    'Image': [
+        'jpg',
+        'jpeg',
+        'gif',
+        'png',
     ],
     'Presentation': [
         'ppt',
@@ -81,12 +92,6 @@ ACCEPTED_FILE_FORMATS = {
         'xlsx',
         'csv',
     ],
-    'Image': [
-        'jpg',
-        'jpeg',
-        'gif',
-        'png',
-    ],
     'Video': [
         'avi',
         'mkv',
@@ -95,14 +100,5 @@ ACCEPTED_FILE_FORMATS = {
         'mpeg4',
         'mpg',
         'wmv',
-    ],
-    'Audio': [
-        'acc',
-        'flac',
-        'm4a',
-        'mp3',
-        'ogg',
-        'wav',
-        'wma',
     ],
 }

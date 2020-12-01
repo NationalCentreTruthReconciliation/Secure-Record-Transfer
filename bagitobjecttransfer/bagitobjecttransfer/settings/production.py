@@ -1,26 +1,22 @@
 # pylint: disable=wildcard-import
+import re
 from decouple import config
 from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 DEBUG = False
+SITE_ID = 2
 
-ALLOWED_HOSTS = [
-    # Add host domain(s) here
-]
-
-
-# MySQL database for production
+ALLOWED_HOSTS = re.split(r'\s+', config('HOST_DOMAINS'))
 
 DATABASES = {
     'default': {
-        # Requires MySQL Connector/Python
         'ENGINE': 'mysql.connector.django',
-        'OPTIONS': {
-            # MySQL configuration files
-            # https://dev.mysql.com/doc/refman/8.0/en/option-files.html
-            'read_default_file': '/path/to/mysqld.cnf'
-        },
+        'PORT': 3306,
+        'HOST': config('MYSQL_HOST'),
+        'USER': config('MYSQL_USER'),
+        'PASSWORD': config('MYSQL_PASSWORD'),
+        'NAME': config('MYSQL_DATABASE'),
     }
 }
 

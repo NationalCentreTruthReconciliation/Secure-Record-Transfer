@@ -41,8 +41,8 @@ install the required packages:
 
 To run the app, you will want to start the Redis and Email services before you start the development
 web server, since the Django app depends on those. There is a docker-compose file created
-specifically for this purpose. First, :code:`cd` into the code:`bagitobjecttransfer` folder, then
-run the docker-compose command:
+specifically for this purpose. :code:`cd` into the :code:`bagitobjecttransfer` folder, then run the
+docker-compose command:
 
 .. code-block:: console
 

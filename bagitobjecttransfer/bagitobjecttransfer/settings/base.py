@@ -10,6 +10,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_countries',
@@ -48,6 +49,8 @@ TEMPLATES = [
         },
     },
 ]
+
+# WSGI
 
 WSGI_APPLICATION = 'bagitobjecttransfer.wsgi.application'
 
@@ -109,3 +112,4 @@ MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+FILE_UPLOAD_PERMISSIONS = 0o644

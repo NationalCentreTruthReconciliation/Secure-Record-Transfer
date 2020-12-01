@@ -1,0 +1,17 @@
+{% extends 'recordtransfer/transferform_standard.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block buttonarrayclass %}flex-item{% endblock %}
+{% block formfields %}
+    {{ block.super }}
+    <div class="flex-item">
+        <label></label>
+        <div class="button-array">
+            <button class="green-button add-extra-source-info">
+                {% trans "Add Notes &amp; History (Optional)" %}
+            </button>
+        </div>
+    </div>
+    <br>
+{% endblock %}

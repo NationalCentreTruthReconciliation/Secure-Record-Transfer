@@ -1,12 +1,15 @@
 import os
+import json
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.storage import OverwriteStorage
 
 
 class User(AbstractUser):
@@ -14,9 +17,12 @@ class User(AbstractUser):
     gets_bag_email_updates = models.BooleanField(default=False)
     confirmed_email = models.BooleanField(default=False)
 
+    def get_full_name(self):
+        return self.first_name + ' ' + self.last_name
+
 
 class UploadSession(models.Model):
-    ''' Represents a file upload session, that may or may not be split into multiple parallel \
+    ''' Represents a file upload session, that may or may not be split into multiple parallel
     uploads.
     '''
     token = models.CharField(max_length=32)
@@ -72,6 +78,21 @@ class Bag(models.Model):
     def location(self):
         return os.path.join(BAG_STORAGE_FOLDER, self.user.username, self.bag_name)
 
+    @property
+    def transfer_info(self):
+        ''' Exposes a small amount of information from the transfer to be shown for a user '''
+        json_metadata = json.loads(self.caais_metadata)
+        title = json_metadata['section_1']['accession_title']
+        extent = json_metadata['section_3']['extent_statement'][0]['quantity_and_type_of_units']
+        return {
+            'title': title,
+            'extent': extent,
+        }
+
+    def get_admin_change_url(self):
+        view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
+
     def __str__(self):
         return f'{self.bag_name} (Created by {self.user})'
 
@@ -86,11 +107,14 @@ class Job(models.Model):
         FAILED = 'FD', _('Failed')
 
     start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True)
     name = models.CharField(max_length=256, null=True)
+    description = models.TextField(null=True)
     user_triggered = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     job_status = models.CharField(max_length=2, choices=JobStatus.choices,
                                   default=JobStatus.NOT_STARTED)
-    attached_file = models.FileField(upload_to='jobs/zipped_bags', blank=True, null=True)
+    attached_file = models.FileField(upload_to='jobs/zipped_bags', storage=OverwriteStorage,
+                                     blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} (Created by {self.user_triggered})'

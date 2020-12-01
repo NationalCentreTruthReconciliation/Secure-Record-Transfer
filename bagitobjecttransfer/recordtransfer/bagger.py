@@ -46,6 +46,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
 
     (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
 
+    bag_valid = False # Invalid until proven otherwise!
     if not missing_files:
         LOGGER.info(msg=('Generating sha512 checksums...'))
         bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'])
@@ -69,6 +70,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     return {
         'missing_files': missing_files,
         'bag_created': bag_was_created,
+        'bag_valid': bag_valid,
         'time_created': current_time if bag_was_created else None,
         'bag_location': str(new_bag_folder) if bag_was_created else None,
     }
@@ -160,7 +162,7 @@ def _copy_session_uploads_to_dir(session_token, directory, delete=True):
         elif not missing_files:
             destination_path = directory / uploaded_file.name
             LOGGER.info(msg=('{0} {1} to {2}'.format(verb, source_path, destination_path)))
-            shutil.copy(source_path, destination_path)
+            shutil.copy2(source_path, destination_path)
             if delete:
                 uploaded_file.delete_file()
             copied_files.append(str(destination_path))

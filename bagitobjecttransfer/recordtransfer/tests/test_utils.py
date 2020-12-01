@@ -1,6 +1,46 @@
 from django.test import TestCase
 from recordtransfer.utils import get_human_readable_file_count, count_file_types, \
-    snake_to_camel_case
+    snake_to_camel_case, html_to_text
+
+
+class HtmlToTextTests(TestCase):
+    def test_empty_string(self):
+        text = html_to_text('')
+        self.assertEqual(text, '')
+
+    def test_simple_tag_removal(self):
+        text = html_to_text('<h1>Hello</h1>')
+        self.assertEqual(text, 'Hello')
+
+    def test_nested_tags(self):
+        text = html_to_text('<div><div><p>Hello</p></div></div>')
+        self.assertEqual(text, 'Hello')
+
+    def test_whitespace_stripped(self):
+        html = '\n'.join([
+            '',
+            '<html>',
+            '    <div> Hello  </div>',
+            '    ',
+            '</html>',
+        ])
+        text = html_to_text(html)
+        self.assertEqual(text, 'Hello')
+
+
+class SnakeToCamelCaseTests(TestCase):
+    def test_empty_string(self):
+        camel_case = snake_to_camel_case('')
+        self.assertEqual(camel_case, '')
+
+    def test_no_underscores(self):
+        camel_case = snake_to_camel_case('encyclopedia')
+        self.assertEqual(camel_case, 'encyclopedia')
+
+    def test_with_underscores(self):
+        camel_case = snake_to_camel_case('very_important_material')
+        self.assertEqual(camel_case, 'veryImportantMaterial')
+
 
 class FileCountingUtilityTests(TestCase):
     @classmethod

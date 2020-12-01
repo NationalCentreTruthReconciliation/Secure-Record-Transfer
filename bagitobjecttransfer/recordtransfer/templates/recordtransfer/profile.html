@@ -1,21 +1,101 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
 
-{% block title %}
-{% trans "User Profile" %}
-{% endblock %}
+{% block title %}{% trans "Your Profile" %}{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-    <div class="title-text">{% trans "Your profile" %}</div>
-    <p>{% trans "First name:" %} {{ user.first_name }}</p>
-    <p>{% trans "Last name:" %} {{ user.last_name }}</p>
-    <p>{% trans "Email:" %} {{ user.email }}</p>
-    <p>{% trans "Username:" %} {{ user.username }}</p>
+    <div class="title-text">{% trans "Your Profile" %}</div>
+    <div class="flex-item margin-top-25px">
+        <label>{% trans "Name" %}</label>
+        <input disabled value="{{ user.get_full_name }}">
+    </div>
+    <div class="flex-item">
+        <label>{% trans "Email" %}</label>
+        <input disabled value="{{ user.email }}">
+    </div>
+    <div class="flex-item">
+        <label>{% trans "Username" %}</label>
+        <input disabled value="{{ user.username }}">
+    </div>
+    <div class="flex-full-width-item margin-top-25px">
+        <label class="past-transfer-label">{% trans "Past Transfers"%}</label>
+    </div>
+    <div class="flex-full-width-item">
+        {% if user_bags %}
+            <table class="full-width-table standard-table" cellspacing="0">
+                <tr>
+                    <th>{% trans "Date Transferred" %}</th>
+                    <th>{% trans "Transfer Title" %}</th>
+                    <th>{% trans "Files Transferred" %}</th>
+                    <th>{% trans "Review Status" %}</th>
+                </tr>
+                {% for bag in user_bags %}
+                    <tr>
+                        <td>{{ bag.bagging_date }}</td>
+                        <td>{{ bag.transfer_info.title }}</td>
+                        <td>{{ bag.transfer_info.extent }}</td>
+                        <td>{{ bag.get_review_status_display }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if is_paginated %}
+                <div class="flex-full-width-item margin-top-25px">
+                    <div class="button-array">
+                        <span class="margin-right-20px">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                        {# First #}
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="no-decoration">
+                                <button class="blue-button">{% trans "&laquo; First" %}</button>
+                            </a>
+                        {% else %}
+                            <button disabled class="blue-button">{% trans "&laquo; First" %}</button>
+                        {% endif %}
+                        {# Previous #}
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" class="no-decoration">
+                                <button class="blue-button">{% trans "Previous" %}</button>
+                            </a>
+                        {% else %}
+                            <button disabled class="blue-button">{% trans "Previous" %}</button>
+                        {% endif %}
+                        {# Next #}
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="no-decoration">
+                                <button class="blue-button">{% trans "Next" %}</button>
+                            </a>
+                        {% else %}
+                            <button disabled class="blue-button">{% trans "Next" %}</button>
+                        {% endif %}
+                        {# Last #}
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="no-decoration">
+                                <button class="blue-button">{% trans "Last &raquo;" %}</button>
+                            </a>
+                        {% else %}
+                            <button disabled class="blue-button">{% trans "Last &raquo;" %}</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <span>
+                {% url 'recordtransfer:formpreparation' as transfer_url %}
+                {% blocktrans %}
+                    You have not sent any records to the NCTR.
+                    <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
+                {% endblocktrans %}
+            </span>
+        {% endif %}
+    </div>
 {% else %}
     {% url 'login' as login %}
+    <p>
     {% blocktrans %}
-        <p><a href="{{ login }}">Log in</a> to see your profile.</p>
+        <a href="{{ login }}">Log in</a> to see your profile.
     {% endblocktrans %}
+    </p>
 {% endif %}
 {% endblock %}

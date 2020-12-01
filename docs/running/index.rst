@@ -23,4 +23,4 @@ sending emails to the console!
 
     docker
     local
-    productionindex
+    production

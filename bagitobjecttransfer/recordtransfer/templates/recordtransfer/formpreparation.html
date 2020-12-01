@@ -1,10 +1,11 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
 
-{% block title %}Prepare for Transfer{% endblock %}
+{% block title %}{% trans "Prepare for Transfer" %}{% endblock %}
 
 {% block content %}
-<p>{% trans "Before transferring files to us, make sure you have the following:" %}<p>
+<div class="title-text">{% trans "Prepare for Transfer" %}</div>
+<p>{% trans "Before transferring files to the NCTR, make sure you have the following:" %}<p>
 <ul>
     <li>{% trans "Information on the source of the files" %}</li>
     <li>{% trans "Contact information in case you must be contacted by our archivists in regards to your transfer" %}</li>
