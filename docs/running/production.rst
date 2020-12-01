@@ -92,34 +92,165 @@ Create an environment variable file for the application at
 
 .. code-block:: console
 
-    $ touch /opt/NCTR-Bagit-Record-Transfer/.env
+    (env) $ touch /opt/NCTR-Bagit-Record-Transfer/.env
 
 
 We will be editing this file throughout this guide. For right now, we only need to add two lines,
 one giving the app the location of the bag storage folder, and the other specifying the settings
 module to use:
 
-.. code-block::
+::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.production
     BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
 
 
-Gunicorn Setup
+2. NGINX Setup
 ##############
 
-WSGI Setup.
+.. note::
+
+    We are using NGINX version **1.18.0**. You can
+    `download NGINX 1.18.0 here <https://nginx.org/en/download/nginx-1.18.0.tar.gz>`_.
 
 
-NGINX Setup
-###########
+`NGINX <https://www.nginx.com/resources/wiki/>`_ is a high performance HTTP server and reverse
+proxy. NGINX is used as both an HTTP server and a reverse proxy for the record transfer application.
+It is used as an HTTP server for serving static content, and acts as a reverse proxy when requests
+are sent to Gunicorn to interpret.
 
-Server Setup.
+To serve the files from the application folder, NGINX needs the proper permissions to access the
+files in the folder. Recursively set the owner and the group of every folder and file in the
+application folder to **nginx**:
+
+.. code-block:: console
+
+    (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
 
 
-Redis and RQ Worker Setup
-#########################
+If the systemd initialization script for nginx doesn't exist, create one at
+:code:`/usr/lib/systemd/system/nginx.service` and add these contents:
+
+::
+
+    # file /usr/lib/systemd/system/nginx.service
+    [Unit]
+    Description=nginx - high performance web server
+    Documentation=http://nginx.org/en/docs/
+    After=network-online.target remote-fs.target nss-lookup.target
+    Wants=network-online.target
+
+    [Service]
+    Type=forking
+    PIDFile=/var/run/nginx.pid
+    ExecStart=/usr/sbin/nginx -c /etc/nginx/nginx.conf
+    ExecReload=/bin/sh -c "/bin/kill -s HUP $(/bin/cat /var/run/nginx.pid)"
+    ExecStop=/bin/sh -c "/bin/kill -s TERM $(/bin/cat /var/run/nginx.pid)"
+    ExecStartPost = /bin/sleep 0.1
+
+    [Install]
+    WantedBy=multi-user.target
+
+
+Enable the nginx service to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable nginx
+
+
+NGINX requires a configuration file to determine how to serve the record transfer application, so
+create a new file at :code:`/etc/nginx/sites-available/recordtransfer.conf` and add these contents
+to it, substituting :code:`your_domain_or_ip` with your actual domain or IP:
+
+.. code-block:: nginx
+
+    server {
+        listen 80;
+        server_name your_domain_or_ip;
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+
+        location /static/ {
+            root /opt/NCTR-Bagit-Record-Transfer;
+        }
+
+        location / {
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_pass http://unix:/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock;
+        }
+    }
+
+
+This configuration assumes you have a unix socket file set up for gunicorn at
+:code:`/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock`, which is not set up *yet* but we will address
+this issue soon.
+
+Enable the site by linking the configuration in the sites-enabled directory:
+
+.. code-block:: console
+
+    (env) $ cd /etc/nginx/
+    (env) $ sudo ln -s sites-available/recordtransfer.conf sites-enabled/recordtransfer.conf
+
+
+You can test if the configuration has syntax errors by using the command:
+
+.. code-block:: console
+
+    (env) $ sudo nginx -t
+
+
+3. Gunicorn Setup
+#################
+
+.. note::
+
+    If the application dependencies have been installed with :code:`pip` as specified above in
+    section 1, gunicorn **20.0.4** will already be installed inside the application's virtual
+    environment! Hooray for pure python dependencies!
+
+
+`Gunicorn <https://gunicorn.org/>`_ is a WSGI server that sits between NGINX and the Django
+application. NGINX forwards non-trivial requests to Gunicorn, where it interprets the HTTP requests
+and forwards them to Django in a way it understands.
+
+A systemd initialization script is not created when gunicorn is installed, so go ahead and create a
+new script for gunicorn at :code:`/usr/lib/systemd/system/gunicorn.service` and add these contents:
+
+.. code-block ::
+
+    # file /usr/lib/systemd/system/gunicorn.service
+    [Unit]
+    Description=Gunicorn WSGI Daemon
+    After=network.target
+
+    [Service]
+    User=nginx
+    Group=nginx
+    WorkingDirectory=/opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
+    ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/gunicorn \
+        --workers 3 \
+        --bind unix:/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock \
+        bagitobjecttransfer.wsgi
+
+    [Install]
+    WantedBy=multi-user.target
+
+
+Enable the gunicorn service to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable gunicorn
+
+
+4. Redis Setup
+##############
 
 .. note::
 
