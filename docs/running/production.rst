@@ -609,30 +609,90 @@ Work in progress.
 Environment Setup
 #################
 
-So far, your environment file :code:`/opt/NCTR-Bagit-Record-Transfer/.env` should look something
+    (env) $ python3 manage.py createsuperuser
+
+
+Once this user is created, you will be able to log in to the record transfer application to transfer
+records as well as administer transfers and other users.
+
+
+7. Email Setup
+##############
+
+**Work in progress.**
+
+
+8. Final Checklist
+##################
+ 
+After getting to this stage, you are almost ready to start the application up. Read through the
+following sections carefully, as they are important.
+
+
+*************************
+8.1 Environment Variables
+*************************
+
+So far, your environment file (:code:`/opt/NCTR-Bagit-Record-Transfer/.env`) should look something
 like this:
 
-.. code-block::
+::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
+    DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.production
+    BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
+    HOST_DOMAINS=your_domain_here
+
+    RQ_HOST_DEFAULT=localhost
+    RQ_PORT_DEFAULT=6379
+    RQ_DB_DEFAULT=0
+    RQ_PASSWORD_DEFAULT=
+    RQ_TIMEOUT_DEFAULT=500
+
+    EMAIL_HOST=localhost
+    EMAIL_PORT=
+    EMAIL_HOST_USER=
+    EMAIL_HOST_PASSWORD=
+
     MYSQL_HOST=localhost
     MYSQL_DATABASE=recordtransfer
     MYSQL_USER=django
     MYSQL_PASSWORD='password'
 
-    RQ_HOST=localhost
-    RQ_PORT=6379
-    RQ_PASSWORD=
-    RQ_DB=0
 
-    EMAIL_HOST=
-    EMAIL_PORT=
-    EMAIL_HOST_USER=
-    EMAIL_HOST_PASSWORD=
-
-To get a new secret key, run the following command:
+There is one final variable to set, and that is the :code:`SECRET_KEY`. To set this variable, you
+will need to generate a new secret key. To do so, run the following command:
 
 .. code-block:: console
 
-    $ python3 -c "from django.core.management.utils import get_random_secret_key as gsk; print(gsk())"
+    (env) $ python3 -c "from django.core.management import utils; print(utils.get_random_secret_key())"
+    &kz_(%wj8$v@cy1)23op8i$_)h2b6kl)ia6glv_*c=1(assr#b
 
+
+Copy and paste the generated string into the environment file:
+
+::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    SECRET_KEY=&kz_(%wj8$v@cy1)23op8i$_)h2b6kl)ia6glv_*c=1(assr#b
+    ...
+
+And that's it! All of the required environment variables should now be set.
+
+
+****************
+8.2 Static Files
+****************
+
+To serve static files (JavaScript, CSS, images, etc.) from NGINX, you will need to 
+`collect the static files <https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/#collectstatic>`_.
+This simply means copying the static files to the /static/ directory. Without doing this, NGINX will
+not know where to find the static files. If you get a prompt asking if you want to overwrite files,
+type :code:`yes` and press ENTER. For good measure, re-set the user & group of all files to
+**nginx:nginx**:
+
+.. code-block:: console
+
+    (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
+    (env) $ python3 manage.py collectstatic
+    (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
