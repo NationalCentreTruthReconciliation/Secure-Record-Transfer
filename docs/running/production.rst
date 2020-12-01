@@ -298,18 +298,54 @@ the :code:`redis.conf` file and change these settings:
     supervised systemd
 
 
-You should now be able to start and restart the redis service with the following command:
+Enable the redis service to start on system startup:
 
 .. code-block:: console
 
-    $ sudo service redis start
-    $ sudo service redis restart
+    $ sudo systemctl enable redis
 
 
-To set up the asynchronous RQ workers, add the following lines to the
-:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
+5. RQ Worker Setup
+##################
+
+.. note::
+
+    If the application dependencies have been installed with :code:`pip` as specified above in
+    section 1, Django-RQ **2.3.2** will already be installed inside the application's virtual
+    environment! Hooray for pure python dependencies!
+
+
+The RQ worker is an aysnchronous worker that interacts with the Django application and the Redis
+server to run tasks off the main thread of the Django app. The implementation used is
+`Django-RQ <https://github.com/rq/django-rq>`_, based on the `RQ <https://github.com/rq/rq>`_
+library.
+
+Create a systemd initialization script for the RQ worker. Create the new file at
+:code:`/usr/lib/systemd/system/rqworker_default.service` and add these contents:
 
 .. code-block::
+
+    # file /usr/lib/systemd/system/rqworker_default.service
+    [Unit]
+    Description=Django-RQ Worker (default priority)
+    After=network.target redis.service
+
+    [Service]
+    WorkingDirectory=/opt/NCTR-Bagit-Record-Transfer/
+    ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/python bagitobjecttransfer/manage.py rqworker default
+
+
+Enable the rqworker_default service to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable rqworker_default
+
+
+We also need to tell the Django app how to access the RQ workers. To do so, add the following lines
+to the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
+
+::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     RQ_HOST_DEFAULT=localhost
