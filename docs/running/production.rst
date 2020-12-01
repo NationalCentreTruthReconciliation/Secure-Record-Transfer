@@ -70,15 +70,15 @@ Install Django and all other dependencies in the virtual environment.
 .. code-block:: console
 
     $ source env/bin/activate
-    $ cd bagitobjecttransfer
-    $ pip install -r requirements.txt
+    (env) $ cd bagitobjecttransfer
+    (env) $ pip install -r requirements.txt
 
 
 Set up a location to store BagIt bags inside:
 
 .. code-block:: console
 
-    $ sudo mkdir -p /srv/www/recordtransfer_bags
+    (env) $ sudo mkdir -p /srv/www/recordtransfer_bags
 
 
 .. note::
@@ -259,7 +259,7 @@ Enable the gunicorn service to start on system startup:
 
 
 Create a systemd service initialization file for redis if it doesn't exist at
-:code:`/usr/lib/systemd/system/redis.service`
+:code:`/usr/lib/systemd/system/redis.service` and add these contents:
 
 .. code-block::
 
@@ -355,20 +355,25 @@ to the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
     RQ_TIMEOUT_DEFAULT=500
 
 
-This is all the setup that the RQ workers need to function correctly.
-
-
-MySQL Setup
-###########
+6. MySQL Setup
+##############
 
 .. note::
 
     We are using MySQL Community Server version **8.0.22**. Download
     `MySQL Community Server here <https://dev.mysql.com/downloads/mysql/>`_.
 
+    If the application dependencies have been installed with :code:`pip` as specified above in
+    section 1, MySQL Connector/Python **8.0.22** will already be installed inside the application's
+    virtual environment! Hooray for pure python dependencies!
+
+
+`MySQL <https://www.mysql.com/>`_ is the chosen relational database system for the record transfer
+application. MySQL is well supported, reliable, and stable. Django interacts with MySQL using the
+`MySQL Connector/Python <https://github.com/mysql/mysql-connector-python>`_ library.
 
 Create a systemd service initialization file for MySQL if it doesn't exist at
-:code:`/usr/lib/systemd/system/mysqld.service`
+:code:`/usr/lib/systemd/system/mysqld.service` and add these contents:
 
 .. code-block::
 
@@ -386,26 +391,51 @@ Create a systemd service initialization file for MySQL if it doesn't exist at
     [Service]
     User=mysql
     Group=mysql
+
     Type=notify
-    TimeoutSec=0 # Disable service start and stop timeout logic of systemd for mysqld service.
-    PermissionsStartOnly=true # Execute pre and post scripts as root
-    ExecStartPre=/usr/bin/mysqld_pre_systemd # Needed to create system tables
-    ExecStart=/usr/sbin/mysqld $MYSQLD_OPTS # Start main service
-    EnvironmentFile=-/etc/sysconfig/mysql # Use this to switch malloc implementation
-    LimitNOFILE = 10000 # Sets open_files_limit
+
+    # Disable service start and stop timeout logic of systemd for mysqld service.
+    TimeoutSec=0
+
+    # Execute pre and post scripts as root
+    PermissionsStartOnly=true
+
+    # Needed to create system tables
+    ExecStartPre=/usr/bin/mysqld_pre_systemd
+
+    # Start main service
+    ExecStart=/usr/sbin/mysqld $MYSQLD_OPTS
+
+    # Use this to switch malloc implementation
+    EnvironmentFile=-/etc/sysconfig/mysql
+
+    # Sets open_files_limit
+    LimitNOFILE = 10000
+
     Restart=on-failure
+
     RestartPreventExitStatus=1
-    PrivateTmp=false
+
     # Set enviroment variable MYSQLD_PARENT_PID. This is required for restart.
     Environment=MYSQLD_PARENT_PID=1
 
+    PrivateTmp=false
 
-You should now be able to start and restart the MySQL service with the following commands:
+
+Enable the mysqld service to start on system startup, and start the service (we will need to
+interact with mysql in the upcoming steps):
 
 .. code-block:: console
 
-    $ sudo service mysqld start
-    $ sudo service mysqld restart
+    (env) $ sudo systemctl enable mysqld
+    (env) $ sudo systemctl start mysqld
+
+
+You can check the status of mysqld with:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl status mysqld
 
 
 Once the MySQL server has started up, we will need to log in to MySQL and do two things:
@@ -414,15 +444,15 @@ Once the MySQL server has started up, we will need to log in to MySQL and do two
 2. Create a user for the database
 
 
-*********************
-Create Empty Database
-*********************
+*************************
+6.1 Create Empty Database
+*************************
 
 To create an empty database, log in to the running MySQL server:
 
 .. code-block:: console
 
-    $ sudo mysql -u root
+    (env) $ sudo mysql -u root
 
 
 When you're logged in, check to make sure the database has not already been created. Execute a
@@ -430,7 +460,7 @@ SHOW query to see all the databases. You'll see something like the below output 
 hasn't been created already. If you see a database named :code:`recordtransfer`, the database
 already exists.
 
-.. code-block::
+::
 
     mysql> SHOW DATABASES;
     +--------------------+
@@ -446,21 +476,21 @@ already exists.
 
 Create the **recordtransfer** database if it hasn't been created already:
 
-.. code-block::
+::
 
     mysql> CREATE DATABASE recordtransfer;
     Query OK, 1 row affected (0.00 sec)
 
 
-********************
-Create Database User
-********************
+************************
+6.2 Create Database User
+************************
 
 Now that the database exists, we will create a new account for this database that the record
 transfer app will use to interact with the database. We will call the user **django**. Remember the
 password you use, you will need to enter it one more place later.
 
-.. code-block::
+::
 
     mysql> CREATE USER 'django'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
     Query OK, 0 rows affected (0.00 sec)
@@ -489,46 +519,59 @@ password you use, you will need to enter it one more place later.
     <https://dev.mysql.com/doc/refman/8.0/en/validate-password-options-variables.html>`_.
 
 
-***********************************
-Add MySQL Connection to Environment
-***********************************
+***************************************
+6.3 Add MySQL Connection to Environment
+***************************************
 
 To tell the record transfer app to use the **recordtransfer** MySQL database as the **django** user,
-add these lines to the environment file at :code:`/opt/NCTR-Bagit-Record-Transfer/.env`:
+add these lines to the environment file at :code:`/opt/NCTR-Bagit-Record-Transfer/.env`, remembering
+to replace **your_password** with the actual password you created above:
 
-.. code-block::
+::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     MYSQL_HOST=localhost
     MYSQL_DATABASE=recordtransfer
     MYSQL_USER=django
-    MYSQL_PASSWORD='password'
+    MYSQL_PASSWORD=your_password
 
 
-********************************
-Migrate Record Transfer Database
-********************************
+************************************
+6.4 Migrate Record Transfer Database
+************************************
+
+.. warning::
+
+    For the following steps, make sure that your virtual environment is activated before calling
+    :code:`python3`! You can tell it's active if your command prompt starts with **(env)**. To
+    activate the virtual environment, source the activation script:
+
+    .. code-block:: console
+
+        $ source /opt/NCTR-Bagit-Record-Transfer/env/bin/activate
+        (env) $
+
 
 After MySQL is set up, you can populate the new **recordtransfer** database with the tables for the
 record transfer application. This process is called *database migration*. But before migrating all
 of the database tables, we need to create a *new* migration so that you can set the domain of your
 website. Without doing this, many common features of the application will break.
 
-Change to the directory that has the :code:`manage.py` script and make a new migration that you'll
-edit to set the domain name of your site:
+Change to the directory of the record transfer application that has the :code:`manage.py` script and
+make a new migration that you'll edit to set the domain name of your site:
 
 .. code-block:: console
 
-    $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer/
-    $ python3 manage.py makemigrations --empty --name set_site_2_domain recordtransfer
+    (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer/
+    (env) $ python3 manage.py makemigrations --empty --name set_site_2_domain recordtransfer
 
 
 A migration file is simply a Python script. Open the generated migration file to edit it. It should
 be called something similar to :code:`0011_set_site_2_domain.py`. If you like vim:
 
-.. code-block::
+.. code-block:: console
 
-    $ vim recortransfer/migration/0011_set_site_2_domain.py
+    (env) $ sudo vim recordtransfer/migration/0011_set_site_2_domain.py
 
 
 Make three changes to the generated Python file:
@@ -580,13 +623,13 @@ Save and exit that file before applying this migration and all of the other migr
 
 .. code-block:: console
 
-    $ python3 manage.py migrate
+    (env) $ python3 manage.py migrate
 
 
-You will also want to set the domain name in the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file
-while we're on the topic of the domain name:
+You will also want to set the domain name in :code:`/opt/NCTR-Bagit-Record-Transfer/.env` while
+we're on the topic of the domain name:
 
-.. code-block::
+::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     HOST_DOMAINS=YOUR_DOMAIN_HERE
@@ -599,15 +642,20 @@ while we're on the topic of the domain name:
     add more than one domain by separating domain names with spaces.
 
 
-****************
-Create Superuser
-****************
+***********************
+6.5 Create a Super User
+***********************
 
-Work in progress.
+Now that the database is ready to be used by the application, we should create a super user that has
+full access to the application and the database. This user is necessary to create other staff users
+and administrators. Without this user, no one will be able to access the administrator website. You
+can think of this super user as analogous to the application as the **django** user we created above
+is to the MySQL database.
 
+Make sure you are in the same directory as the :code:`manage.py` script. Run the super user creation
+command and follow the prompts, remembering the username and password you enter.
 
-Environment Setup
-#################
+.. code-block:: console
 
     (env) $ python3 manage.py createsuperuser
 
