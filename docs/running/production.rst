@@ -173,7 +173,7 @@ to it, substituting :code:`your_domain_or_ip` with your actual domain or IP:
         location = /favicon.ico { access_log off; log_not_found off; }
 
         location /static/ {
-            root /opt/NCTR-Bagit-Record-Transfer;
+            root /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer;
         }
 
         location / {
@@ -194,15 +194,7 @@ Enable the site by linking the configuration in the sites-enabled directory:
 
 .. code-block:: console
 
-    (env) $ cd /etc/nginx/
-    (env) $ sudo ln -s sites-available/recordtransfer.conf sites-enabled/recordtransfer.conf
-
-
-You can test if the configuration has syntax errors by using the command:
-
-.. code-block:: console
-
-    (env) $ sudo nginx -t
+    (env) $ sudo ln -s /etc/nginx/sites-available/recordtransfer.conf /etc/nginx/sites-enabled/recordtransfer.conf
 
 
 3. Gunicorn Setup
@@ -332,7 +324,8 @@ Create a systemd initialization script for the RQ worker. Create the new file at
 
     [Service]
     WorkingDirectory=/opt/NCTR-Bagit-Record-Transfer/
-    ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/python bagitobjecttransfer/manage.py rqworker default
+    ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/python \
+        bagitobjecttransfer/manage.py rqworker default
 
 
 Enable the rqworker_default service to start on system startup:
