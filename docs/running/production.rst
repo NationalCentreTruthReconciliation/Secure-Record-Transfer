@@ -737,3 +737,17 @@ type :code:`yes` and press ENTER. For good measure, re-set the user & group of a
     (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
     (env) $ python3 manage.py collectstatic
     (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
+
+
+9. Start Services
+#################
+
+With all of the setup out of the way, you can finally start all of the application services:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl start mysqld
+    (env) $ sudo systemctl start redis
+    (env) $ sudo systemctl start rqworker_default
+    (env) $ sudo systemctl start gunicorn
+    (env) $ sudo systemctl start nginx
