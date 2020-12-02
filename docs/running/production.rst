@@ -828,11 +828,18 @@ to accept questions and inquiries:
 
 ::
 
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
     ARCHIVIST_EMAIL=you@example.com
     EMAIL_HOST=localhost
     EMAIL_PORT=25
     EMAIL_HOST_USER=mail_user
     EMAIL_HOST_PASSWORD=mail_password
+    EMAIL_USE_SSL=False
+    EMAIL_USE_TLS=True
+
+
+Note that you can only set one of EMAIL_USE_SSL or EMAIL_USE_TLS to True. Both are False by default
+so you have to manually turn one on.
 
 
 8. Final Checklist
