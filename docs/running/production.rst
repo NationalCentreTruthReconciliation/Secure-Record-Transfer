@@ -3,9 +3,9 @@ Deploying in Production
 
 The setup for a production build is much more involved than the development and Docker methods.
 
-To manage services, systemd is used. The OS used for this guide is Red Hat Enterprise Linux 7. There
-may be some differences if you intend to deploy the app on a different Linux distribution, but the
-basics should be the same.
+To manage services, systemd is used. The OS used for this guide is Red Hat Enterprise Linux 7 (RHEL
+7). There may be some differences if you intend to deploy the app on a different Linux distribution,
+but the basics should be the same.
 
 At the end of the process, the most important files will be placed at the following locations in the
 file system:
@@ -19,6 +19,10 @@ file system:
                 |_ recordtransfer.conf
             |_ sites-enabled/
                 |_ recordtransfer.conf -> /etc/nginx/sites-available/recordtransfer.conf
+        |_ systemd/
+            |_ system/
+                |_ gunicorn.service         (User-defined service)
+                |_ rqworker_default.service (User-defined service)
     |_ opt/
         |_ NCTR-Bagit-Record-Transfer/
             |_ gunicorn.sock        (Gunicorn UNIX socket)
@@ -31,11 +35,10 @@ file system:
         |_ lib/
             |_ systemd/
                 |_ system/
-                    |_ gunicorn.service
                     |_ mysqld.service
                     |_ nginx.service
                     |_ redis.service
-                    |_ rqworker_default.service
+                    |_ postfix.service
 
 
 1. Clone Record Transfer App
@@ -129,8 +132,8 @@ application folder to **nginx**:
     (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
 
 
-If the systemd initialization script for nginx doesn't exist, create one at
-:code:`/usr/lib/systemd/system/nginx.service` and add these contents:
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/nginx.service` exists and looks something like this:
 
 .. code-block:: ini
 
@@ -153,7 +156,30 @@ If the systemd initialization script for nginx doesn't exist, create one at
     WantedBy=multi-user.target
 
 
-Enable the nginx service to start on system startup:
+If you want to make changes, make a copy to :code:`/etc/systemd/system/nginx.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/nginx.service /etc/systemd/system/nginx.service
+    (env) $ sudo chmod 644 /etc/systemd/system/nginx.service
+
+
+.. note::
+
+    See the
+    `RHEL 7 documentation section 10.6.4 <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/chap-Managing_Services_with_systemd#brid-Managing_Services_with_systemd-Overriding_Unit_Mod>`_
+    for more information on overriding the systemd service file.
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
+Once you're satisfied with the systemd script, enable the nginx service to start on system startup:
 
 .. code-block:: console
 
@@ -213,12 +239,20 @@ application. NGINX forwards non-trivial requests to Gunicorn, where it interpret
 and forwards them to Django in a way it understands.
 
 A systemd initialization script is not created when gunicorn is installed, so go ahead and create a
-new script for gunicorn at :code:`/usr/lib/systemd/system/gunicorn.service` and add these contents:
+new script for gunicorn at :code:`/etc/systemd/system/gunicorn.service`:
+
+.. code-block:: console
+
+    (env) $ sudo touch /etc/systemd/system/gunicorn.service
+    (env) $ sudo chmod 644 /etc/systemd/system/gunicorn.service
+
+
+Open the service files you created, and add these contents to the file:
 
 .. code-block:: ini
     :emphasize-lines: 12
 
-    # file /usr/lib/systemd/system/gunicorn.service
+    # file /etc/systemd/system/gunicorn.service
     [Unit]
     Description=Gunicorn WSGI Daemon
     After=network.target
@@ -236,10 +270,19 @@ new script for gunicorn at :code:`/usr/lib/systemd/system/gunicorn.service` and 
     WantedBy=multi-user.target
 
 
+.. note::
+
+    The RHEL 7 documentation recommends custom systemd initialization scripts to be placed at
+    :code:`/etc/systemd/system/` rather than :code`/usr/lib/systemd/system/`. See the
+    `RHEL 7 documentation section 10.6.2 <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/chap-managing_services_with_systemd>`_
+    for more information on creating custom systemd services.
+
+
 Enable the gunicorn service to start on system startup:
 
 .. code-block:: console
 
+    (env) $ sudo systemctl daemon-reload
     (env) $ sudo systemctl enable gunicorn
 
 
@@ -252,8 +295,8 @@ Enable the gunicorn service to start on system startup:
     `download Redis 3.2.12 here <http://download.redis.io/releases/redis-3.2.12.tar.gz>`_.
 
 
-Create a systemd service initialization file for redis if it doesn't exist at
-:code:`/usr/lib/systemd/system/redis.service` and add these contents:
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/redis.service` exists and looks something like this:
 
 .. code-block:: ini
 
@@ -277,11 +320,34 @@ Create a systemd service initialization file for redis if it doesn't exist at
     WantedBy=multi-user.target
 
 
-This script tells redis that the configuration file is at :code:`/etc/redis.conf`. If you do not
-have a redis configuration file already, you can get one
-`here <https://raw.githubusercontent.com/redis/redis/3.0/redis.conf>`_ and copy it to
-:code:`/etc/redis.conf`. You will want to edit a few of the default settings, to do so, search in
-the :code:`redis.conf` file and change these settings:
+If you want to make changes, make a copy to :code:`/etc/systemd/system/redis.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/redis.service /etc/systemd/system/redis.service
+    (env) $ sudo chmod 644 /etc/systemd/system/redis.service
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
+Once you're satisfied with the systemd script, enable the redis service to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable redis
+
+
+You may notice that the service script tells redis that the configuration file is at
+:code:`/etc/redis.conf`. If you do not have a redis configuration file already, you can get a
+`redis conf here <https://raw.githubusercontent.com/redis/redis/3.0/redis.conf>`_ and copy it to
+:code:`/etc/redis.conf`. You will want to edit a few of the default settings; to do so, search in
+the :code:`/etc/redis.conf` file and change these settings:
 
 ::
 
@@ -290,13 +356,6 @@ the :code:`redis.conf` file and change these settings:
     logfile /var/log/redis/redis.log
     dir /var/lib/redis/
     supervised systemd
-
-
-Enable the redis service to start on system startup:
-
-.. code-block:: console
-
-    (env) $ sudo systemctl enable redis
 
 
 5. RQ Worker Setup
@@ -314,12 +373,20 @@ server to run tasks off the main thread of the Django app. The implementation us
 `Django-RQ <https://github.com/rq/django-rq>`_, based on the `RQ <https://github.com/rq/rq>`_
 library.
 
-Create a systemd initialization script for the RQ worker. Create the new file at
-:code:`/usr/lib/systemd/system/rqworker_default.service` and add these contents:
+A systemd initialization script is not created when Django-RQ is installed, so go ahead and create a
+new script for Django-RQ at :code:`/etc/systemd/system/rqworker_default.service`:
+
+.. code-block:: console
+
+    (env) $ sudo touch /etc/systemd/system/rqworker_default.service
+    (env) $ sudo chmod 644 /etc/systemd/system/rqworker_default.service
+
+
+Open the service file you created, and add these contents to the file:
 
 .. code-block:: ini
 
-    # file /usr/lib/systemd/system/rqworker_default.service
+    # file /etc/systemd/system/rqworker_default.service
     [Unit]
     Description=Django-RQ Worker (default priority)
     After=network.target redis.service
@@ -334,11 +401,13 @@ Enable the rqworker_default service to start on system startup:
 
 .. code-block:: console
 
+    (env) $ sudo systemctl daemon-reload
     (env) $ sudo systemctl enable rqworker_default
 
 
-We also need to tell the Django app how to access the RQ workers. To do so, add the following lines
-to the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
+We also need to tell the Django record transfer app how to access the RQ
+workers. To do so, add the following lines to the 
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
 
 ::
 
@@ -367,8 +436,8 @@ to the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
 application. MySQL is well supported, reliable, and stable. Django interacts with MySQL using the
 `MySQL Connector/Python <https://github.com/mysql/mysql-connector-python>`_ library.
 
-Create a systemd service initialization file for MySQL if it doesn't exist at
-:code:`/usr/lib/systemd/system/mysqld.service` and add these contents:
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/mysqld.service` exists and looks something like this:
 
 .. code-block:: ini
 
@@ -417,6 +486,22 @@ Create a systemd service initialization file for MySQL if it doesn't exist at
     PrivateTmp=false
 
 
+If you want to make changes, make a copy to :code:`/etc/systemd/system/mysqld.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/mysqld.service /etc/systemd/system/mysqld.service
+    (env) $ sudo chmod 644 /etc/systemd/system/mysqld.service
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
 Enable the mysqld service to start on system startup, and start the service (we will need to
 interact with mysql in the upcoming steps):
 
@@ -426,7 +511,7 @@ interact with mysql in the upcoming steps):
     (env) $ sudo systemctl start mysqld
 
 
-You can check the status of mysqld with:
+You can check whether the service has started with:
 
 .. code-block:: console
 
@@ -754,3 +839,11 @@ With all of the setup out of the way, you can finally start all of the applicati
     (env) $ sudo systemctl start rqworker_default
     (env) $ sudo systemctl start gunicorn
     (env) $ sudo systemctl start nginx
+
+
+If you want to be sure NGINX loaded your configuration file, you can check the configuration it's
+using with:
+
+.. code-block:: console
+
+    (env) $ sudo nginx -T
