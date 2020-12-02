@@ -3,7 +3,7 @@ data structures. The following hierarchy shows what data can be transformed into
 go down in the hierarchy, so for example it is not possible to create the transfer form from the
 flat metadata.
 
-.. code-block::
+::
 
     |__ Cleaned Transfer Form
         |__ Nested CAAIS Metadata Tree

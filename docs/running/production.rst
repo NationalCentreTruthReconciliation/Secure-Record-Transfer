@@ -214,7 +214,7 @@ and forwards them to Django in a way it understands.
 A systemd initialization script is not created when gunicorn is installed, so go ahead and create a
 new script for gunicorn at :code:`/usr/lib/systemd/system/gunicorn.service` and add these contents:
 
-.. code-block ::
+::
 
     # file /usr/lib/systemd/system/gunicorn.service
     [Unit]
@@ -253,7 +253,7 @@ Enable the gunicorn service to start on system startup:
 Create a systemd service initialization file for redis if it doesn't exist at
 :code:`/usr/lib/systemd/system/redis.service` and add these contents:
 
-.. code-block::
+::
 
     # file /usr/lib/systemd/system/redis.service
     [Unit]
@@ -281,7 +281,7 @@ have a redis configuration file already, you can get one
 :code:`/etc/redis.conf`. You will want to edit a few of the default settings, to do so, search in
 the :code:`redis.conf` file and change these settings:
 
-.. code-block::
+::
 
     # file /etc/redis.conf
     databases 1
@@ -315,7 +315,7 @@ library.
 Create a systemd initialization script for the RQ worker. Create the new file at
 :code:`/usr/lib/systemd/system/rqworker_default.service` and add these contents:
 
-.. code-block::
+::
 
     # file /usr/lib/systemd/system/rqworker_default.service
     [Unit]
@@ -368,7 +368,7 @@ application. MySQL is well supported, reliable, and stable. Django interacts wit
 Create a systemd service initialization file for MySQL if it doesn't exist at
 :code:`/usr/lib/systemd/system/mysqld.service` and add these contents:
 
-.. code-block::
+::
 
     # file /usr/lib/systemd/system/mysqld.service
     [Unit]
@@ -503,7 +503,7 @@ password you use, you will need to enter it one more place later.
     If you get an error when creating the password that it doesn't meet the policy requirements, you
     can check the requirements by running the MySQL query:
 
-    .. code-block::
+    ::
 
         SHOW VARIABLES LIKE 'validate_password%';
 

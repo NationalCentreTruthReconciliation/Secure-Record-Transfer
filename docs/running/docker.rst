@@ -8,9 +8,9 @@ on the Django app's backend, refer to the section on :ref:`Running Locally for D
 First, make sure you've installed Docker. Create an environment file called :code:`.dockerenv` in
 the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not already created:
 
-.. code-block::
+::
 
-    BAG_FOLDER_LINUX = /app/media/bags
+    BAG_STORAGE_FOLDER = /app/media/bags
 
 
 After ensuring you have a minimal environment file set up, make sure you are in the

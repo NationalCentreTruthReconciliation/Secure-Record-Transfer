@@ -23,9 +23,9 @@ purposes.
 First, make sure you've installed Docker. Create an environment file called :code:`.dockerenv` in
 the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not already created:
 
-.. code-block::
+::
 
-    BAG_FOLDER_LINUX = /app/media/bags
+    BAG_STORAGE_FOLDER = /app/media/bags
 
 
 Create a virtual environment to run the app out of if you haven't already. :code:`cd` to the root of
