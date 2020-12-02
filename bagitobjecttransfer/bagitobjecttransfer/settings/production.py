@@ -47,36 +47,38 @@ EMAIL_USE_SSL = True
 
 
 # Logging
+# We can log everything to stdout since systemd will capture output and put it in the journal for us
+# automatically
 
 LOGGING = {
-#    'version': 1,
-#    'disable_existing_loggers': False,
-#    'formatters': {
-#        'standard': {
-#            'format': '{levelname} {asctime} {module}: {message}',
-#            'style': '{'
-#        }
-#    },
-#    'handlers': {
-#        'console': {
-#            'class': 'logging.StreamHandler',
-#            'formatter': 'standard'
-#        },
-#    },
-#    'loggers': {
-#        'django': {
-#            'handlers': ['console'],
-#            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
-#        },
-#        'recordtransfer': {
-#            'handlers': ['console'],
-#            'level': 'INFO',
-#            'propagate': True,
-#        },
-#        'rq.worker': {
-#            'handlers': ['console'],
-#            'level': 'INFO',
-#            'propagate': True,
-#        }
-#    }
+   'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '{levelname} {asctime} {module}: {message}',
+            'style': '{'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
+        },
+        'recordtransfer': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'rq.worker': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    }
 }
