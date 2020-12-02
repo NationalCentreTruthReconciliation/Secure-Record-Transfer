@@ -264,6 +264,8 @@ Open the service files you created, and add these contents to the file:
     ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/gunicorn \
         --workers 3 \
         --bind unix:/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock \
+        --capture-output \
+        --enable-stdio-inheritance \
         bagitobjecttransfer.wsgi
 
     [Install]
