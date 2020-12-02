@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 from recordtransfer.bagger import create_bag
 from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
 from recordtransfer.models import Bag, UploadedFile, User, Job
-from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_USERNAME, ARCHIVIST_USERNAME
+from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -224,7 +224,6 @@ def send_thank_you_for_your_transfer(form_data: dict, user_submitted: User):
     '''
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
-    archivist_email = '{0}@{1}'.format(ARCHIVIST_USERNAME, domain)
 
     send_mail_with_logs(
         recipients=[user_submitted.email],
@@ -234,7 +233,7 @@ def send_thank_you_for_your_transfer(form_data: dict, user_submitted: User):
         context={
             'user': user_submitted,
             'form_data': form_data,
-            'archivist_email': archivist_email,
+            'archivist_email': ARCHIVIST_EMAIL,
         }
     )
 
@@ -249,7 +248,6 @@ def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User)
     '''
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
-    archivist_email = '{0}@{1}'.format(ARCHIVIST_USERNAME, domain)
 
     send_mail_with_logs(
         recipients=[user_submitted.email],
@@ -259,7 +257,7 @@ def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User)
         context={
             'user': user_submitted,
             'form_data': form_data,
-            'archivist_email': archivist_email,
+            'archivist_email': ARCHIVIST_EMAIL,
         }
     )
 

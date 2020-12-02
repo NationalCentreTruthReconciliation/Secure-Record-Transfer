@@ -748,7 +748,91 @@ records as well as administer transfers and other users.
 7. Email Setup
 ##############
 
-**Work in progress.**
+.. note::
+
+    We are using Postfix **2.10.1** to relay emails. On CentOS / RedHat, install postfix with
+
+    .. code-block:: console
+
+        $ yum install postfix
+
+
+Postfix is used as a relay mail server that is used for sending emails to users and archivists. You
+will want to have a dedicated SMTP server somewhere else that postfix can relay emails to. Find
+`more information on setting up postfix here <https://www.linode.com/docs/guides/postfix-smtp-debian7/>`_.
+
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/postfix.service` exists and looks something like this:
+
+.. code-block:: ini
+
+    [Unit]
+    Description=Postfix Mail Transport Agent
+    After=syslog.target network.target
+    Conflicts=sendmail.service exim.service
+
+    [Service]
+    Type=forking
+    PIDFile=/var/spool/postfix/pid/master.pid
+    EnvironmentFile=-/etc/sysconfig/network
+    ExecStartPre=-/usr/libexec/postfix/aliasesdb
+    ExecStartPre=-/usr/libexec/postfix/chroot-update
+    ExecStart=/usr/sbin/postfix start
+    ExecReload=/usr/sbin/postfix reload
+    ExecStop=/usr/sbin/postfix stop
+
+    [Install]
+    WantedBy=multi-user.target
+
+
+If you want to make changes, make a copy to :code:`/etc/systemd/system/postfix.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/postfix.service /etc/systemd/system/postfix.service
+    (env) $ sudo chmod 644 /etc/systemd/system/postfix.service
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
+Open the postfix configuration file at :code:`/etc/postfix/main.cf` and make sure to set
+:code:`myhostname` to your domain name, and :code:`relayhost` to your SMTP server:
+
+::
+
+    # file /etc/postfix/main.cf
+
+    myhostname = YOUR_DOMAIN_HERE
+    relayhost = YOUR_SMTP_HOST_HERE
+
+
+Once you're satisfied with the systemd script and the configuration file, enable the postfix service
+to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable postfix
+
+
+You will need to let the Django record transfer app know where to send emails. Edit the
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file and add the following lines, substituting
+mail_user for your mailing username (if you require one) and mail_password for your mailing password
+(if you require one). Also, set an ARCHIVIST_EMAIL to an administrator email address that you'll use
+to accept questions and inquiries:
+
+::
+
+    ARCHIVIST_EMAIL=you@example.com
+    EMAIL_HOST=localhost
+    EMAIL_PORT=25
+    EMAIL_HOST_USER=mail_user
+    EMAIL_HOST_PASSWORD=mail_password
 
 
 8. Final Checklist
@@ -778,8 +862,9 @@ like this:
     RQ_PASSWORD_DEFAULT=
     RQ_TIMEOUT_DEFAULT=500
 
+    ARCHIVIST_EMAIL=you@example.com
     EMAIL_HOST=localhost
-    EMAIL_PORT=
+    EMAIL_PORT=25
     EMAIL_HOST_USER=
     EMAIL_HOST_PASSWORD=
 

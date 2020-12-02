@@ -8,8 +8,8 @@ BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 
 # Email Usernames
 
-DO_NOT_REPLY_USERNAME = 'do-not-reply'
-ARCHIVIST_USERNAME = 'Daniel.Lovegrove'
+DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_NAME', default='do-not-reply')
+ARCHIVIST_EMAIL = config('ARCHIVIST_EMAIL')
 
 # Default data to inject into metadata, after the user enters their own metadata
 
