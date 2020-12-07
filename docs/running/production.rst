@@ -195,6 +195,7 @@ to it, substituting :code:`your_domain_or_ip` with your actual domain or IP:
     # file /etc/nginx/sites-available/recordtransfer.conf
     server {
         listen 80;
+        client_max_body_size 1024M;
         server_name your_domain_or_ip;
 
         location = /favicon.ico { access_log off; log_not_found off; }
