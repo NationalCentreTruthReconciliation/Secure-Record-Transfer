@@ -5,7 +5,7 @@ from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 DEBUG = False
-SITE_ID = 2
+SITE_ID = config('SITE_ID', default=2, cast=int)
 
 ALLOWED_HOSTS = re.split(r'\s+', config('HOST_DOMAINS'))
 
@@ -42,8 +42,8 @@ EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False)
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 
 
 # Logging
