@@ -3,9 +3,9 @@ Deploying in Production
 
 The setup for a production build is much more involved than the development and Docker methods.
 
-To manage services, systemd is used. The OS used for this guide is Red Hat Enterprise Linux 7. There
-may be some differences if you intend to deploy the app on a different Linux distribution, but the
-basics should be the same.
+To manage services, systemd is used. The OS used for this guide is Red Hat Enterprise Linux 7 (RHEL
+7). There may be some differences if you intend to deploy the app on a different Linux distribution,
+but the basics should be the same.
 
 At the end of the process, the most important files will be placed at the following locations in the
 file system:
@@ -19,6 +19,10 @@ file system:
                 |_ recordtransfer.conf
             |_ sites-enabled/
                 |_ recordtransfer.conf -> /etc/nginx/sites-available/recordtransfer.conf
+        |_ systemd/
+            |_ system/
+                |_ gunicorn.service         (User-defined service)
+                |_ rqworker_default.service (User-defined service)
     |_ opt/
         |_ NCTR-Bagit-Record-Transfer/
             |_ gunicorn.sock        (Gunicorn UNIX socket)
@@ -31,11 +35,10 @@ file system:
         |_ lib/
             |_ systemd/
                 |_ system/
-                    |_ gunicorn.service
                     |_ mysqld.service
                     |_ nginx.service
                     |_ redis.service
-                    |_ rqworker_default.service
+                    |_ postfix.service
 
 
 1. Clone Record Transfer App
@@ -129,8 +132,8 @@ application folder to **nginx**:
     (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
 
 
-If the systemd initialization script for nginx doesn't exist, create one at
-:code:`/usr/lib/systemd/system/nginx.service` and add these contents:
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/nginx.service` exists and looks something like this:
 
 .. code-block:: ini
 
@@ -153,7 +156,30 @@ If the systemd initialization script for nginx doesn't exist, create one at
     WantedBy=multi-user.target
 
 
-Enable the nginx service to start on system startup:
+If you want to make changes, make a copy to :code:`/etc/systemd/system/nginx.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/nginx.service /etc/systemd/system/nginx.service
+    (env) $ sudo chmod 644 /etc/systemd/system/nginx.service
+
+
+.. note::
+
+    See the
+    `RHEL 7 documentation section 10.6.4 <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/chap-Managing_Services_with_systemd#brid-Managing_Services_with_systemd-Overriding_Unit_Mod>`_
+    for more information on overriding the systemd service file.
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
+Once you're satisfied with the systemd script, enable the nginx service to start on system startup:
 
 .. code-block:: console
 
@@ -213,12 +239,20 @@ application. NGINX forwards non-trivial requests to Gunicorn, where it interpret
 and forwards them to Django in a way it understands.
 
 A systemd initialization script is not created when gunicorn is installed, so go ahead and create a
-new script for gunicorn at :code:`/usr/lib/systemd/system/gunicorn.service` and add these contents:
+new script for gunicorn at :code:`/etc/systemd/system/gunicorn.service`:
+
+.. code-block:: console
+
+    (env) $ sudo touch /etc/systemd/system/gunicorn.service
+    (env) $ sudo chmod 644 /etc/systemd/system/gunicorn.service
+
+
+Open the service files you created, and add these contents to the file:
 
 .. code-block:: ini
     :emphasize-lines: 12
 
-    # file /usr/lib/systemd/system/gunicorn.service
+    # file /etc/systemd/system/gunicorn.service
     [Unit]
     Description=Gunicorn WSGI Daemon
     After=network.target
@@ -230,16 +264,27 @@ new script for gunicorn at :code:`/usr/lib/systemd/system/gunicorn.service` and 
     ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/gunicorn \
         --workers 3 \
         --bind unix:/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock \
+        --capture-output \
+        --enable-stdio-inheritance \
         bagitobjecttransfer.wsgi
 
     [Install]
     WantedBy=multi-user.target
 
 
+.. note::
+
+    The RHEL 7 documentation recommends custom systemd initialization scripts to be placed at
+    :code:`/etc/systemd/system/` rather than :code`/usr/lib/systemd/system/`. See the
+    `RHEL 7 documentation section 10.6.2 <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/chap-managing_services_with_systemd>`_
+    for more information on creating custom systemd services.
+
+
 Enable the gunicorn service to start on system startup:
 
 .. code-block:: console
 
+    (env) $ sudo systemctl daemon-reload
     (env) $ sudo systemctl enable gunicorn
 
 
@@ -252,8 +297,8 @@ Enable the gunicorn service to start on system startup:
     `download Redis 3.2.12 here <http://download.redis.io/releases/redis-3.2.12.tar.gz>`_.
 
 
-Create a systemd service initialization file for redis if it doesn't exist at
-:code:`/usr/lib/systemd/system/redis.service` and add these contents:
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/redis.service` exists and looks something like this:
 
 .. code-block:: ini
 
@@ -277,11 +322,34 @@ Create a systemd service initialization file for redis if it doesn't exist at
     WantedBy=multi-user.target
 
 
-This script tells redis that the configuration file is at :code:`/etc/redis.conf`. If you do not
-have a redis configuration file already, you can get one
-`here <https://raw.githubusercontent.com/redis/redis/3.0/redis.conf>`_ and copy it to
-:code:`/etc/redis.conf`. You will want to edit a few of the default settings, to do so, search in
-the :code:`redis.conf` file and change these settings:
+If you want to make changes, make a copy to :code:`/etc/systemd/system/redis.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/redis.service /etc/systemd/system/redis.service
+    (env) $ sudo chmod 644 /etc/systemd/system/redis.service
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
+Once you're satisfied with the systemd script, enable the redis service to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable redis
+
+
+You may notice that the service script tells redis that the configuration file is at
+:code:`/etc/redis.conf`. If you do not have a redis configuration file already, you can get a
+`redis conf here <https://raw.githubusercontent.com/redis/redis/3.0/redis.conf>`_ and copy it to
+:code:`/etc/redis.conf`. You will want to edit a few of the default settings; to do so, search in
+the :code:`/etc/redis.conf` file and change these settings:
 
 ::
 
@@ -290,13 +358,6 @@ the :code:`redis.conf` file and change these settings:
     logfile /var/log/redis/redis.log
     dir /var/lib/redis/
     supervised systemd
-
-
-Enable the redis service to start on system startup:
-
-.. code-block:: console
-
-    (env) $ sudo systemctl enable redis
 
 
 5. RQ Worker Setup
@@ -314,12 +375,20 @@ server to run tasks off the main thread of the Django app. The implementation us
 `Django-RQ <https://github.com/rq/django-rq>`_, based on the `RQ <https://github.com/rq/rq>`_
 library.
 
-Create a systemd initialization script for the RQ worker. Create the new file at
-:code:`/usr/lib/systemd/system/rqworker_default.service` and add these contents:
+A systemd initialization script is not created when Django-RQ is installed, so go ahead and create a
+new script for Django-RQ at :code:`/etc/systemd/system/rqworker_default.service`:
+
+.. code-block:: console
+
+    (env) $ sudo touch /etc/systemd/system/rqworker_default.service
+    (env) $ sudo chmod 644 /etc/systemd/system/rqworker_default.service
+
+
+Open the service file you created, and add these contents to the file:
 
 .. code-block:: ini
 
-    # file /usr/lib/systemd/system/rqworker_default.service
+    # file /etc/systemd/system/rqworker_default.service
     [Unit]
     Description=Django-RQ Worker (default priority)
     After=network.target redis.service
@@ -334,11 +403,13 @@ Enable the rqworker_default service to start on system startup:
 
 .. code-block:: console
 
+    (env) $ sudo systemctl daemon-reload
     (env) $ sudo systemctl enable rqworker_default
 
 
-We also need to tell the Django app how to access the RQ workers. To do so, add the following lines
-to the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
+We also need to tell the Django record transfer app how to access the RQ
+workers. To do so, add the following lines to the 
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
 
 ::
 
@@ -367,8 +438,8 @@ to the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
 application. MySQL is well supported, reliable, and stable. Django interacts with MySQL using the
 `MySQL Connector/Python <https://github.com/mysql/mysql-connector-python>`_ library.
 
-Create a systemd service initialization file for MySQL if it doesn't exist at
-:code:`/usr/lib/systemd/system/mysqld.service` and add these contents:
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/mysqld.service` exists and looks something like this:
 
 .. code-block:: ini
 
@@ -417,6 +488,22 @@ Create a systemd service initialization file for MySQL if it doesn't exist at
     PrivateTmp=false
 
 
+If you want to make changes, make a copy to :code:`/etc/systemd/system/mysqld.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/mysqld.service /etc/systemd/system/mysqld.service
+    (env) $ sudo chmod 644 /etc/systemd/system/mysqld.service
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
 Enable the mysqld service to start on system startup, and start the service (we will need to
 interact with mysql in the upcoming steps):
 
@@ -426,7 +513,7 @@ interact with mysql in the upcoming steps):
     (env) $ sudo systemctl start mysqld
 
 
-You can check the status of mysqld with:
+You can check whether the service has started with:
 
 .. code-block:: console
 
@@ -548,94 +635,13 @@ to replace **your_password** with the actual password you created above:
 
 
 After MySQL is set up, you can populate the new **recordtransfer** database with the tables for the
-record transfer application. This process is called *database migration*. But before migrating all
-of the database tables, we need to create a *new* migration so that you can set the domain of your
-website. Without doing this, many common features of the application will break.
-
-Change to the directory of the record transfer application that has the :code:`manage.py` script and
-make a new migration that you'll edit to set the domain name of your site:
-
-.. code-block:: console
-
-    (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer/
-    (env) $ python3 manage.py makemigrations --empty --name set_site_2_domain recordtransfer
-
-
-A migration file is simply a Python script. Open the generated migration file to edit it. It should
-be called something similar to :code:`0011_set_site_2_domain.py`. If you like vim:
-
-.. code-block:: console
-
-    (env) $ sudo vim recordtransfer/migration/0011_set_site_2_domain.py
-
-
-Make three changes to the generated Python file:
-
-1. Add a new function that assigns your domain to ID 2 (ID 1 is set to localhost already)
-2. Add a dependency to the final sites migrations
-3. Add your new function from change 1 above to the :code:`operations`
-
-
-.. note::
-
-    Change YOUR_DOMAIN_HERE to the domain of your site, and YOUR_SITE_NAME_HERE to assign a name to
-    the site. YOUR_DOMAIN_HERE should not include http:// or https:// and only include the domain
-    name.
-
-
-.. code-block:: python
-
-    # file /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer/recordtransfer/migrations/0011_set_site_2_domain.py
-    # Generated by Django 3.1.1 on 2020-11-23 16:06
-
-    from django.db import migrations
-    from django.contrib.sites.models import Site
-
-    # Change 1: Add a new function assigning your domain to ID 2
-    def update_domain(apps, schema_editor):
-        Site.objects.update_or_create(
-            pk=2,
-            defaults={
-                'domain': 'YOUR_DOMAIN_HERE',
-                'name': 'YOUR_SITE_NAME_HERE'
-            }
-        )
-
-    class Migration(migrations.Migration):
-
-        dependencies = [
-            ('recordtransfer', '0010_update_site_name'),
-            # Change 2: Add a dependency on the final sites migration
-            ('sites', '0002_alter_domain_unique'),
-        ]
-
-        operations = [
-            # Change 3: Add your new function here
-            migrations.RunPython(update_domain),
-        ]
-
-
-Save and exit that file before applying this migration and all of the other migrations:
+record transfer application. This process is called *database migration*. To apply the migrations,
+change to the directory of the record transfer application that has the :code:`manage.py` script,
+and run the migration:
 
 .. code-block:: console
 
     (env) $ python3 manage.py migrate
-
-
-You will also want to set the domain name in :code:`/opt/NCTR-Bagit-Record-Transfer/.env` while
-we're on the topic of the domain name:
-
-::
-
-    # file /opt/NCTR-Bagit-Record-Transfer/.env
-    HOST_DOMAINS=YOUR_DOMAIN_HERE
-
-
-.. note::
-
-    The domains you put in HOST_DOMAINS will be used as Django's
-    `ALLOWED_HOSTS <https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts>`_. You can
-    add more than one domain by separating domain names with spaces.
 
 
 ***********************
@@ -663,7 +669,97 @@ records as well as administer transfers and other users.
 7. Email Setup
 ##############
 
-**Work in progress.**
+.. note::
+
+    We are using Postfix **2.10.1** to relay emails. On CentOS / RedHat, install postfix with
+
+    .. code-block:: console
+
+        $ yum install postfix
+
+
+Postfix is used as a relay mail server that is used for sending emails to users and archivists. You
+will want to have a dedicated SMTP server somewhere else that postfix can relay emails to. Find
+`more information on setting up postfix here <https://www.linode.com/docs/guides/postfix-smtp-debian7/>`_.
+
+Make sure the system initialization script at
+:code:`/usr/lib/systemd/system/postfix.service` exists and looks something like this:
+
+.. code-block:: ini
+
+    [Unit]
+    Description=Postfix Mail Transport Agent
+    After=syslog.target network.target
+    Conflicts=sendmail.service exim.service
+
+    [Service]
+    Type=forking
+    PIDFile=/var/spool/postfix/pid/master.pid
+    EnvironmentFile=-/etc/sysconfig/network
+    ExecStartPre=-/usr/libexec/postfix/aliasesdb
+    ExecStartPre=-/usr/libexec/postfix/chroot-update
+    ExecStart=/usr/sbin/postfix start
+    ExecReload=/usr/sbin/postfix reload
+    ExecStop=/usr/sbin/postfix stop
+
+    [Install]
+    WantedBy=multi-user.target
+
+
+If you want to make changes, make a copy to :code:`/etc/systemd/system/postfix.service` and edit the
+file there. This will override the file in :code:`/usr/lib/systemd/system/`:
+
+.. code-block:: console
+
+    (env) $ sudo cp /usr/lib/systemd/system/postfix.service /etc/systemd/system/postfix.service
+    (env) $ sudo chmod 644 /etc/systemd/system/postfix.service
+
+
+If you've made changes to the systemd script, reload the daemon to capture the new changes:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl daemon-reload
+
+
+Open the postfix configuration file at :code:`/etc/postfix/main.cf` and make sure to set
+:code:`myhostname` to your domain name, and :code:`relayhost` to your SMTP server:
+
+::
+
+    # file /etc/postfix/main.cf
+
+    myhostname = YOUR_DOMAIN_HERE
+    relayhost = YOUR_SMTP_HOST_HERE
+
+
+Once you're satisfied with the systemd script and the configuration file, enable the postfix service
+to start on system startup:
+
+.. code-block:: console
+
+    (env) $ sudo systemctl enable postfix
+
+
+You will need to let the Django record transfer app know where to send emails. Edit the
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file and add the following lines, substituting
+mail_user for your mailing username (if you require one) and mail_password for your mailing password
+(if you require one). Also, set an ARCHIVIST_EMAIL to an administrator email address that you'll use
+to accept questions and inquiries:
+
+::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    ARCHIVIST_EMAIL=you@example.com
+    EMAIL_HOST=localhost
+    EMAIL_PORT=25
+    EMAIL_HOST_USER=mail_user
+    EMAIL_HOST_PASSWORD=mail_password
+    EMAIL_USE_TLS=True
+
+
+Note that you can only set one of EMAIL_USE_SSL or EMAIL_USE_TLS to True. Both are False by default
+so you have to manually turn one on.
 
 
 8. Final Checklist
@@ -693,10 +789,12 @@ like this:
     RQ_PASSWORD_DEFAULT=
     RQ_TIMEOUT_DEFAULT=500
 
+    ARCHIVIST_EMAIL=you@example.com
     EMAIL_HOST=localhost
-    EMAIL_PORT=
-    EMAIL_HOST_USER=
-    EMAIL_HOST_PASSWORD=
+    EMAIL_PORT=25
+    EMAIL_HOST_USER=mail_user
+    EMAIL_HOST_PASSWORD=mail_password
+    EMAIL_USE_TLS=True
 
     MYSQL_HOST=localhost
     MYSQL_DATABASE=recordtransfer
@@ -704,8 +802,8 @@ like this:
     MYSQL_PASSWORD='password'
 
 
-There is one final variable to set, and that is the :code:`SECRET_KEY`. To set this variable, you
-will need to generate a new secret key. To do so, run the following command:
+There are two final variables to set. The first is the SECRET_KEY. To set this variable, you will
+need to generate a new secret key. To do so, run the following command:
 
 .. code-block:: console
 
@@ -713,13 +811,29 @@ will need to generate a new secret key. To do so, run the following command:
     &kz_(%wj8$v@cy1)23op8i$_)h2b6kl)ia6glv_*c=1(assr#b
 
 
-Copy and paste the generated string into the environment file:
+The SECRET_KEY output in the terminal can then be copy and pasted into the environment file, like
+so:
 
 ::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     SECRET_KEY=&kz_(%wj8$v@cy1)23op8i$_)h2b6kl)ia6glv_*c=1(assr#b
-    ...
+
+
+The second variable you need to set is HOST_DOMAINS. Set this to the domain(s) of your website:
+
+::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    HOST_DOMAINS=YOUR_DOMAIN_HERE
+
+
+.. note::
+
+    The domains you put in HOST_DOMAINS will be used as Django's
+    `ALLOWED_HOSTS <https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts>`_. You can
+    add more than one domain by separating domain names with spaces.
+
 
 And that's it! All of the required environment variables should now be set.
 
@@ -754,3 +868,102 @@ With all of the setup out of the way, you can finally start all of the applicati
     (env) $ sudo systemctl start rqworker_default
     (env) $ sudo systemctl start gunicorn
     (env) $ sudo systemctl start nginx
+
+
+If you want to be sure NGINX loaded your configuration file, you can check the configuration it's
+using with:
+
+.. code-block:: console
+
+    (env) $ sudo nginx -T
+
+
+10. Admin Set-up
+###################
+
+Once you have the site running, you'll need to log in as the superuser you created, and set the name
+of the site and the domain in the database. You can either do this with the command line or with the
+Django admin.
+
+
+*********************************************
+10.1 Add Site Name and Domain in Django Admin
+*********************************************
+
+To do set the name and domain using the Django admin, log in to http://yourdomain.com/admin/,
+substituting yourdomain.com for the domain the app is being hosted at. You will want to use the same
+credentials to log in that you created in section :ref:`6.5 Create a Super User`.
+
+Once logged in, click **+ Add** under the Sites section to add your site:
+
+.. image:: images/addsite.png
+    :alt: Red circle around add site link
+
+
+Fill out your domain name, and give the website a name (you can change the name later if you don't
+like it). Once filled out, click the blue **Save and continue** button.
+
+.. image:: images/savesite.png
+    :alt: Red circle around save site and continue button
+
+
+Once saved, take a look at the address in the address bar for your new site. You will see something
+like YOUR_DOMAIN.com/admin/sites/site/**2**/change. The important part to note is the number. This
+number is the SITE_ID. The Django site is set to use Site #2, so if you see the number **2** here,
+you are good to go!
+
+.. image:: images/sitecreated.png
+    :alt: Red arrow pointing to SITE_ID in address bar
+
+
+If the number you see is not **2**, you will have to edit the environment variables file and change
+SITE_ID to the correct number. If the number you see is **3**, for example, you will make the
+following change in the :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
+
+::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    SITE_ID=3
+
+
+***********************************************
+10.1 Add Site Name and Domain with Command Line
+***********************************************
+
+If you're more comfortable using the command line, you can also update the site name and domain
+using a terminal. Change to the same directory as the :code:`manage.py`, make sure your virtual
+environment is active, and open a shell in the application:
+
+.. code:: console
+
+    (env) $ python3 manage.py shell
+    Python 3.6.8 (default, Aug 13 2020, 07:46:32)
+    [GCC 4.8.5 20150623 (Red Hat 4.8.5-39)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    (InteractiveConsole)
+    >>>
+
+
+Your terminal will change to a Python shell with this command. You cannot use UNIX commands like
+:code:`ls` or :code:`cd` in this shell. Use :code:`exit()` to close the shell, or **CTRL-Z**
+followed by **ENTER**. Input the following Python "commands" into the shell:
+
+.. code:: console
+
+    >>> from django.contrib.sites.models import Site
+    >>> site = Site(domain='YOUR_DOMAIN.com', name='NCTR Record Transfer')
+    >>> site.save()
+    >>> print(site.id)
+    2
+    >>> exit()
+
+
+Note the ID shown after you input :code:`print(site.id)`. If the number you see is not **2**, you
+will have to edit the environment variables file and change SITE_ID to the correct number. If the
+number you see is **3**, for example, you will make the following change in the
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
+
+::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    SITE_ID=3

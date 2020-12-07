@@ -5,7 +5,7 @@ from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 DEBUG = False
-SITE_ID = 2
+SITE_ID = config('SITE_ID', default=2, cast=int)
 
 ALLOWED_HOSTS = re.split(r'\s+', config('HOST_DOMAINS'))
 
@@ -42,41 +42,43 @@ EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = True
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 
 
 # Logging
+# We can log everything to stdout since systemd will capture output and put it in the journal for us
+# automatically
 
 LOGGING = {
-#    'version': 1,
-#    'disable_existing_loggers': False,
-#    'formatters': {
-#        'standard': {
-#            'format': '{levelname} {asctime} {module}: {message}',
-#            'style': '{'
-#        }
-#    },
-#    'handlers': {
-#        'console': {
-#            'class': 'logging.StreamHandler',
-#            'formatter': 'standard'
-#        },
-#    },
-#    'loggers': {
-#        'django': {
-#            'handlers': ['console'],
-#            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
-#        },
-#        'recordtransfer': {
-#            'handlers': ['console'],
-#            'level': 'INFO',
-#            'propagate': True,
-#        },
-#        'rq.worker': {
-#            'handlers': ['console'],
-#            'level': 'INFO',
-#            'propagate': True,
-#        }
-#    }
+   'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '{levelname} {asctime} {module}: {message}',
+            'style': '{'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
+        },
+        'recordtransfer': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'rq.worker': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    }
 }
