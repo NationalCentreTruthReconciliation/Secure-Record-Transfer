@@ -60,6 +60,25 @@ class UploadedFileAdmin(admin.ModelAdmin):
     clean_temp_files.short_description = 'Remove temp files on filesystem'
 
 
+class UploadedFileInline(admin.TabularInline):
+    model = UploadedFile
+    max_num = 0
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.can_delete = False
+
+
+class UploadSessionAdmin(admin.ModelAdmin):
+    model = UploadSession
+    inlines = [
+        UploadedFileInline,
+    ]
+
+    list_display = ['token', 'started_at']
+    ordering = ['-started_at']
+
+
 class BagAdmin(admin.ModelAdmin):
     change_form_template = 'admin/bag_change_form.html'
 
@@ -79,7 +98,7 @@ class BagAdmin(admin.ModelAdmin):
 
     # Display in Admin GUI
     list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
-    ordering = ['bagging_date']
+    ordering = ['-bagging_date']
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         _class = super().get_form(request, obj, change, **kwargs)
@@ -267,5 +286,5 @@ class JobAdmin(ReadOnlyAdmin):
 admin.site.register(Bag, BagAdmin)
 admin.site.register(UploadedFile, UploadedFileAdmin)
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(UploadSession)
+admin.site.register(UploadSession, UploadSessionAdmin)
 admin.site.register(Job, JobAdmin)
