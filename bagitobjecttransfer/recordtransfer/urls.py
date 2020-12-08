@@ -17,7 +17,6 @@ urlpatterns = [
         ('recorddescription', forms.RecordDescriptionForm),
         ('rights', formset_factory(forms.RightsForm, extra=1)),
         ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=1)),
-        ('generalnotes', forms.GeneralNotesForm),
         ('uploadfiles', forms.UploadFilesForm),
         ])), name='transfer'),
     path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),

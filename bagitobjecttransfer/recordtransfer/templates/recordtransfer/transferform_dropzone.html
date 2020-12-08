@@ -1,18 +1,22 @@
-{% extends 'recordtransfer/transferform_base.html' %}
+{% extends 'recordtransfer/transferform_standard.html' %}
 {% load static %}
 {% load i18n %}
 
 {% block buttonarrayclass %}flex-full-width-item{% endblock %}
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block formfields %}
-    {% for field in form %}
-        {{ field }}
-    {% endfor %}
-    <div class="flex-full-width-item margin-top-25px">
-        <span class="upload-file-label">{% trans "Upload Files" %}</span>
-    </div>
-    <div id="dropzone-errors" class="flex-full-width-error">
-    </div>
+    {{ block.super }}
+    <p class="flex-full-width-item margin-top-25px">
+        <i>Upload your files</i>
+    <p>
+    <p class="flex-full-width-item">
+        {% blocktrans %}
+        You may upload a maximum of 80 files, and you may upload at most 2GB of files. Note that big
+        transfers may take a few minutes, so please do not reload the web page when your files are
+        being uploaded.
+        {% endblocktrans %}
+    </p>
+    <div id="dropzone-errors" class="flex-full-width-error"></div>
     <div class="flex-full-width-item">
         <div id="file-dropzone" class="dz-clickable custom-dropzone dropzone">
             <div class="dz-message">

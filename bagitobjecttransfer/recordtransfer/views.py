@@ -158,19 +158,11 @@ class TransferFormWizard(SessionWizardView):
                 "records, go to the next step"
             )
         },
-        "generalnotes": {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("General Notes (Optional)"),
-            "infomessage": gettext(
-                "This step is optional. If you have any other notes that did not fit anywhere else "
-                "in the transfer form, put them here"
-            )
-        },
         "uploadfiles": {
             "templateref": "recordtransfer/transferform_dropzone.html",
             "formtitle": gettext("Upload Files"),
             "infomessage": gettext(
-                "Upload the files you intend to transfer to the NCTR"
+                "Add any final notes you would like to add, and upload your files"
             )
         },
     }

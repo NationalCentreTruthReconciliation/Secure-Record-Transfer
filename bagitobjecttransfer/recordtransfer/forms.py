@@ -646,8 +646,8 @@ class OtherIdentifiersForm(forms.Form):
     )
 
 
-class GeneralNotesForm(forms.Form):
-    ''' The Other Identifiers portion of the form. Contains fields from Section 6 of CAAIS '''
+class UploadFilesForm(forms.Form):
+    ''' The form where users upload their files and write any final notes '''
     general_note = forms.CharField(
         required=False,
         min_length=4,
@@ -661,7 +661,8 @@ class GeneralNotesForm(forms.Form):
         label=gettext('Other notes'),
     )
 
-
-class UploadFilesForm(forms.Form):
-    ''' The form where users upload their files '''
-    session_token = forms.CharField(widget=forms.HiddenInput())
+    session_token = forms.CharField(
+        required=True,
+        widget=forms.HiddenInput(),
+        label='hidden'
+    )
