@@ -11,7 +11,7 @@ from django.utils.translation import gettext
 from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, User, Bag
+from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -179,6 +179,12 @@ class TransferFormWizard(SessionWizardView):
             initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
             initial['email'] = str(curr_user.email)
         return initial
+
+    def get_form_kwargs(self, step=None):
+        if step == 'grouptransfer':
+            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            return {'users_groups': users_groups}
+        return {}
 
     def get_context_data(self, form, **kwargs):
         ''' Retrieve context data for the current form template.

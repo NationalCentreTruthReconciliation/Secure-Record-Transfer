@@ -646,6 +646,42 @@ class OtherIdentifiersForm(forms.Form):
     )
 
 
+class GroupTransferForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        users_groups = kwargs.pop('users_groups')
+        self.fields['name'].choices = [
+            ('Add New Group', gettext('-- Add New Group --')),
+            *[(x.name, x.name) for x in users_groups],
+        ]
+
+    name = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(),
+        label=gettext('Transfer belongs in this group')
+    )
+
+    new_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': gettext('e.g., My Group')
+            }
+        ),
+        label=gettext('Create new group name'),
+    )
+
+    description = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '2',
+            'placeholder': gettext('e.g., this group represents all of the records from...'),
+        }),
+        label=gettext('Group description')
+    )
+
+
 class UploadFilesForm(forms.Form):
     ''' The form where users upload their files and write any final notes '''
     general_note = forms.CharField(
