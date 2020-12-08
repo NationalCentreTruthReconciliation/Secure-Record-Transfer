@@ -77,36 +77,21 @@ Install Django and all other dependencies in the virtual environment.
     (env) $ pip install -r requirements.txt
 
 
-Set up a location to store BagIt bags inside:
-
-.. code-block:: console
-
-    (env) $ sudo mkdir -p /srv/www/recordtransfer_bags
-
-
-.. note::
-
-    You do not have to use the :code:`/srv/www/recordtransfer_bags/` directory, you can use any
-    directory you like to store BagIt bags in.
-
-
 Create an environment variable file for the application at
-:code:`/opt/NCTR-Bagit-Record-Transfer/.env` if it doesn't exist already:
+:code:`/opt/NCTR-Bagit-Record-Transfer/.env`:
 
 .. code-block:: console
 
     (env) $ touch /opt/NCTR-Bagit-Record-Transfer/.env
 
 
-We will be editing this file throughout this guide. For right now, we only need to add two lines,
-one giving the app the location of the bag storage folder, and the other specifying the settings
-module to use:
+We will be editing this file throughout this guide. For right now, we only need specify that we want
+to use the production settings:
 
 ::
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.production
-    BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
 
 
 2. NGINX Setup
@@ -770,9 +755,51 @@ After getting to this stage, you are almost ready to start the application up. R
 following sections carefully, as they are important.
 
 
+****************
+8.1 Static Files
+****************
+
+To serve static files (JavaScript, CSS, images, etc.) from NGINX, you will need to
+`collect the static files <https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/#collectstatic>`_.
+This simply means copying the static files to the /static/ directory. Without doing this, NGINX will
+not know where to find the static files. If you get a prompt asking if you want to overwrite files,
+type :code:`yes` and press ENTER. For good measure, re-set the user & group of all files to
+**nginx:nginx**:
+
+.. code-block:: console
+
+    (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
+    (env) $ python3 manage.py collectstatic
+    (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
+
+
 *************************
-8.1 Environment Variables
+8.2 Transfer Storage Area
 *************************
+
+The transfer storage area is where all of the BagIt bags are stored on the server. When a user sends
+a transfer, the uploaded files and metadata are combined into a BagIt bag. You can choose any folder
+to store these bags in, but we are using :code:`/srv/www/recordtransfer_bags`. Set the owner of the
+folder to **nginx** so that the application will be able to access the files.
+
+.. code-block:: console
+
+    (env) $ sudo mkdir -p /srv/www/recordtransfer_bags
+    (env) $ sudo chown nginx:nginx /srv/www/recordtransfer_bags
+
+
+Tell the Django application where the transfers are stored by setting the BAG_STORAGE_FOLDER
+environment variable:
+
+::
+
+    # file /opt/NCTR-Bagit-Record-Transfer/.env
+    BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
+
+
+*******************************
+8.3 Final Environment Variables
+*******************************
 
 So far, your environment file (:code:`/opt/NCTR-Bagit-Record-Transfer/.env`) should look something
 like this:
@@ -837,24 +864,6 @@ The second variable you need to set is HOST_DOMAINS. Set this to the domain(s) o
 
 
 And that's it! All of the required environment variables should now be set.
-
-
-****************
-8.2 Static Files
-****************
-
-To serve static files (JavaScript, CSS, images, etc.) from NGINX, you will need to 
-`collect the static files <https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/#collectstatic>`_.
-This simply means copying the static files to the /static/ directory. Without doing this, NGINX will
-not know where to find the static files. If you get a prompt asking if you want to overwrite files,
-type :code:`yes` and press ENTER. For good measure, re-set the user & group of all files to
-**nginx:nginx**:
-
-.. code-block:: console
-
-    (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
-    (env) $ python3 manage.py collectstatic
-    (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
 
 
 9. Start Services
