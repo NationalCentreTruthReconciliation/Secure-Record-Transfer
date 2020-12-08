@@ -53,6 +53,10 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
         LOGGER.info(msg=('Checking validity of new bag...'))
         bag_valid = bag.is_valid()
         if bag_valid:
+            # Fix permissions of payload files (make_bag sometimes makes files unreadable)
+            for payload_file in bag.payload_files():
+                payload_file_path = new_bag_folder / payload_file
+                os.chmod(payload_file_path, 0o644)
             LOGGER.info(msg=('New bag successfully created at "{0}"'.format(new_bag_folder)))
         else:
             LOGGER.error(msg=('New bag created at "{0}" is invalid!'.format(new_bag_folder)))
