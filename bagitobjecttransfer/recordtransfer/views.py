@@ -159,7 +159,7 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "grouptransfer": {
-            "templateref": "recordtransfer/transferform_standard.html",
+            "templateref": "recordtransfer/transferform_group.html",
             "formtitle": gettext("Assign Transfer to Group (Optional)"),
             "infomessage": gettext(
                 "If this transfer belongs in a group with other transfers you have made or will "
@@ -209,6 +209,9 @@ class TransferFormWizard(SessionWizardView):
         context.update({'form_title': self._TEMPLATES[step_name]['formtitle']})
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
+        if step_name == 'grouptransfer':
+            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            context.update({'users_groups': users_groups})
         return context
 
     def get_all_cleaned_data(self):

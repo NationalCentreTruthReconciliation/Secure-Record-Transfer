@@ -669,6 +669,8 @@ class GroupTransferForm(forms.Form):
             self.add_error('group_name', f'Group name "{group_name}" was not in list')
         if group_name == 'Add New Group' and not cleaned_data['new_group_name']:
             self.add_error('new_group_name', 'Group name cannot be empty')
+        if group_name == 'Add New Group' and not cleaned_data['group_description']:
+            self.add_error('group_description', 'Group description cannot be empty')
         return cleaned_data
 
     group_name = forms.ChoiceField(
@@ -691,14 +693,14 @@ class GroupTransferForm(forms.Form):
         label=gettext('New group name'),
     )
 
-    new_group_description = forms.CharField(
+    group_description = forms.CharField(
         required=False,
         min_length=4,
         widget=forms.Textarea(attrs={
             'rows': '2',
             'placeholder': gettext('e.g., this group represents all of the records from...'),
         }),
-        label=gettext('Group description')
+        label=gettext('New group description'),
     )
 
 

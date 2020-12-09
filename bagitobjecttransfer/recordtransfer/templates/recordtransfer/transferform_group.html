@@ -1,0 +1,45 @@
+{% extends 'recordtransfer/transferform_base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block buttonarrayclass %}flex-item{% endblock %}
+{% block formfields %}
+    {% for field in wizard.form %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+            <div class="flex-error">
+                <label for="nothing"></label>
+                <div class="field-error">{{ error }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% if field.label != 'hidden' %}
+            <div class="flex-item">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {# Help tooltip #}
+                {% if field.help_text %}
+                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
+                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            {# Render hidden field #}
+            {{ field }}
+        {% endif %}
+        {% if field.name == 'group_name' %}
+            {# Render hidden descriptions after the group_name field #}
+            {% for group in users_groups %}
+                <div class="flex-item" style="display: none;">
+                    <label for="id_groupname-{{ group.name }}">Group description</label>
+                    <textarea id="id_groupname-{{ group.name }}" name="{{ group.name }}" disabled >{{ group.description }}</textarea>
+                    <div tooltip-content="{% trans 'This is the description you previously provided for this group, you cannot edit it' %}"
+                         class="help-tooltip help-icon">
+                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endblock %}
