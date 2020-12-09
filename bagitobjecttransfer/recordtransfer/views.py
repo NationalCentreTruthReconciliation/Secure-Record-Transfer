@@ -158,6 +158,14 @@ class TransferFormWizard(SessionWizardView):
                 "records, go to the next step"
             )
         },
+        "grouptransfer": {
+            "templateref": "recordtransfer/transferform_standard.html",
+            "formtitle": gettext("Assign Transfer to Group (Optional)"),
+            "infomessage": gettext(
+                "If this transfer belongs in a group with other transfers you have made or will "
+                "make, select the group it belongs in in the dropdown below, or create a new group"
+            )
+        },
         "uploadfiles": {
             "templateref": "recordtransfer/transferform_dropzone.html",
             "formtitle": gettext("Upload Files"),
@@ -181,10 +189,11 @@ class TransferFormWizard(SessionWizardView):
         return initial
 
     def get_form_kwargs(self, step=None):
+        kwargs = super().get_form_kwargs(step)
         if step == 'grouptransfer':
             users_groups = BagGroup.objects.filter(created_by=self.request.user)
-            return {'users_groups': users_groups}
-        return {}
+            kwargs['users_groups'] = users_groups
+        return kwargs
 
     def get_context_data(self, form, **kwargs):
         ''' Retrieve context data for the current form template.

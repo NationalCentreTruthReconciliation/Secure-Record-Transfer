@@ -193,6 +193,7 @@ class SignUpForm(UserCreationForm):
         email_exists = User.objects.filter(email=new_email).first() is not None
         if email_exists:
             self.add_error('email', f'The email {new_email} is already in use')
+        return cleaned_data
 
     email = forms.EmailField(max_length=256,
         required=True,
@@ -227,6 +228,7 @@ class ContactInfoForm(forms.Form):
         if region.lower() == 'other' and not cleaned_data['other_province_or_state']:
             self.add_error('other_province_or_state',
                            'This field must be filled out if "Other" province or state is selected')
+        return cleaned_data
 
     contact_name = forms.CharField(
         max_length=64,
@@ -486,6 +488,7 @@ class RecordDescriptionForm(forms.Form):
             if end_date_of_material < start_date_of_material:
                 msg = 'End date cannot be before start date'
                 self.add_error('end_date_of_material', msg)
+        return cleaned_data
 
     accession_title = forms.CharField(
         min_length=2,
@@ -617,6 +620,7 @@ class OtherIdentifiersForm(forms.Form):
             self.add_error('other_identifier_value', value_msg)
             note_msg = 'Cannot enter a note without entering a value and type'
             self.add_error('other_identifier_note', note_msg)
+        return cleaned_data
 
     other_identifier_type = forms.CharField(
         required=False,
@@ -648,30 +652,46 @@ class OtherIdentifiersForm(forms.Form):
 
 class GroupTransferForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         users_groups = kwargs.pop('users_groups')
-        self.fields['name'].choices = [
+        super().__init__(*args, **kwargs)
+        self.fields['group_name'].choices = [
+            ('No Group', gettext('-- None Selected --')),
             ('Add New Group', gettext('-- Add New Group --')),
             *[(x.name, x.name) for x in users_groups],
         ]
+        self.allowed_group_names = [x[0] for x in self.fields['group_name'].choices]
+        self.fields['group_name'].initial = 'No Group'
 
-    name = forms.ChoiceField(
+    def clean(self):
+        cleaned_data = super().clean()
+        group_name = cleaned_data['group_name']
+        if group_name not in self.allowed_group_names:
+            self.add_error('group_name', f'Group name "{group_name}" was not in list')
+        if group_name == 'Add New Group' and not cleaned_data['new_group_name']:
+            self.add_error('new_group_name', 'Group name cannot be empty')
+        return cleaned_data
+
+    group_name = forms.ChoiceField(
         required=False,
-        widget=forms.Select(),
-        label=gettext('Transfer belongs in this group')
+        widget=forms.Select(
+            attrs={
+                'class': 'reduce-form-field-width',
+            }
+        ),
+        label=gettext('Assigned group')
     )
 
-    new_name = forms.CharField(
+    new_group_name = forms.CharField(
         required=False,
         widget=forms.TextInput(
             attrs={
-                'placeholder': gettext('e.g., My Group')
+                'placeholder': gettext('e.g., My Group'),
             }
         ),
-        label=gettext('Create new group name'),
+        label=gettext('New group name'),
     )
 
-    description = forms.CharField(
+    new_group_description = forms.CharField(
         required=False,
         min_length=4,
         widget=forms.Textarea(attrs={
