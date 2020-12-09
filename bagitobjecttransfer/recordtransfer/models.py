@@ -64,6 +64,9 @@ class BagGroup(models.Model):
     description = models.TextField(default='')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
+    def __str__(self):
+        return f'{self.name} (Created by {self.created_by})'
+
 
 class Bag(models.Model):
     ''' A bag that a user submitted. '''

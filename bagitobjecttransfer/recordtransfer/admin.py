@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
 
-from recordtransfer.models import Bag, User, UploadedFile, UploadSession, Job
+from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
@@ -253,6 +253,25 @@ class BagAdmin(admin.ModelAdmin):
         return super().response_change(request, obj)
 
 
+class BagInline(admin.TabularInline):
+    model = Bag
+    max_num = 0
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.can_delete = False
+
+
+class BagGroupAdmin(admin.ModelAdmin):
+    model = BagGroup
+    inlines = [
+        BagInline,
+    ]
+
+    list_display = ['name', 'created_by']
+    ordering = ['-created_by']
+
+
 class JobAdmin(ReadOnlyAdmin):
     change_form_template = 'admin/job_change_form.html'
 
@@ -284,6 +303,7 @@ class JobAdmin(ReadOnlyAdmin):
 
 
 admin.site.register(Bag, BagAdmin)
+admin.site.register(BagGroup, BagGroupAdmin)
 admin.site.register(UploadedFile, UploadedFileAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UploadSession, UploadSessionAdmin)
