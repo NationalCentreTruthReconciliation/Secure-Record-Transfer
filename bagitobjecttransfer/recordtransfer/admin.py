@@ -7,7 +7,9 @@ from collections import OrderedDict
 
 from django.contrib import admin, messages
 from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.contrib.auth.admin import UserAdmin
 from django.template.loader import render_to_string
@@ -16,10 +18,51 @@ from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSessi
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
-from recordtransfer.forms import BagForm
+from recordtransfer.forms import BagForm, InlineBagForm
 from recordtransfer.jobs import create_downloadable_bag
 
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
+
+
+def linkify(field_name):
+    """
+    Converts a foreign key value into clickable links.
+
+    If field_name is 'parent', link text will be str(obj.parent)
+    Link will be admin url for the admin url for obj.parent.id:change
+    """
+    def _linkify(obj):
+        linked_obj = getattr(obj, field_name)
+        if linked_obj is None:
+            return '-'
+        app_label = linked_obj._meta.app_label
+        model_name = linked_obj._meta.model_name
+        view_name = f'admin:{app_label}_{model_name}_change'
+        link_url = reverse(view_name, args=[linked_obj.pk])
+        return format_html('<a href="{}">{}</a>', link_url, linked_obj)
+
+    _linkify.short_description = field_name.replace('_', ' ') # Sets column name
+    return _linkify
+
+
+def export_bag_csv(queryset, convert_bag_to_row, filename_prefix: str):
+    csv_file = StringIO()
+    writer = csv.writer(csv_file)
+
+    for i, bag in enumerate(queryset, 0):
+        new_row = convert_bag_to_row(bag)
+        # Write the headers on the first loop
+        if i == 0:
+            writer.writerow(new_row.keys())
+        writer.writerow(new_row.values())
+
+    csv_file.seek(0)
+    response = HttpResponse(csv_file, content_type='text/csv')
+    local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
+    filename = f"{filename_prefix}{local_time}.csv"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    csv_file.close()
+    return response
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -97,7 +140,14 @@ class BagAdmin(admin.ModelAdmin):
     ]
 
     # Display in Admin GUI
-    list_display = ['user', 'bagging_date', 'bag_name', 'review_status']
+    list_display = [
+        'bag_name',
+        'bagging_date',
+        linkify('user'),
+        linkify('part_of_group'),
+        'review_status'
+    ]
+
     ordering = ['-bagging_date']
 
     def get_form(self, request, obj=None, change=False, **kwargs):
@@ -113,64 +163,38 @@ class BagAdmin(admin.ModelAdmin):
 
     def export_caais_csv(self, request, queryset):
         def convert_bag_to_row(bag):
-            new_row = OrderedDict()
-            new_row['Username'] = bag.user.username
-            new_row['Bagging Date'] = bag.bagging_date
-            new_row['Bag Location'] = bag.location
-            new_row['Review Status'] = bag.get_review_status_display()
             bag_metadata = json.loads(bag.caais_metadata)
-            metadata_as_csv = flatten_meta_tree(bag_metadata)
-            new_row.update(metadata_as_csv)
-            return new_row
-        return self.export_generic_csv(queryset, convert_bag_to_row, 'caais_v1.0_')
+            return flatten_meta_tree(bag_metadata)
+        return export_bag_csv(queryset, convert_bag_to_row, 'caais_v1.0_')
     export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
 
     def export_atom_2_6_csv(self, request, queryset):
         def convert_bag_to_row(bag):
             bag_metadata = json.loads(bag.caais_metadata)
             return flatten_meta_tree_atom_style(bag_metadata, version=(2, 6))
-        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.6_')
+        return export_bag_csv(queryset, convert_bag_to_row, 'atom_2.6_')
     export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
 
     def export_atom_2_3_csv(self, request, queryset):
         def convert_bag_to_row(bag):
             bag_metadata = json.loads(bag.caais_metadata)
             return flatten_meta_tree_atom_style(bag_metadata, version=(2, 3))
-        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.3_')
+        return export_bag_csv(queryset, convert_bag_to_row, 'atom_2.3_')
     export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
 
     def export_atom_2_2_csv(self, request, queryset):
         def convert_bag_to_row(bag):
             bag_metadata = json.loads(bag.caais_metadata)
             return flatten_meta_tree_atom_style(bag_metadata, version=(2, 2))
-        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.2_')
+        return export_bag_csv(queryset, convert_bag_to_row, 'atom_2.2_')
     export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
 
     def export_atom_2_1_csv(self, request, queryset):
         def convert_bag_to_row(bag):
             bag_metadata = json.loads(bag.caais_metadata)
             return flatten_meta_tree_atom_style(bag_metadata, version=(2, 1))
-        return self.export_generic_csv(queryset, convert_bag_to_row, 'atom_2.1_')
+        return export_bag_csv(queryset, convert_bag_to_row, 'atom_2.1_')
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
-
-    def export_generic_csv(self, queryset, convert_bag_to_row, filename_prefix: str):
-        csv_file = StringIO()
-        writer = csv.writer(csv_file)
-
-        for i, bag in enumerate(queryset, 0):
-            new_row = convert_bag_to_row(bag)
-            # Write the headers on the first loop
-            if i == 0:
-                writer.writerow(new_row.keys())
-            writer.writerow(new_row.values())
-
-        csv_file.seek(0)
-        response = HttpResponse(csv_file, content_type='text/csv')
-        local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
-        filename = f"{filename_prefix}{local_time}.csv"
-        response['Content-Disposition'] = f'attachment; filename={filename}'
-        csv_file.close()
-        return response
 
     def export_caais_reports(self, request, queryset):
         zipf = BytesIO()
@@ -256,20 +280,74 @@ class BagAdmin(admin.ModelAdmin):
 class BagInline(admin.TabularInline):
     model = Bag
     max_num = 0
+    show_change_link = True
+    form = InlineBagForm
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.can_delete = False
 
 
-class BagGroupAdmin(admin.ModelAdmin):
+class BagGroupAdmin(ReadOnlyAdmin):
     model = BagGroup
     inlines = [
         BagInline,
     ]
 
-    list_display = ['name', 'created_by']
+    list_display = ['name', 'created_by', 'bags_in_group']
     ordering = ['-created_by']
+
+    actions = [
+        'export_caais_csv',
+        'export_atom_2_6_csv',
+        'export_atom_2_3_csv',
+        'export_atom_2_2_csv',
+        'export_atom_2_1_csv',
+    ]
+
+    def bags_in_group(self, obj):
+        return len(Bag.objects.filter(part_of_group=obj))
+    bags_in_group.short_description = 'Number of Bags in Group'
+
+    def export_caais_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree(bag_metadata)
+        related_bags = Bag.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, convert_bag_to_row, 'caais_v1.0_')
+    export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Bags in Selected'
+
+    def export_atom_2_6_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 6))
+        related_bags = Bag.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, convert_bag_to_row, 'atom_2.6_')
+    export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Bags in Selected'
+
+    def export_atom_2_3_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 3))
+        related_bags = Bag.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, convert_bag_to_row, 'atom_2.3_')
+    export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Bags in Selected'
+
+    def export_atom_2_2_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 2))
+        related_bags = Bag.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, convert_bag_to_row, 'atom_2.2_')
+    export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Bags in Selected'
+
+    def export_atom_2_1_csv(self, request, queryset):
+        def convert_bag_to_row(bag):
+            bag_metadata = json.loads(bag.caais_metadata)
+            return flatten_meta_tree_atom_style(bag_metadata, version=(2, 1))
+        related_bags = Bag.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, convert_bag_to_row, 'atom_2.1_')
+    export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Bags in Selected'
 
 
 class JobAdmin(ReadOnlyAdmin):

@@ -21,6 +21,27 @@ from recordtransfer.models import User, Bag
 from recordtransfer.settings import DEFAULT_DATA
 
 
+class InlineBagForm(forms.ModelForm):
+    ''' Form used to view inline Bag '''
+    class Meta:
+        model = Bag
+        fields = (
+            'bagging_date',
+            'bag_name',
+            'user',
+            'review_status',
+        )
+    disabled_fields = ['bagging_date', 'bag_name', 'user']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            # Disable fields
+            for field in self.disabled_fields:
+                self.fields[field].disabled = True
+
+
 class BagForm(forms.ModelForm):
     ''' Form used to edit a Bag in the admin '''
 
@@ -31,10 +52,12 @@ class BagForm(forms.ModelForm):
             'bag_name',
             'caais_metadata',
             'user',
+            'part_of_group',
             'review_status',
         )
 
-    disabled_fields = ['bagging_date', 'bag_name', 'caais_metadata', 'user']
+    disabled_fields = ['bagging_date', 'bag_name', 'caais_metadata', 'user', 'part_of_group']
+
 
     def __init__(self, *args, **kwargs):
         self.current_user = kwargs.pop('current_user')
