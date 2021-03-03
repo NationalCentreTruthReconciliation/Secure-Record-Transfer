@@ -21,7 +21,7 @@ $(() => {
     }
 
     function addEstimatedButtonToEndDate(instance) {
-        var buttonPane = $(input).datepicker("widget")
+        var buttonPane = $(instance).datepicker("widget")
         var html = [
             '<div style="margin-bottom: 5px;">',
             '    <input id="end_date_is_approximate_mirror" type="checkbox">',
