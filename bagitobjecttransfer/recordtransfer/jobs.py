@@ -81,10 +81,11 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
             if group_name == 'Add New Group':
                 new_group_name = form_data['new_group_name']
                 description = form_data['group_description']
-                LOGGER.info(msg='Creating "{0}" BagGroup'.format(new_group_name))
-                group = BagGroup.objects.get_or_create(name=new_group_name, description=description,
-                                                       created_by=user_submitted)
-                group.save()
+                group, created = BagGroup.objects.get_or_create(name=new_group_name,
+                                                                description=description,
+                                                                created_by=user_submitted)
+                if created:
+                    LOGGER.info(msg='Created "{0}" BagGroup'.format(new_group_name))
             else:
                 group = BagGroup.objects.get(name=group_name, created_by=user_submitted)
 
