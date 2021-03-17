@@ -243,6 +243,19 @@ class SignUpForm(UserCreationForm):
         label=gettext('Last name'))
 
 
+class AcceptLegal(forms.Form):
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data['agreement_accepted']:
+            self.add_error('agreement_accepted', 'You must accept before continuing')
+
+    agreement_accepted = forms.BooleanField(
+        required=True,
+        widget=forms.CheckboxInput(),
+        label=gettext('I accept these terms'),
+    )
+
+
 class ContactInfoForm(forms.Form):
     ''' The Contact Information portion of the form. Contains fields from Section 2 of CAAIS '''
     def clean(self):

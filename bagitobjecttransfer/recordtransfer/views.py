@@ -117,6 +117,10 @@ class TransferFormWizard(SessionWizardView):
     '''
 
     _TEMPLATES = {
+        "acceptlegal": {
+            "templateref": "recordtransfer/transferform_legal.html",
+            "formtitle": gettext("Legal Agreement"),
+        },
         "contactinfo": {
             "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Contact Information"),
