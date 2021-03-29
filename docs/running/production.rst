@@ -25,9 +25,13 @@ file system:
                 |_ rqworker_default.service (User-defined service)
     |_ opt/
         |_ NCTR-Bagit-Record-Transfer/
-            |_ gunicorn.sock        (Gunicorn UNIX socket)
             |_ bagitobjecttransfer/ (Django App)
             |_ .env                 (App Environment Variables)
+    |_ run/
+        |_ clamd.scan/
+            |_ clamd.sock
+        |_ gunicorn/
+            |_ gunicorn.sock
     |_ srv/
         |_ www/
             |_ recordtransfer_bags/ (Where BagIt bags are stored)
@@ -180,7 +184,6 @@ to it, substituting :code:`your_domain_or_ip` with your actual domain or IP:
     # file /etc/nginx/sites-available/recordtransfer.conf
     server {
         listen 80;
-        client_max_body_size 1024M;
         server_name your_domain_or_ip;
 
         location = /favicon.ico { access_log off; log_not_found off; }
@@ -189,19 +192,23 @@ to it, substituting :code:`your_domain_or_ip` with your actual domain or IP:
             root /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer;
         }
 
+        location /transfer/uploadfile/ {
+            # Maximum size of file that can be uploaded
+            client_max_body_size 1024M;
+        }
+
         location / {
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_pass http://unix:/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock;
+            proxy_pass http://unix:/run/gunicorn/gunicorn.sock;
         }
     }
 
 
 This configuration assumes you have a unix socket file set up for gunicorn at
-:code:`/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock`, which is not set up *yet* but we will address
-this issue soon.
+:code:`/run/gunicorn/gunicorn.sock`, which is not set up *yet* but we will address this issue soon.
 
 Enable the site by linking the configuration in the sites-enabled directory:
 
@@ -249,7 +256,7 @@ Open the service files you created, and add these contents to the file:
     WorkingDirectory=/opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
     ExecStart=/opt/NCTR-Bagit-Record-Transfer/env/bin/gunicorn \
         --workers 3 \
-        --bind unix:/opt/NCTR-Bagit-Record-Transfer/gunicorn.sock \
+        --bind unix:/run/gunicorn/gunicorn.sock \
         --capture-output \
         --enable-stdio-inheritance \
         bagitobjecttransfer.wsgi
@@ -272,6 +279,15 @@ Enable the gunicorn service to start on system startup:
 
     (env) $ sudo systemctl daemon-reload
     (env) $ sudo systemctl enable gunicorn
+
+
+Create the directory in the :code:`run` directory for the gunicorn UNIX socket to be placed
+(otherwise gunicorn may not have permission to create the directory):
+
+.. code-block:: console
+
+    (env) $ sudo mkdir /run/gunicorn/
+    (env) $ sudo chown nginx:nginx /run/gunicorn/
 
 
 4. Redis Setup
@@ -770,7 +786,7 @@ type :code:`yes` and press ENTER. For good measure, re-set the user & group of a
 
     (env) $ cd /opt/NCTR-Bagit-Record-Transfer/bagitobjecttransfer
     (env) $ python3 manage.py collectstatic
-    (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/
+    (env) $ sudo chown -R nginx:nginx /opt/NCTR-Bagit-Record-Transfer/static/
 
 
 *************************
@@ -809,7 +825,6 @@ like this:
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.production
     BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
-    HOST_DOMAINS=your_domain_here
 
     RQ_HOST_DEFAULT=localhost
     RQ_PORT_DEFAULT=6379
