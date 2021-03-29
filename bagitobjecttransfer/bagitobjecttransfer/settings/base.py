@@ -6,6 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SECRET_KEY = config('SECRET_KEY', default='q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz1$g=i$wp2r!s-')
 
 INSTALLED_APPS = [
+    'recordtransfer.apps.RecordTransferConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -16,7 +17,6 @@ INSTALLED_APPS = [
     'django_countries',
     'formtools',
     'django_rq',
-    'recordtransfer.apps.RecordTransferConfig',
 ]
 
 MIDDLEWARE = [
