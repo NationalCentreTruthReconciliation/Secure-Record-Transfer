@@ -1,0 +1,67 @@
+{% load static %}
+{% load i18n %}
+
+<header class="header">
+    <nav class="main-header-content">
+        <ul class="main-navbar">
+            <li class="nav-logo">
+                <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
+                    <img id="app-logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
+                    <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}<span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'recordtransfer:index' %}">
+                    {% trans "Home" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'recordtransfer:about' %}">
+                    {% trans "About" %}
+                </a>
+            </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
+                        {% trans "Profile" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main" href="{% url 'recordtransfer:transfer' %}">
+                        {% trans "Transfer" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main" href="{% url 'logout' %}">
+                        {% trans "Logout" %}
+                    </a>
+                </li>
+            {% elif not user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
+                        {% trans "Sign Up" %}
+                    </a>
+                </li>
+                {% if 'login' not in request.path %}
+                    <li class="nav-item">
+                        <a class="nav-link main" href="{% url 'login' %}">
+                            {% trans "Log In" %}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endif %}
+            <span class="toggle-container">
+                <li class="nav-toggle-open">
+                    <a class="nav-link" href="#">
+                        <img height="20" src="{% static 'recordtransfer/img/menu_64x64px.png'%}">
+                    </a>
+                </li>
+                <li class="nav-toggle-close">
+                    <a class="nav-link" href="#">
+                        <img height="20" src="{% static 'recordtransfer/img/close_menu_64x64px.png'%}">
+                    </a>
+                </li>
+            </span>
+        </ul>
+    </nav>
+</header>

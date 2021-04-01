@@ -1,0 +1,111 @@
+{% load static %}
+{% load i18n %}
+
+<div class="footer" style="background-image: url('{% static 'recordtransfer/img/footer.jpg' %}')">
+    <div class="footer-column center-justify">
+        <div class="footer-item">
+            <a href="https://nctr.ca/">
+                <img id="footer-logo"
+                    width="400"
+                    alt="{% trans 'white NCTR logo' %}"
+                    src="{% static 'recordtransfer/img/logo-white.png' %}" />
+            </a>
+        </div>
+        <div class="footer-item extra-top-margin extra-bottom-margin">
+            {% blocktrans %}
+            <br>
+            Chancellor’s Hall, 177 Dysart Road,
+            <br>
+            University of Manitoba, Winnipeg
+            <br>
+            {% endblocktrans %}
+        </div>
+        <div class="footer-item">
+            <span class="contact-link-container">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    version="1.1"
+                    width="32" height="32"
+                    viewBox="0 0 32 32">
+                    <title>{% trans 'phone' %}</title>
+                    <path d="M22 20c-2 2-2 4-4 4s-4-2-6-4-4-4-4-6 2-2 4-4-4-8-6-8-6 6-6 6c0 4 4.109 12.109 8 16s12 8 16 8c0 0 6-4 6-6s-6-8-8-6z"/>
+                </svg>
+                <a href="tel:204-444-8955">
+                    1-866-925-4419
+                </a>
+            </span>
+        </div>
+        <div class="footer-item">
+            <span class="contact-link-container">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    height="512" width="512"
+                    viewBox="0 0 511.996 511.996">
+                    <title>{% trans 'email' %}</title>
+                    <path d="m230.9 253.371c13.369 8.913 36.827 8.914 50.199-.001.002-.001.005-.003.007-.004l227.865-151.911c-7.474-21.616-28.018-37.188-52.142-37.188h-401.663c-24.125 0-44.668 15.572-52.143 37.188l227.87 151.912c.003.002.005.002.007.004z"/>
+                    <path d="m297.746 278.328c-.003.002-.005.004-.007.005-11.702 7.801-26.724 11.702-41.741 11.702-15.02 0-30.036-3.9-41.739-11.703-.002-.001-.003-.002-.005-.003l-214.254-142.835v257.072c0 30.417 24.747 55.163 55.166 55.163h401.666c30.418 0 55.164-24.746 55.164-55.163v-257.072z"/>
+                </svg>
+                </svg>
+                <a href="mailto:nctr@umanitoba.ca">
+                    nctr@umanitoba.ca
+                </a>
+            </span>
+        </div>
+        <div class="footer-item extra-top-margin">
+            <img class="footer-logo"
+                width="400"
+                alt="{% trans 'UNESCO and NCTR logo' %}"
+                src="{% static 'recordtransfer/img/unesco.webp' %}" />
+        </div>
+    </div>
+    <div class="footer-column left-justify">
+        <div class="footer-item extra-top-margin extra-bottom-margin">
+            <span class="footer-link-title">
+                More from the NCTR:
+            </span>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/records/">
+                {% trans 'Your records' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/memorial/">
+                {% trans 'Memorial' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/news-and-events/">
+                {% trans 'News and events' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/exhibits/">
+                {% trans 'Exhibits' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/education/">
+                {% trans 'Education' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/research/">
+                {% trans 'Research' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/about/">
+                {% trans 'About' %}
+            </a>
+        </div>
+        <div class="footer-item">
+            <a class="footer-link" href="https://nctr.ca/contact/">
+                {% trans 'Contact' %}
+            </a>
+        </div>
+    </div>
+</div>
+<div class="footer-bottom">
+    <div id="copyright">
+        &copy; 2021 National Centre for Truth and Reconciliation
+    </div>
+</div>
