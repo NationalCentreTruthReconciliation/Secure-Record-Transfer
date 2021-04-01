@@ -14,6 +14,7 @@
     {% endblock %}
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/banner.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
@@ -28,6 +29,9 @@
 </head>
 <body>
     <div class="flex-wrapper">
+        {% block banner %}
+            {% include "recordtransfer/banner.html" %}
+        {% endblock %}
         {% block header %}
             {% include "recordtransfer/header.html" %}
         {% endblock %}
