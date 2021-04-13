@@ -3,13 +3,11 @@
  */
 
 .footer {
-    text-align: center;
-    color: black;
-    padding: 25px 0px 25px;
+    color: white;
     margin-top: 25px;
+    padding-bottom: 25px;
     width: 100%;
     font-size: 11pt;
-    background-color: #dddddd;
 
     /* Flex-specific */
     display: flex;
@@ -17,71 +15,94 @@
     flex-wrap: wrap;
 }
 
-.footer-block {
-    padding: 0 30px;
-    margin: 0 5px 10px;
-    text-align: left;
-    max-width: 40%;
-    flex: auto;
+.footer-column {
+    margin-top: 25px;
+    flex: 1 1 0;
 }
 
-.footer-items {
-    margin-top: 10px;
+.footer-column.center-justify {
+    justify-content: center;
+    text-align: center;
 }
 
-.footer-items > * {
-    margin-top: 10px;
-    margin-bottom: 10px;
+.footer-column.left-justify {
+    justify-content: left;
 }
 
-.footer-item-group {
+.footer-item {
+    max-width: 640px;
+    padding: 0px 20px;
+    margin-top: 6px;
+}
+
+.extra-top-margin {
+    margin-top: 25px;
+}
+
+.extra-bottom-margin {
+    margin-bottom: 25px;
+}
+
+.footer-link-title {
+    color: #fcb46c;
+    font-family: Merriweather,serif;
+    font-size: 18pt;
+}
+
+.footer-link {
+    color: white;
+}
+
+.footer-link:hover {
+    color: #7a7a7a;
+}
+
+.contact-link-container {
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-}
-
-.footer-item-group > div {
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0;
-}
-
-.footer-item-group > img {
-    flex-grow: 0;
-    flex-shrink: 0;
-    flex-basis: auto;
-}
-
-.footer-item-group > * {
-    margin-right: 15px;
-}
-
-.footer-title {
     width: 100%;
-    font-size: 12pt;
-    font-weight: bold;
-    border-bottom: 1px solid;
-    padding-bottom: 15px;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.contact-link-container > svg {
+    height: 18;
+    width: 18px;
+    fill: currentColor;
+}
+
+.contact-link-container > a {
+    text-decoration: none;
+    margin-left: 8px;
+    color: currentColor;
+}
+
+.contact-link-container:hover {
+    color: #7a7a7a;
 }
 
 .footer-bottom {
     position: relative;
     height: 40px;
     width: 100%;
-    background-color: #4e2c11;
+    background-color: #ab221d;
 }
 
-#footer-image {
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    height: 88px;
+#copyright {
+    font-size: 0.8rem;
+    color: white;
+    line-height: 40px;
+    text-align: center;
 }
 
-@media(max-width: 850px) {
-    .footer-block {
+@media(max-width: 700px) {
+    #footer-logo {
+        width: 300px;
+    }
+
+    .footer-column {
+        flex: none;
         width: 100%;
-        max-width: 100%;
+        text-align: center;
     }
 }

@@ -1,0 +1,21 @@
+.banner-container {
+    background: linear-gradient(90deg, #ba5b3c 0, #89140a 100%);
+    color: white;
+    padding: 8px 40px;
+}
+
+.banner-text {
+    font-family: Merriweather,serif;
+    font-size: 11pt;
+}
+
+.banner-link {
+    text-decoration: none;
+    color: white;
+    font-family: inherit;
+    font-size: 11pt;
+}
+
+.banner-link:hover {
+    color: #7a7a7a;
+}

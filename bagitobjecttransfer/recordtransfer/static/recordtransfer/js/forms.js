@@ -231,40 +231,22 @@ function clearDropzoneErrors() {
     }
 }
 
-function extraSourceInformationDirty() {
-    if ($('#id_sourceinfo-source_note').val() || $('#id_sourceinfo-source_note').val()) {
-        return true
-    }
-    return false
-}
 
 /**
- * Toggle the extra source information form section
- * @param {Boolean} state 'on' if form section is to be toggled on. 'off' if section is to be closed
+ * Show or hide div.flex-items related to form fields.
+ * @param {Array} selectors Form field selectors, the closest div.flex-items will be shown/hidden
+ * @param {String} state Shows divs if 'on', hides divs if 'off', does nothing otherwise
  */
-function toggleExtraSourceInformation(state) {
+function toggleFlexItems(selectors, state) {
     if (state === 'on') {
-        $('#id_sourceinfo-source_note').closest('div.flex-item').show()
-        $('#id_sourceinfo-custodial_history').closest('div.flex-item').show()
-        $('.add-extra-source-info').closest('div.flex-item').hide()
+        selectors.forEach(function(sel) {
+            $(sel).closest('div.flex-item').show()
+        })
     }
     else if (state === 'off') {
-        $('#id_sourceinfo-source_note').closest('div.flex-item').hide()
-        $('#id_sourceinfo-custodial_history').closest('div.flex-item').hide()
-        $('.add-extra-source-info').closest('div.flex-item').show()
-    }
-}
-
-function provinceOrStateChosen() {
-    return $('#id_contactinfo-province_or_state').val().toLowerCase().trim()
-}
-
-function toggleOtherProvinceOrState(state) {
-    if (state === 'on') {
-        $('#id_contactinfo-other_province_or_state').closest('div.flex-item').show()
-    }
-    else if (state === 'off') {
-        $('#id_contactinfo-other_province_or_state').closest('div.flex-item').hide()
+        selectors.forEach(function(sel) {
+            $(sel).closest('div.flex-item').hide()
+        })
     }
 }
 
@@ -411,27 +393,75 @@ $(() => {
     /***************************************************************************
      * Expandable Forms Setup
      **************************************************************************/
-    if (extraSourceInformationDirty()) {
-        toggleExtraSourceInformation('on')
+    const sourceInfoFlexItems = [
+        '#id_sourceinfo-source_note',
+        '#id_sourceinfo-custodial_history',
+    ]
+
+    const sourceInfoExpandButton = [
+        '.add-extra-source-info'
+    ]
+
+
+    if (sourceInfoFlexItems.some((selector) => elementExists(selector))) {
+        let dirtySourceInfo = (
+            $('#id_sourceinfo-source_note').val() ||
+            $('#id_sourceinfo-custodial_history').val()
+        )
+        let fieldState = dirtySourceInfo ? 'on' : 'off'
+        let buttonState = dirtySourceInfo ? 'off' : 'on'
+        toggleFlexItems(sourceInfoFlexItems, fieldState)
+        toggleFlexItems(sourceInfoExpandButton, buttonState)
+
+        $('.add-extra-source-info').on('click', (event) => {
+            event.preventDefault()
+            toggleFlexItems(sourceInfoFlexItems, 'on')
+            toggleFlexItems(sourceInfoExpandButton, 'off')
+        })
     }
-    else {
-        toggleExtraSourceInformation('off')
+
+    const transferGroupFlexItems = [
+        '#id_grouptransfer-new_group_name',
+        '#id_grouptransfer-group_description',
+    ]
+
+    var groupDescriptionFlexItems = [
+        ...$('[id^=id_groupname-').map(function() { return `[id='${this.id}']` })
+    ]
+
+    if (transferGroupFlexItems.some((selector) => elementExists(selector))) {
+        let groupName = $('#id_grouptransfer-group_name').val()
+        let currentGroupDescId = `[id='id_groupname-${groupName}']`
+        toggleFlexItems(groupDescriptionFlexItems.filter(id => id !== currentGroupDescId), 'off')
+        if (elementExists(currentGroupDescId)) {
+            toggleFlexItems([currentGroupDescId], 'on')
+        }
+        let state = groupName.toLowerCase().trim() === 'add new group' ? 'on' : 'off'
+        toggleFlexItems(transferGroupFlexItems, state)
+
+        $('#id_grouptransfer-group_name').change(function() {
+            let groupName = $(this).val()
+            let currentGroupDescId = `[id='id_groupname-${groupName}']`
+            toggleFlexItems(groupDescriptionFlexItems.filter(id => id !== currentGroupDescId), 'off')
+            if (elementExists(currentGroupDescId)) {
+                toggleFlexItems([currentGroupDescId], 'on')
+            }
+            let state = groupName.toLowerCase().trim() === 'add new group' ? 'on' : 'off'
+            toggleFlexItems(transferGroupFlexItems, state)
+        })
     }
 
-    $('.add-extra-source-info').on('click', (event) => {
-        event.preventDefault()
-        toggleExtraSourceInformation('on')
-    })
+    const otherProvinceFlexItems = [
+        '#id_contactinfo-other_province_or_state',
+    ]
 
-
-    /***************************************************************************
-     * Other Choice Selection Setup
-     **************************************************************************/
-    if (elementExists('#id_contactinfo-province_or_state')) {
-        toggleOtherProvinceOrState(provinceOrStateChosen() === 'other' ? 'on' : 'off')
+    if (otherProvinceFlexItems.some((selector) => elementExists(selector))) {
+        let value = $('#id_contactinfo-province_or_state').val().toLowerCase().trim()
+        let state = value === 'other' ? 'on' : 'off'
+        toggleFlexItems(otherProvinceFlexItems, state)
         $('#id_contactinfo-province_or_state').change(function() {
             let state = $(this).val().toLowerCase().trim() === 'other' ? 'on' : 'off'
-            toggleOtherProvinceOrState(state)
+            toggleFlexItems(otherProvinceFlexItems, state)
         })
     }
 })

@@ -59,6 +59,15 @@ class UploadedFile(models.Model):
         return f'{self.path}, session {self.session}, NOT DELETED'
 
 
+class BagGroup(models.Model):
+    name = models.CharField(max_length=256, null=False)
+    description = models.TextField(default='')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f'{self.name} (Created by {self.created_by})'
+
+
 class Bag(models.Model):
     ''' A bag that a user submitted. '''
     class ReviewStatus(models.TextChoices):
@@ -68,6 +77,7 @@ class Bag(models.Model):
         REVIEW_COMPLETE = 'RC', _('Review Complete')
 
     bagging_date = models.DateTimeField()
+    part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, null=True)
     bag_name = models.CharField(max_length=256, null=True)
     caais_metadata = models.TextField(default=r'{}')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

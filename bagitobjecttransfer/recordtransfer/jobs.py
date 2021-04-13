@@ -17,7 +17,7 @@ from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
 from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
-from recordtransfer.models import Bag, UploadedFile, User, Job
+from recordtransfer.models import Bag, BagGroup, UploadedFile, User, Job
 from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
@@ -66,6 +66,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         bagging_time = bagging_result['time_created']
 
         # Create object to be viewed in admin app
+        LOGGER.info('Storing Bag in database')
         bag_name = Path(bag_location).name
         new_bag = Bag(
             bagging_date=bagging_time,
@@ -73,6 +74,27 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
             user=user_submitted,
             caais_metadata=json.dumps(caais_metadata))
         new_bag.save()
+
+        group_name = form_data['group_name']
+        if group_name != 'No Group':
+            group = None
+            if group_name == 'Add New Group':
+                new_group_name = form_data['new_group_name']
+                description = form_data['group_description']
+                group, created = BagGroup.objects.get_or_create(name=new_group_name,
+                                                                description=description,
+                                                                created_by=user_submitted)
+                if created:
+                    LOGGER.info(msg='Created "{0}" BagGroup'.format(new_group_name))
+            else:
+                group = BagGroup.objects.get(name=group_name, created_by=user_submitted)
+
+            if group:
+                LOGGER.info(msg='Associating Bag with "{0}" BagGroup'.format(group.name))
+                new_bag.part_of_group = group
+                new_bag.save()
+            else:
+                LOGGER.warning(msg='Could not find "{0}" BagGroup'.format(group.name))
 
         LOGGER.info('Sending transfer success email to administrators')
         send_bag_creation_success.delay(form_data, new_bag, user_submitted)

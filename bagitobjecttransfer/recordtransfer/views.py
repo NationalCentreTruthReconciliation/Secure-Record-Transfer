@@ -11,7 +11,7 @@ from django.utils.translation import gettext
 from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, User, Bag
+from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -117,6 +117,10 @@ class TransferFormWizard(SessionWizardView):
     '''
 
     _TEMPLATES = {
+        "acceptlegal": {
+            "templateref": "recordtransfer/transferform_legal.html",
+            "formtitle": gettext("Legal Agreement"),
+        },
         "contactinfo": {
             "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Contact Information"),
@@ -158,19 +162,19 @@ class TransferFormWizard(SessionWizardView):
                 "records, go to the next step"
             )
         },
-        "generalnotes": {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("General Notes (Optional)"),
+        "grouptransfer": {
+            "templateref": "recordtransfer/transferform_group.html",
+            "formtitle": gettext("Assign Transfer to Group (Optional)"),
             "infomessage": gettext(
-                "This step is optional. If you have any other notes that did not fit anywhere else "
-                "in the transfer form, put them here"
+                "If this transfer belongs in a group with other transfers you have made or will "
+                "make, select the group it belongs in in the dropdown below, or create a new group"
             )
         },
         "uploadfiles": {
             "templateref": "recordtransfer/transferform_dropzone.html",
             "formtitle": gettext("Upload Files"),
             "infomessage": gettext(
-                "Upload the files you intend to transfer to the NCTR"
+                "Add any final notes you would like to add, and upload your files"
             )
         },
     }
@@ -188,6 +192,13 @@ class TransferFormWizard(SessionWizardView):
             initial['email'] = str(curr_user.email)
         return initial
 
+    def get_form_kwargs(self, step=None):
+        kwargs = super().get_form_kwargs(step)
+        if step == 'grouptransfer':
+            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            kwargs['users_groups'] = users_groups
+        return kwargs
+
     def get_context_data(self, form, **kwargs):
         ''' Retrieve context data for the current form template.
 
@@ -202,6 +213,9 @@ class TransferFormWizard(SessionWizardView):
         context.update({'form_title': self._TEMPLATES[step_name]['formtitle']})
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
+        if step_name == 'grouptransfer':
+            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            context.update({'users_groups': users_groups})
         return context
 
     def get_all_cleaned_data(self):

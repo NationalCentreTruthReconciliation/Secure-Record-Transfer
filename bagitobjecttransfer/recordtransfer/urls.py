@@ -9,15 +9,14 @@ app_name = 'recordtransfer'
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
 
-    path('pretransfer/', login_required(views.FormPreparation.as_view()),
-         name='formpreparation'),
     path('transfer/', login_required(views.TransferFormWizard.as_view([
+        ('acceptlegal', forms.AcceptLegal),
         ('contactinfo', forms.ContactInfoForm),
         ('sourceinfo', forms.SourceInfoForm),
         ('recorddescription', forms.RecordDescriptionForm),
         ('rights', formset_factory(forms.RightsForm, extra=1)),
         ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=1)),
-        ('generalnotes', forms.GeneralNotesForm),
+        ('grouptransfer', forms.GroupTransferForm),
         ('uploadfiles', forms.UploadFilesForm),
         ])), name='transfer'),
     path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),

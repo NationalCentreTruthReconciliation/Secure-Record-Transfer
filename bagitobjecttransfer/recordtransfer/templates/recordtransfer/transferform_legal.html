@@ -1,0 +1,20 @@
+{% extends 'recordtransfer/transferform_standard.html' %}
+{% load i18n %}
+
+{% block form_explanation %}
+    {% url 'recordtransfer:index' as homepage %}
+    {% blocktrans %}
+    <p>
+        <strong>This legal statement is a work in progress</strong>
+    </p>
+    <p>
+        By filling out this form and sending files to the NCTR, you are giving the NCTR ownership
+        over these files and the freedom to use your information internally.
+    </p>
+    <p>
+        Before continuing, you must accept these terms. If you do not wish to continue, you may
+        <a href="{{ homepage }}">go back.</a>
+    </p>
+    {% endblocktrans %}
+    <br>
+{% endblock %}

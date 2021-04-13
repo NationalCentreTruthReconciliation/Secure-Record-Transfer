@@ -1,0 +1,48 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrahead %}
+    <link rel="icon" href="{% static 'recordtransfer/img/favicon.ico'  %}" />
+    <style>
+        #header {
+            background: #eee;
+            box-shadow: 0 4px 3px -3px #bbb;
+        }
+        #branding h1 {
+            float: left;
+        }
+        #branding h1, #branding h1 a:link, #branding h1 a:visited {
+            color: #333;
+        }
+        #user-tools {
+            color: #333;
+        }
+        #header a:link, #header a:visited {
+            color: #447e9b;
+        }
+        #branding img {
+            float: left;
+            margin-right: 10px;
+        }
+        .module h2, .module caption, .inline-group h2 {
+            background: #b13d32;
+        }
+        div.breadcrumbs {
+            background: #b13d32;
+        }
+        #nav-sidebar {
+            margin-top: 5px;
+        }
+        #nav-sidebar .current-model {
+            background: #cef;
+        }
+        #toggle-nav-sidebar {
+            background: #ddd;
+        }
+    </style>
+{% endblock %}
+{% block branding %}
+    <img height="40" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
+    <h1 style="line-height: 40px;" id="site-name">
+        <a href="/admin/">NCTR Transfer App Administration</a>
+    </h1>
+{% endblock %}

@@ -14,6 +14,7 @@
     {% endblock %}
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/banner.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
@@ -28,71 +29,13 @@
 </head>
 <body>
     <div class="flex-wrapper">
+        {% block banner %}
+            {% include "recordtransfer/banner.html" %}
+        {% endblock %}
+        {% block header %}
+            {% include "recordtransfer/header.html" %}
+        {% endblock %}
         <div class="main-container">
-            <header class="header">
-                <nav class="main-header-content">
-                    <ul class="main-navbar">
-                        <li class="nav-logo">
-                            <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
-                                <img id="app-logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
-                                <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}<span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'recordtransfer:index' %}">
-                                {% trans "Home" %}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'recordtransfer:about' %}">
-                                {% trans "About" %}
-                            </a>
-                        </li>
-                        {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
-                                    {% trans "Profile" %}
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link main" href="{% url 'recordtransfer:formpreparation' %}">
-                                    {% trans "Transfer" %}
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link main" href="{% url 'logout' %}">
-                                    {% trans "Logout" %}
-                                </a>
-                            </li>
-                        {% elif not user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
-                                    {% trans "Sign Up" %}
-                                </a>
-                            </li>
-                            {% if 'login' not in request.path %}
-                                <li class="nav-item">
-                                    <a class="nav-link main" href="{% url 'login' %}">
-                                        {% trans "Log In" %}
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endif %}
-                        <span class="toggle-container">
-                            <li class="nav-toggle-open">
-                                <a class="nav-link" href="#">
-                                    <img height="20" src="{% static 'recordtransfer/img/menu_64x64px.png'%}">
-                                </a>
-                            </li>
-                            <li class="nav-toggle-close">
-                                <a class="nav-link" href="#">
-                                    <img height="20" src="{% static 'recordtransfer/img/close_menu_64x64px.png'%}">
-                                </a>
-                            </li>
-                        </span>
-                    </ul>
-                </nav>
-            </header>
             <div class="focused-content">
                 {% block focused_content %}{% endblock %}
             </div>
@@ -100,58 +43,9 @@
                 {% block content %}{% endblock %}
             </div>
         </div>
-        <div class="footer">
-            <div class="footer-block">
-                <div class="footer-title">National Centre for Truth and Reconciliation</div>
-                <div class="footer-items">
-                    <div class="footer-item-group">
-                        <div><b>About</b></div>
-                        <div><b>For Educators</b></div>
-                        <div><b>Archives</b></div>
-                    </div>
-                    <div class="footer-item-group">
-                        <div><b>Research</b></div>
-                        <div><b>Exhibitions</b></div>
-                        <div><b>Reports</b></div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-block">
-                <div class="footer-title">NCTR Social Media</div>
-                <div class="footer-items">
-                    <div class="footer-item-group">
-                        <div><b>YouTube</b></div>
-                        <div><b>Facebook</b></div>
-                        <div><b>Twitter</b></div>
-                    </div>
-                    <div class="footer-item-group">
-                        <div>Icon</div>
-                        <div>Icon</div>
-                        <div>Icon</div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-block">
-                <div class="footer-title">University of Manitoba</div>
-                <div class="footer-items">
-                    <div class="footer-item-group">
-                        <img width="140" src="{% static 'recordtransfer/img/uofm_logo.svg' %}">
-                        <div>
-                            Notice Regarding Collection, Use, and Disclosure of Personal Information by the
-                            National Centre for Truth and Reconciliation
-                        </div>
-                    </div>
-                    <div class="footer-item-group">
-                        <div>
-                            &copy; National Centre for Truth and Reconciliation
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <img id="footer-image" src="{% static 'recordtransfer/img/footer_graphic_242x157px.png' %}">
-        </div>
+        {% block footer %}
+            {% include "recordtransfer/footer.html" %}
+        {% endblock %}
     </div>
 </body>
 </html>
