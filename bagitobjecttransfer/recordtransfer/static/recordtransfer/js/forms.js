@@ -254,8 +254,10 @@ $(() => {
     /***************************************************************************
      * Dropzone Setup
      **************************************************************************/
-    var issueFiles = []
+    var issueFiles = []    // An array of file names
+    var uploadedFiles = [] // An array of File objects
     var sessionToken = ''
+    const csrfToken = getCookie('csrftoken')
 
     $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
@@ -269,29 +271,66 @@ $(() => {
         maxFilesize: 1024,
         timeout: 180000,
         headers: {
-            "X-CSRFToken": getCookie("csrftoken")
+            "X-CSRFToken": csrfToken,
+        },
+        // Hit endpoint to determine if a file can be uploaded
+        accept: function(file, done) {
+            $.post({
+                url: '/transfer/checkfile/',
+                data: {'filename': file.name},
+                dataType: 'json',
+                headers: {'X-CSRFToken': csrfToken},
+                success: function(response) {
+                    if (response.accepted) {
+                        done()
+                    }
+                    else {
+                        done(response)
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.responseJSON) {
+                        done(xhr.responseJSON)
+                    }
+                    else {
+                        done({
+                            'error': xhr.status + ': ' + xhr.statusText,
+                            'verboseError': undefined,
+                        })
+                    }
+                }
+            })
         },
         init: function() {
             issueFiles = []
-            dropzoneClosure = this
-            submitButton = document.getElementById("submit-form-btn")
+            uploadedFiles = []
+            sessionToken = ''
+
+            var dropzoneClosure = this
+            var submitButton = document.getElementById("submit-form-btn")
 
             submitButton.addEventListener("click", (event) => {
                 event.preventDefault()
                 event.stopPropagation()
-                clearDropzoneErrors()
 
-                if (dropzoneClosure.getQueuedFiles().length > 0) {
-                    dropzoneClosure.options.autoProcessQueue = true
-                    dropzoneClosure.processQueue()
-                } else {
-                    addDropzoneError('You cannot submit a form without files.')
+                if (issueFiles.length > 0) {
+                    alert('One or more files cannot be uploaded. Remove them before submitting')
                 }
-            });
+                else {
+                    clearDropzoneErrors()
+                    if (dropzoneClosure.getQueuedFiles().length + uploadedFiles.length === 0) {
+                        alert('You cannot submit a form without files. Please choose at least one file')
+                    }
+                    else {
+                        dropzoneClosure.options.autoProcessQueue = true
+                        dropzoneClosure.processQueue()
+                    }
+                }
+            })
 
             // Triggers on non-200 status
             this.on("error", (file, response, xhr) => {
-                if ("verboseError" in response) {
+                if (response.verboseError) {
                     addDropzoneError(response.verboseError)
                 }
                 else {
@@ -302,19 +341,15 @@ $(() => {
                 dropzoneClosure.options.autoProcessQueue = false
             })
 
-            this.on("addedfile", (file) => {
-                clearDropzoneErrors()
-            })
-
             this.on("removedfile", (file) => {
                 // If this file previously caused an issue, remove it from issueFiles
                 issueIndex = issueFiles.indexOf(file.name)
                 if (issueIndex > -1) {
                     issueFiles.splice(issueIndex, 1)
                 }
-
                 if (issueFiles.length === 0) {
                     document.getElementById("submit-form-btn").disabled = false
+                    clearDropzoneErrors()
                 }
             })
 
@@ -322,8 +357,24 @@ $(() => {
                 xhr.setRequestHeader("Upload-Session-Token", sessionToken)
             })
 
-            this.on("successmultiple", (file, response) => {
-                sessionToken = response['upload_session_token']
+            this.on("successmultiple", (files, response) => {
+                if (response.uploadSessionToken) {
+                    sessionToken = response.uploadSessionToken
+                }
+                var invalidFileNames = []
+                for (const issue of response.issues) {
+                    var fileName = issue.file
+                    invalidFileNames.push(fileName)
+                    var fileObj = files.filter(file => { return file.name === fileName })[0]
+                    var errMessage = {'error': issue.error, 'verboseError': issue.verboseError}
+                    dropzoneClosure.emit('error', fileObj, errMessage, null)
+                    console.log(`pushed: ${fileName}`)
+                }
+                for (const file of files) {
+                    if (invalidFileNames && invalidFileNames.indexOf(file.name) === -1) {
+                        uploadedFiles.push(file)
+                    }
+                }
             })
 
             this.on("queuecomplete", () => {
@@ -341,7 +392,7 @@ $(() => {
                         console.error('Could not find any input id matching "session_token" on the page!')
                     }
                 }
-                else {
+                else if (!issueFiles.length === dropzoneClosure.files.length) {
                     alert('There are one or more files that could not be uploaded. Remove these files and try again.')
                 }
             })

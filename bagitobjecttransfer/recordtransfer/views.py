@@ -267,6 +267,45 @@ class TransferFormWizard(SessionWizardView):
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 
+def checkfileextension(request):
+    ''' Check whether the file is allowed to be uploaded by inspecting the file's extension. The
+    allowed file extensions are set using the ACCEPTED_FILE_FORMATS setting.
+
+    Args:
+        request: The request sent by the user. This request should either be a GET or a POST
+            request, with the name of the file in the **filename** parameter.
+
+    Returns:
+        JsonResponse: If the file is allowed to be uploaded, 'accepted' will be True. Otherwise,
+            'accepted' is False and both 'error' and 'verboseError' are set.
+    '''
+    filename = ''
+    if request.method == 'POST':
+        filename = request.POST.get('filename', '')
+    elif request.method == 'GET':
+        filename = request.GET.get('filename', '')
+    else:
+        return JsonResponse({
+            'accepted': False,
+            'error': gettext('File extensions can only be checked using GET or POST.'),
+        }, status=400)
+    if not filename:
+        return JsonResponse({
+            'accepted': False,
+            'error': gettext('Could not find filename parameter in request'),
+        }, status=400)
+
+    try:
+        check = _file_extension_check(filename)
+        return JsonResponse(check, status=200)
+    except Exception as exc:
+        LOGGER.error(msg=('Uncaught exception in checkfile view: {0}'.format(str(exc))))
+        return JsonResponse({
+            'error': gettext('500 Internal Server Error'),
+            'verboseError': gettext('500 Internal Server Error'),
+        }, status=500)
+
+
 def uploadfiles(request):
     ''' Upload one or more files to the server, and return a token representing the file upload
     session. If a token is passed in the request header using the Upload-Session-Token header, the
@@ -274,14 +313,14 @@ def uploadfiles(request):
     multiple times for a large batch upload of files.
 
     Each file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if any
-    file is not an accepted type, a 403 status is returned.
+    file is not an accepted type, an error message is returned.
 
     Args:
-        request: The request sent by the user.
+        request: The POST request sent by the user.
 
     Returns:
         JsonResponse: If the upload was successful, the session token is returned in
-        upload_session_token. If not successful, the error description is returned in 'error',
+            'upload_session_token'. If not successful, the error description is returned in 'error',
             and a more verbose error is returned in 'verboseError'.
     '''
     if not request.method == 'POST':
@@ -291,13 +330,12 @@ def uploadfiles(request):
         return JsonResponse({
             'error': terse_error,
             'verboseError': verbose_error,
-        }, status=403)
-
+        }, status=400)
     if not request.FILES:
         return JsonResponse({
             'error': gettext('No files were uploaded'),
             'verboseError': gettext('No files were uploaded'),
-        }, status=403)
+        }, status=400)
 
     try:
         headers = request.headers
@@ -310,28 +348,18 @@ def uploadfiles(request):
                 session = UploadSession.new_session()
                 session.save()
 
-        for _, temp_file in request.FILES.dict().items():
-            file_accepted = False
-            temp_file_extension = Path(temp_file.name).suffix.lower().replace('.', '')
-            for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
-                if temp_file_extension in accepted_extensions:
-                    file_accepted = True
-                    break
+        issues = []
+        for _file in request.FILES.dict().values():
+            check = _file_extension_check(_file.name)
+            if not check['accepted']:
+                _file.close()
+                issues.append({'file': _file.name, **check})
+            else:
+                new_file = UploadedFile(name=_file.name, path=_file.path,
+                                        old_copy_removed=False, session=session)
+                new_file.save()
 
-            if not file_accepted:
-                terse_error = gettext('{0} files are not allowed'.format(temp_file_extension))
-                verbose_error = gettext('{0} file has an unaccepted format ({1}).'.format(
-                    temp_file_extension, temp_file.name))
-                return JsonResponse({
-                        'error': terse_error,
-                        'verboseError': verbose_error,
-                    }, status=403)
-
-            new_file = UploadedFile(name=temp_file.name, path=temp_file.path,
-                old_copy_removed=False, session=session)
-            new_file.save()
-
-        return JsonResponse({'upload_session_token': session.token}, status=200)
+        return JsonResponse({'uploadSessionToken': session.token, 'issues': issues}, status=200)
 
     except Exception as exc:
         LOGGER.error(msg=('Uncaught exception in uploadfiles view: {0}'.format(str(exc))))
@@ -339,3 +367,28 @@ def uploadfiles(request):
             'error': gettext('500 Internal Server Error'),
             'verboseError': gettext('500 Internal Server Error'),
         }, status=500)
+
+
+def _file_extension_check(filename: str) -> dict:
+    split_name = filename.split('.')
+
+    if len(split_name) == 0:
+        return {
+            'accepted': False,
+            'error': gettext('Files without extensions are not allowed'),
+            'verboseError': gettext('The file {} does not have a file extension'.format(filename))
+        }
+
+    extension = split_name[-1].lower()
+    for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
+        if extension in accepted_extensions:
+            return {
+                'accepted': True
+            }
+
+    return {
+        'accepted': False,
+        'error': gettext('Files with ".{}" extension are not allowed'.format(extension)),
+        'verboseError': gettext('The file "{}" has an invalid extension (.{})'\
+            .format(filename, extension))
+    }
