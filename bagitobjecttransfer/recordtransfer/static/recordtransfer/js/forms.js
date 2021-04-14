@@ -256,6 +256,7 @@ $(() => {
      **************************************************************************/
     var issueFiles = []
     var sessionToken = ''
+    const csrfToken = getCookie('csrftoken')
 
     $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
@@ -269,7 +270,35 @@ $(() => {
         maxFilesize: 1024,
         timeout: 180000,
         headers: {
-            "X-CSRFToken": getCookie("csrftoken")
+            "X-CSRFToken": csrfToken,
+        },
+        // Hit endpoint to determine if a file can be uploaded
+        accept: function(file, done) {
+            $.post({
+                url: '/transfer/checkfile/',
+                data: {'filename': file.name},
+                dataType: 'json',
+                headers: {'X-CSRFToken': csrfToken},
+                success: function(response) {
+                    if (response.accepted) {
+                        done()
+                    }
+                    else {
+                        done(response)
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.responseJSON) {
+                        done(xhr.responseJSON)
+                    }
+                    else {
+                        done({
+                            'error': xhr.status + ': ' + xhr.statusText,
+                            'verboseError': undefined,
+                        })
+                    }
+                }
+            })
         },
         init: function() {
             issueFiles = []
