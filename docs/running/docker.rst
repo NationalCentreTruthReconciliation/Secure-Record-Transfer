@@ -11,6 +11,11 @@ the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not alr
 ::
 
     BAG_STORAGE_FOLDER = /app/media/bags
+    ARCHIVIST_EMAIL=<your email address>
+    MYSQL_ROOT_PASSWORD=root-pw
+    MYSQL_DATABASE=records-transfer-db
+    MYSQL_USER=records-user
+    MYSQL_PASSWORD=records-password
 
 
 After ensuring you have a minimal environment file set up, make sure you are in the
