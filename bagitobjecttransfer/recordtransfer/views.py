@@ -32,11 +32,6 @@ class TransferSent(TemplateView):
     template_name = 'recordtransfer/transfersent.html'
 
 
-class FormPreparation(TemplateView):
-    ''' The page a user sees before they start a transfer '''
-    template_name = 'recordtransfer/formpreparation.html'
-
-
 class UserProfile(ListView):
     ''' This view shows two things:
     - The user's profile information

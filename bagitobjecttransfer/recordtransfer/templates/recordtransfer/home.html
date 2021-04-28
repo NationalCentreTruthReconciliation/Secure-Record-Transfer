@@ -19,7 +19,7 @@
     {% endblocktrans %}
 </p>
 {% if user.is_authenticated %}
-    {% url 'recordtransfer:formpreparation' as pre_transfer_page %}
+    {% url 'recordtransfer:transfer' as pre_transfer_page %}
     <p>
         {% blocktrans %}
             Welcome back! To start a new transfer, <a href="{{ pre_transfer_page }}">click here</a>.
