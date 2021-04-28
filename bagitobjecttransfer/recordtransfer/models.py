@@ -77,7 +77,7 @@ class Bag(models.Model):
         REVIEW_COMPLETE = 'RC', _('Review Complete')
 
     bagging_date = models.DateTimeField()
-    part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, null=True)
+    part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, blank=True, null=True)
     bag_name = models.CharField(max_length=256, null=True)
     caais_metadata = models.TextField(default=r'{}')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
