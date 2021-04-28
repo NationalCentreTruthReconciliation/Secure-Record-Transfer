@@ -82,7 +82,7 @@
             {% endif %}
         {% else %}
             <span>
-                {% url 'recordtransfer:formpreparation' as transfer_url %}
+                {% url 'recordtransfer:transfer' as transfer_url %}
                 {% blocktrans %}
                     You have not sent any records to the NCTR.
                     <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
