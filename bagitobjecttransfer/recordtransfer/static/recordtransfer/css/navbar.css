@@ -79,7 +79,7 @@ header {
 }
 
 /* Desktop menu (design is mobile-first) */
-@media all and (min-width: 700px) {
+@media all and (min-width: 800px) {
     .main-navbar {
         align-items: flex-start;
         flex-wrap: nowrap;
