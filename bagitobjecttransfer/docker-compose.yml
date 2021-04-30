@@ -14,8 +14,8 @@ services:
       - ./.dockerenv
     volumes:
       - mysql-database:/var/lib/mysql
-      - ./mysql/mysqld.cnf:/etc/mysql/mysqld.cnf
-      - ./logs:/var/log/mysql
+      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf
+      - ./docker/logs/mysql:/var/log/mysql
 
   email:
     image: mailhog/mailhog
@@ -37,8 +37,8 @@ services:
     volumes:
       - ./:/app
       - temp-directory:/tmp
-      - ./logs/rqworker.log:/var/log/django-rq/rqworker.log
-      - ./logs/recordtransfer.log:/var/log/django/recordtransfer.log
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
     ports:
       - 8000:8000
     env_file:
@@ -57,8 +57,8 @@ services:
     volumes:
       - ./:/app
       - temp-directory:/tmp
-      - ./logs/rqworker.log:/var/log/django-rq/rqworker.log
-      - ./logs/recordtransfer.log:/var/log/django/recordtransfer.log
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
     env_file:
       - ./.dockerenv
     environment:
@@ -73,8 +73,8 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./logs/redis-server.log:/var/log/redis/redis-server.log
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./docker/logs/redis:/var/log/redis
     environment:
       REDIS_REPLICATION_MODE: master
 
