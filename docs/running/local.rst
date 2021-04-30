@@ -66,11 +66,11 @@ the :code:`README.md` file), create a new environment, and install the required 
 
 
 If this is your first time running the app, you will want to migrate the database tables and create
-a super user account to use to log in to the app. To do so, run these commands:
+a super user account to use to log in to the app. To do so, run these commands from the same folder
+as the :code:`manage.py` script:
 
 .. code-block:: console
 
-    (env) $ cd bagitobjecttransfer
     (env) $ python3 manage.py migrate
     (env) $ python3 manage.py createsuperuser
 
@@ -86,12 +86,10 @@ username and password you enter as you will need these to log in to the app.
 
 To run the app, you will want to start the Redis and Email services before you start the development
 web server, since the Django app depends on those. There is a docker-compose file created
-specifically for this purpose. :code:`cd` into the :code:`bagitobjecttransfer` folder, then run the
-docker-compose command with the development compose file:
+specifically for this purpose. Run the docker-compose command with the development compose file:
 
 .. code-block:: console
 
-    (env) $ cd bagitobjecttransfer
     (env) $ docker-compose -f docker-compose.dev.yml up -d
 
 
