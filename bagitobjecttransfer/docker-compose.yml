@@ -21,6 +21,8 @@ services:
     image: mailhog/mailhog
     user: root
     container_name: recordtransfer_mailhog
+    logging:
+      driver: 'none' # disable saving logs
     ports:
       - 1025:1025
       - 8025:8025
