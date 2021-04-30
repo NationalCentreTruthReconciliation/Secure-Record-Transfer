@@ -318,6 +318,12 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
             msg = 'Changing FROM email for local development. Using {0} instead of {1}'
             LOGGER.info(msg=msg.format(new_email, from_email))
             from_email = new_email
+        elif ":" in Site.objects.get_current().domain:
+            new_domain = Site.objects.get_current().domain.split(":")[0]
+            new_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, new_domain)
+            msg = 'Changing FROM email to remove port number. Using {0} instead of {1}'
+            LOGGER.info(msg=msg.format(new_email, from_email))
+            from_email = new_email
 
         LOGGER.info('Setting up new email:')
         LOGGER.info(msg='SUBJECT: {0}'.format(subject))
