@@ -22,8 +22,8 @@ services:
     volumes:
       - ./:/app
       - /tmp:/tmp
-      - ./logs/django-rq:/var/log/django-rq
-      - ./logs/django:/var/log/django
+      - ./docker/logs/django-rq:/var/log/django-rq
+      - ./docker/logs/django:/var/log/django
     env_file:
       - ./.dockerenv
     environment:
@@ -34,12 +34,12 @@ services:
   redis:
     image: redis:5.0.7-alpine
     container_name: redis_server_dev
-    command: sh -c "touch /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf"
+    command: redis-server /usr/local/etc/redis/redis.conf
     ports:
       - 6379:6379
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./logs/redis:/var/log/redis
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./docker/logs/redis:/var/log/redis
     environment:
       REDIS_REPLICATION_MODE: master
 
