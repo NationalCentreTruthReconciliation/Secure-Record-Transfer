@@ -1,11 +1,3 @@
-''' These are the forms that users will fill to transfer records to your institution. Each of these
-are based on the CAAIS fields, but have been rearranged to fit a more natural form entry experience.
-
-The form is split into multiple related pieces. The reason a single form is not used is because it
-would be too long, and might create a negative experience, especially on mobile.
-
-Remember that each form must be specified in the wizard in :code:`urls.py`.
-'''
 import json
 from collections import OrderedDict
 
