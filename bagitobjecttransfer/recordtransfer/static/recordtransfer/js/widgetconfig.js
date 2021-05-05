@@ -2,76 +2,38 @@ $(() => {
     /***************************************************************************
      * jQuery Date Picker Setup
      **************************************************************************/
-    function addEstimatedButtonToStartDate(instance) {
-        var buttonPane = $(instance).datepicker("widget")
-        var html = [
-            '<div style="margin-bottom: 5px;">',
-            '    <input id="start_date_is_approximate_mirror" type="checkbox">',
-            '    <label>&nbsp;Date Estimated</label>',
-            '</div>',
-        ].join('\n')
-        buttonPane.append(html)
-        if ($('#id_recorddescription-start_date_is_approximate').prop('checked')) {
-            $('#start_date_is_approximate_mirror').prop('checked', true)
-        }
-        $('#start_date_is_approximate_mirror').on('click', function(event) {
-            checked = $(this).prop('checked')
-            $('#id_recorddescription-start_date_is_approximate').prop('checked', checked)
-        })
+     // Map original function to _old
+    $.datepicker._generateHTML_old = $.datepicker._generateHTML;
+    // Override the function.
+    $.datepicker._generateHTML = function(inst) {
+        var html = this._generateHTML_old(inst);
+        var pickerName = ($('#' + inst.id).hasClass("start_date_picker") ? "start_date" : "end_date");
+        var checkboxName = pickerName + "_is_approximate_mirror";
+        var hiddenName = "id_recorddescription-" + pickerName + "_is_approximate";
+        var hiddenChecked = $('#' + hiddenName).is(':checked');
+        var appendHtml = [
+             '<div style="margin-bottom: 5px;">',
+             '    <input id="' + checkboxName + '" type="checkbox"' +
+             (hiddenChecked ? ' checked="checked"' : "") + '>',
+             '    <label>&nbsp;Date Estimated</label>',
+             '</div>',
+          ].join('\n');
+
+        setTimeout(function() {
+            $('#' + checkboxName).on('click', function(event) {
+                checked = $(this).is(':checked')
+                $('#' + hiddenName).prop('checked', checked)
+            });
+        }, 5);
+        return html + appendHtml;
     }
 
-    function addEstimatedButtonToEndDate(instance) {
-        var buttonPane = $(instance).datepicker("widget")
-        var html = [
-            '<div style="margin-bottom: 5px;">',
-            '    <input id="end_date_is_approximate_mirror" type="checkbox">',
-            '    <label>&nbsp;Date Estimated</label>',
-            '</div>',
-        ].join('\n')
-        buttonPane.append(html)
-        if ($('#id_recorddescription-end_date_is_approximate').prop('checked')) {
-            $('#end_date_is_approximate_mirror').prop('checked', true)
-        }
-        $('#end_date_is_approximate_mirror').on('click', function(event) {
-            checked = $(this).prop('checked')
-            $('#id_recorddescription-end_date_is_approximate').prop('checked', checked)
-        })
-    }
-
-    $('.start_date_picker').datepicker({
+    $('.start_date_picker, .end_date_picker').datepicker({
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         changeYear: true,
         minDate: new Date(1700, 1, 1),
         maxDate: 0,
-        beforeShow: function (input, inst) {
-            setTimeout(function () {
-                addEstimatedButtonToStartDate(input)
-            }, 5)
-        },
-        onChangeMonthYear: function(year, month, inst) {
-            setTimeout(function () {
-                addEstimatedButtonToStartDate(inst)
-            }, 5)
-        },
-    })
-
-    $('.end_date_picker').datepicker({
-        dateFormat:"yy-mm-dd",
-        changeMonth: true,
-        changeYear: true,
-        minDate: new Date(1700, 1, 1),
-        maxDate: 0,
-        beforeShow: function (input, inst) {
-            setTimeout(function () {
-                addEstimatedButtonToEndDate(input)
-            }, 5)
-        },
-        onChangeMonthYear: function(year, month, inst) {
-            setTimeout(function () {
-                addEstimatedButtonToEndDate(inst)
-            }, 5)
-        },
     })
 
     /***************************************************************************
