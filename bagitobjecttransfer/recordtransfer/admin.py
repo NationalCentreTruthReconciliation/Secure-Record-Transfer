@@ -93,6 +93,16 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
+    def save_model(self, request, obj, form, change):
+        # TODO: We may want to notify the modified user (by sending an email) if any major changes
+        #       are made to their account.
+        if change and 'is_superuser' in form.changed_data and not request.user.is_superuser:
+            messages.set_level(request, messages.ERROR)
+            msg = ('Non-superusers cannot change the superuser status of another User.')
+            self.message_user(request, msg, messages.ERROR)
+        else:
+            super().save_model(request, obj, form, change)
+
 
 class UploadedFileAdmin(admin.ModelAdmin):
     actions = ['clean_temp_files']
