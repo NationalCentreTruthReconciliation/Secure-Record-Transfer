@@ -293,12 +293,10 @@
                     <td class="left-col level-2">4.2.1 Rights Statement Type</td>
                     <td>{{ rights.rights_statement_type }}</td>
                 </tr>
-                {% if rights.other_rights_statement_type or rights.rights_statement_type|lower == "other" %}
                 <tr>
                     <td class="left-col level-2">4.2.1 Rights Statement Value</td>
-                    <td>{{ rights.other_rights_statement_type }}</td>
+                    <td>{{ rights.rights_statement_value }}</td>
                 </tr>
-                {% endif %}
                 {% if rights.rights_statement_note %}
                     <tr>
                         <td class="left-col level-2">4.2.3 Rights Statement Note</td>

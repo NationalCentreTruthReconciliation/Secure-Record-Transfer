@@ -613,6 +613,11 @@ class RightsForm(forms.Form):
                 if rights_type_other in forms.Field.empty_values:
                     self.add_error('other_rights_statement_type',
                                    'When "Type of Rights" is "Other", you must fill out this field.')
+                else:
+                    cleaned_data['rights_statement_type'] = rights_type_other
+
+        # Rights Statement Note is required for CAAIS compliance, but is not used
+        cleaned_data['rights_statement_note'] = ''
         return cleaned_data
 
     rights_statement_type = forms.ModelChoiceField(
@@ -624,20 +629,21 @@ class RightsForm(forms.Form):
     other_rights_statement_type = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'placeholder': gettext('Special description of rights not covered by other choices.'),
+            'placeholder': gettext('Other type of rights not covered by other choices'),
             'class': 'rights-select-other',
         }),
-        help_text=gettext('For example: "UK Human Rights Act 1998'),
-        label=gettext('Other rights description'),
+        help_text=gettext('For example: "UK Human Rights Act 1998"'),
+        label=gettext('Other type of rights'),
     )
 
-    rights_statement_note = forms.CharField(
+    rights_statement_value = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
             'placeholder': gettext('Any notes on these rights or which files they may apply to '
-                                   '(optional). For example: "Copyright until 2050"'),
+                                   '(optional)'),
         }),
+        help_text=gettext('For example: "Copyright until 2050," "Only applies to images," etc.'),
         label=gettext('Notes for rights')
     )
 
