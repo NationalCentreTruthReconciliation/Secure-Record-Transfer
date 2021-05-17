@@ -146,7 +146,8 @@ class TransferFormWizard(SessionWizardView):
             "infomessage": gettext(
                 "Enter any associated rights that apply to the records. They can be copyright, "
                 "intellectual property, cultural rights, etc. Add as many rights sections as you "
-                "like using the + More button"
+                "like using the + More button. You may enter another type of rights if the "
+                "dropdown does not contain the type of rights you're looking for."
             )
         },
         "otheridentifiers": {

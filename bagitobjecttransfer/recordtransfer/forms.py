@@ -2,6 +2,7 @@ import json
 from collections import OrderedDict
 
 from django import forms
+from django.forms import BaseFormSet
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.contrib.auth.forms import UserCreationForm
@@ -9,7 +10,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
-from recordtransfer.models import User, Bag
+from recordtransfer.models import User, Bag, Right
 from recordtransfer.settings import DEFAULT_DATA
 
 
@@ -593,35 +594,56 @@ class RecordDescriptionForm(forms.Form):
     )
 
 
+class RightsFormSet(BaseFormSet):
+    """ Special formset to enforce at least one rights form to have a value """
+    def __init__(self, *args, **kwargs):
+        super(RightsFormSet, self).__init__(*args, **kwargs)
+        self.forms[0].empty_permitted = False
+
+
 class RightsForm(forms.Form):
     ''' The Rights portion of the form. Contains fields from Section 4 of CAAIS '''
-    rights_statement_type = forms.CharField(
-        required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('Enter the type of rights governing the records'),
-            'required': 'required',
-        }),
-        help_text=gettext('For example: "Copyright," "Cultural rights," etc.'),
+    def clean(self):
+        cleaned_data = super().clean()
+
+        rights_type = cleaned_data.get('rights_statement_type')
+        if rights_type is not None:
+            if rights_type.name.lower().strip() == 'other':
+                rights_type_other = cleaned_data.get('other_rights_statement_type')
+                if rights_type_other in forms.Field.empty_values:
+                    self.add_error('other_rights_statement_type',
+                                   'When "Type of Rights" is "Other", you must fill out this field.')
+                else:
+                    cleaned_data['rights_statement_type'] = rights_type_other
+
+        # Rights Statement Note is required for CAAIS compliance, but is not used
+        cleaned_data['rights_statement_note'] = ''
+        return cleaned_data
+
+    rights_statement_type = forms.ModelChoiceField(
+        queryset=Right.objects.all().order_by('name'),
         label=gettext('Type of rights'),
+        empty_label=gettext('Please select one')
+    )
+
+    other_rights_statement_type = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': gettext('Other type of rights not covered by other choices'),
+            'class': 'rights-select-other',
+        }),
+        help_text=gettext('For example: "UK Human Rights Act 1998"'),
+        label=gettext('Other type of rights'),
     )
 
     rights_statement_value = forms.CharField(
-        required=True,
-        widget=forms.TextInput(attrs={
-            'placeholder': gettext('Nature and duration of permission or restrictions'),
-            'required': 'required',
-        }),
-        help_text=gettext('For example: "Public domain," "FIPPA," "Copyright until 2050," etc.'),
-        label=gettext('Description of rights'),
-    )
-
-    rights_statement_note = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
             'placeholder': gettext('Any notes on these rights or which files they may apply to '
-                                   '(optional).'),
+                                   '(optional)'),
         }),
+        help_text=gettext('For example: "Copyright until 2050," "Only applies to images," etc.'),
         label=gettext('Notes for rights')
     )
 
