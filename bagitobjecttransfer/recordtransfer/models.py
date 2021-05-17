@@ -128,3 +128,12 @@ class Job(models.Model):
 
     def __str__(self):
         return f'{self.name} (Created by {self.user_triggered})'
+
+
+class Right(models.Model):
+    """ The pre-populated rights statements. """
+    name = models.CharField(max_length=256, null=False, unique=True)
+    description = models.CharField(max_length=256, null=False)
+
+    def __str__(self):
+        return self.name
