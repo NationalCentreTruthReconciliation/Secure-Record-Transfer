@@ -1,27 +1,24 @@
+import csv
 import json
 import zipfile
-import csv
 from io import StringIO, BytesIO
 from pathlib import Path
-from collections import OrderedDict
 
+from bagitobjecttransfer.settings.base import MEDIA_ROOT
 from django.contrib import admin, messages
+from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django.contrib.auth.admin import UserAdmin
-from django.template.loader import render_to_string
-
-from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job
-from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
+from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.forms import BagForm, InlineBagForm
 from recordtransfer.jobs import create_downloadable_bag
-
-from bagitobjecttransfer.settings.base import MEDIA_ROOT
+from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job, Right
 
 
 def linkify(field_name):
@@ -390,9 +387,17 @@ class JobAdmin(ReadOnlyAdmin):
         return super().response_change(request, obj)
 
 
+class RightsAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    fieldsets = [
+        (None, {'fields': ['name', 'description']}),
+    ]
+
+
 admin.site.register(Bag, BagAdmin)
 admin.site.register(BagGroup, BagGroupAdmin)
 admin.site.register(UploadedFile, UploadedFileAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(UploadSession, UploadSessionAdmin)
 admin.site.register(Job, JobAdmin)
+admin.site.register(Right, RightsAdmin)

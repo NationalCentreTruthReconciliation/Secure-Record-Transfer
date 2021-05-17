@@ -362,14 +362,15 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
         for rights_form in valid_forms:
             rights = OrderedDict()
             # 4.2.1 Rights Statement Type
-            rights['rights_statement_type'] = get_mandatory_field(
+            # These are objects so the str() gets us the name as string.
+            rights['rights_statement_type'] = str(get_mandatory_field(
                 form_data=rights_form,
                 caais_key='rights_statement_type',
-                section=curr_section)
+                section=curr_section))
             # 4.2.2 Rights Statement Value
-            rights['rights_statement_value'] = get_mandatory_field(
+            rights['other_rights_statement_type'] = get_optional_field(
                 form_data=rights_form,
-                caais_key='rights_statement_value',
+                caais_key='other_rights_statement_type',
                 section=curr_section)
             # 4.2.3 Rights Statement Note
             rights['rights_statement_note'] = get_optional_field(
@@ -420,7 +421,7 @@ def _flatten_section_4_tree(section_4: OrderedDict, flat: OrderedDict):
     rights_notes = []
     for rights in section_4['rights_statement']:
         rights_types.append(rights['rights_statement_type'])
-        rights_values.append(rights['rights_statement_value'])
+        rights_values.append(rights['other_rights_statement_type'])
         rights_notes.append(rights['rights_statement_note'] or 'NULL')
     flat['rightsStatementType'] = '|'.join(rights_types)
     flat['rightsStatementValue'] = '|'.join(rights_values)

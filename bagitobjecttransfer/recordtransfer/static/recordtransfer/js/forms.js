@@ -6,7 +6,7 @@
  */
 
 
-const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea'
+const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea, select'
 const ID_NUM_REGEX = new RegExp('-(\\d+)-')
 Dropzone.autoDiscover = false
 
@@ -231,6 +231,54 @@ function clearDropzoneErrors() {
     }
 }
 
+/**
+ * Function to setup on click handlers for select boxes to toggle text fields when selecting "Other"
+ *
+ * @param otherField : Array of selectors to return some objects.
+ * @param choiceFieldFn : callable that converts the found text field id to the corresponding select box id
+ *                        ie. id_rightsstatement-other_rights_statement_type => id_rightsstatement-rights_statement_type
+ */
+function setupSelectOtherToggle(otherField, choiceFieldFn) {
+    if (otherField.some((selector) => $(selector).length)) {
+        $.each(otherField, function(_, v) {
+            // Use each as a single value in the otherField array could result in multiple objects, ie. class selector
+            $(v).each(function() {
+                let currentId = "#" + $(this).attr("id");
+                let choiceField = choiceFieldFn(currentId);
+                let value = $(choiceField + " option:selected").text().toLowerCase().trim()
+                let state = value === 'other' ? 'on' : 'off'
+                toggleFlexItems([currentId], state)
+                // Remove any current event handlers
+                $(choiceField).off('change');
+                // Add the new event handlers
+                $(choiceField).change(function() {onSelectChange.call(this, currentId)});
+            });
+        });
+    }
+}
+
+/**
+ * Function to toggle the visibility of the "other" text field based on the select box value.
+ *
+ * @param currentId : id of the "other" text field
+ */
+function onSelectChange(currentId) {
+    let state = $("option:selected", this).text().toLowerCase().trim() === 'other' ? 'on' : 'off'
+    toggleFlexItems([currentId], state)
+}
+
+/**
+ * Alter the id of the "other" field to refer back to the select box.
+ *
+ * @param id : the id of the other text field.
+ */
+function removeOther(id) {
+    let newId = id.replace('other_','');
+    if (!/^#/.test(newId)) {
+        newId = "#" + newId;
+    }
+    return newId;
+}
 
 /**
  * Show or hide div.flex-items related to form fields.
@@ -502,17 +550,12 @@ $(() => {
         })
     }
 
-    const otherProvinceFlexItems = [
-        '#id_contactinfo-other_province_or_state',
-    ]
+    setupSelectOtherToggle(['#id_contactinfo-other_province_or_state'], removeOther);
 
-    if (otherProvinceFlexItems.some((selector) => elementExists(selector))) {
-        let value = $('#id_contactinfo-province_or_state').val().toLowerCase().trim()
-        let state = value === 'other' ? 'on' : 'off'
-        toggleFlexItems(otherProvinceFlexItems, state)
-        $('#id_contactinfo-province_or_state').change(function() {
-            let state = $(this).val().toLowerCase().trim() === 'other' ? 'on' : 'off'
-            toggleFlexItems(otherProvinceFlexItems, state)
-        })
-    }
+    setupSelectOtherToggle(['.rights-select-other'], removeOther);
+
+    // Add a new click handler (with namespace) to fix the event handlers that were cloned.
+    $('.add-form-row', '#transfer-form').on('click.transfer-form', (event) => {
+        setupSelectOtherToggle(['.rights-select-other'], removeOther);
+    })
 })
