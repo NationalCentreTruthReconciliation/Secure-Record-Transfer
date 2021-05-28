@@ -4,8 +4,8 @@ services:
   db:
     image: mysql
     container_name: recordtransfer_mysqldb
-    restart: always
     command: --defaults-extra-file=/etc/mysql/mysqld.cnf --default-authentication-plugin=mysql_native_password --mysqlx=0
+    restart: always
     ports:
       - 3306:3306
     environment:
@@ -14,7 +14,7 @@ services:
       - ./.dockerenv
     volumes:
       - mysql-database:/var/lib/mysql
-      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf
+      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
       - ./docker/logs/mysql:/var/log/mysql
 
   email:
@@ -35,7 +35,9 @@ services:
   app:
     build: .
     container_name: recordtransfer_django_app
-    command: python3 manage.py runserver 0.0.0.0:8000 --settings=bagitobjecttransfer.settings.docker
+    entrypoint:
+      - /bin/bash
+      - /app/docker/django/django-entrypoint.sh
     volumes:
       - ./:/app
       - temp-directory:/tmp
@@ -55,7 +57,9 @@ services:
   rq:
     build: .
     container_name: recordtransfer_rq_workers
-    command: python3 manage.py rqworker default
+    entrypoint:
+      - /bin/bash
+      - /app/docker/django-rq/django-rq-entrypoint.sh
     volumes:
       - ./:/app
       - temp-directory:/tmp
@@ -66,12 +70,13 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: bagitobjecttransfer.settings.docker
     depends_on:
+      - db
       - redis
 
   redis:
     image: redis:5.0.7-alpine
     container_name: redis_server
-    command: sh -c "touch /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf"
+    command: /usr/local/etc/redis/redis.conf
     ports:
       - 6379:6379
     volumes:
