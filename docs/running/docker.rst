@@ -1,12 +1,20 @@
 Running with Docker Compose
 ===========================
 
-The easiest way to run the application is to run the entire thing with Docker. This is the preferred
-method to run the app if you aren't doing any sort of development on the app. If you do want to work
-on the Django app's backend, refer to the section on :ref:`Running Locally for Development`.
+Using Docker is the simplest way to test the record transfer application out on your local computer.
+Docker is not recommended for deploying the app, to do so, follow the instructions for
+:ref:`Deploying in Production`.
 
-First, make sure you've installed Docker. Create an environment file called :code:`.dockerenv` in
-the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not already created:
+To run the app in Docker, first make sure you've installed Docker. You can go to the
+`Docker website <https://docs.docker.com/get-docker/>`_ to find download links for your operating
+system. Note that in Windows, you'll also need to
+`install WSL <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_. Once Docker is
+installed, clone or download the code from the
+`GitHub repository <https://github.com/danloveg/NCTR-Bagit-Record-Transfer>`_.
+
+From the root of the repository, go to the :code:`bagitobjecttransfer` folder. This is the same
+folder where you will find a file called :code:`manage.py`. Once in the folder, create a
+file called :code:`.dockerenv`, and put these contents in it:
 
 ::
 
@@ -19,6 +27,8 @@ the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not alr
     MYSQL_PASSWORD=records-password
 
 
+This is an environment variable file, which is used to control some parts of the application.
+
 .. note::
 
     The first time the MySQL container is created, the MYSQL_USER and MYSQL_PASSWORD settings are
@@ -27,58 +37,35 @@ the :code:`bagitobjecttransfer` folder. Put these contents in it if it's not alr
     database.
 
 
-After ensuring you have a minimal environment file set up, make sure you are in the
-:code:`bagitobjecttransfer` folder, and run all of the services with Docker:
+After ensuring you have a minimal environment file set up, you can start up the application in
+Docker with this command:
 
 .. code-block:: console
 
     $ docker-compose up -d
 
 
-If this is your first time running the app in this configuration, you will first want to do a few
-things. These are:
-
-1. Update permissions on :code:`mysqld.cnf`
-2. Migrate the database tables
-3. Create a super user
-
-
-Update MySQL Configuration Permissions
-######################################
-
-If you run the :code:`docker-compose up` command and receive a warning from the database container
-like :code:`mysqld: [Warning] World-writable config file '/etc/mysql/mysqld.cnf' is ignored.`, you
-need to update the file's permissions so it is not world-writable. This configuration file tells
-MySQL where to store logs, so if it is not used, the log files will be more difficult to find.
-
-To update the permissions, run these commands:
+The app will appear in Docker Desktop provided Docker is installed. To stop the app, you may click
+the Stop button in Docker Desktop, or run this command:
 
 .. code-block:: console
 
-    (env) $ docker-compose exec db sh
-    # chmod 755 /etc/mysql/mysqld.cnf
-    # exit
-    (env) $
+    $ docker-compose down
 
 
-And then you can restart the app:
+If this is your first time running the app in this configuration, you will first want to create a
+super user so that you can log in to the application.
 
-.. code-block:: console
+Creating a Super-User
+#####################
 
-    (env) $ docker-compose down
-    (env) $ docker-compose up -d
-
-
-Migrating the Database Tables and Creating a Super-User
-#######################################################
-
-Migrating the database tables and creating a super user are both tasks that are run in the Django
-:code:`app` container, and so can be run one after another. To complete these tasks, run:
+Creating a super user is a task that should be run in the Django :code:`app` container. To create
+a new super user, run these commands and follow the user creation prompts (you will be asked for
+your name, email, etc.):
 
 .. code-block:: console
 
     (env) $ docker-compose exec app sh
-    # python3 manage.py migrate
     # python3 manage.py createsuperuser
     # exit
     (env) $
