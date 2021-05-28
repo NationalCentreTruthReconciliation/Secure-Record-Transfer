@@ -12,8 +12,7 @@ archivists to view and export information about transfers submitted by users.
 
    introduction/index
    running/index
-   publicapp/index
-   privateapp/index
+   howtouse/index
    customization/index
    code/index
 
