@@ -132,8 +132,8 @@ class Job(models.Model):
 
 class Right(models.Model):
     """ The pre-populated rights statements. """
-    name = models.CharField(max_length=256, null=False, unique=True)
-    description = models.CharField(max_length=256, null=False)
+    name = models.CharField(max_length=255, null=False, unique=True)
+    description = models.CharField(max_length=255, null=False)
 
     def __str__(self):
         return self.name
