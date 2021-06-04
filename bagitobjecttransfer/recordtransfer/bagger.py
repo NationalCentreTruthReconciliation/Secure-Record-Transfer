@@ -16,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_identifier=None,
-               deletefiles=True):
+               deletefiles=True, logger=None):
     """ Creates a bag from a user upload session and any number of metadata fields.
 
     Creates a bag within the storage_folder. A bag consists of a bag folder, and a number of tag
@@ -29,12 +29,16 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
         bag_identifier (str): A string to identify the bag. If None, the time is used to identify
             the bag.
         deletefiles (bool): Delete files in upload session after bagging if True.
+        logger (Logger): A logging instance for messages.
     """
+    if logger is None:
+        logger = LOGGER
+
     if not Path(storage_folder).exists():
-        LOGGER.error(msg=('Could not find storage folder "{0}"'.format(storage_folder)))
+        logger.error(msg=('Could not find storage folder "{0}"'.format(storage_folder)))
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
 
-    LOGGER.info(msg=('Starting new bag creation for upload session "{0}"'.format(session_token)))
+    logger.info(msg=('Starting new bag creation for upload session "{0}"'.format(session_token)))
 
     current_time = timezone.now()
     identifier = bag_identifier or 'Bag_{0}'.format(current_time.strftime(r'%Y%m%d_%H%M%S'))
@@ -42,28 +46,31 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     new_bag_folder = _get_bagging_folder(storage_folder, identifier)
     if not new_bag_folder.exists():
         os.mkdir(new_bag_folder)
-        LOGGER.info(msg=('Created new empty folder for the bag at "{0}"'.format(new_bag_folder)))
+        logger.info(msg=('Created new empty folder for the bag at "{0}"'.format(new_bag_folder)))
 
-    (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token, new_bag_folder, deletefiles)
+    (copied_files, missing_files) = _copy_session_uploads_to_dir(session_token,
+                                                                 new_bag_folder,
+                                                                 deletefiles,
+                                                                 logger=logger)
 
     bag_valid = False # Invalid until proven otherwise!
     if not missing_files:
-        LOGGER.info(msg=('Generating sha512 checksums...'))
+        logger.info(msg=('Generating sha512 checksums...'))
         bag = bagit.make_bag(new_bag_folder, metadata, checksums=['sha512'])
-        LOGGER.info(msg=('Checking validity of new bag...'))
+        logger.info(msg=('Checking validity of new bag...'))
         bag_valid = bag.is_valid()
         if bag_valid:
             # Fix permissions of payload files (make_bag sometimes makes files unreadable)
             for payload_file in bag.payload_files():
                 payload_file_path = new_bag_folder / payload_file
                 os.chmod(payload_file_path, 0o644)
-            LOGGER.info(msg=('New bag successfully created at "{0}"'.format(new_bag_folder)))
+            logger.info(msg=('New bag successfully created at "{0}"'.format(new_bag_folder)))
         else:
-            LOGGER.error(msg=('New bag created at "{0}" is invalid!'.format(new_bag_folder)))
+            logger.error(msg=('New bag created at "{0}" is invalid!'.format(new_bag_folder)))
     else:
-        LOGGER.error(msg=('New bag "{0}" was not created due to these files missing: {1}'.format(
+        logger.error(msg=('New bag "{0}" was not created due to these files missing: {1}'.format(
             new_bag_folder, missing_files)))
-        LOGGER.info(msg=('Removing half-created bag at {0}'.format(new_bag_folder)))
+        logger.info(msg=('Removing half-created bag at {0}'.format(new_bag_folder)))
         for copied_file in copied_files:
             os.remove(copied_file)
         if new_bag_folder.exists():
@@ -145,14 +152,17 @@ def delete_bag(bag_folder: str):
     shutil.rmtree(bag_folder)
 
 
-def _copy_session_uploads_to_dir(session_token, directory, delete=True):
+def _copy_session_uploads_to_dir(session_token, directory, delete=True, logger=None):
+    if logger is None:
+        logger = LOGGER
+
     files = UploadedFile.objects.filter(
         session__token=session_token
     ).filter(
         old_copy_removed=False
     )
 
-    LOGGER.info(msg=('Copying {0} temp files to {1}'.format(len(files), directory)))
+    logger.info(msg=('Copying {0} temp files to {1}'.format(len(files), directory)))
     copied_files = []
     missing_files = []
     verb = 'Moving' if delete else 'Copying'
@@ -160,12 +170,12 @@ def _copy_session_uploads_to_dir(session_token, directory, delete=True):
         source_path = Path(uploaded_file.path)
 
         if not source_path.exists():
-            LOGGER.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
+            logger.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
             missing_files.append(str(source_path))
 
         elif not missing_files:
             destination_path = directory / uploaded_file.name
-            LOGGER.info(msg=('{0} {1} to {2}'.format(verb, source_path, destination_path)))
+            logger.info(msg=('{0} {1} to {2}'.format(verb, source_path, destination_path)))
             shutil.copy2(source_path, destination_path)
             if delete:
                 uploaded_file.delete_file()

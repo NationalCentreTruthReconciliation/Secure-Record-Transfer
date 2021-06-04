@@ -1,4 +1,4 @@
-import logging
+from logging import Logger
 import os
 from zipfile import ZipFile
 
@@ -6,7 +6,6 @@ from recordtransfer.exceptions import FolderNotFoundError
 
 from django.utils.html import strip_tags
 
-LOGGER = logging.getLogger(__name__)
 
 def zip_directory(directory: str, zipf: ZipFile):
     ''' Zip a directory structure into a zip file.
@@ -42,7 +41,7 @@ def html_to_text(html: str):
     return '\n'.join(plain_text_split)
 
 
-def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
+def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, logger: Logger):
     ''' Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
     English) the number of files in each group.
 
@@ -50,11 +49,12 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
         file_names (list): A list of file paths or names with extension intact
         accepted_file_groups (dict): A dictionary of file group names mapping to a list of
             lowercase file extensions without periods.
+        logger (Logger): A logging instance for any messages.
 
     Returns:
         (str): A string reporting the number of files in each group.
     '''
-    counted_types = count_file_types(file_names, accepted_file_groups)
+    counted_types = count_file_types(file_names, accepted_file_groups, logger)
     if not counted_types:
         return 'No file types could be identified'
 
@@ -79,7 +79,7 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     return string_statement
 
 
-def count_file_types(file_names: list, accepted_file_groups: dict):
+def count_file_types(file_names: list, accepted_file_groups: dict, logger: Logger):
     ''' Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
@@ -90,6 +90,7 @@ def count_file_types(file_names: list, accepted_file_groups: dict):
         file_names (list): A list of file paths or names with extension intact
         accepted_file_groups (dict): A dictionary of file group names mapping to a list of
             lowercase file extensions without periods.
+        logger (Logger): A logging instance.
 
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
@@ -100,7 +101,7 @@ def count_file_types(file_names: list, accepted_file_groups: dict):
     for name in file_names:
         split_name = name.split('.')
         if len(split_name) == 1:
-            LOGGER.warning(msg=('Could not identify file type for file name: {0}'.format(name)))
+            logger.warning(msg=('Could not identify file type for file name: {0}'.format(name)))
         else:
             extension_name = split_name[-1].lower()
             if extension_name not in counted_extensions:
