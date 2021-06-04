@@ -1,7 +1,7 @@
 Deploying in Production
 =======================
 
-The setup for a production build is much more involved than the development and Docker methods.
+The setup for a production build is much more involved than the Docker method.
 
 To manage services, systemd is used. The OS used for this guide is Red Hat Enterprise Linux 7 (RHEL
 7). There may be some differences if you intend to deploy the app on a different Linux distribution,
@@ -915,7 +915,7 @@ Django admin.
 10.1 Add Site Name and Domain in Django Admin
 *********************************************
 
-To do set the name and domain using the Django admin, log in to http://yourdomain.com/admin/,
+To set the name and domain using the Django admin, log in to http://yourdomain.com/admin/,
 substituting yourdomain.com for the domain the app is being hosted at. You will want to use the same
 credentials to log in that you created in section :ref:`6.5 Create a Super User`.
 
