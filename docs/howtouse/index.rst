@@ -9,4 +9,5 @@ specifically for administrators that should be referred to for tasks involving B
     :maxdepth: 1
 
     addingusers
+    addingrights
     transferform

@@ -489,6 +489,25 @@ $(() => {
         })
     })
 
+    var dialog = $('#rights-dialog').dialog({
+        autoOpen: false,
+        modal: false,
+        width: 500,
+        position: { my: "center", at: "top", of: window },
+        buttons: [
+            {
+                text: "OK",
+                click: () => { dialog.dialog("close") }
+            }
+        ],
+    })
+
+    $("#show-rights-dialog").on("click", (event) => {
+        event.preventDefault()
+        dialog.dialog("open")
+        dialog.dialog("moveToTop")
+    })
+
     /***************************************************************************
      * Expandable Forms Setup
      **************************************************************************/

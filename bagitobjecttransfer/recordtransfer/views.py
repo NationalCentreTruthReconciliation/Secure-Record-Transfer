@@ -11,7 +11,7 @@ from django.utils.translation import gettext
 from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup
+from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup, Right
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -141,13 +141,12 @@ class TransferFormWizard(SessionWizardView):
             )
         },
         "rights": {
-            "templateref": "recordtransfer/transferform_formset.html",
+            "templateref": "recordtransfer/transferform_rights.html",
             "formtitle": gettext("Record Rights"),
             "infomessage": gettext(
-                "Enter any associated rights that apply to the records. They can be copyright, "
-                "intellectual property, cultural rights, etc. Add as many rights sections as you "
-                "like using the + More button. You may enter another type of rights if the "
-                "dropdown does not contain the type of rights you're looking for."
+                "Enter any associated rights that apply to the records. Add as many rights "
+                "sections as you like using the + More button. You may enter another type of "
+                "rights if the dropdown does not contain the type of rights you're looking for."
             )
         },
         "otheridentifiers": {
@@ -212,6 +211,9 @@ class TransferFormWizard(SessionWizardView):
         if step_name == 'grouptransfer':
             users_groups = BagGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
+        elif step_name == 'rights':
+            all_rights = Right.objects.all().order_by('name')
+            context.update({'rights': all_rights})
         return context
 
     def get_all_cleaned_data(self):
