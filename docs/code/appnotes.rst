@@ -1,5 +1,7 @@
-FAQ
-===
+App Notes
+=========
+
+These notes are written a Q/A fashion.
 
 **Q: How can I modify the HTML report used to generate HTML CAAIS reports?**
 
