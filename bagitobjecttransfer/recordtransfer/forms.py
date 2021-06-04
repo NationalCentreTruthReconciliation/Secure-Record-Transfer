@@ -2,6 +2,7 @@ import json
 from collections import OrderedDict
 
 from django import forms
+from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
 from django.utils import timezone
 from django.utils.translation import gettext
@@ -603,6 +604,7 @@ class RightsFormSet(BaseFormSet):
 
 class RightsForm(forms.Form):
     ''' The Rights portion of the form. Contains fields from Section 4 of CAAIS '''
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -621,7 +623,15 @@ class RightsForm(forms.Form):
         return cleaned_data
 
     rights_statement_type = forms.ModelChoiceField(
-        queryset=Right.objects.all().order_by('name'),
+        queryset=Right.objects.all()\
+            .annotate(
+                sort_order_other_first=Case(
+                    When(name__iexact='other', then=Value('____')),
+                    default='name',
+                    output_field=CharField(),
+                )
+            )\
+            .order_by('sort_order_other_first'),
         label=gettext('Type of rights'),
         empty_label=gettext('Please select one')
     )
