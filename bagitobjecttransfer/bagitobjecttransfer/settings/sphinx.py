@@ -1,10 +1,6 @@
-# pylint: disable=wildcard-import
-# pylint: disable=unused-wildcard-import
-from pathlib import Path
+# Minimal settings for building docs with Sphinx
 from .base import *
 
-DEBUG = True
-TESTING = False
 SITE_ID = 1
 
 ALLOWED_HOSTS = [
@@ -12,18 +8,12 @@ ALLOWED_HOSTS = [
     'localhost',
 ]
 
-
-# SQLite 3 database is used for development (as opposed to MySQL)
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-# Asynchronous Redis Task Queue Manager
-# https://github.com/rq/django-rq
 
 RQ_QUEUES = {
     'default': {
@@ -35,25 +25,12 @@ RQ_QUEUES = {
     },
 }
 
-if TESTING:
-    for queue_config in RQ_QUEUES:
-        # Disable aynchronicity if running tests
-        queue_config['ASYNC'] = False
-
-
-# Emailing - Uses MailHog to intercept emails
-# MailHog web UI runs at localhost:8025
-# More information: https://github.com/mailhog/MailHog
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = '0.0.0.0'
 EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
-
-
-# Logging
 
 LOGGING = {
     'version': 1,

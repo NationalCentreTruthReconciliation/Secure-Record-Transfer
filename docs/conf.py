@@ -15,7 +15,7 @@ import django
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../bagitobjecttransfer'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bagitobjecttransfer.settings.development'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'bagitobjecttransfer.settings.sphinx'
 django.setup()
 
 

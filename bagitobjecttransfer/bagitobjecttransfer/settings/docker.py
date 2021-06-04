@@ -5,7 +5,7 @@ from decouple import config
 from .base import *
 
 DEBUG = True
-SITE_ID = 1
+SITE_ID = config('SITE_ID', default=1, cast=int)
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
