@@ -11,3 +11,4 @@ specifically for administrators that should be referred to for tasks involving B
     addingusers
     addingrights
     transferform
+    sitename
