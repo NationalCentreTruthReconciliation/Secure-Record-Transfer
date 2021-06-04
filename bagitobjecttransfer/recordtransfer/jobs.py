@@ -66,7 +66,8 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         session_token=form_data['session_token'],
         metadata=bagit_tags,
         bag_identifier=bag_name,
-        deletefiles=True)
+        deletefiles=True,
+        logger=LOGGER)
 
     if bagging_result['bag_created']:
         LOGGER.info('bagger reported that the bag was created successfully')
