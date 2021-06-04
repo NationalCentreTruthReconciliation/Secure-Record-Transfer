@@ -13,6 +13,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.utils.text import slugify
 from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
@@ -52,12 +53,19 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     LOGGER.info(msg='Flattening CAAIS metadata to be used as BagIt tags')
     bagit_tags = flatten_meta_tree(caais_metadata)
 
+    title = form_data['accession_title']
+    abbrev_title = title if len(title) <= 20 else title[0:20]
+    bag_name = '{username}_{datetime}_{title}'.format(
+        username=slugify(user_submitted),
+        datetime=timezone.now().strftime(r'%Y%m%d-%H%M%S'),
+        title=slugify(abbrev_title))
+
     LOGGER.info(msg='Creating bag on filesystem')
     bagging_result = create_bag(
         storage_folder=str(folder),
         session_token=form_data['session_token'],
         metadata=bagit_tags,
-        bag_identifier=None,
+        bag_identifier=bag_name,
         deletefiles=True)
 
     if bagging_result['bag_created']:

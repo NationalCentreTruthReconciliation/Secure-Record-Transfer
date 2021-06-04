@@ -37,7 +37,7 @@ def create_bag(storage_folder: str, session_token: str, metadata: dict, bag_iden
     LOGGER.info(msg=('Starting new bag creation for upload session "{0}"'.format(session_token)))
 
     current_time = timezone.now()
-    identifier = bag_identifier or current_time.strftime(r'%Y%m%d_%H%M%S')
+    identifier = bag_identifier or 'Bag_{0}'.format(current_time.strftime(r'%Y%m%d_%H%M%S'))
 
     new_bag_folder = _get_bagging_folder(storage_folder, identifier)
     if not new_bag_folder.exists():
@@ -188,9 +188,9 @@ def _get_bagging_folder(storage_folder: str, identifier: str):
 
     if not Path(storage_folder_path).exists():
         raise FolderNotFoundError(f'Could not find folder "{storage_folder}"')
-    new_folder = storage_folder_path / f'Bag_{identifier}'
+    new_folder = storage_folder_path / f'{identifier}'
     increment = 1
     while new_folder.exists():
-        new_folder = storage_folder_path / f'Bag_{identifier}_{increment}'
+        new_folder = storage_folder_path / f'{identifier}_{increment}'
         increment += 1
     return new_folder
