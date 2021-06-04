@@ -3,7 +3,7 @@
 
 {% block form_explanation %}
     <p>
-        {% blocktrans %}        
+        {% blocktrans %}
         <a id="show-rights-dialog" href="#">Click here</a> for an explanation of the different types
         of rights.
         {% endblocktrans %}
@@ -14,8 +14,8 @@
             {% blocktrans %}
             Depending on the records you are transferring, there may be specific rights that govern
             the access of your records. The following is a brief description about the types of
-            rights that are available to be used. If none of suit your needs, select Other in the
-            rights dropdown.
+            rights that are available to be used. If none suit your needs, select <b>Other</b> in
+            the rights dropdown.
             {% endblocktrans %}
         </p>
         {% for right in rights %}

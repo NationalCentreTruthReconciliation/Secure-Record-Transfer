@@ -212,7 +212,7 @@ class TransferFormWizard(SessionWizardView):
             users_groups = BagGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
         elif step_name == 'rights':
-            all_rights = Right.objects.all().order_by('name')
+            all_rights = Right.objects.all().order_by('name').exclude(name='Other')
             context.update({'rights': all_rights})
         return context
 
