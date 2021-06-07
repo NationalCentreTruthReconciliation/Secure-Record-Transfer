@@ -216,13 +216,16 @@ def _map_section_2(section_2: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row['donorNote'] = '. '.join(donor_narrative)
 
     # 2.1.2 Source Name -> donorName
+    # 2.1.2 Source Name -> creators
     atom_row['donorName'] = source_of_info['source_name']
+    atom_row['creators'] = source_of_info['source_name']
 
     # Contact Name -> donorContactPerson (v2.6)
     # Job Title -> donorContactPerson (v2.6, NOT IDEAL)
     if version >= (2, 6):
         contact_person = f'{contact_info["contact_name"]} ({contact_info["job_title"]})'
         atom_row['donorContactPerson'] = contact_person
+
 
     # Address Line 1 -> donorStreetAddress
     # Address Line 2 -> donorStreetAddress
@@ -276,13 +279,13 @@ def _map_section_3(section_3: OrderedDict, atom_row: OrderedDict, version: tuple
         atom_row['creationDates'] = section_3['date_of_material']
         atom_row['creationDatesStart'] = start_date
         atom_row['creationDatesEnd'] = end_date
-        atom_row['creators'] = 'NULL'
+        atom_row['creators'] = atom_row['creators'] or 'NULL'
         atom_row['creationDatesType'] = 'Creation'
     elif version >= (2, 3):
         atom_row['eventDates'] = section_3['date_of_material']
         atom_row['eventStartDates'] = start_date
         atom_row['eventEndDates'] = end_date
-        atom_row['creators'] = 'NULL'
+        atom_row['creators'] = atom_row['creators'] or 'NULL'
         atom_row['eventTypes'] = 'Creation'
 
     # 3.2.1 Extent Statement Type -> (NO EQUIVALENT)
@@ -329,13 +332,13 @@ def _map_section_4(section_4: OrderedDict, atom_row: OrderedDict, version: tuple
     for statement in section_4['material_assessment_statement']:
         statement_types.append(statement['material_assessment_statement_type'])
         statement_values.append(statement['material_assessment_statement_value'])
-        action_plans.append(statement['material_assessment_action_plan'] or 'NULL')
-        statement_notes.append(statement['material_assessment_statement_note'] or 'NULL')
+        action_plans.append(statement['material_assessment_action_plan'])
+        statement_notes.append(statement['material_assessment_statement_note'])
     atom_row['physicalCondition'] = '|'.join([f'Assessment Type: {x}; Statement: {y}' for \
         x, y in zip(statement_types, statement_values)
     ])
-    atom_row['processingStatus'] = '|'.join(action_plans)
-    atom_row['processingNotes'] = '|'.join(statement_notes)
+    # atom_row['processingStatus'] = '|'.join(action_plans)
+    # atom_row['processingNotes'] = '|'.join(statement_notes)
 
     # 4.4.1 Appraisal Statement Type -> appraisal (NOT IDEAL)
     # 4.4.2 Appraisal Statement Value -> appraisal (NOT IDEAL)
