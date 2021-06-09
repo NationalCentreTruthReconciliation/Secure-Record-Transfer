@@ -4,9 +4,11 @@ import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
 
+from django.contrib.admin.utils import unquote
+
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
 from django.contrib import admin, messages
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -17,7 +19,7 @@ from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.forms import BagForm, InlineBagForm
-from recordtransfer.jobs import create_downloadable_bag
+from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
 from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job, Right
 
 
@@ -90,15 +92,68 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
+    @sensitive_post_parameters_m
+    def user_change_password(self, request, id, form_url=''):
+        """ Send a notification email when a user's password is changed. """
+        response = super().user_change_password(request, id, form_url)
+        user = self.get_object(request, unquote(id))
+        form = self.change_password_form(user, request.POST)
+        if form.is_valid() and request.method == 'POST':
+            context = {
+                'subject': "Password updated",
+                'changed_item': "password",
+                'changed_status': "updated"
+            }
+            send_user_account_updated.delay(user, context)
+        return response
+
     def save_model(self, request, obj, form, change):
-        # TODO: We may want to notify the modified user (by sending an email) if any major changes
-        #       are made to their account.
+        """ Enforce superuser permissions checks and send notification emails for other account updates. """
         if change and obj.is_superuser and not request.user.is_superuser:
             messages.set_level(request, messages.ERROR)
             msg = 'Non-superusers cannot modify superuser accounts.'
             self.message_user(request, msg, messages.ERROR)
         else:
             super().save_model(request, obj, form, change)
+            if change and (not obj.is_active or self._alert_user_changed(form)):
+                if not obj.is_active:
+                    context = {
+                        'subject': "Account Deactivated",
+                        'changed_item': "account",
+                        'changed_status': "deactivated"
+                    }
+                else:
+                    context = {
+                        'subject': "Account updated",
+                        'changed_item': "account",
+                        'changed_status': "updated",
+                        'changed_list': self._get_changed_message(form.changed_data, obj)
+                    }
+
+                send_user_account_updated.delay(obj, context)
+
+    @staticmethod
+    def _get_changed_message(changed_data: list, user: User):
+        """ Generate a list of changed status message for certain account details. """
+        message_list = list()
+        for item in changed_data:
+            message = None
+            change = None
+            if item == "is_superuser":
+                message = "Superuser privileges"
+                change = user.is_superuser
+            elif item == "is_staff":
+                message = "Staff privileges"
+                change = user.is_staff
+            if message is not None:
+                message += " have been {} your account".format("added to" if change else "removed from")
+                message_list.append(message)
+        return message_list
+
+    @staticmethod
+    def _alert_user_changed(form):
+        """ Check if any of the account details updated require notification. """
+        return len([val for val in form.changed_data if val in ['is_superuser', 'is_staff']]) > 0
 
 
 class UploadedFileAdmin(admin.ModelAdmin):
