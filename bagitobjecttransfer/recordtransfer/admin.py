@@ -5,6 +5,7 @@ from io import StringIO, BytesIO
 from pathlib import Path
 
 from django.contrib.admin.utils import unquote
+from django.utils.translation import gettext
 
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
 from django.contrib import admin, messages
@@ -100,9 +101,9 @@ class CustomUserAdmin(UserAdmin):
         form = self.change_password_form(user, request.POST)
         if form.is_valid() and request.method == 'POST':
             context = {
-                'subject': "Password updated",
-                'changed_item': "password",
-                'changed_status': "updated"
+                'subject': gettext("Password updated"),
+                'changed_item': gettext("password"),
+                'changed_status': gettext("updated")
             }
             send_user_account_updated.delay(user, context)
         return response
@@ -115,18 +116,18 @@ class CustomUserAdmin(UserAdmin):
             self.message_user(request, msg, messages.ERROR)
         else:
             super().save_model(request, obj, form, change)
-            if change and (not obj.is_active or self._alert_user_changed(form)):
+            if change and (not obj.is_active or "is_superuser" in form.changed_data or "is_staff" in form.changed_data):
                 if not obj.is_active:
                     context = {
-                        'subject': "Account Deactivated",
-                        'changed_item': "account",
-                        'changed_status': "deactivated"
+                        'subject': gettext("Account Deactivated"),
+                        'changed_item': gettext("account"),
+                        'changed_status': gettext("deactivated")
                     }
                 else:
                     context = {
-                        'subject': "Account updated",
-                        'changed_item': "account",
-                        'changed_status': "updated",
+                        'subject': gettext("Account updated"),
+                        'changed_item': gettext("account"),
+                        'changed_status': gettext("updated"),
                         'changed_list': self._get_changed_message(form.changed_data, obj)
                     }
 
@@ -136,24 +137,17 @@ class CustomUserAdmin(UserAdmin):
     def _get_changed_message(changed_data: list, user: User):
         """ Generate a list of changed status message for certain account details. """
         message_list = list()
-        for item in changed_data:
-            message = None
-            change = None
-            if item == "is_superuser":
-                message = "Superuser privileges"
-                change = user.is_superuser
-            elif item == "is_staff":
-                message = "Staff privileges"
-                change = user.is_staff
-            if message is not None:
-                message += " have been {} your account".format("added to" if change else "removed from")
-                message_list.append(message)
+        if "is_superuser" in changed_data:
+            if user.is_superuser:
+                message_list.append("Superuser privileges have been added to your account.")
+            else:
+                message_list.append("Superuser privileges have been removed from your account.")
+        if "is_staff" in changed_data:
+            if user.is_staff:
+                message_list.append("Staff privileges have been added to your account.")
+            else:
+                message_list.append("Staff privileges have been removed from your account.")
         return message_list
-
-    @staticmethod
-    def _alert_user_changed(form):
-        """ Check if any of the account details updated require notification. """
-        return len([val for val in form.changed_data if val in ['is_superuser', 'is_staff']]) > 0
 
 
 class UploadedFileAdmin(admin.ModelAdmin):
