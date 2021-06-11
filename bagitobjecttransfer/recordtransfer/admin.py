@@ -4,9 +4,12 @@ import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
 
+from django.contrib.admin.utils import unquote
+from django.utils.translation import gettext
+
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
 from django.contrib import admin, messages
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -17,7 +20,7 @@ from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.bagger import update_bag
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.forms import BagForm, InlineBagForm
-from recordtransfer.jobs import create_downloadable_bag
+from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
 from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job, Right
 
 
@@ -90,15 +93,61 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
+    @sensitive_post_parameters_m
+    def user_change_password(self, request, id, form_url=''):
+        """ Send a notification email when a user's password is changed. """
+        response = super().user_change_password(request, id, form_url)
+        user = self.get_object(request, unquote(id))
+        form = self.change_password_form(user, request.POST)
+        if form.is_valid() and request.method == 'POST':
+            context = {
+                'subject': gettext("Password updated"),
+                'changed_item': gettext("password"),
+                'changed_status': gettext("updated")
+            }
+            send_user_account_updated.delay(user, context)
+        return response
+
     def save_model(self, request, obj, form, change):
-        # TODO: We may want to notify the modified user (by sending an email) if any major changes
-        #       are made to their account.
+        """ Enforce superuser permissions checks and send notification emails for other account updates. """
         if change and obj.is_superuser and not request.user.is_superuser:
             messages.set_level(request, messages.ERROR)
             msg = 'Non-superusers cannot modify superuser accounts.'
             self.message_user(request, msg, messages.ERROR)
         else:
             super().save_model(request, obj, form, change)
+            if change and (not obj.is_active or "is_superuser" in form.changed_data or "is_staff" in form.changed_data):
+                if not obj.is_active:
+                    context = {
+                        'subject': gettext("Account Deactivated"),
+                        'changed_item': gettext("account"),
+                        'changed_status': gettext("deactivated")
+                    }
+                else:
+                    context = {
+                        'subject': gettext("Account updated"),
+                        'changed_item': gettext("account"),
+                        'changed_status': gettext("updated"),
+                        'changed_list': self._get_changed_message(form.changed_data, obj)
+                    }
+
+                send_user_account_updated.delay(obj, context)
+
+    @staticmethod
+    def _get_changed_message(changed_data: list, user: User):
+        """ Generate a list of changed status message for certain account details. """
+        message_list = list()
+        if "is_superuser" in changed_data:
+            if user.is_superuser:
+                message_list.append(gettext("Superuser privileges have been added to your account."))
+            else:
+                message_list.append(gettext("Superuser privileges have been removed from your account."))
+        if "is_staff" in changed_data:
+            if user.is_staff:
+                message_list.append(gettext("Staff privileges have been added to your account."))
+            else:
+                message_list.append(gettext("Staff privileges have been removed from your account."))
+        return message_list
 
 
 class UploadedFileAdmin(admin.ModelAdmin):

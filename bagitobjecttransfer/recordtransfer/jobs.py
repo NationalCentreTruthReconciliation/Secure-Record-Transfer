@@ -319,6 +319,28 @@ def send_user_activation_email(new_user: User):
         }
     )
 
+
+@django_rq.job
+def send_user_account_updated(user_updated: User, context_vars: dict):
+    """ Send a notice that the user's account has been updated.
+
+    Args:
+        user_updated (User): The user whose account was updated.
+        context_vars (dict): Template context variables.
+    """
+
+    domain = Site.objects.get_current().domain
+    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+
+    send_mail_with_logs(
+        recipients=[user_updated.email],
+        from_email=from_email,
+        subject=context_vars['subject'],
+        template_name='recordtransfer/email/account_updated.html',
+        context=context_vars
+    )
+
+
 def send_mail_with_logs(recipients: list, from_email: str, subject, template_name: str,
                         context: dict):
     try:
