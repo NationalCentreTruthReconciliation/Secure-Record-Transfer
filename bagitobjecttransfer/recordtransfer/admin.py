@@ -139,14 +139,14 @@ class CustomUserAdmin(UserAdmin):
         message_list = list()
         if "is_superuser" in changed_data:
             if user.is_superuser:
-                message_list.append("Superuser privileges have been added to your account.")
+                message_list.append(gettext("Superuser privileges have been added to your account."))
             else:
-                message_list.append("Superuser privileges have been removed from your account.")
+                message_list.append(gettext("Superuser privileges have been removed from your account."))
         if "is_staff" in changed_data:
             if user.is_staff:
-                message_list.append("Staff privileges have been added to your account.")
+                message_list.append(gettext("Staff privileges have been added to your account."))
             else:
-                message_list.append("Staff privileges have been removed from your account.")
+                message_list.append(gettext("Staff privileges have been removed from your account."))
         return message_list
 
 
