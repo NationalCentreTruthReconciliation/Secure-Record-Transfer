@@ -2,6 +2,10 @@
 import platform
 from decouple import config
 
+# Enable or disable the sign-up ability
+
+SIGN_UP_ENABLED = config('SIGN_UP_ENABLED', default=True, cast=bool)
+
 # The location where bags will be stored
 
 BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
