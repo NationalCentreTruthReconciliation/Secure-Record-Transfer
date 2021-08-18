@@ -4,38 +4,59 @@ recordtransfer.settings - Application Settings
 .. automodule:: recordtransfer.settings
    :members:
 
+All options can be set by directly modifying the :code:`recordtransfer/settings.py` file or by
+setting a value in the :code:`.env` environment file.
+
 
 **BAG_STORAGE_FOLDER** *(string)*:
     The folder on the server where bags are to be stored.
 
-    .. code-block:: python
+    **This value can be set in the settings.py file or in the .env file**
 
-        BAG_STORAGE_FOLDER = '/path/to/your/folder'
+    ::
+
+        BAG_STORAGE_FOLDER=/path/to/your/folder
 
 
 **APPROXIMATE_DATE_FORMAT** *(string)*:
     A format string for the date to indicate an approximate date. The string variable :code:`{date}`
     must be present for the date format to be used.
 
-    .. code-block:: python
+    **This value can be set in the settings.py file or in the .env file**
 
-        APPROXIMATE_DATE_FORMAT = 'Circa. {date}'
+    ::
+
+        APPROXIMATE_DATE_FORMAT='Circa. {date}'
 
 
 **DO_NOT_REPLY_EMAIL** *(string)*:
     An email address for the application use to send emails from.
 
-    .. code-block:: python
+    **This value can be set in the settings.py file or in the .env file**
 
-        DO_NOT_REPLY_EMAIL = 'donotreply@recordtransfer.ca'
+    ::
+
+        DO_NOT_REPLY_EMAIL=donotreply@recordtransfer.ca
+
+
+**ARCHIVIST_EMAIL** *(string)*:
+    The email displayed for people to contact an archivist.
+
+    **This value can be set in the settings.py file or in the .env file**
+
+    ::
+
+        ARCHIVIST_EMAIL=archives@domain.ca
 
 
 **BASE_URL** *(string)*:
     The base URL of the website.
 
-    .. code-block:: python
+    **This value can be set in the settings.py file or in the .env file**
 
-        BASE_URL = 'https://recordtransfer.ca'
+    ::
+
+        BASE_URL=https://recordtransfer.ca
 
 
 **ACCEPTED_FILE_FORMATS** *(dict)*:
@@ -46,6 +67,8 @@ recordtransfer.settings - Application Settings
     The file extensions are used to determine what a user is allowed to upload. The group name is
     used to create a human-readable extent statement about the quantity and type of files the user
     uploaded.
+
+    **This value can only be set in the settings.py file**
 
     .. code-block:: python
 
@@ -88,6 +111,8 @@ recordtransfer.settings - Application Settings
     fields that are not filled out.
 
     Here is an example bare-bones configuration with the absolute minimum amount of fields set:
+
+    **This value can only be set in the settings.py file**
 
     .. code-block:: python
 

@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 
 from . import views
 from . import forms
+from . import settings
 
 app_name = 'recordtransfer'
 urlpatterns = [
@@ -26,14 +27,17 @@ urlpatterns = [
 
     path('about/', views.About.as_view(), name='about'),
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
-
-    path('createaccount/', views.CreateAccount.as_view(), name='createaccount'),
-    path('createaccount/sent/', views.ActivationSent.as_view(), name='activationsent'),
-    path('createaccount/complete/', views.ActivationComplete.as_view(), name='accountcreated'),
-    path('createaccount/invalid/', views.ActivationInvalid.as_view(), name='activationinvalid'),
-    re_path(('createaccount/'
-             'activate/'
-             r'(?P<uidb64>[0-9A-Za-z_\-]+)/'
-             r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$'),
-        views.activate_account, name='activateaccount')
 ]
+
+if settings.SIGN_UP_ENABLED:
+    urlpatterns.extend([
+        path('createaccount/', views.CreateAccount.as_view(), name='createaccount'),
+        path('createaccount/sent/', views.ActivationSent.as_view(), name='activationsent'),
+        path('createaccount/complete/', views.ActivationComplete.as_view(), name='accountcreated'),
+        path('createaccount/invalid/', views.ActivationInvalid.as_view(), name='activationinvalid'),
+        re_path(('createaccount/'
+                'activate/'
+                r'(?P<uidb64>[0-9A-Za-z_\-]+)/'
+                r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$'),
+            views.activate_account, name='activateaccount')
+    ])

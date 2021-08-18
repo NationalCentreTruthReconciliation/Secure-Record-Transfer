@@ -2,13 +2,17 @@
 import platform
 from decouple import config
 
+# Enable or disable the sign-up ability
+
+SIGN_UP_ENABLED = config('SIGN_UP_ENABLED', default=True, cast=bool)
+
 # The location where bags will be stored
 
 BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 
 # Email Usernames
 
-DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_NAME', default='do-not-reply')
+DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_USERNAME', default='do-not-reply')
 ARCHIVIST_EMAIL = config('ARCHIVIST_EMAIL')
 
 # Default data to inject into metadata, after the user enters their own metadata
@@ -48,7 +52,7 @@ DEFAULT_DATA = {
 }
 
 
-APPROXIMATE_DATE_FORMAT = '[ca. {date}]'
+APPROXIMATE_DATE_FORMAT = config('APPROXIMATE_DATE_FORMAT', default='[ca. {date}]')
 
 # File types allowed to be uploaded to the backend. Do not use periods before the extension, and
 # ensure that all file extensions are lowercase.
