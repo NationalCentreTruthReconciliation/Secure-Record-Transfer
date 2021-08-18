@@ -17,11 +17,11 @@
             <div>
                 Someone created a new account for the NCTR Record Transfer Portal using this email.
                 To activate your account,
-                <a href="{{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}">click here</a>,
+                <a href="http://{{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}">click here</a>,
                 or copy and paste the following link into your favourite browser:
             </div>
             <p>
-                {{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}
+                http://{{ base_url }}{% url 'recordtransfer:activateaccount' uidb64=uid token=token %}
             </p>
             <div style="
                 font-size: 10pt;">
