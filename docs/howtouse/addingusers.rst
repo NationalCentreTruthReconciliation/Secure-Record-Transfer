@@ -59,6 +59,10 @@ The simplest way for a new user to be created is to use the sign up form. The Si
 appear in the header on the main site if you are not logged in. Clicking the Sign Up link will
 present the user with a sign up form.
 
+.. note::
+   You can disable the sign up function by setting SIGN_UP_ENABLED to False in
+   recordtransfer/settings.py
+
 .. image:: images/user_sign_up.png
     :alt: Filled in sign up form
 

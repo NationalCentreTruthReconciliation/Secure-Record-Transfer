@@ -13,3 +13,5 @@ specifically for administrators that should be referred to for tasks involving B
     transferform
     acceptedfiletypes
     sitename
+
+See also: :ref:`recordtransfer.settings - Application Settings`.
