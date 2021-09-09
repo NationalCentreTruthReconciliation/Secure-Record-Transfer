@@ -11,7 +11,8 @@ from django.utils.translation import gettext
 from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup, Right
+from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup, Right, \
+    SourceRole, SourceType
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -212,8 +213,15 @@ class TransferFormWizard(SessionWizardView):
             users_groups = BagGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
         elif step_name == 'rights':
-            all_rights = Right.objects.all().order_by('name').exclude(name='Other')
+            all_rights = Right.objects.all().exclude(name='Other')
             context.update({'rights': all_rights})
+        elif step_name == 'sourceinfo':
+            all_roles = SourceRole.objects.all().exclude(name='Other')
+            all_types = SourceType.objects.all().exclude(name='Other')
+            context.update({
+                'source_roles': all_roles,
+                'source_types': all_types,
+            })
         return context
 
     def get_all_cleaned_data(self):

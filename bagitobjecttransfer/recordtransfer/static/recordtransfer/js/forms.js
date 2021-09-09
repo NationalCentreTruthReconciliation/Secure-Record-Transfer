@@ -298,6 +298,7 @@ function toggleFlexItems(selectors, state) {
     }
 }
 
+
 $(() => {
     /***************************************************************************
      * Dropzone Setup
@@ -306,6 +307,10 @@ $(() => {
     var uploadedFiles = [] // An array of File objects
     var sessionToken = ''
     const csrfToken = getCookie('csrftoken')
+
+    var rightsDialog = undefined
+    var sourceRolesDialog = undefined
+    var sourceTypesDialog = undefined
 
     $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
@@ -489,7 +494,12 @@ $(() => {
         })
     })
 
-    var dialog = $('#rights-dialog').dialog({
+
+    /***************************************************************************
+     * Dialog Box Setup
+     **************************************************************************/
+
+    rightsDialog = $('#rights-dialog').dialog({
         autoOpen: false,
         modal: false,
         width: 500,
@@ -497,16 +507,55 @@ $(() => {
         buttons: [
             {
                 text: "OK",
-                click: () => { dialog.dialog("close") }
+                click: () => { rightsDialog.dialog("close") }
             }
         ],
     })
 
-    $("#show-rights-dialog").on("click", (event) => {
+    $('#show-rights-dialog').on("click", (event) => {
         event.preventDefault()
-        dialog.dialog("open")
-        dialog.dialog("moveToTop")
+        rightsDialog.dialog("open")
+        rightsDialog.dialog("moveToTop")
     })
+
+    sourceRolesDialog = $('#source-roles-dialog').dialog({
+        autoOpen: false,
+        modal: false,
+        width: 500,
+        position: { my: "center", at: "top", of: window },
+        buttons: [
+            {
+                text: "OK",
+                click: () => { sourceRolesDialog.dialog("close") }
+            }
+        ],
+    })
+
+    $('#show-source-roles-dialog').on("click", (event) => {
+        event.preventDefault()
+        sourceRolesDialog.dialog("open")
+        sourceRolesDialog.dialog("moveToTop")
+    })
+
+    sourceTypesDialog = $('#source-types-dialog').dialog({
+        autoOpen: false,
+        modal: false,
+        width: 500,
+        position: { my: "center", at: "top", of: window },
+        buttons: [
+            {
+                text: "OK",
+                click: () => { sourceTypesDialog.dialog("close") }
+            }
+        ],
+    })
+
+    $('#show-source-types-dialog').on("click", (event) => {
+        event.preventDefault()
+        sourceTypesDialog.dialog("open")
+        sourceTypesDialog.dialog("moveToTop")
+    })
+
 
     /***************************************************************************
      * Expandable Forms Setup
@@ -572,6 +621,9 @@ $(() => {
     setupSelectOtherToggle(['#id_contactinfo-other_province_or_state'], removeOther);
 
     setupSelectOtherToggle(['.rights-select-other'], removeOther);
+
+    setupSelectOtherToggle(['.source-type-select-other'], removeOther);
+    setupSelectOtherToggle(['.source-role-select-other'], removeOther);
 
     // Add a new click handler (with namespace) to fix the event handlers that were cloned.
     $('.add-form-row', '#transfer-form').on('click.transfer-form', (event) => {
