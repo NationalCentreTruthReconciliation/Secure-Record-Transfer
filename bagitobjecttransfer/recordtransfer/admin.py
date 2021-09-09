@@ -21,7 +21,8 @@ from recordtransfer.bagger import update_bag
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.forms import BagForm, InlineBagForm
 from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
-from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job, Right
+from recordtransfer.models import Bag, BagGroup, User, UploadedFile, UploadSession, Job, Right, \
+    SourceType, SourceRole
 
 
 def linkify(field_name):
@@ -442,6 +443,18 @@ class RightsAdmin(admin.ModelAdmin):
         (None, {'fields': ['name', 'description']}),
     ]
 
+class SourceRoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    fieldsets = [
+        (None, {'fields': ['name', 'description']}),
+    ]
+
+class SourceTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    fieldsets = [
+        (None, {'fields': ['name', 'description']}),
+    ]
+
 
 admin.site.register(Bag, BagAdmin)
 admin.site.register(BagGroup, BagGroupAdmin)
@@ -450,3 +463,5 @@ admin.site.register(User, CustomUserAdmin)
 admin.site.register(UploadSession, UploadSessionAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(Right, RightsAdmin)
+admin.site.register(SourceRole, SourceRoleAdmin)
+admin.site.register(SourceType, SourceTypeAdmin)

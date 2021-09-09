@@ -11,7 +11,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
-from recordtransfer.models import User, Bag, Right
+from recordtransfer.models import User, Bag, Right, SourceRole, SourceType
 from recordtransfer.settings import DEFAULT_DATA
 
 
@@ -429,6 +429,37 @@ class ContactInfoForm(forms.Form):
 
 class SourceInfoForm(forms.Form):
     ''' The Source Information portion of the form. Contains fields from Section 2 of CAAIS '''
+    def clean(self):
+        cleaned_data = super().clean()
+
+        source_type = cleaned_data.get('source_type')
+        if source_type is None or source_type in forms.Field.empty_values:
+            self.add_error('source_type', gettext('The source type is required'))
+        else:
+            if source_type.name.lower().strip() == 'other':
+                source_type_other = cleaned_data.get('other_source_type')
+                if source_type_other in forms.Field.empty_values:
+                    self.add_error('other_source_type',
+                                   gettext('When source type is "Other", you must fill out '
+                                           'this field.'))
+                else:
+                    cleaned_data['source_type'] = source_type_other
+
+        source_role = cleaned_data.get('source_role')
+        if source_role is None or source_role in forms.Field.empty_values:
+            self.add_error('source_role', gettext('The source role is required'))
+        else:
+            if source_role.name.lower().strip() == 'other':
+                source_role_other = cleaned_data.get('other_source_role')
+                if source_role_other in forms.Field.empty_values:
+                    self.add_error('other_source_role',
+                                   gettext('When source role is "Other", you must fill out '
+                                           'this field.'))
+                else:
+                    cleaned_data['source_role'] = source_role_other
+
+        return cleaned_data
+
     source_name = forms.CharField(
         max_length=64,
         min_length=2,
@@ -438,45 +469,67 @@ class SourceInfoForm(forms.Form):
         help_text=gettext('The organization or entity submitting the records')
     )
 
-    source_type = forms.ChoiceField(
-        required=True,
-        choices=[
-            ('Person', gettext('Person')),
-            ('Family', gettext('Family')),
-            ('Band', gettext('Band')),
-            ('Company', gettext('Company')),
-            ('Corporation', gettext('Corporation')),
-            ('Organization', gettext('Organization')),
-            ('Educational Insitution', gettext('Educational Institution')),
-            ('Government Office', gettext('Government Office')),
-            ('Other', gettext('Other')),
-            ('Unknown', gettext('Unknown')),
-        ],
+    source_type = forms.ModelChoiceField(
+        required=False,
+        queryset=SourceType.objects.all()\
+            .annotate(
+                sort_order_other_first=Case(
+                    When(name__iexact='other', then=Value('____')),
+                    default='name',
+                    output_field=CharField(),
+                )
+            )\
+            .order_by('sort_order_other_first'),
+        empty_label=gettext('Please select one'),
+        label=gettext('Source type *'),
+        help_text=gettext(
+            'How would you describe <b>what</b> the source entity is? '
+            'i.e., The source is a(n) ______'
+        ),
         widget=forms.Select(
             attrs={
                 'class': 'reduce-form-field-width',
             }
         ),
-        label=gettext('The source is a(n)'),
-        help_text=gettext('How would you describe <b>what</b> the source entity is?'),
     )
 
-    source_role = forms.ChoiceField(
-        required=True,
-        choices=[
-            ('Creator', gettext('Record Creator')),
-            ('Donor', gettext('Record Donor')),
-            ('Custodian', gettext('Record Holder')),
-            ('Other', gettext('Other')),
-            ('Unknown', gettext('Unknown')),
-        ],
+    other_source_type = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': gettext('A source type not covered by the other choices'),
+            'class': 'source-type-select-other',
+        }),
+        label=gettext('Other source type'),
+    )
+
+    source_role = forms.ModelChoiceField(
+        required=False,
+        queryset=SourceRole.objects.all()\
+            .annotate(
+                sort_order_other_first=Case(
+                    When(name__iexact='other', then=Value('____')),
+                    default='name',
+                    output_field=CharField(),
+                )
+            )\
+            .order_by('sort_order_other_first'),
+        empty_label=gettext('Please select one'),
+        label=gettext('Source role **'),
+        help_text=gettext('How would you describe <b>how</b> the source relates to the records? '),
         widget=forms.Select(
             attrs={
                 'class': 'reduce-form-field-width',
             }
-        ),
-        label=gettext('The source\'s relationship to the records'),
-        help_text=gettext('How would you describe <b>how</b> the source relates to the records?'),
+        )
+    )
+
+    other_source_role = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': gettext('A source role not covered by the other choices'),
+            'class': 'source-role-select-other',
+        }),
+        label=gettext('Other source role'),
     )
 
     source_note = forms.CharField(
@@ -614,7 +667,8 @@ class RightsForm(forms.Form):
                 rights_type_other = cleaned_data.get('other_rights_statement_type')
                 if rights_type_other in forms.Field.empty_values:
                     self.add_error('other_rights_statement_type',
-                                   'When "Type of Rights" is "Other", you must fill out this field.')
+                                   gettext('When "Type of Rights" is "Other", you must fill out '
+                                           'this field.'))
                 else:
                     cleaned_data['rights_statement_type'] = rights_type_other
 

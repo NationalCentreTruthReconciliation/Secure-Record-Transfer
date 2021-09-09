@@ -2,6 +2,49 @@
 {% load static %}
 {% load i18n %}
 
+{% block form_explanation %}
+    <p>
+        {% blocktrans %}
+        <a id="show-source-types-dialog" href="#">* Click here</a> for an explanation of the
+        different types of source types.
+        {% endblocktrans %}
+        <br/>
+        {% blocktrans %}
+        <a id="show-source-roles-dialog" href="#">** Click here</a> for an explanation of the
+        different types of source relationships (roles).
+        {% endblocktrans %}
+    </p>
+    <br/>
+    <div id="source-types-dialog" title="Explanation of Source Types">
+        <p>
+            {% blocktrans %}
+            The source type describes what type of entity the source of the records is. If none of
+            the provided options properly describe the source entity, select <b>Other</b> in the
+            source types dropdown and enter your own type.
+            {% endblocktrans %}
+        </p>
+        {% for stype in source_types %}
+            <p>
+                <b>{{ stype.name }}:</b> {{ stype.description }}
+            </p>
+        {% endfor %}
+    </div>
+    <div id="source-roles-dialog" title="Explanation of Source Roles">
+        <p>
+            {% blocktrans %}
+            The source role describes how the entity relates to the records. If none of the
+            provided options properly describe the source's relationship to the records, select
+            <b>Other</b> in the source roles dropdown and enter your own type.
+            {% endblocktrans %}
+        </p>
+        {% for role in source_roles %}
+            <p>
+                <b>{{ role.name }}:</b> {{ role.description }}
+            </p>
+        {% endfor %}
+    </div>
+{% endblock %}
+
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
     {{ block.super }}

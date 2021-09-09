@@ -131,9 +131,24 @@ class Job(models.Model):
 
 
 class Right(models.Model):
-    """ The pre-populated rights statements. """
+    ''' A term describing a right '''
     name = models.CharField(max_length=255, null=False, unique=True)
     description = models.CharField(max_length=255, null=False)
+    def __str__(self):
+        return self.name
 
+
+class SourceType(models.Model):
+    ''' A term describing a source type '''
+    name = models.CharField(max_length=255, null=False, unique=True)
+    description = models.CharField(max_length=255, null=False)
+    def __str__(self):
+        return self.name
+
+
+class SourceRole(models.Model):
+    ''' A term describing a source role '''
+    name = models.CharField(max_length=255, null=False, unique=True)
+    description = models.CharField(max_length=255, null=False)
     def __str__(self):
         return self.name
