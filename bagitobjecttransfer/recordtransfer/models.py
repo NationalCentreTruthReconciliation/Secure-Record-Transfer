@@ -2,6 +2,7 @@ import os
 import json
 
 from django.db import models
+from django.contrib import admin
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -69,20 +70,12 @@ class BagGroup(models.Model):
 
 
 class Bag(models.Model):
-    ''' A bag that a user submitted. '''
-    class ReviewStatus(models.TextChoices):
-        ''' The status of the bag's review '''
-        NOT_REVIEWED = 'NR', _('Not Reviewed')
-        REVIEW_STARTED = 'RS', _('Review Started')
-        REVIEW_COMPLETE = 'RC', _('Review Complete')
-
+    ''' A bag created as a part of a user's submission '''
     bagging_date = models.DateTimeField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, blank=True, null=True)
     bag_name = models.CharField(max_length=256, null=True)
     caais_metadata = models.TextField(default=r'{}')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
-                                     default=ReviewStatus.NOT_REVIEWED)
 
     @property
     def location(self):
@@ -103,8 +96,65 @@ class Bag(models.Model):
         view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
+    def get_admin_zip_url(self):
+        view_name = 'admin:{0}_{1}_zip'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
+
     def __str__(self):
-        return f'{self.bag_name} (Created by {self.user})'
+        return self.bag_name
+
+
+class Submission(models.Model):
+    class ReviewStatus(models.TextChoices):
+        ''' The status of the bag's review '''
+        NOT_REVIEWED = 'NR', _('Not Reviewed')
+        REVIEW_STARTED = 'RS', _('Review Started')
+        REVIEW_COMPLETE = 'RC', _('Review Complete')
+
+    class LevelOfDetail(models.TextChoices):
+        ''' The level of detail of the submission '''
+        NOT_SPECIFIED = 'NS', _('Not Specified')
+        MINIMAL = 'ML', _('Minimal')
+        PARTIAL = 'PL', _('Partial')
+        FULL = 'FL', _('Full')
+
+    submission_date = models.DateTimeField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    bag = models.ForeignKey(Bag, on_delete=models.SET_NULL, null=True)
+    review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
+                                     default=ReviewStatus.NOT_REVIEWED)
+    accession_identifier = models.CharField(max_length=128, default='', null=True)
+    level_of_detail = models.CharField(max_length=2, choices=LevelOfDetail.choices,
+                                       default=LevelOfDetail.NOT_SPECIFIED)
+
+    def get_admin_change_url(self):
+        view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
+
+    def get_admin_report_url(self):
+        view_name = 'admin:{0}_{1}_report'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
+
+    def __str__(self):
+        return f'Submission by {self.user} at {self.submission_date}'
+
+
+class Appraisal(models.Model):
+    ''' An appraisal made by and administrator for a donation '''
+    class AppraisalType(models.TextChoices):
+        ARCHIVAL_APPRAISAL = 'AP', _('Archival Appraisal')
+        MONETARY_APPRAISAL = 'MP', _('Monetary Appraisal')
+
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    appraisal_type = models.CharField(max_length=2, choices=AppraisalType.choices)
+    appraisal_date = models.DateTimeField()
+    statement = models.TextField(null=False)
+    note = models.TextField(default='', null=True)
+
+    def __str__(self):
+        return f'{self.get_appraisal_type_display()} by {self.user} on {self.appraisal_date}'
 
 
 class Job(models.Model):
@@ -125,6 +175,10 @@ class Job(models.Model):
                                   default=JobStatus.NOT_STARTED)
     attached_file = models.FileField(upload_to='jobs/zipped_bags', storage=OverwriteStorage,
                                      blank=True, null=True)
+
+    def get_admin_download_url(self):
+        view_name = 'admin:{0}_{1}_download'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
 
     def __str__(self):
         return f'{self.name} (Created by {self.user_triggered})'
