@@ -4,6 +4,7 @@ import json
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
@@ -146,6 +147,18 @@ class Submission(models.Model):
     accession_identifier = models.CharField(max_length=128, default='', null=True)
     level_of_detail = models.CharField(max_length=2, choices=LevelOfDetail.choices,
                                        default=LevelOfDetail.NOT_SPECIFIED)
+
+    def get_report(self):
+        ''' Create an HTML report for this submission
+
+        Returns:
+            (str): A string containing the report markup
+        '''
+        return render_to_string('recordtransfer/report/metadata_report.html', context={
+            'bag': self.bag,
+            'current_date': timezone.now(),
+            'metadata': json.loads(self.bag.caais_metadata),
+        })
 
     def get_admin_change_url(self):
         ''' Get the URL to change this object in the admin
