@@ -1,8 +1,8 @@
+''' Record Transfer application models '''
 import os
 import json
 
 from django.db import models
-from django.contrib import admin
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -14,7 +14,8 @@ from recordtransfer.storage import OverwriteStorage
 
 
 class User(AbstractUser):
-    ''' The main User object used to authenticate users. '''
+    ''' The main User object used to authenticate users
+    '''
     gets_bag_email_updates = models.BooleanField(default=False)
     confirmed_email = models.BooleanField(default=False)
 
@@ -23,8 +24,8 @@ class User(AbstractUser):
 
 
 class UploadSession(models.Model):
-    ''' Represents a file upload session, that may or may not be split into multiple parallel
-    uploads.
+    ''' Represents a file upload session, that may or may not be split into
+    multiple parallel uploads
     '''
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
@@ -39,13 +40,16 @@ class UploadSession(models.Model):
 
 
 class UploadedFile(models.Model):
-    ''' Represents a file that a user uploaded during an upload session. '''
+    ''' Represents a file that a user uploaded during an upload session
+    '''
     name = models.CharField(max_length=256)
     path = models.CharField(max_length=256)
     old_copy_removed = models.BooleanField()
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=True)
 
     def delete_file(self):
+        ''' Delete the real file-system representation of this model
+        '''
         try:
             os.remove(str(self.path))
         except FileNotFoundError:
@@ -61,6 +65,8 @@ class UploadedFile(models.Model):
 
 
 class BagGroup(models.Model):
+    ''' Represents a similar grouping of bags
+    '''
     name = models.CharField(max_length=256, null=False)
     description = models.TextField(default='')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -70,7 +76,8 @@ class BagGroup(models.Model):
 
 
 class Bag(models.Model):
-    ''' A bag created as a part of a user's submission '''
+    ''' A bag created as a part of a user's submission
+    '''
     bagging_date = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, blank=True, null=True)
@@ -79,11 +86,15 @@ class Bag(models.Model):
 
     @property
     def location(self):
+        ''' Get the location on the file system for this bag
+        '''
         return os.path.join(BAG_STORAGE_FOLDER, self.user.username, self.bag_name)
 
     @property
     def transfer_info(self):
-        ''' Exposes a small amount of information from the transfer to be shown for a user '''
+        ''' Exposes a small amount of information from the transfer to be shown
+        for a user
+        '''
         json_metadata = json.loads(self.caais_metadata)
         title = json_metadata['section_1']['accession_title']
         extent = json_metadata['section_3']['extent_statement'][0]['quantity_and_type_of_units']
@@ -93,10 +104,14 @@ class Bag(models.Model):
         }
 
     def get_admin_change_url(self):
+        ''' Get the URL to change this object in the admin
+        '''
         view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
     def get_admin_zip_url(self):
+        ''' Get the URL to start zipping this bag from the admin
+        '''
         view_name = 'admin:{0}_{1}_zip'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
@@ -105,14 +120,19 @@ class Bag(models.Model):
 
 
 class Submission(models.Model):
+    ''' The top-level object representing a user's submission. This object has
+    a user, a bag, and can have any number of appraisal statements linked to it
+    '''
     class ReviewStatus(models.TextChoices):
-        ''' The status of the bag's review '''
+        ''' The status of the bag's review
+        '''
         NOT_REVIEWED = 'NR', _('Not Reviewed')
         REVIEW_STARTED = 'RS', _('Review Started')
         REVIEW_COMPLETE = 'RC', _('Review Complete')
 
     class LevelOfDetail(models.TextChoices):
-        ''' The level of detail of the submission '''
+        ''' The level of detail of the submission
+        '''
         NOT_SPECIFIED = 'NS', _('Not Specified')
         MINIMAL = 'ML', _('Minimal')
         PARTIAL = 'PL', _('Partial')
@@ -128,10 +148,14 @@ class Submission(models.Model):
                                        default=LevelOfDetail.NOT_SPECIFIED)
 
     def get_admin_change_url(self):
+        ''' Get the URL to change this object in the admin
+        '''
         view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
     def get_admin_report_url(self):
+        ''' Get the URL to generate a report for this object in the admin
+        '''
         view_name = 'admin:{0}_{1}_report'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
@@ -140,8 +164,10 @@ class Submission(models.Model):
 
 
 class Appraisal(models.Model):
-    ''' An appraisal made by and administrator for a donation '''
+    ''' An appraisal made by an administrator for a submission
+    '''
     class AppraisalType(models.TextChoices):
+        ''' The type of the appraisal being made '''
         ARCHIVAL_APPRAISAL = 'AP', _('Archival Appraisal')
         MONETARY_APPRAISAL = 'MP', _('Monetary Appraisal')
 
@@ -158,9 +184,11 @@ class Appraisal(models.Model):
 
 
 class Job(models.Model):
-    ''' A background job executed by an admin user '''
+    ''' A background job executed by an admin user
+    '''
     class JobStatus(models.TextChoices):
-        ''' The status of the bag's review '''
+        ''' The status of the bag's review
+        '''
         NOT_STARTED = 'NS', _('Not Started')
         IN_PROGRESS = 'IP', _('In Progress')
         COMPLETE = 'CP', _('Complete')
@@ -177,6 +205,8 @@ class Job(models.Model):
                                      blank=True, null=True)
 
     def get_admin_download_url(self):
+        ''' Get the URL to download the attached file from the admin
+        '''
         view_name = 'admin:{0}_{1}_download'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
@@ -185,24 +215,30 @@ class Job(models.Model):
 
 
 class Right(models.Model):
-    ''' A term describing a right '''
+    ''' A term describing a right
+    '''
     name = models.CharField(max_length=255, null=False, unique=True)
     description = models.CharField(max_length=255, null=False)
+
     def __str__(self):
         return self.name
 
 
 class SourceType(models.Model):
-    ''' A term describing a source type '''
+    ''' A term describing a source type
+    '''
     name = models.CharField(max_length=255, null=False, unique=True)
     description = models.CharField(max_length=255, null=False)
+
     def __str__(self):
         return self.name
 
 
 class SourceRole(models.Model):
-    ''' A term describing a source role '''
+    ''' A term describing a source role
+    '''
     name = models.CharField(max_length=255, null=False, unique=True)
     description = models.CharField(max_length=255, null=False)
+
     def __str__(self):
         return self.name
