@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 
 from recordtransfer.bagger import create_bag
 from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
-from recordtransfer.models import Bag, BagGroup, UploadedFile, User, Job
+from recordtransfer.models import Bag, BagGroup, UploadedFile, User, Job, Submission
 from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
@@ -38,7 +38,9 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
         user_submitted (User): The user who submitted the data and files.
     '''
-    LOGGER.info(msg='Creating a bag from the transfer submitted by {0}'.format(str(user_submitted)))
+    LOGGER.info(msg='Creating a submission and bag from the transfer submitted by {0}'.format(
+        str(user_submitted))
+    )
 
     # Get folder to store bag in, set the storage location in form
     folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
@@ -74,15 +76,22 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         bag_location = bagging_result['bag_location']
         bagging_time = bagging_result['time_created']
 
-        # Create object to be viewed in admin app
-        LOGGER.info('Storing Bag in database')
+        LOGGER.info('Creating Bag object in database')
         bag_name = Path(bag_location).name
         new_bag = Bag(
+            user=user_submitted,
             bagging_date=bagging_time,
             bag_name=bag_name,
-            user=user_submitted,
             caais_metadata=json.dumps(caais_metadata))
         new_bag.save()
+
+        LOGGER.info('Creating Submission object in database')
+        new_submission = Submission(
+            submission_date=bagging_time,
+            user=user_submitted,
+            bag=new_bag,
+        )
+        new_submission.save()
 
         group_name = form_data['group_name']
         if group_name != 'No Group':
@@ -106,15 +115,15 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
                 LOGGER.warning(msg='Could not find "{0}" BagGroup'.format(group.name))
 
         LOGGER.info('Sending transfer success email to administrators')
-        send_bag_creation_success.delay(form_data, new_bag, user_submitted)
+        send_bag_creation_success.delay(form_data, new_submission)
         LOGGER.info('Sending thank you email to user')
-        send_thank_you_for_your_transfer.delay(form_data, user_submitted)
+        send_thank_you_for_your_transfer.delay(form_data, new_submission)
     else:
         LOGGER.error('bagger reported that the bag was NOT created successfully')
         LOGGER.info('Sending transfer failure email to administrators')
-        send_bag_creation_failure.delay(form_data, user_submitted)
+        send_bag_creation_failure.delay(form_data, new_submission)
         LOGGER.info('Sending transfer issue email to user')
-        send_your_transfer_did_not_go_through.delay(form_data, user_submitted)
+        send_your_transfer_did_not_go_through.delay(form_data, new_submission)
 
 @django_rq.job
 def create_downloadable_bag(bag: Bag, user_triggered: User):
@@ -127,9 +136,9 @@ def create_downloadable_bag(bag: Bag, user_triggered: User):
     LOGGER.info(msg='Creating zipped bag from {0}'.format(str(bag.location)))
 
     description = (
-        '{user} triggered this job to generate a download link for a transfer submitted by '
-        '{bag_user}.'
-    ).format(user=user_triggered.get_full_name(), bag_user=bag.user.get_full_name())
+        '{user} triggered this job to generate a download link for the bag '
+        '{name}'
+    ).format(user=str(user_triggered), name=bag.bag_name)
 
     new_job = Job(
         name=f'Generate Download Link for {str(bag)}',
@@ -170,24 +179,23 @@ def create_downloadable_bag(bag: Bag, user_triggered: User):
             zipf.close()
 
 @django_rq.job
-def send_bag_creation_success(form_data: dict, bag: Bag, user_submitted: User):
+def send_bag_creation_success(form_data: dict, submission: Submission):
     ''' Send an email to users who get bag email updates that a user submitted a new bag and there
     were no errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        bag (Bag): The new bag that was created.
-        user_submitted (User): The user who submitted the data and files.
+        submission (Submission): The new submission that was created.
     '''
     subject = 'New Transfer Ready for Review'
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
-    bag_url = 'http://{domain}/{change_url}'.format(
+    submission_url = 'http://{domain}/{change_url}'.format(
         domain=domain.rstrip(' /'),
-        change_url=bag.get_admin_change_url().lstrip(' /')
+        change_url=submission.get_admin_change_url().lstrip(' /')
     )
-    LOGGER.info(msg='Generated bag change URL: {0}'.format(bag_url))
+    LOGGER.info(msg='Generated submission change URL: {0}'.format(submission_url))
 
     LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
     recipients = User.objects.filter(gets_bag_email_updates=True)
@@ -198,6 +206,7 @@ def send_bag_creation_success(form_data: dict, bag: Bag, user_submitted: User):
     LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
     recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
 
+    user_submitted = submission.user
     send_mail_with_logs(
         recipients=recipient_emails,
         from_email=from_email,
@@ -206,19 +215,19 @@ def send_bag_creation_success(form_data: dict, bag: Bag, user_submitted: User):
         context={
             'user': user_submitted,
             'form_data': form_data,
-            'bag_url': bag_url,
+            'submission_url': submission_url,
         }
     )
 
 @django_rq.job
-def send_bag_creation_failure(form_data: dict, user_submitted: User):
+def send_bag_creation_failure(form_data: dict, submission: Submission):
     ''' Send an email to users who get bag email updates that a user submitted a new bag and there
     WERE errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        user_submitted (User): The user who submitted the data and files.
+        submission (Submission): The new submission that was created.
     '''
     subject = 'Bag Creation Failed'
     domain = Site.objects.get_current().domain
@@ -233,6 +242,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
     LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
     recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
 
+    user_submitted = submission.user
     send_mail_with_logs(
         recipients=recipient_emails,
         from_email=from_email,
@@ -245,17 +255,18 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
     )
 
 @django_rq.job
-def send_thank_you_for_your_transfer(form_data: dict, user_submitted: User):
+def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
     ''' Send a transfer success email to the user who submitted the transfer.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        user_submitted (User): The user who submitted the data and files.
+        submission (Submission): The new submission that was created.
     '''
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
+    user_submitted = submission.user
     send_mail_with_logs(
         recipients=[user_submitted.email],
         from_email=from_email,
@@ -269,17 +280,18 @@ def send_thank_you_for_your_transfer(form_data: dict, user_submitted: User):
     )
 
 @django_rq.job
-def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User):
+def send_your_transfer_did_not_go_through(form_data: dict, submission: Submission):
     ''' Send a transfer failure email to the user who submitted the transfer.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        user_submitted (User): The user who submitted the data and files.
+        submission (Submission): The new submission that was created.
     '''
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
+    user_submitted = submission.user
     send_mail_with_logs(
         recipients=[user_submitted.email],
         from_email=from_email,
