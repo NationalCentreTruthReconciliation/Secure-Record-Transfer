@@ -51,6 +51,10 @@ TEMPLATES = [
     },
 ]
 
+# Database primary key fields
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # WSGI
 
 WSGI_APPLICATION = 'bagitobjecttransfer.wsgi.application'
