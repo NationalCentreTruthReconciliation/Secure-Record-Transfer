@@ -223,7 +223,7 @@ Enable the site by linking the configuration in the sites-enabled directory:
 .. note::
 
     If the application dependencies have been installed with :code:`pip` as specified above in
-    section 1, gunicorn **20.0.4** will already be installed inside the application's virtual
+    section 1, gunicorn **20.1.0** will already be installed inside the application's virtual
     environment! Hooray for pure python dependencies!
 
 
@@ -368,7 +368,7 @@ the :code:`/etc/redis.conf` file and change these settings:
 .. note::
 
     If the application dependencies have been installed with :code:`pip` as specified above in
-    section 1, Django-RQ **2.3.2** will already be installed inside the application's virtual
+    section 1, Django-RQ **2.5.1** will already be installed inside the application's virtual
     environment! Hooray for pure python dependencies!
 
 
@@ -410,7 +410,7 @@ Enable the rqworker_default service to start on system startup:
 
 
 We also need to tell the Django record transfer app how to access the RQ
-workers. To do so, add the following lines to the 
+workers. To do so, add the following lines to the
 :code:`/opt/NCTR-Bagit-Record-Transfer/.env` file:
 
 ::
@@ -428,11 +428,11 @@ workers. To do so, add the following lines to the
 
 .. note::
 
-    We are using MySQL Community Server version **8.0.22**. Download
+    We are using MySQL Community Server version **8.0.27**. Download
     `MySQL Community Server here <https://dev.mysql.com/downloads/mysql/>`_.
 
     If the application dependencies have been installed with :code:`pip` as specified above in
-    section 1, MySQL Connector/Python **8.0.22** will already be installed inside the application's
+    section 1, MySQL Connector/Python **8.0.23** will already be installed inside the application's
     virtual environment! Hooray for pure python dependencies!
 
 
@@ -766,7 +766,7 @@ so you have to manually turn one on.
 
 8. Final Checklist
 ##################
- 
+
 After getting to this stage, you are almost ready to start the application up. Read through the
 following sections carefully, as they are important.
 
