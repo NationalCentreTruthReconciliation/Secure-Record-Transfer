@@ -22,7 +22,7 @@
         <label class="past-transfer-label">{% trans "Past Transfers"%}</label>
     </div>
     <div class="flex-full-width-item">
-        {% if user_bags %}
+        {% if user_submissions %}
             <table class="full-width-table standard-table" cellspacing="0">
                 <tr>
                     <th>{% trans "Date Transferred" %}</th>
@@ -30,12 +30,12 @@
                     <th>{% trans "Files Transferred" %}</th>
                     <th>{% trans "Review Status" %}</th>
                 </tr>
-                {% for bag in user_bags %}
+                {% for submission in user_submissions %}
                     <tr>
-                        <td>{{ bag.bagging_date }}</td>
-                        <td>{{ bag.transfer_info.title }}</td>
-                        <td>{{ bag.transfer_info.extent }}</td>
-                        <td>{{ bag.get_review_status_display }}</td>
+                        <td>{{ submission.submission_date }}</td>
+                        <td>{{ submission.bag.transfer_info.title }}</td>
+                        <td>{{ submission.bag.transfer_info.extent }}</td>
+                        <td>{{ submission.get_review_status_display }}</td>
                     </tr>
                 {% endfor %}
             </table>

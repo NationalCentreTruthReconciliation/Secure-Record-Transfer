@@ -12,7 +12,7 @@ from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.models import UploadedFile, UploadSession, User, Bag, BagGroup, Right, \
-    SourceRole, SourceType
+    SourceRole, SourceType, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
 from recordtransfer.utils import get_human_readable_file_count
@@ -40,12 +40,12 @@ class UserProfile(ListView):
     '''
 
     template_name = 'recordtransfer/profile.html'
-    context_object_name = 'user_bags'
-    model = Bag
+    context_object_name = 'user_submissions'
+    model = Submission
     paginate_by = 10
 
     def get_queryset(self):
-        return Bag.objects.filter(user=self.request.user).order_by('-bagging_date')
+        return Submission.objects.filter(user=self.request.user).order_by('-submission_date')
 
 
 class About(TemplateView):
