@@ -7,7 +7,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordtransfer', '0020_appraisal_user'),
+        ('recordtransfer', '0021_appraisal_user'),
     ]
 
     operations = [

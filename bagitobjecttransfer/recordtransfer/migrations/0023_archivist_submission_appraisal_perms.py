@@ -24,7 +24,7 @@ def populate_permissions(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordtransfer', '0021_auto_20220110_1027'),
+        ('recordtransfer', '0022_auto_20220110_1027'),
     ]
 
     operations = [
