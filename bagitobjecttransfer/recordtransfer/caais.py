@@ -172,10 +172,10 @@ def _get_section_2_tree(form_data: dict) -> OrderedDict:
     # 2.1 Source of Information
     curr_tree['source_of_information'] = OrderedDict()
     # 2.1.1 Source Type
-    curr_tree['source_of_information']['source_type'] = get_optional_field(
+    curr_tree['source_of_information']['source_type'] = str(get_optional_field(
         form_data=form_data,
         caais_key='source_type',
-        section=curr_section)
+        section=curr_section))
     # 2.1.2 Source Name - Mandatory
     curr_tree['source_of_information']['source_name'] = get_mandatory_field(
         form_data=form_data,
@@ -226,10 +226,10 @@ def _get_section_2_tree(form_data: dict) -> OrderedDict:
         caais_key='country',
         section=curr_section)
     # 2.1.4 Source Role - Mandatory
-    curr_tree['source_of_information']['source_role'] = get_mandatory_field(
+    curr_tree['source_of_information']['source_role'] = str(get_mandatory_field(
         form_data=form_data,
         caais_key='source_role',
-        section=curr_section)
+        section=curr_section))
     # 2.1.5 Source Note - Optional
     curr_tree['source_of_information']['source_note'] = get_optional_field(
         form_data=form_data,
