@@ -1,14 +1,17 @@
 ''' Record Transfer application models '''
 import os
 import json
+import shutil
 
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from django.utils.crypto import get_random_string
 from django.utils import timezone
+from django.utils.crypto import get_random_string
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.settings import BAG_STORAGE_FOLDER
 from recordtransfer.storage import OverwriteStorage
@@ -75,7 +78,6 @@ class BagGroup(models.Model):
     def __str__(self):
         return f'{self.name} (Created by {self.created_by})'
 
-
 class Bag(models.Model):
     ''' A bag created as a part of a user's submission
     '''
@@ -118,6 +120,17 @@ class Bag(models.Model):
 
     def __str__(self):
         return self.bag_name
+
+
+@receiver(pre_delete)
+def delete_bag(sender, instance, **kwargs):
+    ''' Delete the filesystem mirror of a Bag before the Bag is deleted from the
+    database
+    '''
+    if sender == Bag:
+        bag = instance
+        if os.path.exists(bag.location) and os.path.isdir(bag.location):
+            shutil.rmtree(bag.location)
 
 
 class Submission(models.Model):
