@@ -779,25 +779,25 @@ class JobAdmin(ReadOnlyAdmin):
             object_id: The ID for the job
         '''
         job = Job.objects.filter(id=object_id).first()
-        if job:
-            msg = gettext('Job with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
-                'key': object_id,
-            }
-            self.message_user(request, msg, messages.WARNING)
-            url = reverse('admin:index', current_app=self.admin_site.name)
-            return HttpResponseRedirect(url)
-        if job.attached_file:
+        if job and job.attached_file:
             file_path = Path(MEDIA_ROOT) / job.attached_file.name
             file_handle = open(file_path, "rb")
             response = HttpResponse(file_handle, content_type='application/x-zip-compressed')
             response['Content-Disposition'] = f'attachment; filename="{file_path.name}"'
             return response
+        if job:
+            msg = gettext('Could not find a file attached to the Job with ID “%(key)s”') % {
+                'key': object_id
+            }
+            self.message_user(request, msg, messages.WARNING)
+            return HttpResponseRedirect('../')
         # Error response
-        msg = gettext('Could not find a file attached to the Job with ID “%(key)s”') % {
-            'key': object_id
+        msg = gettext('Job with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
+            'key': object_id,
         }
         self.message_user(request, msg, messages.WARNING)
-        return HttpResponseRedirect('../')
+        url = reverse('admin:index', current_app=self.admin_site.name)
+        return HttpResponseRedirect(url)
 
     def get_fields(self, request, obj=None):
         ''' Hide the attached file field, the user is not allowed to interact
