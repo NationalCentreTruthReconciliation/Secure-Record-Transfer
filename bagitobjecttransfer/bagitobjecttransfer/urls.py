@@ -18,8 +18,8 @@ from django.contrib.auth.views import PasswordResetView
 from django.urls import include, path
 
 urlpatterns = [
+    path('admin/django_rq/', include('django_rq.urls')),
     path('admin/', admin.site.urls),
-    path('admin/django-rq/', include('django_rq.urls')),
     path('', include('recordtransfer.urls')),
     # HTML email is set to None by default, so we set html_email_template_name here
     path('accounts/password_reset/', PasswordResetView.as_view(
