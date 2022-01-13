@@ -626,37 +626,17 @@ class JobAdmin(ReadOnlyAdmin):
 
 
 @admin.register(Right)
-class RightsAdmin(admin.ModelAdmin):
-    ''' Admin for the Right model
-    '''
-    list_display = [
-        'name',
-        'description',
-    ]
-
-    fieldsets = [
-        (None, {'fields': ['name', 'description']}),
-    ]
-
-
 @admin.register(SourceType)
-class SourceTypeAdmin(admin.ModelAdmin):
-    ''' Admin for the SourceType model
-    '''
-    list_display = [
-        'name',
-        'description',
-    ]
-
-    fieldsets = [
-        (None, {'fields': ['name', 'description']}),
-    ]
-
-
 @admin.register(SourceRole)
-class SourceRoleAdmin(admin.ModelAdmin):
-    ''' Admin for the SourceRole model
+class TaxonomyAdmin(admin.ModelAdmin):
+    ''' Admin for a taxonomy model
+
+    Permissions:
+        - Add: Allowed
+        - change: Allowed
+        - delete: Allowed
     '''
+
     list_display = [
         'name',
         'description',
@@ -665,3 +645,12 @@ class SourceRoleAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['name', 'description']}),
     ]
+
+    def has_add_permission(self, request):
+        return True
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return True
