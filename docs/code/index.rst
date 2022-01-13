@@ -14,7 +14,6 @@ Code Files
     forms
     views
     jobs
-    bagger
     caais
     models
     utils
