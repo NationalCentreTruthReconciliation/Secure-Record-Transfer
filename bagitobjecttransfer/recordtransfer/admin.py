@@ -1,6 +1,5 @@
 ''' Custom administration code for the admin site '''
 import csv
-import json
 import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
@@ -16,9 +15,9 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 from recordtransfer.atom import flatten_meta_tree_atom_style
-from recordtransfer.bagger import update_bag
 from recordtransfer.caais import flatten_meta_tree
-from recordtransfer.forms import BagForm, InlineBagForm, InlineAppraisalForm, SubmissionForm
+from recordtransfer.forms import BagForm, InlineBagForm, SubmissionForm, \
+    AppraisalForm, InlineAppraisalFormSet
 from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
 from recordtransfer.models import User, UploadSession, UploadedFile, Bag, BagGroup, Appraisal, \
     Submission, Job, Right, SourceType, SourceRole
@@ -716,18 +715,15 @@ class SubmissionAdmin(admin.ModelAdmin):
         return response
     export_reports.short_description = 'Export CAAIS submission reports for Selected'
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        ''' Add the URL to the Bag's change page to the form
-        '''
-        _class = super().get_form(request, obj, change, **kwargs)
-
-        class WrappedSubmissionForm(_class):
-            def __new__(cls, *args, **kwargs):
-                if obj.bag:
-                    kwargs['bag_change_url'] = obj.bag.get_admin_change_url()
-                return _class(*args, **kwargs)
-
-        return WrappedSubmissionForm
+    def save_related(self, request, form, formsets, change):
+        for formset in formsets:
+            if formset.model == Appraisal:
+                instances = formset.save(commit=False)
+                for instance in instances:
+                    instance.user = request.user
+                    instance.save()
+                formset.save_m2m()
+        super().save_related(request, form, formsets, change)
 
 
 @admin.register(Job)
