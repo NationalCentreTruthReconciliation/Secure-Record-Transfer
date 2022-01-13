@@ -6,7 +6,7 @@ from bagit import Bag
 from django.test import TestCase
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.bagger import create_bag, update_bag, delete_bag
+from recordtransfer.bagger import create_bag, update_bag
 
 
 class CreateBagTests(TestCase):

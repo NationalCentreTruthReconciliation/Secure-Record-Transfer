@@ -3,7 +3,6 @@ import logging
 import smtplib
 import zipfile
 from io import BytesIO
-from pathlib import Path
 from datetime import timedelta
 
 import django_rq
@@ -16,10 +15,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.text import slugify
 from django.template.loader import render_to_string
 
-from recordtransfer.bagger import create_bag
-from recordtransfer.caais import convert_transfer_form_to_meta_tree, flatten_meta_tree
-from recordtransfer.models import Bag, BagGroup, UploadedFile, User, Job, Submission
-from recordtransfer.settings import BAG_STORAGE_FOLDER, DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
+from recordtransfer.caais import convert_transfer_form_to_meta_tree
+from recordtransfer.models import Bag, BagGroup, UploadedFile, UploadSession, User, Job, Submission
+from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -29,10 +27,8 @@ LOGGER = logging.getLogger('rq.worker')
 
 @django_rq.job
 def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
-    ''' This job does three things. First, it converts the form data the user submitted into BagIt
-    tags. Second, it creates a bag in the user's folder under the BAG_STORAGE_FOLDER with all of
-    the user's submitted files and the BagIt tag metadata. Finally, it sends an email out on
-    whether the new bag was submitted without errors or with errors.
+    ''' Create database models and BagIt bag on file system for the submitted form. Sends an email
+    to the submitting user and the staff members who receive submission email updates.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
@@ -42,18 +38,12 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         str(user_submitted))
     )
 
-    # Get folder to store bag in, set the storage location in form
-    folder = Path(BAG_STORAGE_FOLDER) / user_submitted.username
-    if not folder.exists():
-        folder.mkdir()
-        LOGGER.info(msg=('Created new transfer folder for user "{0}" at {1}'.format(
-            user_submitted.username, str(folder))))
-    form_data['storage_location'] = str(folder.resolve())
+    token = form_data['session_token']
+    LOGGER.info(msg=('Fetching session with the token {0}'.format(token)))
+    upload_session = UploadSession.objects.filter(token=token).first()
 
     LOGGER.info(msg='Creating serializable CAAIS metadata from form data')
     caais_metadata = convert_transfer_form_to_meta_tree(form_data)
-    LOGGER.info(msg='Flattening CAAIS metadata to be used as BagIt tags')
-    bagit_tags = flatten_meta_tree(caais_metadata)
 
     title = form_data['accession_title']
     abbrev_title = title if len(title) <= 20 else title[0:20]
@@ -62,32 +52,29 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         datetime=timezone.now().strftime(r'%Y%m%d-%H%M%S'),
         title=slugify(abbrev_title))
 
+    LOGGER.info(msg=('Created name for bag: "{0}"'.format(bag_name)))
+
+    new_bag = Bag(
+        user=user_submitted,
+        bag_name=bag_name,
+        caais_metadata=json.dumps(caais_metadata),
+        upload_session=upload_session,
+    )
+    new_bag.save()
+
     LOGGER.info(msg='Creating bag on filesystem')
-    bagging_result = create_bag(
-        storage_folder=str(folder),
-        session_token=form_data['session_token'],
-        metadata=bagit_tags,
-        bag_identifier=bag_name,
-        deletefiles=True,
-        logger=LOGGER)
+    bagging_result = new_bag.make_bag(
+        algorithms=['sha512'],
+        file_perms='644',
+        move_files=True,
+        logger=LOGGER,
+    )
 
     if bagging_result['bag_created']:
-        LOGGER.info('bagger reported that the bag was created successfully')
-        bag_location = bagging_result['bag_location']
-        bagging_time = bagging_result['time_created']
-
-        LOGGER.info('Creating Bag object in database')
-        bag_name = Path(bag_location).name
-        new_bag = Bag(
-            user=user_submitted,
-            bagging_date=bagging_time,
-            bag_name=bag_name,
-            caais_metadata=json.dumps(caais_metadata))
-        new_bag.save()
-
-        LOGGER.info('Creating Submission object in database')
+        LOGGER.info('The BagIt bag was created successfully')
+        LOGGER.info('Creating Submission object linked to new bag')
         new_submission = Submission(
-            submission_date=bagging_time,
+            submission_date=bagging_result['time_created'],
             user=user_submitted,
             bag=new_bag,
         )
@@ -411,4 +398,4 @@ def clean_undeleted_temp_files(hours=12):
     LOGGER.info('Running cleaning')
 
     for upload in old_undeleted_files:
-        upload.delete_file()
+        upload.remove()
