@@ -88,6 +88,11 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
 
 class ReadOnlyAdmin(admin.ModelAdmin):
     ''' A model admin that does not allow any editing/changing/ or deletions
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
     '''
     readonly_fields = []
 
@@ -99,6 +104,9 @@ class ReadOnlyAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def has_change_permission(self, request, obj=None):
+        return False
+
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -106,6 +114,10 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     ''' Admin for the User model.
+
+    Permissions:
+        - change: Allowed if editing own account, or if editor is a superuser
+        - delete: Allowed by superusers
     '''
     fieldsets = (
         *UserAdmin.fieldsets, # original form fieldsets, expanded
@@ -118,6 +130,14 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
     )
+
+    def has_change_permission(self, request, obj=None):
+        if not obj:
+            return True
+        return obj and (request.user.is_superuser or obj == request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
 
     @sensitive_post_parameters_m
     def user_change_password(self, request, id, form_url=''):
@@ -188,11 +208,30 @@ class CustomUserAdmin(UserAdmin):
 
 
 @admin.register(UploadedFile)
-class UploadedFileAdmin(admin.ModelAdmin):
+class UploadedFileAdmin(ReadOnlyAdmin):
     ''' Admin for the UploadedFile model
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
     '''
+    change_form_template = 'admin/readonly_change_form.html'
+
     actions = [
         'clean_temp_files',
+    ]
+
+    list_display = [
+        'name',
+        'path',
+        'old_copy_removed',
+        linkify('session'),
+    ]
+
+    ordering = [
+        '-session',
+        'name'
     ]
 
     def clean_temp_files(self, request, queryset):
@@ -200,27 +239,48 @@ class UploadedFileAdmin(admin.ModelAdmin):
         files
         '''
         for uploaded_file in queryset:
-            uploaded_file.delete_file()
+            uploaded_file.remove()
     clean_temp_files.short_description = gettext('Remove temp files on filesystem')
 
 
 class UploadedFileInline(admin.TabularInline):
     ''' Inline admin for the UploadedFile model. Used to view the files
-    associated with an upload session. Deletions are not allowed.
+    associated with an upload session
+
+    Permission:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
     '''
     model = UploadedFile
     max_num = 0
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.can_delete = False
+    readonly_fields = [
+        'name',
+        'path',
+        'old_copy_removed',
+    ]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(UploadSession)
-class UploadSessionAdmin(admin.ModelAdmin):
+class UploadSessionAdmin(ReadOnlyAdmin):
     ''' Admin for the UploadSession model
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
     '''
-    model = UploadSession
+    change_form_template = 'admin/readonly_change_form.html'
 
     inlines = [
         UploadedFileInline,
@@ -241,10 +301,20 @@ class BagAdmin(admin.ModelAdmin):
     ''' Admin for the Bag model. Adds a view to start a job to zip the bag up so
     it can be downloaded. The zip/download view can be accessed at
     code:`submission/<id>/zip/`
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Only by superusers
     '''
     change_form_template = 'admin/bag_change_form.html'
 
     form = BagForm
+
+    search_fields = [
+        'bag_name',
+        'upload_session',
+    ]
 
     actions = [
         'export_caais_reports',
@@ -259,12 +329,23 @@ class BagAdmin(admin.ModelAdmin):
     list_display = [
         'bagging_date',
         'bag_name',
+        linkify('user'),
         linkify('part_of_group'),
+        linkify('upload_session'),
     ]
 
     ordering = [
         '-bagging_date',
     ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
 
     def get_urls(self):
         ''' Add zip/ view to admin
@@ -359,21 +440,38 @@ class BagAdmin(admin.ModelAdmin):
 
 class BagInline(admin.TabularInline):
     ''' Inline admin for the Bag model. Used to view Bags associated with a
-    BagGroup. Deletions are not allowed.
+    BagGroup
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
     '''
     model = Bag
     max_num = 0
     show_change_link = True
     form = InlineBagForm
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.can_delete = False
+    ordering = ['-bagging_date']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
 
 
 @admin.register(BagGroup)
 class BagGroupAdmin(ReadOnlyAdmin):
     ''' Admin for the BagGroup model. Bags can be viewed in-line.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Only by superusers
     '''
     inlines = [
         BagInline,
@@ -383,6 +481,10 @@ class BagGroupAdmin(ReadOnlyAdmin):
         'name',
         'created_by',
         'bags_in_group',
+    ]
+
+    search_fields = [
+        'name',
     ]
 
     ordering = [
@@ -396,6 +498,15 @@ class BagGroupAdmin(ReadOnlyAdmin):
         'export_atom_2_2_csv',
         'export_atom_2_1_csv',
     ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
 
     def bags_in_group(self, obj):
         return len(Bag.objects.filter(part_of_group=obj))
@@ -430,7 +541,14 @@ class BagGroupAdmin(ReadOnlyAdmin):
 @admin.register(Appraisal)
 class AppraisalAdmin(admin.ModelAdmin):
     ''' Admin for the Appraisal model
+
+    Permissions:
+        - add: Not allowed (must be done from the Appraisal inline)
+        - change: Allowed if editor created the appraisal
+        - delete: Allowed if editor created the appraisal, or if editor is a superuser
     '''
+    form = AppraisalForm
+
     list_display = [
         'appraisal_type',
         'appraisal_date',
@@ -442,20 +560,55 @@ class AppraisalAdmin(admin.ModelAdmin):
         '-appraisal_date',
     ]
 
+    readonly_fields = [
+        'user',
+        'appraisal_date'
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return obj and request.user == obj.user
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and (request.user == obj.user or request.user.is_superuser)
+
 
 class AppraisalInline(admin.TabularInline):
     ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
     with a Submission. Deletions are not allowed.
+
+    Permissions:
+        - add: Allowed
+        - change: Not allowed - go to Appraisal page for change ability
+        - delete: Not allowed - go to Appraisal page for delete ability
     '''
     model = Appraisal
     max_num = 64
     extra = 0
     show_change_link = True
-    form = InlineAppraisalForm
+
+    form = AppraisalForm
+    formset = InlineAppraisalFormSet
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return True
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        formset.request = request
+        return formset
 
 
 @admin.register(Submission)
@@ -463,6 +616,11 @@ class SubmissionAdmin(admin.ModelAdmin):
     ''' Admin for the Submission model. Adds a view to view the transfer report
     associated with the submission. The report view can be accessed at
     code:`submission/<id>/report/`
+
+    Permissions:
+        - add: Not allowed
+        - change: Allowed
+        - delete: Only by superusers
     '''
     change_form_template = 'admin/submission_change_form.html'
 
@@ -476,6 +634,11 @@ class SubmissionAdmin(admin.ModelAdmin):
         'export_reports',
     ]
 
+    search_fields = [
+        'id',
+        'bag__bag_name',
+    ]
+
     list_display = [
         'submission_date',
         'id',
@@ -487,6 +650,20 @@ class SubmissionAdmin(admin.ModelAdmin):
     ordering = [
         '-submission_date',
     ]
+
+    readonly_fields = [
+        'submission_date',
+        'user',
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
 
     def get_urls(self):
         ''' Add report/ view to admin
@@ -558,6 +735,11 @@ class JobAdmin(ReadOnlyAdmin):
     ''' Admin for the Job model. Adds a view to download the file associated
     with the job, if there is a file. The file download view can be accessed at
     code:`job/<id>/download/`
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Only if current user created job
     '''
     change_form_template = 'admin/job_change_form.html'
 
@@ -571,6 +753,12 @@ class JobAdmin(ReadOnlyAdmin):
     ordering = [
         '-start_time'
     ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user == obj.user_triggered
 
     def get_urls(self):
         ''' Add download/ view to admin
