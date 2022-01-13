@@ -181,8 +181,7 @@ class CustomUserAdmin(UserAdmin):
 
                 send_user_account_updated.delay(obj, context)
 
-    @staticmethod
-    def _get_changed_message(changed_data: list, user: User):
+    def _get_changed_message(self, changed_data: list, user: User):
         """ Generate a list of changed status message for certain account details. """
         message_list = []
         if "is_superuser" in changed_data:
@@ -366,12 +365,18 @@ class BagAdmin(admin.ModelAdmin):
             object_id: The ID for the submission
         '''
         bag = Bag.objects.filter(id=object_id).first()
-        if bag:
+        if bag and bag.exists:
             create_downloadable_bag.delay(bag, request.user)
             self.message_user(request, mark_safe(gettext(
                 'A downloadable bag is being generated. Check the '
                 "<a href='/admin/recordtransfer/job'>Jobs</a> page for more information."
             )))
+            return HttpResponseRedirect('../')
+        if bag:
+            self.message_user(request, (
+                'A downloadable bag could not be generated, the bag at {0} may have been moved or '
+                'deleted.'.format(bag.location)
+            ), messages.WARNING)
             return HttpResponseRedirect('../')
         # Error response
         msg = gettext('Bag with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
@@ -413,27 +418,24 @@ class BagAdmin(admin.ModelAdmin):
             request: The originating request
             bag (Bag): The bag that is to be updated
         '''
-        bagit_tags = flatten_meta_tree(json.loads(bag.caais_metadata))
-        bag_location = bag.location
-        results = update_bag(bag_location, bagit_tags)
-
+        results = bag.update_filesystem_bag()
+        num_updates = results['num_fields_updated']
         if not results['bag_exists']:
-            msg = f'The bag at "{bag_location}" was moved or deleted, so it could not be updated!'
+            msg = f'The bag at "{bag.location}" was moved or deleted, so it could not be updated!'
             messages.error(request, msg)
-        elif not results['bag_valid'] and results['num_fields_updated'] == 0:
-            msg = f'The bag at "{bag_location}" was found to be invalid!'
+        elif not results['bag_valid'] and num_updates == 0:
+            msg = f'The bag at "{bag.location}" was found to be invalid!'
             messages.error(request, msg)
-        elif not results['bag_valid'] and results['num_fields_updated'] > 0:
-            msg = (f'The bag-info.txt for the bag at "{bag_location}" was updated, but is now '
+        elif not results['bag_valid'] and num_updates > 0:
+            msg = (f'The bag-info.txt for the bag at "{bag.location}" was updated, but is now '
                    'invalid!')
             messages.error(request, msg)
-        elif results['bag_valid'] and results['num_fields_updated'] == 0:
-            msg = f'No updates were made to the bag-info.txt for the bag at "{bag_location}"'
+        elif results['bag_valid'] and num_updates == 0:
+            msg = f'No updates were made to the bag-info.txt for the bag at "{bag.location}"'
             messages.info(request, msg)
         else:
-            num_updates = results['num_fields_updated']
             msg = (f'{num_updates} related fields were updated in the bag-info.txt for the bag at '
-                   f'"{bag_location}"')
+                   f'"{bag.location}"')
             messages.success(request, msg)
 
 
