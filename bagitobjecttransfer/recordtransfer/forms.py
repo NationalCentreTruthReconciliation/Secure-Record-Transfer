@@ -74,19 +74,10 @@ class InlineBagForm(RecordTransferModelForm):
         model = Bag
         fields = (
             'bag_name',
+            'bagging_date',
         )
 
-    disabled_fields = ['bag_name']
-
-
-class InlineAppraisalForm(RecordTransferModelForm):
-    class Meta:
-        model = Appraisal
-        fields = (
-            'appraisal_type',
-            'statement',
-            'note',
-        )
+    title = forms.CharField(required=False)
 
 
 class SubmissionForm(RecordTransferModelForm):
@@ -104,17 +95,13 @@ class SubmissionForm(RecordTransferModelForm):
     disabled_fields = ['submission_date', 'bag', 'user']
 
     def __init__(self, *args, **kwargs):
-        if 'bag_change_url' in kwargs:
-            self.bag_change_url = kwargs.pop('bag_change_url')
-        else:
-            self.bag_change_url = ''
-
         super().__init__(*args, **kwargs)
-
-        if self.bag_change_url:
+        self.fields['accession_identifier'].required = False
+        if hasattr(self, 'instance'):
             self.fields['bag'].help_text = gettext(
                 '<a href="{0}">Click to view bag</a>'
-            ).format(self.bag_change_url)
+            ).format(self.instance.bag.get_admin_change_url())
+        self.fields['bag'].widget.can_add_related = False
 
 
 class BagForm(RecordTransferModelForm):
@@ -128,6 +115,7 @@ class BagForm(RecordTransferModelForm):
             'bag_name',
             'caais_metadata',
             'part_of_group',
+            'upload_session',
         )
 
     disabled_fields = [
@@ -136,7 +124,13 @@ class BagForm(RecordTransferModelForm):
         'bag_name',
         'caais_metadata',
         'part_of_group',
+        'location',
+        'exists',
     ]
+
+    title = forms.CharField(required=False)
+    location = forms.CharField(required=False)
+    exists = forms.BooleanField(required=False)
 
     '''
     def log_new_event(self, event_type: str, event_note: str = ''):
