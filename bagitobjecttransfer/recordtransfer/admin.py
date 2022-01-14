@@ -1,5 +1,6 @@
 ''' Custom administration code for the admin site '''
 import csv
+import json
 import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
@@ -68,7 +69,7 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     writer = csv.writer(csv_file)
     convert_bag_to_row = FLATTEN_FUNCTIONS[version]
     for i, bag in enumerate(queryset, 0):
-        new_row = convert_bag_to_row(bag)
+        new_row = convert_bag_to_row(json.loads(bag.caais_metadata))
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())
@@ -78,7 +79,7 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     response = HttpResponse(csv_file, content_type='text/csv')
     local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
     if not filename_prefix:
-        filename_prefix = str(version[0]) + '_' + '.'.join(version[1:])
+        filename_prefix = '{0}_v{1}_'.format(version[0], '.'.join([str(x) for x in version[1:]]))
     filename = f"{filename_prefix}{local_time}.csv"
     response['Content-Disposition'] = f'attachment; filename={filename}'
     csv_file.close()
