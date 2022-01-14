@@ -49,6 +49,14 @@ class UploadSession(models.Model):
         ''' Start a new upload session '''
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
+    def number_of_files_uploaded(self):
+        ''' Get the number of files associated with this session.
+
+        Returns:
+            (int): The number of files
+        '''
+        return len(self.uploadedfile_set.all())
+
     def remove_session_uploads(self, logger=None):
         ''' Remove uploaded files associated with this session.
 
@@ -187,8 +195,12 @@ class BagGroup(models.Model):
     description = models.TextField(default='')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
+    @property
+    def number_of_bags_in_group(self):
+        return len(self.bag_set.all())
+
     def __str__(self):
-        return f'{self.name} (Created by {self.created_by})'
+        return f'{self.name} ({self.created_by})'
 
 
 class Bag(models.Model):
