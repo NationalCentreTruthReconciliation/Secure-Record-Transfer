@@ -254,7 +254,7 @@ class TransferFormWizard(SessionWizardView):
         del cleaned_data['end_date_of_material']
 
         # Add dates for events
-        current_time = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
+        current_time = timezone.localtime(timezone.now()).strftime(r'%Y-%m-%d %H:%M:%S %Z')
         cleaned_data['action_date'] = current_time
         cleaned_data['event_date'] = current_time
 

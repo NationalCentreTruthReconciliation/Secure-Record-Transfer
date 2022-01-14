@@ -49,7 +49,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     abbrev_title = title if len(title) <= 20 else title[0:20]
     bag_name = '{username}_{datetime}_{title}'.format(
         username=slugify(user_submitted),
-        datetime=timezone.now().strftime(r'%Y%m%d-%H%M%S'),
+        datetime=timezone.localtime(timezone.now()).strftime(r'%Y%m%d-%H%M%S'),
         title=slugify(abbrev_title))
 
     LOGGER.info(msg=('Created name for bag: "{0}"'.format(bag_name)))
