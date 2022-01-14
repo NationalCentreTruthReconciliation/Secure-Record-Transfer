@@ -17,8 +17,8 @@ from django.utils.translation import gettext
 
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.caais import flatten_meta_tree
-from recordtransfer.forms import BagForm, InlineBagForm, SubmissionForm, \
-    AppraisalForm, InlineAppraisalFormSet
+from recordtransfer.forms import BagForm, InlineBagForm, InlineBagGroupForm, SubmissionForm, \
+    InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm
 from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
 from recordtransfer.models import User, UploadSession, UploadedFile, Bag, BagGroup, Appraisal, \
     Submission, Job, Right, SourceType, SourceRole
@@ -116,99 +116,35 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(User)
-class CustomUserAdmin(UserAdmin):
-    ''' Admin for the User model.
+@admin.register(Right)
+@admin.register(SourceType)
+@admin.register(SourceRole)
+class TaxonomyAdmin(admin.ModelAdmin):
+    ''' Admin for a taxonomy model
 
     Permissions:
-        - change: Allowed if editing own account, or if editor is a superuser
-        - delete: Allowed by superusers
+        - Add: Allowed
+        - change: Allowed
+        - delete: Allowed
     '''
-    fieldsets = (
-        *UserAdmin.fieldsets, # original form fieldsets, expanded
-        (                     # New fieldset added on to the bottom
-            'Email Updates',  # Group heading of your choice. set to None for a blank space
-            {
-                'fields': (
-                    'gets_bag_email_updates',
-                ),
-            },
-        ),
-    )
+
+    list_display = [
+        'name',
+        'description',
+    ]
+
+    fieldsets = [
+        (None, {'fields': ['name', 'description']}),
+    ]
+
+    def has_add_permission(self, request):
+        return True
 
     def has_change_permission(self, request, obj=None):
-        if not obj:
-            return True
-        return obj and (request.user.is_superuser or obj == request.user)
+        return True
 
     def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
-
-    @sensitive_post_parameters_m
-    def user_change_password(self, request, id, form_url=''):
-        """ Send a notification email when a user's password is changed. """
-        response = super().user_change_password(request, id, form_url)
-        user = self.get_object(request, unquote(id))
-        form = self.change_password_form(user, request.POST)
-        if form.is_valid() and request.method == 'POST':
-            context = {
-                'subject': gettext("Password updated"),
-                'changed_item': gettext("password"),
-                'changed_status': gettext("updated")
-            }
-            send_user_account_updated.delay(user, context)
-        return response
-
-    def save_model(self, request, obj, form, change):
-        ''' Enforce superuser permissions checks and send notification emails
-        for other account updates
-        '''
-        if change and obj.is_superuser and not request.user.is_superuser:
-            messages.set_level(request, messages.ERROR)
-            msg = 'Non-superusers cannot modify superuser accounts.'
-            self.message_user(request, msg, messages.ERROR)
-        else:
-            super().save_model(request, obj, form, change)
-            if change and (not obj.is_active or "is_superuser" in form.changed_data or \
-                           "is_staff" in form.changed_data):
-                if not obj.is_active:
-                    context = {
-                        'subject': gettext("Account Deactivated"),
-                        'changed_item': gettext("account"),
-                        'changed_status': gettext("deactivated")
-                    }
-                else:
-                    context = {
-                        'subject': gettext("Account updated"),
-                        'changed_item': gettext("account"),
-                        'changed_status': gettext("updated"),
-                        'changed_list': self._get_changed_message(form.changed_data, obj)
-                    }
-
-                send_user_account_updated.delay(obj, context)
-
-    def _get_changed_message(self, changed_data: list, user: User):
-        """ Generate a list of changed status message for certain account details. """
-        message_list = []
-        if "is_superuser" in changed_data:
-            if user.is_superuser:
-                message_list.append(
-                    gettext("Superuser privileges have been added to your account.")
-                )
-            else:
-                message_list.append(
-                    gettext("Superuser privileges have been removed from your account.")
-                )
-        if "is_staff" in changed_data:
-            if user.is_staff:
-                message_list.append(
-                    gettext("Staff privileges have been added to your account.")
-                )
-            else:
-                message_list.append(
-                    gettext("Staff privileges have been removed from your account.")
-                )
-        return message_list
+        return True
 
 
 @admin.register(UploadedFile)
@@ -258,6 +194,7 @@ class UploadedFileInline(admin.TabularInline):
     '''
     model = UploadedFile
     max_num = 0
+    show_change_link = True
 
     readonly_fields = [
         'name',
@@ -286,6 +223,8 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     '''
     change_form_template = 'admin/readonly_change_form.html'
 
+    form = UploadSessionForm
+
     inlines = [
         UploadedFileInline,
     ]
@@ -293,11 +232,13 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     list_display = [
         'token',
         'started_at',
+        'number_of_files_uploaded'
     ]
 
     ordering = [
         '-started_at',
     ]
+
 
 
 @admin.register(Bag)
@@ -317,7 +258,6 @@ class BagAdmin(admin.ModelAdmin):
 
     search_fields = [
         'bag_name',
-        'upload_session',
     ]
 
     actions = [
@@ -331,16 +271,23 @@ class BagAdmin(admin.ModelAdmin):
 
     # Display in Admin GUI
     list_display = [
-        'bagging_date',
         'bag_name',
+        'bagging_date',
         linkify('user'),
         linkify('part_of_group'),
-        linkify('upload_session'),
+        'submission',
     ]
 
     ordering = [
         '-bagging_date',
     ]
+
+    def submission(self, obj):
+        submission = Submission.objects.filter(bag=obj).first()
+        if not submission:
+            return '-'
+        return format_html('<a href="{}">{}</a>', submission.get_admin_change_url(), submission)
+    submission.short_description = gettext('Part of Submission')
 
     def has_add_permission(self, request):
         return False
@@ -486,8 +433,8 @@ class BagGroupAdmin(ReadOnlyAdmin):
 
     list_display = [
         'name',
-        'created_by',
-        'bags_in_group',
+        linkify('created_by'),
+        'number_of_bags_in_group',
     ]
 
     search_fields = [
@@ -515,10 +462,6 @@ class BagGroupAdmin(ReadOnlyAdmin):
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
 
-    def bags_in_group(self, obj):
-        return len(Bag.objects.filter(part_of_group=obj))
-    bags_in_group.short_description = 'Number of Bags in Group'
-
     def export_caais_csv(self, request, queryset):
         related_bags = Bag.objects.filter(part_of_group__in=queryset)
         return export_bag_csv(related_bags, ('caais', 1, 0))
@@ -543,6 +486,31 @@ class BagGroupAdmin(ReadOnlyAdmin):
         related_bags = Bag.objects.filter(part_of_group__in=queryset)
         return export_bag_csv(related_bags, ('atom', 2, 1))
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Bags in Selected'
+
+
+class BagGroupInline(admin.TabularInline):
+    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
+    with a Submission. Deletions are not allowed.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed - go to BagGroup page for change ability
+        - delete: Not allowed - go to BagGroup page for delete ability
+    '''
+    model = BagGroup
+    max_num = 0
+    show_change_link = True
+
+    form = InlineBagGroupForm
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Appraisal)
@@ -734,6 +702,32 @@ class SubmissionAdmin(admin.ModelAdmin):
         super().save_related(request, form, formsets, change)
 
 
+class SubmissionInline(admin.TabularInline):
+    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
+    with a Submission. Deletions are not allowed.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed - go to Submission page for change ability
+        - delete: Only by superusers
+    '''
+    model = Submission
+    max_num = 0
+    show_change_link = True
+    form = InlineSubmissionForm
+
+    ordering = ['-submission_date']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
+
+
 @admin.register(Job)
 class JobAdmin(ReadOnlyAdmin):
     ''' Admin for the Job model. Adds a view to download the file associated
@@ -817,32 +811,101 @@ class JobAdmin(ReadOnlyAdmin):
         return [f for f in fields if f not in exclude_set]
 
 
-@admin.register(Right)
-@admin.register(SourceType)
-@admin.register(SourceRole)
-class TaxonomyAdmin(admin.ModelAdmin):
-    ''' Admin for a taxonomy model
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    ''' Admin for the User model.
 
     Permissions:
-        - Add: Allowed
-        - change: Allowed
-        - delete: Allowed
+        - change: Allowed if editing own account, or if editor is a superuser
+        - delete: Allowed by superusers
     '''
+    fieldsets = (
+        *UserAdmin.fieldsets, # original form fieldsets, expanded
+        (                     # New fieldset added on to the bottom
+            'Email Updates',  # Group heading of your choice. set to None for a blank space
+            {
+                'fields': (
+                    'gets_bag_email_updates',
+                ),
+            },
+        ),
+    )
 
-    list_display = [
-        'name',
-        'description',
+    inlines = [
+        SubmissionInline,
+        BagGroupInline,
     ]
-
-    fieldsets = [
-        (None, {'fields': ['name', 'description']}),
-    ]
-
-    def has_add_permission(self, request):
-        return True
 
     def has_change_permission(self, request, obj=None):
-        return True
+        if not obj:
+            return True
+        return obj and (request.user.is_superuser or obj == request.user)
 
     def has_delete_permission(self, request, obj=None):
-        return True
+        return obj and request.user.is_superuser
+
+    @sensitive_post_parameters_m
+    def user_change_password(self, request, id, form_url=''):
+        """ Send a notification email when a user's password is changed. """
+        response = super().user_change_password(request, id, form_url)
+        user = self.get_object(request, unquote(id))
+        form = self.change_password_form(user, request.POST)
+        if form.is_valid() and request.method == 'POST':
+            context = {
+                'subject': gettext("Password updated"),
+                'changed_item': gettext("password"),
+                'changed_status': gettext("updated")
+            }
+            send_user_account_updated.delay(user, context)
+        return response
+
+    def save_model(self, request, obj, form, change):
+        ''' Enforce superuser permissions checks and send notification emails
+        for other account updates
+        '''
+        if change and obj.is_superuser and not request.user.is_superuser:
+            messages.set_level(request, messages.ERROR)
+            msg = 'Non-superusers cannot modify superuser accounts.'
+            self.message_user(request, msg, messages.ERROR)
+        else:
+            super().save_model(request, obj, form, change)
+            if change and (not obj.is_active or "is_superuser" in form.changed_data or \
+                           "is_staff" in form.changed_data):
+                if not obj.is_active:
+                    context = {
+                        'subject': gettext("Account Deactivated"),
+                        'changed_item': gettext("account"),
+                        'changed_status': gettext("deactivated")
+                    }
+                else:
+                    context = {
+                        'subject': gettext("Account updated"),
+                        'changed_item': gettext("account"),
+                        'changed_status': gettext("updated"),
+                        'changed_list': self._get_changed_message(form.changed_data, obj)
+                    }
+
+                send_user_account_updated.delay(obj, context)
+
+    def _get_changed_message(self, changed_data: list, user: User):
+        """ Generate a list of changed status message for certain account details. """
+        message_list = []
+        if "is_superuser" in changed_data:
+            if user.is_superuser:
+                message_list.append(
+                    gettext("Superuser privileges have been added to your account.")
+                )
+            else:
+                message_list.append(
+                    gettext("Superuser privileges have been removed from your account.")
+                )
+        if "is_staff" in changed_data:
+            if user.is_staff:
+                message_list.append(
+                    gettext("Staff privileges have been added to your account.")
+                )
+            else:
+                message_list.append(
+                    gettext("Staff privileges have been removed from your account.")
+                )
+        return message_list
