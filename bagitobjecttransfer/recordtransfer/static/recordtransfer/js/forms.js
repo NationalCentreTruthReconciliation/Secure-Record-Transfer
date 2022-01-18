@@ -312,6 +312,21 @@ $(() => {
     var sourceRolesDialog = undefined
     var sourceTypesDialog = undefined
 
+    var maxTotalUploadSize = 2048
+    if (typeof(MAX_TOTAL_UPLOAD_SIZE) !== 'undefined') {
+        maxTotalUploadSize = MAX_TOTAL_UPLOAD_SIZE
+    }
+
+    var maxSingleUploadSize = 512
+    if (typeof(MAX_SINGLE_UPLOAD_SIZE) !== 'undefined') {
+        maxSingleUploadSize = MAX_SINGLE_UPLOAD_SIZE
+    }
+
+    var maxTotalUploadCount = 80
+    if (typeof(MAX_TOTAL_UPLOAD_COUNT) !== 'undefined') {
+        maxTotalUploadCount = MAX_TOTAL_UPLOAD_COUNT
+    }
+
     $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
         paramName: "upload_files",
@@ -320,8 +335,8 @@ $(() => {
         autoQueue: true,
         uploadMultiple: true,
         parallelUploads: 2,
-        maxFiles: 80,
-        maxFilesize: 1024,
+        maxFiles: maxTotalUploadCount,
+        maxFilesize: maxSingleUploadSize,
         timeout: 180000,
         headers: {
             "X-CSRFToken": csrfToken,
@@ -421,7 +436,6 @@ $(() => {
                     var fileObj = files.filter(file => { return file.name === fileName })[0]
                     var errMessage = {'error': issue.error, 'verboseError': issue.verboseError}
                     dropzoneClosure.emit('error', fileObj, errMessage, null)
-                    console.log(`pushed: ${fileName}`)
                 }
                 for (const file of files) {
                     if (invalidFileNames && invalidFileNames.indexOf(file.name) === -1) {
