@@ -760,6 +760,11 @@ to accept questions and inquiries:
     EMAIL_USE_TLS=True
 
 
+.. seealso::
+
+    See :ref:`ARCHIVIST_EMAIL` for more information on this setting.
+
+
 Note that you can only set one of EMAIL_USE_SSL or EMAIL_USE_TLS to True. Both are False by default
 so you have to manually turn one on.
 
@@ -811,6 +816,10 @@ environment variable:
 
     # file /opt/NCTR-Bagit-Record-Transfer/.env
     BAG_STORAGE_FOLDER=/srv/www/recordtransfer_bags/
+
+.. seealso::
+
+    See :ref:`BAG_STORAGE_FOLDER` for more information on this setting.
 
 
 *******************************
@@ -880,6 +889,11 @@ The second variable you need to set is HOST_DOMAINS. Set this to the domain(s) o
 
 And that's it! All of the required environment variables should now be set.
 
+.. seealso::
+
+    Visit the :ref:`recordtransfer.settings - Application Settings` page for more settings specific
+    to the recordtransfer app.
+
 
 9. Start Services
 #################
@@ -921,15 +935,15 @@ credentials to log in that you created in section :ref:`6.5 Create a Super User`
 
 Once logged in, click **+ Add** under the Sites section to add your site:
 
-.. image:: images/addsite.png
-    :alt: Red circle around add site link
+.. image:: images/admin_add_site.png
+    :alt: Green circle around add site link
 
 
 Fill out your domain name, and give the website a name (you can change the name later if you don't
 like it). Once filled out, click the blue **Save and continue** button.
 
 .. image:: images/savesite.png
-    :alt: Red circle around save site and continue button
+    :alt: Green circle around save site and continue button
 
 
 Once saved, take a look at the address in the address bar for your new site. You will see something
@@ -938,7 +952,7 @@ number is the SITE_ID. The Django site is set to use Site #2, so if you see the 
 you are good to go!
 
 .. image:: images/sitecreated.png
-    :alt: Red arrow pointing to SITE_ID in address bar
+    :alt: Green arrow pointing to SITE_ID in address bar
 
 
 If the number you see is not **2**, you will have to edit the environment variables file and change

@@ -8,15 +8,10 @@ correctly, and will have the wrong link to your site.
 To set the name and domain of your site, first log in as a **superuser**. Regular staff users do not
 have permission to modify Sites.
 
-Go to the administrator application (accessible at /admin/), and click on **Sites**.
-
-.. image:: images/admin_sites.png
-    :alt: Green circle around Sites link in admin app
-
-Next, click **Add Site**.
+Go to the administrator application (accessible at /admin/), and click on **+ Add** next to **Sites**.
 
 .. image:: images/admin_add_site.png
-    :alt: Green circle around Add Site link on Sites admin page
+    :alt: Green circle around Add Sites link in admin app
 
 Fill out your domain name, and give the website a name (you can change the name later if you don't
 like it). Once filled out, click the blue **Save and continue** button.
