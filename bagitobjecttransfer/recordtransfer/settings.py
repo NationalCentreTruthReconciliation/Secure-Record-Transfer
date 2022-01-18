@@ -15,6 +15,12 @@ BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_USERNAME', default='do-not-reply')
 ARCHIVIST_EMAIL = config('ARCHIVIST_EMAIL')
 
+# Maximum upload thresholds
+
+MAX_TOTAL_UPLOAD_SIZE = config('MAX_TOTAL_UPLOAD_SIZE', default=256, cast=int)
+MAX_SINGLE_UPLOAD_SIZE = config('MAX_SINGLE_UPLOAD_SIZE', default=64, cast=int)
+MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
+
 # Default data to inject into metadata, after the user enters their own metadata
 
 DEFAULT_DATA = {
