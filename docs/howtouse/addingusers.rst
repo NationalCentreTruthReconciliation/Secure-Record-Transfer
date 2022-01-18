@@ -23,8 +23,8 @@ production, to create a superuser, use this command and follow the prompts:
     (env) $ python3 manage.py createsuperuser
 
 
-Creating Users from Backend
-###########################
+Creating Users from Admin Site
+##############################
 
 A staff member or superuser with access to the administrator application (accessible at /admin/) has
 the ability to create new users. To start the process, go to the admin site, and click Users.
@@ -60,7 +60,7 @@ appear in the header on the main site if you are not logged in. Clicking the Sig
 present the user with a sign up form.
 
 .. note::
-   You can disable the sign up function by setting SIGN_UP_ENABLED to False in
+   You can disable the sign up function by setting :ref:`SIGN_UP_ENABLED` to False in
    recordtransfer/settings.py
 
 .. image:: images/user_sign_up.png

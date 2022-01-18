@@ -5,8 +5,9 @@ from unittest.mock import Mock, patch, ANY
 from bagit import Bag
 from django.test import TestCase
 
+'''
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.bagger import create_bag, update_bag, delete_bag
+from recordtransfer.bagger import create_bag, update_bag
 
 
 class CreateBagTests(TestCase):
@@ -103,3 +104,4 @@ class CreateBagTests(TestCase):
 
     def tearDown(self):
         patch.stopall()
+'''

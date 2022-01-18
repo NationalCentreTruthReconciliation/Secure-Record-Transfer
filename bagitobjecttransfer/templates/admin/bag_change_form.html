@@ -1,10 +1,9 @@
 {% extends "admin/change_form.html" %}
+{% load i18n %}
 
 {% block submit_buttons_bottom %}
     {{ block.super }}
     <div class="submit-row">
-        <input type="submit" value="Generate Zipped Bag" name="_download_bag">
-        <input type="submit" value="Where is this Bag?" name="_get_bag_location">
-        <input type="submit" value="View Metadata as HTML" name="_view_report">
+        <a href="{{ original.get_admin_zip_url }}">{% trans "Click here to create a downloadable bag" %}</a>
     </div>
 {% endblock %}

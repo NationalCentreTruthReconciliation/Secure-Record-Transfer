@@ -16,7 +16,11 @@
         <div style="
             padding: 0px 20px;">
             <div>
-                <p>{% blocktranslate %}Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.{% endblocktranslate %}</p>
+                <p>
+                {% blocktrans %}
+                Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.
+                {% endblocktrans %}
+                </p>
                 {% if changed_list %}
                 <p>{% translate "The following changes have been made to your account." %}</p>
                 <ul>

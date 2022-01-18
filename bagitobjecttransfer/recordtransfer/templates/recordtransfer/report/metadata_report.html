@@ -73,16 +73,11 @@
         <p>
             The following is an automatically generated report for the transfer submitted by
             {{ bag.user.username }} ({{ bag.user.email }}) at {{ bag.bagging_date }}, titled
-            {{ metadata.section_1.accession_title }}. To change this report, you must update the
-            information via the Bag administration page in the record transfer portal.
+            {{ metadata.section_1.accession_title }}.
         </p>
         <table border="1" cellspacing="0">
             <tr>
                 <th colspan="2"><div class="title">Transfer Context</div></th>
-            </tr>
-            <tr>
-                <td class="left-col level-1">Review Status</td>
-                <td>{{ bag.get_review_status_display }}</td>
             </tr>
             <tr>
                 <td class="left-col level-1">Transfer Date</td>
@@ -95,6 +90,10 @@
             <tr>
                 <td class="left-col level-1">Report Generation Date</td>
                 <td>{{ current_date }}</td>
+            </tr>
+            <tr>
+                <td class="left-col level-1">Bag UUID</td>
+                <td>{{ bag.uuid }}</td>
             </tr>
         </table>
         <table border="1" cellspacing="0" id="section_1">

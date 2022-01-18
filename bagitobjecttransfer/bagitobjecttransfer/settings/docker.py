@@ -39,6 +39,8 @@ RQ_QUEUES = {
     },
 }
 
+RQ_SHOW_ADMIN_LINK = True
+
 
 # Emailing - Uses MailHog to intercept emails
 # MailHog web UI runs at localhost:8025
