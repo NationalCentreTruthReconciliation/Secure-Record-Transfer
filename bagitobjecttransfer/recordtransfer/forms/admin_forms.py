@@ -137,6 +137,7 @@ class BagForm(RecordTransferModelForm):
     class Meta:
         model = Bag
         fields = (
+            'uuid',
             'user',
             'bagging_date',
             'bag_name',
@@ -146,6 +147,7 @@ class BagForm(RecordTransferModelForm):
         )
 
     disabled_fields = [
+        'uuid',
         'user',
         'bagging_date',
         'bag_name',

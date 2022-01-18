@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import shutil
+import uuid
 
 import bagit
 
@@ -212,10 +213,17 @@ class Bag(models.Model):
     bag_name = models.CharField(max_length=256, null=True)
     caais_metadata = models.TextField(default=r'{}')
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
+    uuid = models.UUIDField(default=uuid.uuid4)
+
+    _json_metadata = None
 
     @property
     def json_metadata(self):
-        return json.loads(self.caais_metadata)
+        ''' Returns caais_metadata as a python dict
+        '''
+        if not self._json_metadata:
+            return json.loads(self.caais_metadata)
+        return self._json_metadata
 
     @property
     def flat_json_metadata(self):
