@@ -45,7 +45,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'recordtransfer.context_processors.signup_status'
+                'recordtransfer.context_processors.signup_status',
+                'recordtransfer.context_processors.file_uploads',
             ],
         },
     },
