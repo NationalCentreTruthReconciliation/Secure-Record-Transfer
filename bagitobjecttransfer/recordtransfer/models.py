@@ -1,4 +1,5 @@
 ''' Record Transfer application models '''
+from collections import OrderedDict
 from pathlib import Path
 from typing import Union
 import os
@@ -272,19 +273,143 @@ class Bag(models.Model):
                 extent = statements[0].get('quantity_and_type_of_units', None)
         return extent or 'No files'
 
-        return {
-            'title': title or 'No title',
-            'extent': extent or 'No files',
-        }
+    def update_metadata(self, metadata: dict):
+        ''' Replace caais_metadata with a new serialized dictionary.
 
-    @property
-    def title(self):
-        title = None
-        json_metadata = self.json_metadata
-        if 'section_1' in json_metadata:
-            title = json_metadata['section_1'].get('accession_title', None)
-        return title or 'No title'
+        Args:
+            metadata (dict): The new dictionary to replace caais_metadata
+        '''
+        self.caais_metadata = json.dumps(metadata)
+        self._json_metadata = None
 
+    def update_accession_id(self, user, accession_id: str, commit=False):
+        ''' Update the bag's accession identifier in Section 1 of the
+        caais_metadata
+
+        Args:
+            user: The user making the request to update this bag
+            accession_id (str): The new accession identifier
+            commit (bool): True to save() the model post-change, False if not
+        '''
+        bag_metadata = self.json_metadata
+        if 'section_1' in bag_metadata and 'accession_identifier' in bag_metadata['section_1']:
+            curr_id = bag_metadata['section_1']['accession_identifier']
+            if curr_id != accession_id:
+                bag_metadata['section_1']['accession_identifier'] = accession_id
+                self.update_metadata(bag_metadata)
+                if curr_id:
+                    note = 'Accession Identifier changed from {} to {}'.format(
+                        curr_id, accession_id
+                    )
+                else:
+                    note = 'Accession Identifier assigned to {}'.format(
+                        accession_id
+                    )
+                self._log_new_event(user, 'Accession Identifier Changed', note, commit=commit)
+
+    def update_level_of_detail(self, user, level_of_detail: str, commit=False):
+        ''' Update the bag's level of detail in Section 7 of the caais_metadata
+
+        Args:
+            user: The user making the request to update this bag
+            level_of_detail (str): The new level of detail
+            commit (bool): True to save() the model post-change, False if not
+        '''
+        bag_metadata = self.json_metadata
+        if 'section_7' in bag_metadata and 'level_of_detail' in bag_metadata['section_7']:
+            curr_level = bag_metadata['section_7']['level_of_detail']
+            if curr_level != level_of_detail:
+                bag_metadata['section_7']['level_of_detail'] = level_of_detail
+                self.update_metadata(bag_metadata)
+                if curr_level:
+                    note = 'Level of Detail changed from {} to {}'.format(
+                        curr_level, level_of_detail
+                    )
+                else:
+                    note = 'Level of Detail assigned to {}'.format(
+                        level_of_detail
+                    )
+                self._log_new_event(user, 'Level of Detail Changed', note, commit=commit)
+
+    def add_appraisal(self, user, appraisal, commit=False):
+        ''' Add an Appraisal statement to the Bag in Section 4 of the
+        caais_metadata. If an appraisal with the same ID already exists in the
+        appraisal list, it is not added again.
+
+        Args:
+            user: The user making the request to update this bag
+            appraisal (Appraisal): The new appraisal
+            commit (bool): True to save() the model post-change, False if not
+        '''
+        bag_metadata = self.json_metadata
+        if 'section_4' in bag_metadata:
+            if 'appraisal_statement' not in bag_metadata['section_4']:
+                bag_metadata['section_4']['appraisal_statement'] = []
+
+            # Skip adding if appraisal already exists
+            for existing in bag_metadata['section_4']['appraisal_statement']:
+                if existing['_id'] == appraisal.id:
+                    return
+
+            new_appraisal = appraisal.to_serializable()
+            bag_metadata['section_4']['appraisal_statement'].append(new_appraisal)
+            self.update_metadata(bag_metadata)
+            note = '{} with ID {} created by {} ({}) was added'.format(
+                str(Appraisal.AppraisalType(appraisal.appraisal_type).label),
+                appraisal.id, user.username, user.email
+            )
+            self._log_new_event(user, 'Appraisal Added', note, commit=commit)
+
+    def remove_appraisal(self, user, appraisal, commit=False):
+        ''' Remove an Appraisal statement from the Bag in Section 4 of the
+        caais_metadata. If an appraisal with the same ID does not exist in the
+        appraisal list, no appraisal is removed.
+
+        One appraisal maximum is removed at a time with this method. If an
+        appraisal was added multiple times by accident to the Bag or two or more
+        appraisals were added with the same ID, call this method multiple times
+        to remove each instance of the duplicate appraisal one-by-one.
+
+        Args:
+            user: The user making the request to update this bag
+            appraisal (Appraisal): The new appraisal
+            commit (bool): True to save() the model post-change, False if not
+        '''
+        bag_metadata = self.json_metadata
+        if 'section_4' in bag_metadata and 'appraisal_statement' in bag_metadata['section_4']:
+            i_del = -1
+            for i, bag_appraisal in enumerate(bag_metadata['section_4']['appraisal_statement']):
+                if bag_appraisal['_id'] == appraisal.id:
+                    i_del = i
+                    break
+            if i_del != -1:
+                del bag_metadata['section_4']['appraisal_statement'][i_del]
+                self.update_metadata(bag_metadata)
+                note = 'Appraisal with ID {} created by {} ({}) was deleted'.format(
+                    appraisal.id, appraisal.user.username, appraisal.user.email
+                )
+                self._log_new_event(user, 'Appraisal Deleted', note, commit=commit)
+
+    def _log_new_event(self, user, event_type: str, event_note: str, commit=False):
+        ''' Create a new event in Section 5 of the caais_metadata.
+
+        Args:
+            user: The user making the request to change the bag
+            event_type (str): The name of the event
+            event_note (str): A note detailing what happened in the event
+            commit (bool): True to save() the model post-change, False if not
+        '''
+        new_event = OrderedDict()
+        now = timezone.localtime(timezone.now())
+        new_event['event_type'] = event_type
+        new_event['event_date'] = now.strftime(r'%Y-%m-%d %H:%M:%S %Z')
+        new_event['event_agent'] = '{} ({})'.format(user.username, user.email)
+        new_event['event_note'] = event_note
+        bag_metadata = self.json_metadata
+        bag_metadata['section_5']['event_statement'].append(new_event)
+        self.update_metadata(bag_metadata)
+        if commit:
+            self.save()
 
     def make_bag(self, algorithms: Union[str, list] = 'sha512', file_perms: str = '644',
                  move_files: bool = True, logger=None):
@@ -388,7 +513,6 @@ class Bag(models.Model):
             'time_created': current_time,
         }
 
-
     def update_bag(self, logger=None):
         ''' Update the file system mirror of this Bag with the current metadata of this Bag. The
         integrity of the bag is checked before updating; if the bag is invalid, the bag will not be
@@ -400,6 +524,8 @@ class Bag(models.Model):
         metadata = self.flat_json_metadata
         logger = logger or LOGGER
         bag_folder = self.location
+
+        logger.info('Updating file system bag located at "{0}"'.format(bag_folder))
 
         if not os.path.exists(bag_folder):
             logger.error(msg=(
@@ -428,6 +554,9 @@ class Bag(models.Model):
         LOGGER.info(msg=('Updating bag-info.txt for the bag at "{0}"'.format(bag_folder)))
         fields_updated = 0
         for key, new_value in metadata.items():
+            if key.startswith('_'):
+                # Ignore hidden fields
+                continue
             if key not in bag.info:
                 logger.warning(msg=(
                     'New fields cannot be added to a bag. Found invalid field "{0}"'\
@@ -461,7 +590,6 @@ class Bag(models.Model):
         ))
         return {'bag_exists': True, 'bag_valid': True, 'num_fields_updated': fields_updated}
 
-
     def remove_bag(self):
         ''' Remove the BagIt bag from the file system associated with this Bag
         '''
@@ -469,20 +597,17 @@ class Bag(models.Model):
         if os.path.exists(self.location) and os.path.isdir(self.location):
             shutil.rmtree(self.location)
 
-
     def get_admin_change_url(self):
         ''' Get the URL to change this object in the admin
         '''
         view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-
     def get_admin_zip_url(self):
         ''' Get the URL to start zipping this bag from the admin
         '''
         view_name = 'admin:{0}_{1}_zip'.format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
-
 
     def __str__(self):
         return self.bag_name
@@ -493,9 +618,10 @@ def update_location(sender, instance, *args, **kwargs):
     '''
     if sender == Bag:
         bag = instance
-        metadata = bag.json_metadata
-        metadata['section_4']['storage_location'] = bag.location
-        bag.caais_metadata = json.dumps(metadata)
+        if not bag.location:
+            metadata = bag.json_metadata
+            metadata['section_4']['storage_location'] = bag.location
+            bag.update_metadata(metadata)
 
 @receiver(pre_delete)
 def delete_bag(sender, instance, **kwargs):
@@ -578,6 +704,14 @@ class Appraisal(models.Model):
     appraisal_date = models.DateTimeField(auto_now=True)
     statement = models.TextField(null=False)
     note = models.TextField(default='', null=True)
+
+    def to_serializable(self):
+        obj = OrderedDict()
+        obj['_id'] = self.id
+        obj['appraisal_statement_type'] = str(self.AppraisalType(self.appraisal_type).label)
+        obj['appraisal_statement_value'] = str(self.statement)
+        obj['appraisal_statement_note'] = str(self.note)
+        return obj
 
     def __str__(self):
         return f'{self.get_appraisal_type_display()} by {self.user} on {self.appraisal_date}'

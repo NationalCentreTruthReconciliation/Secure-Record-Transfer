@@ -181,20 +181,6 @@ class BagForm(RecordTransferModelForm):
     location = forms.CharField(required=False)
     exists = forms.BooleanField(required=False)
 
-    '''
-    def log_new_event(self, event_type: str, event_note: str = ''):
-        new_event = OrderedDict()
-        new_event['event_type'] = event_type
-        new_event['event_date'] = timezone.now().strftime(r'%Y-%m-%d %H:%M:%S %Z')
-        if self.current_user:
-            new_event['event_agent'] = (f'User {self.current_user.username} '
-                                        f'({self.current_user.email})')
-        else:
-            new_event['event_agent'] = 'Transfer Portal User'
-        new_event['event_note'] = event_note
-        self._bag_metadata['section_5']['event_statement'].append(new_event)
-    '''
-
 
 class InlineBagForm(RecordTransferModelForm):
     ''' Form used to view Bags in-line. This form should not be used to provide edit capabilities

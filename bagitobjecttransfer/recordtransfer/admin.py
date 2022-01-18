@@ -1,6 +1,6 @@
 ''' Custom administration code for the admin site '''
 import csv
-import json
+import logging
 import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
@@ -8,6 +8,7 @@ from pathlib import Path
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, path
 from django.utils import timezone
@@ -22,8 +23,12 @@ from recordtransfer.forms import BagForm, InlineBagForm, InlineBagGroupForm, Sub
 from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
 from recordtransfer.models import User, UploadSession, UploadedFile, Bag, BagGroup, Appraisal, \
     Submission, Job, Right, SourceType, SourceRole
+from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def linkify(field_name):
@@ -74,7 +79,7 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     writer = csv.writer(csv_file)
     convert_bag_to_row = FLATTEN_FUNCTIONS[version]
     for i, bag in enumerate(queryset, 0):
-        new_row = convert_bag_to_row(json.loads(bag.caais_metadata))
+        new_row = convert_bag_to_row(bag.json_metadata)
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())
@@ -89,6 +94,43 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     response['Content-Disposition'] = f'attachment; filename={filename}'
     csv_file.close()
     return response
+
+
+def update_filesystem_bag(request, bag: Bag):
+    ''' Update the Bag on the filesystem. Messages the user depending on the
+    action taken.
+
+    Args:
+        request: The originating request
+        bag (Bag): The bag that is to be updated
+    '''
+    results = bag.update_bag()
+    num_updates = results['num_fields_updated']
+
+    if not results['bag_exists']:
+        messages.error(request, gettext(
+            'The bag at "{}" was moved or deleted, so it could not be updated!'
+        ).format(bag.location))
+
+    elif not results['bag_valid'] and num_updates == 0:
+        messages.error(request, gettext(
+            'The bag at "{}" was found to be invalid!'
+        ).format(bag.location))
+
+    elif not results['bag_valid'] and num_updates > 0:
+        messages.error(request, gettext(
+            'The bag-info.txt for the bag at "{}" was updated, but is now invalid!'
+        ).format(bag.location))
+
+    elif results['bag_valid'] and num_updates == 0:
+        messages.info(request, gettext(
+            'No updates were made to the bag-info.txt for the bag at "{}"'
+        ).format(bag.location))
+
+    else:
+        messages.success(request, gettext(
+            '{} related fields were updated in the bag-info.txt for the bag at "{}"'
+        ).format(num_updates, bag.location))
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -240,7 +282,6 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ]
 
 
-
 @admin.register(Bag)
 class BagAdmin(admin.ModelAdmin):
     ''' Admin for the Bag model. Adds a view to start a job to zip the bag up so
@@ -359,38 +400,6 @@ class BagAdmin(admin.ModelAdmin):
         return export_bag_csv(queryset, ('atom', 2, 1))
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
 
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        self.update_filesystem_bag(request, obj)
-
-    def update_filesystem_bag(self, request, bag: Bag):
-        ''' Update the Bag on the filesystem. Messages the user depending on the
-        action taken.
-
-        Args:
-            request: The originating request
-            bag (Bag): The bag that is to be updated
-        '''
-        results = bag.update_filesystem_bag()
-        num_updates = results['num_fields_updated']
-        if not results['bag_exists']:
-            msg = f'The bag at "{bag.location}" was moved or deleted, so it could not be updated!'
-            messages.error(request, msg)
-        elif not results['bag_valid'] and num_updates == 0:
-            msg = f'The bag at "{bag.location}" was found to be invalid!'
-            messages.error(request, msg)
-        elif not results['bag_valid'] and num_updates > 0:
-            msg = (f'The bag-info.txt for the bag at "{bag.location}" was updated, but is now '
-                   'invalid!')
-            messages.error(request, msg)
-        elif results['bag_valid'] and num_updates == 0:
-            msg = f'No updates were made to the bag-info.txt for the bag at "{bag.location}"'
-            messages.info(request, msg)
-        else:
-            msg = (f'{num_updates} related fields were updated in the bag-info.txt for the bag at '
-                   f'"{bag.location}"')
-            messages.success(request, msg)
-
 
 class BagInline(admin.TabularInline):
     ''' Inline admin for the Bag model. Used to view Bags associated with a
@@ -439,6 +448,7 @@ class BagGroupAdmin(ReadOnlyAdmin):
 
     search_fields = [
         'name',
+        'uuid',
     ]
 
     ordering = [
@@ -524,6 +534,10 @@ class AppraisalAdmin(admin.ModelAdmin):
     '''
     form = AppraisalForm
 
+    actions = [
+        'delete_selected'
+    ]
+
     list_display = [
         'appraisal_type',
         'appraisal_date',
@@ -547,7 +561,59 @@ class AppraisalAdmin(admin.ModelAdmin):
         return obj and request.user == obj.user
 
     def has_delete_permission(self, request, obj=None):
-        return obj and (request.user == obj.user or request.user.is_superuser)
+        return request.user.is_superuser or (obj and request.user == obj.user)
+
+    def delete_model(self, request, obj):
+        ''' Delete the Appraisal from the Appraisal's Submission's Bag (if Bag
+        editing is allowed)
+        '''
+        appraisal = obj
+        has_bag = appraisal and appraisal.submission and appraisal.submission.bag
+
+        if has_bag and ALLOW_BAG_CHANGES:
+            bag = appraisal.submission.bag
+            bag.remove_appraisal(request.user, appraisal, commit=True)
+            update_filesystem_bag(request, bag)
+
+        elif has_bag:
+            messages.warning(request, gettext(
+                'An appraisal was deleted, an operation that would normally have affected the '
+                "Bag associated with the appraisal's submission, but ALLOW_BAG_CHANGES is OFF, "
+                'so no change was made to the Bag'
+            ))
+
+        super().delete_model(request, obj)
+
+
+    def delete_queryset(self, request, queryset):
+        ''' Delete the Appraisals from the Appraisals' Submissions' Bags (if Bag
+        editing is allowed)
+        '''
+        # Find appraisals in queryset with a bag and sort them by bag ID
+        appraisals_with_bags = queryset\
+            .filter(~Q(submission=None))\
+            .filter(~Q(submission__bag=None))\
+            .order_by('submission__bag__id')
+
+        # save and update each Bag only once
+        if appraisals_with_bags and ALLOW_BAG_CHANGES:
+            prev_bag = None
+            for appraisal in appraisals_with_bags:
+                curr_bag = appraisal.submission.bag
+                curr_bag.remove_appraisal(request.user, appraisal, commit=True)
+                if prev_bag and curr_bag.id != prev_bag.id:
+                    update_filesystem_bag(request, prev_bag)
+                prev_bag = curr_bag
+            update_filesystem_bag(request, prev_bag)
+
+        elif appraisals_with_bags:
+            messages.warning(request, gettext(
+                'One or more appraisals were deleted, an operation that would normally have '
+                "affected the Bags associated with the appraisals' submissions', but "
+                'ALLOW_BAG_CHANGES is OFF, so no changes were made to the Bag(s)'
+            ))
+
+        super().delete_queryset(request, queryset)
 
 
 class AppraisalInline(admin.TabularInline):
@@ -692,14 +758,70 @@ class SubmissionAdmin(admin.ModelAdmin):
     export_reports.short_description = 'Export CAAIS submission reports for Selected'
 
     def save_related(self, request, form, formsets, change):
+        ''' Update Bag in case an Appraisal is added. Deleting inline Appraisals
+        is not allowed, so the case of deleting from the formset is not handled.
+        '''
         for formset in formsets:
-            if formset.model == Appraisal:
-                instances = formset.save(commit=False)
-                for instance in instances:
-                    instance.user = request.user
-                    instance.save()
-                formset.save_m2m()
+            if formset.model != Appraisal:
+                continue
+
+            obj = form.instance
+            appraisals = formset.save(commit=False)
+
+            if not appraisals:
+                continue
+
+            for appraisal in appraisals:
+                appraisal.user = request.user
+                appraisal.save()
+                if ALLOW_BAG_CHANGES:
+                    obj.bag.add_appraisal(request.user, appraisal, commit=False)
+
+            if ALLOW_BAG_CHANGES:
+                obj.bag.save()
+                update_filesystem_bag(request, obj.bag)
+
+            else:
+                messages.warning(request, gettext(
+                    'A change to the appraisals was made to this submission that would normally '
+                    "have affected the Bag's bag-info.txt, but ALLOW_BAG_CHANGES is OFF, so no "
+                    'change was made to the Bag'
+                ))
+
+            formset.save_m2m()
         super().save_related(request, form, formsets, change)
+
+    def save_model(self, request, obj, form, change):
+        ''' Update Bag in case the accession identifier or level of detail
+        changes.
+        '''
+        bag_changes = change and any(
+            f in form.changed_data for f in ('accession_identifier', 'level_of_detail')
+        )
+
+        if not bag_changes:
+            super().save_model(request, obj, form, change)
+            return
+
+        if not ALLOW_BAG_CHANGES:
+            messages.warning(request, gettext(
+                "A change was made to this submission that would have affected the Bag's "
+                'bag-info.txt, but ALLOW_BAG_CHANGES is OFF, so no change was made to the Bag'
+            ))
+            super().save_model(request, obj, form, change)
+            return
+
+        if 'accession_identifier' in form.changed_data:
+            updated_id = form.cleaned_data['accession_identifier']
+            obj.bag.update_accession_id(request.user, updated_id, commit=False)
+
+        if 'level_of_detail' in form.changed_data:
+            updated_choice = Submission.LevelOfDetail(form.cleaned_data['level_of_detail'])
+            obj.bag.update_level_of_detail(request.user, str(updated_choice.label), commit=False)
+
+        obj.bag.save()
+        update_filesystem_bag(request, obj.bag)
+        super().save_model(request, obj, form, change)
 
 
 class SubmissionInline(admin.TabularInline):
