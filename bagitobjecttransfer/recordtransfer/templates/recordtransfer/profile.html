@@ -33,8 +33,8 @@
                 {% for submission in user_submissions %}
                     <tr>
                         <td>{{ submission.submission_date }}</td>
-                        <td>{{ submission.bag.transfer_info.title }}</td>
-                        <td>{{ submission.bag.transfer_info.extent }}</td>
+                        <td>{{ submission.bag.title }}</td>
+                        <td>{{ submission.bag.extent }}</td>
                         <td>{{ submission.get_review_status_display }}</td>
                     </tr>
                 {% endfor %}

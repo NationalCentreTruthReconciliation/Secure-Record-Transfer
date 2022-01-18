@@ -244,19 +244,33 @@ class Bag(models.Model):
         return os.path.exists(self.location)
 
     @property
-    def transfer_info(self):
-        ''' Exposes a small amount of information from the transfer to be shown
-        for a user
+    def title(self):
+        ''' Get title from caais_metadata
+
+        Returns:
+            (str): The title as it was captured in the transfer form
         '''
         title = None
-        extent = None
         json_metadata = self.json_metadata
         if 'section_1' in json_metadata:
             title = json_metadata['section_1'].get('accession_title', None)
+        return title or 'No title'
+
+    @property
+    def extent(self):
+        ''' Get first extent statement from caais_metadata
+
+        Returns:
+            (str): The extent statement as it was created from the Bag's file
+                uploads
+        '''
+        extent = None
+        json_metadata = self.json_metadata
         if 'section_3' in json_metadata:
             statements = json_metadata['section_3'].get('extent_statement', [])
             if statements:
                 extent = statements[0].get('quantity_and_type_of_units', None)
+        return extent or 'No files'
 
         return {
             'title': title or 'No title',
