@@ -18,6 +18,15 @@ setting a value in the :code:`.env` environment file.
         BAG_STORAGE_FOLDER=/path/to/your/folder
 
 
+**ALLOW_BAG_CHANGES** *(string)*:
+    Allow changes to be made to a BagIt bag from the admin page. If set to false, a warning will be
+    posted when a change is made that would have made a change to a BagIt bag. Defaults to true.
+
+    ::
+
+        ALLOW_BAG_CHANGES=true
+
+
 **APPROXIMATE_DATE_FORMAT** *(string)*:
     A format string for the date to indicate an approximate date. The string variable :code:`{date}`
     must be present for the date format to be used.

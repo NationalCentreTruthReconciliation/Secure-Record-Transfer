@@ -1,8 +1,10 @@
 ''' Forms specific to the recordtransfer admin site '''
 from django import forms
+from django.utils.html import format_html
 from django.utils.translation import gettext
 
 from recordtransfer.models import Appraisal, Bag, BagGroup, Submission, UploadSession
+from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 
 class RecordTransferModelForm(forms.ModelForm):
@@ -108,10 +110,28 @@ class SubmissionForm(RecordTransferModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['accession_identifier'].required = False
+
         if hasattr(self, 'instance'):
-            self.fields['bag'].help_text = gettext(
-                '<a href="{0}">Click to view bag</a>'
-            ).format(self.instance.bag.get_admin_change_url())
+            self.fields['bag'].help_text = ' | '.join([
+                format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
+                    (self.instance.bag.get_admin_change_url(), 'View Bag'),
+                    (self.instance.get_admin_report_url(), 'View Bag metadata'),
+                    (self.instance.bag.get_admin_zip_url(), 'Create downloadable Bag'),
+                ]
+            ])
+
+            for field in ('accession_identifier', 'level_of_detail'):
+                if field in self.fields:
+                    if ALLOW_BAG_CHANGES:
+                        self.fields[field].help_text = gettext(
+                            'Changing this field will change the Bag\'s bag-info.txt'
+                        )
+                    else:
+                        self.fields[field].help_text = gettext(
+                            'ALLOW_BAG_CHANGES is OFF, changing this field will not update the '
+                            "Bag's bag-info.txt"
+                        )
+
         self.fields['bag'].widget.can_add_related = False
 
 
