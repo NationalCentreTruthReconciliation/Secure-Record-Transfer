@@ -51,6 +51,11 @@ class UploadSession(models.Model):
         ''' Start a new upload session '''
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
+    def get_existing_file_set(self):
+        ''' Get all files from the uploadedfile_set where the file exists
+        '''
+        return [f for f in self.uploadedfile_set.all() if f.exists]
+
     def number_of_files_uploaded(self):
         ''' Get the number of files associated with this session.
 
@@ -66,14 +71,19 @@ class UploadSession(models.Model):
             logger: A logger object
         '''
         logger = logger or LOGGER
-        # TODO: filter for existing files
-        files = self.uploadedfile_set.all()
-        logger.info(msg=(
-            'Removing {0} uploaded files from the session {1}'\
-            .format(len(files), self.token)
-        ))
-        for uploaded_file in files:
-            uploaded_file.remove()
+        existing_files = self.get_existing_file_set()
+        if not existing_files:
+            logger.info(msg=(
+                'There are no existing uploaded files in the session {0}'\
+                .format(self.token)
+            ))
+        else:
+            logger.info(msg=(
+                'Removing {0} uploaded files from the session {1}'\
+                .format(len(existing_files), self.token)
+            ))
+            for uploaded_file in existing_files:
+                uploaded_file.remove()
 
     def move_session_uploads(self, destination, logger=None):
         ''' Move uploaded files associated with this session to a destination directory.
@@ -109,11 +119,10 @@ class UploadSession(models.Model):
             logger.error(msg=message.format(destination))
             raise FileNotFoundError(message.format(destination))
 
-        # TODO: filter for existing files
         files = self.uploadedfile_set.all()
 
         if not files:
-            logger.warning(msg=('No files found in the session {0}'.format(self.token)))
+            logger.warning(msg=('No existing files found in the session {0}'.format(self.token)))
             return ([], [])
 
         verb = 'Moving' if delete else 'Copying'
@@ -121,8 +130,9 @@ class UploadSession(models.Model):
         copied = []
         missing = []
         for uploaded_file in files:
-            source_path = Path(uploaded_file.path)
-            if not source_path.exists():
+            source_path = uploaded_file.file_upload.path
+
+            if not uploaded_file.exists:
                 logger.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
                 missing.append(str(source_path))
                 continue
@@ -164,7 +174,7 @@ class UploadedFile(models.Model):
         Returns:
             (bool): True if file exists, False otherwise
         '''
-        return self.file_upload and os.path.exists(self.file_upload.path)
+        return bool(self.file_upload) and os.path.exists(self.file_upload.path)
 
     def copy(self, new_path):
         ''' Copy this file to a new path.
@@ -188,15 +198,13 @@ class UploadedFile(models.Model):
     def remove(self):
         ''' Delete the real file-system representation of this model.
         '''
-        if self.exists():
+        if self.file_upload:
             self.file_upload.delete(save=True)
 
     def __str__(self):
-        if self.file_upload:
-            if self.exists:
-                return f'{self.name} | Session {self.session}'
-            return f'File removed! | Session {self.session}'
-        return f'File removed! | Session {self.session}'
+        if self.exists:
+            return f'{self.name} | Session {self.session}'
+        return f'{self.name} Removed! | Session {self.session}'
 
 
 class BagGroup(models.Model):

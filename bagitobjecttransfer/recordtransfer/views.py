@@ -226,15 +226,18 @@ class TransferFormWizard(SessionWizardView):
     def get_all_cleaned_data(self):
         cleaned_data = super().get_all_cleaned_data()
 
-        # TODO: filter for existing files
-        file_names = list(map(str, UploadedFile.objects.filter(
-            session__token=cleaned_data['session_token']
-        ).values_list('name', flat=True)))
+        file_names = [
+            f.name for f in UploadedFile.objects.filter(
+                session__token=cleaned_data['session_token']
+            ) if f.exists
+        ]
 
         # Get quantity and type of files for extent
-        cleaned_data['quantity_and_type_of_units'] = get_human_readable_file_count(file_names,
-                                                                                   ACCEPTED_FILE_FORMATS,
-                                                                                   LOGGER)
+        cleaned_data['quantity_and_type_of_units'] = get_human_readable_file_count(
+            file_names,
+            ACCEPTED_FILE_FORMATS,
+            LOGGER
+        )
 
         # Convert the four date-related fields to a single date
         start_date = cleaned_data['start_date_of_material'].strftime(r'%Y-%m-%d')
