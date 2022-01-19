@@ -15,6 +15,9 @@ the :code:`.env` environment file. In alphabetical order, these settings are:
 - :ref:`BAG_STORAGE_FOLDER`
 - :ref:`DEFAULT_DATA`
 - :ref:`DO_NOT_REPLY_USERNAME`
+- :ref:`MAX_TOTAL_UPLOAD_SIZE`
+- :ref:`MAX_SINGLE_UPLOAD_SIZE`
+- :ref:`MAX_TOTAL_UPLOAD_COUNT`
 - :ref:`SIGN_UP_ENABLED`
 - :ref:`UPLOAD_STORAGE_FOLDER`
 
@@ -257,6 +260,77 @@ DO_NOT_REPLY_USERNAME
 
         #file: .env
         DO_NOT_REPLY_USERNAME=donotreply
+
+
+MAX_SINGLE_UPLOAD_SIZE
+######################
+
+    *Choose the maximum size (in MiB) an uploaded file is allowed to be*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        64            int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum allowed size a single file can be when uploaded with the transfer form. The
+    size is expressed in **MiB**, *not* MB.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_SINGLE_UPLOAD_SIZE=512
+
+
+MAX_TOTAL_UPLOAD_COUNT
+######################
+
+    *Choose the maximum number of files can be transferred*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        40            int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum number of files that can be transferred at one time with the transfer form.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_TOTAL_UPLOAD_COUNT=10
+
+
+MAX_TOTAL_UPLOAD_SIZE
+#####################
+
+    *Choose the maximum total size (in MiB) of a file transfer*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        256           int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum allowed total size of all files being transferred at one time. The size is
+    expressed in **MiB**, *not* MB.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_TOTAL_UPLOAD_SIZE=1024
 
 
 SIGN_UP_ENABLED
