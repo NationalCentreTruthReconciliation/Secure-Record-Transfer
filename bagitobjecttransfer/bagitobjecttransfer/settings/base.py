@@ -87,7 +87,8 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_USER_MODEL = 'recordtransfer.User'
 
 FILE_UPLOAD_HANDLERS = [
-    'bagitobjecttransfer.persistentuploadhandler.PersistentFileUploadHandler'
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 ]
 
 # Internationalization
