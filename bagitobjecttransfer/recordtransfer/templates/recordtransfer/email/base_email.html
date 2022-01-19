@@ -1,0 +1,43 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html style="
+    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;">
+    <body style="
+        margin: 0;">
+        <div style="
+            color: #333333;
+            font-size: 20pt;
+            padding: 6px 20px;
+            background-color: #eeeeee;
+            margin-bottom: 15px;">
+            {% block title %}Email Title Goes Here{% endblock %}
+        </div>
+        <div style="
+            padding: 0px 20px;">
+
+            {% block message %}
+            Email Message Goes Here
+            {% endblock %}
+
+            {% block postscript %}
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% blocktrans %}
+                This email address is not monitored, do not reply to this message.
+                {% endblocktrans %}
+                </i>
+            </div>
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% blocktrans %}
+                If you do not want to receive these emails anymore, click this link.
+                {% endblocktrans %}
+                </i>
+            </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>
