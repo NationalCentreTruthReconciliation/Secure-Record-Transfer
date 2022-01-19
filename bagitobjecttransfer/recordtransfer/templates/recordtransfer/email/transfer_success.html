@@ -1,52 +1,46 @@
-<!DOCTYPE html>
-<html style="
-    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;">
-    <body style="
-        margin: 0;">
-        <div style="
-            color: #333333;
-            font-size: 20pt;
-            padding: 6px 20px;
-            background-color: #eeeeee;">
-            Thank You for Your Transfer
-        </div>
-        <div style="
-            padding: 0px 20px;">
-            <p>
-                Thank you for your record transfer using the NCTR Record Transfer Portal. The
-                files you sent are being stored securely on our servers until an archivist has the
-                opportunity to view them.
-            </p>
-            <p>
-                If you have any questions about your transfer, you can email an NCTR archivist at
-                this email address:
-            </p>
-            <p>
-                {{ archivist_email }}
-            </p>
-            <hr>
-            <h3>Terms of Agreement</h3>
-            <p>
-                By completing and submitting material via the record transfer form, you have agreed
-                to give the National Centre for Truth and Reconciliation Archives legal, physical,
-                and intellectual control and responsibility over the materials you submitted for the
-                purpose of allowing the NCTR Archives to inspect, research and appraise the material
-                for a potential donation to the NCTR.
-            </p>
-            <p>
-                The NCTR accepts full responsibility for the physical condition of the materials
-                during the period when the NCTR Archives staff will examine the materials for
-                potential donation.
-            </p>
-            <div style="
-                font-size: 10pt;">
-                <i>This email address is not monitored, do not reply to this message.</i>
-            </div>
-            <div style="
-                font-size: 10pt;">
-                <i>If you do not want to receive these emails anymore, click this link.</i>
-            </div>
-        </div>
-    </body>
-</html>
+{% extends 'recordtransfer/email/base_email.html' %}
+{% load i18n %}
+
+{% block title %}
+{% trans "Thank You for Your Transfer" %}
+{% endblock %}
+
+{% block message %}
+<p>
+    {% blocktrans %}
+    Thank you for your record transfer using the NCTR Record Transfer Portal. The
+    files you sent are being stored securely on our servers until an archivist has the
+    opportunity to view them.
+    {% endblocktrans %}
+</p>
+<p>
+    {% blocktrans %}
+    If you have any questions about your transfer, you can email an NCTR archivist at
+    this email address:
+    {% endblocktrans %}
+</p>
+<p>
+    {{ archivist_email }}
+</p>
+<hr>
+<h3>
+    {% trans "Submission Agreement" %}
+</h3>
+<p>
+    {% blocktrans %}
+    Thank you for submitting a transfer with the NCTR Record Transfer App. By completing
+    and submitting the form you hereby agree to give the National Centre for Truth and
+    Reconciliation (“NCTR”) legal and physical custody and control and responsibility
+    over the materials you have submitted for the purpose of allowing the NCTR Archives
+    to inspect, research and appraise this material for a potential donation to the
+    NCTR.
+    {% endblocktrans %}
+</p>
+<p>
+    {% blocktrans %}
+    The NCTR accepts full responsibility for the physical condition of the materials you
+    have submitted during the period when the NCTR Archives staff will examine the
+    materials for potential donation.
+    {% endblocktrans %}
+</p>
+{% endblock %}
