@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django_countries',
     'formtools',
     'django_rq',
+    'captcha',
 ]
 
 MIDDLEWARE = [

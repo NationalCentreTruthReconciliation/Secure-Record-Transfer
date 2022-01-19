@@ -32,6 +32,8 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
