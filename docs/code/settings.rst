@@ -16,6 +16,7 @@ the :code:`.env` environment file. In alphabetical order, these settings are:
 - :ref:`DEFAULT_DATA`
 - :ref:`DO_NOT_REPLY_USERNAME`
 - :ref:`SIGN_UP_ENABLED`
+- :ref:`UPLOAD_STORAGE_FOLDER`
 
 
 ACCEPTED_FILE_FORMATS
@@ -281,3 +282,28 @@ SIGN_UP_ENABLED
 
         #file: .env
         SIGN_UP_ENABLED=false
+
+
+UPLOAD_STORAGE_FOLDER
+#####################
+
+    *Choose storage location for uploaded files*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        YES                     string     YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    The files users upload will be copied here after being uploaded with either of the Django
+    file upload handlers. Uploaded files will first be uploaded in memory or to a temporary file
+    before being moved to the UPLOAD_STORAGE_FOLDER.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_STORAGE_FOLDER=/path/to/upload/folder
