@@ -54,6 +54,11 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
 
+# Captcha
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+
 # Logging
 
 LOGGING = {
