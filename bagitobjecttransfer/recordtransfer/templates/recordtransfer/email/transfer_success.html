@@ -1,8 +1,10 @@
-{% extends 'recordtransfer/email/base_email.html' %}
+{% extends 'recordtransfer/email/_base_email.html' %}
 {% load i18n %}
 
 {% block title %}
-{% trans "Thank You for Your Transfer" %}
+{% blocktrans %}
+Thank You for Your Transfer
+{% endblocktrans %}
 {% endblock %}
 
 {% block message %}
