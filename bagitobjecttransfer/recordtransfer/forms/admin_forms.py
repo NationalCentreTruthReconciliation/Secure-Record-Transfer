@@ -3,7 +3,7 @@ from django import forms
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
-from recordtransfer.models import Appraisal, Bag, BagGroup, Submission, UploadSession
+from recordtransfer.models import Appraisal, Bag, BagGroup, Submission, UploadSession, UploadedFile
 from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 
@@ -21,6 +21,28 @@ class RecordTransferModelForm(forms.ModelForm):
             for field in self.disabled_fields:
                 if field in self.fields:
                     self.fields[field].disabled = True
+
+
+class UploadedFileForm(RecordTransferModelForm):
+    class Meta:
+        model = UploadedFile
+        fields = (
+            'name',
+            'session',
+            'file_upload'
+        )
+
+    exists = forms.BooleanField()
+
+
+class InlineUploadedFileForm(RecordTransferModelForm):
+    class Meta:
+        model = UploadedFile
+        fields = (
+            'name',
+        )
+
+    exists = forms.BooleanField()
 
 
 class InlineAppraisalFormSet(forms.models.BaseInlineFormSet):
@@ -139,7 +161,6 @@ class InlineSubmissionForm(RecordTransferModelForm):
     ''' Form for viewing Submissions in-line. This form should not be used to provide edit
     capabilities in-line for Submissions.
     '''
-
     class Meta:
         model = Submission
         fields = (

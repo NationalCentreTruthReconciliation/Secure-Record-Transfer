@@ -19,7 +19,8 @@ from django.utils.translation import gettext
 from recordtransfer.atom import flatten_meta_tree_atom_style
 from recordtransfer.caais import flatten_meta_tree
 from recordtransfer.forms import BagForm, InlineBagForm, InlineBagGroupForm, SubmissionForm, \
-    InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm
+    InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
+    UploadedFileForm, InlineUploadedFileForm
 from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
 from recordtransfer.models import User, UploadSession, UploadedFile, Bag, BagGroup, Appraisal, \
     Submission, Job, Right, SourceType, SourceRole
@@ -198,7 +199,12 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - change: Not allowed
         - delete: Not allowed
     '''
+    class Media:
+        js = ("recordtransfer/js/hideMediaLink.js",)
+
     change_form_template = 'admin/readonly_change_form.html'
+
+    form = UploadedFileForm
 
     actions = [
         'clean_temp_files',
@@ -206,8 +212,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
 
     list_display = [
         'name',
-        'path',
-        'old_copy_removed',
+        'exists',
         linkify('session'),
     ]
 
@@ -234,15 +239,10 @@ class UploadedFileInline(admin.TabularInline):
         - change: Not allowed
         - delete: Not allowed
     '''
+    form = InlineUploadedFileForm
     model = UploadedFile
     max_num = 0
     show_change_link = True
-
-    readonly_fields = [
-        'name',
-        'path',
-        'old_copy_removed',
-    ]
 
     def has_add_permission(self, request, obj=None):
         return False
