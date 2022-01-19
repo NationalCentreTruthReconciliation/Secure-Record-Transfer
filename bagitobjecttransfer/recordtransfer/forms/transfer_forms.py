@@ -4,6 +4,7 @@ from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
 from django.utils.translation import gettext
 
+from captcha.fields import ReCaptchaField
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
@@ -611,3 +612,5 @@ class UploadFilesForm(forms.Form):
         widget=forms.HiddenInput(),
         label='hidden'
     )
+
+    captcha = ReCaptchaField()
