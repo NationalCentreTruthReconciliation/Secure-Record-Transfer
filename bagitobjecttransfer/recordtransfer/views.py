@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
@@ -227,13 +226,12 @@ class TransferFormWizard(SessionWizardView):
     def get_all_cleaned_data(self):
         cleaned_data = super().get_all_cleaned_data()
 
-        # Get quantity and type of files for extent
+        # TODO: filter for existing files
         file_names = list(map(str, UploadedFile.objects.filter(
             session__token=cleaned_data['session_token']
-        ).filter(
-            old_copy_removed=False
         ).values_list('name', flat=True)))
 
+        # Get quantity and type of files for extent
         cleaned_data['quantity_and_type_of_units'] = get_human_readable_file_count(file_names,
                                                                                    ACCEPTED_FILE_FORMATS,
                                                                                    LOGGER)
@@ -362,8 +360,7 @@ def uploadfiles(request):
                 _file.close()
                 issues.append({'file': _file.name, **check})
             else:
-                new_file = UploadedFile(name=_file.name, path=_file.path,
-                                        old_copy_removed=False, session=session)
+                new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
                 new_file.save()
 
         return JsonResponse({'uploadSessionToken': session.token, 'issues': issues}, status=200)
