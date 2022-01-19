@@ -1,5 +1,7 @@
 from django.core.files.storage import get_storage_class
 
+from recordtransfer.settings import UPLOAD_STORAGE_FOLDER
+
 Storage = get_storage_class()
 
 class OverwriteStorage(Storage):
@@ -15,3 +17,10 @@ class OverwriteStorage(Storage):
 
     def get_available_name(self, name, max_length=None):
         return name
+
+class UploadedFileStorage(Storage):
+    ''' Stores files in UPLOAD_STORAGE_FOLDER
+    '''
+    def __init__(self, **kwargs):
+        kwargs['location'] = UPLOAD_STORAGE_FOLDER
+        super().__init__(**kwargs)
