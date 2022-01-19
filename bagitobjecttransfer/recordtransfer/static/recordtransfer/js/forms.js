@@ -401,8 +401,11 @@ $(() => {
                 if (response.verboseError) {
                     addDropzoneError(response.verboseError)
                 }
-                else {
+                else if (response.error) {
                     addDropzoneError(response.error)
+                }
+                else {
+                    addDropzoneError(response)
                 }
                 issueFiles.push(file.name)
                 document.getElementById("submit-form-btn").disabled = true
