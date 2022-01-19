@@ -1,36 +1,22 @@
-<!DOCTYPE html>
-<html style="
-    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;">
-    <body style="
-        margin: 0;">
-        <div style="
-            color: #333333;
-            font-size: 20pt;
-            padding: 6px 20px;
-            background-color: #eeeeee;
-            margin-bottom: 15px;">
-            New Transfer Submitted by {{ user.username }}
-        </div>
-        <div style="
-            padding: 0px 20px;">
-            <div>
-                {{ user.first_name }} {{ user.last_name }} ({{ user.username }}) submitted a new
-                transfer at {{ form_data.action_date }} with the NCTR Record Transfer Portal. To
-                view their new submission, <a href="{{ bag_url }}">click here</a> or copy and paste
-                the link below into your favourite browser:
-            </div>
-            <p>
-                {{ bag_url }}
-            </p>
-            <div style="
-                font-size: 10pt;">
-                <i>This email address is not monitored, do not reply to this message.</i>
-            </div>
-            <div style="
-                font-size: 10pt;">
-                <i>If you do not want to receive these emails anymore, click this link.</i>
-            </div>
-        </div>
-    </body>
-</html>
+{% extends 'recordtransfer/email/_base_email.html' %}
+{% load i18n %}
+
+{% block title %}
+{% blocktrans %}
+New Transfer Submitted by {{ user.username }}
+{% endblocktrans %}
+{% endblock %}
+
+{% block message %}
+<div>
+    {% blocktrans %}
+    {{ user.first_name }} {{ user.last_name }} ({{ user.username }}) submitted a new
+    transfer at {{ form_data.action_date }} with the NCTR Record Transfer Portal. To
+    view their new submission, <a href="{{ submission_url }}">click here</a> or copy and paste
+    the link below into your favourite browser:
+    {% endblocktrans %}
+</div>
+<p>
+    {{ submission_url }}
+</p>
+{% endblock %}

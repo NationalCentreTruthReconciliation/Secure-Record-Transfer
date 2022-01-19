@@ -39,6 +39,8 @@ RQ_QUEUES = {
     },
 }
 
+RQ_SHOW_ADMIN_LINK = True
+
 
 # Emailing - Uses MailHog to intercept emails
 # MailHog web UI runs at localhost:8025
@@ -50,6 +52,11 @@ EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
+
+
+# Captcha
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 
 # Logging

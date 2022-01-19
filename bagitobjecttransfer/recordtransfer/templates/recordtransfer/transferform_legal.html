@@ -3,24 +3,31 @@
 
 {% block form_explanation %}
     {% url 'recordtransfer:index' as homepage %}
-    {% blocktrans %}
     <p>
-        <strong>This legal statement is a work in progress</strong>
+        <b>
+        {% blocktrans %}
+        Terms of Submission
+        {% endblocktrans %}
+        </b>
     </p>
     <p>
-        By completing and submitting this form you agree to give the National Centre for Truth and
-        Reconciliation Archives legal, physical, and intellectual control and responsibility over
-        the materials you submit for the purpose of allowing the NCTR Archives to inspect, research
-        and appraise the material for a potential donation to the NCTR.
+        {% blocktrans %}
+        By completing and submitting this form you hereby agree to give the National Centre for
+        Truth and Reconciliation (“NCTR”) legal and physical custody and control and responsibility
+        over the materials you have submitted for the purpose of allowing the NCTR Archives to
+        inspect, research and appraise this material for a potential donation to the NCTR.
+        {% endblocktrans %}
     </p>
     <p>
-        The NCTR accepts full responsibility for the physical condition of the materials during the
-        period when the NCTR Archives staff will examine the materials for potential donation.
+        {% blocktrans %}
+        The NCTR accepts full responsibility for the physical condition of the materials you have
+        submitted during the period when the NCTR Archives staff will examine the materials for
+        potential donation.
+        {% endblocktrans %}
     </p>
     <p>
-        Before continuing, you must accept these terms. If you do not wish to continue, you may
-        <a href="{{ homepage }}">go back.</a>
-    </p>
-    {% endblocktrans %}
+        {% blocktrans %}
+        If you do not wish to continue, you may <a href="{{ homepage }}">go back.</a>
+        {% endblocktrans %}
     <br>
 {% endblock %}

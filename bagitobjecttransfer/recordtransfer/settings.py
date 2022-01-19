@@ -10,6 +10,10 @@ SIGN_UP_ENABLED = config('SIGN_UP_ENABLED', default=True, cast=bool)
 
 BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 
+# Whether to allow updating BagIt bags
+
+ALLOW_BAG_CHANGES = config('ALLOW_BAG_CHANGES', default=True, cast=bool)
+
 # Email Usernames
 
 DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_USERNAME', default='do-not-reply')

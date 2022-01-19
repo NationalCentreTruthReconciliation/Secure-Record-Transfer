@@ -4,11 +4,28 @@
 {% block title %}{% trans "Transfer Complete!" %}{% endblock %}
 
 {% block content %}
-<div class="title-text">{% trans "Thank you for your transfer." %}</div>
+{% url 'recordtransfer:userprofile' as profileurl %}
+<div class="title-text">{% trans "Thank you for your Submission" %}</div>
 <p>
-    <a href="{% url 'recordtransfer:transfer' %}">{% trans "Start another Transfer" %}</a>
+    {% blocktrans %}
+    Your files are being held at the NCTR until an archivist reviews them. You may be contacted by
+    an archivist using the contact information you provided in the form you submitted. You may view
+    the current status of your submissions by visiting your <a href="{{ profileurl }}">profile</a>
+    page.
+    {% endblocktrans %}
 </p>
 <p>
-    <a href="{% url 'recordtransfer:index' %}">{% trans "Home" %}</a>
+    {% blocktrans with email=user.email %}
+    An email will be sent to you at {{ email }} confirming that your submission has been
+    received. The email will also contain the terms you agreed to when creating your submission.
+    {% endblocktrans %}
+</p>
+<p>
+<div class="medium-text">{% trans "Links:" %}</div>
+<ul>
+    <li><a href="{% url 'recordtransfer:transfer' %}">{% trans "Start another Transfer" %}</a></li>
+    <li><a href="{% url 'recordtransfer:index' %}">{% trans "Go to Homepage" %}</a></li>
+    <li><a href="{{ profileurl }}">{% trans "View your Profile" %}</a></li>
+</ul>
 </p>
 {% endblock %}

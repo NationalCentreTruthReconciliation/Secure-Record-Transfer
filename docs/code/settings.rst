@@ -4,62 +4,37 @@ recordtransfer.settings - Application Settings
 .. automodule:: recordtransfer.settings
    :members:
 
-All options can be set by directly modifying the :code:`recordtransfer/settings.py` file or by
-setting a value in the :code:`.env` environment file.
+These settings control the behaviour of the application. All options can be set by directly
+modifying the :code:`recordtransfer/settings.py` file, and some may be changed by setting a value in
+the :code:`.env` environment file. In alphabetical order, these settings are:
+
+- :ref:`ACCEPTED_FILE_FORMATS`
+- :ref:`ALLOW_BAG_CHANGES`
+- :ref:`APPROXIMATE_DATE_FORMAT`
+- :ref:`ARCHIVIST_EMAIL`
+- :ref:`BAG_STORAGE_FOLDER`
+- :ref:`DEFAULT_DATA`
+- :ref:`DO_NOT_REPLY_USERNAME`
+- :ref:`SIGN_UP_ENABLED`
 
 
-**BAG_STORAGE_FOLDER** *(string)*:
-    The folder on the server where bags are to be stored.
+ACCEPTED_FILE_FORMATS
+#####################
 
-    **This value can be set in the settings.py file or in the .env file**
+    *Choose what files can be uploaded*
 
-    ::
+    .. table::
 
-        BAG_STORAGE_FOLDER=/path/to/your/folder
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        NO        See settings.py  dict       NO                  YES
+        ========  ===============  =========  ==================  =========================
 
+    .. seealso::
 
-**APPROXIMATE_DATE_FORMAT** *(string)*:
-    A format string for the date to indicate an approximate date. The string variable :code:`{date}`
-    must be present for the date format to be used.
+        See also the section of the docs on :ref:`Accepted File Types`.
 
-    **This value can be set in the settings.py file or in the .env file**
-
-    ::
-
-        APPROXIMATE_DATE_FORMAT='Circa. {date}'
-
-
-**DO_NOT_REPLY_EMAIL** *(string)*:
-    An email address for the application use to send emails from.
-
-    **This value can be set in the settings.py file or in the .env file**
-
-    ::
-
-        DO_NOT_REPLY_EMAIL=donotreply@recordtransfer.ca
-
-
-**ARCHIVIST_EMAIL** *(string)*:
-    The email displayed for people to contact an archivist.
-
-    **This value can be set in the settings.py file or in the .env file**
-
-    ::
-
-        ARCHIVIST_EMAIL=archives@domain.ca
-
-
-**BASE_URL** *(string)*:
-    The base URL of the website.
-
-    **This value can be set in the settings.py file or in the .env file**
-
-    ::
-
-        BASE_URL=https://recordtransfer.ca
-
-
-**ACCEPTED_FILE_FORMATS** *(dict)*:
     A dictionary of accepted file formats, each within a named group. You may name the groups
     anything you like. Make sure that file extensions do not start with a period, and that they
     are all lowercase. Group names should not be plural.
@@ -68,10 +43,11 @@ setting a value in the :code:`.env` environment file.
     used to create a human-readable extent statement about the quantity and type of files the user
     uploaded.
 
-    **This value can only be set in the settings.py file**
+    **settings.py Example:**
 
     .. code-block:: python
 
+        #file: settings.py
         # There is no limit to the number of groups or the number of extensions in a group.
         ACCEPTED_FILE_FORMATS = {
             'Archive': [
@@ -95,7 +71,113 @@ setting a value in the :code:`.env` environment file.
         }
 
 
-**DEFAULT_DATA** *(dict)*:
+ALLOW_BAG_CHANGES
+#################
+
+    *Choose whether BagIt bags can be modified*
+
+    .. table::
+
+        ========  =======  =========  ==================  =========================
+        Required  Default  Type       Can be set in .env  Can be set in settings.py
+        ========  =======  =========  ==================  =========================
+        NO        True     bool       YES                 YES
+        ========  =======  =========  ==================  =========================
+
+    Allow changes to be made to a BagIt bag from the admin page. If set to false, a warning will be
+    posted when a change is made that would have made a change to a BagIt bag. Defaults to true.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        ALLOW_BAG_CHANGES=true
+
+
+APPROXIMATE_DATE_FORMAT
+#######################
+
+    *Choose estimated date format*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        :code:`'[ca. {date}]'`  string     YES                 YES
+        ========  ======================  =========  ==================  =========================
+
+    A format string for the date to indicate an approximate date. The string variable :code:`{date}`
+    must be present for the date format to be used.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        APPROXIMATE_DATE_FORMAT='Circa. {date}'
+
+
+ARCHIVIST_EMAIL
+###############
+
+    *Choose contact email address*
+
+    .. table::
+
+        ========  =======  =========  ==================  =========================
+        Required  Default  Type       Can be set in .env  Can be set in settings.py
+        ========  =======  =========  ==================  =========================
+        YES                string     YES                 YES
+        ========  =======  =========  ==================  =========================
+
+    The email displayed for people to contact an archivist.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        ARCHIVIST_EMAIL=archives@domain.ca
+
+
+BAG_STORAGE_FOLDER
+##################
+
+    *Choose where BagIt bags are stored*
+
+    .. table::
+
+        ========  =======  =========  ==================  =========================
+        Required  Default  Type       Can be set in .env  Can be set in settings.py
+        ========  =======  =========  ==================  =========================
+        YES                string     YES                 YES
+        ========  =======  =========  ==================  =========================
+
+    The folder on the server where bags are to be stored.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        BAG_STORAGE_FOLDER=/path/to/your/folder
+
+
+DEFAULT_DATA
+############
+
+    *Choose default form data*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        NO        See settings.py  dict       NO                  YES
+        ========  ===============  =========  ==================  =========================
+
     Default data to inject into the form in case the user did not enter data in a field. These
     fields are important to fill out if the field is not in the form, and the field is mandatory in
     CAAIS.
@@ -112,10 +194,11 @@ setting a value in the :code:`.env` environment file.
 
     Here is an example bare-bones configuration with the absolute minimum amount of fields set:
 
-    **This value can only be set in the settings.py file**
+    **settings.py Example:**
 
     .. code-block:: python
 
+        #file: settings.py
         DEFAULT_DATA = {
             'section_1': {
                 'accession_identifier': 'Not assigned',
@@ -149,3 +232,52 @@ setting a value in the :code:`.env` environment file.
                 'language_of_accession_record': 'en',
             }
         }
+
+
+DO_NOT_REPLY_USERNAME
+#####################
+
+    *Choose username for do not reply emails*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        do-not-reply  string     YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    A username for the application to send "do not reply" emails from. This username is combined
+    with the site's base URL to create an email address. The URL can be set from the admin site.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        DO_NOT_REPLY_USERNAME=donotreply
+
+
+SIGN_UP_ENABLED
+###############
+
+    *Choose whether new users can sign up*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        True          bool       YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    You may want to create users manually to tightly control who has access to the application. In
+    this case, you will want to disable signing up so that no new users can be created without an
+    admin creating them.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        SIGN_UP_ENABLED=false
