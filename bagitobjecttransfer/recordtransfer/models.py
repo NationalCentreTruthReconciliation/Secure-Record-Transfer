@@ -51,6 +51,12 @@ class UploadSession(models.Model):
         ''' Start a new upload session '''
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
+    @property
+    def upload_size(self):
+        ''' Get total size (in bytes) of all uploaded files in this session
+        '''
+        return sum(f.file_upload.size for f in self.get_existing_file_set())
+
     def get_existing_file_set(self):
         ''' Get all files from the uploadedfile_set where the file exists
         '''

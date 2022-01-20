@@ -341,8 +341,6 @@ $(() => {
             changed = true
         }
         if (changed) {
-            console.log(totalSizeBytes)
-
             var totalSizeElement = document.getElementById('total-size')
             if (totalSizeElement) {
                 let totalMiB = parseFloat((totalSizeBytes / (1024 * 1024)).toFixed(2))
@@ -381,6 +379,8 @@ $(() => {
         parallelUploads: 2,
         maxFiles: maxTotalUploadCount,
         maxFilesize: maxSingleUploadSize,
+        filesizeBase: 1024,
+        dictFileSizeUnits: { tb: "TiB", gb: "GiB", mb: "MiB", kb: "KiB", b: "b" },
         timeout: 180000,
         headers: {
             "X-CSRFToken": csrfToken,
