@@ -22,7 +22,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.caais import flatten_meta_tree
-from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, DEFAULT_DATA
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
 
@@ -641,8 +641,12 @@ def update_location(sender, instance, *args, **kwargs):
     '''
     if sender == Bag:
         bag = instance
-        if not bag.location:
-            metadata = bag.json_metadata
+        metadata = bag.json_metadata
+        default_location = DEFAULT_DATA.get('section_4', {}).get('storage_location', '')
+        current_location = metadata.get('section_4', {}).get('storage_location', '')
+        if not current_location or current_location == default_location:
+            if 'section_4' not in metadata:
+                metadata['section_4'] = {}
             metadata['section_4']['storage_location'] = bag.location
             bag.update_metadata(metadata)
 
