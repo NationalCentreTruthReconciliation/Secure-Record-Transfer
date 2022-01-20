@@ -114,6 +114,14 @@
     margin: auto;
 }
 
+.dz-submit-disabled {
+    box-shadow: 0px 0px 7px red;
+}
+
+.custom-dropzone {
+    margin-top: 10px;
+}
+
 @media (max-width: 600px) {
     .flex-item > label,
     .flex-error > label {
