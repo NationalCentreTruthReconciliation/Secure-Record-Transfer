@@ -1,11 +1,13 @@
-from logging import Logger
-import os
 from zipfile import ZipFile
+import logging
+import os
 
 from recordtransfer.exceptions import FolderNotFoundError
 
 from django.utils.html import strip_tags
 
+
+LOGGER = logging.getLogger(__name__)
 
 def zip_directory(directory: str, zipf: ZipFile):
     ''' Zip a directory structure into a zip file.
@@ -41,7 +43,41 @@ def html_to_text(html: str):
     return '\n'.join(plain_text_split)
 
 
-def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, logger: Logger):
+def get_human_readable_size(size_bytes: int, base=1024, precision=2):
+    ''' Convert bytes into a human-readable size.
+
+    Args:
+        size_bytes: The number of bytes to convert
+        base: Either of 1024 or 1000. 1024 for sizes like MiB, 1000 for sizes
+            like MB
+        precision: The number of decimals on the returned size
+
+    Returns:
+        (str): The bytes converted to a human readable size
+    '''
+    if base not in (1000, 1024):
+        raise ValueError('base may only be 1000 or 1024')
+    if size_bytes < 0:
+        raise ValueError('size_bytes cannot be negative')
+
+    suffixes = {
+        1000: ('B', 'KB',  'MB',  'GB',  'TB',  'PB',  'EB',  'ZB',  'YB'),
+        1024: ('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'),
+    }
+
+    if size_bytes < base:
+        return '%d %s' % (size_bytes, suffixes[base][0])
+
+    suffix = suffixes[base][0]
+    for suffix in suffixes[base]:
+        if round(size_bytes) < base:
+            break
+        size_bytes /= float(base)
+
+    return "%.*f %s" % (precision, size_bytes, suffix)
+
+
+def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, logger=None):
     ''' Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
     English) the number of files in each group.
 
@@ -54,7 +90,9 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, 
     Returns:
         (str): A string reporting the number of files in each group.
     '''
-    counted_types = count_file_types(file_names, accepted_file_groups, logger)
+    logger = logger or LOGGER
+
+    counted_types = count_file_types(file_names, accepted_file_groups, logger=logger)
     if not counted_types:
         return 'No file types could be identified'
 
@@ -79,7 +117,7 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, 
     return string_statement
 
 
-def count_file_types(file_names: list, accepted_file_groups: dict, logger: Logger):
+def count_file_types(file_names: list, accepted_file_groups: dict, logger=None):
     ''' Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
@@ -95,6 +133,8 @@ def count_file_types(file_names: list, accepted_file_groups: dict, logger: Logge
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
     '''
+    logger = logger or LOGGER
+
     counted_extensions = {}
 
     # Tabulate number of times each extension each appears
