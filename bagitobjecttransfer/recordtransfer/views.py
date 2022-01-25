@@ -1,3 +1,4 @@
+from typing import Union
 import logging
 
 from django.contrib.auth import login
@@ -7,13 +8,15 @@ from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
+from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
     SourceRole, SourceType, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
-from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT
+from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT, \
+    MAX_TOTAL_UPLOAD_SIZE, MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm
 from recordtransfer.tokens import account_activation_token
@@ -273,45 +276,7 @@ class TransferFormWizard(SessionWizardView):
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 
-def checkfileextension(request):
-    ''' Check whether the file is allowed to be uploaded by inspecting the file's extension. The
-    allowed file extensions are set using the ACCEPTED_FILE_FORMATS setting.
-
-    Args:
-        request: The request sent by the user. This request should either be a GET or a POST
-            request, with the name of the file in the **filename** parameter.
-
-    Returns:
-        JsonResponse: If the file is allowed to be uploaded, 'accepted' will be True. Otherwise,
-            'accepted' is False and both 'error' and 'verboseError' are set.
-    '''
-    filename = ''
-    if request.method == 'POST':
-        filename = request.POST.get('filename', '')
-    elif request.method == 'GET':
-        filename = request.GET.get('filename', '')
-    else:
-        return JsonResponse({
-            'accepted': False,
-            'error': gettext('File extensions can only be checked using GET or POST.'),
-        }, status=400)
-    if not filename:
-        return JsonResponse({
-            'accepted': False,
-            'error': gettext('Could not find filename parameter in request'),
-        }, status=400)
-
-    try:
-        check = _file_extension_check(filename)
-        return JsonResponse(check, status=200)
-    except Exception as exc:
-        LOGGER.error(msg=('Uncaught exception in checkfile view: {0}'.format(str(exc))))
-        return JsonResponse({
-            'error': gettext('500 Internal Server Error'),
-            'verboseError': gettext('500 Internal Server Error'),
-        }, status=500)
-
-
+@require_http_methods(['POST'])
 def uploadfiles(request):
     ''' Upload one or more files to the server, and return a token representing the file upload
     session. If a token is passed in the request header using the Upload-Session-Token header, the
@@ -329,14 +294,6 @@ def uploadfiles(request):
             'upload_session_token'. If not successful, the error description is returned in 'error',
             and a more verbose error is returned in 'verboseError'.
     '''
-    if not request.method == 'POST':
-        terse_error = gettext('Files can only be uploaded using POST.')
-        verbose_error =  gettext(('Attempted to uploaded files using the {0} HTTP method, but '
-                                  'only POST is allowed.').format(request.method))
-        return JsonResponse({
-            'error': terse_error,
-            'verboseError': verbose_error,
-        }, status=400)
     if not request.FILES:
         return JsonResponse({
             'error': gettext('No files were uploaded'),
@@ -356,13 +313,14 @@ def uploadfiles(request):
 
         issues = []
         for _file in request.FILES.dict().values():
-            check = _file_extension_check(_file.name)
+            check = _accept_file(_file.name, _file.size, session.token)
             if not check['accepted']:
                 _file.close()
                 issues.append({'file': _file.name, **check})
-            else:
-                new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
-                new_file.save()
+                continue
+
+            new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
+            new_file.save()
 
         return JsonResponse({'uploadSessionToken': session.token, 'issues': issues}, status=200)
 
@@ -374,26 +332,189 @@ def uploadfiles(request):
         }, status=500)
 
 
-def _file_extension_check(filename: str) -> dict:
-    split_name = filename.split('.')
+@require_http_methods(['GET', 'POST'])
+def accept_file(request):
+    ''' Check whether the file is allowed to be uploaded by inspecting the file's extension. The
+    allowed file extensions are set using the ACCEPTED_FILE_FORMATS setting.
 
-    if len(split_name) == 0:
+    Args:
+        request: The request sent by the user. This request should either be a GET or a POST
+            request, with the name of the file in the **filename** parameter.
+
+    Returns:
+        JsonResponse: If the file is allowed to be uploaded, 'accepted' will be True. Otherwise,
+            'accepted' is False and both 'error' and 'verboseError' are set.
+    '''
+    # Ensure required parameters are set
+    request_params = request.POST if request.method == 'POST' else request.GET
+    for required in ('filename', 'filesize'):
+        if required not in request_params:
+            return JsonResponse({
+                'accepted': False,
+                'error': gettext('Could not find {0} parameter in request').format(
+                    required
+                )
+            }, status=400)
+
+    filename = request_params['filename']
+    filesize = request_params['filesize']
+    token = request.headers.get('Upload-Session-Token', None)
+
+    try:
+        return JsonResponse(_accept_file(filename, filesize, token), status=200)
+
+    except Exception as exc:
+        LOGGER.error(msg=('Uncaught exception in checkfile view: {0}'.format(str(exc))))
+        return JsonResponse({
+            'accepted': False,
+            'error': gettext('500 Internal Server Error'),
+            'verboseError': gettext('500 Internal Server Error'),
+        }, status=500)
+
+
+def _accept_file(filename: str, filesize: Union[str, int],
+                 session_token: str = None) -> dict:
+
+    mib_to_bytes = lambda m: m * (1024 ** 2)
+    bytes_to_mib = lambda b: b / (1024 ** 2)
+
+    def extension_exists(name):
+        split = name.split('.')
+        return (len(name.split('.')) > 1, split)
+
+    def extension_valid(name):
+        ext = name.split('.')[-1].lower()
+        for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
+            for accepted_extension in accepted_extensions:
+                if ext == accepted_extension.lower():
+                    return (True, ext)
+        return (False, ext)
+
+    def filesize_valid(filesize):
+        try:
+            _size = int(filesize)
+            if _size < 0:
+                raise ValueError('File size cannot be negative')
+            return (True, _size)
+        except ValueError:
+            return (False, str(_size))
+
+    def filesize_greater_than_zero(filesize):
+        _size = int(filesize)
+        if _size > 0:
+            return (True, _size)
+        return (False, _size)
+
+    def filesize_less_than_max_size(filesize):
+        _size = int(filesize)
+        _size_mib = bytes_to_mib(_size)
+        # Check both in case the administrator set the max total size to less
+        # than the max single size
+        for max_size_bytes in (
+                mib_to_bytes(MAX_SINGLE_UPLOAD_SIZE),
+                mib_to_bytes(MAX_TOTAL_UPLOAD_SIZE),
+            ):
+            if _size > max_size_bytes:
+                return (False, _size_mib)
+        return (True, _size_mib)
+
+    def file_count_less_than_max(token):
+        session = None
+        if token:
+            session = UploadSession.objects.filter(token=token).first()
+            if session and len(session.uploadedfile_set) >= MAX_TOTAL_UPLOAD_COUNT:
+                return (False, session)
+        return (True, session)
+
+    def session_size_less_than_max(filesize, token):
+        session = None
+        if token:
+            session = UploadSession.objects.filter(token=token).first()
+
+        max_remaining_size_bytes = mib_to_bytes(MAX_TOTAL_UPLOAD_SIZE)
+        if session:
+            max_remaining_size_bytes -= session.upload_size
+
+        if int(filesize) > max_remaining_size_bytes:
+            return (False, session)
+        return (True, session)
+
+
+    valid, _ = extension_exists(filename)
+    if not valid:
         return {
             'accepted': False,
-            'error': gettext('Files without extensions are not allowed'),
-            'verboseError': gettext('The file {} does not have a file extension'.format(filename))
+            'error': gettext('File is missing an extension.'),
+            'verboseError': gettext(
+                'The file "{0}" does not have a file extension'
+            ).format(filename)
         }
 
-    extension = split_name[-1].lower()
-    for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
-        if extension in accepted_extensions:
-            return {
-                'accepted': True
-            }
+    valid, extension = extension_valid(filename)
+    if not valid:
+        return {
+            'accepted': False,
+            'error': gettext(
+                'Files with "{0}" extension are not allowed.'
+            ).format(extension),
+            'verboseError': gettext(
+                'The file "{0}" has an invalid extension (.{1})'
+            ).format(filename, extension)
+        }
 
-    return {
-        'accepted': False,
-        'error': gettext('Files with ".{}" extension are not allowed'.format(extension)),
-        'verboseError': gettext('The file "{}" has an invalid extension (.{})'\
-            .format(filename, extension))
-    }
+    valid, size = filesize_valid(filesize)
+    if not valid:
+        return {
+            'accepted': False,
+            'error': gettext('File size is invalid.'),
+            'verboseError': gettext(
+                'The file "{0}" has an invalid size ({1})'
+            ).format(filename, size)
+        }
+
+    valid, _ = filesize_greater_than_zero(filesize)
+    if not valid:
+        return {
+            'accepted': False,
+            'error': gettext('File is empty.'),
+            'verboseError': gettext('The file "{0}" is empty').format(filename)
+        }
+
+    valid, size_mib = filesize_less_than_max_size(filesize)
+    if not valid:
+        max_size = min(MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_SIZE)
+        return {
+            'accepted': False,
+            'error': gettext(
+                'File is too big ({0:.2f}MiB). Max filesize: {1}MiB'
+            ).format(size_mib, max_size),
+            'verboseError': gettext(
+                'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
+            ).format(filename, size_mib, max_size),
+        }
+
+    valid, _ = file_count_less_than_max(session_token)
+    if not valid:
+        return {
+            'accepted': False,
+            'error': gettext('You can not upload anymore files.'),
+            'verboseError': gettext(
+                'The file "{0}" would push the total file count past the '
+                'maximum number of files ({1})'
+            ).format(filename, MAX_TOTAL_UPLOAD_SIZE)
+        }
+
+    valid, _ = session_size_less_than_max(filesize, session_token)
+    if not valid:
+        return {
+            'accepted': False,
+            'error': gettext(
+                'Maximum total upload size ({0} MiB) exceeded'
+            ).format(MAX_TOTAL_UPLOAD_SIZE),
+            'verboseError': gettext(
+                'The file "{0}" would push the total transfer size past the '
+                '{1}MiB max'
+            ).format(filename, MAX_TOTAL_UPLOAD_SIZE)
+        }
+
+    return {'accepted': True}

@@ -405,7 +405,10 @@ $(() => {
             else {
                 $.post({
                     url: '/transfer/checkfile/',
-                    data: {'filename': file.name},
+                    data: {
+                        'filename': file.name,
+                        'filesize': file.size,
+                    },
                     dataType: 'json',
                     headers: {'X-CSRFToken': csrfToken},
                     success: function(response) {

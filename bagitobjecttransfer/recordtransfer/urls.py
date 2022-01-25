@@ -21,7 +21,7 @@ urlpatterns = [
         ('uploadfiles', forms.UploadFilesForm),
         ])), name='transfer'),
 
-    path('transfer/checkfile/', login_required(views.checkfileextension), name='checkfile'),
+    path('transfer/checkfile/', login_required(views.accept_file), name='checkfile'),
     path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
 
