@@ -325,6 +325,13 @@ def uploadfiles(request):
                 issues.append({'file': _file.name, **session_check})
                 continue
 
+            content_check = _accept_contents(_file)
+            if not content_check['accepted']:
+                _file.close()
+                raise NotImplementedError(
+                    'file malware check with clamav has not been fully implemented'
+                )
+
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
             new_file.save()
 
@@ -378,6 +385,9 @@ def accept_file(request):
                 if not session_check['accepted']:
                     return JsonResponse(session_check, status=200)
 
+        # The contents of the file are not known here, so it is not necessary to
+        # call _accept_content()
+
         return JsonResponse({'accepted': True}, status=200)
 
     except Exception as exc:
@@ -407,7 +417,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     Returns:
         (dict): A dictionary containing an 'accepted' key that contains True if
             the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key.
+            an 'error' and 'verboseError' key if 'accepted' is False.
     '''
     mib_to_bytes = lambda m: m * (1024 ** 2)
     bytes_to_mib = lambda b: b / (1024 ** 2)
@@ -502,7 +512,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
     Returns:
         (dict): A dictionary containing an 'accepted' key that contains True if
             the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key.
+            an 'error' and 'verboseError' key if 'accepted' is False.
     '''
     if not session:
         return {'accepted': True}
@@ -549,4 +559,38 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         }
 
     # All checks succeded
+    return {'accepted': True}
+
+
+def _accept_contents(file_upload):
+    ''' Scan the contents of the file to ensure it does not contain malware.
+
+    Args:
+        file_upload: File object from request.FILES
+
+    Returns:
+        (dict): A dictionary containing an 'accepted' key that contains True if
+            the file did not contain malware, or False if not. The dictionary
+            also contains an 'error', 'verboseError', and 'clamav' key if
+            accepted is False. The 'clamav' key is a dict itself that has a
+            'reason' and a 'status' key.
+    '''
+    # TODO: Implement with clamd, like so:
+    '''
+    scan_results = clamd_socket.instream(file_upload)
+    status, reason = scan_results['stream']
+    if (status != 'OK'):
+        return {
+            'accepted': False,
+            'error': 'Malware found in file',
+            'verboseError': gettext(
+                'The file "{0}" was identified to contain malware! This issue '
+                'will be sent to the administrator'
+            ),
+            'clamav': {
+                'reason': reason
+                'status': status
+            }
+        }
+    '''
     return {'accepted': True}
