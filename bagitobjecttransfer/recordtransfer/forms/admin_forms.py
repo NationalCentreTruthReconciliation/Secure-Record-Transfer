@@ -133,7 +133,7 @@ class SubmissionForm(RecordTransferModelForm):
         super().__init__(*args, **kwargs)
         self.fields['accession_identifier'].required = False
 
-        if hasattr(self, 'instance'):
+        if hasattr(self, 'instance') and self.instance.bag:
             self.fields['bag'].help_text = ' | '.join([
                 format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
                     (self.instance.bag.get_admin_change_url(), 'View Bag'),
