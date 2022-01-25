@@ -313,10 +313,16 @@ def uploadfiles(request):
 
         issues = []
         for _file in request.FILES.dict().values():
-            check = _accept_file(_file.name, _file.size, session.token)
-            if not check['accepted']:
+            file_check = _accept_file(_file.name, _file.size)
+            if not file_check['accepted']:
                 _file.close()
-                issues.append({'file': _file.name, **check})
+                issues.append({'file': _file.name, **file_check})
+                continue
+
+            session_check = _accept_session(_file.name, _file.size, session)
+            if not session_check['accepted']:
+                _file.close()
+                issues.append({'file': _file.name, **session_check})
                 continue
 
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
@@ -361,7 +367,18 @@ def accept_file(request):
     token = request.headers.get('Upload-Session-Token', None)
 
     try:
-        return JsonResponse(_accept_file(filename, filesize, token), status=200)
+        file_check = _accept_file(filename, filesize)
+        if not file_check['accepted']:
+            return JsonResponse(file_check, status=200)
+
+        if token:
+            session = UploadSession.objects.filter(token=token).first()
+            if session:
+                session_check = _accept_session(filename, filesize, token)
+                if not session_check['accepted']:
+                    return JsonResponse(session_check, status=200)
+
+        return JsonResponse({'accepted': True}, status=200)
 
     except Exception as exc:
         LOGGER.error(msg=('Uncaught exception in checkfile view: {0}'.format(str(exc))))
@@ -372,76 +389,32 @@ def accept_file(request):
         }, status=500)
 
 
-def _accept_file(filename: str, filesize: Union[str, int],
-                 session_token: str = None) -> dict:
+def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
+    ''' Determine if a new file should be accepted. Does not check the file's
+    contents, only its name and its size.
 
+    These checks are applied:
+    - The file has an extension
+    - The file's extension exists in ACCEPTED_FILE_FORMATS
+    - The file's size is an integer greater than zero
+    - The file's size is less than or equal to the maximum allowed size for one file
+
+    Args:
+        filename (str): The name of the file
+        filesize (Union[str, int]): A string or integer representing the size of
+            the file (in bytes)
+
+    Returns:
+        (dict): A dictionary containing an 'accepted' key that contains True if
+            the session is valid, or False if not. The dictionary also contains
+            an 'error' and 'verboseError' key.
+    '''
     mib_to_bytes = lambda m: m * (1024 ** 2)
     bytes_to_mib = lambda b: b / (1024 ** 2)
 
-    def extension_exists(name):
-        split = name.split('.')
-        return (len(name.split('.')) > 1, split)
-
-    def extension_valid(name):
-        ext = name.split('.')[-1].lower()
-        for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
-            for accepted_extension in accepted_extensions:
-                if ext == accepted_extension.lower():
-                    return (True, ext)
-        return (False, ext)
-
-    def filesize_valid(filesize):
-        try:
-            _size = int(filesize)
-            if _size < 0:
-                raise ValueError('File size cannot be negative')
-            return (True, _size)
-        except ValueError:
-            return (False, str(_size))
-
-    def filesize_greater_than_zero(filesize):
-        _size = int(filesize)
-        if _size > 0:
-            return (True, _size)
-        return (False, _size)
-
-    def filesize_less_than_max_size(filesize):
-        _size = int(filesize)
-        _size_mib = bytes_to_mib(_size)
-        # Check both in case the administrator set the max total size to less
-        # than the max single size
-        for max_size_bytes in (
-                mib_to_bytes(MAX_SINGLE_UPLOAD_SIZE),
-                mib_to_bytes(MAX_TOTAL_UPLOAD_SIZE),
-            ):
-            if _size > max_size_bytes:
-                return (False, _size_mib)
-        return (True, _size_mib)
-
-    def file_count_less_than_max(token):
-        session = None
-        if token:
-            session = UploadSession.objects.filter(token=token).first()
-            if session and len(session.uploadedfile_set) >= MAX_TOTAL_UPLOAD_COUNT:
-                return (False, session)
-        return (True, session)
-
-    def session_size_less_than_max(filesize, token):
-        session = None
-        if token:
-            session = UploadSession.objects.filter(token=token).first()
-
-        max_remaining_size_bytes = mib_to_bytes(MAX_TOTAL_UPLOAD_SIZE)
-        if session:
-            max_remaining_size_bytes -= session.upload_size
-
-        if int(filesize) > max_remaining_size_bytes:
-            return (False, session)
-        return (True, session)
-
-
-    valid, _ = extension_exists(filename)
-    if not valid:
+    # Check extension exists
+    name_split = filename.split('.')
+    if len(name_split) == 1:
         return {
             'accepted': False,
             'error': gettext('File is missing an extension.'),
@@ -450,8 +423,16 @@ def _accept_file(filename: str, filesize: Union[str, int],
             ).format(filename)
         }
 
-    valid, extension = extension_valid(filename)
-    if not valid:
+    # Check extension is allowed
+    extension = name_split[-1].lower()
+    extension_accepted = False
+    for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
+        for accepted_extension in accepted_extensions:
+            if extension == accepted_extension.lower():
+                extension_accepted = True
+                break
+
+    if not extension_accepted:
         return {
             'accepted': False,
             'error': gettext(
@@ -462,8 +443,13 @@ def _accept_file(filename: str, filesize: Union[str, int],
             ).format(filename, extension)
         }
 
-    valid, size = filesize_valid(filesize)
-    if not valid:
+    # Check filesize is an integer
+    size = filesize
+    try:
+        size = int(filesize)
+        if size < 0:
+            raise ValueError('File size cannot be negative')
+    except ValueError:
         return {
             'accepted': False,
             'error': gettext('File size is invalid.'),
@@ -472,29 +458,59 @@ def _accept_file(filename: str, filesize: Union[str, int],
             ).format(filename, size)
         }
 
-    valid, _ = filesize_greater_than_zero(filesize)
-    if not valid:
+    # Check file has some contents (i.e., non-zero size)
+    if size == 0:
         return {
             'accepted': False,
             'error': gettext('File is empty.'),
             'verboseError': gettext('The file "{0}" is empty').format(filename)
         }
 
-    valid, size_mib = filesize_less_than_max_size(filesize)
-    if not valid:
-        max_size = min(MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_SIZE)
+    # Check file size is less than the maximum allowed size for a single file
+    max_single_size = min(MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_SIZE)
+    max_single_size_bytes = mib_to_bytes(max_single_size)
+    size_mib = bytes_to_mib(size)
+    if size > max_single_size_bytes:
         return {
             'accepted': False,
             'error': gettext(
                 'File is too big ({0:.2f}MiB). Max filesize: {1}MiB'
-            ).format(size_mib, max_size),
+            ).format(size_mib, max_single_size),
             'verboseError': gettext(
                 'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
-            ).format(filename, size_mib, max_size),
+            ).format(filename, size_mib, max_single_size),
         }
 
-    valid, _ = file_count_less_than_max(session_token)
-    if not valid:
+    # All checks succeded
+    return {'accepted': True}
+
+
+def _accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
+    ''' Determine if a new file should be accepted as part of the session.
+
+    These checks are applied:
+    - The session has room for more files according to the MAX_TOTAL_UPLOAD_COUNT
+    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE
+    - A file with the same name has not already been uploaded
+
+    Args:
+        filename (str): The name of the file
+        filesize (Union[str, int]): A string or integer representing the size of
+            the file (in bytes)
+        session (UploadSession): The session files are being uploaded to
+
+    Returns:
+        (dict): A dictionary containing an 'accepted' key that contains True if
+            the session is valid, or False if not. The dictionary also contains
+            an 'error' and 'verboseError' key.
+    '''
+    if not session:
+        return {'accepted': True}
+
+    mib_to_bytes = lambda m: m * (1024 ** 2)
+
+    # Check number of files is within allowed total
+    if len(session.uploadedfile_set) >= MAX_TOTAL_UPLOAD_COUNT:
         return {
             'accepted': False,
             'error': gettext('You can not upload anymore files.'),
@@ -504,17 +520,33 @@ def _accept_file(filename: str, filesize: Union[str, int],
             ).format(filename, MAX_TOTAL_UPLOAD_SIZE)
         }
 
-    valid, _ = session_size_less_than_max(filesize, session_token)
-    if not valid:
+    # Check total size of all files plus current one is within allowed size
+    max_size = mib_to_bytes(max(MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_SIZE))
+    max_remaining_size_bytes = max_size - session.upload_size
+    if int(filesize) > max_remaining_size_bytes:
         return {
             'accepted': False,
             'error': gettext(
                 'Maximum total upload size ({0} MiB) exceeded'
-            ).format(MAX_TOTAL_UPLOAD_SIZE),
+            ).format(max_size),
             'verboseError': gettext(
                 'The file "{0}" would push the total transfer size past the '
                 '{1}MiB max'
-            ).format(filename, MAX_TOTAL_UPLOAD_SIZE)
+            ).format(filename, max_size)
         }
 
+    # Check that a file with this name has not already been uploaded
+    filename_list = session.uploadedfile_set.value_list('name', flat=True)
+    if filename in filename_list:
+        return {
+            'accepted': False,
+            'error': gettext(
+                'A file with the same name has already been uploaded.'
+            ),
+            'verboseError': gettext(
+                'A file with the name "{0}" has already been uploaded'
+            ).format(filename)
+        }
+
+    # All checks succeded
     return {'accepted': True}
