@@ -12,11 +12,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, FormView, ListView
 from formtools.wizard.views import SessionWizardView
 
+from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
     SourceRole, SourceType, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
-from recordtransfer.settings import ACCEPTED_FILE_FORMATS, APPROXIMATE_DATE_FORMAT, \
-    MAX_TOTAL_UPLOAD_SIZE, MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm
 from recordtransfer.tokens import account_activation_token
@@ -56,7 +55,7 @@ class About(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['accepted_files'] = ACCEPTED_FILE_FORMATS
+        context['accepted_files'] = settings.ACCEPTED_FILE_FORMATS
         return context
 
 
@@ -234,7 +233,7 @@ class TransferFormWizard(SessionWizardView):
         size = get_human_readable_size(session.upload_size, base=1024, precision=2)
         count = get_human_readable_file_count(
             [f.name for f in session.get_existing_file_set()],
-            ACCEPTED_FILE_FORMATS,
+            settings.ACCEPTED_FILE_FORMATS,
             LOGGER
         )
 
@@ -244,9 +243,9 @@ class TransferFormWizard(SessionWizardView):
         start_date = cleaned_data['start_date_of_material'].strftime(r'%Y-%m-%d')
         end_date = cleaned_data['end_date_of_material'].strftime(r'%Y-%m-%d')
         if cleaned_data['start_date_is_approximate']:
-            start_date = APPROXIMATE_DATE_FORMAT.format(date=start_date)
+            start_date = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date)
         if cleaned_data['end_date_is_approximate']:
-            end_date = APPROXIMATE_DATE_FORMAT.format(date=end_date)
+            end_date = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date)
 
         date_of_material = start_date if start_date == end_date else f'{start_date} - {end_date}'
         cleaned_data['date_of_material'] = date_of_material
@@ -368,6 +367,13 @@ def accept_file(request):
                     required
                 )
             }, status=400)
+        if not request_params[required]:
+            return JsonResponse({
+                'accepted': False,
+                'error': gettext('{0} parameter cannot be empty').format(
+                    required
+                )
+            }, status=400)
 
     filename = request_params['filename']
     filesize = request_params['filesize']
@@ -404,6 +410,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     contents, only its name and its size.
 
     These checks are applied:
+    - The file name is not empty
     - The file has an extension
     - The file's extension exists in ACCEPTED_FILE_FORMATS
     - The file's size is an integer greater than zero
@@ -436,7 +443,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     # Check extension is allowed
     extension = name_split[-1].lower()
     extension_accepted = False
-    for _, accepted_extensions in ACCEPTED_FILE_FORMATS.items():
+    for _, accepted_extensions in settings.ACCEPTED_FILE_FORMATS.items():
         for accepted_extension in accepted_extensions:
             if extension == accepted_extension.lower():
                 extension_accepted = True
@@ -477,7 +484,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
         }
 
     # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_SIZE)
+    max_single_size = min(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
     max_single_size_bytes = mib_to_bytes(max_single_size)
     size_mib = bytes_to_mib(size)
     if size > max_single_size_bytes:
@@ -520,18 +527,18 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
     mib_to_bytes = lambda m: m * (1024 ** 2)
 
     # Check number of files is within allowed total
-    if len(session.uploadedfile_set) >= MAX_TOTAL_UPLOAD_COUNT:
+    if len(session.uploadedfile_set) >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
             'accepted': False,
             'error': gettext('You can not upload anymore files.'),
             'verboseError': gettext(
                 'The file "{0}" would push the total file count past the '
                 'maximum number of files ({1})'
-            ).format(filename, MAX_TOTAL_UPLOAD_SIZE)
+            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE)
         }
 
     # Check total size of all files plus current one is within allowed size
-    max_size = mib_to_bytes(max(MAX_SINGLE_UPLOAD_SIZE, MAX_TOTAL_UPLOAD_SIZE))
+    max_size = mib_to_bytes(max(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE))
     max_remaining_size_bytes = max_size - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
         return {

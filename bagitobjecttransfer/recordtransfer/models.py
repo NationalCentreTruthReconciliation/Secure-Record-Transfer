@@ -21,8 +21,8 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from recordtransfer import settings
 from recordtransfer.caais import flatten_meta_tree
-from recordtransfer.settings import BAG_STORAGE_FOLDER, DEFAULT_DATA
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
 
@@ -255,7 +255,7 @@ class Bag(models.Model):
 
     @property
     def user_folder(self):
-        return os.path.join(BAG_STORAGE_FOLDER, slugify(self.user.username))
+        return os.path.join(settings.BAG_STORAGE_FOLDER, slugify(self.user.username))
 
     @property
     def location(self):
@@ -466,9 +466,10 @@ class Bag(models.Model):
             if algorithm not in bagit.CHECKSUM_ALGOS:
                 raise ValueError('{0} is not a valid checksum algorithm'.format(algorithm))
 
-        if not os.path.exists(BAG_STORAGE_FOLDER) or not os.path.isdir(BAG_STORAGE_FOLDER):
+        if not os.path.exists(settings.BAG_STORAGE_FOLDER) or \
+            not os.path.isdir(settings.BAG_STORAGE_FOLDER):
             LOGGER.error(msg=(
-                'The BAG_STORAGE_FOLDER "{0}" does not exist!'.format(BAG_STORAGE_FOLDER)
+                'The BAG_STORAGE_FOLDER "{0}" does not exist!'.format(settings.BAG_STORAGE_FOLDER)
             ))
             return {
                 'missing_files': [], 'bag_created': False, 'bag_valid': False,
@@ -642,7 +643,7 @@ def update_location(sender, instance, *args, **kwargs):
     if sender == Bag:
         bag = instance
         metadata = bag.json_metadata
-        default_location = DEFAULT_DATA.get('section_4', {}).get('storage_location', '')
+        default_location = settings.DEFAULT_DATA.get('section_4', {}).get('storage_location', '')
         current_location = metadata.get('section_4', {}).get('storage_location', '')
         if not current_location or current_location == default_location:
             if 'section_4' not in metadata:

@@ -1,6 +1,6 @@
 from django.core.files.storage import get_storage_class
 
-from recordtransfer.settings import UPLOAD_STORAGE_FOLDER
+from recordtransfer import settings
 
 Storage = get_storage_class()
 
@@ -22,5 +22,5 @@ class UploadedFileStorage(Storage):
     ''' Stores files in UPLOAD_STORAGE_FOLDER
     '''
     def __init__(self, **kwargs):
-        kwargs['location'] = UPLOAD_STORAGE_FOLDER
+        kwargs['location'] = settings.UPLOAD_STORAGE_FOLDER
         super().__init__(**kwargs)
