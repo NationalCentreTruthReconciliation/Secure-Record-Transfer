@@ -387,7 +387,7 @@ def accept_file(request):
         if token:
             session = UploadSession.objects.filter(token=token).first()
             if session:
-                session_check = _accept_session(filename, filesize, token)
+                session_check = _accept_session(filename, filesize, session)
                 if not session_check['accepted']:
                     return JsonResponse(session_check, status=200)
 
@@ -527,7 +527,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
     mib_to_bytes = lambda m: m * (1024 ** 2)
 
     # Check number of files is within allowed total
-    if len(session.uploadedfile_set) >= settings.MAX_TOTAL_UPLOAD_COUNT:
+    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
             'accepted': False,
             'error': gettext('You can not upload anymore files.'),
@@ -538,8 +538,8 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         }
 
     # Check total size of all files plus current one is within allowed size
-    max_size = mib_to_bytes(max(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE))
-    max_remaining_size_bytes = max_size - session.upload_size
+    max_size = max(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
         return {
             'accepted': False,
@@ -553,7 +553,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         }
 
     # Check that a file with this name has not already been uploaded
-    filename_list = session.uploadedfile_set.value_list('name', flat=True)
+    filename_list = session.uploadedfile_set.all().values_list('name', flat=True)
     if filename in filename_list:
         return {
             'accepted': False,
