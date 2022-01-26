@@ -180,7 +180,7 @@ class UploadedFile(models.Model):
         Returns:
             (bool): True if file exists, False otherwise
         '''
-        return bool(self.file_upload) and os.path.exists(self.file_upload.path)
+        return self.file_upload and self.file_upload.storage.exists(self.file_upload.name)
 
     def copy(self, new_path):
         ''' Copy this file to a new path.
