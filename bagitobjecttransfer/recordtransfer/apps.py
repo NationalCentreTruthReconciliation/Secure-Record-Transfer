@@ -1,9 +1,9 @@
 import logging
-from pathlib import Path
+import os
 
 from django.apps import AppConfig
 
-from recordtransfer.settings import BAG_STORAGE_FOLDER
+from recordtransfer.settings import BAG_STORAGE_FOLDER, UPLOAD_STORAGE_FOLDER
 
 
 LOGGER = logging.getLogger(__name__)
@@ -13,7 +13,12 @@ class RecordTransferConfig(AppConfig):
     name = 'recordtransfer'
 
     def ready(self):
-        bagging_area = Path(BAG_STORAGE_FOLDER)
-        if not bagging_area.exists():
-            LOGGER.warning(msg=('Bag storage folder {0} does not exist!'.format(
-                str(BAG_STORAGE_FOLDER))))
+        create_directories = [
+            ('BAG_STORAGE_FOLDER', BAG_STORAGE_FOLDER),
+            ('UPLOAD_STORAGE_FOLDER', UPLOAD_STORAGE_FOLDER),
+        ]
+
+        for name, directory in create_directories:
+            if not os.path.exists(directory) or not os.path.isdir(directory):
+                os.mkdir(directory)
+                LOGGER.info(msg=('Created {0} at {1}'.format(name, directory)))

@@ -6,22 +6,40 @@ recordtransfer.settings - Application Settings
 
 These settings control the behaviour of the application. All options can be set by directly
 modifying the :code:`recordtransfer/settings.py` file, and some may be changed by setting a value in
-the :code:`.env` environment file. In alphabetical order, these settings are:
+the :code:`.env` environment file. By category, these settings are:
+
+**File Upload Controls**
 
 - :ref:`ACCEPTED_FILE_FORMATS`
-- :ref:`ALLOW_BAG_CHANGES`
-- :ref:`APPROXIMATE_DATE_FORMAT`
-- :ref:`ARCHIVIST_EMAIL`
+- :ref:`MAX_TOTAL_UPLOAD_SIZE`
+- :ref:`MAX_SINGLE_UPLOAD_SIZE`
+- :ref:`MAX_TOTAL_UPLOAD_COUNT`
+
+**Storage Locations**
+
 - :ref:`BAG_STORAGE_FOLDER`
-- :ref:`DEFAULT_DATA`
-- :ref:`DO_NOT_REPLY_USERNAME`
+- :ref:`UPLOAD_STORAGE_FOLDER`
+
+**Application Features**
+
+- :ref:`ALLOW_BAG_CHANGES`
 - :ref:`SIGN_UP_ENABLED`
+
+**Emailing**
+
+- :ref:`ARCHIVIST_EMAIL`
+- :ref:`DO_NOT_REPLY_USERNAME`
+
+**Data Formatting**
+
+- :ref:`APPROXIMATE_DATE_FORMAT`
+- :ref:`DEFAULT_DATA`
 
 
 ACCEPTED_FILE_FORMATS
-#####################
+---------------------
 
-    *Choose what files can be uploaded*
+    *Choose what files (by extension) can be uploaded*
 
     .. table::
 
@@ -71,8 +89,127 @@ ACCEPTED_FILE_FORMATS
         }
 
 
+MAX_SINGLE_UPLOAD_SIZE
+----------------------
+
+    *Choose the maximum size (in MiB) an uploaded file is allowed to be*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        64            int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum allowed size a single file can be when uploaded with the transfer form. The
+    size is expressed in **MiB**, *not* MB.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_SINGLE_UPLOAD_SIZE=512
+
+
+MAX_TOTAL_UPLOAD_COUNT
+----------------------
+
+    *Choose the maximum number of files can be transferred*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        40            int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum number of files that can be transferred at one time with the transfer form.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_TOTAL_UPLOAD_COUNT=10
+
+
+MAX_TOTAL_UPLOAD_SIZE
+---------------------
+
+    *Choose the maximum total size (in MiB) of a file transfer*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        256           int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum allowed total size of all files being transferred at one time. The size is
+    expressed in **MiB**, *not* MB.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_TOTAL_UPLOAD_SIZE=1024
+
+
+BAG_STORAGE_FOLDER
+------------------
+
+    *Choose where BagIt bags are stored*
+
+    .. table::
+
+        ========  =======  =========  ==================  =========================
+        Required  Default  Type       Can be set in .env  Can be set in settings.py
+        ========  =======  =========  ==================  =========================
+        YES                string     YES                 YES
+        ========  =======  =========  ==================  =========================
+
+    The folder on the server where bags are to be stored.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        BAG_STORAGE_FOLDER=/path/to/your/folder
+
+
+UPLOAD_STORAGE_FOLDER
+---------------------
+
+    *Choose storage location for uploaded files*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        YES                     string     YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    The files users upload will be copied here after being uploaded with either of the Django
+    file upload handlers. Uploaded files will first be uploaded in memory or to a temporary file
+    before being moved to the UPLOAD_STORAGE_FOLDER.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_STORAGE_FOLDER=/path/to/upload/folder
+
+
 ALLOW_BAG_CHANGES
-#################
+-----------------
 
     *Choose whether BagIt bags can be modified*
 
@@ -95,8 +232,80 @@ ALLOW_BAG_CHANGES
         ALLOW_BAG_CHANGES=true
 
 
+SIGN_UP_ENABLED
+---------------
+
+    *Choose whether new users can sign up*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        True          bool       YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    You may want to create users manually to tightly control who has access to the application. In
+    this case, you will want to disable signing up so that no new users can be created without an
+    admin creating them.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        SIGN_UP_ENABLED=false
+
+
+ARCHIVIST_EMAIL
+---------------
+
+    *Choose contact email address*
+
+    .. table::
+
+        ========  =======  =========  ==================  =========================
+        Required  Default  Type       Can be set in .env  Can be set in settings.py
+        ========  =======  =========  ==================  =========================
+        YES                string     YES                 YES
+        ========  =======  =========  ==================  =========================
+
+    The email displayed for people to contact an archivist.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        ARCHIVIST_EMAIL=archives@domain.ca
+
+
+DO_NOT_REPLY_USERNAME
+---------------------
+
+    *Choose username for do not reply emails*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        do-not-reply  string     YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    A username for the application to send "do not reply" emails from. This username is combined
+    with the site's base URL to create an email address. The URL can be set from the admin site.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        DO_NOT_REPLY_USERNAME=donotreply
+
+
 APPROXIMATE_DATE_FORMAT
-#######################
+-----------------------
 
     *Choose estimated date format*
 
@@ -119,54 +328,8 @@ APPROXIMATE_DATE_FORMAT
         APPROXIMATE_DATE_FORMAT='Circa. {date}'
 
 
-ARCHIVIST_EMAIL
-###############
-
-    *Choose contact email address*
-
-    .. table::
-
-        ========  =======  =========  ==================  =========================
-        Required  Default  Type       Can be set in .env  Can be set in settings.py
-        ========  =======  =========  ==================  =========================
-        YES                string     YES                 YES
-        ========  =======  =========  ==================  =========================
-
-    The email displayed for people to contact an archivist.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        ARCHIVIST_EMAIL=archives@domain.ca
-
-
-BAG_STORAGE_FOLDER
-##################
-
-    *Choose where BagIt bags are stored*
-
-    .. table::
-
-        ========  =======  =========  ==================  =========================
-        Required  Default  Type       Can be set in .env  Can be set in settings.py
-        ========  =======  =========  ==================  =========================
-        YES                string     YES                 YES
-        ========  =======  =========  ==================  =========================
-
-    The folder on the server where bags are to be stored.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        BAG_STORAGE_FOLDER=/path/to/your/folder
-
-
 DEFAULT_DATA
-############
+------------
 
     *Choose default form data*
 
@@ -232,52 +395,3 @@ DEFAULT_DATA
                 'language_of_accession_record': 'en',
             }
         }
-
-
-DO_NOT_REPLY_USERNAME
-#####################
-
-    *Choose username for do not reply emails*
-
-    .. table::
-
-        ========  ============  =========  ==================  =========================
-        Required  Default       Type       Can be set in .env  Can be set in settings.py
-        ========  ============  =========  ==================  =========================
-        NO        do-not-reply  string     YES                 YES
-        ========  ============  =========  ==================  =========================
-
-    A username for the application to send "do not reply" emails from. This username is combined
-    with the site's base URL to create an email address. The URL can be set from the admin site.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        DO_NOT_REPLY_USERNAME=donotreply
-
-
-SIGN_UP_ENABLED
-###############
-
-    *Choose whether new users can sign up*
-
-    .. table::
-
-        ========  ============  =========  ==================  =========================
-        Required  Default       Type       Can be set in .env  Can be set in settings.py
-        ========  ============  =========  ==================  =========================
-        NO        True          bool       YES                 YES
-        ========  ============  =========  ==================  =========================
-
-    You may want to create users manually to tightly control who has access to the application. In
-    this case, you will want to disable signing up so that no new users can be created without an
-    admin creating them.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        SIGN_UP_ENABLED=false

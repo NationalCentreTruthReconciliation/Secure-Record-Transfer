@@ -21,9 +21,9 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from recordtransfer import settings
 from recordtransfer.caais import flatten_meta_tree
-from recordtransfer.settings import BAG_STORAGE_FOLDER
-from recordtransfer.storage import OverwriteStorage
+from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
 
 LOGGER = logging.getLogger(__name__)
@@ -51,6 +51,17 @@ class UploadSession(models.Model):
         ''' Start a new upload session '''
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
+    @property
+    def upload_size(self):
+        ''' Get total size (in bytes) of all uploaded files in this session
+        '''
+        return sum(f.file_upload.size for f in self.get_existing_file_set())
+
+    def get_existing_file_set(self):
+        ''' Get all files from the uploadedfile_set where the file exists
+        '''
+        return [f for f in self.uploadedfile_set.all() if f.exists]
+
     def number_of_files_uploaded(self):
         ''' Get the number of files associated with this session.
 
@@ -66,13 +77,19 @@ class UploadSession(models.Model):
             logger: A logger object
         '''
         logger = logger or LOGGER
-        files = self.uploadedfile_set.all().filter(old_copy_removed=False)
-        logger.info(msg=(
-            'Removing {0} uploaded files from the session {1}'\
-            .format(len(files), self.token)
-        ))
-        for uploaded_file in files:
-            uploaded_file.remove()
+        existing_files = self.get_existing_file_set()
+        if not existing_files:
+            logger.info(msg=(
+                'There are no existing uploaded files in the session {0}'\
+                .format(self.token)
+            ))
+        else:
+            logger.info(msg=(
+                'Removing {0} uploaded files from the session {1}'\
+                .format(len(existing_files), self.token)
+            ))
+            for uploaded_file in existing_files:
+                uploaded_file.remove()
 
     def move_session_uploads(self, destination, logger=None):
         ''' Move uploaded files associated with this session to a destination directory.
@@ -108,19 +125,20 @@ class UploadSession(models.Model):
             logger.error(msg=message.format(destination))
             raise FileNotFoundError(message.format(destination))
 
-        files = self.uploadedfile_set.all().filter(old_copy_removed=False)
+        files = self.uploadedfile_set.all()
 
         if not files:
-            logger.warning(msg=('No files found in the session {0}'.format(self.token)))
+            logger.warning(msg=('No existing files found in the session {0}'.format(self.token)))
             return ([], [])
 
-        logger.info(msg=('Copying {0} temp files to {1}'.format(len(files), destination)))
+        verb = 'Moving' if delete else 'Copying'
+        logger.info(msg=('{0} {1} temp files to {2}'.format(verb, len(files), destination)))
         copied = []
         missing = []
-        verb = 'Moving' if delete else 'Copying'
         for uploaded_file in files:
-            source_path = Path(uploaded_file.path)
-            if not source_path.exists():
+            source_path = uploaded_file.file_upload.path
+
+            if not uploaded_file.exists:
                 logger.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
                 missing.append(str(source_path))
                 continue
@@ -141,21 +159,28 @@ class UploadSession(models.Model):
         return f'{self.token} ({self.started_at})'
 
 
+def session_upload_location(instance, filename):
+    if instance.session:
+        return '{0}/{1}'.format(instance.session.token, filename)
+    return 'NOSESSION/{0}'.format(filename)
+
 class UploadedFile(models.Model):
     ''' Represents a file that a user uploaded during an upload session
     '''
-    name = models.CharField(max_length=256)
-    path = models.CharField(max_length=256)
-    old_copy_removed = models.BooleanField()
+    name = models.CharField(max_length=256, null=True, default='-')
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=True)
+    file_upload = models.FileField(null=True,
+                                   storage=UploadedFileStorage,
+                                   upload_to=session_upload_location)
 
+    @property
     def exists(self):
         ''' Determine if the file this object represents exists on the file system.
 
         Returns:
             (bool): True if file exists, False otherwise
         '''
-        return os.path.exists(str(self.path))
+        return self.file_upload and self.file_upload.storage.exists(self.file_upload.name)
 
     def copy(self, new_path):
         ''' Copy this file to a new path.
@@ -163,7 +188,8 @@ class UploadedFile(models.Model):
         Args:
             new_path: The new path to copy this file to
         '''
-        shutil.copy2(self.path, new_path)
+        if self.file_upload:
+            shutil.copy2(self.file_upload.path, new_path)
 
     def move(self, new_path):
         ''' Move this file to a new path. Marks this file as removed post-move.
@@ -171,23 +197,20 @@ class UploadedFile(models.Model):
         Args:
             new_path: The new path to move this file to
         '''
-        shutil.move(self.path, new_path)
-        self.remove()
+        if self.file_upload:
+            shutil.move(self.file_upload.path, new_path)
+            self.remove()
 
     def remove(self):
-        ''' Delete the real file-system representation of this model. Marks this file as removed
-        regardless of whether the file exists and was removed.
+        ''' Delete the real file-system representation of this model.
         '''
-        if self.exists():
-            os.remove(str(self.path))
-        if not self.old_copy_removed:
-            self.old_copy_removed = True
-            self.save()
+        if self.file_upload:
+            self.file_upload.delete(save=True)
 
     def __str__(self):
-        if self.old_copy_removed:
-            return f'{self.path}, session {self.session}, DELETED'
-        return f'{self.path}, session {self.session}, NOT DELETED'
+        if self.exists:
+            return f'{self.name} | Session {self.session}'
+        return f'{self.name} Removed! | Session {self.session}'
 
 
 class BagGroup(models.Model):
@@ -232,7 +255,7 @@ class Bag(models.Model):
 
     @property
     def user_folder(self):
-        return os.path.join(BAG_STORAGE_FOLDER, slugify(self.user.username))
+        return os.path.join(settings.BAG_STORAGE_FOLDER, slugify(self.user.username))
 
     @property
     def location(self):
@@ -443,9 +466,10 @@ class Bag(models.Model):
             if algorithm not in bagit.CHECKSUM_ALGOS:
                 raise ValueError('{0} is not a valid checksum algorithm'.format(algorithm))
 
-        if not os.path.exists(BAG_STORAGE_FOLDER) or not os.path.isdir(BAG_STORAGE_FOLDER):
+        if not os.path.exists(settings.BAG_STORAGE_FOLDER) or \
+            not os.path.isdir(settings.BAG_STORAGE_FOLDER):
             LOGGER.error(msg=(
-                'The BAG_STORAGE_FOLDER "{0}" does not exist!'.format(BAG_STORAGE_FOLDER)
+                'The BAG_STORAGE_FOLDER "{0}" does not exist!'.format(settings.BAG_STORAGE_FOLDER)
             ))
             return {
                 'missing_files': [], 'bag_created': False, 'bag_valid': False,
@@ -618,8 +642,12 @@ def update_location(sender, instance, *args, **kwargs):
     '''
     if sender == Bag:
         bag = instance
-        if not bag.location:
-            metadata = bag.json_metadata
+        metadata = bag.json_metadata
+        default_location = settings.DEFAULT_DATA.get('section_4', {}).get('storage_location', '')
+        current_location = metadata.get('section_4', {}).get('storage_location', '')
+        if not current_location or current_location == default_location:
+            if 'section_4' not in metadata:
+                metadata['section_4'] = {}
             metadata['section_4']['storage_location'] = bag.location
             bag.update_metadata(metadata)
 

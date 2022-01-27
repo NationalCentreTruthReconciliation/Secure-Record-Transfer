@@ -6,6 +6,7 @@ Deprecated==1.2.13
 Django==3.2.11
 django-countries==7.2.1
 django-formtools==2.3
+django-override-storage==0.3.2
 django-recaptcha==2.0.6
 django-rq==2.5.1
 gpg==1.13.1

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-echo "Creating media directories if they do not exist"
-mkdir -p /app/media/bags
+echo "Creating job directory"
 mkdir -p /app/media/jobs
 
 echo "Collecting static files..."

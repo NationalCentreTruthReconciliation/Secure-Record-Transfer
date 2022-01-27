@@ -46,7 +46,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'recordtransfer.context_processors.signup_status'
+                'recordtransfer.context_processors.signup_status',
+                'recordtransfer.context_processors.file_uploads',
             ],
         },
     },
@@ -86,7 +87,8 @@ LOGIN_REDIRECT_URL = '/'
 AUTH_USER_MODEL = 'recordtransfer.User'
 
 FILE_UPLOAD_HANDLERS = [
-    'bagitobjecttransfer.persistentuploadhandler.PersistentFileUploadHandler'
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 ]
 
 # Internationalization

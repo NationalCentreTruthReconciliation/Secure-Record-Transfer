@@ -1,5 +1,4 @@
 ''' Application-specific settings for the recordtransfer app '''
-import platform
 from decouple import config
 
 # Enable or disable the sign-up ability
@@ -10,6 +9,10 @@ SIGN_UP_ENABLED = config('SIGN_UP_ENABLED', default=True, cast=bool)
 
 BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
 
+# The location where uploaded files are stored temporarily
+
+UPLOAD_STORAGE_FOLDER = config('UPLOAD_STORAGE_FOLDER')
+
 # Whether to allow updating BagIt bags
 
 ALLOW_BAG_CHANGES = config('ALLOW_BAG_CHANGES', default=True, cast=bool)
@@ -18,6 +21,12 @@ ALLOW_BAG_CHANGES = config('ALLOW_BAG_CHANGES', default=True, cast=bool)
 
 DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_USERNAME', default='do-not-reply')
 ARCHIVIST_EMAIL = config('ARCHIVIST_EMAIL')
+
+# Maximum upload thresholds
+
+MAX_TOTAL_UPLOAD_SIZE = config('MAX_TOTAL_UPLOAD_SIZE', default=256, cast=int)
+MAX_SINGLE_UPLOAD_SIZE = config('MAX_SINGLE_UPLOAD_SIZE', default=64, cast=int)
+MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
 
 # Default data to inject into metadata, after the user enters their own metadata
 
