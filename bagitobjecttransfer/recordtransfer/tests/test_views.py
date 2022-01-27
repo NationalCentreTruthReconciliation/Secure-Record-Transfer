@@ -1,3 +1,4 @@
+#pylint: disable=too-many-public-methods
 from unittest.mock import patch
 import logging
 
@@ -19,7 +20,10 @@ from recordtransfer.models import UploadSession, UploadedFile, User
 @patch('recordtransfer.settings.MAX_SINGLE_UPLOAD_SIZE', 1) # MiB
 @patch('recordtransfer.settings.MAX_TOTAL_UPLOAD_COUNT', 4) # Number of files
 @override_storage(storage=LocMemStorage())
-class TestAcceptFileView(TestCase):
+class TestUploadFileView(TestCase):
+    ''' Tests for recordtransfer:uploadfile view
+    '''
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -27,11 +31,146 @@ class TestAcceptFileView(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.session_1 = UploadSession(
+        cls.one_kib = bytearray([1] * 1024)
+        cls.test_user_1 = User.objects.create_user(username='testuser1', password='1X<ISRUkw+tuK')
+
+    def setUp(self):
+        _ = self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
+        self.patch__accept_file = patch('recordtransfer.views._accept_file').start()
+        self.patch__accept_session = patch('recordtransfer.views._accept_session').start()
+        self.patch__accept_contents = patch('recordtransfer.views._accept_contents').start()
+        self.patch__accept_file.return_value = {'accepted': True}
+        self.patch__accept_session.return_value = {'accepted': True}
+        self.patch__accept_contents.return_value = {'accepted': True}
+
+    def test_logged_out_error(self):
+        self.client.logout()
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {})
+        self.assertEqual(response.status_code, 302)
+
+    def test_500_error_caught(self):
+        self.patch__accept_file.side_effect = ValueError('err')
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {
+            'file': SimpleUploadedFile('File.PDF', self.one_kib)
+        })
+        self.assertEqual(response.status_code, 500)
+
+    def test_no_files_uploaded(self):
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {})
+        self.assertEqual(response.status_code, 400)
+
+    def test_new_session_created(self):
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {
+            'file': SimpleUploadedFile('File.PDF', self.one_kib)
+        })
+
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertIn('uploadSessionToken', response_json)
+        session = UploadSession.objects.filter(token=response_json['uploadSessionToken']).first()
+        self.assertTrue(session)
+
+        session.uploadedfile_set.all().delete()
+        session.delete()
+
+    def test_same_session_used(self):
+        session = UploadSession.new_session()
+        session.save()
+
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {
+            'file': SimpleUploadedFile('File.PDF', self.one_kib)
+        }, HTTP_Upload_Session_Token=session.token)
+
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertEqual(response_json['uploadSessionToken'], session.token)
+        self.assertEqual(len(session.uploadedfile_set.all()), 1)
+        self.assertEqual(session.uploadedfile_set.first().name, 'File.PDF')
+
+        session.uploadedfile_set.all().delete()
+        session.delete()
+
+    def test_file_issue_flagged(self):
+        self.patch__accept_file.return_value = {'accepted': False, 'error': 'ISSUE'}
+
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {
+            'file': SimpleUploadedFile('File.PDF', self.one_kib)
+        })
+
+        response_json = response.json()
+        session = UploadSession.objects.filter(token=response_json['uploadSessionToken']).first()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_json['issues']), 1)
+        self.assertEqual(response_json['issues'][0]['error'], 'ISSUE')
+        self.assertEqual(len(session.uploadedfile_set.all()), 0)
+
+        session.uploadedfile_set.all().delete()
+        session.delete()
+
+    def test_session_issue_flagged(self):
+        self.patch__accept_session.return_value = {'accepted': False, 'error': 'ISSUE'}
+
+        response = self.client.post(reverse('recordtransfer:uploadfile'), {
+            'file': SimpleUploadedFile('File.PDF', self.one_kib)
+        })
+
+        response_json = response.json()
+        session = UploadSession.objects.filter(token=response_json['uploadSessionToken']).first()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_json['issues']), 1)
+        self.assertEqual(response_json['issues'][0]['error'], 'ISSUE')
+        self.assertEqual(len(session.uploadedfile_set.all()), 0)
+
+        session.uploadedfile_set.all().delete()
+        session.delete()
+
+    def test_content_issue_flagged(self):
+        self.patch__accept_contents.return_value = {
+            'accepted': False,
+            'error': 'ISSUE',
+            'clamav': {
+                'reason': 'Virus',
+                'status': 'FOUND',
+            }
+        }
+        # accept contents logic not complete yet
+
+    def tearDown(self):
+        self.client.logout()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        logging.disable(logging.NOTSET)
+        patch.stopall()
+        UploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
+
+
+@patch('recordtransfer.settings.ACCEPTED_FILE_FORMATS', {
+    'Document': ['docx', 'pdf'], 'Spreadsheet': ['xlsx']
+})
+@patch('recordtransfer.settings.MAX_TOTAL_UPLOAD_SIZE', 3) # MiB
+@patch('recordtransfer.settings.MAX_SINGLE_UPLOAD_SIZE', 1) # MiB
+@patch('recordtransfer.settings.MAX_TOTAL_UPLOAD_COUNT', 4) # Number of files
+@override_storage(storage=LocMemStorage())
+class TestAcceptFileView(TestCase):
+    ''' Tests for recordtransfer:checkfile view
+    '''
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.session_1 = UploadSession.objects.create(
             token='test_session_1',
             started_at=timezone.now(),
         )
-        cls.session_1.save()
         cls.one_mib = bytearray([1] * (1024 ** 2))
         cls.half_mib = bytearray([1] * int((1024 ** 2) / 2))
         cls.test_user_1 = User.objects.create_user(username='testuser1', password='1X<ISRUkw+tuK')
@@ -39,6 +178,14 @@ class TestAcceptFileView(TestCase):
     def setUp(self):
         # Log in
         _ = self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
+
+    def test_logged_out_error(self):
+        self.client.logout()
+        response = self.client.get(reverse('recordtransfer:checkfile'), {
+            'filesize': '190',
+            'filename': 'My File.pdf'
+        })
+        self.assertEqual(response.status_code, 302)
 
     def test_filename_missing(self):
         response = self.client.get(reverse('recordtransfer:checkfile'), {
@@ -65,6 +212,15 @@ class TestAcceptFileView(TestCase):
             'filesize': '',
         })
         self.assertEqual(response.status_code, 400)
+
+    @patch('recordtransfer.views._accept_file')
+    def test_500_error_caught(self, patch__accept_file):
+        patch__accept_file.side_effect = ValueError('err')
+        response = self.client.get(reverse('recordtransfer:checkfile'), {
+            'filename': 'My File.pdf',
+            'filesize': '1024',
+        })
+        self.assertEqual(response.status_code, 500)
 
     def test_filename_filesize_ok(self):
         param_list = [
@@ -173,14 +329,13 @@ class TestAcceptFileView(TestCase):
         files = []
         try:
             # 2 MiB of files (one MiB x 2)
-            for name in ('File 1.docx', 'File 2.docx'):
-                new_file =  UploadedFile(
+            files = [
+                UploadedFile.objects.create(
                     session=self.session_1,
                     file_upload=SimpleUploadedFile(name, self.one_mib),
-                    name=name,
-                )
-                new_file.save()
-                files.append(new_file)
+                    name=name
+                ) for name in ('File 1.docx', 'File 2.docx')
+            ]
 
             for size in ('1024', len(self.one_mib)):
                 with self.subTest():
@@ -201,14 +356,13 @@ class TestAcceptFileView(TestCase):
         try:
             # 2 MiB of files (half MiB x 4)
             # Max file count is 4
-            for name in ('File 1.docx', 'File 2.pdf', 'File 3.pdf', 'File 4.pdf'):
-                new_file = UploadedFile(
+            files = [
+                UploadedFile.objects.create(
                     session=self.session_1,
                     name=name,
                     file_upload=SimpleUploadedFile(name, self.half_mib),
-                )
-                new_file.save()
-                files.append(new_file)
+                ) for name in ('File 1.docx', 'File 2.pdf', 'File 3.pdf', 'File 4.pdf')
+            ]
 
             response = self.client.post(reverse('recordtransfer:checkfile'), {
                 'filename': 'My File.pdf',
@@ -228,17 +382,17 @@ class TestAcceptFileView(TestCase):
         files = []
         try:
             # 2.5 MiB of files (1 Mib x 2, 0.5 MiB x 1)
-            for name, content in (
-                ('File 1.docx', self.one_mib),
-                ('File 2.pdf', self.one_mib),
-                ('File 3.pdf', self.half_mib)):
-                new_file = UploadedFile(
+            files = [
+                UploadedFile.objects.create(
                     session=self.session_1,
                     name=name,
                     file_upload=SimpleUploadedFile(name, content),
+                ) for name, content in (
+                    ('File 1.docx', self.one_mib),
+                    ('File 2.pdf', self.one_mib),
+                    ('File 3.pdf', self.half_mib)
                 )
-                new_file.save()
-                files.append(new_file)
+            ]
 
             response = self.client.post(reverse('recordtransfer:checkfile'), {
                 'filename': 'My File.pdf',
@@ -258,14 +412,13 @@ class TestAcceptFileView(TestCase):
         files = []
         names = ('File.1.docx', 'File.2.pdf')
         try:
-            for name in names:
-                new_file = UploadedFile(
+            files = [
+                UploadedFile.objects.create(
                     session=self.session_1,
                     name=name,
                     file_upload=SimpleUploadedFile(name, self.half_mib),
-                )
-                new_file.save()
-                files.append(new_file)
+                ) for name in names
+            ]
 
             for name in names:
                 with self.subTest():
@@ -288,3 +441,5 @@ class TestAcceptFileView(TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
         logging.disable(logging.NOTSET)
+        UploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
