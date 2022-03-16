@@ -56,6 +56,9 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['accepted_files'] = settings.ACCEPTED_FILE_FORMATS
+        context['max_total_upload_size'] = settings.MAX_TOTAL_UPLOAD_SIZE
+        context['max_single_upload_size'] = settings.MAX_SINGLE_UPLOAD_SIZE
+        context['max_total_upload_count'] = settings.MAX_TOTAL_UPLOAD_COUNT
         return context
 
 
