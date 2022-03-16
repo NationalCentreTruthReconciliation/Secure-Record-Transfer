@@ -17,7 +17,7 @@ from django.template.loader import render_to_string
 
 from recordtransfer.caais import convert_transfer_form_to_meta_tree
 from recordtransfer.models import Bag, BagGroup, UploadedFile, UploadSession, User, Job, Submission
-from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
+from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL, BAG_CHECKSUMS
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -64,7 +64,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
 
     LOGGER.info(msg='Creating bag on filesystem')
     bagging_result = new_bag.make_bag(
-        algorithms=['sha512'],
+        algorithms=BAG_CHECKSUMS,
         file_perms='644',
         move_files=True,
         logger=LOGGER,

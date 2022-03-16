@@ -22,6 +22,12 @@ ALLOW_BAG_CHANGES = config('ALLOW_BAG_CHANGES', default=True, cast=bool)
 DO_NOT_REPLY_USERNAME = config('DO_NOT_REPLY_USERNAME', default='do-not-reply')
 ARCHIVIST_EMAIL = config('ARCHIVIST_EMAIL')
 
+# Checksum types
+
+BAG_CHECKSUMS = [
+    algorithm.strip() for algorithm in config('BAG_CHECKSUMS', default='sha512').split(',')
+]
+
 # Maximum upload thresholds
 
 MAX_TOTAL_UPLOAD_SIZE = config('MAX_TOTAL_UPLOAD_SIZE', default=256, cast=int)

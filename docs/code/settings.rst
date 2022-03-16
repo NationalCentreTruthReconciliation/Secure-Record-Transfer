@@ -20,6 +20,10 @@ the :code:`.env` environment file. By category, these settings are:
 - :ref:`BAG_STORAGE_FOLDER`
 - :ref:`UPLOAD_STORAGE_FOLDER`
 
+**Checksums**
+
+- :ref:`BAG_CHECKSUMS`
+
 **Application Features**
 
 - :ref:`ALLOW_BAG_CHANGES`
@@ -206,6 +210,33 @@ UPLOAD_STORAGE_FOLDER
 
         #file: .env
         UPLOAD_STORAGE_FOLDER=/path/to/upload/folder
+
+
+BAG_CHECKSUMS
+-------------
+
+    *Choose the checksum algorithms used to create BagIt manifests*
+
+    .. table::
+
+        ========  =======  =========  ==================  =========================
+        Required  Default  Type       Can be set in .env  Can be set in settings.py
+        ========  =======  =========  ==================  =========================
+        NO        sha512   str        YES                 YES - Use with caution
+        ========  =======  =========  ==================  =========================
+
+    When BagIt is run, the selected algorithm(s) are used to generate manifests for the files as
+    well as the tag files in the Bag. Multiple algorithms can be used, separated by commas. Avoid
+    setting these algorithms directly in :code:`settings.py`, as there is some pre-processing of the
+    selected algorithms needed to make sure they're formatted correctly.
+
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        BAG_CHECKSUMS=sha1,blake2b,md5
 
 
 ALLOW_BAG_CHANGES
