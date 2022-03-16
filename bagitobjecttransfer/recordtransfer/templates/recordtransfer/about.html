@@ -12,6 +12,17 @@
     is the preferred method of sending records to the NCTR Archives.
     {% endblocktrans %}
 </p>
+<div class="title-text margin-top-25px">{% trans "Maximum Transfer Size" %}</div>
+<p>
+    {% blocktrans %}
+    Transfers sent through the transfer portal are subject to the maximum transfer size.
+    You may upload a <b>maximum of {{ max_total_upload_count }} files</b>, and <b>at most
+    {{ max_total_upload_size }}MiB of files</b>. Any <b>one file may not exceed
+    {{ max_single_upload_size }} MiB</b>. If you would like to transfer <i>more</i> than this
+    amount, please split your transfer into multiple parts, and use the group form to group similar
+    transfers together so our archivists know your transfers are related.
+    {% endblocktrans %}
+</p>
 <div class="title-text margin-top-25px">{% trans "Accepted File Types" %}</div>
 <p>
     {% blocktrans %}
