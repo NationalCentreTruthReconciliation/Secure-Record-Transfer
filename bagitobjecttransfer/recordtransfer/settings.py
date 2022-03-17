@@ -50,9 +50,7 @@ DEFAULT_DATA = {
         'extent_statement_note': 'Files counted automatically by application',
     },
     'section_4': {
-        'storage_location': 'N/A',
-        'appraisal_statement': 'N/A',
-        'associated_documentation': 'N/A',
+        'storage_location': 'Placeholder',
         'material_assessment_statement_type': 'Physical Condition',
         'material_assessment_statement_value': 'Record is digital, physical assessment is not possible'
     },
