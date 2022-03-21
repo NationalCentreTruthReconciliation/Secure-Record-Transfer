@@ -9,6 +9,7 @@ from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
 from recordtransfer.models import SourceRole, SourceType, Right
+from recordtransfer.settings import USE_DATE_WIDGETS
 
 
 class AcceptLegal(forms.Form):
@@ -32,6 +33,9 @@ class ContactInfoForm(forms.Form):
         if region.lower() == 'other' and not cleaned_data['other_province_or_state']:
             self.add_error('other_province_or_state',
                            'This field must be filled out if "Other" province or state is selected')
+        elif region.lower() == '':
+            self.add_error('province_or_state',
+                           'You must select a province or state, use "Other" to enter a custom location')
         return cleaned_data
 
     contact_name = forms.CharField(
@@ -97,6 +101,7 @@ class ContactInfoForm(forms.Form):
             }
         ),
         choices=[
+            ('', gettext("Select your province")),
             # Canada
             ('Other', gettext("Other")),
             ('AB', 'Alberta'),
@@ -308,6 +313,7 @@ class SourceInfoForm(forms.Form):
 
     source_note = forms.CharField(
         required=False,
+        max_length=2000,
         widget=forms.Textarea(attrs={
             'rows': '4',
             'placeholder': gettext('Enter any notes you think may be useful for the archives to '
@@ -319,6 +325,7 @@ class SourceInfoForm(forms.Form):
 
     custodial_history = forms.CharField(
         required=False,
+        max_length=2000,
         widget=forms.Textarea(attrs={
             'rows': '4',
             'placeholder': gettext('Enter any information you have on the history of who has had '
@@ -335,16 +342,20 @@ class RecordDescriptionForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
 
-        start_date_of_material = cleaned_data.get('start_date_of_material')
-        end_date_of_material = cleaned_data.get('end_date_of_material')
-        if not start_date_of_material:
-            self.add_error('start_date_of_material', 'Start date was not valid')
-        if not end_date_of_material:
-            self.add_error('end_date_of_material', 'End date was not valid')
-        if start_date_of_material and end_date_of_material:
-            if end_date_of_material < start_date_of_material:
-                msg = 'End date cannot be before start date'
-                self.add_error('end_date_of_material', msg)
+        if not USE_DATE_WIDGETS:
+            cleaned_data['start_date_of_material'] = cleaned_data.get('start_date_of_material_text')
+            cleaned_data['end_date_of_material'] = cleaned_data.get('end_date_of_material_text')
+        else:
+            start_date_of_material = cleaned_data.get('start_date_of_material')
+            end_date_of_material = cleaned_data.get('end_date_of_material')
+            if not start_date_of_material:
+                self.add_error('start_date_of_material', 'Start date was not valid')
+            if not end_date_of_material:
+                self.add_error('end_date_of_material', 'End date was not valid')
+            if start_date_of_material and end_date_of_material:
+                if end_date_of_material < start_date_of_material:
+                    msg = 'End date cannot be before start date'
+                    self.add_error('end_date_of_material', msg)
         return cleaned_data
 
     accession_title = forms.CharField(
@@ -357,51 +368,77 @@ class RecordDescriptionForm(forms.Form):
         label=gettext('Title')
     )
 
-    start_date_of_material = forms.DateField(
-        input_formats=[r'%Y-%m-%d'],
-        required=True,
-        widget=forms.DateInput(attrs={
-            'class': 'start_date_picker reduce-form-field-width',
-            'autocomplete': 'off',
-            'placeholder': 'yyyy-mm-dd',
-        }),
-        label=gettext('Earliest date'),
-        help_text=gettext('Enter the earliest date relevant to the files you\'re transferring.'),
-    )
+    if not USE_DATE_WIDGETS:
+        # Use _text to avoid jQuery input masks
+        start_date_of_material_text = forms.CharField(
+            min_length=2,
+            max_length=64,
+            required=True,
+            widget=forms.TextInput(attrs={
+                'placeholder': gettext('e.g., 2000-03-14')
+            }),
+            label=gettext('Earliest date'),
+            help_text=gettext('Enter the earliest date relevant to the files you\'re transferring.'),
+        )
+        end_date_of_material_text = forms.CharField(
+            min_length=2,
+            max_length=64,
+            required=True,
+            widget=forms.TextInput(attrs={
+                'placeholder': 'e.g., Fall 1925',
+            }),
+            label=gettext('Latest date'),
+            help_text=gettext('Enter the latest date relevant to the files you\'re transferring.'),
+        )
+        start_date_is_approximate = False
+        end_date_is_approximate = False
+    else:
+        start_date_of_material = forms.DateField(
+            input_formats=[r'%Y-%m-%d'],
+            required=True,
+            widget=forms.DateInput(attrs={
+                'class': 'start_date_picker reduce-form-field-width',
+                'autocomplete': 'off',
+                'placeholder': 'yyyy-mm-dd',
+            }),
+            label=gettext('Earliest date'),
+            help_text=gettext('Enter the earliest date relevant to the files you\'re transferring.'),
+        )
 
-    # This field is intended to be tied to a button in a date picker for the start date
-    start_date_is_approximate = forms.BooleanField(
-        required=False,
-        widget=forms.CheckboxInput(attrs={
-            'hidden': True,
-        }),
-        label='hidden',
-    )
+        # This field is intended to be tied to a button in a date picker for the start date
+        start_date_is_approximate = forms.BooleanField(
+            required=False,
+            widget=forms.CheckboxInput(attrs={
+                'hidden': True,
+            }),
+            label='hidden',
+        )
 
-    end_date_of_material = forms.DateField(
-        input_formats=[r'%Y-%m-%d'],
-        required=True,
-        widget=forms.DateInput(attrs={
-            'class': 'end_date_picker reduce-form-field-width',
-            'autocomplete': 'off',
-            'placeholder': 'yyyy-mm-dd',
-        }),
-        label=gettext('Latest date'),
-        help_text=gettext('Enter the latest date relevant to the files you\'re transferring.'),
-    )
+        end_date_of_material = forms.DateField(
+            input_formats=[r'%Y-%m-%d'],
+            required=True,
+            widget=forms.DateInput(attrs={
+                'class': 'end_date_picker reduce-form-field-width',
+                'autocomplete': 'off',
+                'placeholder': 'yyyy-mm-dd',
+            }),
+            label=gettext('Latest date'),
+            help_text=gettext('Enter the latest date relevant to the files you\'re transferring.'),
+        )
 
-    # This field is intended to be tied to a button in a date picker for the end date
-    end_date_is_approximate = forms.BooleanField(
-        required=False,
-        widget=forms.CheckboxInput(attrs={
-            'hidden': True,
-        }),
-        label='hidden',
-    )
+        # This field is intended to be tied to a button in a date picker for the end date
+        end_date_is_approximate = forms.BooleanField(
+            required=False,
+            widget=forms.CheckboxInput(attrs={
+                'hidden': True,
+            }),
+            label='hidden',
+        )
 
     language_of_material = forms.CharField(
         required=True,
         min_length=2,
+        max_length=100,
         widget=forms.TextInput(attrs={
             'placeholder': gettext('English, French')
         }),
@@ -412,6 +449,7 @@ class RecordDescriptionForm(forms.Form):
     scope_and_content = forms.CharField(
         required=True,
         min_length=4,
+        max_length=2000,
         widget=forms.Textarea(attrs={
             'rows': '6',
             'placeholder': 'e.g., These files contain images from ...'
