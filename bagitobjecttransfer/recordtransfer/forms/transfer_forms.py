@@ -421,6 +421,18 @@ class RecordDescriptionForm(forms.Form):
                           'What do the files contain?')
     )
 
+    condition_assessment = forms.CharField(
+        required=False,
+        min_length=4,
+        max_length=2000,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': 'e.g., The documents are photocopies ... (optional)'
+        }),
+        label=gettext('Condition of files'),
+        help_text=gettext('Briefly describe the condition of the files you are transferring.')
+    )
+
 
 class RightsFormSet(BaseFormSet):
     """ Special formset to enforce at least one rights form to have a value """

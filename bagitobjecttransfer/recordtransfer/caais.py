@@ -402,6 +402,20 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
         caais_key='material_assessment_statement_note',
         section=curr_section)
     curr_tree['material_assessment_statement'].append(new_assessment)
+    # Possible Contact Assessment as a second Material Assessment section.
+    condition_assessment = get_optional_field(
+        form_data=form_data,
+        caais_key='condition_assessment',
+        section=curr_section
+    )
+    if len(condition_assessment) > 0:
+        physical_assessment = OrderedDict()
+        physical_assessment['material_assessment_statement_type'] = 'Contact assessment'
+        physical_assessment['material_assessment_statement_value'] = condition_assessment
+        physical_assessment['material_assessment_action_plan'] = ''
+        physical_assessment['material_assessment_statement_note'] = ''
+        curr_tree['material_assessment_statement'].append(physical_assessment)
+
     # 4.4 Appraisal Statement
     curr_tree['appraisal_statement'] = []
     # 4.5 Associated Documentation
