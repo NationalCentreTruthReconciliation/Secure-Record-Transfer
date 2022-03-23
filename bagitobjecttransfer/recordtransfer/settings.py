@@ -36,7 +36,7 @@ MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
 
 # Use Date widgets for record dates or use free text fields.
 
-USE_DATE_WIDGETS = True
+USE_DATE_WIDGETS = config('USE_DATE_WIDGETS', default=True, cast=bool)
 
 # Default data to inject into metadata, after the user enters their own metadata
 
