@@ -1,3 +1,5 @@
+import datetime
+import pickle
 from typing import Union
 import logging
 
@@ -5,6 +7,7 @@ import clamd
 from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_text
@@ -16,9 +19,9 @@ from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
-    SourceRole, SourceType, Submission
+    SourceRole, SourceType, Submission, SavedTransfer
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
-from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED
+from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED, MAX_SAVED_TRANSFER_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
@@ -57,13 +60,25 @@ class UserProfile(UpdateView):
         return self.request.user
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(UserProfile, self).get_context_data(**kwargs)
+        context['in_process_submissions'] = SavedTransfer.objects.filter(user=self.request.user)\
+            .order_by('-last_updated')
         context['user_submissions'] = Submission.objects.filter(user=self.request.user).order_by('-submission_date')
         return context
 
     def form_valid(self, form):
         messages.success(self.request, 'Preferences updated')
         return super().form_valid(form)
+
+    def get(self, request, *args, **kwargs):
+        if 'delete_transfer' in request.GET:
+            transfers = SavedTransfer.objects.filter(
+                user=self.request.user,
+                id=request.GET.get('delete_transfer')
+            )
+            for transfer in transfers:
+                transfer.delete()
+        return super().get(request, *args, **kwargs)
 
 
 class About(TemplateView):
@@ -196,6 +211,40 @@ class TransferFormWizard(SessionWizardView):
         },
     }
 
+    def get(self, request, *args, **kwargs):
+        resume_id = request.GET.get('resume_transfer', None)
+        if resume_id:
+            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            if transfer is None:
+                LOGGER.error(
+                    f"Expected at least 1 saved transfers for user {self.request.user} and ID {resume_id}, found 0"
+                )
+            else:
+                self.storage.data = pickle.loads(transfer.step_data)
+                self.storage.current_step = transfer.current_step
+                return self.render(self.get_form())
+        elif self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
+            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
+            try:
+                clamd_socket.ping()
+            except clamd.ClamdError as exc:
+                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
+                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
+        return super().get(self, request, *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        save_form_step = self.request.POST.get('save_form_step', None)
+        if save_form_step and save_form_step in self.steps.all:
+            transfer = SavedTransfer()
+            transfer.current_step = save_form_step
+            transfer.user = self.request.user
+            transfer.last_updated = datetime.datetime.now(timezone.get_current_timezone())
+            transfer.step_data = pickle.dumps(self.storage.data)
+            transfer.save()
+            return redirect('recordtransfer:userprofile')
+        else:
+            return super().post(*args, **kwargs)
+
     def get_template_names(self):
         ''' Retrieve the name of the template for the current step '''
         step_name = self.steps.current
@@ -243,17 +292,9 @@ class TransferFormWizard(SessionWizardView):
                 'source_roles': all_roles,
                 'source_types': all_types,
             })
+        can_save_form = SavedTransfer.objects.filter(user=self.request.user).count() < MAX_SAVED_TRANSFER_COUNT
+        context.update({'save_form_enabled': can_save_form})
         return context
-
-    def get(self, request, *args, **kwargs):
-        if self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
-            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
-            try:
-                clamd_socket.ping()
-            except clamd.ClamdError as exc:
-                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
-                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
-        return super().get(request, *args, **kwargs)
 
     def get_all_cleaned_data(self):
         cleaned_data = super().get_all_cleaned_data()

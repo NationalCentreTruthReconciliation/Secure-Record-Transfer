@@ -387,6 +387,29 @@ APPROXIMATE_DATE_FORMAT
         APPROXIMATE_DATE_FORMAT='Circa. {date}'
 
 
+MAX_SAVED_TRANSFER_COUNT
+------------------------
+
+    *Choose maximum saved transfers per user*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        2                       int        YES                 YES
+        ========  ======================  =========  ==================  =========================
+
+    The maximum number of transfers a user can save to resume later.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_SAVED_TRANSFER_COUNT=5
+
+
 DEFAULT_DATA
 ------------
 
