@@ -8,6 +8,7 @@ SECRET_KEY = config('SECRET_KEY', default='q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 INSTALLED_APPS = [
+    'caais.apps.CaaisConfig',
     'recordtransfer.apps.RecordTransferConfig',
     'django.contrib.admin',
     'django.contrib.auth',
