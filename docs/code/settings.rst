@@ -28,6 +28,7 @@ the :code:`.env` environment file. By category, these settings are:
 
 - :ref:`ALLOW_BAG_CHANGES`
 - :ref:`SIGN_UP_ENABLED`
+- :ref:`USE_DATE_WIDGETS`
 
 **Emailing**
 
@@ -288,6 +289,30 @@ SIGN_UP_ENABLED
         SIGN_UP_ENABLED=false
 
 
+USE_DATE_WIDGETS
+----------------
+
+  *Use javascript date widgets*
+
+  .. table::
+
+      ========  ============  =========  ==================  =========================
+      Required  Default       Type       Can be set in .env  Can be set in settings.py
+      ========  ============  =========  ==================  =========================
+      NO        True          bool       YES                 YES
+      ========  ============  =========  ==================  =========================
+
+  By default you must enter full dates in the format YYYY-MM-DD for records start and end dates.
+  Setting this to False allows users to enter free text for the start and end date fields.
+
+  **.env Example:**
+
+  ::
+
+      #file: .env
+      USE_DATE_WIDGETS=false
+
+
 ARCHIVIST_EMAIL
 ---------------
 
@@ -426,26 +451,3 @@ DEFAULT_DATA
                 'language_of_accession_record': 'en',
             }
         }
-
-USE_DATE_WIDGETS
-----------------
-
-  *Use javascript date widgets*
-
-  .. table::
-
-      ========  ============  =========  ==================  =========================
-      Required  Default       Type       Can be set in .env  Can be set in settings.py
-      ========  ============  =========  ==================  =========================
-      NO        True          bool       YES                 YES
-      ========  ============  =========  ==================  =========================
-
-  By default you must enter full dates in the format YYYY-MM-DD for records start and end dates.
-  Setting this to False allows users to enter free text for the start and end date fields.
-
-  **.env Example:**
-
-  ::
-
-      #file: .env
-      USE_DATE_WIDGETS=false
