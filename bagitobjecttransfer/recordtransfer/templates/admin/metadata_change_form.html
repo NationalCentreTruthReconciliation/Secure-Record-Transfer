@@ -1,0 +1,17 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {# textarea overflow fix #}
+    <style type="text/css">
+        .inline-textarea {
+            width: 97%;
+            resize: none;
+        }
+
+        .inline-text-input {
+            width: 97%;
+        }
+    </style>
+{% endblock %}
