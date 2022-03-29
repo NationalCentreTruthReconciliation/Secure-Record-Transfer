@@ -2,9 +2,11 @@
 
 http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
 '''
-
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext
+
+from caais.export import ExportVersion
 
 
 class Status(models.Model):
@@ -25,6 +27,39 @@ class Status(models.Model):
         return self.status
 
 
+class MetadataManager(models.Manager):
+    ''' Custom metadata manager that provides a function to flatten metadata
+    objects to be able to write them to a CSV.
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten metadata objects in queryset to be exported as CSV rows.
+        '''
+        rows = []
+
+        for metadata in self.get_queryset().all():
+            row = {c: '' for c in version.fieldnames}
+
+            if version == ExportVersion.CAAIS_1_0:
+                row['repository'] = metadata.repository or ''
+                row['accessionTitle'] = metadata.accession_title or 'No title'
+                row['acquisitionMethod'] = metadata.acquisition_method or ''
+                row['status'] = metadata.status.status if metadata.status else ''
+
+            else:
+                row['title'] = metadata.accession_title or 'No title'
+
+                accession_identifier = metadata.identifiers.accession_identifier()
+                if accession_identifier is not None:
+                    row['accessionNumber'] = accession_identifier.identifier_value
+
+            # Flatten repeatable fields
+            row.update(metadata.identifiers.flatten(version))
+            rows.append(row)
+
+        return rows
+
+
 class Metadata(models.Model):
     ''' Top-level container for all CAAIS metadata. Contains all simple
     non-repeatable fields. Any repeatable field is represented by a separate
@@ -34,6 +69,8 @@ class Metadata(models.Model):
     class Meta:
         verbose_name_plural = gettext('CAAIS metadata')
         verbose_name = gettext('CAAIS metadata')
+
+    objects = MetadataManager()
 
     repository = models.CharField(max_length=128, null=True, help_text=gettext(
         "Give the authorized form(s) of the name of the institution in "
@@ -58,9 +95,69 @@ class Metadata(models.Model):
         return title
 
 
+class IdentifierManager(models.Manager):
+    ''' Custom identifier related manager
+    '''
+
+    def accession_identifier(self):
+        ''' Get the first identifier with Accession Identifier or Accession
+        Number as the type, or None if an identifier like this does not exist.
+        '''
+        return self.get_queryset().filter(
+            Q(identifier_type__icontains='Accession Identifier') |
+            Q(identifier_type__icontains='Accession Number')
+        ).first()
+
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten identifiers in queryset to export them in a CSV.
+        '''
+        # alternativeIdentifiers were added in AtoM v2.6
+        if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2, ExportVersion.ATOM_2_3):
+            return {}
+
+        if version == ExportVersion.CAAIS_1_0:
+            identifiers = self.get_queryset().all()
+            return {
+                'identifierTypes': '|'.join([
+                    id.identifier_type or 'NULL' for id in identifiers
+                ]),
+                'identifierValues': '|'.join([
+                    id.identifier_value or 'NULL' for id in identifiers
+                ]),
+                'identifierNotes': '|'.join([
+                    id.identifier_note or 'NULL' for id in identifiers
+                ]),
+            }
+
+        if version == ExportVersion.ATOM_2_6:
+            accession_identifier = self.accession_identifier()
+
+            if accession_identifier:
+                identifiers = self.get_queryset().all().exclude(id=accession_identifier.id)
+            else:
+                identifiers = self.get_queryset().all()
+
+            return {
+                'alternativeIdentifiers': '|'.join([
+                    id.identifier_value or 'NULL' for id in identifiers
+                ]),
+                'alternativeIdentifierTypes': '|'.join([
+                    id.identifier_type or 'NULL' for id in identifiers
+                ]),
+                'alternativeIdentifierNotes': '|'.join([
+                    id.identifier_note or 'NULL' for id in identifiers
+                ]),
+            }
+
+        return {}
+
+
 class Identifier(models.Model):
     ''' 1.2 Identifiers (Repeatable field)
     '''
+
+    objects = IdentifierManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='identifiers')
@@ -96,6 +193,10 @@ class ArchivalUnit(models.Model):
 class DispositionAuthority(models.Model):
     ''' 1.6 - Disposition Authority (Repeatable field)
     '''
+
+    class Meta:
+        verbose_name_plural = gettext('Disposition authorities')
+        verbose_name = gettext('Disposition authority')
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='disposition_authorities')
