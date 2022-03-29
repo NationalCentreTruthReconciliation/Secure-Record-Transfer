@@ -242,20 +242,27 @@ class TransferFormWizard(SessionWizardView):
 
         cleaned_data['quantity_and_type_of_units'] = '{0}, totalling {1}'.format(count, size)
 
-        # Convert the four date-related fields to a single date
-        start_date = cleaned_data['start_date_of_material'].strftime(r'%Y-%m-%d')
-        end_date = cleaned_data['end_date_of_material'].strftime(r'%Y-%m-%d')
-        if cleaned_data['start_date_is_approximate']:
-            start_date = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date)
-        if cleaned_data['end_date_is_approximate']:
-            end_date = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date)
+        start_date = cleaned_data['start_date_of_material']
+        end_date = cleaned_data['end_date_of_material']
+        if settings.USE_DATE_WIDGETS:
+            # Convert the four date-related fields to a single date
+            start_date = start_date.strftime(r'%Y-%m-%d')
+            end_date = end_date.strftime(r'%Y-%m-%d')
+            if cleaned_data['start_date_is_approximate']:
+                start_date = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date)
+            if cleaned_data['end_date_is_approximate']:
+                end_date = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date)
 
         date_of_material = start_date if start_date == end_date else f'{start_date} - {end_date}'
         cleaned_data['date_of_material'] = date_of_material
-        del cleaned_data['start_date_is_approximate']
-        del cleaned_data['start_date_of_material']
-        del cleaned_data['end_date_is_approximate']
-        del cleaned_data['end_date_of_material']
+        cleaned_data = TransferFormWizard.delete_keys(cleaned_data, [
+            'start_date_is_approximate',
+            'start_date_of_material',
+            'start_date_of_material_text',
+            'end_date_is_approximate',
+            'end_date_of_material',
+            'end_date_of_material_text'
+        ])
 
         # Add dates for events
         current_time = timezone.localtime(timezone.now()).strftime(r'%Y-%m-%d %H:%M:%S %Z')
@@ -263,6 +270,13 @@ class TransferFormWizard(SessionWizardView):
         cleaned_data['event_date'] = current_time
 
         return cleaned_data
+
+    @staticmethod
+    def delete_keys(form_data, keys):
+        for key in keys:
+            if key in form_data:
+                del form_data[key]
+        return form_data
 
     def done(self, form_list, **kwargs):
         ''' Retrieves all of the form data, and creates a bag from it asynchronously.

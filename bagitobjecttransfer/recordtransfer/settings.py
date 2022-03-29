@@ -34,6 +34,10 @@ MAX_TOTAL_UPLOAD_SIZE = config('MAX_TOTAL_UPLOAD_SIZE', default=256, cast=int)
 MAX_SINGLE_UPLOAD_SIZE = config('MAX_SINGLE_UPLOAD_SIZE', default=64, cast=int)
 MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
 
+# Use Date widgets for record dates or use free text fields.
+
+USE_DATE_WIDGETS = config('USE_DATE_WIDGETS', default=True, cast=bool)
+
 # Default data to inject into metadata, after the user enters their own metadata
 
 DEFAULT_DATA = {
