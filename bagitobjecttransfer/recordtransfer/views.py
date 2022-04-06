@@ -1,6 +1,7 @@
 from typing import Union
 import logging
 
+from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
@@ -9,7 +10,7 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, ListView
+from django.views.generic import TemplateView, FormView, UpdateView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import settings
@@ -17,7 +18,7 @@ from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, R
     SourceRole, SourceType, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
-from recordtransfer.forms import SignUpForm
+from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
 
 
@@ -34,19 +35,28 @@ class TransferSent(TemplateView):
     template_name = 'recordtransfer/transfersent.html'
 
 
-class UserProfile(ListView):
+class UserProfile(UpdateView):
     ''' This view shows two things:
     - The user's profile information
     - A list of the Bags a user has created via transfer
     '''
 
     template_name = 'recordtransfer/profile.html'
-    context_object_name = 'user_submissions'
-    model = Submission
     paginate_by = 10
+    form_class = UserProfileForm
+    success_url = reverse_lazy('recordtransfer:userprofile')
 
-    def get_queryset(self):
-        return Submission.objects.filter(user=self.request.user).order_by('-submission_date')
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_submissions'] = Submission.objects.filter(user=self.request.user).order_by('-submission_date')
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Preferences updated')
+        return super().form_valid(form)
 
 
 class About(TemplateView):

@@ -6,6 +6,9 @@
 {% block content %}
 {% if user.is_authenticated %}
     <div class="title-text">{% trans "Your Profile" %}</div>
+    <form method="post" action="{% url 'recordtransfer:userprofile' %}">
+    {% csrf_token %}
+    {% include 'recordtransfer/messages.html' %}
     <div class="flex-item margin-top-25px">
         <label>{% trans "Name" %}</label>
         <input disabled value="{{ user.get_full_name }}">
@@ -18,6 +21,16 @@
         <label>{% trans "Username" %}</label>
         <input disabled value="{{ user.username }}">
     </div>
+    <div class="flex-item">
+        <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans "Receive notification emails?" %}</label>
+        {{ form.gets_notification_emails }}
+    </div>
+    <div class="flex-item">
+        <button type="submit" class="blue-button">
+            {% trans "Save" %}
+        </button>
+    </div>
+    </form>
     <div class="flex-full-width-item margin-top-25px">
         <label class="past-transfer-label">{% trans "Past Transfers"%}</label>
     </div>

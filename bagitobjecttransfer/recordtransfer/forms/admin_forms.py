@@ -1,9 +1,10 @@
 ''' Forms specific to the recordtransfer admin site '''
 from django import forms
+from django.forms import ModelForm
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
-from recordtransfer.models import Appraisal, Bag, BagGroup, Submission, UploadSession, UploadedFile
+from recordtransfer.models import Appraisal, Bag, BagGroup, Submission, UploadSession, UploadedFile, User
 from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 
@@ -231,3 +232,13 @@ class InlineBagGroupForm(RecordTransferModelForm):
         )
 
     number_of_bags_in_group = forms.IntegerField(required=False)
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = (
+            'gets_notification_emails',
+        )
+
+    gets_notification_emails = forms.CheckboxInput()
