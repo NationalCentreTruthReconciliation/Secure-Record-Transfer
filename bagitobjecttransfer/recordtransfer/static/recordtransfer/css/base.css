@@ -168,3 +168,30 @@ body {
         margin-right: auto;
     }
 }
+
+/**
+ * Messages styles
+ */
+
+.alert {
+    display: flex;
+    width: 100%;
+    padding: 7px;
+    margin: 5px 0px;
+    border-radius: 10px;
+}
+
+.alert > button {
+    margin: 0px 4px;
+}
+
+.alert-success {
+    border: 1px #080 solid;
+    background-color: #0d0;
+}
+
+.alert-error {
+    border: 1px #800 solid;
+    background-color: #d00;
+}
+

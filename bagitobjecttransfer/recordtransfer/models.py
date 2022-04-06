@@ -34,6 +34,7 @@ class User(AbstractUser):
     '''
     gets_bag_email_updates = models.BooleanField(default=False)
     confirmed_email = models.BooleanField(default=False)
+    gets_notification_emails = models.BooleanField(default=True)
 
     def get_full_name(self):
         return self.first_name + ' ' + self.last_name
