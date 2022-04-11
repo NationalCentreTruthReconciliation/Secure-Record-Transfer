@@ -29,6 +29,8 @@ the :code:`.env` environment file. By category, these settings are:
 - :ref:`ALLOW_BAG_CHANGES`
 - :ref:`SIGN_UP_ENABLED`
 - :ref:`USE_DATE_WIDGETS`
+- :ref:`CLAMAV_HOST`
+- :ref:`CLAMAV_PORT`
 
 **Emailing**
 
@@ -451,3 +453,47 @@ DEFAULT_DATA
                 'language_of_accession_record': 'en',
             }
         }
+
+CLAMAV_HOST
+-----------
+
+    *Hostname of ClamAV instance*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       None             string     YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Hostname of the server running ClamAV.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_HOST='example.server.org'
+
+CLAMAV_PORT
+-----------
+
+    *Port of ClamAV instance*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       3310             int        YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Port of the Clamd instance on the server running ClamAV.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_PORT=8181

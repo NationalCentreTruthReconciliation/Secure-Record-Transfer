@@ -1,6 +1,7 @@
 from typing import Union
 import logging
 
+import clamd
 from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
@@ -17,6 +18,7 @@ from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
     SourceRole, SourceType, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
+from recordtransfer.settings import CLAMD_HOST, CLAMD_PORT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
@@ -354,9 +356,8 @@ def uploadfiles(request):
             content_check = _accept_contents(_file)
             if not content_check['accepted']:
                 _file.close()
-                raise NotImplementedError(
-                    'file malware check with clamav has not been fully implemented'
-                )
+                issues.append({'file': _file.name, **content_check})
+                continue
 
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
             new_file.save()
@@ -609,22 +610,30 @@ def _accept_contents(file_upload):
             accepted is False. The 'clamav' key is a dict itself that has a
             'reason' and a 'status' key.
     '''
-    # TODO: Implement with clamd, like so:
-    '''
-    scan_results = clamd_socket.instream(file_upload)
-    status, reason = scan_results['stream']
-    if (status != 'OK'):
+    clamd_socket = clamd.ClamdNetworkSocket(CLAMD_HOST, CLAMD_PORT)
+    try:
+        scan_results = clamd_socket.instream(file_upload.file)
+        status, reason = scan_results['stream']
+        if status != 'OK':
+            return {
+                'accepted': False,
+                'error': 'Malware found in file',
+                'verboseError': gettext(
+                    'The file "{0}" was identified to contain malware! This issue '
+                    'will be sent to the administrator'.format(file_upload)
+                ),
+                'clamav': {
+                    'reason': reason,
+                    'status': status,
+                }
+            }
+    except (clamd.BufferTooLongError, clamd.ConnectionError) as exc:
+        LOGGER.error("Unable to scan file (%s)", uploadfiles, exc_info=exc)
         return {
             'accepted': False,
-            'error': 'Malware found in file',
+            'error': 'Unable to scan file for malware',
             'verboseError': gettext(
-                'The file "{0}" was identified to contain malware! This issue '
-                'will be sent to the administrator'
-            ),
-            'clamav': {
-                'reason': reason
-                'status': status
-            }
+                'Unable to scan the file "{0}" due to exception {1}'.format(file_upload, exc)
+            )
         }
-    '''
     return {'accepted': True}
