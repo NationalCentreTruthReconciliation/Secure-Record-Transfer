@@ -124,6 +124,11 @@ COUNTRIES_FIRST = [
 
 COUNTRIES_FLAG_URL = 'flags/{code}.gif'
 
+# django-dbtemplates configuration
+# https://github.com/NationalCentreTruthReconciliation/django-dbtemplates
+
+DBTEMPLATES_USE_CODEMIRROR = True
+
 # Media and Static files (CSS, JavaScript, Images)
 
 MEDIA_URL = '/media/'
