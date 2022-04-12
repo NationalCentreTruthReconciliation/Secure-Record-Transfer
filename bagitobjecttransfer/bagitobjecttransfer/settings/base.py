@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'formtools',
     'django_rq',
     'captcha',
+    'dbtemplates',
 ]
 
 MIDDLEWARE = [
@@ -39,7 +40,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates')
         ],
-        'APP_DIRS': True,
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -49,6 +50,11 @@ TEMPLATES = [
                 'recordtransfer.context_processors.signup_status',
                 'recordtransfer.context_processors.file_uploads',
             ],
+            'loaders': [
+                'dbtemplates.loader.Loader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
         },
     },
 ]
