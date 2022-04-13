@@ -521,6 +521,15 @@ $(() => {
                 }
             })
 
+            this.on("errormultiple", (files, response) => {
+                if (response.uploadSessionToken) {
+                    sessionToken = response.uploadSessionToken
+                }
+                if (response.fatalError) {
+                    window.location.href = response.redirect
+                }
+            })
+
             this.on("queuecomplete", () => {
                 if (issueFiles.length === 0) {
                     var sessionTokenElement = document.querySelector('[id$="session_token"]')

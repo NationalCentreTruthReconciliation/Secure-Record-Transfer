@@ -29,6 +29,7 @@ the :code:`.env` environment file. By category, these settings are:
 - :ref:`ALLOW_BAG_CHANGES`
 - :ref:`SIGN_UP_ENABLED`
 - :ref:`USE_DATE_WIDGETS`
+- :ref:`CLAMAV_ENABLED`
 - :ref:`CLAMAV_HOST`
 - :ref:`CLAMAV_PORT`
 
@@ -453,6 +454,28 @@ DEFAULT_DATA
                 'language_of_accession_record': 'en',
             }
         }
+
+CLAMAV_ENABLED
+-----------
+
+    *Whether ClamAV checking is enabled*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       False            bool       YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Whether ClamAV malware checking is enabled.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_ENABLED=True
 
 CLAMAV_HOST
 -----------

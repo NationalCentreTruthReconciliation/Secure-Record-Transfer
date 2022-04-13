@@ -23,6 +23,7 @@ urlpatterns = [
 
     path('transfer/checkfile/', login_required(views.accept_file), name='checkfile'),
     path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),
+    path('transfer/error/', login_required(views.SystemErrorPage.as_view()), name="systemerror"),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
 
     path('about/', views.About.as_view(), name='about'),
