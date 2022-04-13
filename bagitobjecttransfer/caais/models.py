@@ -35,29 +35,9 @@ class MetadataManager(models.Manager):
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
         ''' Flatten metadata objects in queryset to be exported as CSV rows.
         '''
-        rows = []
-
-        for metadata in self.get_queryset().all():
-            row = {c: '' for c in version.fieldnames}
-
-            if version == ExportVersion.CAAIS_1_0:
-                row['repository'] = metadata.repository or ''
-                row['accessionTitle'] = metadata.accession_title or 'No title'
-                row['acquisitionMethod'] = metadata.acquisition_method or ''
-                row['status'] = metadata.status.status if metadata.status else ''
-
-            else:
-                row['title'] = metadata.accession_title or 'No title'
-
-                accession_identifier = metadata.identifiers.accession_identifier()
-                if accession_identifier is not None:
-                    row['accessionNumber'] = accession_identifier.identifier_value
-
-            # Flatten repeatable fields
-            row.update(metadata.identifiers.flatten(version))
-            rows.append(row)
-
-        return rows
+        return [
+            metadata.flatten(version) for metadata in self.get_queryset().all()
+        ]
 
 
 class Metadata(models.Model):
@@ -87,6 +67,36 @@ class Metadata(models.Model):
     ))
     status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True,
                                related_name='metadatas')
+
+    #pylint: disable=no-member
+    def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
+        ''' Convert this model and all related models into a flat dictionary
+        suitable to be written to a CSV or used as the metadata fields for a
+        BagIt bag.
+        '''
+
+        row = {c: '' for c in version.fieldnames}
+
+        if version == ExportVersion.CAAIS_1_0:
+            row['repository'] = self.repository or ''
+            row['accessionTitle'] = self.accession_title or 'No title'
+            row['acquisitionMethod'] = self.acquisition_method or ''
+            row['status'] = self.status.status if self.status else ''
+
+        else:
+            row['title'] = self.accession_title or 'No title'
+            row['acquisitionType'] = self.acquisition_method or ''
+
+            accession_identifier = self.identifiers.accession_identifier()
+            if accession_identifier is not None:
+                row['accessionNumber'] = accession_identifier.identifier_value
+            else:
+                row['accessionNumber'] = ''
+
+        row.update(self.identifiers.flatten(version))
+        row.update(self.archival_units.flatten(version))
+        row.update(self.disposition_authorities.flatten(version))
+        return row
 
     def __str__(self):
         title = self.accession_title or 'No title'
@@ -178,9 +188,35 @@ class Identifier(models.Model):
         return f'{self.identifier_value} ({self.identifier_type})'
 
 
+class ArchivalUnitManager(models.Manager):
+    ''' Custom arhival unit manager
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten archival units in queryset to export them in a CSV.
+        '''
+        # No equivalent for archival unit in AtoM
+        if version != ExportVersion.CAAIS_1_0:
+            return {}
+
+        # Don't bother including NULL for empty archival units, just skip them
+        units = self.get_queryset().exclude(
+            Q(archival_unit__exact='') |
+            Q(archival_unit__isnull=True)
+        ).all()
+
+        return {
+            'archivalUnit': '|'.join([
+                u.archival_unit for u in units
+            ])
+        }
+
+
 class ArchivalUnit(models.Model):
     ''' 1.4 Archival Unit (Repeatable field)
     '''
+
+    objects = ArchivalUnitManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='archival_units')
@@ -190,6 +226,30 @@ class ArchivalUnit(models.Model):
     ))
 
 
+class DispositionAuthorityManager(models.Manager):
+    ''' Custom disposition authority manager
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten archival units in queryset to export them in a CSV.
+        '''
+        # No equivalent for disposition authority in AtoM
+        if version != ExportVersion.CAAIS_1_0:
+            return {}
+
+        # Don't bother including NULL for empty disposition authority, just skip it
+        authorities = self.get_queryset().exclude(
+            Q(disposition_authority__exact='') |
+            Q(disposition_authority__isnull=True)
+        ).all()
+
+        return {
+            'dispositionAuthority': '|'.join([
+                d.disposition_authority for d in authorities
+            ])
+        }
+
+
 class DispositionAuthority(models.Model):
     ''' 1.6 - Disposition Authority (Repeatable field)
     '''
@@ -197,6 +257,8 @@ class DispositionAuthority(models.Model):
     class Meta:
         verbose_name_plural = gettext('Disposition authorities')
         verbose_name = gettext('Disposition authority')
+
+    objects = DispositionAuthorityManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='disposition_authorities')

@@ -24,9 +24,9 @@ class ExportVersion(Enum):
                 'identifierValues',
                 'identifierNotes',
                 'accessionTitle',
-                'archivalUnits',
+                'archivalUnit',
                 'acquisitionMethod',
-                'dispositionAuthorities',
+                'dispositionAuthority',
                 'status',
             ]
 
