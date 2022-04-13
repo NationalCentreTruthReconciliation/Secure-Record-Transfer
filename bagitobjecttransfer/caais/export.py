@@ -11,13 +11,24 @@ class ExportVersion(Enum):
     ATOM_2_2 = auto()
     ATOM_2_1 = auto()
 
+    @staticmethod
+    def is_atom(version):
+        ''' Determine if version is an AtoM version.
+        '''
+        return version in (
+            ExportVersion.ATOM_2_1,
+            ExportVersion.ATOM_2_2,
+            ExportVersion.ATOM_2_3,
+            ExportVersion.ATOM_2_6,
+        )
+
     @property
     def fieldnames(self):
         ''' Get CSV column names for the specific version.
         '''
 
         if self == ExportVersion.CAAIS_1_0:
-            # TODO: Incomplete! Only contains section 1
+            # TODO: Incomplete! Only contains section 1 and 2
             return [
                 'repository',
                 'identifierTypes',
@@ -28,6 +39,21 @@ class ExportVersion(Enum):
                 'acquisitionMethod',
                 'dispositionAuthority',
                 'status',
+                'sourceType',
+                'sourceName',
+                'sourceContactPerson',
+                'sourceJobTitle',
+                'sourceStreetAddress',
+                'sourceCity',
+                'sourceRegion',
+                'sourcePostalCode',
+                'sourceCountry',
+                'sourcePhoneNumber',
+                'sourceEmail',
+                'sourceRole',
+                'sourceNote',
+                'sourceConfidentiality',
+                'preliminaryCustodialHistory',
             ]
 
         if self == ExportVersion.ATOM_2_6:
