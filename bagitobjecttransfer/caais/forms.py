@@ -1,8 +1,13 @@
 from django import forms
+from django.utils.translation import gettext
+
 from caais.models import (
     Identifier,
     ArchivalUnit,
     DispositionAuthority,
+    SourceOfMaterial,
+    SourceConfidentiality,
+    PreliminaryCustodialHistory,
 )
 
 
@@ -65,6 +70,61 @@ class InlineDispositionAuthorityForm(forms.ModelForm):
 
         widgets = {
             'disposition_authority': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'inline-textarea',
+            })
+        }
+
+
+class InlineSourceOfMaterialForm(forms.ModelForm):
+    ''' Form to edit sources of material inline in administrator website
+    '''
+
+    class Meta:
+        model = SourceOfMaterial
+        fields = '__all__'
+
+    source_confidentiality = forms.ModelChoiceField(
+        queryset=SourceConfidentiality.objects.all(),
+        required=False,
+    )
+
+    phone_number = forms.RegexField(
+        regex=r'^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$',
+        error_messages={
+            'required': gettext('This field is required.'),
+            'invalid': gettext('Phone number must look like "+1 (999) 999-9999"')
+        },
+        widget=forms.TextInput(attrs={
+            'placeholder': '+1 (999) 999-9999',
+            'class': 'vTextField',
+        }),
+        label=gettext('Phone number'),
+    )
+
+    email_address = forms.EmailField(
+        label=gettext('Email'),
+        widget=forms.TextInput(attrs={
+            'placeholder': 'person@example.com',
+            'class': 'vTextField',
+        }),
+    )
+
+
+class InlinePreliminaryCustodialHistoryForm(forms.ModelForm):
+    ''' Form to edit preliminary custodial histories inline in administrator
+    website
+    '''
+
+    class Meta:
+        model = PreliminaryCustodialHistory
+
+        fields = (
+            'preliminary_custodial_history',
+        )
+
+        widgets = {
+            'preliminary_custodial_history': forms.widgets.Textarea(attrs={
                 'rows': 2,
                 'class': 'inline-textarea',
             })
