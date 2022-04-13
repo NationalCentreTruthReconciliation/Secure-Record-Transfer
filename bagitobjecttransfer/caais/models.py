@@ -4,12 +4,14 @@ http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
 '''
 from functools import partial
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext
 
 from django_countries.fields import CountryField
 
+from caais.dates import EventDateParser, UnknownDateFormat
 from caais.export import ExportVersion
 
 
@@ -73,6 +75,10 @@ class Metadata(models.Model):
     ))
     status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True,
                                related_name='metadatas')
+    date_of_material = models.CharField(max_length=128, null=True, help_text=gettext(
+        "Provide a preliminary estimate of the date range or explicitly "
+        "indicate if not it has yet been determined"
+    ))
 
     #pylint: disable=no-member
     def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
@@ -88,6 +94,7 @@ class Metadata(models.Model):
             row['accessionTitle'] = self.accession_title or 'No title'
             row['acquisitionMethod'] = self.acquisition_method or ''
             row['status'] = self.status.status if self.status else ''
+            row['dateOfMaterial'] = self.date_of_material or ''
 
         else:
             row['title'] = self.accession_title or 'No title'
@@ -98,6 +105,42 @@ class Metadata(models.Model):
                 row['accessionNumber'] = accession_identifier.identifier_value
             else:
                 row['accessionNumber'] = ''
+
+            if self.date_of_material:
+                try:
+                    parser = EventDateParser(
+                        unknown_date=settings.CAAIS_UNKNOWN_DATE_TEXT,
+                        unknown_start_date=settings.CAAIS_UNKNOWN_START_DATE,
+                        unknown_end_date=settings.CAAIS_UNKNOWN_END_DATE,
+                        timid=False
+                    )
+                    parsed_date, date_range = parser.parse_date(self.date_of_material)
+                    if len(date_range) == 1:
+                        start_date, end_date = date_range[0], date_range[0]
+                    else:
+                        start_date, end_date = date_range[0], date_range[1]
+
+                    if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2):
+                        row['creationDatesType'] = 'Creation'
+                        row['creationDates'] = parsed_date
+                        row['creationDatesStart'] = str(start_date)
+                        row['creationDatesEnd'] = str(end_date)
+                    else:
+                        row['eventTypes'] = 'Creation'
+                        row['eventDates'] = parsed_date
+                        row['eventStartDates'] = str(start_date)
+                        row['eventEndDates'] = str(end_date)
+                except UnknownDateFormat:
+                    if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2):
+                        row['creationDatesType'] = 'Creation'
+                        row['creationDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
+                        row['creationDatesStart'] = settings.CAAIS_UNKNOWN_START_DATE
+                        row['creationDatesEnd'] = settings.CAAIS_UNKNOWN_END_DATE
+                    else:
+                        row['eventTypes'] = 'Creation'
+                        row['eventDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
+                        row['eventStartDates'] = settings.CAAIS_UNKNOWN_START_DATE
+                        row['eventEndDates'] = settings.CAAIS_UNKNOWN_END_DATE
 
         row.update(self.identifiers.flatten(version))
         row.update(self.archival_units.flatten(version))

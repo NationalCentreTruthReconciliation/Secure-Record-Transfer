@@ -28,7 +28,7 @@ class ExportVersion(Enum):
         '''
 
         if self == ExportVersion.CAAIS_1_0:
-            # TODO: Incomplete! Only contains section 1 and 2
+            # TODO: Incomplete! Only contains section 1, 2, and 3
             return [
                 'repository',
                 'identifierTypes',
@@ -54,6 +54,7 @@ class ExportVersion(Enum):
                 'sourceNote',
                 'sourceConfidentiality',
                 'preliminaryCustodialHistory',
+                'dateOfMaterial',
             ]
 
         if self == ExportVersion.ATOM_2_6:
