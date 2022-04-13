@@ -6,6 +6,8 @@ from caais.forms import (
     InlineIdentifierForm,
     InlineArchivalUnitForm,
     InlineDispositionAuthorityForm,
+    InlineSourceOfMaterialForm,
+    InlinePreliminaryCustodialHistoryForm,
 )
 from caais.models import (
     Status,
@@ -13,6 +15,11 @@ from caais.models import (
     Identifier,
     ArchivalUnit,
     DispositionAuthority,
+    SourceRole,
+    SourceType,
+    SourceConfidentiality,
+    SourceOfMaterial,
+    PreliminaryCustodialHistory,
 )
 
 
@@ -46,6 +53,34 @@ class DispositionAuthorityInlineAdmin(admin.TabularInline):
     extra = 0
 
 
+class SourceOfMaterialInlineAdmin(admin.StackedInline):
+    ''' Admin for editing source(s) of material inline
+    '''
+
+    class Media:
+        ''' JavaScript to load for inline form '''
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",
+            "caais/js/phoneNumberMask.js",
+        )
+
+    model = SourceOfMaterial
+    form = InlineSourceOfMaterialForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class PreliminaryCustodialHistoryInlineAdmin(admin.TabularInline):
+    ''' Admin for editing preliminary custodial histories inline
+    '''
+    model = PreliminaryCustodialHistory
+    form = InlinePreliminaryCustodialHistoryForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
 @admin.register(Metadata)
 class MetadataAdmin(admin.ModelAdmin):
     ''' Main CAAIS metadata model admin. All repeatable fields have an
@@ -65,6 +100,8 @@ class MetadataAdmin(admin.ModelAdmin):
         IdentifierInlineAdmin,
         ArchivalUnitInlineAdmin,
         DispositionAuthorityInlineAdmin,
+        SourceOfMaterialInlineAdmin,
+        PreliminaryCustodialHistoryInlineAdmin,
     ]
 
 
@@ -76,4 +113,34 @@ class StatusAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'status',
+    ]
+
+@admin.register(SourceRole)
+class SourceRoleAdmin(admin.ModelAdmin):
+    ''' Administrator to add/change source roles
+    '''
+
+    list_display = [
+        'id',
+        'source_role',
+    ]
+
+@admin.register(SourceType)
+class SourceTypeAdmin(admin.ModelAdmin):
+    ''' Administrator to add/change source types
+    '''
+
+    list_display = [
+        'id',
+        'source_type',
+    ]
+
+@admin.register(SourceConfidentiality)
+class SourceConfidentialityAdmin(admin.ModelAdmin):
+    ''' Administrator to add/change source confidentialies
+    '''
+
+    list_display = [
+        'id',
+        'source_confidentiality',
     ]
