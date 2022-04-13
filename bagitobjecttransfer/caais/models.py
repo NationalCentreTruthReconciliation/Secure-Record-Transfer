@@ -2,9 +2,13 @@
 
 http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
 '''
+from functools import partial
+
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext
+
+from django_countries.fields import CountryField
 
 from caais.export import ExportVersion
 
@@ -22,6 +26,8 @@ class Status(models.Model):
         "through an accession procedure that has clearly defined, successive "
         "phases"
     ))
+
+    description = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.status
@@ -96,6 +102,8 @@ class Metadata(models.Model):
         row.update(self.identifiers.flatten(version))
         row.update(self.archival_units.flatten(version))
         row.update(self.disposition_authorities.flatten(version))
+        row.update(self.source_of_materials.flatten(version))
+        row.update(self.preliminary_custodial_histories.flatten(version))
         return row
 
     def __str__(self):
@@ -203,13 +211,9 @@ class ArchivalUnitManager(models.Manager):
         units = self.get_queryset().exclude(
             Q(archival_unit__exact='') |
             Q(archival_unit__isnull=True)
-        ).all()
+        ).values_list('archival_unit', flat=True)
 
-        return {
-            'archivalUnit': '|'.join([
-                u.archival_unit for u in units
-            ])
-        }
+        return {'archivalUnit': '|'.join(units)}
 
 
 class ArchivalUnit(models.Model):
@@ -225,13 +229,16 @@ class ArchivalUnit(models.Model):
         "the accession belongs"
     ))
 
+    def __str__(self):
+        return f'Archival Unit #{self.id}'
+
 
 class DispositionAuthorityManager(models.Manager):
     ''' Custom disposition authority manager
     '''
 
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten archival units in queryset to export them in a CSV.
+        ''' Flatten disposition authorities in queryset to export them in a CSV.
         '''
         # No equivalent for disposition authority in AtoM
         if version != ExportVersion.CAAIS_1_0:
@@ -241,13 +248,9 @@ class DispositionAuthorityManager(models.Manager):
         authorities = self.get_queryset().exclude(
             Q(disposition_authority__exact='') |
             Q(disposition_authority__isnull=True)
-        ).all()
+        ).values_list('disposition_authority', flat=True)
 
-        return {
-            'dispositionAuthority': '|'.join([
-                d.disposition_authority for d in authorities
-            ])
-        }
+        return {'dispositionAuthority': '|'.join(authorities)}
 
 
 class DispositionAuthority(models.Model):
@@ -267,3 +270,290 @@ class DispositionAuthority(models.Model):
         "accessioned material. Legal instruments include statutes, records "
         "schedules or disposition authorities, and donor agreements"
     ))
+
+    def __str__(self):
+        return f'Disposition Authority #{self.id}'
+
+
+class SourceType(models.Model):
+    ''' 2.1.1 Source Type (Non-repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Source types')
+        verbose_name = gettext('Source type')
+
+    source_type = models.CharField(max_length=128, null=True, help_text=gettext(
+        "Record the source in accordance with a controlled vocabulary "
+        "maintained by the repository"
+    ))
+
+    description = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return self.source_type
+
+
+class SourceRole(models.Model):
+    ''' 2.1.4 Source Role (Non-repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Source roles')
+        verbose_name = gettext('Source role')
+
+    source_role = models.CharField(max_length=128, null=True, help_text=gettext(
+        "Record the source role (when known) in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ))
+
+    description = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return self.source_role
+
+
+class SourceConfidentiality(models.Model):
+    ''' 2.1.6 Source Confidentiality (Non-repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Source confidentialities')
+        verbose_name = gettext('Source confidentiality')
+
+    source_confidentiality = models.CharField(max_length=128, null=True, help_text=gettext(
+        "Use this element to identify source statements or source information "
+        "that is for internal use only by the repository. Repositories should "
+        "develop a controlled vocabulary with terms that can be  translated "
+        "into clear rules for handling source information"
+    ))
+
+    description = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return self.source_confidentiality
+
+
+class SourceOfMaterialManager(models.Manager):
+    ''' Custom source of material manager
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten source of material info in queryset to export them in a CSV.
+        '''
+        if self.get_queryset().count() == 0:
+            return {}
+
+        types = []
+        names = []
+        contact_persons = []
+        job_titles = []
+        street_addresses = []
+        cities = []
+        regions = []
+        postal_codes = []
+        countries = []
+        phone_numbers = []
+        emails = []
+        roles = []
+        notes = []
+        confidentialities = []
+
+        is_atom = ExportVersion.is_atom(version)
+
+        def get_source_attr(src, attrs):
+            obj = src
+            attrs = attrs.split(',')
+            for attr in attrs:
+                try:
+                    obj = getattr(obj, attr)
+                except AttributeError:
+                    return '' if is_atom else 'NULL'
+            if obj:
+                return str(obj)
+            return '' if is_atom else 'NULL'
+
+        for source in self.get_queryset().all():
+            get_field = partial(get_source_attr, source)
+
+            types.append(get_field('source_type,source_type'))
+            names.append(get_field('source_name'))
+            contact_persons.append(get_field('contact_name'))
+            job_titles.append(get_field('job_title'))
+
+            # Join address line 1 and 2
+            if source.address_line_1 and source.address_line_2:
+                street_addresses.append(', '.join([
+                    source.address_line_1,
+                    source.address_line_2,
+                ]))
+            elif source.address_line_1:
+                street_addresses.append(source.address_line_1)
+            elif source.address_line_2:
+                street_addresses.append(source.address_line_2)
+            else:
+                street_addresses.append('' if is_atom else 'NULL')
+
+            cities.append(get_field('city'))
+            regions.append(get_field('region'))
+            postal_codes.append(get_field('postal_or_zip_code'))
+            countries.append(get_field('country,name'))
+            phone_numbers.append(get_field('phone_number'))
+            emails.append(get_field('email_address'))
+            roles.append(get_field('source_role,source_role'))
+            notes.append(get_field('source_note'))
+            confidentialities.append(get_field('source_confidentiality,source_confidentiality'))
+
+            # AtoM can only handle one source!
+            if is_atom:
+                break
+
+        flat = {}
+
+        if not is_atom:
+            flat['sourceType'] = '|'.join(types)
+            flat['sourceName'] = '|'.join(names)
+            flat['sourceContactPerson'] = '|'.join(contact_persons)
+            flat['sourceJobTitle'] = '|'.join(job_titles)
+            flat['sourceStreetAddress'] = '|'.join(street_addresses)
+            flat['sourceCity'] = '|'.join(cities)
+            flat['sourceRegion'] = '|'.join(regions)
+            flat['sourcePostalCode'] = '|'.join(postal_codes)
+            flat['sourceCountry'] = '|'.join(countries)
+            flat['sourcePhoneNumber'] = '|'.join(phone_numbers)
+            flat['sourceEmail'] = '|'.join(emails)
+            flat['sourceRole'] = '|'.join(roles)
+            flat['sourceNote'] = '|'.join(notes)
+            flat['sourceConfidentiality'] = '|'.join(confidentialities)
+
+        else:
+            flat = {}
+
+            note = notes[0]
+            role = roles[0]
+            type_ = types[0]
+            confidentiality = confidentialities[0]
+
+            # donorNote added in AtoM 2.6
+            # donorContactPerson added in AtoM 2.6
+            if version == ExportVersion.ATOM_2_6 and any((note, role, type_, confidentiality)):
+                donor_narrative = []
+                if type_:
+                    if type_[0].lower() in ('a', 'e', 'i', 'o', 'u'):
+                        donor_narrative.append(f'The donor is an {type_}')
+                    else:
+                        donor_narrative.append(f'The donor is a {type_}')
+                if role:
+                    donor_narrative.append((
+                        'The donor\'s relationship to the records is: '
+                        f'{role}'
+                    ))
+                if confidentiality:
+                    donor_narrative.append((
+                        'The donor\'s confidentiality has been noted as: '
+                        f'{confidentiality}'
+                    ))
+                if note:
+                    donor_narrative.append(note)
+                flat['donorNote'] = '. '.join(donor_narrative)
+                flat['donorContactPerson'] = contact_persons[0]
+
+            flat['donorName'] = names[0]
+            flat['donorStreetAddress'] = street_addresses[0]
+            flat['donorCity'] = cities[0]
+            flat['donorRegion'] = regions[0]
+            flat['donorPostalCode'] = postal_codes[0]
+            flat['donorCountry'] = countries[0]
+            flat['donorTelephone'] = phone_numbers[0]
+            flat['donorEmail'] = emails[0]
+
+        return flat
+
+
+class SourceOfMaterial(models.Model):
+    ''' 2.1 Source of Material (Repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Sources of material')
+        verbose_name = gettext('Source of material')
+
+    objects = SourceOfMaterialManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='source_of_materials')
+
+    source_type = models.ForeignKey(SourceType, on_delete=models.SET_NULL,
+                                    null=True, related_name='source_of_materials')
+
+    source_name = models.CharField(max_length=256, null=False, default='', help_text=gettext(
+        "Record the source name in accordance with the repository's "
+        "descriptive standard"
+    ))
+
+    source_role = models.ForeignKey(SourceRole, on_delete=models.SET_NULL,
+                                    null=True, related_name='source_of_materials')
+
+    source_confidentiality = models.ForeignKey(SourceConfidentiality, on_delete=models.SET_NULL,
+                                               null=True, related_name='source_of_materials')
+
+    contact_name = models.CharField(max_length=256, blank=True, default='')
+    job_title = models.CharField(max_length=256, blank=True, default='')
+    phone_number = models.CharField(max_length=32, null=False)
+    email_address = models.CharField(max_length=256, null=False)
+    address_line_1 = models.CharField(max_length=256, blank=True, default='')
+    address_line_2 = models.CharField(max_length=256, blank=True, default='')
+    city = models.CharField(max_length=128, blank=True, default='')
+    region = models.CharField(max_length=128, blank=True, default='')
+    postal_or_zip_code = models.CharField(max_length=16, blank=True, default='')
+    country = CountryField(null=True)
+
+    source_note = models.TextField(blank=True, default='', help_text=gettext(
+        "Record any other information about the source of the accessioned "
+        "materials. If the source performed the role for only a specific "
+        "period of time (e.g. was a custodian for several years), record the "
+        "dates in this element"
+    ))
+
+    def __str__(self):
+        return f'{self.source_name} (Phone: {self.phone_number})'
+
+
+class PreliminaryCustodialHistoryManager(models.Manager):
+    ''' Custom manager for preliminary custodial histories
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten custodial histories in queryset to export them in a CSV.
+        '''
+        histories = self.get_queryset().exclude(
+            Q(preliminary_custodial_history__exact='') |
+            Q(preliminary_custodial_history__isnull=True)
+        ).values_list('preliminary_custodial_history', flat=True)
+
+        if version == ExportVersion.CAAIS_1_0:
+            return {'preliminaryCustodialHistory': '|'.join(histories)}
+        return {'archivalHistory': '; '.join(histories)}
+
+
+class PreliminaryCustodialHistory(models.Model):
+    ''' 2.2 Preliminary Custodial History
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Preliminary custodial histories')
+        verbose_name = gettext('Preliminary custodial history')
+
+    objects = PreliminaryCustodialHistoryManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='preliminary_custodial_histories')
+    preliminary_custodial_history = models.TextField(null=False, help_text=gettext(
+        "Provide relevant custodial history information in accordance with the "
+        "repository's descriptive standard. Record the successive transfers of "
+        "ownership, responsibility and/or custody of the accessioned material "
+        "prior to its transfer to the repository"
+    ))
+
+    def __str__(self):
+        return f'Preliminary Custodial History #{self.id}'
