@@ -550,7 +550,7 @@ class Bag(models.Model):
         logger = logger or LOGGER
         bag_folder = self.location
 
-        logger.info('Updating file system bag located at "{0}"'.format(bag_folder))
+        logger.info('Updating file system bag located at "%s"', bag_folder)
 
         if not os.path.exists(bag_folder):
             logger.error(msg=(
@@ -683,7 +683,7 @@ class Submission(models.Model):
 
     submission_date = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    bag = models.ForeignKey(Bag, on_delete=models.SET_NULL, null=True)
+    bag = models.OneToOneField(Bag, on_delete=models.SET_NULL, null=True, related_name='submission')
     review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
                                      default=ReviewStatus.NOT_REVIEWED)
     accession_identifier = models.CharField(max_length=128, default='', null=True)
