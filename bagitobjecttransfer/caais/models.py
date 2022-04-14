@@ -214,6 +214,8 @@ class Metadata(models.Model):
             row.update(scope_updates)
             row.update(language_updates)
 
+        row.update(self.storage_locations.flatten(version))
+        row.update(self.rights.flatten(version))
         return row
 
     def __str__(self):
@@ -860,3 +862,126 @@ class LanguageOfMaterial(models.Model):
 
     def __str__(self):
         return f'Language of Material #{self.id}'
+
+
+class StorageLocationManager(models.Manager):
+    ''' Custom manager for storage locations
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten storage locations into a dictionary
+        '''
+        if self.get_queryset().count() == 0:
+            return {}
+
+        locations = self.get_queryset().values_list(
+            'storage_location', flat=True
+        )
+
+        if version == ExportVersion.CAAIS_1_0:
+            return {'storageLocation': '|'.join(locations)}
+        else:
+            return {'locationInformation': '. '.join([
+                l.rstrip('. ') for l in locations
+            ])}
+
+
+class StorageLocation(models.Model):
+    ''' 4.1 Storage Location (Repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = 'Storage locations'
+        verbose_name = 'Storage location'
+
+    objects = StorageLocationManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='storage_locations')
+
+    storage_location = models.TextField(null=False, help_text=gettext(
+        "Record the physical and/or digital location(s) within the repository "
+        "in which the accessioned material is stored"
+    ))
+
+    def __str__(self):
+        return f'Storage Location #{self.id}'
+
+
+class RightsType(AbstractTerm):
+    ''' 4.2.1 Rights Type (Non-repeatable)
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = 'Rights types'
+        verbose_name = 'Rights'
+RightsType._meta.get_field('name').help_text = gettext(
+    "Record the rights statement type in accordance with a controlled "
+    "vocabulary maintained by the repository"
+)
+
+
+class RightsManager(models.Manager):
+    ''' Custom manager for rights
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Convert rights in queryset to a flat dictionary
+        '''
+        # There is no equivalent field in AtoM for rights
+        if ExportVersion.is_atom(version) or self.get_queryset().count() == 0:
+            return {}
+
+        types = []
+        values = []
+        notes = []
+
+        for rights in self.get_queryset():
+            if rights.rights_type and rights.rights_type.name:
+                types.append(str(rights.rights_type.name))
+            else:
+                types.append('NULL')
+            if rights.rights_value:
+                values.append(rights.rights_value)
+            else:
+                values.append('NULL')
+            if rights.rights_note:
+                notes.append(rights.rights_note)
+            else:
+                notes.append('NULL')
+
+        return {
+            'rightsType': '|'.join(types),
+            'rightsValue': '|'.join(values),
+            'rightsNote': '|'.join(notes),
+        }
+
+
+class Rights(models.Model):
+    ''' 4.2 Rights (Repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = 'Rights'
+        verbose_name = 'Rights'
+
+    objects = RightsManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='rights')
+
+    rights_type = models.ForeignKey(RightsType, on_delete=models.SET_NULL,
+                                    null=True, related_name='rights_type')
+
+    rights_value = models.TextField(blank=True, default='', help_text=gettext(
+        "Record the nature and duration of the permission granted or "
+        "restriction imposed. Specify where the condition applies only to part "
+        "of the accession"
+    ))
+
+    rights_note = models.TextField(blank=True, default='', help_text=gettext(
+        "Record any other information relevant to describing the rights "
+        "statement"
+    ))
+
+    def __str__(self):
+        return f'Rights Statement #{self.id}'
