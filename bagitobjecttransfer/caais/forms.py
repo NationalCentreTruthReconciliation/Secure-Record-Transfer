@@ -1,11 +1,16 @@
 from django import forms
 from django.utils.translation import gettext
 
+from django_countries.fields import CountryField
+from django_countries.widgets import CountrySelectWidget
+
 from caais.models import (
     Identifier,
     ArchivalUnit,
     DispositionAuthority,
     SourceOfMaterial,
+    SourceRole,
+    SourceType,
     SourceConfidentiality,
     PreliminaryCustodialHistory,
 )
@@ -84,9 +89,41 @@ class InlineSourceOfMaterialForm(forms.ModelForm):
         model = SourceOfMaterial
         fields = '__all__'
 
+        widgets = {
+            'source_note': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'vLargeTextField',
+            })
+        }
+
+    source_role = forms.ModelChoiceField(
+        queryset=SourceRole.objects.all(),
+        required=False,
+        widget=forms.Select(
+            attrs={
+                'class': 'vTextField',
+            }
+        )
+    )
+
+    source_type = forms.ModelChoiceField(
+        queryset=SourceType.objects.all(),
+        required=False,
+        widget=forms.Select(
+            attrs={
+                'class': 'vTextField',
+            }
+        )
+    )
+
     source_confidentiality = forms.ModelChoiceField(
         queryset=SourceConfidentiality.objects.all(),
         required=False,
+        widget=forms.Select(
+            attrs={
+                'class': 'vTextField',
+            }
+        )
     )
 
     phone_number = forms.RegexField(
@@ -108,6 +145,15 @@ class InlineSourceOfMaterialForm(forms.ModelForm):
             'placeholder': 'person@example.com',
             'class': 'vTextField',
         }),
+    )
+
+    country = CountryField(blank_label=gettext('Select a Country')).formfield(
+        required=False,
+        widget=CountrySelectWidget(
+            attrs={
+                'class': 'vTextField',
+            }
+        )
     )
 
 
