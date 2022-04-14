@@ -98,13 +98,18 @@ class MetadataAdmin(admin.ModelAdmin):
     associated Inline admin for editing all metadata at once.
     '''
 
-    change_form_template = 'admin/metadata_change_form.html'
+    class Media:
+        css = {
+            'all': (
+                'caais/css/inlineTextInputs.css',
+            )
+        }
 
     list_display = [
-        'id',
-        'repository',
         'accession_title',
+        'repository',
         'acquisition_method',
+        'id',
     ]
 
     inlines = [
