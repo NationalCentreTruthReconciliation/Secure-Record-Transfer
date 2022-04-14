@@ -82,7 +82,6 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
 
         group_name = form_data['group_name']
         if group_name != 'No Group':
-            group = None
             if group_name == 'Add New Group':
                 new_group_name = form_data['new_group_name']
                 description = form_data['group_description']
@@ -108,9 +107,9 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     else:
         LOGGER.error('bagger reported that the bag was NOT created successfully')
         LOGGER.info('Sending transfer failure email to administrators')
-        send_bag_creation_failure.delay(form_data, new_submission)
+        send_bag_creation_failure.delay(form_data, user_submitted)
         LOGGER.info('Sending transfer issue email to user')
-        send_your_transfer_did_not_go_through.delay(form_data, new_submission)
+        send_your_transfer_did_not_go_through.delay(form_data, user_submitted)
 
 @django_rq.job
 def create_downloadable_bag(bag: Bag, user_triggered: User):
@@ -207,14 +206,14 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
     )
 
 @django_rq.job
-def send_bag_creation_failure(form_data: dict, submission: Submission):
+def send_bag_creation_failure(form_data: dict, user_submitted: User):
     ''' Send an email to users who get bag email updates that a user submitted a new bag and there
     WERE errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        submission (Submission): The new submission that was created.
+        user_submitted (User): The user that tried to create the submission.
     '''
     subject = 'Bag Creation Failed'
     domain = Site.objects.get_current().domain
@@ -223,13 +222,12 @@ def send_bag_creation_failure(form_data: dict, submission: Submission):
     LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
     recipients = User.objects.filter(gets_bag_email_updates=True)
     if not recipients:
-        LOGGER.warning(msg=('There are no users configured to receive transfer update emails.'))
+        LOGGER.warning(msg='There are no users configured to receive transfer update emails.')
         return
     user_list = list(recipients)
     LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
     recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
 
-    user_submitted = submission.user
     send_mail_with_logs(
         recipients=recipient_emails,
         from_email=from_email,
@@ -250,46 +248,47 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
             the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
     '''
-    domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    if submission.user.gets_notification_emails:
+        domain = Site.objects.get_current().domain
+        from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
-    user_submitted = submission.user
-    send_mail_with_logs(
-        recipients=[user_submitted.email],
-        from_email=from_email,
-        subject='Thank You For Your Transfer',
-        template_name='recordtransfer/email/transfer_success.html',
-        context={
-            'user': user_submitted,
-            'form_data': form_data,
-            'archivist_email': ARCHIVIST_EMAIL,
-        }
-    )
+        user_submitted = submission.user
+        send_mail_with_logs(
+            recipients=[user_submitted.email],
+            from_email=from_email,
+            subject='Thank You For Your Transfer',
+            template_name='recordtransfer/email/transfer_success.html',
+            context={
+                'user': user_submitted,
+                'form_data': form_data,
+                'archivist_email': ARCHIVIST_EMAIL,
+            }
+        )
 
 @django_rq.job
-def send_your_transfer_did_not_go_through(form_data: dict, submission: Submission):
+def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User):
     ''' Send a transfer failure email to the user who submitted the transfer.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
-        submission (Submission): The new submission that was created.
+        user_submitted (User): The user that tried to create the submission.
     '''
-    domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    if user_submitted.gets_notification_emails:
+        domain = Site.objects.get_current().domain
+        from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
-    user_submitted = submission.user
-    send_mail_with_logs(
-        recipients=[user_submitted.email],
-        from_email=from_email,
-        subject='Issue With Your Transfer',
-        template_name='recordtransfer/email/transfer_failure.html',
-        context={
-            'user': user_submitted,
-            'form_data': form_data,
-            'archivist_email': ARCHIVIST_EMAIL,
-        }
-    )
+        send_mail_with_logs(
+            recipients=[user_submitted.email],
+            from_email=from_email,
+            subject='Issue With Your Transfer',
+            template_name='recordtransfer/email/transfer_failure.html',
+            context={
+                'user': user_submitted,
+                'form_data': form_data,
+                'archivist_email': ARCHIVIST_EMAIL,
+            }
+        )
 
 @django_rq.job
 def send_user_activation_email(new_user: User):

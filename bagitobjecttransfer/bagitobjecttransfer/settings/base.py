@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'formtools',
     'django_rq',
     'captcha',
+    'dbtemplates',
 ]
 
 MIDDLEWARE = [
@@ -40,7 +41,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates')
         ],
-        'APP_DIRS': True,
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -50,6 +51,11 @@ TEMPLATES = [
                 'recordtransfer.context_processors.signup_status',
                 'recordtransfer.context_processors.file_uploads',
             ],
+            'loaders': [
+                'dbtemplates.loader.Loader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
         },
     },
 ]
@@ -118,6 +124,11 @@ COUNTRIES_FIRST = [
 ]
 
 COUNTRIES_FLAG_URL = 'flags/{code}.gif'
+
+# django-dbtemplates configuration
+# https://github.com/NationalCentreTruthReconciliation/django-dbtemplates
+
+DBTEMPLATES_USE_CODEMIRROR = True
 
 # Media and Static files (CSS, JavaScript, Images)
 
