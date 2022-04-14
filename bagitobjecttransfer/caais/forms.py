@@ -10,6 +10,9 @@ from caais.models import (
     DispositionAuthority,
     SourceOfMaterial,
     PreliminaryCustodialHistory,
+    ExtentStatement,
+    PreliminaryScopeAndContent,
+    LanguageOfMaterial,
 )
 
 
@@ -139,6 +142,62 @@ class InlinePreliminaryCustodialHistoryForm(forms.ModelForm):
         widgets = {
             'preliminary_custodial_history': forms.widgets.Textarea(attrs={
                 'rows': 2,
+                'class': 'inline-textarea',
+            })
+        }
+
+
+class InlineExtentStatementForm(forms.ModelForm):
+    ''' Form to edit extent statements inline in administrator website
+    '''
+
+    class Meta:
+        model = ExtentStatement
+
+        fields = '__all__'
+
+        widgets = {
+            'extent_note': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'vLargeTextField'
+            })
+        }
+
+
+class InlinePreliminaryScopeAndContentForm(forms.ModelForm):
+    ''' Form to edit preliminary scope and contents inline in administrator
+    website
+    '''
+
+    class Meta:
+        model = PreliminaryScopeAndContent
+
+        fields = (
+            'preliminary_scope_and_content',
+        )
+
+        widgets = {
+            'preliminary_scope_and_content': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'inline-textarea',
+            })
+        }
+
+
+class InlineLanguageOfMaterialForm(forms.ModelForm):
+    ''' Form to edit language of materials inline in administrator website
+    '''
+
+    class Meta:
+        model = LanguageOfMaterial
+
+        fields = (
+            'language_of_material',
+        )
+
+        widgets = {
+            'language_of_material': forms.widgets.Textarea(attrs={
+                'rows': 1,
                 'class': 'inline-textarea',
             })
         }

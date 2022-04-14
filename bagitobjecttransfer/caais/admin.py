@@ -8,6 +8,9 @@ from caais.forms import (
     InlineDispositionAuthorityForm,
     InlineSourceOfMaterialForm,
     InlinePreliminaryCustodialHistoryForm,
+    InlineExtentStatementForm,
+    InlinePreliminaryScopeAndContentForm,
+    InlineLanguageOfMaterialForm,
 )
 from caais.models import (
     Status,
@@ -20,6 +23,12 @@ from caais.models import (
     SourceConfidentiality,
     SourceOfMaterial,
     PreliminaryCustodialHistory,
+    ExtentStatement,
+    ExtentType,
+    ContentType,
+    CarrierType,
+    PreliminaryScopeAndContent,
+    LanguageOfMaterial,
 )
 
 
@@ -72,13 +81,18 @@ class SourceOfMaterialInlineAdmin(admin.StackedInline):
 
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
-        for field_name in ('source_role', 'source_type', 'source_confidentiality'):
+        for field_name, model in (
+                ('source_role', SourceRole),
+                ('source_type', SourceType),
+                ('source_confidentiality', SourceConfidentiality),
+            ):
             field = formset.form.base_fields[field_name]
             field.required = False
             field.widget.can_add_related = True
             field.widget.can_change_related = True
             field.widget.can_delete_related = True
             field.widget.attrs.update({'class': 'vTextField'})
+            field.help_text = model._meta.get_field('name').help_text
         return formset
 
 
@@ -87,6 +101,55 @@ class PreliminaryCustodialHistoryInlineAdmin(admin.TabularInline):
     '''
     model = PreliminaryCustodialHistory
     form = InlinePreliminaryCustodialHistoryForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class ExtentStatementInlineAdmin(admin.StackedInline):
+    ''' Admin for editing extent statements inline
+    '''
+
+    model = ExtentStatement
+    form = InlineExtentStatementForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        for field_name, model, required in (
+                ('extent_type', ExtentType, True),
+                ('content_type', ContentType, False),
+                ('carrier_type', CarrierType, False),
+            ):
+            field = formset.form.base_fields[field_name]
+            field.required = required
+            field.widget.can_add_related = True
+            field.widget.can_change_related = True
+            field.widget.can_delete_related = True
+            field.widget.attrs.update({'class': 'vTextField'})
+            field.help_text = model._meta.get_field('name').help_text
+        return formset
+
+
+class PreliminaryScopeAndContentInlineAdmin(admin.TabularInline):
+    ''' Admin for editing preliminary scope and contents inline
+    '''
+
+    model = PreliminaryScopeAndContent
+    form = InlinePreliminaryScopeAndContentForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class LanguageOfMaterialInlineAdmin(admin.TabularInline):
+    ''' Admin for editing language of materials inlines
+    '''
+
+    model = LanguageOfMaterial
+    form = InlineLanguageOfMaterialForm
     show_change_link = False
     max_num = 64
     extra = 0
@@ -118,45 +181,61 @@ class MetadataAdmin(admin.ModelAdmin):
         DispositionAuthorityInlineAdmin,
         SourceOfMaterialInlineAdmin,
         PreliminaryCustodialHistoryInlineAdmin,
+        ExtentStatementInlineAdmin,
+        PreliminaryScopeAndContentInlineAdmin,
+        LanguageOfMaterialInlineAdmin,
     ]
+
+
+class TermAdmin(admin.ModelAdmin):
+    ''' Generic administrator for models inheriting from AbstractTerm
+    '''
+
+    list_display = [
+        'name',
+        'id',
+    ]
+
+    ordering = ['-id']
 
 
 @admin.register(Status)
-class StatusAdmin(admin.ModelAdmin):
+class StatusAdmin(TermAdmin):
     ''' Administrator to add/change accession statuses
     '''
 
-    list_display = [
-        'id',
-        'status',
-    ]
 
 @admin.register(SourceRole)
-class SourceRoleAdmin(admin.ModelAdmin):
+class SourceRoleAdmin(TermAdmin):
     ''' Administrator to add/change source roles
     '''
 
-    list_display = [
-        'id',
-        'source_role',
-    ]
 
 @admin.register(SourceType)
-class SourceTypeAdmin(admin.ModelAdmin):
+class SourceTypeAdmin(TermAdmin):
     ''' Administrator to add/change source types
     '''
 
-    list_display = [
-        'id',
-        'source_type',
-    ]
 
 @admin.register(SourceConfidentiality)
-class SourceConfidentialityAdmin(admin.ModelAdmin):
+class SourceConfidentialityAdmin(TermAdmin):
     ''' Administrator to add/change source confidentialies
     '''
 
-    list_display = [
-        'id',
-        'source_confidentiality',
-    ]
+
+@admin.register(ExtentType)
+class ExtentTypeAdmin(TermAdmin):
+    ''' Administrator to add/change extent types
+    '''
+
+
+@admin.register(ContentType)
+class ContentTypeAdmin(TermAdmin):
+    ''' Administrator to add/change content types
+    '''
+
+
+@admin.register(CarrierType)
+class CarrierTypeAdmin(TermAdmin):
+    ''' Administrator to add/change carrier types
+    '''
