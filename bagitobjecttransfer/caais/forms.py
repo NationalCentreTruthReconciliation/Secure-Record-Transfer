@@ -9,9 +9,6 @@ from caais.models import (
     ArchivalUnit,
     DispositionAuthority,
     SourceOfMaterial,
-    SourceRole,
-    SourceType,
-    SourceConfidentiality,
     PreliminaryCustodialHistory,
 )
 
@@ -95,36 +92,6 @@ class InlineSourceOfMaterialForm(forms.ModelForm):
                 'class': 'vLargeTextField',
             })
         }
-
-    source_role = forms.ModelChoiceField(
-        queryset=SourceRole.objects.all(),
-        required=False,
-        widget=forms.Select(
-            attrs={
-                'class': 'vTextField',
-            }
-        )
-    )
-
-    source_type = forms.ModelChoiceField(
-        queryset=SourceType.objects.all(),
-        required=False,
-        widget=forms.Select(
-            attrs={
-                'class': 'vTextField',
-            }
-        )
-    )
-
-    source_confidentiality = forms.ModelChoiceField(
-        queryset=SourceConfidentiality.objects.all(),
-        required=False,
-        widget=forms.Select(
-            attrs={
-                'class': 'vTextField',
-            }
-        )
-    )
 
     phone_number = forms.RegexField(
         regex=r'^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$',
