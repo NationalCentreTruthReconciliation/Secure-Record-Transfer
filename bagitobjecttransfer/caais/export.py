@@ -55,6 +55,13 @@ class ExportVersion(Enum):
                 'sourceConfidentiality',
                 'preliminaryCustodialHistory',
                 'dateOfMaterial',
+                'extentType',
+                'quantityAndUnitOfMeasure',
+                'contentType',
+                'carrierType',
+                'extentNote',
+                'preliminaryScopeAndContent',
+                'languageOfMaterial',
             ]
 
         if self == ExportVersion.ATOM_2_6:

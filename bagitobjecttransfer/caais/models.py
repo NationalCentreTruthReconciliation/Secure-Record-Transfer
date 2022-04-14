@@ -3,10 +3,12 @@
 http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
 '''
 from functools import partial
+from typing import Union, Iterable
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 from django_countries.fields import CountryField
@@ -15,24 +17,72 @@ from caais.dates import EventDateParser, UnknownDateFormat
 from caais.export import ExportVersion
 
 
-class Status(models.Model):
-    ''' 1.7 Status (Non-repeatable)
+def get_nested_attr(model, attrs: Union[str, Iterable]):
+    ''' Get one or more nested attributes as a string value from a model. If
+    value does not exist or is Falsy, returns None.
+
+    Args:
+        model: Some model or object with attributes
+        attrs (Union[str, Iterable]): A list of strings or a comma-delimited
+            string of properties
+    '''
+    obj = model
+    if isinstance(attrs, str):
+        attr_list = map(str.strip, attrs.split(','))
+    else:
+        attr_list = attrs
+    for attr in attr_list:
+        try:
+            obj = getattr(obj, attr)
+        except AttributeError:
+            return None
+    if obj:
+        return str(obj) or None
+    return None
+
+
+
+class TermManager(models.Manager):
+    ''' Custom manager for terms that excludes all empty or NULL terms from
+    queryset.
+    '''
+
+    def get_queryset(self):
+        ''' Returns all terms that havea a name.
+        '''
+        return super().get_queryset().exclude(
+            Q(name__iexact='') | Q(name__isnull=True)
+        )
+
+
+class AbstractTerm(models.Model):
+    ''' An abstract class that can be used to define any term that consists of
+    a name and a description.
     '''
 
     class Meta:
-        verbose_name_plural = gettext('Accession statuses')
-        verbose_name = gettext('Accession status')
+        abstract = True
 
-    status = models.CharField(max_length=128, null=True, help_text=gettext(
-        "This element is intended to support the tracking of a material "
-        "through an accession procedure that has clearly defined, successive "
-        "phases"
-    ))
+    objects = TermManager()
 
+    name = models.CharField(max_length=128, null=False, blank=False)
     description = models.TextField(blank=True, default='')
 
     def __str__(self):
-        return self.status
+        return self.name
+
+
+class Status(AbstractTerm):
+    ''' 1.7 Status (Non-repeatable)
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Accession statuses')
+        verbose_name = gettext('Accession status')
+Status._meta.get_field('name').help_text = gettext(
+    "Record the current position of the material with respect to the "
+    "repository's workflows and business processes using a controlled "
+    "vocabulary"
+)
 
 
 class MetadataManager(models.Manager):
@@ -93,7 +143,7 @@ class Metadata(models.Model):
             row['repository'] = self.repository or ''
             row['accessionTitle'] = self.accession_title or 'No title'
             row['acquisitionMethod'] = self.acquisition_method or ''
-            row['status'] = self.status.status if self.status else ''
+            row['status'] = self.status.name if self.status else ''
             row['dateOfMaterial'] = self.date_of_material or ''
 
         else:
@@ -147,12 +197,29 @@ class Metadata(models.Model):
         row.update(self.disposition_authorities.flatten(version))
         row.update(self.source_of_materials.flatten(version))
         row.update(self.preliminary_custodial_histories.flatten(version))
+        row.update(self.extent_statements.flatten(version))
+
+        scope_updates = self.preliminary_scope_and_contents.flatten(version)
+        language_updates = self.language_of_materials.flatten(version)
+
+        if 'scopeAndContent' in scope_updates and language_updates:
+            combined_updates = {
+                'scopeAndContent': '. '.join([
+                    scope_updates['scopeAndContent'].rstrip('. '),
+                    language_updates['scopeAndContent'].rstrip('. '),
+                ])
+            }
+            row.update(combined_updates)
+        else:
+            row.update(scope_updates)
+            row.update(language_updates)
+
         return row
 
     def __str__(self):
         title = self.accession_title or 'No title'
         if self.status:
-            title += f' - {self.status.status}'
+            title += f' - {self.status.name}'
         return title
 
 
@@ -318,63 +385,42 @@ class DispositionAuthority(models.Model):
         return f'Disposition Authority #{self.id}'
 
 
-class SourceType(models.Model):
+class SourceType(AbstractTerm):
     ''' 2.1.1 Source Type (Non-repeatable)
     '''
-
-    class Meta:
+    class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Source types')
         verbose_name = gettext('Source type')
-
-    source_type = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Record the source in accordance with a controlled vocabulary "
-        "maintained by the repository"
-    ))
-
-    description = models.TextField(blank=True, default='')
-
-    def __str__(self):
-        return self.source_type
+SourceType._meta.get_field('name').help_text = gettext(
+    "Record the source in accordance with a controlled vocabulary maintained "
+    "by the repository"
+)
 
 
-class SourceRole(models.Model):
+class SourceRole(AbstractTerm):
     ''' 2.1.4 Source Role (Non-repeatable)
     '''
-
-    class Meta:
+    class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Source roles')
         verbose_name = gettext('Source role')
-
-    source_role = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Record the source role (when known) in accordance with a controlled "
-        "vocabulary maintained by the repository"
-    ))
-
-    description = models.TextField(blank=True, default='')
-
-    def __str__(self):
-        return self.source_role
+SourceRole._meta.get_field('name').help_text = gettext(
+    "Record the source role (when known) in accordance with a controlled "
+    "vocabulary maintained by the repository"
+)
 
 
-class SourceConfidentiality(models.Model):
+class SourceConfidentiality(AbstractTerm):
     ''' 2.1.6 Source Confidentiality (Non-repeatable)
     '''
-
-    class Meta:
+    class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Source confidentialities')
         verbose_name = gettext('Source confidentiality')
-
-    source_confidentiality = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Use this element to identify source statements or source information "
-        "that is for internal use only by the repository. Repositories should "
-        "develop a controlled vocabulary with terms that can be  translated "
-        "into clear rules for handling source information"
-    ))
-
-    description = models.TextField(blank=True, default='')
-
-    def __str__(self):
-        return self.source_confidentiality
+SourceConfidentiality._meta.get_field('name').help_text = gettext(
+    "Record source statements or source information that is for internal use "
+    "only by the repository. Repositories should develop a controlled "
+    "vocabulary with terms that can be translated into clear rules for "
+    "handling source information"
+)
 
 
 class SourceOfMaterialManager(models.Manager):
@@ -405,21 +451,15 @@ class SourceOfMaterialManager(models.Manager):
         is_atom = ExportVersion.is_atom(version)
 
         def get_source_attr(src, attrs):
-            obj = src
-            attrs = attrs.split(',')
-            for attr in attrs:
-                try:
-                    obj = getattr(obj, attr)
-                except AttributeError:
-                    return '' if is_atom else 'NULL'
-            if obj:
-                return str(obj)
+            value = get_nested_attr(src, attrs)
+            if value:
+                return value
             return '' if is_atom else 'NULL'
 
         for source in self.get_queryset().all():
             get_field = partial(get_source_attr, source)
 
-            types.append(get_field('source_type,source_type'))
+            types.append(get_field('source_type,name'))
             names.append(get_field('source_name'))
             contact_persons.append(get_field('contact_name'))
             job_titles.append(get_field('job_title'))
@@ -443,9 +483,9 @@ class SourceOfMaterialManager(models.Manager):
             countries.append(get_field('country,name'))
             phone_numbers.append(get_field('phone_number'))
             emails.append(get_field('email_address'))
-            roles.append(get_field('source_role,source_role'))
+            roles.append(get_field('source_role,name'))
             notes.append(get_field('source_note'))
-            confidentialities.append(get_field('source_confidentiality,source_confidentiality'))
+            confidentialities.append(get_field('source_confidentiality,name'))
 
             # AtoM can only handle one source!
             if is_atom:
@@ -600,3 +640,223 @@ class PreliminaryCustodialHistory(models.Model):
 
     def __str__(self):
         return f'Preliminary Custodial History #{self.id}'
+
+
+class ExtentType(AbstractTerm):
+    ''' 3.2.1 Extent Type (Non-repeatable)
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Extent types')
+        verbose_name = gettext('Extent type')
+ExtentType._meta.get_field('name').help_text = gettext(
+    "Record the extent statement type in accordance with a controlled "
+    "vocabulary maintained by the repository"
+)
+
+
+class ContentType(AbstractTerm):
+    ''' 3.2.3 Content Type (Non-repeatable)
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Content types')
+        verbose_name = gettext('Content type')
+ContentType._meta.get_field('name').help_text = mark_safe(gettext(
+    "Record the type of material contained in the units measured, i.e., the "
+    "<b>genre</b> of the material"
+))
+
+
+class CarrierType(AbstractTerm):
+    ''' 3.2.4 Carrier Type (Non-repeatable)
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Carrier types')
+        verbose_name = gettext('Content type')
+CarrierType._meta.get_field('name').help_text = gettext(
+    "Record the physical format of an object that supports or carries archival "
+    "materials using a controlled vocabulary maintained by the repository"
+)
+
+
+class ExtentStatementManager(models.Manager):
+    ''' Custom manager for extent statements
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Convert the extent statements into a flat dictionary structure
+        '''
+
+        if self.get_queryset().count() == 0:
+            return {}
+
+        extent_types = []
+        quantities = []
+        content_types = []
+        carrier_types = []
+        extent_notes = []
+
+        is_atom = ExportVersion.is_atom(version)
+
+        def get_extent_attr(extent, attrs):
+            value = get_nested_attr(extent, attrs)
+            if value:
+                return value
+            return '' if is_atom else 'NULL'
+
+        for extent in self.get_queryset().all():
+            get_field = partial(get_extent_attr, extent)
+
+            extent_types.append(get_field('extent_type,name'))
+            quantities.append(get_field('quantity_and_unit_of_measure'))
+            content_types.append(get_field('content_type,name'))
+            carrier_types.append(get_field('carrier_type,name'))
+            extent_notes.append(get_field('extent_note'))
+
+        if not is_atom:
+            return {
+                'extentType': '|'.join(extent_types),
+                'quantityAndUnitOfMeasure': '|'.join(quantities),
+                'contentType': '|'.join(content_types),
+                'carrierType': '|'.join(carrier_types),
+                'extentNote': '|'.join(extent_notes),
+            }
+        else:
+            return {
+                'receivedExtentUnits': '|'.join(quantities)
+            }
+
+
+class ExtentStatement(models.Model):
+    ''' 3.2 Extent Statement (repeatable)
+    '''
+
+    class Meta:
+        verbose_name = gettext('Extent statement')
+        verbose_name_plural = gettext('Extent statements')
+
+    objects = ExtentStatementManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='extent_statements')
+
+    extent_type = models.ForeignKey(ExtentType, on_delete=models.SET_NULL,
+                                    null=True, related_name='extent_statements')
+
+    quantity_and_unit_of_measure = models.CharField(
+        max_length=256, null=False, blank=False, default=gettext('Not specified'),
+        help_text=gettext((
+        "Record the number and unit of measure expressing the quantity of the "
+        "extent (e.g., 5 files, totalling 2.5MB)"
+    )))
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL,
+                                     null=True, related_name='extent_statements')
+
+    carrier_type = models.ForeignKey(CarrierType, on_delete=models.SET_NULL,
+                                     null=True, related_name='extent_statements')
+
+    extent_note = models.TextField(blank=True, default='', help_text=gettext(
+        "Record additional information related to the number and type of units "
+        "received, retained, or removed not otherwise recorded"
+    ))
+
+    def __str__(self):
+        return f'Extent Statement #{self.id}'
+
+
+class PreliminaryScopeAndContentManager(models.Manager):
+    ''' Custom manager for preliminary scope and content
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten scope and contents for exporting in a CSV
+        '''
+        contents = self.get_queryset().values_list(
+            'preliminary_scope_and_content', flat=True
+        )
+
+        if not contents:
+            return {}
+
+        if version == ExportVersion.CAAIS_1_0:
+            return {
+                'preliminaryScopeAndContent': '|'.join(contents)
+            }
+        else:
+            return {
+                'scopeAndContent': '. '.join([
+                    c.rstrip('. ') for c in contents
+                ])
+            }
+
+
+class PreliminaryScopeAndContent(models.Model):
+    ''' 3.3 Preliminary Scope and Content
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Preliminary scope and contents')
+        verbose_name = gettext('Preliminary scope and content')
+
+    objects = PreliminaryScopeAndContentManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='preliminary_scope_and_contents')
+
+    preliminary_scope_and_content = models.TextField(null=False, help_text=gettext(
+        "Record a preliminary description that may include: functions and "
+        "activities that resulted in the material's generation, dates, the "
+        "geographic area to which the material pertains, subject matter, "
+        "arrangement, classification, and documentary forms"
+    ))
+
+    def __str__(self):
+        return f'Preliminary Scope and Content #{self.id}'
+
+
+class LanguageOfMaterialManager(models.Manager):
+    ''' Custom manager for language of material
+    '''
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        ''' Flatten languages into a dict so that they can be exported in a CSV.
+        '''
+
+        languages = self.get_queryset().values_list(
+            'language_of_material', flat=True,
+        )
+
+        if not languages:
+            return {}
+
+        if version == ExportVersion.CAAIS_1_0:
+            return {
+                'languageOfMaterial': '|'.join(languages)
+            }
+        else:
+            language_list = ', '.join(languages)
+            return {
+                'scopeAndContent': f"Language of material: {language_list}"
+            }
+
+
+class LanguageOfMaterial(models.Model):
+    ''' 3.4 Language of Material (Repeatable)
+    '''
+
+    class Meta:
+        verbose_name_plural = gettext('Language of materials')
+        verbose_name = gettext('Language of material')
+
+    objects = LanguageOfMaterialManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='language_of_materials')
+
+    language_of_material = models.CharField(max_length=128, null=False, help_text=gettext(
+        "Record, at a minimum, the language that is predominantly found in the "
+        "accessioned material"
+    ))
+
+    def __str__(self):
+        return f'Language of Material #{self.id}'
