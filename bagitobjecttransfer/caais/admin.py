@@ -74,6 +74,7 @@ class SourceOfMaterialInlineAdmin(admin.StackedInline):
         formset = super().get_formset(request, obj, **kwargs)
         for field_name in ('source_role', 'source_type', 'source_confidentiality'):
             field = formset.form.base_fields[field_name]
+            field.required = False
             field.widget.can_add_related = True
             field.widget.can_change_related = True
             field.widget.can_delete_related = True
