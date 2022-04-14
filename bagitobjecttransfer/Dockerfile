@@ -7,6 +7,7 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 
 # Install Dependencies
+RUN yum install -y git
 RUN yum install -y python3
 RUN python3 -m pip install --upgrade pip
 COPY ./requirements.txt .
