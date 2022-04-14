@@ -11,6 +11,8 @@ from caais.forms import (
     InlineExtentStatementForm,
     InlinePreliminaryScopeAndContentForm,
     InlineLanguageOfMaterialForm,
+    InlineStorageLocationForm,
+    InlineRightsForm,
 )
 from caais.models import (
     Status,
@@ -29,6 +31,9 @@ from caais.models import (
     CarrierType,
     PreliminaryScopeAndContent,
     LanguageOfMaterial,
+    StorageLocation,
+    RightsType,
+    Rights,
 )
 
 
@@ -40,6 +45,12 @@ class IdentifierInlineAdmin(admin.TabularInline):
     show_change_link = False
     max_num = 64
     extra = 0
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        formset.form.base_fields['identifier_value'].required = True
+        formset.form.base_fields['identifier_note'].required = False
+        return formset
 
 
 class ArchivalUnitInlineAdmin(admin.TabularInline):
@@ -145,7 +156,7 @@ class PreliminaryScopeAndContentInlineAdmin(admin.TabularInline):
 
 
 class LanguageOfMaterialInlineAdmin(admin.TabularInline):
-    ''' Admin for editing language of materials inlines
+    ''' Admin for editing language of materials inline
     '''
 
     model = LanguageOfMaterial
@@ -153,6 +164,44 @@ class LanguageOfMaterialInlineAdmin(admin.TabularInline):
     show_change_link = False
     max_num = 64
     extra = 0
+
+
+class StorageLocationInlineAdmin(admin.TabularInline):
+    ''' Admin for editing storage locations inline
+    '''
+
+    model = StorageLocation
+    form = InlineStorageLocationForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class RightsInlineAdmin(admin.TabularInline):
+    ''' Admin for editing rights inline
+    '''
+
+    model = Rights
+    form = InlineRightsForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        for field_name, model, required in (
+                ('rights_type', RightsType, True),
+            ):
+            field = formset.form.base_fields[field_name]
+            field.required = required
+            field.widget.can_add_related = True
+            field.widget.can_change_related = True
+            field.widget.can_delete_related = True
+            field.widget.attrs.update({'class': 'vTextField'})
+            field.help_text = model._meta.get_field('name').help_text
+        formset.form.base_fields['rights_value'].required = True
+        formset.form.base_fields['rights_note'].required = False
+        return formset
 
 
 @admin.register(Metadata)
@@ -184,6 +233,8 @@ class MetadataAdmin(admin.ModelAdmin):
         ExtentStatementInlineAdmin,
         PreliminaryScopeAndContentInlineAdmin,
         LanguageOfMaterialInlineAdmin,
+        StorageLocationInlineAdmin,
+        RightsInlineAdmin,
     ]
 
 
@@ -238,4 +289,10 @@ class ContentTypeAdmin(TermAdmin):
 @admin.register(CarrierType)
 class CarrierTypeAdmin(TermAdmin):
     ''' Administrator to add/change carrier types
+    '''
+
+
+@admin.register(RightsType)
+class RightsTypeAdmin(TermAdmin):
+    ''' Administratro add/change rights types
     '''

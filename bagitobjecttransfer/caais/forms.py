@@ -13,6 +13,8 @@ from caais.models import (
     ExtentStatement,
     PreliminaryScopeAndContent,
     LanguageOfMaterial,
+    StorageLocation,
+    Rights,
 )
 
 
@@ -37,7 +39,7 @@ class InlineIdentifierForm(forms.ModelForm):
                 'class': 'inline-text-input',
             }),
             'identifier_note': forms.widgets.Textarea(attrs={
-                'rows': 3,
+                'rows': 2,
                 'class': 'inline-textarea',
             }),
         }
@@ -200,4 +202,44 @@ class InlineLanguageOfMaterialForm(forms.ModelForm):
                 'rows': 1,
                 'class': 'inline-textarea',
             })
+        }
+
+
+class InlineStorageLocationForm(forms.ModelForm):
+    ''' Form to edit storage locations inline in administrator website
+    '''
+
+    class Meta:
+        model = StorageLocation
+
+        fields = (
+            'storage_location',
+        )
+
+        widgets = {
+            'storage_location': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'inline-textarea',
+            })
+        }
+
+
+class InlineRightsForm(forms.ModelForm):
+    ''' Form to edit rights inline in administrator website
+    '''
+
+    class Meta:
+        model = Rights
+
+        fields = '__all__'
+
+        widgets = {
+            'rights_value': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'inline-textarea',
+            }),
+            'rights_note': forms.widgets.Textarea(attrs={
+                'rows': 2,
+                'class': 'inline-textarea',
+            }),
         }
