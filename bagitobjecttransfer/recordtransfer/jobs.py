@@ -336,33 +336,6 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
     )
 
 
-@django_rq.job
-def send_admin_clamav_error(user_submitting: User, exception_thrown: Exception):
-    """ Send a notice to site administrators that ClamAV is experiencing problems.
-
-    Args:
-        user_submitting (User): The user submitting the transfer.
-        exception_thrown (Exception): The exception caught.
-    """
-    subject = 'ClamAV error'
-    domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
-
-    recipient_emails = _get_admin_recipient_list(subject)
-
-    if recipient_emails is not None:
-        send_mail_with_logs(
-            recipients=recipient_emails,
-            from_email=from_email,
-            subject=subject,
-            template_name='recordtransfer/email/clamav_error.html',
-            context={
-                'user': user_submitting,
-                'exception': exception_thrown,
-            }
-        )
-
-
 def send_mail_with_logs(recipients: list, from_email: str, subject, template_name: str,
                         context: dict):
     try:

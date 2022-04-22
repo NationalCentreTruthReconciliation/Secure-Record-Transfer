@@ -17,7 +17,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
     SourceRole, SourceType, Submission
-from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email, send_admin_clamav_error
+from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
@@ -252,7 +252,6 @@ class TransferFormWizard(SessionWizardView):
                 clamd_socket.ping()
             except clamd.ClamdError as exc:
                 LOGGER.error("Unable to ping ClamAV", exc_info=exc)
-                send_admin_clamav_error(self.request.user, exc)
                 return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
         return super().get(request, *args, **kwargs)
 
@@ -377,7 +376,6 @@ def uploadfiles(request):
                     continue
             except clamd.ClamdError as exc:
                 LOGGER.error("Unable to scan file (%s)", uploadfiles, exc_info=exc)
-                send_admin_clamav_error(request.user, exc)
                 session.remove_session_uploads()
                 return JsonResponse(
                     {'uploadSessionToken': session.token,
