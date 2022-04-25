@@ -1,6 +1,7 @@
 from typing import Union
 import logging
 
+import clamd
 from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
@@ -17,6 +18,7 @@ from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
     SourceRole, SourceType, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
+from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
@@ -33,6 +35,11 @@ class Index(TemplateView):
 class TransferSent(TemplateView):
     ''' The page a user sees when they finish a transfer '''
     template_name = 'recordtransfer/transfersent.html'
+
+
+class SystemErrorPage(TemplateView):
+    """ The page a user sees when there is some system error. """
+    template_name = 'recordtransfer/systemerror.html'
 
 
 class UserProfile(UpdateView):
@@ -238,6 +245,16 @@ class TransferFormWizard(SessionWizardView):
             })
         return context
 
+    def get(self, request, *args, **kwargs):
+        if self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
+            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
+            try:
+                clamd_socket.ping()
+            except clamd.ClamdError as exc:
+                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
+                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
+        return super().get(request, *args, **kwargs)
+
     def get_all_cleaned_data(self):
         cleaned_data = super().get_all_cleaned_data()
 
@@ -351,11 +368,22 @@ def uploadfiles(request):
                 issues.append({'file': _file.name, **session_check})
                 continue
 
-            content_check = _accept_contents(_file)
-            if not content_check['accepted']:
-                _file.close()
-                raise NotImplementedError(
-                    'file malware check with clamav has not been fully implemented'
+            try:
+                content_check = _accept_contents(_file)
+                if not content_check['accepted']:
+                    _file.close()
+                    issues.append({'file': _file.name, **content_check})
+                    continue
+            except clamd.ClamdError as exc:
+                LOGGER.error("Unable to scan file (%s)", uploadfiles, exc_info=exc)
+                session.remove_session_uploads()
+                return JsonResponse(
+                    {'uploadSessionToken': session.token,
+                     'error': gettext('500 Internal Server Error'),
+                     'verboseError': gettext('500 Internal Server Error'),
+                     'fatalError': True,
+                     'redirect': reverse('recordtransfer:systemerror')
+                     }, status=500
                 )
 
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
@@ -609,22 +637,21 @@ def _accept_contents(file_upload):
             accepted is False. The 'clamav' key is a dict itself that has a
             'reason' and a 'status' key.
     '''
-    # TODO: Implement with clamd, like so:
-    '''
-    scan_results = clamd_socket.instream(file_upload)
-    status, reason = scan_results['stream']
-    if (status != 'OK'):
-        return {
-            'accepted': False,
-            'error': 'Malware found in file',
-            'verboseError': gettext(
-                'The file "{0}" was identified to contain malware! This issue '
-                'will be sent to the administrator'
-            ),
-            'clamav': {
-                'reason': reason
-                'status': status
+    if CLAMAV_ENABLED:
+        clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
+        scan_results = clamd_socket.instream(file_upload.file)
+        status, reason = scan_results['stream']
+        if status != 'OK':
+            return {
+                'accepted': False,
+                'error': 'Malware found in file',
+                'verboseError': gettext(
+                    'The file "{0}" was identified to contain malware! This issue '
+                    'will be sent to the administrator'.format(file_upload)
+                ),
+                'clamav': {
+                    'reason': reason,
+                    'status': status,
+                }
             }
-        }
-    '''
     return {'accepted': True}

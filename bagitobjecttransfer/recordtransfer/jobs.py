@@ -25,6 +25,17 @@ from recordtransfer.utils import html_to_text, zip_directory
 LOGGER = logging.getLogger('rq.worker')
 
 
+def _get_admin_recipient_list(subject):
+    LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
+    recipients = User.objects.filter(gets_bag_email_updates=True)
+    if not recipients:
+        LOGGER.warning(msg='There are no users configured to receive transfer update emails.')
+        return
+    user_list = list(recipients)
+    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
+    return [str(e) for e in recipients.values_list('email', flat=True)]
+
+
 @django_rq.job
 def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     ''' Create database models and BagIt bag on file system for the submitted form. Sends an email
@@ -183,14 +194,7 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
     )
     LOGGER.info(msg='Generated submission change URL: {0}'.format(submission_url))
 
-    LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
-    recipients = User.objects.filter(gets_bag_email_updates=True)
-    if not recipients:
-        LOGGER.warning(msg=('There are no users configured to receive transfer update emails.'))
-        return
-    user_list = list(recipients)
-    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
-    recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
+    recipient_emails = _get_admin_recipient_list(subject)
 
     user_submitted = submission.user
     send_mail_with_logs(
@@ -219,14 +223,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
     domain = Site.objects.get_current().domain
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
-    LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
-    recipients = User.objects.filter(gets_bag_email_updates=True)
-    if not recipients:
-        LOGGER.warning(msg='There are no users configured to receive transfer update emails.')
-        return
-    user_list = list(recipients)
-    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
-    recipient_emails = [str(e) for e in recipients.values_list('email', flat=True)]
+    recipient_emails = _get_admin_recipient_list(subject)
 
     send_mail_with_logs(
         recipients=recipient_emails,

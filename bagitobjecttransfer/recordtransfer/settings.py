@@ -38,6 +38,12 @@ MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
 
 USE_DATE_WIDGETS = config('USE_DATE_WIDGETS', default=True, cast=bool)
 
+# CLAMAV configuration.
+
+CLAMAV_ENABLED = config('CLAMAV_ENABLED', default=False, cast=bool)
+CLAMAV_HOST = config('CLAMAV_HOST', default=None)
+CLAMAV_PORT = config('CLAMAV_PORT', default=3310, cast=int)
+
 # Default data to inject into metadata, after the user enters their own metadata
 
 DEFAULT_DATA = {
