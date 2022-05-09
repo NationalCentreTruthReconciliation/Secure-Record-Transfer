@@ -356,6 +356,7 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
         LOGGER.info(msg='TO: {0}'.format(recipients))
         LOGGER.info(msg='FROM: {0}'.format(from_email))
         LOGGER.info(msg='Rendering HTML email from {0}'.format(template_name))
+        context['site_domain'] = Site.objects.get_current().domain
         msg_html = render_to_string(template_name, context=context)
         LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
         msg_plain = html_to_text(msg_html)
