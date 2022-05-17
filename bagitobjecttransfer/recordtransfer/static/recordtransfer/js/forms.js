@@ -538,7 +538,8 @@ $(() => {
                         sessionToken = ''
                         // Show the end of the dropzone animation by delaying submission
                         window.setTimeout(() => {
-                            document.getElementById("transfer-form").submit()
+                            // Use this function to execute the invisible Captcha methods.
+                            singleCaptchaFn();
                         }, 1000)
                     }
                     else {
