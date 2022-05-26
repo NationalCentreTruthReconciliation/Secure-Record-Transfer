@@ -235,7 +235,11 @@ class TransferFormWizard(SessionWizardView):
     def post(self, *args, **kwargs):
         save_form_step = self.request.POST.get('save_form_step', None)
         if save_form_step and save_form_step in self.steps.all:
-            transfer = SavedTransfer()
+            resume_id = self.request.GET.get('resume_transfer', None)
+            if resume_id:
+                transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            else:
+                transfer = SavedTransfer()
             transfer.current_step = save_form_step
             transfer.user = self.request.user
             transfer.last_updated = datetime.datetime.now(timezone.get_current_timezone())
