@@ -212,6 +212,13 @@ class TransferFormWizard(SessionWizardView):
     }
 
     def get(self, request, *args, **kwargs):
+        if self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
+            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
+            try:
+                clamd_socket.ping()
+            except clamd.ClamdError as exc:
+                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
+                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
         resume_id = request.GET.get('resume_transfer', None)
         if resume_id:
             transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
@@ -223,13 +230,6 @@ class TransferFormWizard(SessionWizardView):
                 self.storage.data = pickle.loads(transfer.step_data)
                 self.storage.current_step = transfer.current_step
                 return self.render(self.get_form())
-        elif self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
-            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
-            try:
-                clamd_socket.ping()
-            except clamd.ClamdError as exc:
-                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
-                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
         return super().get(self, request, *args, **kwargs)
 
     def post(self, *args, **kwargs):
