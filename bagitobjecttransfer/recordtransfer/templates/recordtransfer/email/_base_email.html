@@ -32,8 +32,11 @@
             <div style="
                 font-size: 10pt;">
                 <i>
+                {% url 'recordtransfer:userprofile' as profile_url %}
                 {% blocktrans %}
-                If you do not want to receive these emails anymore, click this link.
+                If you do not want to receive these emails anymore, you can change the
+                    "Receive notification emails?" setting in
+                    <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
                 {% endblocktrans %}
                 </i>
             </div>
