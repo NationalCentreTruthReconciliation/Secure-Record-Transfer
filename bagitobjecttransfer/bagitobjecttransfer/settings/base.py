@@ -5,6 +5,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 SECRET_KEY = config('SECRET_KEY', default='q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz1$g=i$wp2r!s-')
 
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
 INSTALLED_APPS = [
     'recordtransfer.apps.RecordTransferConfig',
     'django.contrib.admin',
@@ -15,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_countries',
+    'django.forms',
     'formtools',
     'django_rq',
     'captcha',

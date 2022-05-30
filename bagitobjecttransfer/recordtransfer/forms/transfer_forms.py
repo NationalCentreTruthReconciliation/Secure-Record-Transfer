@@ -1,4 +1,5 @@
 ''' Forms specific to transferring files with a new submission '''
+from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
@@ -663,4 +664,4 @@ class UploadFilesForm(forms.Form):
         label='hidden'
     )
 
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label='hidden')
