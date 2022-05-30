@@ -27,11 +27,12 @@ the :code:`.env` environment file. By category, these settings are:
 **Application Features**
 
 - :ref:`ALLOW_BAG_CHANGES`
-- :ref:`SIGN_UP_ENABLED`
-- :ref:`USE_DATE_WIDGETS`
 - :ref:`CLAMAV_ENABLED`
 - :ref:`CLAMAV_HOST`
 - :ref:`CLAMAV_PORT`
+- :ref:`MAX_SAVED_TRANSFER_COUNT`
+- :ref:`SIGN_UP_ENABLED`
+- :ref:`USE_DATE_WIDGETS`
 
 **Emailing**
 
@@ -385,6 +386,30 @@ APPROXIMATE_DATE_FORMAT
 
         #file: .env
         APPROXIMATE_DATE_FORMAT='Circa. {date}'
+
+
+MAX_SAVED_TRANSFER_COUNT
+------------------------
+
+    *Choose maximum saved transfers per user*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        2                       int        YES                 YES
+        ========  ======================  =========  ==================  =========================
+
+    The maximum number of transfers a user can save to resume later. Must be a non-negative integer. 
+    Set to 0 to disable saving transfers.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_SAVED_TRANSFER_COUNT=5
 
 
 DEFAULT_DATA

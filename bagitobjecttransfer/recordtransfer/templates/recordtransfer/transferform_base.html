@@ -39,6 +39,13 @@
                         {% trans "Previous Step" %}
                     </button>
                 {% endif %}
+                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_enabled %}
+                <button class="blue-button margin-left-20px margin-right-20px" formnovalidate="formnovalidate"
+                        name="save_form_step"
+                        value="{{ wizard.steps.current }}">
+                    {% trans "Save form" %}
+                </button>
+                {% endif %}
                 <button {% block submitbuttonattributes %}{% endblock %} type="{% block submitbuttontype %}submit{% endblock %}" class="blue-button">
                     {% if wizard.steps.step1 == wizard.steps.count %}
                         {% trans "Submit" %}
