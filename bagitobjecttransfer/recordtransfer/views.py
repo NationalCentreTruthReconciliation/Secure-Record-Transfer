@@ -296,8 +296,19 @@ class TransferFormWizard(SessionWizardView):
                 'source_roles': all_roles,
                 'source_types': all_types,
             })
-        can_save_form = SavedTransfer.objects.filter(user=self.request.user).count() < MAX_SAVED_TRANSFER_COUNT
-        context.update({'save_form_enabled': can_save_form})
+        resume_id = self.request.GET.get('resume_transfer', None)
+        max_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+        if MAX_SAVED_TRANSFER_COUNT == 0:
+            # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
+            save_form_state = 'off'
+        elif resume_id is None and max_saves >= MAX_SAVED_TRANSFER_COUNT:
+            # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
+            # transfer, disable the save form button.
+            save_form_state = 'disabled'
+        else:
+            # else enable the button.
+            save_form_state = 'on'
+        context.update({'save_form_state': save_form_state})
         return context
 
     def get_all_cleaned_data(self):
