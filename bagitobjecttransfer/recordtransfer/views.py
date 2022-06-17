@@ -227,7 +227,7 @@ class TransferFormWizard(SessionWizardView):
                     f"Expected at least 1 saved transfers for user {self.request.user} and ID {resume_id}, found 0"
                 )
             else:
-                self.storage.data = pickle.loads(transfer.step_data)
+                self.storage.data = pickle.loads(transfer.step_data)['past']
                 self.storage.current_step = transfer.current_step
                 return self.render(self.get_form())
         return super().get(self, request, *args, **kwargs)
@@ -241,9 +241,12 @@ class TransferFormWizard(SessionWizardView):
             else:
                 transfer = SavedTransfer()
             transfer.current_step = save_form_step
+            # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
+            current_data = {f.replace(save_form_step + "-", ""): self.request.POST[f] for f in self.request.POST.keys()
+                            if f.startswith(save_form_step + "-")}
             transfer.user = self.request.user
             transfer.last_updated = datetime.datetime.now(timezone.get_current_timezone())
-            transfer.step_data = pickle.dumps(self.storage.data)
+            transfer.step_data = pickle.dumps({'past': self.storage.data, 'current': current_data })
             transfer.save()
             return redirect('recordtransfer:userprofile')
         else:
@@ -256,6 +259,13 @@ class TransferFormWizard(SessionWizardView):
 
     def get_form_initial(self, step):
         initial = self.initial_dict.get(step, {})
+        resume_id = self.request.GET.get('resume_transfer', None)
+        if resume_id is not None:
+            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            if step == transfer.current_step:
+                data = pickle.loads(transfer.step_data)['current']
+                for (k, v) in data.items():
+                    initial[k] = v
         if step == 'contactinfo':
             curr_user = self.request.user
             initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
