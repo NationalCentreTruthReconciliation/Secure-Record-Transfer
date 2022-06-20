@@ -25,6 +25,7 @@ urlpatterns = [
     path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),
     path('transfer/error/', login_required(views.SystemErrorPage.as_view()), name="systemerror"),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
+    path('transfer/delete/<int:transfer_id>/', login_required(views.DeleteTransfer.as_view()), name="transferdelete"),
 
     path('about/', views.About.as_view(), name='about'),
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),

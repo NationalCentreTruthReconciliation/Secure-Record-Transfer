@@ -1,6 +1,5 @@
 ''' Forms specific to the recordtransfer admin site '''
 from django import forms
-from django.forms import ModelForm
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
