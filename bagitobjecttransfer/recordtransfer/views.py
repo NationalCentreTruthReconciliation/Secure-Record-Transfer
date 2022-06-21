@@ -70,16 +70,6 @@ class UserProfile(UpdateView):
         messages.success(self.request, 'Preferences updated')
         return super().form_valid(form)
 
-    def get(self, request, *args, **kwargs):
-        if 'delete_transfer' in request.GET:
-            transfers = SavedTransfer.objects.filter(
-                user=self.request.user,
-                id=request.GET.get('delete_transfer')
-            )
-            for transfer in transfers:
-                transfer.delete()
-        return super().get(request, *args, **kwargs)
-
 
 class About(TemplateView):
     ''' About the application '''
