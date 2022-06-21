@@ -39,10 +39,10 @@
                         {% trans "Previous Step" %}
                     </button>
                 {% endif %}
-                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_enabled %}
+                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_state|stringformat:'s' != 'off' %}
                 <button class="blue-button margin-left-20px margin-right-20px" formnovalidate="formnovalidate"
                         name="save_form_step"
-                        value="{{ wizard.steps.current }}">
+                        value="{{ wizard.steps.current }}" {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
                     {% trans "Save form" %}
                 </button>
                 {% endif %}
