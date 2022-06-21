@@ -13,7 +13,11 @@ from recordtransfer.models import SourceRole, SourceType, Right
 from recordtransfer.settings import USE_DATE_WIDGETS
 
 
-class AcceptLegal(forms.Form):
+class TransferForm(forms.Form):
+    required_css_class = 'required-field'
+
+
+class AcceptLegal(TransferForm):
     def clean(self):
         cleaned_data = super().clean()
         if not cleaned_data['agreement_accepted']:
@@ -26,7 +30,7 @@ class AcceptLegal(forms.Form):
     )
 
 
-class ContactInfoForm(forms.Form):
+class ContactInfoForm(TransferForm):
     ''' The Contact Information portion of the form. Contains fields from Section 2 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -207,7 +211,7 @@ class ContactInfoForm(forms.Form):
     )
 
 
-class SourceInfoForm(forms.Form):
+class SourceInfoForm(TransferForm):
     ''' The Source Information portion of the form. Contains fields from Section 2 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -338,7 +342,7 @@ class SourceInfoForm(forms.Form):
     )
 
 
-class RecordDescriptionForm(forms.Form):
+class RecordDescriptionForm(TransferForm):
     ''' The Description Information portion of the form. Contains fields from Section 3 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -480,7 +484,7 @@ class RightsFormSet(BaseFormSet):
         self.forms[0].empty_permitted = False
 
 
-class RightsForm(forms.Form):
+class RightsForm(TransferForm):
     ''' The Rights portion of the form. Contains fields from Section 4 of CAAIS '''
 
     def clean(self):
@@ -537,7 +541,7 @@ class RightsForm(forms.Form):
     )
 
 
-class OtherIdentifiersForm(forms.Form):
+class OtherIdentifiersForm(TransferForm):
     ''' The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -589,7 +593,7 @@ class OtherIdentifiersForm(forms.Form):
     )
 
 
-class GroupTransferForm(forms.Form):
+class GroupTransferForm(TransferForm):
     def __init__(self, *args, **kwargs):
         users_groups = kwargs.pop('users_groups')
         super().__init__(*args, **kwargs)
@@ -643,7 +647,7 @@ class GroupTransferForm(forms.Form):
     )
 
 
-class UploadFilesForm(forms.Form):
+class UploadFilesForm(TransferForm):
     ''' The form where users upload their files and write any final notes '''
     general_note = forms.CharField(
         required=False,
