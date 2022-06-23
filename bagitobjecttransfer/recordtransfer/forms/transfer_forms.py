@@ -254,7 +254,7 @@ class SourceInfoForm(TransferForm):
     )
 
     source_type = forms.ModelChoiceField(
-        required=False,
+        required=True,
         queryset=SourceType.objects.all()\
             .annotate(
                 sort_order_other_first=Case(
@@ -287,7 +287,7 @@ class SourceInfoForm(TransferForm):
     )
 
     source_role = forms.ModelChoiceField(
-        required=False,
+        required=True,
         queryset=SourceRole.objects.all()\
             .annotate(
                 sort_order_other_first=Case(
