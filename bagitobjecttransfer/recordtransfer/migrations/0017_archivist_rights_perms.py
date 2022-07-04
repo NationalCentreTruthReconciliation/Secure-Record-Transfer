@@ -11,9 +11,9 @@ def populate_permissions(apps, schema_editor):
 
     for codename in (
         # Rights
-        'add_right',
-        'change_right',
-        'view_right'):
+        'add_rightstype',
+        'change_rightstype',
+        'view_rightstype'):
         permission = Permission.objects.get(codename=codename)
         if permission not in existing_permissions:
             group.permissions.add(permission)

@@ -15,8 +15,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.text import slugify
 from django.template.loader import render_to_string
 
+from caais.models import Metadata
 from recordtransfer.caais import convert_transfer_form_to_meta_tree
-from recordtransfer.models import Bag, BagGroup, UploadedFile, UploadSession, User, Job, Submission
+from recordtransfer.models import BagGroup, UploadedFile, UploadSession, User, Job, Submission
 from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL, BAG_CHECKSUMS
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
@@ -38,7 +39,7 @@ def _get_admin_recipient_list(subject):
 
 @django_rq.job
 def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
-    ''' Create database models and BagIt bag on file system for the submitted form. Sends an email
+    ''' Create database models for the submitted form. Sends an email
     to the submitting user and the staff members who receive submission email updates.
 
     Args:
@@ -65,69 +66,51 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
 
     LOGGER.info(msg=('Created name for bag: "{0}"'.format(bag_name)))
 
-    new_bag = Bag(
+    metadata = Metadata(caais_metadata)
+    metadata.save()
+
+    LOGGER.info('Creating Submission object linked to new metadata')
+    new_submission = Submission(
+        submission_date=timezone.now(),
         user=user_submitted,
-        bag_name=bag_name,
-        caais_metadata=json.dumps(caais_metadata),
+        bag=metadata,
         upload_session=upload_session,
+        bag_name=bag_name
     )
-    new_bag.save()
+    new_submission.save()
 
-    LOGGER.info(msg='Creating bag on filesystem')
-    bagging_result = new_bag.make_bag(
-        algorithms=BAG_CHECKSUMS,
-        file_perms='644',
-        move_files=True,
-        logger=LOGGER,
-    )
+    group_name = form_data['group_name']
+    if group_name != 'No Group':
+        if group_name == 'Add New Group':
+            new_group_name = form_data['new_group_name']
+            description = form_data['group_description']
+            group, created = BagGroup.objects.get_or_create(name=new_group_name,
+                                                            description=description,
+                                                            created_by=user_submitted)
+            if created:
+                LOGGER.info(msg='Created "{0}" BagGroup'.format(new_group_name))
+        else:
+            group = BagGroup.objects.get(name=group_name, created_by=user_submitted)
 
-    if bagging_result['bag_created']:
-        LOGGER.info('The BagIt bag was created successfully')
-        LOGGER.info('Creating Submission object linked to new bag')
-        new_submission = Submission(
-            submission_date=bagging_result['time_created'],
-            user=user_submitted,
-            bag=new_bag,
-        )
-        new_submission.save()
-
-        group_name = form_data['group_name']
-        if group_name != 'No Group':
-            if group_name == 'Add New Group':
-                new_group_name = form_data['new_group_name']
-                description = form_data['group_description']
-                group, created = BagGroup.objects.get_or_create(name=new_group_name,
-                                                                description=description,
-                                                                created_by=user_submitted)
-                if created:
-                    LOGGER.info(msg='Created "{0}" BagGroup'.format(new_group_name))
-            else:
-                group = BagGroup.objects.get(name=group_name, created_by=user_submitted)
-
-            if group:
-                LOGGER.info(msg='Associating Bag with "{0}" BagGroup'.format(group.name))
-                new_bag.part_of_group = group
-                new_bag.save()
-            else:
-                LOGGER.warning(msg='Could not find "{0}" BagGroup'.format(group.name))
+        if group:
+            LOGGER.info(msg='Associating Submission with "{0}" BagGroup'.format(group.name))
+            new_submission.part_of_group = group
+            new_submission.save()
+        else:
+            LOGGER.warning(msg='Could not find "{0}" BagGroup'.format(group.name))
 
         LOGGER.info('Sending transfer success email to administrators')
         send_bag_creation_success.delay(form_data, new_submission)
         LOGGER.info('Sending thank you email to user')
         send_thank_you_for_your_transfer.delay(form_data, new_submission)
-    else:
-        LOGGER.error('bagger reported that the bag was NOT created successfully')
-        LOGGER.info('Sending transfer failure email to administrators')
-        send_bag_creation_failure.delay(form_data, user_submitted)
-        LOGGER.info('Sending transfer issue email to user')
-        send_your_transfer_did_not_go_through.delay(form_data, user_submitted)
+
 
 @django_rq.job
-def create_downloadable_bag(bag: Bag, user_triggered: User):
+def create_downloadable_bag(bag: Submission, user_triggered: User):
     ''' Create a zipped bag that a user can download using a Job model.
 
     Args:
-        bag (Bag): The bag to zip up for users to download
+        bag (Submission): The submission to zip up for users to download
         user (User): The user who triggered this new Job creation
     '''
     LOGGER.info(msg='Creating zipped bag from {0}'.format(str(bag.location)))
