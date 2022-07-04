@@ -105,7 +105,7 @@ class EventDateParser:
 
     def parse_date(self, date: str) -> tuple:
         ''' Get parsed date range, and a clean string representation of the date. May raise an
-        UnkonwnDateFormat exception if the date could not be parsed.
+        UnknownDateFormat exception if the date could not be parsed.
 
         Args:
             date (str): The date string to parse
@@ -130,9 +130,9 @@ class EventDateParser:
         ''' Parse dates and get well-formatted string dates for each date column.
 
         Args:
-            event_dates: The eventDates cell from a row of a CSV
-            event_start_dates: The eventStartDates cell from the same row
-            event_end_dates: The eventEndDates cell from the same row
+            event_date: The eventDates cell from a row of a CSV
+            start_date: The eventStartDates cell from the same row
+            end_date: The eventEndDates cell from the same row
 
         Returns:
             (dict): A fixed-up version of the eventDates, eventStartDates, and eventEndDates

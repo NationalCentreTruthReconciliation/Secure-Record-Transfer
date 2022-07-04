@@ -13,9 +13,9 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, FormView, UpdateView
 from formtools.wizard.views import SessionWizardView
 
+from caais.models import RightsType, SourceRole, SourceType
 from recordtransfer import settings
-from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Right, \
-    SourceRole, SourceType, Submission
+from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Submission
 from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
@@ -227,7 +227,7 @@ class TransferFormWizard(SessionWizardView):
             users_groups = BagGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
         elif step_name == 'rights':
-            all_rights = Right.objects.all().exclude(name='Other')
+            all_rights = RightsType.objects.all().exclude(name='Other')
             context.update({'rights': all_rights})
         elif step_name == 'sourceinfo':
             all_roles = SourceRole.objects.all().exclude(name='Other')
