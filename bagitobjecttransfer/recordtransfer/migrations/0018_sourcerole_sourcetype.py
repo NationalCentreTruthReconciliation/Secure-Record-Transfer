@@ -3,7 +3,8 @@
 from django.db import migrations, models
 from django.core.management.sql import emit_post_migrate_signal
 from django.contrib.auth.models import Group, Permission
-from recordtransfer.models import SourceType, SourceRole
+
+from caais.models import SourceType, SourceRole
 
 
 def populate_initial_terms(apps, schema_editor):
@@ -48,22 +49,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='SourceRole',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('description', models.CharField(max_length=255)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='SourceType',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('description', models.CharField(max_length=255)),
-            ],
-        ),
         migrations.RunPython(populate_initial_terms),
         migrations.RunPython(populate_permissions),
     ]
