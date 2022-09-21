@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 from caais.models import Metadata, Identifier, ArchivalUnit, DispositionAuthority, SourceOfMaterial, \
     PreliminaryCustodialHistory, ExtentStatement, ExtentType, PreliminaryScopeAndContent, LanguageOfMaterial, \
-    StorageLocation, Rights, RightsType, PreservationAssessment, PreservationAssessmentType
+    StorageLocation, Rights, RightsType, PreservationRequirement, PreservationRequirementType
 from recordtransfer import settings
 from recordtransfer.settings import DEFAULT_DATA
 
@@ -391,31 +391,26 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
                 caais_key='other_rights_statement_type',
                 section=curr_section)
             curr_tree['rights_statement'].append(rights)
-    # 4.3 Material Assessment Statement - Technically repeatable, but we only include one array item
-    curr_tree['material_assessment_statement'] = []
+    # 4.3 Preservation Requirement - Repeatable
+    curr_tree['preservation_requirement'] = []
     new_assessment = OrderedDict()
-    # 4.3.1 Material Assessment Statement Type
-    new_assessment['material_assessment_statement_type'] = get_mandatory_field(
+    # 4.3.1 Preservation Requirement Type
+    new_assessment['preservation_requirement_type'] = get_mandatory_field(
         form_data=form_data,
-        caais_key='material_assessment_statement_type',
+        caais_key='preservation_requirement_type',
         section=curr_section)
-    # 4.3.2 Material Assessment Statement Value
-    new_assessment['material_assessment_statement_value'] = get_mandatory_field(
+    # 4.3.2 Preservation Requirement Value
+    new_assessment['preservation_requirement_value'] = get_mandatory_field(
         form_data=form_data,
-        caais_key='material_assessment_statement_value',
+        caais_key='preservation_requirement_value',
         section=curr_section)
-    # 4.3.3 Material Assessment Action Plan
-    new_assessment['material_assessment_action_plan'] = get_optional_field(
+    # 4.3.3 Preservation Requirement Note
+    new_assessment['preservation_requirement_note'] = get_optional_field(
         form_data=form_data,
-        caais_key='material_assessment_action_plan',
+        caais_key='preservation_requirement_note',
         section=curr_section)
-    # 4.3.4 Material Assessment Statement Note
-    new_assessment['material_assessment_statement_note'] = get_optional_field(
-        form_data=form_data,
-        caais_key='material_assessment_statement_note',
-        section=curr_section)
-    curr_tree['material_assessment_statement'].append(new_assessment)
-    # Possible Contact Assessment as a second Material Assessment section.
+    curr_tree['preservation_requirement'].append(new_assessment)
+    # Possible Contact Assessment as a second Preservation Requirment section.
     condition_assessment = get_optional_field(
         form_data=form_data,
         caais_key='condition_assessment',
@@ -423,11 +418,10 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
     )
     if len(condition_assessment) > 0:
         physical_assessment = OrderedDict()
-        physical_assessment['material_assessment_statement_type'] = 'Contact assessment'
-        physical_assessment['material_assessment_statement_value'] = condition_assessment
-        physical_assessment['material_assessment_action_plan'] = ''
-        physical_assessment['material_assessment_statement_note'] = ''
-        curr_tree['material_assessment_statement'].append(physical_assessment)
+        physical_assessment['preservation_requirement_type'] = 'Contact assessment'
+        physical_assessment['preservation_requirement_value'] = condition_assessment
+        physical_assessment['preservation_requirement_note'] = ''
+        curr_tree['preservation_requirement'].append(physical_assessment)
 
     # 4.4 Appraisal Statement
     curr_tree['appraisal_statement'] = []
@@ -802,7 +796,7 @@ def _convert_form_to_caais_section_4(metadata: Metadata, form_data: dict):
     """
     # 4 Management Information Section
     # 4.1 Storage Location - Currently no entry point for location
-    location = get_optional_field(form_data, 'storage_location', 'section_4')
+    location = form_data['storage_location']
     storage_location = StorageLocation.objects.filter(storage_location=location).first()
     if not storage_location:
         storage_location = StorageLocation()
@@ -827,19 +821,19 @@ def _convert_form_to_caais_section_4(metadata: Metadata, form_data: dict):
         right.rights_note = rights_statement['rights_statement_note']
         right.save()
     # 4.3 Preservation Requirements
-    for assess_statement in form_data['material_assessment_statement']:
-        assessment = PreservationAssessment()
-        assessment.metadata = metadata
-        # 4.3.1 Preservation Assessment Type
-        assessment_type = PreservationAssessmentType.objects.filter(name=assess_statement['material_assessment_type'])\
-            .first()
-        if not assessment_type:
-            assessment_type = PreservationAssessmentType()
-            assessment_type.name = assess_statement['material_assessment_type']
-        assessment.assessment_type = assessment_type
-        assessment.assessment_value = assess_statement['material_assessment_value']
-        assessment.assessment_note = assess_statement['material_assessment_note']
-        assessment.save()
+    for preservation_requirement in form_data['preservation_requirement']:
+        requirement_type = PreservationRequirementType.objects\
+            .filter(name=preservation_requirement['preservation_requirement_type']).first()
+        if not requirement_type:
+            requirement_type = PreservationRequirementType()
+            requirement_type.name = preservation_requirement['preservation_requirement_type']
+        requirement = PreservationRequirement({
+            'metadata': metadata,
+            'requirement_type': requirement_type,
+            'requirement_value': preservation_requirement['preservation_requirement_value'],
+            'requirement_note': preservation_requirement['preservation_requirement_note']
+        })
+        requirement.save()
 
 
 def get_mandatory_field(form_data: dict, caais_key: str, section: str) -> str:

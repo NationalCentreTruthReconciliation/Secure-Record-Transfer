@@ -987,21 +987,21 @@ class Rights(models.Model):
         return f'Rights Statement #{self.id}'
 
 
-class PreservationAssessmentType(AbstractTerm):
-    """ 4.3.1 Preservation Assessment Type (Repeatable)
+class PreservationRequirementType(AbstractTerm):
+    """ 4.3.1 Preservation Requirement Type (Repeatable)
     """
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = 'Preservation Assessment Types'
-        verbose_name = 'Preservation Assessment Type'
+        verbose_name_plural = 'Preservation Requirement Types'
+        verbose_name = 'Preservation Requirement Type'
 
-PreservationAssessmentType._meta.get_field('name').help_text = gettext(
-    "Record the preservation assessment type in accordance with a controlled "
+PreservationRequirementType._meta.get_field('name').help_text = gettext(
+    "Record the preservation requirement type in accordance with a controlled "
     "vocabulary maintained by the repository"
 )
 
 
-class PreservationAssessmentManager(models.Manager):
-    """ Custom manager for preservation assessments
+class PreservationRequirementManager(models.Manager):
+    """ Custom manager for preservation requirements
     """
 
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
@@ -1030,36 +1030,36 @@ class PreservationAssessmentManager(models.Manager):
                 notes.append('NULL')
 
         return {
-            'preservationAssessmentType': '|'.join(types),
-            'preservationAssessmentValue': '|'.join(values),
-            'preservationAssessmentNote': '|'.join(notes),
+            'preservationRequirementType': '|'.join(types),
+            'preservationRequirementValue': '|'.join(values),
+            'preservationRequirementNote': '|'.join(notes),
         }
 
 
-class PreservationAssessment(models.Model):
-    """ 4.3 Preservation Assessment (Repeatable)
+class PreservationRequirement(models.Model):
+    """ 4.3 Preservation Requirement (Repeatable)
     """
 
     class Meta:
-        verbose_name_plural = 'Preservation Assessments'
-        verbose_name = 'Preservation Assessment'
+        verbose_name_plural = 'Preservation Requirements'
+        verbose_name = 'Preservation Requirement'
 
-    objects = PreservationAssessmentManager()
+    objects = PreservationRequirementManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
-                                 related_name='preservation_assessments')
+                                 related_name='preservation_requirement')
 
-    assessment_type = models.ForeignKey(PreservationAssessmentType, on_delete=models.SET_NULL, null=True,
-                                        related_name='rights_type')
+    requirement_type = models.ForeignKey(PreservationRequirementType, on_delete=models.SET_NULL, null=True,
+                                         related_name='preservation_requirement_type')
 
-    assessment_value = models.TextField(blank=True, default='', help_text=gettext(
+    requirement_value = models.TextField(blank=True, default='', help_text=gettext(
         "Record information about the assessment of the material with respect to its physical "
         "condition, dependencies, processing or access."
     ))
 
-    assessment_note = models.TextField(blank=True, default='', help_text=gettext(
+    requirement_note = models.TextField(blank=True, default='', help_text=gettext(
         "Record any other information relevant to the long-term preservation of the material."
     ))
 
     def __str__(self):
-        return f'Preservation Assessment #{self.id}'
+        return f'Preservation Requirement #{self.id}'

@@ -129,12 +129,11 @@ class TestCaaisMethods(TestCase):
                         'other_rights_statement_type': 'Intellectual Property',
                     })
                 ],
-                'material_assessment_statement': [
+                'preservation_requirement': [
                     OrderedDict({
-                        'material_assessment_statement_type': 'Physical Condition',
-                        'material_assessment_statement_value': 'Record is digital, physical assessment is not possible',
-                        'material_assessment_action_plan': '',
-                        'material_assessment_statement_note': '',
+                        'preservation_requirement_type': 'Physical Condition',
+                        'preservation_requirement_value': 'Record is digital, physical assessment is not possible',
+                        'preservation_requirement_note': '',
                     })
                 ],
                 'appraisal_statement': [],
@@ -176,12 +175,11 @@ class TestCaaisMethods(TestCase):
     def test_translate_form_data_condition_assessment(self):
         """ Add in a condition assessment. """
         self.form_data['condition_assessment'] = "Some bumps and bruises"
-        self.expected_metadata['section_4']['material_assessment_statement'].append(
+        self.expected_metadata['section_4']['preservation_requirement'].append(
             OrderedDict({
-                'material_assessment_statement_type': 'Contact assessment',
-                'material_assessment_statement_value': 'Some bumps and bruises',
-                'material_assessment_action_plan': '',
-                'material_assessment_statement_note': '',
+                'preservation_requirement_type': 'Contact assessment',
+                'preservation_requirement_value': 'Some bumps and bruises',
+                'preservation_requirement_note': '',
             }),
         )
         tree = convert_transfer_form_to_meta_tree(self.form_data)

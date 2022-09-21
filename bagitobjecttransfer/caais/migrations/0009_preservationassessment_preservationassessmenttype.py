@@ -12,30 +12,36 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PreservationAssessmentType',
+            name='PreservationRequirementType',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Record the preservation assessment type in accordance with a controlled vocabulary maintained by the repository', max_length=128)),
+                ('name', models.CharField(
+                    help_text='Record the preservation requirement type in accordance with a controlled vocabulary maintained by the repository',
+                    max_length=128)),
                 ('description', models.TextField(blank=True, default='')),
             ],
             options={
-                'verbose_name': 'Preservation Assessment Type',
-                'verbose_name_plural': 'Preservation Assessment Types',
+                'verbose_name': 'Preservation Requirement Type',
+                'verbose_name_plural': 'Preservation Requirement Types',
                 'abstract': False,
             },
         ),
         migrations.CreateModel(
-            name='PreservationAssessment',
+            name='PreservationRequirement',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assessment_value', models.TextField(blank=True, default='', help_text='Record information about the assessment of the material with respect to its physical condition, dependencies, processing or access.')),
-                ('assessment_note', models.TextField(blank=True, default='', help_text='Record any other information relevant to the long-term preservation of the material.')),
-                ('assessment_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='rights_type', to='caais.preservationassessmenttype')),
-                ('metadata', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='preservation_assessments', to='caais.metadata')),
+                ('requirement_value', models.TextField(blank=True, default='',
+                                                       help_text='Record information about the assessment of the material with respect to its physical condition, dependencies, processing or access.')),
+                ('requirement_note', models.TextField(blank=True, default='',
+                                                      help_text='Record any other information relevant to the long-term preservation of the material.')),
+                ('requirement_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='preservation_requirement_type', to='caais.preservationrequirementtype')),
+                ('metadata',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='preservation_requirement',
+                                   to='caais.metadata')),
             ],
             options={
-                'verbose_name': 'Preservation Assessment',
-                'verbose_name_plural': 'Preservation Assessments',
+                'verbose_name': 'Preservation Requirement',
+                'verbose_name_plural': 'Preservation Requirements',
             },
         ),
     ]
