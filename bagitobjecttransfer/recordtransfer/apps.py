@@ -254,8 +254,8 @@ def verify_default_data():
             ],
             'section_4': [
                 'storage_location',
-                'material_assessment_statement_type',
-                'material_assessment_statement_value',
+                'preservation_requirement_type',
+                'preservation_requirement_value',
             ],
             'section_5': [
                 'event_type',
