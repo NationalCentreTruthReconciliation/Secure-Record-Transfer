@@ -41,20 +41,6 @@ def get_nested_attr(model, attrs: Union[str, Iterable]):
     return None
 
 
-
-class TermManager(models.Manager):
-    ''' Custom manager for terms that excludes all empty or NULL terms from
-    queryset.
-    '''
-
-    def get_queryset(self):
-        ''' Returns all terms that havea a name.
-        '''
-        return super().get_queryset().exclude(
-            Q(name__iexact='') | Q(name__isnull=True)
-        )
-
-
 class AbstractTerm(models.Model):
     ''' An abstract class that can be used to define any term that consists of
     a name and a description.
@@ -62,8 +48,6 @@ class AbstractTerm(models.Model):
 
     class Meta:
         abstract = True
-
-    objects = TermManager()
 
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.TextField(blank=True, default='')
@@ -129,6 +113,7 @@ class Metadata(models.Model):
         "Provide a preliminary estimate of the date range or explicitly "
         "indicate if not it has yet been determined"
     ))
+
 
     #pylint: disable=no-member
     def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
@@ -309,7 +294,7 @@ class Identifier(models.Model):
 
 
 class ArchivalUnitManager(models.Manager):
-    ''' Custom arhival unit manager
+    ''' Custom archival unit manager
     '''
 
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
@@ -935,7 +920,7 @@ class RightsManager(models.Manager):
         values = []
         notes = []
 
-        for rights in self.get_queryset():
+        for rights in self.get_queryset().all():
             if rights.rights_type and rights.rights_type.name:
                 types.append(str(rights.rights_type.name))
             else:
@@ -1015,7 +1000,7 @@ class PreservationRequirementManager(models.Manager):
         values = []
         notes = []
 
-        for assessments in self.get_queryset():
+        for assessments in self.get_queryset().all():
             if assessments.rights_type and assessments.rights_type.name:
                 types.append(str(assessments.rights_type.name))
             else:
@@ -1063,3 +1048,192 @@ class PreservationRequirement(models.Model):
 
     def __str__(self):
         return f'Preservation Requirement #{self.id}'
+
+
+class EventType(AbstractTerm):
+    """ 5.1.1 Event Type """
+    class Meta:
+        verbose_name = 'Event Type'
+        verbose_name_plural = 'Event Types'
+EventType._meta.get_field('name').help_text = gettext(
+    "Record the event type in accordance with a controlled vocabulary maintained by the repository"
+)
+
+
+class EventManager(models.Manager):
+
+    def __flatten__(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        if self.get_queryset().count() == 0:
+            return {}
+        types = []
+        dates = []
+        agents = []
+        notes = []
+
+        for events in self.get_queryset().all():
+            if events.event_type and events.event_type.name:
+                types.append(str(events.event_type.name))
+            else:
+                types.append('NULL')
+            if events.event_date:
+                dates.append(events.event_date)
+            else:
+                dates.append('NULL')
+            if events.event_agent:
+                agents.append(events.event_agent)
+            else:
+                agents.append('NULL')
+            if events.event_note:
+                notes.append(events.event_note)
+            else:
+                notes.append('NULL')
+
+        return {
+            'eventStatementType': '|'.join(types),
+            'eventStatementDate': '|'.join(dates),
+            'eventStatementAgent': '|'.join(agents),
+            'eventStatementNote': '|'.join(notes),
+        }
+
+
+class Event(models.Model):
+    """ 5.1 Event (Repeatable) """
+    class Meta:
+        verbose_name_plural = 'Events'
+        verbose_name = 'Event'
+
+    objects = EventManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='events')
+    event_type = models.ForeignKey(EventType, on_delete=models.SET_NULL, null=True, related_name='event_type')
+    event_date = models.DateTimeField(auto_now_add=True)
+    event_agent = models.CharField(max_length=256, null=False, help_text=gettext(
+        "Record the name of the staff member or application responsible for the event."
+    ))
+    event_note = models.TextField(blank=True, default='', help_text=gettext(
+        "Record any other information relevant to describing the event."
+    ))
+
+    def __str__(self):
+        return f'Event: #{self.id}'
+
+
+class GeneralNote(models.Model):
+    """ 6.1 General Note """
+    class Meta:
+        verbose_name = 'General Note'
+        verbose_name_plural = 'General Notes'
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='general_note')
+    note = models.TextField(blank=True, default='', help_text=gettext(
+        "To provide an open text element for repositories to record any relevant information not accommodated "
+        "elsewhere in this standard."
+    ))
+
+
+class DateOfCreationOrRevisionManager(models.Manager):
+
+    def __flatten__(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        if self.get_queryset().count() == 0:
+            return {}
+
+        types = []
+        dates = []
+        agents = []
+        notes = []
+
+        for revision in self.get_queryset().all():
+            types.append(revision.revision_type or 'NULL')
+            dates.append(revision.revision_date or 'NULL')
+            agents.append(revision.revision_agent or 'NULL')
+            notes.append(revision.revision_note or 'NULL')
+
+        # TODO: Verify the correct column headings for AtoM, RAD or ISD.
+        return {
+            'dateOfCreationOrRevisionType': '|'.join(types),
+            'dateOfCreationOrRevisionDate': '|'.join(dates),
+            'dateOfCreationOrRevisionAgent': '|'.join(agents),
+            'dateOfCreationOrRevisionNote': '|'.join(notes)
+        }
+
+    def __str__(self):
+        return f'DateOfCreationOrRevision #{self.id}'
+
+
+class DateOfCreationOrRevision(models.Model):
+    """ 7.3 Date of Creation or Revision """
+    class Meta:
+        verbose_name = 'Date of Creation or Revision'
+        verbose_name_plural = 'Dates of Creation or Revision'
+
+    object = DateOfCreationOrRevisionManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='date_creation_revisions')
+    revision_type = models.CharField(max_length=255, blank=False, default='', help_text=gettext(
+        "Record the action type in accordance with a controlled vocabulary maintained by the repository."
+    ))
+    revision_date = models.DateTimeField(auto_now_add=True, help_text=gettext(
+        "Record the date on which the action (creation or revision) occurred."
+    ))
+    revision_agent = models.CharField(max_length=255, blank=False, default='', help_text=gettext(
+        "Record the name of the staff member who performed the action (creation or revision) on the accession record."
+    ))
+    revision_note = models.TextField(blank=True, default='', help_text=gettext(
+        "Record any information summarizing actions applied to the accession record."
+    ))
+
+
+class ControlInformationManager(models.Manager):
+
+    def __flatten__(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        if self.get_queryset().count() == 0:
+            return {}
+
+        rules = []
+        levels = []
+        languages = []
+        for control in self.get_queryset().all():
+            rules.append(control.rules_or_conventions or 'NULL')
+            levels.append(control.level_of_detail or 'NULL')
+            languages.append(control.language_of_record or 'NULL')
+
+        # TODO: Verify the correct column headings for AtoM, RAD or ISD.
+        return {
+            'rulesOrConventions': '|'.join(rules),
+            'levelOfDetail': '|'.join(levels),
+            'languageOfRecord': '|'.join(languages)
+        }
+
+    def __str__(self):
+        return f'Control Information #{self.id}'
+
+
+class ControlInformation(models.Model):
+    class Meta:
+        verbose_name = 'Control Information'
+        verbose_name_plural = 'Control Information'
+
+    objects = ControlInformationManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False, related_name='control_informations')
+
+    # 7.1 Rules or Conventions
+    rules_or_conventions = models.CharField(max_length=255, blank=True, default='', help_text=gettext(
+        "Record information about the standards, rules or conventions that were followed when creating or maintaining "
+        "the accession record. Indicate the software application if the accession record is based on a data entry "
+        "template in a database or other automated system. Give the version number of the standard or software "
+        "application where applicable."
+    ))
+    # 7.2 Level of detail
+    level_of_detail = models.CharField(max_length=255, blank=True, default='', help_text=gettext(
+        "Record the level of detail in accordance with a controlled vocabulary maintained by the repository."
+    ))
+    # 7.4 Language of record
+    language_of_record = models.CharField(max_length=20, blank=True, default='en', help_text=gettext(
+        "Record the language(s) and script(s) used to create the accession record. If the content has been translated "
+        "and is available in other languages, give those languages. Provide information about script only where it is "
+        "common to use multiple scripts to represent a language and it is important to know which script is employed."
+    ))

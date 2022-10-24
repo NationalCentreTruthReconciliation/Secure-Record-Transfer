@@ -44,4 +44,101 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Preservation Requirements',
             },
         ),
+        migrations.CreateModel(
+            name='EventType',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(
+                    help_text='Record the event type in accordance with a controlled vocabulary maintained by the repository',
+                    max_length=128)),
+                ('description', models.TextField(blank=True, default='')),
+            ],
+            options={
+                'verbose_name': 'Event Type',
+                'verbose_name_plural': 'Event Types',
+            },
+        ),
+        migrations.CreateModel(
+            name='GeneralNote',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('note', models.TextField(blank=True, default='',
+                                          help_text='To provide an open text element for repositories to record any relevant information not accommodated elsewhere in this standard.')),
+                ('metadata', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='general_note',
+                                               to='caais.metadata')),
+            ],
+            options={
+                'verbose_name': 'General Note',
+                'verbose_name_plural': 'General Notes',
+            },
+        ),
+        migrations.CreateModel(
+            name='Event',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('event_date', models.DateTimeField(auto_now_add=True)),
+                ('event_agent', models.CharField(
+                    help_text='Record the name of the staff member or application responsible for the event.',
+                    max_length=256)),
+                ('event_note', models.TextField(blank=True, default='',
+                                                help_text='Record any other information relevant to describing the event.')),
+                ('event_type',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='event_type',
+                                   to='caais.eventtype')),
+                ('metadata', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events',
+                                               to='caais.metadata')),
+            ],
+            options={
+                'verbose_name': 'Event',
+                'verbose_name_plural': 'Events',
+            },
+        ),
+        migrations.CreateModel(
+            name='DateOfCreationOrRevision',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('revision_type', models.CharField(default='',
+                                                   help_text='Record the action type in accordance with a controlled vocabulary maintained by the repository.',
+                                                   max_length=255)),
+                ('revision_date', models.DateTimeField(auto_now_add=True,
+                                                       help_text='Record the date on which the action (creation or revision) occurred.')),
+                ('revision_agent', models.CharField(default='',
+                                                    help_text='Record the name of the staff member who performed the action (creation or revision) on the accession record.',
+                                                    max_length=255)),
+                ('revision_note', models.TextField(blank=True, default='',
+                                                   help_text='Record any information summarizing actions applied to the accession record.')),
+                ('metadata',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='date_creation_revisions',
+                                   to='caais.metadata')),
+            ],
+            options={
+                'verbose_name': 'Date of Creation or Revision',
+                'verbose_name_plural': 'Dates of Creation or Revision',
+            },
+            managers=[
+                ('object', django.db.models.manager.Manager()),
+            ],
+        ),
+        migrations.CreateModel(
+            name='ControlInformation',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('rules_or_conventions', models.CharField(blank=True, default='',
+                                                          help_text='Record information about the standards, rules or conventions that were followed when creating or maintaining the accession record. Indicate the software application if the accession record is based on a data entry template in a database or other automated system. Give the version number of the standard or software application where applicable.',
+                                                          max_length=255)),
+                ('level_of_detail', models.CharField(blank=True, default='',
+                                                     help_text='Record the level of detail in accordance with a controlled vocabulary maintained by the repository.',
+                                                     max_length=255)),
+                ('language_of_record', models.CharField(blank=True, default='en',
+                                                        help_text='Record the language(s) and script(s) used to create the accession record. If the content has been translated and is available in other languages, give those languages. Provide information about script only where it is common to use multiple scripts to represent a language and it is important to know which script is employed.',
+                                                        max_length=20)),
+                ('metadata',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='control_informations',
+                                   to='caais.metadata')),
+            ],
+            options={
+                'verbose_name': 'Control Information',
+                'verbose_name_plural': 'Control Information',
+            },
+        ),
     ]

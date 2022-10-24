@@ -245,7 +245,6 @@ class Submission(models.Model):
     part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, blank=True, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
-    bag_name = models.CharField(max_length=256, null=True)
 
     @property
     def user_folder(self):

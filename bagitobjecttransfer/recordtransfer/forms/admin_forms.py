@@ -122,8 +122,7 @@ class SubmissionForm(RecordTransferModelForm):
             'submission_date',
             'bag',
             'user',
-            'review_status',
-            'bag_name'
+            'review_status'
         )
 
     disabled_fields = ['submission_date', 'bag', 'user']
