@@ -15,10 +15,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.text import slugify
 from django.template.loader import render_to_string
 
-from caais.models import Metadata
-from recordtransfer.caais import convert_transfer_form_to_meta_tree
+from recordtransfer.caais import convert_form_data_to_metadata
 from recordtransfer.models import BagGroup, UploadedFile, UploadSession, User, Job, Submission
-from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL, BAG_CHECKSUMS
+from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -35,7 +34,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
         user_submitted (User): The user who submitted the data and files.
     '''
-    LOGGER.info(msg='Creating a submission and bag from the transfer submitted by {0}'.format(
+    LOGGER.info(msg='Creating a submission from the transfer submitted by {0}'.format(
         str(user_submitted))
     )
 
@@ -44,7 +43,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     upload_session = UploadSession.objects.filter(token=token).first()
 
     LOGGER.info(msg='Creating serializable CAAIS metadata from form data')
-    caais_metadata = convert_transfer_form_to_meta_tree(form_data)
+    metadata = convert_form_data_to_metadata(form_data)
 
     title = form_data['accession_title']
     abbrev_title = title if len(title) <= 20 else title[0:20]
@@ -55,16 +54,12 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
 
     LOGGER.info(msg=('Created name for bag: "{0}"'.format(bag_name)))
 
-    metadata = Metadata(caais_metadata)
-    metadata.save()
-
     LOGGER.info('Creating Submission object linked to new metadata')
     new_submission = Submission(
         submission_date=timezone.now(),
         user=user_submitted,
         bag=metadata,
         upload_session=upload_session,
-        bag_name=bag_name
     )
     new_submission.save()
 
