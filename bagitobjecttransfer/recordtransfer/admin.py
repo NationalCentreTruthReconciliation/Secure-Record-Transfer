@@ -5,9 +5,7 @@ import os
 import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
-from typing import Union
 
-import bagit
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
@@ -467,7 +465,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     search_fields = [
         'id',
-        'bag__bag_name',
+        'bag__accession_title',
     ]
 
     list_display = [
@@ -525,18 +523,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         self.message_user(request, msg, messages.WARNING)
         url = reverse('admin:index', current_app=self.admin_site.name)
         return HttpResponseRedirect(url)
-
-    def get_urls(self):
-        ''' Add zip/ view to admin
-        '''
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        download_url = [
-            path('<path:object_id>/zip/',
-                 self.admin_site.admin_view(self.create_zipped_bag),
-                 name='%s_%s_zip' % info),
-        ]
-        return download_url + urls
 
     def export_reports(self, request, queryset):
         ''' Download an application/x-zip-compressed file containing reports

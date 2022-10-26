@@ -72,8 +72,8 @@
     <div class="main-container">
         <p>
             The following is an automatically generated report for the transfer submitted by
-            {{ bag.user.username }} ({{ bag.user.email }}) at {{ bag.bagging_date }}, titled
-            {{ metadata.section_1.accession_title }}.
+            {{ submission.user.username }} ({{ submission.user.email }}) at {{ submission.submission_date }}, titled
+            "{{ metadata.section_1.accession_title }}".
         </p>
         <table border="1" cellspacing="0">
             <tr>
@@ -81,11 +81,11 @@
             </tr>
             <tr>
                 <td class="left-col level-1">Transfer Date</td>
-                <td>{{ bag.bagging_date }}</td>
+                <td>{{ submission.submission_date }}</td>
             </tr>
             <tr>
                 <td class="left-col level-1">Submitted By</td>
-                <td>{{ bag.user.username }}</td>
+                <td>{{ submission.user.username }}</td>
             </tr>
             <tr>
                 <td class="left-col level-1">Report Generation Date</td>
@@ -93,7 +93,7 @@
             </tr>
             <tr>
                 <td class="left-col level-1">Bag UUID</td>
-                <td>{{ bag.uuid }}</td>
+                <td>{{ submission.uuid }}</td>
             </tr>
         </table>
         <table border="1" cellspacing="0" id="section_1">
@@ -139,9 +139,20 @@
                 <td>{{ metadata.section_1.accession_title }}</td>
             </tr>
             <tr>
-                <td class="left-col level-1">1.5 Archival Unit</td>
-                <td>{{ metadata.section_1.archival_unit }}</td>
+                <td colspan="2" class="level-1">1.5 Archival Unit</td>
             </tr>
+            {% if metadata.section_1.archival_unit|length > 0 %}
+                {% for unit in metadata.section_1.archival_unit %}
+                <tr>
+                    <td colspan="2" class="array-item-title">
+                        Archival Unit
+                        ({{ forloop.counter }} of {{ metadata.section_1.archival_unit|length }})
+                    </td>
+                </tr><tr>
+                    <td>{{ unit.archival_unit }}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
             <tr>
                 <td class="left-col level-1">1.6 Acquisition Method</td>
                 <td>{{ metadata.section_1.acquisition_method }}</td>
@@ -160,66 +171,76 @@
             <tr>
                 <td colspan="2" class="level-1">2.1 Source of Material</td>
             </tr>
-            <tr>
-                <td class="left-col level-2">2.1.1 Source Type</td>
-                <td>{{ metadata.section_2.source_of_information.source_type }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-2">2.1.2 Source Name</td>
-                <td>{{ metadata.section_2.source_of_information.source_name }}</td>
-            </tr>
-            <tr>
-                <td colspan="2" class="level-2">2.1.3 Source Contact Information</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Contact Name</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.contact_name }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Job Title</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.job_title }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Phone Number</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.phone_number }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Email</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.email }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Address Line 1</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.address_line_1 }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Address Line 2</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.address_line_2 }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">City</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.city }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Province or State</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.province_or_state }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Postal or Zip Code</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.postal_or_zip_code }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-3">Country</td>
-                <td>{{ metadata.section_2.source_of_information.source_contact_information.country }}</td>
-            </tr>
-            <tr>
-                <td class="left-col level-2">2.1.4 Source Role</td>
-                <td>{{ metadata.section_2.source_of_information.source_role}}</td>
-            </tr>
-            {% if metadata.section_2.source_of_information.source_note %}
+            {% if metadata.section_2.source_of_material|length > 0 %}
+                {% for source in metadata.section_2.source_of_material %}
                 <tr>
-                    <td class="left-col level-2">2.1.5 Source Note</td>
-                    <td>{{ metadata.section_2.source_of_information.source_note}}</td>
+                        <td colspan="2" class="array-item-title">
+                            Source of Material
+                            ({{ forloop.counter }} of {{ metadata.section_2.source_of_material|length }})
+                        </td>
+                    </tr>
+                <tr>
+                    <td class="left-col level-2">2.1.1 Source Type</td>
+                    <td>{{ source.source_type }}</td>
                 </tr>
+                <tr>
+                    <td class="left-col level-2">2.1.2 Source Name</td>
+                    <td>{{ source.source_name }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="level-2">2.1.3 Source Contact Information</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Contact Name</td>
+                    <td>{{ source.source_contact_information.contact_name }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Job Title</td>
+                    <td>{{ source.source_contact_information.job_title }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Phone Number</td>
+                    <td>{{ source.source_contact_information.phone_number }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Email</td>
+                    <td>{{ source.source_contact_information.email }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Address Line 1</td>
+                    <td>{{ source.source_contact_information.address_line_1 }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Address Line 2</td>
+                    <td>{{ source.source_contact_information.address_line_2 }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">City</td>
+                    <td>{{ source.source_contact_information.city }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Province or State</td>
+                    <td>{{ source.source_contact_information.province_or_state }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Postal or Zip Code</td>
+                    <td>{{ source.source_contact_information.postal_or_zip_code }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-3">Country</td>
+                    <td>{{ source.source_contact_information.country }}</td>
+                </tr>
+                <tr>
+                    <td class="left-col level-2">2.1.4 Source Role</td>
+                    <td>{{ source.source_role}}</td>
+                </tr>
+                    {% if source.source_note %}
+                        <tr>
+                            <td class="left-col level-2">2.1.5 Source Note</td>
+                            <td>{{ source.source_note}}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
             {% if metadata.section_2.custodial_history %}
                 <tr>
@@ -245,7 +266,7 @@
                         Extent Statement
                         ({{ forloop.counter }} of {{ metadata.section_3.extent_statement|length }})
                     </td>
-                <tr>
+                </tr>
                 <tr>
                     <td class="left-col level-2">3.2.1 Extent Statement Type</td>
                     <td>{{ extent.extent_statement_type }}</td>
@@ -275,9 +296,22 @@
                 <th colspan="2"><div class="title">Section 4: Management Information</div></th>
             </tr>
             <tr>
-                <td class="left-col level-1">4.1 Storage Location</td>
-                <td>{{ metadata.section_4.storage_location }}</td>
+                <td colspan="2" class="level-1">4.1 Storage Location</td>
             </tr>
+            {% if metadata.section_4.storage_location|length > 0 %}
+            {% for location in metadata.section_4.storage_location %}
+                <tr>
+                    <td colspan="2" class="array-item-title">
+                        Storage Location
+                        ({{ forloop.counter }} of {{ metadata.section_4.storage_location|length }})
+                    </td>
+                </tr>
+                <tr>
+                    <td class="left-col level-2"></td>
+                    <td>{{ location }}</td>
+                </tr>
+            {% endfor %}
+            {% endif %}
             <tr>
                 <td colspan="2" class="level-1">4.2 Rights Statement</td>
             </tr>
@@ -287,7 +321,7 @@
                         Rights Statement
                         ({{ forloop.counter }} of {{ metadata.section_4.rights_statement|length }})
                     </td>
-                <tr>
+                </tr>
                 <tr>
                     <td class="left-col level-2">4.2.1 Rights Statement Type</td>
                     <td>{{ rights.rights_statement_type }}</td>
@@ -312,7 +346,7 @@
                         Material Assessment Statement
                         ({{ forloop.counter }} of {{ metadata.section_4.material_assessment_statement|length }})
                     </td>
-                <tr>
+                </tr>
                 <tr>
                     <td class="left-col level-2">4.3.1 Material Assessment Statement Type</td>
                     <td>{{ assessment.material_assessment_statement_type }}</td>
@@ -402,7 +436,7 @@
                         Event Statement
                         ({{ forloop.counter }} of {{ metadata.section_5.event_statement|length }})
                     </td>
-                <tr>
+                </tr>
                 <tr>
                     <td class="left-col level-2">5.1.1 Event Type</td>
                     <td>{{ event.event_type }}</td>
@@ -426,8 +460,22 @@
             </tr>
             <tr>
                 <td class="left-col level-1">6.1 General Note</td>
-                <td>{{ metadata.section_6.general_note }}</td>
+                <td></td>
             </tr>
+            {% if metadata.section_6.general_note|length > 0 %}
+            {% for note in metadata.section_6.general_note %}
+                <tr>
+                    <td colspan="2" class="array-item-title">
+                        General Note
+                        ({{ forloop.counter }} of {{ metadata.section_6.general_note|length }})
+                    </td>
+                </tr>
+                <tr>
+                    <td class="left-col level-2"></td>
+                    <td>{{ note }}</td>
+                </tr>
+            {% endfor %}
+            {% endif %}
         </table>
         <table border="1" cellspacing="0" id="section_7">
             <tr>

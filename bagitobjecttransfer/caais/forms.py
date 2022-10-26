@@ -7,11 +7,8 @@ from django_countries.widgets import CountrySelectWidget
 from caais.models import (
     Identifier,
     ArchivalUnit,
-    DispositionAuthority,
     SourceOfMaterial,
-    PreliminaryCustodialHistory,
     ExtentStatement,
-    PreliminaryScopeAndContent,
     LanguageOfMaterial,
     StorageLocation,
     Rights,
@@ -64,25 +61,6 @@ class InlineArchivalUnitForm(forms.ModelForm):
         }
 
 
-class InlineDispositionAuthorityForm(forms.ModelForm):
-    ''' Form to edit disposition authorities inline in administrator website
-    '''
-
-    class Meta:
-        model = DispositionAuthority
-
-        fields = (
-            'disposition_authority',
-        )
-
-        widgets = {
-            'disposition_authority': forms.widgets.Textarea(attrs={
-                'rows': 2,
-                'class': 'inline-textarea',
-            })
-        }
-
-
 class InlineSourceOfMaterialForm(forms.ModelForm):
     ''' Form to edit sources of material inline in administrator website
     '''
@@ -129,26 +107,6 @@ class InlineSourceOfMaterialForm(forms.ModelForm):
     )
 
 
-class InlinePreliminaryCustodialHistoryForm(forms.ModelForm):
-    ''' Form to edit preliminary custodial histories inline in administrator
-    website
-    '''
-
-    class Meta:
-        model = PreliminaryCustodialHistory
-
-        fields = (
-            'preliminary_custodial_history',
-        )
-
-        widgets = {
-            'preliminary_custodial_history': forms.widgets.Textarea(attrs={
-                'rows': 2,
-                'class': 'inline-textarea',
-            })
-        }
-
-
 class InlineExtentStatementForm(forms.ModelForm):
     ''' Form to edit extent statements inline in administrator website
     '''
@@ -162,26 +120,6 @@ class InlineExtentStatementForm(forms.ModelForm):
             'extent_note': forms.widgets.Textarea(attrs={
                 'rows': 2,
                 'class': 'vLargeTextField'
-            })
-        }
-
-
-class InlinePreliminaryScopeAndContentForm(forms.ModelForm):
-    ''' Form to edit preliminary scope and contents inline in administrator
-    website
-    '''
-
-    class Meta:
-        model = PreliminaryScopeAndContent
-
-        fields = (
-            'preliminary_scope_and_content',
-        )
-
-        widgets = {
-            'preliminary_scope_and_content': forms.widgets.Textarea(attrs={
-                'rows': 2,
-                'class': 'inline-textarea',
             })
         }
 
