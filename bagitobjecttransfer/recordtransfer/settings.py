@@ -65,8 +65,8 @@ DEFAULT_DATA = {
     },
     'section_4': {
         'storage_location': 'Placeholder',
-        'preservation_requirement_type': 'Physical Condition',
-        'preservation_requirement_value': 'Record is digital, physical assessment is not possible'
+        'material_assessment_statement_type': 'Physical Condition',
+        'material_assessment_statement_value': 'Record is digital, physical assessment is not possible'
     },
     'section_5': {
         'event_type': 'Digital Object Transfer',

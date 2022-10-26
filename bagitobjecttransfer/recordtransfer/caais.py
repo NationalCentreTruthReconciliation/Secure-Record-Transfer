@@ -12,10 +12,7 @@ flat metadata.
 '''
 from collections import OrderedDict
 
-from caais.models import Metadata, Identifier, ArchivalUnit, DispositionAuthority, SourceOfMaterial, \
-    PreliminaryCustodialHistory, ExtentStatement, ExtentType, PreliminaryScopeAndContent, LanguageOfMaterial, \
-    StorageLocation, Rights, RightsType, PreservationRequirement, PreservationRequirementType, Event, EventType, \
-    GeneralNote, DateOfCreationOrRevision, ControlInformation
+import caais.models as c_models
 from recordtransfer.settings import DEFAULT_DATA
 
 
@@ -88,19 +85,13 @@ def _get_section_1_tree(form_data: dict) -> OrderedDict:
         form_data=form_data,
         caais_key='repository',
         section=curr_section)
-    # 1.2 Identifiers
+    # 1.2 Accession Identifier
+    curr_tree['accession_identifier'] = get_mandatory_field(
+        form_data=form_data,
+        caais_key='accession_identifier',
+        section=curr_section)
+    # 1.3 Other Identifiers
     curr_tree['identifiers'] = []
-    # Accession identifier is required so we add it separately.
-    curr_tree['identifiers'].append(
-        OrderedDict({
-            'identifier_type': 'Accession Identifier',
-            'identifier_value': get_mandatory_field(
-                form_data=form_data,
-                caais_key='accession_identifier',
-                section=curr_section),
-            'identifier_note': '',
-        })
-    )
     formset_key = 'formset-otheridentifiers'
     if formset_key in form_data and form_data[formset_key]:
         valid_forms = [x for x in form_data[formset_key] if x]
@@ -122,22 +113,22 @@ def _get_section_1_tree(form_data: dict) -> OrderedDict:
                 caais_key='identifier_note',
                 section=curr_section)
             curr_tree['identifiers'].append(other_identifier)
-    # 1.3 Accession Title
+    # 1.4 Accession Title
     curr_tree['accession_title'] = get_mandatory_field(
         form_data=form_data,
         caais_key='accession_title',
         section=curr_section)
-    # 1.4 Archival Unit
+    # 1.5 Archival Unit
     curr_tree['archival_unit'] = get_mandatory_field(
         form_data=form_data,
         caais_key='archival_unit',
         section=curr_section)
-    # 1.5 Acquisition Method
+    # 1.6 Acquisition Method
     curr_tree['acquisition_method'] = get_mandatory_field(
         form_data=form_data,
         caais_key='acquisition_method',
         section=curr_section)
-    # 1.6 Disposition Authority - Technically Conditional, treating as Optional
+    # 1.7 Disposition Authority - Technically Conditional, treating as Optional
     curr_tree['disposition_authority'] = get_optional_field(
         form_data=form_data,
         caais_key='disposition_authority',
@@ -181,66 +172,69 @@ def _get_section_2_tree(form_data: dict) -> OrderedDict:
     # 2.1 Source of Information
     curr_tree['source_of_information'] = OrderedDict()
     # 2.1.1 Source Type
-    curr_tree['source_of_information']['source_type'] = str(get_optional_field(
+    curr_tree['source_type'] = str(get_optional_field(
         form_data=form_data,
         caais_key='source_type',
         section=curr_section))
     # 2.1.2 Source Name - Mandatory
-    curr_tree['source_of_information']['source_name'] = get_mandatory_field(
+    curr_tree['source_name'] = get_mandatory_field(
         form_data=form_data,
         caais_key='source_name',
         section=curr_section)
     # 2.1.3 Source Contact Information - Mandatory
-    contact_info_field = 'source_contact_information'
-    curr_tree['source_of_information'][contact_info_field] = OrderedDict()
     # The following fields up to 2.1.4 are technically not in the standard
-    curr_tree['source_of_information'][contact_info_field]['contact_name'] = get_mandatory_field(
+    curr_tree['contact_name'] = get_mandatory_field(
         form_data=form_data,
         caais_key='contact_name',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['job_title'] = get_mandatory_field(
+    curr_tree['job_title'] = get_mandatory_field(
         form_data=form_data,
         caais_key='job_title',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['phone_number'] = get_mandatory_field(
+    curr_tree['phone_number'] = get_mandatory_field(
         form_data=form_data,
         caais_key='phone_number',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['email'] = get_mandatory_field(
+    curr_tree['email_address'] = get_mandatory_field(
         form_data=form_data,
         caais_key='email',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['address_line_1'] = get_mandatory_field(
+    curr_tree['address_line_1'] = get_mandatory_field(
         form_data=form_data,
         caais_key='address_line_1',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['address_line_2'] = get_optional_field(
+    curr_tree['address_line_2'] = get_optional_field(
         form_data=form_data,
         caais_key='address_line_2',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['city'] = get_mandatory_field(
+    curr_tree['city'] = get_mandatory_field(
         form_data=form_data,
         caais_key='city',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['province_or_state'] = get_mandatory_field(
+    curr_tree['region'] = get_mandatory_field(
         form_data=form_data,
         caais_key='province_or_state',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['postal_or_zip_code'] = get_mandatory_field(
+    if curr_tree['region'].lower() == 'other':
+        curr_tree['region'] = get_optional_field(
+            form_data=form_data,
+            caais_key='other_province_or_state',
+            section=curr_section)
+    curr_tree['postal_or_zip_code'] = get_mandatory_field(
         form_data=form_data,
         caais_key='postal_or_zip_code',
         section=curr_section)
-    curr_tree['source_of_information'][contact_info_field]['country'] = get_mandatory_field(
+    curr_tree['country'] = get_mandatory_field(
         form_data=form_data,
         caais_key='country',
         section=curr_section)
     # 2.1.4 Source Role - Mandatory
-    curr_tree['source_of_information']['source_role'] = str(get_mandatory_field(
+    curr_tree['source_role'] = str(get_mandatory_field(
         form_data=form_data,
         caais_key='source_role',
         section=curr_section))
     # 2.1.5 Source Note - Optional
-    curr_tree['source_of_information']['source_note'] = get_optional_field(
+    curr_tree['source_note'] = get_optional_field(
         form_data=form_data,
         caais_key='source_note',
         section=curr_section)
@@ -294,7 +288,7 @@ def _get_section_3_tree(form_data: dict) -> OrderedDict:
     curr_tree['date_of_material'] = get_mandatory_field(
         form_data=form_data,
         caais_key='date_of_material',
-        section= curr_section)
+        section=curr_section)
     # 3.2 Extent Statement - Technically repeatable, but we only include one array item
     curr_tree['extent_statement'] = []
     new_extent = OrderedDict()
@@ -391,25 +385,30 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
                 caais_key='other_rights_statement_type',
                 section=curr_section)
             curr_tree['rights_statement'].append(rights)
-    # 4.3 Preservation Requirement - Repeatable
-    curr_tree['preservation_requirement'] = []
+    # 4.3 Material Assessment Statement - Repeatable
+    curr_tree['material_assessments'] = []
     new_assessment = OrderedDict()
-    # 4.3.1 Preservation Requirement Type
-    new_assessment['preservation_requirement_type'] = get_mandatory_field(
+    # 4.3.1 Material Assessment Statement Type
+    new_assessment['material_assessment_statement_type'] = get_mandatory_field(
         form_data=form_data,
-        caais_key='preservation_requirement_type',
+        caais_key='material_assessment_statement_type',
         section=curr_section)
-    # 4.3.2 Preservation Requirement Value
-    new_assessment['preservation_requirement_value'] = get_mandatory_field(
+    # 4.3.2 Material Assessment Statement Value
+    new_assessment['material_assessment_statement_value'] = get_mandatory_field(
         form_data=form_data,
-        caais_key='preservation_requirement_value',
+        caais_key='material_assessment_statement_value',
         section=curr_section)
-    # 4.3.3 Preservation Requirement Note
-    new_assessment['preservation_requirement_note'] = get_optional_field(
+    # 4.3.3 Material Assessment Statement Plan
+    new_assessment['material_assessment_statement_plan'] = get_optional_field(
         form_data=form_data,
-        caais_key='preservation_requirement_note',
+        caais_key='material_assessment_statement_plan',
         section=curr_section)
-    curr_tree['preservation_requirement'].append(new_assessment)
+    # 4.3.4 Material Assessment Statement Note
+    new_assessment['material_assessment_statement_note'] = get_optional_field(
+        form_data=form_data,
+        caais_key='material_assessment_statement_note',
+        section=curr_section)
+    curr_tree['material_assessments'].append(new_assessment)
     # Possible Contact Assessment as a second Preservation Requirment section.
     condition_assessment = get_optional_field(
         form_data=form_data,
@@ -418,10 +417,9 @@ def _get_section_4_tree(form_data: dict) -> OrderedDict:
     )
     if len(condition_assessment) > 0:
         physical_assessment = OrderedDict()
-        physical_assessment['preservation_requirement_type'] = 'Contact assessment'
-        physical_assessment['preservation_requirement_value'] = condition_assessment
-        physical_assessment['preservation_requirement_note'] = ''
-        curr_tree['preservation_requirement'].append(physical_assessment)
+        physical_assessment['material_assessment_statement_type'] = 'Contact assessment'
+        physical_assessment['material_assessment_statement_value'] = condition_assessment
+        curr_tree['material_assessments'].append(physical_assessment)
 
     # 4.4 Appraisal Statement
     curr_tree['appraisal_statement'] = []
@@ -647,36 +645,37 @@ def _get_property_fields(form_data: dict, section_name: str) -> dict:
     property_fields = {
         'section_1': [
             'repository',
+            'accession_identifier',
             'accession_title',
             'acquisition_method',
-            'status'
+            'custodial_history',
+            'disposition_authority',
+            'status',
         ],
         'section_2': [
-            'source_type',
             'source_name',
-            'source_role',
             'contact_name',
             'job_title',
             'phone_number',
-            'email',
+            'email_address',
             'address_line_1',
             'address_line_2',
             'city',
-            'province_or_state',
+            'region',
             'postal_or_zip_code',
-            'country'
+            'country',
         ],
         'section_4': [
             'storage_location',
             'rights_statement',
             'material_assessment_statement',
-            'condition_assessment'
+            'condition_assessment',
         ]
     }
     return {f: v for f, v in form_data.items() if f in property_fields[section_name]}
 
 
-def convert_form_data_to_metadata(form_data: dict) -> Metadata:
+def convert_form_data_to_metadata(form_data: dict) -> c_models.Metadata:
     arranged_data = convert_transfer_form_to_meta_tree(form_data)
     metadata = _convert_form_to_caais_section_1(arranged_data['section_1'])
     _convert_form_to_caais_section_2(metadata, arranged_data['section_2'])
@@ -688,7 +687,7 @@ def convert_form_data_to_metadata(form_data: dict) -> Metadata:
     return metadata
 
 
-def _convert_form_to_caais_section_1(form_data: dict) -> Metadata:
+def _convert_form_to_caais_section_1(form_data: dict) -> c_models.Metadata:
     """ Convert form data into the top-level Metadata model and any necessary
     associated models.
 
@@ -700,46 +699,53 @@ def _convert_form_to_caais_section_1(form_data: dict) -> Metadata:
     # Make the main CAAIS object
     section_1_data = _get_property_fields(form_data, 'section_1')
     # 1.1 Repository, 1.3 Accession Title & 1.5 Acqusition Method as properties.
-    metadata = Metadata.objects.create(**section_1_data)
+    metadata = c_models.Metadata.objects.create(**section_1_data)
     # 1.2 Create identifiers.
     for identifier in form_data['identifiers']:
-        identifier['metadata'] = metadata
-        new_id = Identifier.objects.create(**identifier)
+        if len(identifier['identifier_type']) > 0 or len(identifier['identifier_value']) > 0 or \
+                len(identifier['identifier_note']) > 0:
+            identifier['metadata'] = metadata
+            c_models.Identifier.objects.create(**identifier)
     # 1.4 Archival Unit, if it exists.
     if form_data['archival_unit']:
-        ArchivalUnit.objects.create(**{
+        c_models.ArchivalUnit.objects.create(**{
             'metadata': metadata,
             'archival_unit': form_data['archival_unit']
-        })
-    # 1.6 Disposition Authority, if it exists.
-    if form_data['disposition_authority']:
-        DispositionAuthority.objects.create(**{
-            'metadata': metadata,
-            'disposition_authority': form_data['disposition_authority']
         })
     return metadata
 
 
-def _convert_form_to_caais_section_2(metadata: Metadata, form_data: dict):
+def _convert_form_to_caais_section_2(metadata: c_models.Metadata, form_data: dict):
     """ Convert form data into any necessary models for section 2 of the CAAIS model.
 
     Args:
         metadata (Metadata): The main Metadata object for this form submission.
         form_data (dict): The section 2 form data.
     """
-    source_data = _get_property_fields(form_data, 'section_2')
-    source_data['metadata'] = metadata
     # 2.1 Source of Material
-    SourceOfMaterial.objects.create(**source_data)
-    if form_data['custodial_history']:
+    fields = _get_property_fields(form_data, 'section_2')
+    fields['metadata'] = metadata
+    source = c_models.SourceOfMaterial.objects.create(**fields)
+    s_type = c_models.SourceType.objects.filter(name__iexact=form_data['source_type']).first()
+    if s_type is None:
+        s_type = c_models.SourceType()
+        s_type.name = form_data['source_type']
+        s_type.save()
+    source.source_type = s_type
+    role = c_models.SourceRole.objects.filter(name__iexact=form_data['source_role']).first()
+    if role is None:
+        role = c_models.SourceRole()
+        role.name = form_data['source_role']
+        role.save()
+    source.source_role = role
+    source.save()
+    if form_data['custodial_history'] is not None and len(form_data['custodial_history']) > 0:
         # 2.2 Preliminary Custodial History
-        PreliminaryCustodialHistory.object.create(**{
-            'metadata': metadata,
-            'preliminary_custodial_history': form_data['custodial_history']
-        })
+        metadata.custodial_history = form_data['custodial_history']
+        metadata.save()
 
 
-def _convert_form_to_caais_section_3(metadata: Metadata, form_data: dict):
+def _convert_form_to_caais_section_3(metadata: c_models.Metadata, form_data: dict):
     """ Convert form data into any necessary models for section 3 of the CAAIS model.
 
     Args:
@@ -748,39 +754,40 @@ def _convert_form_to_caais_section_3(metadata: Metadata, form_data: dict):
     """
     # 3.1 Date of Material (stored on the main Metadata)
     metadata.date_of_material = form_data['date_of_material']
+    metadata.save()
     for extent in form_data['extent_statement']:
         # 3.2 Extent Statement
         # We generate a single Extent Statement with only the type, quantity and units and a note.
-        statement = ExtentStatement()
+        statement = c_models.ExtentStatement()
         statement.metadata = metadata
         # 3.2.1 Extent type, try to reuse existing entries.
-        ext_type = ExtentType.objects.filter(name=extent['extent_statement_type']).first()
+        ext_type = c_models.ExtentType.objects.filter(name=extent['extent_statement_type']).first()
         if ext_type is None:
-            ext_type = ExtentType()
+            ext_type = c_models.ExtentType()
             ext_type.name = extent['extent_statement_type']
             ext_type.save()
         statement.extent_type = ext_type
         # 3.2.2 Quantity and Unit of Measure
-        statement.quantity_and_unit_of_measure = extent['quantity_and_type_of_units']
-        # 3.2.6 Extent Note
+        statement.quantity_and_type_of_units = extent['quantity_and_type_of_units']
+        # 3.2.3 Extent Note
         statement.extent_note = extent['extent_statement_note']
         statement.save()
-    # 3.3 Preliminary Scope and Content
-    PreliminaryScopeAndContent.objects.create(**{
-        'metadata': metadata,
-        'preliminary_scope_and_content': form_data['scope_and_content']
-    })
+    # 3.3 Scope and Content
+    if form_data['scope_and_content'] is not None and len(form_data['scope_and_content']) > 0:
+        metadata.scope_and_content = form_data['scope_and_content']
+        metadata.save()
+
     # 3.4 Language of Material
     # Split languages on comma and standardize as lowercase in the database.
     # langs = [x.strip().lower() for x in form_data['language_of_material'].split(',')]
     # for lang in langs:
-    LanguageOfMaterial.objects.create(**{
+    c_models.LanguageOfMaterial.objects.create(**{
         'metadata': metadata,
         'language_of_material': form_data['language_of_material']
     })
 
 
-def _convert_form_to_caais_section_4(metadata: Metadata, form_data: dict):
+def _convert_form_to_caais_section_4(metadata: c_models.Metadata, form_data: dict):
     """ Convert form data into any necessary models for section 4 of the CAAIS model.
 
     Args:
@@ -790,22 +797,22 @@ def _convert_form_to_caais_section_4(metadata: Metadata, form_data: dict):
     # 4 Management Information Section
     # 4.1 Storage Location - Currently no entry point for location
     location = get_optional_field(form_data, 'storage_location', 'section_4')
-    storage_location = StorageLocation.objects.filter(storage_location=location).first()
+    storage_location = c_models.StorageLocation.objects.filter(storage_location__iexact=location).first()
     if not storage_location:
-        storage_location = StorageLocation()
+        storage_location = c_models.StorageLocation()
         storage_location.storage_location = location
         storage_location.metadata = metadata
         storage_location.save()
     # 4.2 Rights
     for rights_statement in form_data['rights_statement']:
-        right = Rights()
+        right = c_models.Rights()
         right.metadata = metadata
         # 4.2.1 Rights Type
         rights_statement_type = rights_statement['rights_statement_type'] if \
             rights_statement['rights_statement_type'] != 'Other' else rights_statement['other_rights_statement_type']
-        rights_type = RightsType.objects.filter(name=rights_statement_type).first()
+        rights_type = c_models.RightsType.objects.filter(name__iexact=rights_statement_type).first()
         if not rights_type:
-            rights_type = RightsType()
+            rights_type = c_models.RightsType()
             rights_type.name = rights_statement_type
             rights_type.save()
         right.rights_type = rights_type
@@ -814,32 +821,43 @@ def _convert_form_to_caais_section_4(metadata: Metadata, form_data: dict):
         # 4.1.3 Rights Note
         right.rights_note = rights_statement['rights_statement_note']
         right.save()
-    # 4.3 Preservation Requirements
-    for preservation_requirement in form_data['preservation_requirement']:
-        requirement_type = PreservationRequirementType.objects\
-            .filter(name=preservation_requirement['preservation_requirement_type']).first()
+    # 4.3 Material Assessment Statements
+    for preservation_requirement in form_data['material_assessments']:
+        requirement_type = c_models.MaterialAssessmentType.objects\
+            .filter(name__iexact=preservation_requirement['material_assessment_statement_type']).first()
         if not requirement_type:
-            requirement_type = PreservationRequirementType()
-            requirement_type.name = preservation_requirement['preservation_requirement_type']
+            requirement_type = c_models.MaterialAssessmentType()
+            requirement_type.name = preservation_requirement['material_assessment_statement_type']
             requirement_type.save()
-        PreservationRequirement.objects.create(**{
+        mas = c_models.MaterialAssessmentStatement.objects.create(**{
             'metadata': metadata,
-            'requirement_type': requirement_type,
-            'requirement_value': preservation_requirement['preservation_requirement_value'],
-            'requirement_note': preservation_requirement['preservation_requirement_note']
+            'assessment_type': requirement_type,
+            'assessment_value': preservation_requirement['material_assessment_statement_value'],
         })
+        try:
+            if len(preservation_requirement['material_assessment_statement_note']) > 0:
+                mas.assessment_note = preservation_requirement['material_assessment_statement_note']
+        except KeyError:
+            pass
+        try:
+            if len(preservation_requirement['material_assessment_statement_plan']) > 0:
+                mas.assessment_plan = preservation_requirement['material_assessment_statement_plan']
+        except KeyError:
+            pass
+        mas.save()
 
 
-def _convert_form_to_caais_section_5(metadata: Metadata, form_data: dict):
-    new_event = Event()
+def _convert_form_to_caais_section_5(metadata: c_models.Metadata, form_data: dict):
+    new_event = c_models.Event()
+    new_event.metadata = metadata
     # 5.1.1 Event Type
     event_type_from_form = get_mandatory_field(
         form_data=form_data,
         caais_key='event_type',
         section='section_5')
-    event_type = EventType.objects.filter(name=event_type_from_form).first()
+    event_type = c_models.EventType.objects.filter(name__iexact=event_type_from_form).first()
     if event_type is None:
-        event_type = EventType()
+        event_type = c_models.EventType()
         event_type.name = event_type_from_form
         event_type.save()
     new_event.event_type = event_type
@@ -858,24 +876,23 @@ def _convert_form_to_caais_section_5(metadata: Metadata, form_data: dict):
         form_data=form_data,
         caais_key='event_note',
         section='section_5')
-    new_event.metadata = metadata
     new_event.save()
 
 
-def _convert_form_to_caais_section_6(metadata: Metadata, form_data: dict):
+def _convert_form_to_caais_section_6(metadata: c_models.Metadata, form_data: dict):
     note = get_optional_field(
         form_data=form_data,
         caais_key='general_note',
         section='section_6')
 
     if len(note) > 0:
-        GeneralNote.objects.create(**{
+        c_models.GeneralNote.objects.create(**{
             'note': note,
             'metadata': metadata
         })
 
 
-def _convert_form_to_caais_section_7(metadata: Metadata, form_data: dict):
+def _convert_form_to_caais_section_7(metadata: c_models.Metadata, form_data: dict):
     # 7.1 Rules or Conventions (static value currently)
     rules_or_conventions = get_optional_field(
         form_data=form_data,
@@ -891,33 +908,38 @@ def _convert_form_to_caais_section_7(metadata: Metadata, form_data: dict):
         form_data=form_data,
         caais_key='language_of_accession_record',
         section='section_7')
-    if rules_or_conventions or level_of_detail or language_of_accession_record:
-        ControlInformation.objects.create(**{
-            'metadata': metadata,
-            'rules_or_conventions': rules_or_conventions,
-            'level_of_detail': level_of_detail,
-            'language_of_record': language_of_accession_record
-        })
+    updated = False
+    if len(rules_or_conventions) > 0:
+        metadata.rules_or_conventions = rules_or_conventions
+        updated = True
+    if len(level_of_detail) > 0:
+        metadata.level_of_detail = level_of_detail
+        updated = True
+    if len(language_of_accession_record) > 0:
+        metadata.language_of_record = language_of_accession_record
+        updated = True
+    if updated:
+        metadata.save()
     # 7.3 Date of Creation or Revision - Technically repeatable, but we only include one array item
-    revision = DateOfCreationOrRevision()
+    revision = c_models.DateOfCreationOrRevision()
     revision.metadata = metadata
     # 7.3.1 Action Type
-    revision.revision_type = get_mandatory_field(
+    revision.action_type = get_mandatory_field(
         form_data=form_data,
         caais_key='action_type',
         section='section_7')
     # 7.3.2 Action Date
-    revision.revision_date = get_mandatory_field(
+    revision.action_date = get_mandatory_field(
         form_data=form_data,
         caais_key='action_date',
         section='section_7')
     # 7.3.3 Action Agent
-    revision.revision_agent = get_mandatory_field(
+    revision.action_agent = get_mandatory_field(
         form_data=form_data,
         caais_key='action_agent',
         section='section_7')
     # 7.3.4 Action Note
-    revision.revision_note = get_optional_field(
+    revision.action_note = get_optional_field(
         form_data=form_data,
         caais_key='action_note',
         section='section_7')

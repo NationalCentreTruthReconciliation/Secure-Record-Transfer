@@ -256,6 +256,13 @@ class Submission(models.Model):
         """
         return os.path.join(self.user_folder, self.bag_name)
 
+    @property
+    def extent_statements(self):
+        """ Return the first extent statement for this submission. """
+        for e in self.bag.extent_statements.get_queryset().all():
+            return e.quantity_and_type_of_units
+        return ''
+
     def get_report(self):
         ''' Create an HTML report for this submission
 
@@ -263,9 +270,9 @@ class Submission(models.Model):
             (str): A string containing the report markup
         '''
         return render_to_string('recordtransfer/report/metadata_report.html', context={
-            'bag': self.bag,
+            'submission': self,
             'current_date': timezone.now(),
-            'metadata': json.loads(self.bag.caais_metadata),
+            'metadata': self.bag.get_caais_metadata(),
         })
 
     def get_admin_change_url(self):
@@ -392,7 +399,7 @@ class Appraisal(models.Model):
         ARCHIVAL_APPRAISAL = 'AP', _('Archival Appraisal')
         MONETARY_APPRAISAL = 'MP', _('Monetary Appraisal')
 
-    submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='appraisals')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     appraisal_type = models.CharField(max_length=2, choices=AppraisalType.choices)

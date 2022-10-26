@@ -5,11 +5,8 @@ from django.contrib import admin
 from caais.forms import (
     InlineIdentifierForm,
     InlineArchivalUnitForm,
-    InlineDispositionAuthorityForm,
     InlineSourceOfMaterialForm,
-    InlinePreliminaryCustodialHistoryForm,
     InlineExtentStatementForm,
-    InlinePreliminaryScopeAndContentForm,
     InlineLanguageOfMaterialForm,
     InlineStorageLocationForm,
     InlineRightsForm,
@@ -19,21 +16,16 @@ from caais.models import (
     Metadata,
     Identifier,
     ArchivalUnit,
-    DispositionAuthority,
     SourceRole,
     SourceType,
     SourceConfidentiality,
     SourceOfMaterial,
-    PreliminaryCustodialHistory,
     ExtentStatement,
     ExtentType,
-    ContentType,
-    CarrierType,
-    PreliminaryScopeAndContent,
     LanguageOfMaterial,
     StorageLocation,
     RightsType,
-    Rights,
+    Rights, EventType,
 )
 
 
@@ -58,16 +50,6 @@ class ArchivalUnitInlineAdmin(admin.TabularInline):
     '''
     model = ArchivalUnit
     form = InlineArchivalUnitForm
-    show_change_link = False
-    max_num = 64
-    extra = 0
-
-
-class DispositionAuthorityInlineAdmin(admin.TabularInline):
-    ''' Admin for editing disposition authorities inline
-    '''
-    model = DispositionAuthority
-    form = InlineDispositionAuthorityForm
     show_change_link = False
     max_num = 64
     extra = 0
@@ -107,16 +89,6 @@ class SourceOfMaterialInlineAdmin(admin.StackedInline):
         return formset
 
 
-class PreliminaryCustodialHistoryInlineAdmin(admin.TabularInline):
-    ''' Admin for editing preliminary custodial histories inline
-    '''
-    model = PreliminaryCustodialHistory
-    form = InlinePreliminaryCustodialHistoryForm
-    show_change_link = False
-    max_num = 64
-    extra = 0
-
-
 class ExtentStatementInlineAdmin(admin.StackedInline):
     ''' Admin for editing extent statements inline
     '''
@@ -131,8 +103,6 @@ class ExtentStatementInlineAdmin(admin.StackedInline):
         formset = super().get_formset(request, obj, **kwargs)
         for field_name, model, required in (
                 ('extent_type', ExtentType, True),
-                ('content_type', ContentType, False),
-                ('carrier_type', CarrierType, False),
             ):
             field = formset.form.base_fields[field_name]
             field.required = required
@@ -142,17 +112,6 @@ class ExtentStatementInlineAdmin(admin.StackedInline):
             field.widget.attrs.update({'class': 'vTextField'})
             field.help_text = model._meta.get_field('name').help_text
         return formset
-
-
-class PreliminaryScopeAndContentInlineAdmin(admin.TabularInline):
-    ''' Admin for editing preliminary scope and contents inline
-    '''
-
-    model = PreliminaryScopeAndContent
-    form = InlinePreliminaryScopeAndContentForm
-    show_change_link = False
-    max_num = 64
-    extra = 0
 
 
 class LanguageOfMaterialInlineAdmin(admin.TabularInline):
@@ -227,11 +186,8 @@ class MetadataAdmin(admin.ModelAdmin):
     inlines = [
         IdentifierInlineAdmin,
         ArchivalUnitInlineAdmin,
-        DispositionAuthorityInlineAdmin,
         SourceOfMaterialInlineAdmin,
-        PreliminaryCustodialHistoryInlineAdmin,
         ExtentStatementInlineAdmin,
-        PreliminaryScopeAndContentInlineAdmin,
         LanguageOfMaterialInlineAdmin,
         StorageLocationInlineAdmin,
         RightsInlineAdmin,
@@ -280,19 +236,12 @@ class ExtentTypeAdmin(TermAdmin):
     '''
 
 
-@admin.register(ContentType)
-class ContentTypeAdmin(TermAdmin):
-    ''' Administrator to add/change content types
-    '''
-
-
-@admin.register(CarrierType)
-class CarrierTypeAdmin(TermAdmin):
-    ''' Administrator to add/change carrier types
-    '''
-
-
 @admin.register(RightsType)
 class RightsTypeAdmin(TermAdmin):
-    ''' Administratro add/change rights types
+    ''' Administrator add/change rights types
     '''
+
+
+@admin.register(EventType)
+class EventTypeAdmin(TermAdmin):
+    """Administrator add/change event types"""
