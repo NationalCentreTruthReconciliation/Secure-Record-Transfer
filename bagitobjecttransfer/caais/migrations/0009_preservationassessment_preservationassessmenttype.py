@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('note', models.TextField(blank=True, default='',
                                           help_text='To provide an open text element for repositories to record any relevant information not accommodated elsewhere in this standard.')),
-                ('metadata', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='general_note',
+                ('metadata', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='general_notes',
                                                to='caais.metadata')),
             ],
             options={
@@ -95,12 +95,25 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='DateOfCreationOrRevisionType',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(
+                    help_text='Record the action type in accordance with a controlled vocabulary maintained by the repository.',
+                    max_length=128)),
+                ('description', models.TextField(blank=True, default='')),
+            ],
+            options={
+                'verbose_name': 'Date of Creation or Revision Type',
+                'verbose_name_plural': 'Date of Creation or Revision Types',
+            },
+        ),
+        migrations.CreateModel(
             name='DateOfCreationOrRevision',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action_type', models.CharField(default='',
-                                                   help_text='Record the action type in accordance with a controlled vocabulary maintained by the repository.',
-                                                   max_length=255)),
+                ('action_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='action_type',
+                                    to='caais.dateofcreationorrevisiontype')),
                 ('action_date', models.DateTimeField(auto_now_add=True,
                                                        help_text='Record the date on which the action (creation or revision) occurred.')),
                 ('action_agent', models.CharField(default='',
