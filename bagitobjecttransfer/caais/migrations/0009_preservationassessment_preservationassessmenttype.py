@@ -133,32 +133,6 @@ class Migration(migrations.Migration):
                 ('object', django.db.models.manager.Manager()),
             ],
         ),
-        migrations.CreateModel(
-            name='ControlInformation',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('rules_or_conventions', models.CharField(blank=True, default='',
-                                                          help_text='Record information about the standards, rules or conventions that were followed when creating or maintaining the accession record. Indicate the software application if the accession record is based on a data entry template in a database or other automated system. Give the version number of the standard or software application where applicable.',
-                                                          max_length=255)),
-                ('level_of_detail', models.CharField(blank=True, default='',
-                                                     help_text='Record the level of detail in accordance with a controlled vocabulary maintained by the repository.',
-                                                     max_length=255)),
-                ('language_of_record', models.CharField(blank=True, default='en',
-                                                        help_text='Record the language(s) and script(s) used to create the accession record. If the content has been translated and is available in other languages, give those languages. Provide information about script only where it is common to use multiple scripts to represent a language and it is important to know which script is employed.',
-                                                        max_length=20)),
-                ('metadata',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='control_informations',
-                                   to='caais.metadata')),
-            ],
-            options={
-                'verbose_name': 'Control Information',
-                'verbose_name_plural': 'Control Information',
-            },
-        ),
-        migrations.RemoveField(
-            model_name='controlinformation',
-            name='metadata',
-        ),
         migrations.RemoveField(
             model_name='dispositionauthority',
             name='metadata',
@@ -238,9 +212,6 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='ContentType',
-        ),
-        migrations.DeleteModel(
-            name='ControlInformation',
         ),
         migrations.DeleteModel(
             name='DispositionAuthority',
