@@ -8,7 +8,6 @@ from typing import Union, Iterable
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 from django_countries.fields import CountryField
@@ -270,7 +269,7 @@ class Metadata(models.Model):
                 'event_statement': self.events.get_caais_metadata(),
             },
             'section_6': {
-                'general_note': self.general_note.get_caais_metadata(),
+                'general_note': self.general_notes.get_caais_metadata(),
             },
             'section_7': {
                 'date_of_creation_or_revision': self.date_creation_revisions.get_caais_metadata(),
@@ -1154,11 +1153,20 @@ class GeneralNote(models.Model):
     objects = GeneralNoteManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
-                                 related_name='general_note')
+                                 related_name='general_notes')
     note = models.TextField(blank=True, default='', help_text=gettext(
         "To provide an open text element for repositories to record any relevant information not accommodated "
         "elsewhere in this standard."
     ))
+
+
+class DateOfCreationOrRevisionType(AbstractTerm):
+    class Meta:
+        verbose_name = 'Date of Creation or Revision Type'
+        verbose_name_plural = 'Date of Creation or Revision Types'
+DateOfCreationOrRevisionType._meta.get_field('name').help_text = gettext(
+    "Record the action type in accordance with a controlled vocabulary maintained by the repository."
+)
 
 
 class DateOfCreationOrRevisionManager(models.Manager):
@@ -1193,7 +1201,7 @@ class DateOfCreationOrRevisionManager(models.Manager):
         revisions = []
         for revision in self.get_queryset().all():
             revisions.append({
-                'action_type': revision.action_type,
+                'action_type': revision.action_type.name,
                 'action_date': str(revision.action_date),
                 'action_agent': revision.action_agent,
                 'action_note': revision.action_note,
@@ -1211,9 +1219,8 @@ class DateOfCreationOrRevision(models.Model):
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='date_creation_revisions')
-    action_type = models.CharField(max_length=255, blank=False, default='', help_text=gettext(
-        "Record the action type in accordance with a controlled vocabulary maintained by the repository."
-    ))
+    action_type = models.ForeignKey(DateOfCreationOrRevisionType, on_delete=models.SET_NULL, null=True,
+                                    related_name='action_type')
     action_date = models.DateTimeField(auto_now_add=True, help_text=gettext(
         "Record the date on which the action (creation or revision) occurred."
     ))

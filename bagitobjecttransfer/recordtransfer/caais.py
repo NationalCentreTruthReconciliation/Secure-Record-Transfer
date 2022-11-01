@@ -170,7 +170,6 @@ def _get_section_2_tree(form_data: dict) -> OrderedDict:
     curr_tree = OrderedDict()
     curr_section = 'section_2'
     # 2.1 Source of Information
-    curr_tree['source_of_information'] = OrderedDict()
     # 2.1.1 Source Type
     curr_tree['source_type'] = str(get_optional_field(
         form_data=form_data,
@@ -499,10 +498,7 @@ def _get_section_5_tree(form_data: dict) -> OrderedDict:
         caais_key='event_type',
         section=curr_section)
     # 5.1.2 Event Date
-    new_event['event_date'] = get_mandatory_field(
-        form_data=form_data,
-        caais_key='event_date',
-        section=curr_section)
+    # Date is set to now() when the record is added.
     # 5.1.3 Event Agent
     new_event['event_agent'] = get_mandatory_field(
         form_data=form_data,
@@ -594,10 +590,7 @@ def _get_section_7_tree(form_data: dict) -> OrderedDict:
         caais_key='action_type',
         section=curr_section)
     # 7.3.2 Action Date
-    new_date['action_date'] = get_mandatory_field(
-        form_data=form_data,
-        caais_key='action_date',
-        section=curr_section)
+    # Date is set to now() when the record is added.
     # 7.3.3 Action Agent
     new_date['action_agent'] = get_mandatory_field(
         form_data=form_data,
@@ -664,6 +657,7 @@ def _get_property_fields(form_data: dict, section_name: str) -> dict:
             'region',
             'postal_or_zip_code',
             'country',
+            'source_note',
         ],
         'section_4': [
             'storage_location',
@@ -862,10 +856,7 @@ def _convert_form_to_caais_section_5(metadata: c_models.Metadata, form_data: dic
         event_type.save()
     new_event.event_type = event_type
     # 5.1.2 Event Date
-    new_event.event_date = get_mandatory_field(
-        form_data=form_data,
-        caais_key='event_date',
-        section='section_5')
+    # Date is set to now() on record add.
     # 5.1.3 Event Agent
     new_event.event_agent = get_mandatory_field(
         form_data=form_data,
@@ -924,15 +915,18 @@ def _convert_form_to_caais_section_7(metadata: c_models.Metadata, form_data: dic
     revision = c_models.DateOfCreationOrRevision()
     revision.metadata = metadata
     # 7.3.1 Action Type
-    revision.action_type = get_mandatory_field(
+    action_type = get_mandatory_field(
         form_data=form_data,
         caais_key='action_type',
         section='section_7')
+    revision_type = c_models.DateOfCreationOrRevisionType.objects.filter(name__iexact=action_type).first()
+    if revision_type is None:
+        revision_type = c_models.DateOfCreationOrRevisionType.objects.create(**{
+            'name': action_type
+        })
+    revision.action_type = revision_type
     # 7.3.2 Action Date
-    revision.action_date = get_mandatory_field(
-        form_data=form_data,
-        caais_key='action_date',
-        section='section_7')
+    # Date is set to now() on record add.
     # 7.3.3 Action Agent
     revision.action_agent = get_mandatory_field(
         form_data=form_data,
