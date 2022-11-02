@@ -18,6 +18,7 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from caais.export import ExportVersion
 from caais.models import Metadata
 from recordtransfer import settings
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
@@ -391,6 +392,37 @@ class Submission(models.Model):
             os.unlink(self.location)
 
 
+class AppraisalManager(models.Manager):
+    """ Custom manager for Appraisals """
+
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        if self.get_queryset().count() == 0:
+            return {}
+
+        appraisal_types = []
+        appraisal_values = []
+        appraisal_notes = []
+        for appraisal in self.get_queryset().all():
+            appraisal_types.append(appraisal.appraisal_type)
+            appraisal_values.append(appraisal.statement)
+            appraisal_notes.append(appraisal.note or 'NULL')
+
+        if version == ExportVersion.CAAIS_1_0:
+            return {
+                'appraisalStatementType': '|'.join(appraisal_types),
+                'appraisalStatementValue': '|'.join(appraisal_values),
+                'appraisalStatementNote': '|'.join(appraisal_notes),
+            }
+        else:
+            return {
+                'appraisal': '|'.join([
+                    f'Appraisal Type: {x}; Statement: {y}; Notes: {z}' if z != 'NULL' else
+                    f'Appraisal Type: {x}; Statement: {y}' for
+                    x, y, z in zip(appraisal_types, appraisal_values, appraisal_notes)
+                ])
+            }
+
+
 class Appraisal(models.Model):
     ''' An appraisal made by an administrator for a submission
     '''
@@ -398,6 +430,8 @@ class Appraisal(models.Model):
         ''' The type of the appraisal being made '''
         ARCHIVAL_APPRAISAL = 'AP', _('Archival Appraisal')
         MONETARY_APPRAISAL = 'MP', _('Monetary Appraisal')
+
+    objects = AppraisalManager()
 
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='appraisals')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

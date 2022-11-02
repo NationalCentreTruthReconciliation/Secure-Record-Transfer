@@ -11,6 +11,9 @@ class ExportVersion(Enum):
     ATOM_2_2 = auto()
     ATOM_2_1 = auto()
 
+    def __str__(self):
+        return f'{self.name}'
+
     @staticmethod
     def is_atom(version):
         ''' Determine if version is an AtoM version.
@@ -53,19 +56,39 @@ class ExportVersion(Enum):
                 'sourceRole',
                 'sourceNote',
                 'sourceConfidentiality',
-                'preliminaryCustodialHistory',
+                'custodialHistory',
                 'dateOfMaterial',
-                'extentType',
-                'quantityAndUnitOfMeasure',
-                'contentType',
-                'carrierType',
-                'extentNote',
-                'preliminaryScopeAndContent',
+                'extentStatementType',
+                'quantityAndTypeOfUnits',
+                'extentStatementNote',
+                'scopeAndContent',
                 'languageOfMaterial',
                 'storageLocation',
-                'rightsType',
-                'rightsValue',
-                'rightsNote',
+                'rightsStatementType',
+                'rightsStatementValue',
+                'rightsStatementNote',
+                'materialAssessmentStatementType',
+                'materialAssessmentStatementValue',
+                'materialAssessmentActionPlan',
+                'materialAssessmentStatementNote',
+                'appraisalStatementType',
+                'appraisalStatementValue',
+                'appraisalStatementNote',
+                # 'associatedDocumentationType',
+                # 'associatedDocumentationTitle',
+                # 'associatedDocumentationNote',
+                'eventType',
+                'eventDate',
+                'eventAgent',
+                'eventNote',
+                'generalNote',
+                'rulesOrConventions',
+                'levelOfDetail',
+                'actionType',
+                'actionDate',
+                'actionAgent',
+                'actionNote',
+                'languageOfAccessionRecord',
             ]
 
         if self == ExportVersion.ATOM_2_6:

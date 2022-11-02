@@ -17,8 +17,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
-from recordtransfer.atom import flatten_meta_tree_atom_style
-from recordtransfer.caais import flatten_meta_tree
+from caais.export import ExportVersion
 from recordtransfer.forms import InlineBagGroupForm, SubmissionForm, \
     InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
     UploadedFileForm, InlineUploadedFileForm
@@ -58,16 +57,7 @@ def linkify(field_name):
     return _linkify
 
 
-FLATTEN_FUNCTIONS = {
-    ('caais', 1, 0): flatten_meta_tree,
-    ('atom', 2, 6): lambda b: flatten_meta_tree_atom_style(b, version=(2, 6)),
-    ('atom', 2, 3): lambda b: flatten_meta_tree_atom_style(b, version=(2, 3)),
-    ('atom', 2, 2): lambda b: flatten_meta_tree_atom_style(b, version=(2, 2)),
-    ('atom', 2, 1): lambda b: flatten_meta_tree_atom_style(b, version=(2, 1)),
-}
-
-
-def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
+def export_bag_csv(queryset, version: ExportVersion, filename_prefix: str = None):
     ''' Export one or more bags to a CSV file
 
     Args:
@@ -81,9 +71,9 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     '''
     csv_file = StringIO()
     writer = csv.writer(csv_file)
-    convert_bag_to_row = FLATTEN_FUNCTIONS[version]
-    for i, bag in enumerate(queryset, 0):
-        new_row = convert_bag_to_row(bag.json_metadata)
+    for i, submission in enumerate(queryset, 0):
+        new_row = submission.bag.flatten(version)
+        new_row.update(submission.appraisals.flatten(version))
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())
@@ -93,7 +83,8 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     response = HttpResponse(csv_file, content_type='text/csv')
     local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
     if not filename_prefix:
-        filename_prefix = '{0}_v{1}_'.format(version[0], '.'.join([str(x) for x in version[1:]]))
+        version_bits = str(version).split('_')
+        filename_prefix = '{0}_v{1}_'.format(version_bits[0], '.'.join([str(x) for x in version_bits[1:]]))
     filename = f"{filename_prefix}{local_time}.csv"
     response['Content-Disposition'] = f'attachment; filename={filename}'
     csv_file.close()
@@ -350,26 +341,6 @@ class AppraisalAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and request.user == obj.user)
 
-    def delete_model(self, request, obj):
-        ''' Delete the Appraisal from the Appraisal's Submission's Bag (if Bag
-        editing is allowed)
-        '''
-        appraisal = obj
-        has_bag = appraisal and appraisal.submission and appraisal.submission.bag
-
-        if has_bag and ALLOW_BAG_CHANGES:
-            bag = appraisal.submission.bag
-            bag.remove_appraisal(request.user, appraisal, commit=True)
-
-        elif has_bag:
-            messages.warning(request, gettext(
-                'An appraisal was deleted, an operation that would normally have affected the '
-                "Bag associated with the appraisal's submission, but ALLOW_BAG_CHANGES is OFF, "
-                'so no change was made to the Bag'
-            ))
-
-        super().delete_model(request, obj)
-
     def delete_queryset(self, request, queryset):
         ''' Delete the Appraisals from the Appraisals' Submissions' Bags (if Bag
         editing is allowed)
@@ -563,10 +534,10 @@ class SubmissionAdmin(admin.ModelAdmin):
                 appraisal.user = request.user
                 appraisal.save()
                 if ALLOW_BAG_CHANGES:
-                    obj.bag.add_appraisal(request.user, appraisal, commit=False)
+                    pass
 
             if ALLOW_BAG_CHANGES:
-                obj.bag.save()
+                obj.save()
             else:
                 messages.warning(request, gettext(
                     'A change to the appraisals was made to this submission that would normally '
@@ -599,9 +570,10 @@ class SubmissionAdmin(admin.ModelAdmin):
 
         if 'accession_identifier' in form.changed_data:
             updated_id = form.cleaned_data['accession_identifier']
-            obj.bag.update_accession_id(request.user, updated_id, commit=False)
+            obj.bag.update_accession_id(updated_id, commit=False)
 
         if 'level_of_detail' in form.changed_data:
+            # TODO: Not sure what this LevelOfDetail function is for?
             updated_choice = Submission.LevelOfDetail(form.cleaned_data['level_of_detail'])
             obj.bag.update_level_of_detail(request.user, str(updated_choice.label), commit=False)
 
@@ -638,27 +610,27 @@ class SubmissionAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(url)
 
     def export_caais_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('caais', 1, 0))
+        return export_bag_csv(queryset, ExportVersion.CAAIS_1_0)
 
     export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
 
     def export_atom_2_6_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 6))
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_6)
 
     export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
 
     def export_atom_2_3_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 3))
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_3)
 
     export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
 
     def export_atom_2_2_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 2))
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_2)
 
     export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
 
     def export_atom_2_1_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 1))
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_1)
 
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
 

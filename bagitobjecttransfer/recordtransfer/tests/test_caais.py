@@ -304,3 +304,7 @@ class TestCaaisMethods(TransactionTestCase):
         self.assertEqual(1, metadata.general_notes.count())
         note = metadata.general_notes.first()
         self.assertEqual(self.form_data['general_note'], note.note)
+
+        self.assertEqual(1, metadata.archival_units.count())
+        archival_unit = metadata.archival_units.first()
+        self.assertEqual('NCTR Archives', archival_unit.archival_unit)
