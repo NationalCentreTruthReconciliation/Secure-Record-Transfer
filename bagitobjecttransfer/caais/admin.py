@@ -193,6 +193,16 @@ class MetadataAdmin(admin.ModelAdmin):
         RightsInlineAdmin,
     ]
 
+    def get_form(self, request, obj=None, **kwargs):
+        """ Some fields are not populated in the form but seem required. """
+        form = super().get_form(request, obj, **kwargs)
+        for field_name, required in (
+                ('disposition_authority', False),
+                ('status', False),
+            ):
+            form.base_fields[field_name].required = required
+        return form
+
 
 class TermAdmin(admin.ModelAdmin):
     ''' Generic administrator for models inheriting from AbstractTerm

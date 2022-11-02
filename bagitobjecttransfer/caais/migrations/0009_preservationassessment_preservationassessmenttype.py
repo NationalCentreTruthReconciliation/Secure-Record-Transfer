@@ -129,9 +129,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Date of Creation or Revision',
                 'verbose_name_plural': 'Dates of Creation or Revision',
             },
-            managers=[
-                ('object', django.db.models.manager.Manager()),
-            ],
         ),
         migrations.RemoveField(
             model_name='dispositionauthority',
@@ -157,13 +154,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='extentstatement',
             name='content_type',
-        ),
-        migrations.AddField(
-            model_name='metadata',
-            name='accession_identifier',
-            field=models.CharField(
-                help_text='To uniquely and persistently identify the material. To support the location and retrieval of the material. To link all relevant information surrounding a transfer of material to a repository',
-                max_length=128, null=True),
         ),
         migrations.AddField(
             model_name='metadata',

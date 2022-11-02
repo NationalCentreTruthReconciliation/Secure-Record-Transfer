@@ -97,10 +97,6 @@ class Metadata(models.Model):
         "Give the authorized form(s) of the name of the institution in "
         "accordance with the repository's naming standard"
     ))
-    accession_identifier = models.CharField(max_length=128, null=True, help_text=gettext(
-        "To uniquely and persistently identify the material. To support the location and retrieval of the material. "
-        "To link all relevant information surrounding a transfer of material to a repository"
-    ))
     accession_title = models.CharField(max_length=128, null=True, help_text=gettext(
         "Supply an accession title in accordance with the repository's "
         "descriptive standard, typically consisting of the creator's name(s) "
@@ -173,13 +169,18 @@ class Metadata(models.Model):
             row['status'] = self.status.name if self.status else ''
             row['dateOfMaterial'] = self.date_of_material or ''
             row['dispositionAuthority'] = self.disposition_authority or ''
-            row['preliminaryScopeAndContent'] = self.scope_and_content or ''
-
+            row['scopeAndContent'] = self.scope_and_content or ''
+            row['custodialHistory'] = self.custodial_history or ''
+            row['rulesOrConventions'] = self.rules_or_conventions or ''
+            row['levelOfDetail'] = self.level_of_detail or ''
+            row.update(self.language_of_materials.flatten(version))
+            row['languageOfAccessionRecord'] = self.language_of_record or ''
         else:
             row['title'] = self.accession_title or 'No title'
             row['acquisitionType'] = self.acquisition_method or ''
 
-            row['accessionNumber'] = self.accession_identifier if self.accession_identifier is not None else ''
+            row['accessionNumber'] = self.identifiers.accession_identifier().identifier_value if \
+                self.identifiers.accession_identifier() is not None else ''
 
             if self.date_of_material:
                 try:
@@ -216,18 +217,26 @@ class Metadata(models.Model):
                         row['eventDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
                         row['eventStartDates'] = settings.CAAIS_UNKNOWN_START_DATE
                         row['eventEndDates'] = settings.CAAIS_UNKNOWN_END_DATE
+            language_updates = self.language_of_materials.flatten(version)
+            if language_updates or self.scope_and_content:
+                combined_updates = {
+                    'scopeAndContent': '. '.join([
+                        self.scope_and_content.rstrip('. '),
+                        language_updates['scopeAndContent'].rstrip('. '),
+                    ])
+                }
+                row.update(combined_updates)
+            row['archivalHistory'] = self.custodial_history
 
         row.update(self.identifiers.flatten(version))
         row.update(self.archival_units.flatten(version))
         row.update(self.source_of_materials.flatten(version))
-        row.update(self.preliminary_custodial_histories.flatten(version))
         row.update(self.extent_statements.flatten(version))
-        row.update(self.language_of_materials.flatten(version))
         row.update(self.storage_locations.flatten(version))
         row.update(self.rights.flatten(version))
         row.update(self.material_assessments.flatten(version))
         row.update(self.events.flatten(version))
-        row.update(self.general_note.flatten(version))
+        row.update(self.general_notes.flatten(version))
         row.update(self.date_creation_revisions.flatten(version))
         return row
 
@@ -242,7 +251,7 @@ class Metadata(models.Model):
         data = {
             'section_1': {
                 'repository': self.repository,
-                'accession_identifier': self.accession_identifier,
+                'accession_identifier': self.identifiers.accession_identifier().identifier_value,
                 'accession_title': self.accession_title,
                 'acquisition_method': self.acquisition_method,
                 'disposition_authority': self.disposition_authority,
@@ -282,8 +291,15 @@ class Metadata(models.Model):
         if self.level_of_detail:
             data['section_7']['level_of_detail'] = self.level_of_detail
         if self.language_of_record:
-            data['section_7']['language_of_record'] = self.language_of_record
+            data['section_7']['language_of_accession_record'] = self.language_of_record
         return data
+
+    def update_accession_id(self, accession_id: str, commit: bool = True):
+        a_id = self.identifiers.accession_identifier()
+        if a_id is not None:
+            a_id.identifier_value = accession_id
+            if commit:
+                a_id.save()
 
 
 class IdentifierManager(models.Manager):
@@ -298,7 +314,6 @@ class IdentifierManager(models.Manager):
             Q(identifier_type__icontains='Accession Identifier') |
             Q(identifier_type__icontains='Accession Number')
         ).first()
-
 
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
         ''' Flatten identifiers in queryset to export them in a CSV.
@@ -322,12 +337,10 @@ class IdentifierManager(models.Manager):
             }
 
         if version == ExportVersion.ATOM_2_6:
-            accession_identifier = self.accession_identifier()
-
-            if accession_identifier:
-                identifiers = self.get_queryset().all().exclude(id=accession_identifier.id)
-            else:
-                identifiers = self.get_queryset().all()
+            identifiers = self.get_queryset().filter(
+                Q(identifier_type__icontains='Accession Identifier', _negated=True) &
+                Q(identifier_type__icontains='Accession Number', _negated=True)
+            ).all()
 
             return {
                 'alternativeIdentifiers': '|'.join([
@@ -345,7 +358,10 @@ class IdentifierManager(models.Manager):
 
     def get_caais_metadata(self):
         identifiers = []
-        for identifier in self.get_queryset().all():
+        for identifier in self.get_queryset().filter(
+                Q(identifier_type__icontains='Accession Identifier', _negated=True) &
+                Q(identifier_type__icontains='Accession Number', _negated=True)
+        ).all():
             identifiers.append({
                 'other_identifier_type': identifier.identifier_type,
                 'other_identifier_value': identifier.identifier_value,
@@ -416,8 +432,7 @@ class ArchivalUnit(models.Model):
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='archival_units')
     archival_unit = models.TextField(null=False, help_text=gettext(
-        "Record the reference code and/or title of the archival unit to which "
-        "the accession belongs"
+        "Record the reference code and/or title of the archival unit to which the accession belongs."
     ))
 
     def __str__(self):
@@ -703,14 +718,14 @@ class ExtentStatementManager(models.Manager):
             get_field = partial(get_extent_attr, extent)
 
             extent_types.append(get_field('extent_type,name'))
-            quantities.append(get_field('quantity_and_unit_of_measure'))
+            quantities.append(get_field('quantity_and_type_of_units'))
             extent_notes.append(get_field('extent_note'))
 
         if not is_atom:
             return {
-                'extentType': '|'.join(extent_types),
-                'quantityAndUnitOfMeasure': '|'.join(quantities),
-                'extentNote': '|'.join(extent_notes),
+                'extentStatementType': '|'.join(extent_types),
+                'quantityAndTypeOfUnits': '|'.join(quantities),
+                'extentStatementNote': '|'.join(extent_notes),
             }
         else:
             return {
@@ -896,19 +911,13 @@ class RightsManager(models.Manager):
                 types.append(str(rights.rights_type.name))
             else:
                 types.append('NULL')
-            if rights.rights_value:
-                values.append(rights.rights_value)
-            else:
-                values.append('NULL')
-            if rights.rights_note:
-                notes.append(rights.rights_note)
-            else:
-                notes.append('NULL')
+            values.append(rights.rights_value or 'NULL')
+            notes.append(rights.rights_note or 'NULL')
 
         return {
-            'rightsType': '|'.join(types),
-            'rightsValue': '|'.join(values),
-            'rightsNote': '|'.join(notes),
+            'rightsStatementType': '|'.join(types),
+            'rightsStatementValue': '|'.join(values),
+            'rightsStatementNote': '|'.join(notes),
         }
 
     def get_caais_metadata(self):
@@ -973,7 +982,6 @@ class MaterialAssessmentManager(models.Manager):
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
         """ Convert preservation in queryset to a flat dictionary
         """
-        # There is no equivalent field in AtoM for rights
         if self.get_queryset().count() == 0:
             return {}
 
@@ -991,12 +999,18 @@ class MaterialAssessmentManager(models.Manager):
             notes.append(assessments.assessment_note or 'NULL')
             plans.append(assessments.assessment_plan or 'NULL')
 
-        return {
-            'materialAssessmentType': '|'.join(types),
-            'materialAssessmentValue': '|'.join(values),
-            'materialAssessmentNote': '|'.join(notes),
-            'materialAssessmentPlan': '|'.join(plans),
-        }
+        if version == ExportVersion.CAAIS_1_0:
+            return {
+                'materialAssessmentStatementType': '|'.join(types),
+                'materialAssessmentStatementValue': '|'.join(values),
+                'materialAssessmentStatementNote': '|'.join(notes),
+                'materialAssessmentActionPlan': '|'.join(plans),
+            }
+        else:
+            return {
+                'physicalCondition': '|'.join([f'Assessment Type: {x}; Statement: {y}' for
+                                               x, y in zip(types, values)])
+            }
 
     def get_caais_metadata(self):
         material_assessments = []
@@ -1056,9 +1070,11 @@ EventType._meta.get_field('name').help_text = gettext(
 
 class EventManager(models.Manager):
 
-    def __flatten__(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        if self.get_queryset().count() == 0:
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        # There is no equivalent for event in AtoM
+        if self.get_queryset().count() == 0 or ExportVersion.is_atom(version):
             return {}
+
         types = []
         dates = []
         agents = []
@@ -1069,24 +1085,15 @@ class EventManager(models.Manager):
                 types.append(str(events.event_type.name))
             else:
                 types.append('NULL')
-            if events.event_date:
-                dates.append(events.event_date)
-            else:
-                dates.append('NULL')
-            if events.event_agent:
-                agents.append(events.event_agent)
-            else:
-                agents.append('NULL')
-            if events.event_note:
-                notes.append(events.event_note)
-            else:
-                notes.append('NULL')
+            dates.append(events.event_date.strftime(r'%Y-%m-%d %H:%M:%S %Z') or 'NULL')
+            agents.append(events.event_agent or 'NULL')
+            notes.append(events.event_note or 'NULL')
 
         return {
-            'eventStatementType': '|'.join(types),
-            'eventStatementDate': '|'.join(dates),
-            'eventStatementAgent': '|'.join(agents),
-            'eventStatementNote': '|'.join(notes),
+            'eventType': '|'.join(types),
+            'eventDate': '|'.join(dates),
+            'eventAgent': '|'.join(agents),
+            'eventNote': '|'.join(notes),
         }
 
     def get_caais_metadata(self):
@@ -1094,7 +1101,7 @@ class EventManager(models.Manager):
         for event in self.get_queryset().all():
             events.append({
                 'event_type': str(event.event_type.name),
-                'event_date': str(event.event_date),
+                'event_date': event.event_date.strftime(r'%Y-%m-%d %H:%M:%S %Z'),
                 'event_agent': event.event_agent,
                 'event_note': event.event_note,
             })
@@ -1126,8 +1133,9 @@ class Event(models.Model):
 
 class GeneralNoteManager(models.Manager):
 
-    def __flatten__(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        if self.get_queryset().count() == 0:
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        # There is no equivalent for generalNote in AtoM
+        if self.get_queryset().count() == 0 or ExportVersion.is_atom(version):
             return {}
 
         notes = []
@@ -1171,7 +1179,7 @@ DateOfCreationOrRevisionType._meta.get_field('name').help_text = gettext(
 
 class DateOfCreationOrRevisionManager(models.Manager):
 
-    def __flatten__(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
         if self.get_queryset().count() == 0:
             return {}
 
@@ -1180,19 +1188,41 @@ class DateOfCreationOrRevisionManager(models.Manager):
         agents = []
         notes = []
 
+        date_format = r'%Y-%m-%d %H:%M:%S %Z' if version == ExportVersion.CAAIS_1_0 else r'%Y-%m-%d'
+
         for revision in self.get_queryset().all():
-            types.append(revision.action_type or 'NULL')
-            dates.append(revision.action_date or 'NULL')
+            types.append(revision.action_type.name or 'NULL')
+            dates.append(revision.action_date.strftime(date_format) or 'NULL')
             agents.append(revision.action_agent or 'NULL')
             notes.append(revision.action_note or 'NULL')
 
-        # TODO: Verify the correct column headings for AtoM, RAD or ISD.
-        return {
-            'dateOfCreationOrRevisionType': '|'.join(types),
-            'dateOfCreationOrRevisionDate': '|'.join(dates),
-            'dateOfCreationOrRevisionAgent': '|'.join(agents),
-            'dateOfCreationOrRevisionNote': '|'.join(notes)
-        }
+        if version == ExportVersion.CAAIS_1_0:
+            return {
+                'actionType': '|'.join(types),
+                'actionDate': '|'.join(dates),
+                'actionAgent': '|'.join(agents),
+                'actionNote': '|'.join(notes)
+            }
+        elif version == ExportVersion.ATOM_2_1:
+            return {
+                'creators': '|'.join(agents)
+            }
+        elif version == ExportVersion.ATOM_2_2:
+            return {
+                'creators': '|'.join(agents),
+                'creationDatesType': '|'.join(types),
+                'creationDates': '|'.join(dates),
+                'creationDatesStart': '|'.join(dates),
+                'creationDatesEnd': '|'.join(dates),
+            }
+        else:
+            return {
+                'creators': '|'.join(agents),
+                'eventTypes': '|'.join(types),
+                'eventDates': '|'.join(dates),
+                'eventStartDates': '|'.join(dates),
+                'eventEndDates': '|'.join(dates),
+            }
 
     def __str__(self):
         return f'DateOfCreationOrRevision #{self.id}'
@@ -1202,7 +1232,7 @@ class DateOfCreationOrRevisionManager(models.Manager):
         for revision in self.get_queryset().all():
             revisions.append({
                 'action_type': revision.action_type.name,
-                'action_date': str(revision.action_date),
+                'action_date': revision.action_date.strftime(r'%Y-%m-%d %H:%M:%S %Z'),
                 'action_agent': revision.action_agent,
                 'action_note': revision.action_note,
             })
@@ -1215,7 +1245,7 @@ class DateOfCreationOrRevision(models.Model):
         verbose_name = 'Date of Creation or Revision'
         verbose_name_plural = 'Dates of Creation or Revision'
 
-    object = DateOfCreationOrRevisionManager()
+    objects = DateOfCreationOrRevisionManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='date_creation_revisions')
