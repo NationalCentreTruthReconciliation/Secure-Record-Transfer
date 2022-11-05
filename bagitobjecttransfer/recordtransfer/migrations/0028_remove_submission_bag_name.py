@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='submission',
-            name='bag_name',
-        ),
         migrations.AlterField(
             model_name='appraisal',
             name='submission',
