@@ -8,7 +8,7 @@ from typing import Union, Iterable
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import gettext
+from django.utils.translation import gettext, gettext_lazy as _
 
 from django_countries.fields import CountryField
 
@@ -91,6 +91,14 @@ class Metadata(models.Model):
         verbose_name_plural = gettext('CAAIS metadata')
         verbose_name = gettext('CAAIS metadata')
 
+    class LevelOfDetail(models.TextChoices):
+        ''' The level of detail of the submission
+        '''
+        NOT_SPECIFIED = 'NS', _('Not Specified')
+        MINIMAL = 'ML', _('Minimal')
+        PARTIAL = 'PL', _('Partial')
+        FULL = 'FL', _('Full')
+
     objects = MetadataManager()
 
     repository = models.CharField(max_length=128, null=True, help_text=gettext(
@@ -120,8 +128,6 @@ class Metadata(models.Model):
         "prior to its transfer to the repository"
     ))
 
-    status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True,
-                               related_name='metadatas')
     # 3.1 Date of Material
     date_of_material = models.CharField(max_length=128, null=True, help_text=gettext(
         "Provide a preliminary estimate of the date range or explicitly "
@@ -142,9 +148,10 @@ class Metadata(models.Model):
         "application where applicable."
     ))
     # 7.2 Level of detail
-    level_of_detail = models.CharField(max_length=255, blank=True, default='', help_text=gettext(
-        "Record the level of detail in accordance with a controlled vocabulary maintained by the repository."
-    ))
+    level_of_detail = models.CharField(max_length=2, choices=LevelOfDetail, default=LevelOfDetail.NOT_SPECIFIED,
+                                       help_text=gettext("Record the level of detail in accordance with a controlled "
+                                                         "vocabulary maintained by the repository."
+                                                         ))
     # 7.4 Language of record
     language_of_record = models.CharField(max_length=20, blank=True, default='en', help_text=gettext(
         "Record the language(s) and script(s) used to create the accession record. If the content has been translated "

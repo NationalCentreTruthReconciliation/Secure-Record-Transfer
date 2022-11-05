@@ -246,6 +246,7 @@ class Submission(models.Model):
     part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, blank=True, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
+    bag_name = models.CharField(max_length=256, null=True)
 
     @property
     def user_folder(self):
@@ -270,10 +271,13 @@ class Submission(models.Model):
         Returns:
             (str): A string containing the report markup
         '''
+        report_metadata = self.bag.get_caais_metadata()
+        report_metadata['section_1']['status'] = self.ReviewStatus(self.review_status).label
+        report_metadata['section_4']['appraisal_statement'] = self.appraisals.get_caais_metadata()
         return render_to_string('recordtransfer/report/metadata_report.html', context={
             'submission': self,
             'current_date': timezone.now(),
-            'metadata': self.bag.get_caais_metadata(),
+            'metadata': report_metadata,
         })
 
     def get_admin_change_url(self):
@@ -286,6 +290,11 @@ class Submission(models.Model):
         ''' Get the URL to generate a report for this object in the admin
         '''
         view_name = 'admin:{0}_{1}_report'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
+
+    def get_admin_zip_url(self):
+        """ Get the URL to generate a zipped bag for this object in the admin """
+        view_name = f'admin:{self._meta.app_label}_{self._meta.model_name}_zip'
         return reverse(view_name, args=(self.pk,))
 
     def __str__(self):
@@ -358,7 +367,9 @@ class Submission(models.Model):
         logger.info(msg=('Creating BagIt bag at "{0}"'.format(self.location)))
         logger.info(msg=('Using these checksum algorithm(s): {0}'.format(', '.join(algorithms))))
 
-        bag = bagit.make_bag(self.location, self.bag.flatten(), checksums=algorithms)
+        bagit_info = self.bag.flatten()
+        bagit_info.update(self.appraisals.flatten())
+        bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
 
         logger.info(msg=('Setting file mode for bag payload files to {0}'.format(file_perms)))
         perms = int(file_perms, 8)

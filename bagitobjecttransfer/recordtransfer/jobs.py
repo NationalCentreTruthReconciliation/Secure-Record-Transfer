@@ -4,6 +4,7 @@ import smtplib
 import zipfile
 from io import BytesIO
 from datetime import timedelta
+import os.path
 
 import django_rq
 from django.contrib.sites.models import Site
@@ -17,7 +18,7 @@ from django.template.loader import render_to_string
 
 from recordtransfer.caais import convert_form_data_to_metadata
 from recordtransfer.models import BagGroup, UploadedFile, UploadSession, User, Job, Submission
-from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL
+from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL, BAG_CHECKSUMS
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -71,6 +72,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         user=user_submitted,
         bag=metadata,
         upload_session=upload_session,
+        bag_name=bag_name,
     )
     new_submission.save()
 
@@ -94,10 +96,10 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         else:
             LOGGER.warning(msg='Could not find "{0}" BagGroup'.format(group.name))
 
-        LOGGER.info('Sending transfer success email to administrators')
-        send_bag_creation_success.delay(form_data, new_submission)
-        LOGGER.info('Sending thank you email to user')
-        send_thank_you_for_your_transfer.delay(form_data, new_submission)
+    LOGGER.info('Sending transfer success email to administrators')
+    send_bag_creation_success.delay(form_data, new_submission)
+    LOGGER.info('Sending thank you email to user')
+    send_thank_you_for_your_transfer.delay(form_data, new_submission)
 
 
 @django_rq.job
@@ -106,7 +108,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
 
     Args:
         bag (Submission): The submission to zip up for users to download
-        user (User): The user who triggered this new Job creation
+        user_triggered (User): The user who triggered this new Job creation
     '''
     LOGGER.info(msg='Creating zipped bag from {0}'.format(str(bag.location)))
 
@@ -114,6 +116,14 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         '{user} triggered this job to generate a download link for the bag '
         '{name}'
     ).format(user=str(user_triggered), name=bag.bag_name)
+
+    if not os.path.exists(bag.location):
+        LOGGER.info(msg=f'No bag exists at {bag.location}, creating it now.')
+        result = bag.make_bag(algorithms=BAG_CHECKSUMS)
+        if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
+                result['time_created'] is None:
+            # Because we didn't generate the bag directory, exit.
+            return
 
     new_job = Job(
         name=f'Generate Download Link for {str(bag)}',

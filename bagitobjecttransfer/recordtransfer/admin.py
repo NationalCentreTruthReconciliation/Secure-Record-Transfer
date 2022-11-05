@@ -252,27 +252,27 @@ class BagGroupAdmin(ReadOnlyAdmin):
 
     def export_caais_csv(self, request, queryset):
         related_bags = Submission.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('caais', 1, 0))
+        return export_bag_csv(related_bags, ExportVersion.CAAIS_1_0)
     export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Bags in Selected'
 
     def export_atom_2_6_csv(self, request, queryset):
         related_bags = Submission.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 6))
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_6)
     export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Bags in Selected'
 
     def export_atom_2_3_csv(self, request, queryset):
         related_bags = Submission.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 3))
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_3)
     export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Bags in Selected'
 
     def export_atom_2_2_csv(self, request, queryset):
         related_bags = Submission.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 2))
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_2)
     export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Bags in Selected'
 
     def export_atom_2_1_csv(self, request, queryset):
         related_bags = Submission.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 1))
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_1)
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Bags in Selected'
 
 

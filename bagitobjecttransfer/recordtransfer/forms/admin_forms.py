@@ -131,11 +131,13 @@ class SubmissionForm(RecordTransferModelForm):
         super().__init__(*args, **kwargs)
 
         if hasattr(self, 'instance') and self.instance.bag:
-            self.fields['bag'].help_text = ' | '.join([
-                format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
-                    (self.instance.get_admin_report_url(), 'View Bag metadata'),
-                ]
-            ])
+            # TODO: This makes the tiny link by the Metadata title in the Submission form.
+            #self.fields['bag'].help_text = ' | '.join([
+            #    format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
+            #        (self.instance.get_admin_report_url(), 'View Bag metadata'),
+            #    ]
+            #])
+            pass
 
         self.fields['bag'].widget.can_add_related = False
 
