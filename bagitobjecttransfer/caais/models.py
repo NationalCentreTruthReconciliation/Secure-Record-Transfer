@@ -8,6 +8,7 @@ from typing import Union, Iterable
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy as _
 
 from django_countries.fields import CountryField
@@ -148,7 +149,7 @@ class Metadata(models.Model):
         "application where applicable."
     ))
     # 7.2 Level of detail
-    level_of_detail = models.CharField(max_length=2, choices=LevelOfDetail, default=LevelOfDetail.NOT_SPECIFIED,
+    level_of_detail = models.CharField(max_length=2, choices=LevelOfDetail.choices, default=LevelOfDetail.NOT_SPECIFIED,
                                        help_text=gettext("Record the level of detail in accordance with a controlled "
                                                          "vocabulary maintained by the repository."
                                                          ))
@@ -158,7 +159,6 @@ class Metadata(models.Model):
         "and is available in other languages, give those languages. Provide information about script only where it is "
         "common to use multiple scripts to represent a language and it is important to know which script is employed."
     ))
-
 
     #pylint: disable=no-member
     def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
@@ -173,13 +173,12 @@ class Metadata(models.Model):
             row['repository'] = self.repository or ''
             row['accessionTitle'] = self.accession_title or 'No title'
             row['acquisitionMethod'] = self.acquisition_method or ''
-            row['status'] = self.status.name if self.status else ''
             row['dateOfMaterial'] = self.date_of_material or ''
             row['dispositionAuthority'] = self.disposition_authority or ''
             row['scopeAndContent'] = self.scope_and_content or ''
             row['custodialHistory'] = self.custodial_history or ''
             row['rulesOrConventions'] = self.rules_or_conventions or ''
-            row['levelOfDetail'] = self.level_of_detail or ''
+            row['levelOfDetail'] = self.LevelOfDetail(self.level_of_detail).label or ''
             row.update(self.language_of_materials.flatten(version))
             row['languageOfAccessionRecord'] = self.language_of_record or ''
         else:
@@ -248,10 +247,7 @@ class Metadata(models.Model):
         return row
 
     def __str__(self):
-        title = self.accession_title or 'No title'
-        if self.status:
-            title += f' - {self.status.name}'
-        return title
+        return self.accession_title or 'No title'
 
     def get_caais_metadata(self):
         """Return a structured dict of the CAAIS metadata elements."""
@@ -291,12 +287,10 @@ class Metadata(models.Model):
                 'date_of_creation_or_revision': self.date_creation_revisions.get_caais_metadata(),
             },
         }
-        if self.status:
-            data['section_1']['status'] = self.status.name
         if self.rules_or_conventions:
             data['section_7']['rules_or_conventions'] = self.rules_or_conventions
         if self.level_of_detail:
-            data['section_7']['level_of_detail'] = self.level_of_detail
+            data['section_7']['level_of_detail'] = self.LevelOfDetail(self.level_of_detail).label
         if self.language_of_record:
             data['section_7']['language_of_accession_record'] = self.language_of_record
         return data
