@@ -95,6 +95,10 @@
                 <td class="left-col level-1">Bag UUID</td>
                 <td>{{ submission.uuid }}</td>
             </tr>
+            <tr>
+                <td class="left-col level-1">Review Status</td>
+                <td>{{ metadata.section_1.status }}</td>
+            </tr>
         </table>
         <table border="1" cellspacing="0" id="section_1">
             <tr>
@@ -374,10 +378,10 @@
                     </tr>
                 {% endif %}
             {% endfor %}
-            {% if metadata.section_4.appraisal_statement %}
                 <tr>
                     <td colspan="2" class="level-1">4.4 Appraisal Statement</td>
                 </tr>
+            {% if metadata.section_4.appraisal_statement %}
                 {% for appraisal in metadata.section_4.appraisal_statement %}
                     <tr>
                         <td colspan="2" class="array-item-title">

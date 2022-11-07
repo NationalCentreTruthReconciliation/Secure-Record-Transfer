@@ -240,11 +240,11 @@ class Submission(models.Model):
 
     submission_date = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    bag = models.OneToOneField(Metadata, on_delete=models.SET_NULL, null=True, related_name='submission')
+    bag = models.OneToOneField(Metadata, on_delete=models.CASCADE, null=True, related_name='submission')
     review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
                                      default=ReviewStatus.NOT_REVIEWED)
     part_of_group = models.ForeignKey(BagGroup, on_delete=models.SET_NULL, blank=True, null=True)
-    upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
+    upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4)
     bag_name = models.CharField(max_length=256, null=True)
 
@@ -300,6 +300,12 @@ class Submission(models.Model):
     def __str__(self):
         return f'Submission by {self.user} at {self.submission_date}'
 
+    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
+        new_row = self.bag.flatten(version)
+        new_row['status'] = self.ReviewStatus(self.review_status).label if self.review_status else ''
+        new_row.update(self.appraisals.flatten(version))
+        return new_row
+
     def make_bag(self, algorithms: Union[str, list] = 'sha512', file_perms: str = '644',
                  move_files: bool = True, logger=None):
         """ Create a BagIt bag on the file system for this Submission. The location of the BagIt bag is
@@ -350,10 +356,7 @@ class Submission(models.Model):
         os.mkdir(self.location)
         LOGGER.info(msg=('Created new bag folder at "{0}"'.format(self.user_folder)))
 
-        if move_files:
-            copied, missing = self.upload_session.move_session_uploads(self.location, logger)
-        else:
-            copied, missing = self.upload_session.copy_session_uploads(self.location, logger)
+        copied, missing = self.upload_session.copy_session_uploads(self.location, logger)
 
         if missing:
             LOGGER.error(msg='One or more uploaded files is missing!')
@@ -432,6 +435,16 @@ class AppraisalManager(models.Manager):
                     x, y, z in zip(appraisal_types, appraisal_values, appraisal_notes)
                 ])
             }
+
+    def get_caais_metadata(self):
+        appraisals = []
+        for appraisal in self.get_queryset().all():
+            appraisals.append({
+                'appraisal_statement_type': Appraisal.AppraisalType(appraisal.appraisal_type).label,
+                'appraisal_statement_value': appraisal.statement,
+                'appraisal_statement_note':  appraisal.note,
+            })
+        return appraisals
 
 
 class Appraisal(models.Model):

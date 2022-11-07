@@ -1,5 +1,5 @@
-import json
 import logging
+import shutil
 import smtplib
 import zipfile
 from io import BytesIO
@@ -137,7 +137,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         file_name = f'{bag.user.username}-{bag.bag_name}.zip'
         LOGGER.info(msg='Saving zip file as {0} ...'.format(file_name))
         new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
-        LOGGER.info(msg='Saved file succesfully')
+        LOGGER.info(msg='Saved file successfully')
 
         new_job.job_status = Job.JobStatus.COMPLETE
         new_job.end_time = timezone.now()
@@ -151,6 +151,10 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
     finally:
         if zipf is not None:
             zipf.close()
+        if os.path.exists(bag.location):
+            LOGGER.info(msg="Removing bag from disk after zip generation.")
+            shutil.rmtree(bag.location)
+
 
 @django_rq.job
 def send_bag_creation_success(form_data: dict, submission: Submission):

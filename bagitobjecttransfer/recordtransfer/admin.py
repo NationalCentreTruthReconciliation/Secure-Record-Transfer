@@ -72,8 +72,7 @@ def export_bag_csv(queryset, version: ExportVersion, filename_prefix: str = None
     csv_file = StringIO()
     writer = csv.writer(csv_file)
     for i, submission in enumerate(queryset, 0):
-        new_row = submission.bag.flatten(version)
-        new_row.update(submission.appraisals.flatten(version))
+        new_row = submission.flatten(version)
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())
@@ -474,6 +473,9 @@ class SubmissionAdmin(admin.ModelAdmin):
             path('<path:object_id>/report/',
                  self.admin_site.admin_view(self.view_report),
                  name='%s_%s_report' % info),
+            path('<path:object_id>/zip/',
+                 self.admin_site.admin_view(self.create_zipped_bag),
+                 name='%s_%s_zip' % info),
         ]
         return report_url + urls
 
@@ -508,7 +510,7 @@ class SubmissionAdmin(admin.ModelAdmin):
             for submission in queryset:
                 if submission and submission.bag:
                     report = submission.get_report()
-                    zipped_reports.writestr(f'{submission.bag.bag_name}.html', report)
+                    zipped_reports.writestr(f'{submission.bag_name}.html', report)
         zipf.seek(0)
         response = HttpResponse(zipf, content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=exported-bag-reports.zip'
@@ -689,7 +691,7 @@ class JobAdmin(ReadOnlyAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return obj and request.user == obj.user_triggered
+        return obj and (request.user == obj.user_triggered or request.user.is_superuser)
 
     def get_urls(self):
         ''' Add download/ view to admin
