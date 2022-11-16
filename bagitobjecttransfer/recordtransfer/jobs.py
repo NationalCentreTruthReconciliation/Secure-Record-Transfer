@@ -130,7 +130,9 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         description=description,
         start_time=timezone.now(),
         user_triggered=user_triggered,
-        job_status=Job.JobStatus.NOT_STARTED)
+        job_status=Job.JobStatus.NOT_STARTED,
+        submission=bag
+    )
     new_job.save()
 
     zipf = None
@@ -145,7 +147,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         zipped_bag.close()
         LOGGER.info(msg='Zipped directory successfully')
 
-        file_name = f'{bag.user.username}-{bag.bag_name}.zip'
+        file_name = f'{user_triggered.username}-{bag.bag_name}.zip'
         LOGGER.info(msg='Saving zip file as {0} ...'.format(file_name))
         new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
         LOGGER.info(msg='Saved file successfully')

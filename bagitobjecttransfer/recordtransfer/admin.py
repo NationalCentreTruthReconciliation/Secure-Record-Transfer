@@ -10,6 +10,8 @@ from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, path
 from django.utils import timezone
@@ -88,6 +90,12 @@ def export_bag_csv(queryset, version: ExportVersion, filename_prefix: str = None
     response['Content-Disposition'] = f'attachment; filename={filename}'
     csv_file.close()
     return response
+
+
+@receiver(pre_delete, sender=Job)
+def job_file_delete(sender, instance, **kwargs):
+    """ FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
+    instance.attached_file.delete(False)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -476,8 +484,20 @@ class SubmissionAdmin(admin.ModelAdmin):
             path('<path:object_id>/zip/',
                  self.admin_site.admin_view(self.create_zipped_bag),
                  name='%s_%s_zip' % info),
+            path('<path:object_id>/rezip/',
+                 self.admin_site.admin_view(self.recreate_zipped_bag),
+                 name='%s_%s_rezip' % info),
         ]
         return report_url + urls
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        job = Job.objects.get_queryset().filter(Q(user_triggered=request.user) & Q(submission_id=object_id)).first()
+        if extra_context is None:
+            extra_context = {}
+        extra_context['has_generated_bag'] = job is not None
+        if job is not None:
+            extra_context['generated_bag_url'] = job.get_admin_download_url()
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     def view_report(self, request, object_id):
         ''' Redirect to the submission's report if the submission exists
@@ -582,6 +602,18 @@ class SubmissionAdmin(admin.ModelAdmin):
         obj.bag.save()
         super().save_model(request, obj, form, change)
 
+    def recreate_zipped_bag(self, request, object_id):
+        """ Remove the existing bag for this submission and user, then recreate it.
+
+        Args:
+            request: The originating request
+            object_id: The ID for the submission
+        """
+        job = Job.objects.filter(Q(submission_id=object_id) & Q(user_triggered=request.user)).first()
+        if job:
+            job.delete()
+        return self.create_zipped_bag(request, object_id)
+
     def create_zipped_bag(self, request, object_id):
         ''' Start a background job to create a downloadable bag
 
@@ -590,26 +622,28 @@ class SubmissionAdmin(admin.ModelAdmin):
             object_id: The ID for the submission
         '''
         bag = Submission.objects.filter(id=object_id).first()
-        if bag and not os.path.exists(bag.location):
+        if bag:
+            job = Job.objects.filter(Q(submission_id=object_id) & Q(user_triggered=request.user)).first()
+            if job:
+                # You should not get here, reload the submission page.
+                self.message_user(request, mark_safe(gettext(
+                    'A downloadable bag already exists for you. Check the Submission page for links to download and '
+                    'regenerate the bag.'
+                )))
+                return HttpResponseRedirect(bag.get_admin_change_url())
             create_downloadable_bag.delay(bag, request.user)
             self.message_user(request, mark_safe(gettext(
-                'A downloadable bag is being generated. Check the '
-                "<a href='/admin/recordtransfer/job'>Jobs</a> page for more information."
+                'A downloadable bag is being generated. Check the Submission page for links access the bag.'
             )))
-            return HttpResponseRedirect('../')
-        if bag:
-            self.message_user(request, (
-                'A downloadable bag could not be generated, the bag at {0} may have been moved or '
-                'deleted.'.format(bag.location)
-            ), messages.WARNING)
-            return HttpResponseRedirect('../')
+            url = reverse('admin:recordtransfer_submission_changelist', current_app=self.admin_site.name)
+            return HttpResponseRedirect(url)
         # Error response
         msg = gettext('Bag with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
             'key': object_id,
         }
         self.message_user(request, msg, messages.WARNING)
-        url = reverse('admin:index', current_app=self.admin_site.name)
-        return HttpResponseRedirect(url)
+        admin_url = reverse('admin:index', current_app=self.admin_site.name)
+        return HttpResponseRedirect(admin_url)
 
     def export_caais_csv(self, request, queryset):
         return export_bag_csv(queryset, ExportVersion.CAAIS_1_0)
