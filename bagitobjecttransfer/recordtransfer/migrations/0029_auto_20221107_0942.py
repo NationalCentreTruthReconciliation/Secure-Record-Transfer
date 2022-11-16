@@ -22,4 +22,10 @@ class Migration(migrations.Migration):
             name='upload_session',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='recordtransfer.uploadsession'),
         ),
+        migrations.AddField(
+            model_name='job',
+            name='submission',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='job',
+                                    to='recordtransfer.submission'),
+        ),
     ]
