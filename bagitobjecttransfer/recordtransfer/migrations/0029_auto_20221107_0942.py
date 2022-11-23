@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('caais', '0010_alter_archivalunit_archival_unit'),
-        ('recordtransfer', '0028_remove_submission_bag_name'),
+        ('recordtransfer', '0028_auto_20220704_1020'),
     ]
 
     operations = [

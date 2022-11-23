@@ -514,36 +514,6 @@ class Job(models.Model):
         return f'{self.name} (Created by {self.user_triggered})'
 
 
-class Right(models.Model):
-    ''' A term describing a right
-    '''
-    name = models.CharField(max_length=255, null=False, unique=True)
-    description = models.CharField(max_length=255, null=False)
-
-    def __str__(self):
-        return self.name
-
-
-class SourceType(models.Model):
-    ''' A term describing a source type
-    '''
-    name = models.CharField(max_length=255, null=False, unique=True)
-    description = models.CharField(max_length=255, null=False)
-
-    def __str__(self):
-        return self.name
-
-
-class SourceRole(models.Model):
-    ''' A term describing a source role
-    '''
-    name = models.CharField(max_length=255, null=False, unique=True)
-    description = models.CharField(max_length=255, null=False)
-
-    def __str__(self):
-        return self.name
-
-
 class SavedTransfer(models.Model):
     """ A saved transfer """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
