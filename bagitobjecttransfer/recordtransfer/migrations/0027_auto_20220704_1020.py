@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('caais', '0008_rights_types'),
-        ('recordtransfer', '0027_savedtransfer'),
+        ('recordtransfer', '0026_dbtemplates'),
     ]
 
     operations = [
@@ -51,11 +51,5 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='Right',
-        ),
-        migrations.AlterField(
-            model_name='appraisal',
-            name='submission',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='appraisals',
-                                    to='recordtransfer.submission'),
         ),
     ]
