@@ -512,3 +512,14 @@ class Job(models.Model):
 
     def __str__(self):
         return f'{self.name} (Created by {self.user_triggered})'
+
+
+class SavedTransfer(models.Model):
+    """ A saved transfer """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_updated = models.DateTimeField(unique=True)
+    current_step = models.CharField(max_length=20, null=False)
+    step_data = models.BinaryField(default=b'')
+
+    def __str__(self):
+        return f"Transfer of {self.last_updated} by {self.user}"
