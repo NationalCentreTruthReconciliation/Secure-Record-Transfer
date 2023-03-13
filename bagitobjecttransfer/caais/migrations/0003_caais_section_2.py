@@ -10,14 +10,14 @@ from caais.models import SourceType, SourceRole
 
 def populate_initial_terms(apps, schema_editor):
     other_type, created = SourceType.objects.get_or_create(
-        name='Other',
+        source_type='Other',
         description='Placeholder right to allow user to specify unique source type'
     )
     if created:
         other_type.save()
 
     other_role, created = SourceRole.objects.get_or_create(
-        name='Other',
+        source_role='Other',
         description='Placeholder right to allow user to specify unique source role'
     )
     if created:
@@ -129,6 +129,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Sources of material',
             },
         ),
-        migrations.RunPython(populate_initial_terms),
-        migrations.RunPython(populate_permissions),
+
+        # migrations.RunPython(populate_initial_terms),
+        # migrations.RunPython(populate_permissions),
     ]
