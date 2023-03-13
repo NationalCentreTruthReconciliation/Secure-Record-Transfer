@@ -8,6 +8,7 @@ SECRET_KEY = config('SECRET_KEY', default='q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 INSTALLED_APPS = [
+    'caais.apps.CaaisConfig',
     'recordtransfer.apps.RecordTransferConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -139,3 +140,9 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 FILE_UPLOAD_PERMISSIONS = 0o644
+
+# CAAIS dates
+
+CAAIS_UNKNOWN_DATE_TEXT = config('CAAIS_UNKNOWN_DATE_TEXT', cast=str, default='Unknown date')
+CAAIS_UNKNOWN_START_DATE = config('CAAIS_UNKNOWN_START_DATE', cast=str, default='1800-01-01')
+CAAIS_UNKNOWN_END_DATE = config('CAAIS_UNKNOWN_END_DATE', cast=str, default='2020-01-01')

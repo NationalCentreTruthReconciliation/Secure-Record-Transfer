@@ -3,7 +3,8 @@
 from django.db import migrations, models
 from django.core.management.sql import emit_post_migrate_signal
 from django.contrib.auth.models import Group, Permission
-from recordtransfer.models import SourceType, SourceRole
+
+from caais.models import SourceType, SourceRole
 
 
 def populate_initial_terms(apps, schema_editor):

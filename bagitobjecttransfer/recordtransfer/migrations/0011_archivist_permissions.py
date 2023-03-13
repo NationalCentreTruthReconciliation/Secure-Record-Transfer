@@ -12,9 +12,9 @@ def populate_permissions(apps, schema_editor):
     existing_permissions = group.permissions.all()
 
     for codename in (
-        # Bag
-        'change_bag',
-        'view_bag',
+        # CAAIS Metadata
+        'change_metadata',
+        'view_metadata',
         # Job
         'add_job',
         'change_job',

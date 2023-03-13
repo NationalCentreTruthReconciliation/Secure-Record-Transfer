@@ -9,7 +9,7 @@ from captcha.fields import ReCaptchaField
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
-from recordtransfer.models import SourceRole, SourceType, Right
+from caais.models import SourceType, SourceRole, RightsType
 from recordtransfer.settings import USE_DATE_WIDGETS
 
 
@@ -506,7 +506,7 @@ class RightsForm(TransferForm):
         return cleaned_data
 
     rights_statement_type = forms.ModelChoiceField(
-        queryset=Right.objects.all()\
+        queryset=RightsType.objects.all()\
             .annotate(
                 sort_order_other_first=Case(
                     When(name__iexact='other', then=Value('____')),

@@ -3,7 +3,7 @@ from django import forms
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
-from recordtransfer.models import Appraisal, Bag, BagGroup, Submission, UploadSession, UploadedFile, User
+from recordtransfer.models import Appraisal, BagGroup, Submission, UploadSession, UploadedFile, User
 from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 
@@ -122,37 +122,22 @@ class SubmissionForm(RecordTransferModelForm):
             'submission_date',
             'bag',
             'user',
-            'accession_identifier',
-            'review_status',
-            'level_of_detail',
+            'review_status'
         )
 
     disabled_fields = ['submission_date', 'bag', 'user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['accession_identifier'].required = False
 
         if hasattr(self, 'instance') and self.instance.bag:
-            self.fields['bag'].help_text = ' | '.join([
-                format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
-                    (self.instance.bag.get_admin_change_url(), 'View Bag'),
-                    (self.instance.get_admin_report_url(), 'View Bag metadata'),
-                    (self.instance.bag.get_admin_zip_url(), 'Create downloadable Bag'),
-                ]
-            ])
-
-            for field in ('accession_identifier', 'level_of_detail'):
-                if field in self.fields:
-                    if ALLOW_BAG_CHANGES:
-                        self.fields[field].help_text = gettext(
-                            'Changing this field will change the Bag\'s bag-info.txt'
-                        )
-                    else:
-                        self.fields[field].help_text = gettext(
-                            'ALLOW_BAG_CHANGES is OFF, changing this field will not update the '
-                            "Bag's bag-info.txt"
-                        )
+            # TODO: This makes the tiny link by the Metadata title in the Submission form.
+            #self.fields['bag'].help_text = ' | '.join([
+            #    format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
+            #        (self.instance.get_admin_report_url(), 'View Bag metadata'),
+            #    ]
+            #])
+            pass
 
         self.fields['bag'].widget.can_add_related = False
 
@@ -168,54 +153,6 @@ class InlineSubmissionForm(RecordTransferModelForm):
             'bag',
             'review_status',
         )
-
-
-class BagForm(RecordTransferModelForm):
-    ''' Form for vieweing Bags in the admin. This form should not be used to provide edit
-    capabilities for a Bag.
-    '''
-
-    class Meta:
-        model = Bag
-        fields = (
-            'uuid',
-            'user',
-            'bagging_date',
-            'bag_name',
-            'caais_metadata',
-            'part_of_group',
-            'upload_session',
-        )
-
-    disabled_fields = [
-        'uuid',
-        'user',
-        'bagging_date',
-        'bag_name',
-        'caais_metadata',
-        'part_of_group',
-        'location',
-        'exists',
-    ]
-
-    title = forms.CharField(required=False)
-    location = forms.CharField(required=False)
-    exists = forms.BooleanField(required=False)
-
-
-class InlineBagForm(RecordTransferModelForm):
-    ''' Form used to view Bags in-line. This form should not be used to provide edit capabilities
-    in-line for a Bag.
-    '''
-
-    class Meta:
-        model = Bag
-        fields = (
-            'bag_name',
-            'bagging_date',
-        )
-
-    title = forms.CharField(required=False)
 
 
 class InlineBagGroupForm(RecordTransferModelForm):

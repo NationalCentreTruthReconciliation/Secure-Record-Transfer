@@ -1,6 +1,7 @@
 ''' Custom administration code for the admin site '''
 import csv
 import logging
+import os
 import zipfile
 from io import StringIO, BytesIO
 from pathlib import Path
@@ -9,6 +10,8 @@ from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, path
 from django.utils import timezone
@@ -16,14 +19,13 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
-from recordtransfer.atom import flatten_meta_tree_atom_style
-from recordtransfer.caais import flatten_meta_tree
-from recordtransfer.forms import BagForm, InlineBagForm, InlineBagGroupForm, SubmissionForm, \
+from caais.export import ExportVersion
+from recordtransfer.forms import InlineBagGroupForm, SubmissionForm, \
     InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
     UploadedFileForm, InlineUploadedFileForm
 from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
-from recordtransfer.models import User, UploadSession, UploadedFile, Bag, BagGroup, Appraisal, \
-    Submission, Job, Right, SourceType, SourceRole
+from recordtransfer.models import User, UploadSession, UploadedFile, BagGroup, Appraisal, \
+    Submission, Job
 from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
@@ -57,14 +59,7 @@ def linkify(field_name):
     return _linkify
 
 
-FLATTEN_FUNCTIONS = {
-    ('caais', 1, 0): flatten_meta_tree,
-    ('atom', 2, 6): lambda b: flatten_meta_tree_atom_style(b, version=(2, 6)),
-    ('atom', 2, 3): lambda b: flatten_meta_tree_atom_style(b, version=(2, 3)),
-    ('atom', 2, 2): lambda b: flatten_meta_tree_atom_style(b, version=(2, 2)),
-    ('atom', 2, 1): lambda b: flatten_meta_tree_atom_style(b, version=(2, 1)),
-}
-def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
+def export_bag_csv(queryset, version: ExportVersion, filename_prefix: str = None):
     ''' Export one or more bags to a CSV file
 
     Args:
@@ -78,9 +73,8 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     '''
     csv_file = StringIO()
     writer = csv.writer(csv_file)
-    convert_bag_to_row = FLATTEN_FUNCTIONS[version]
-    for i, bag in enumerate(queryset, 0):
-        new_row = convert_bag_to_row(bag.json_metadata)
+    for i, submission in enumerate(queryset, 0):
+        new_row = submission.flatten(version)
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())
@@ -90,48 +84,18 @@ def export_bag_csv(queryset, version: tuple, filename_prefix: str = None):
     response = HttpResponse(csv_file, content_type='text/csv')
     local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
     if not filename_prefix:
-        filename_prefix = '{0}_v{1}_'.format(version[0], '.'.join([str(x) for x in version[1:]]))
+        version_bits = str(version).split('_')
+        filename_prefix = '{0}_v{1}_'.format(version_bits[0], '.'.join([str(x) for x in version_bits[1:]]))
     filename = f"{filename_prefix}{local_time}.csv"
     response['Content-Disposition'] = f'attachment; filename={filename}'
     csv_file.close()
     return response
 
 
-def update_filesystem_bag(request, bag: Bag):
-    ''' Update the Bag on the filesystem. Messages the user depending on the
-    action taken.
-
-    Args:
-        request: The originating request
-        bag (Bag): The bag that is to be updated
-    '''
-    results = bag.update_bag()
-    num_updates = results['num_fields_updated']
-
-    if not results['bag_exists']:
-        messages.error(request, gettext(
-            'The bag at "{}" was moved or deleted, so it could not be updated!'
-        ).format(bag.location))
-
-    elif not results['bag_valid'] and num_updates == 0:
-        messages.error(request, gettext(
-            'The bag at "{}" was found to be invalid!'
-        ).format(bag.location))
-
-    elif not results['bag_valid'] and num_updates > 0:
-        messages.error(request, gettext(
-            'The bag-info.txt for the bag at "{}" was updated, but is now invalid!'
-        ).format(bag.location))
-
-    elif results['bag_valid'] and num_updates == 0:
-        messages.info(request, gettext(
-            'No updates were made to the bag-info.txt for the bag at "{}"'
-        ).format(bag.location))
-
-    else:
-        messages.success(request, gettext(
-            '{} related fields were updated in the bag-info.txt for the bag at "{}"'
-        ).format(num_updates, bag.location))
+@receiver(pre_delete, sender=Job)
+def job_file_delete(sender, instance, **kwargs):
+    """ FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
+    instance.attached_file.delete(False)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -157,37 +121,6 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-
-@admin.register(Right)
-@admin.register(SourceType)
-@admin.register(SourceRole)
-class TaxonomyAdmin(admin.ModelAdmin):
-    ''' Admin for a taxonomy model
-
-    Permissions:
-        - Add: Allowed
-        - change: Allowed
-        - delete: Allowed
-    '''
-
-    list_display = [
-        'name',
-        'description',
-    ]
-
-    fieldsets = [
-        (None, {'fields': ['name', 'description']}),
-    ]
-
-    def has_add_permission(self, request):
-        return True
-
-    def has_change_permission(self, request, obj=None):
-        return True
-
-    def has_delete_permission(self, request, obj=None):
-        return True
 
 
 @admin.register(UploadedFile)
@@ -282,151 +215,6 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ]
 
 
-@admin.register(Bag)
-class BagAdmin(admin.ModelAdmin):
-    ''' Admin for the Bag model. Adds a view to start a job to zip the bag up so
-    it can be downloaded. The zip/download view can be accessed at
-    code:`submission/<id>/zip/`
-
-    Permissions:
-        - add: Not allowed
-        - change: Not allowed
-        - delete: Only by superusers
-    '''
-    change_form_template = 'admin/bag_change_form.html'
-
-    form = BagForm
-
-    search_fields = [
-        'bag_name',
-    ]
-
-    actions = [
-        'export_caais_reports',
-        'export_caais_csv',
-        'export_atom_2_6_csv',
-        'export_atom_2_3_csv',
-        'export_atom_2_2_csv',
-        'export_atom_2_1_csv',
-    ]
-
-    # Display in Admin GUI
-    list_display = [
-        'bag_name',
-        'bagging_date',
-        linkify('user'),
-        linkify('part_of_group'),
-        'submission',
-    ]
-
-    ordering = [
-        '-bagging_date',
-    ]
-
-    def submission(self, obj):
-        submission = Submission.objects.filter(bag=obj).first()
-        if not submission:
-            return '-'
-        return format_html('<a href="{}">{}</a>', submission.get_admin_change_url(), submission)
-    submission.short_description = gettext('Part of Submission')
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
-
-    def get_urls(self):
-        ''' Add zip/ view to admin
-        '''
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        download_url = [
-            path('<path:object_id>/zip/',
-                 self.admin_site.admin_view(self.create_zipped_bag),
-                 name='%s_%s_zip' % info),
-        ]
-        return download_url + urls
-
-    def create_zipped_bag(self, request, object_id):
-        ''' Start a background job to create a downloadable bag
-
-        Args:
-            request: The originating request
-            object_id: The ID for the submission
-        '''
-        bag = Bag.objects.filter(id=object_id).first()
-        if bag and bag.exists:
-            create_downloadable_bag.delay(bag, request.user)
-            self.message_user(request, mark_safe(gettext(
-                'A downloadable bag is being generated. Check the '
-                "<a href='/admin/recordtransfer/job'>Jobs</a> page for more information."
-            )))
-            return HttpResponseRedirect('../')
-        if bag:
-            self.message_user(request, (
-                'A downloadable bag could not be generated, the bag at {0} may have been moved or '
-                'deleted.'.format(bag.location)
-            ), messages.WARNING)
-            return HttpResponseRedirect('../')
-        # Error response
-        msg = gettext('Bag with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
-            'key': object_id,
-        }
-        self.message_user(request, msg, messages.WARNING)
-        url = reverse('admin:index', current_app=self.admin_site.name)
-        return HttpResponseRedirect(url)
-
-    def export_caais_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('caais', 1, 0))
-    export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
-
-    def export_atom_2_6_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 6))
-    export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
-
-    def export_atom_2_3_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 3))
-    export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
-
-    def export_atom_2_2_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 2))
-    export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
-
-    def export_atom_2_1_csv(self, request, queryset):
-        return export_bag_csv(queryset, ('atom', 2, 1))
-    export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
-
-
-class BagInline(admin.TabularInline):
-    ''' Inline admin for the Bag model. Used to view Bags associated with a
-    BagGroup
-
-    Permissions:
-        - add: Not allowed
-        - change: Not allowed
-        - delete: Not allowed
-    '''
-    model = Bag
-    max_num = 0
-    show_change_link = True
-    form = InlineBagForm
-
-    ordering = ['-bagging_date']
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
-
-
 @admin.register(BagGroup)
 class BagGroupAdmin(ReadOnlyAdmin):
     ''' Admin for the BagGroup model. Bags can be viewed in-line.
@@ -436,9 +224,6 @@ class BagGroupAdmin(ReadOnlyAdmin):
         - change: Not allowed
         - delete: Only by superusers
     '''
-    inlines = [
-        BagInline,
-    ]
 
     list_display = [
         'name',
@@ -473,28 +258,28 @@ class BagGroupAdmin(ReadOnlyAdmin):
         return obj and request.user.is_superuser
 
     def export_caais_csv(self, request, queryset):
-        related_bags = Bag.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('caais', 1, 0))
+        related_bags = Submission.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, ExportVersion.CAAIS_1_0)
     export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Bags in Selected'
 
     def export_atom_2_6_csv(self, request, queryset):
-        related_bags = Bag.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 6))
+        related_bags = Submission.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_6)
     export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Bags in Selected'
 
     def export_atom_2_3_csv(self, request, queryset):
-        related_bags = Bag.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 3))
+        related_bags = Submission.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_3)
     export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Bags in Selected'
 
     def export_atom_2_2_csv(self, request, queryset):
-        related_bags = Bag.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 2))
+        related_bags = Submission.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_2)
     export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Bags in Selected'
 
     def export_atom_2_1_csv(self, request, queryset):
-        related_bags = Bag.objects.filter(part_of_group__in=queryset)
-        return export_bag_csv(related_bags, ('atom', 2, 1))
+        related_bags = Submission.objects.filter(part_of_group__in=queryset)
+        return export_bag_csv(related_bags, ExportVersion.ATOM_2_1)
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Bags in Selected'
 
 
@@ -563,28 +348,6 @@ class AppraisalAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and request.user == obj.user)
 
-    def delete_model(self, request, obj):
-        ''' Delete the Appraisal from the Appraisal's Submission's Bag (if Bag
-        editing is allowed)
-        '''
-        appraisal = obj
-        has_bag = appraisal and appraisal.submission and appraisal.submission.bag
-
-        if has_bag and ALLOW_BAG_CHANGES:
-            bag = appraisal.submission.bag
-            bag.remove_appraisal(request.user, appraisal, commit=True)
-            update_filesystem_bag(request, bag)
-
-        elif has_bag:
-            messages.warning(request, gettext(
-                'An appraisal was deleted, an operation that would normally have affected the '
-                "Bag associated with the appraisal's submission, but ALLOW_BAG_CHANGES is OFF, "
-                'so no change was made to the Bag'
-            ))
-
-        super().delete_model(request, obj)
-
-
     def delete_queryset(self, request, queryset):
         ''' Delete the Appraisals from the Appraisals' Submissions' Bags (if Bag
         editing is allowed)
@@ -601,10 +364,7 @@ class AppraisalAdmin(admin.ModelAdmin):
             for appraisal in appraisals_with_bags:
                 curr_bag = appraisal.submission.bag
                 curr_bag.remove_appraisal(request.user, appraisal, commit=True)
-                if prev_bag and curr_bag.id != prev_bag.id:
-                    update_filesystem_bag(request, prev_bag)
                 prev_bag = curr_bag
-            update_filesystem_bag(request, prev_bag)
 
         elif appraisals_with_bags:
             messages.warning(request, gettext(
@@ -672,12 +432,18 @@ class SubmissionAdmin(admin.ModelAdmin):
     ]
 
     actions = [
+        'export_caais_reports',
+        'export_caais_csv',
+        'export_atom_2_6_csv',
+        'export_atom_2_3_csv',
+        'export_atom_2_2_csv',
+        'export_atom_2_1_csv',
         'export_reports',
     ]
 
     search_fields = [
         'id',
-        'bag__bag_name',
+        'bag__accession_title',
     ]
 
     list_display = [
@@ -715,8 +481,23 @@ class SubmissionAdmin(admin.ModelAdmin):
             path('<path:object_id>/report/',
                  self.admin_site.admin_view(self.view_report),
                  name='%s_%s_report' % info),
+            path('<path:object_id>/zip/',
+                 self.admin_site.admin_view(self.create_zipped_bag),
+                 name='%s_%s_zip' % info),
+            path('<path:object_id>/rezip/',
+                 self.admin_site.admin_view(self.recreate_zipped_bag),
+                 name='%s_%s_rezip' % info),
         ]
         return report_url + urls
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        job = Job.objects.get_queryset().filter(Q(user_triggered=request.user) & Q(submission_id=object_id)).first()
+        if extra_context is None:
+            extra_context = {}
+        extra_context['has_generated_bag'] = job is not None
+        if job is not None:
+            extra_context['generated_bag_url'] = job.get_admin_download_url()
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     def view_report(self, request, object_id):
         ''' Redirect to the submission's report if the submission exists
@@ -749,7 +530,7 @@ class SubmissionAdmin(admin.ModelAdmin):
             for submission in queryset:
                 if submission and submission.bag:
                     report = submission.get_report()
-                    zipped_reports.writestr(f'{submission.bag.bag_name}.html', report)
+                    zipped_reports.writestr(f'{submission.bag_name}.html', report)
         zipf.seek(0)
         response = HttpResponse(zipf, content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=exported-bag-reports.zip'
@@ -775,12 +556,10 @@ class SubmissionAdmin(admin.ModelAdmin):
                 appraisal.user = request.user
                 appraisal.save()
                 if ALLOW_BAG_CHANGES:
-                    obj.bag.add_appraisal(request.user, appraisal, commit=False)
+                    pass
 
             if ALLOW_BAG_CHANGES:
-                obj.bag.save()
-                update_filesystem_bag(request, obj.bag)
-
+                obj.save()
             else:
                 messages.warning(request, gettext(
                     'A change to the appraisals was made to this submission that would normally '
@@ -813,15 +592,83 @@ class SubmissionAdmin(admin.ModelAdmin):
 
         if 'accession_identifier' in form.changed_data:
             updated_id = form.cleaned_data['accession_identifier']
-            obj.bag.update_accession_id(request.user, updated_id, commit=False)
+            obj.bag.update_accession_id(updated_id, commit=False)
 
         if 'level_of_detail' in form.changed_data:
+            # TODO: Not sure what this LevelOfDetail function is for?
             updated_choice = Submission.LevelOfDetail(form.cleaned_data['level_of_detail'])
             obj.bag.update_level_of_detail(request.user, str(updated_choice.label), commit=False)
 
         obj.bag.save()
-        update_filesystem_bag(request, obj.bag)
         super().save_model(request, obj, form, change)
+
+    def recreate_zipped_bag(self, request, object_id):
+        """ Remove the existing bag for this submission and user, then recreate it.
+
+        Args:
+            request: The originating request
+            object_id: The ID for the submission
+        """
+        job = Job.objects.filter(Q(submission_id=object_id) & Q(user_triggered=request.user)).first()
+        if job:
+            job.delete()
+        return self.create_zipped_bag(request, object_id)
+
+    def create_zipped_bag(self, request, object_id):
+        ''' Start a background job to create a downloadable bag
+
+        Args:
+            request: The originating request
+            object_id: The ID for the submission
+        '''
+        bag = Submission.objects.filter(id=object_id).first()
+        if bag:
+            job = Job.objects.filter(Q(submission_id=object_id) & Q(user_triggered=request.user)).first()
+            if job:
+                # You should not get here, reload the submission page.
+                self.message_user(request, mark_safe(gettext(
+                    'A downloadable bag already exists for you. Check the Submission page for links to download and '
+                    'regenerate the bag.'
+                )))
+                return HttpResponseRedirect(bag.get_admin_change_url())
+            create_downloadable_bag.delay(bag, request.user)
+            self.message_user(request, mark_safe(gettext(
+                'A downloadable bag is being generated. Check the Submission page for links access the bag.'
+            )))
+            url = reverse('admin:recordtransfer_submission_changelist', current_app=self.admin_site.name)
+            return HttpResponseRedirect(url)
+        # Error response
+        msg = gettext('Bag with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
+            'key': object_id,
+        }
+        self.message_user(request, msg, messages.WARNING)
+        admin_url = reverse('admin:index', current_app=self.admin_site.name)
+        return HttpResponseRedirect(admin_url)
+
+    def export_caais_csv(self, request, queryset):
+        return export_bag_csv(queryset, ExportVersion.CAAIS_1_0)
+
+    export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
+
+    def export_atom_2_6_csv(self, request, queryset):
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_6)
+
+    export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
+
+    def export_atom_2_3_csv(self, request, queryset):
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_3)
+
+    export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
+
+    def export_atom_2_2_csv(self, request, queryset):
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_2)
+
+    export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
+
+    def export_atom_2_1_csv(self, request, queryset):
+        return export_bag_csv(queryset, ExportVersion.ATOM_2_1)
+
+    export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
 
 
 class SubmissionInline(admin.TabularInline):
@@ -878,7 +725,7 @@ class JobAdmin(ReadOnlyAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return obj and request.user == obj.user_triggered
+        return obj and (request.user == obj.user_triggered or request.user.is_superuser)
 
     def get_urls(self):
         ''' Add download/ view to admin
