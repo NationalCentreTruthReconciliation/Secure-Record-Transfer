@@ -70,16 +70,6 @@ class UserProfile(UpdateView):
         messages.success(self.request, 'Preferences updated')
         return super().form_valid(form)
 
-    def get(self, request, *args, **kwargs):
-        if 'delete_transfer' in request.GET:
-            transfers = SavedTransfer.objects.filter(
-                user=self.request.user,
-                id=request.GET.get('delete_transfer')
-            )
-            for transfer in transfers:
-                transfer.delete()
-        return super().get(request, *args, **kwargs)
-
 
 class About(TemplateView):
     ''' About the application '''
@@ -721,3 +711,24 @@ def _accept_contents(file_upload):
                 }
             }
     return {'accepted': True}
+
+
+class DeleteTransfer(TemplateView):
+
+    template_name = 'recordtransfer/transfer_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        transfer = SavedTransfer.objects.filter(user=self.request.user, id=context['transfer_id']).first()
+        context['last_updated'] = transfer.last_updated
+        return context
+
+    def post(self, request, *args, **kwargs):
+        try:
+            if 'yes_delete' in request.POST:
+                transfer_id = request.POST['transfer_id']
+                transfer = SavedTransfer.objects.filter(user=self.request.user, id=transfer_id).first()
+                transfer.delete()
+        except KeyError:
+            LOGGER.error("Tried to render DeleteTransfer view without a transfer_id")
+        return redirect('recordtransfer:userprofile')

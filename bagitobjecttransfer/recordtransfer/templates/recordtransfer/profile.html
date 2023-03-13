@@ -46,7 +46,7 @@
             <tr>
                 <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
                 <td><a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a></td>
-                <td><a href="{% url 'recordtransfer:userprofile' %}?delete_transfer={{ in_process.id }}">Delete</a></td>
+                <td><a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a></td>
             </tr>
             {% endfor %}
         </table>
