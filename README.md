@@ -31,7 +31,17 @@ cp example.env .env
 docker-compose up -d
 ```
 
-After the containers are built, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. If you run into an error the first time your run the app where the migrations haven't all been applied yet, simply restart the application and that should fix the problem. To restart the app:
+After the containers are built, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025.
+
+Run these commands to build the database after the app starts in Docker.
+
+```shell
+docker-compose exec app python3 manage.py makemigrations --no-input
+docker-compose exec app python3 manage.py migrate --no-input
+docker-compose exec app python3 manage.py collectstatic --clear --no-input
+```
+
+To restart the application, run these commands.
 
 ```shell
 docker-compose down
