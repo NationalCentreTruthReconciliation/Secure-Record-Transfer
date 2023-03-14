@@ -10,7 +10,7 @@ This application is compatible with version 2.x of [AtoM](https://www.accesstome
 
 ## Quickstart
 
-The simplest way to run the application is using Docker. To run the app in this way, ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed on your system. You will also need [Python 3](https://python.org) and [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+The simplest way to run the application is using Docker. To run the app in this way, ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed on your system.
 
 From a terminal, clone the repository:
 
@@ -24,14 +24,14 @@ Enter the `Secure-Record-Transfer/bagitobjecttransfer` directory:
 cd Secure-Record-Transfer/bagitobjecttransfer
 ```
 
-Create a default `.dockerenv` file and run the application in Docker:
+Make a copy of the example `.env` file and run the application in Docker:
 
 ```shell
-python manage.py dockerenv
+cp example.env .env
 docker-compose up -d
 ```
 
-After the containers are built, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. If you run into an error the first time your run the app where the MySQL database hasn't been initialized yet, simply restart the application and that should fix the problem. To restart the app:
+After the containers are built, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. If you run into an error the first time your run the app where the migrations haven't all been applied yet, simply restart the application and that should fix the problem. To restart the app:
 
 ```shell
 docker-compose down

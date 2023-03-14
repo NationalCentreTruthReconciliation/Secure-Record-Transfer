@@ -5,13 +5,21 @@ services:
     image: mysql
     container_name: recordtransfer_mysqldb
     command: --defaults-extra-file=/etc/mysql/mysqld.cnf --default-authentication-plugin=mysql_native_password --mysqlx=0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}", "ping", "-h", "localhost"]
+      interval: 8s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     restart: always
     ports:
       - 3306:3306
     environment:
       MYSQL_PORT: 3306
-    env_file:
-      - ./.dockerenv
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql-database:/var/lib/mysql
       - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
@@ -57,15 +65,22 @@ services:
       - ./docker/logs/django:/var/log/django/
     ports:
       - 8000:8000
-    env_file:
-      - ./.dockerenv
     environment:
       DJANGO_SETTINGS_MODULE: bagitobjecttransfer.settings.docker
+      SIGN_UP_ENABLED: ${SIGN_UP_ENABLED}
+      ALLOW_BAG_CHANGES: ${ALLOW_BAG_CHANGES}
+      BAG_STORAGE_FOLDER: ${BAG_STORAGE_FOLDER}
+      UPLOAD_STORAGE_FOLDER: ${UPLOAD_STORAGE_FOLDER}
+      ARCHIVIST_EMAIL: ${ARCHIVIST_EMAIL}
     depends_on:
-      - rq
-      - db
-      - email
-      - clamav
+      db:
+        condition: service_healthy
+      rq:
+        condition: service_started
+      email:
+        condition: service_started
+      clamav:
+        condition: service_started
 
   rq:
     build: .
@@ -78,18 +93,29 @@ services:
       - temp-directory:/tmp
       - ./docker/logs/django-rq:/var/log/django-rq/
       - ./docker/logs/django:/var/log/django/
-    env_file:
-      - ./.dockerenv
     environment:
       DJANGO_SETTINGS_MODULE: bagitobjecttransfer.settings.docker
+      SIGN_UP_ENABLED: ${SIGN_UP_ENABLED}
+      ALLOW_BAG_CHANGES: ${ALLOW_BAG_CHANGES}
+      BAG_STORAGE_FOLDER: ${BAG_STORAGE_FOLDER}
+      UPLOAD_STORAGE_FOLDER: ${UPLOAD_STORAGE_FOLDER}
+      ARCHIVIST_EMAIL: ${ARCHIVIST_EMAIL}
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:5.0.7-alpine
     container_name: redis_server
     command: /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 8s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     ports:
       - 6379:6379
     volumes:
