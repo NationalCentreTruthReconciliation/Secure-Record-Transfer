@@ -9,7 +9,7 @@ services:
     ports:
       - 3306:3306
     env_file:
-      - .env
+      - .dev.env
     volumes:
       - mysql-database:/var/lib/mysql
       - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
@@ -54,27 +54,12 @@ services:
     ports:
       - 8000:8000
     env_file:
-      - .env
+      - .dev.env
     depends_on:
       - db
       - rq
       - email
       - clamav
-
-  rq:
-    build: .
-    container_name: recordtransfer_rq_workers
-    command: python manage.py rqworker default
-    volumes:
-      - ./:/app
-      - temp-directory:/tmp
-      - ./docker/logs/django-rq:/var/log/django-rq/
-      - ./docker/logs/django:/var/log/django/
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
 
   redis:
     image: redis:5.0.7-alpine

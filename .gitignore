@@ -93,6 +93,8 @@ local_settings.py
 bagitobjecttransfer/static/
 
 .env
+.dev.env
+.prod.env
 .dockerenv
 db.sqlite3
 env/
