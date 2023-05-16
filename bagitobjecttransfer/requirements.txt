@@ -16,7 +16,7 @@ gunicorn==20.1.0
 importlib-metadata==4.8.3
 mysql-connector-python==8.0.24
 packaging==21.3
-protobuf==3.19.3
+protobuf==3.19.5
 PyMySQL==1.0.2
 pyparsing==3.0.6
 python-decouple==3.5
