@@ -10,7 +10,7 @@ This application is compatible with version 2.x of [AtoM](https://www.accesstome
 
 ## Quickstart
 
-The simplest way to run the application is using Docker. To run the app in this way, ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed on your system.
+This application is run using Docker or Podman. Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) or [Podman Desktop](https://podman-desktop.io/) installed on your system before running the app. If you want to use Podman, you will also need [Podman Compose](https://github.com/containers/podman-compose).
 
 From a terminal, clone the repository:
 
@@ -24,11 +24,16 @@ Enter the `Secure-Record-Transfer/bagitobjecttransfer` directory:
 cd Secure-Record-Transfer/bagitobjecttransfer
 ```
 
-Make a copy of the example `.env` file and run the application in Docker:
+Make a copy of the example `.dev.env` file and run the application:
 
 ```shell
-cp example.env .env
-docker-compose up -d
+cp example.dev.env .dev.env
+
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
 After the containers are built, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025.
@@ -36,21 +41,31 @@ After the containers are built, the application should now be accessible at http
 Run these commands to build the database after the app starts in Docker.
 
 ```shell
-docker-compose exec app python3 manage.py makemigrations --no-input
-docker-compose exec app python3 manage.py migrate --no-input
-docker-compose exec app python3 manage.py collectstatic --clear --no-input
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
 ```
 
 To restart the application, run these commands.
 
 ```shell
-docker-compose down
-docker-compose up -d
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml down
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
-If you'd like to be able to log in to the record transfer app, you can create a superuser with these commands:
+If you'd like to be able to log in to the record transfer app as an administrator, use the following command, and follow the prompts you are given.
 
 ```shell
-docker-compose exec app sh
-python3 manage.py createsuperuser
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
 ```
