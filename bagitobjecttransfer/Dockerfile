@@ -1,8 +1,4 @@
-################################################################################
-#
-# BASE IMAGE
-#
-FROM python:3 as base
+FROM python:3
 
 # Set Work Directoy
 WORKDIR /app
@@ -10,46 +6,17 @@ WORKDIR /app
 # Set Environment Variables
 ENV PYTHONUNBUFFERED=1
 
-# Make Directories
-RUN mkdir -p /app/media/jobs/
-RUN mkdir -p /var/log/django/
-RUN mkdir -p /var/log/django-rq/
-
 # Copy app files
 COPY . .
 
-# Install Dependencies
-RUN apt update; \
-    apt install -y netcat; \
-    pip install --upgrade setuptools wheel; \
-    pip install -r requirements.txt
-
-# Prepare entrypoint script
-RUN sed -i 's/\r$//g' /app/docker/entrypoint.sh; \
-    chmod +x /app/docker/entrypoint.sh
-
-
-################################################################################
-#
-# DEVELOPMENT
-#
-FROM base as dev
-
-ENTRYPOINT ["/app/docker/entrypoint.sh"]
-
-
-################################################################################
-#
-# PRODUCTION
-#
-FROM base as prod
-
-# Create user to run app as
-RUN addgroup -S app && adduser -S app -G app
-
-# Set ownership of everything to app:app
-RUN chown -R app:app /app
-
-USER app
+# Make directories, install dependencies and prepare entrypoint script
+RUN mkdir -p /var/log/django/ \
+    && mkdir -p /var/log/django-rq/ \
+    && mkdir -p /app/static/ \
+    && mkdir -p /app/media/ \
+    && pip install --upgrade setuptools wheel \
+    && pip install -r requirements.txt \
+    && sed -i 's/\r$//g' /app/docker/entrypoint.sh \
+    && chmod +x /app/docker/entrypoint.sh
 
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
