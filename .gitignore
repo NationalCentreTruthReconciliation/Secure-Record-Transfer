@@ -96,5 +96,5 @@ bagitobjecttransfer/static/
 .dev.env
 .prod.env
 .dockerenv
-db.sqlite3
+*.sqlite3
 env/

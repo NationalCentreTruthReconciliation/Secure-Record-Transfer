@@ -16,12 +16,8 @@ ALLOWED_HOSTS = [
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
-        'HOST': config('MYSQL_HOST'),
-        'PORT': config('MYSQL_PORT'),
-        'USER': config('MYSQL_USER'),
-        'PASSWORD': config('MYSQL_PASSWORD'),
-        'NAME': config('MYSQL_DATABASE'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'development_database.sqlite3'),
     }
 }
 
