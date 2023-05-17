@@ -94,7 +94,7 @@ def verify_storage_folder_settings():
 
         if not os.path.exists(directory):
             try:
-                os.mkdir(directory)
+                os.makedirs(directory, exist_ok=True)
                 LOGGER.info('Created %s at %s', setting_name, directory)
             except PermissionError as exc:
                 raise ImproperlyConfigured((
