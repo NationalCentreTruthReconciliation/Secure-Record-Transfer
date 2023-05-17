@@ -16,11 +16,24 @@ services:
     volumes:
       - mailhog:/home/mailhog/mail
 
+  rq:
+    build: .
+    container_name: recordtransfer_rq_workers
+    command: python manage.py rqworker default
+    volumes:
+      - ./:/app
+      - temp-directory:/tmp
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
+    env_file:
+      - .dev.env
+    environment:
+      - ENV=dev
+    depends_on:
+      - redis
+
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: dev
+    build: .
     container_name: recordtransfer_django_app
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -32,26 +45,12 @@ services:
       - 8000:8000
     env_file:
       - .dev.env
+    environment:
+      - ENV=dev
     depends_on:
-      - db
       - rq
       - email
       - clamav
 
-  rq:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: dev
-    container_name: recordtransfer_rq_workers
-    command: python manage.py rqworker default
-    volumes:
-      - ./:/app
-      - temp-directory:/tmp
-      - ./docker/logs/django-rq:/var/log/django-rq/
-      - ./docker/logs/django:/var/log/django/
-    env_file:
-      - .dev.env
-    depends_on:
-      - db
-      - redis
+volumes:
+  mailhog:
