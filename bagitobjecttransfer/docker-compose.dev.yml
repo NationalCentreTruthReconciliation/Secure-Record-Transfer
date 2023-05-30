@@ -43,10 +43,14 @@ services:
       - ./docker/logs/django:/var/log/django/
     ports:
       - 8000:8000
+      - 8009:8009
     env_file:
       - .dev.env
+    # See manage.py for debugger setup
     environment:
       - ENV=dev
+      - ENABLE_DEBUGPY=1
+      - DEBUGPY_PORT=8009
     depends_on:
       - rq
       - email

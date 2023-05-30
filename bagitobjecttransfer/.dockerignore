@@ -1,1 +1,7 @@
-db.sqlite3
+*.sqlite3
+**/__pycache__
+.dockerignore
+docker-compose*
+Dockerfile
+example.dev.env
+example.prod.env
