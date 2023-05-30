@@ -1,6 +1,6 @@
 # Secure Record Transfer Application
 
-Please, [read the docs!](https://nctr-bagit-record-transfer.readthedocs.io/en/latest/)
+Please, [read the docs!](https://secure-record-transfer.readthedocs.io/en/latest/)
 
 The secure record transfer application has been designed for the purpose of transferring files and metadata over the internet to an institution before securing the files in a [BagIt](https://datatracker.ietf.org/doc/html/rfc8493) bag. This application attempts to closely follow the [Canadian Archival Accession Information Standard (CAAIS)](http://archivescanada.ca/CWG_AccessionStandard). As such, most of the fields in the Accession Standard are captured when a user submits files and metadata through the application's [transfer form](https://nctr-bagit-record-transfer.readthedocs.io/en/latest/howtouse/transferform.html). A suite of administrative tools is also provided with the app to allow staff members to view, appraise, download, an export submissions made by users.
 
