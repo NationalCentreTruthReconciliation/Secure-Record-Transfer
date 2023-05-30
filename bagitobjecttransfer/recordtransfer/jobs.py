@@ -300,7 +300,7 @@ def send_user_activation_email(new_user: User):
         from_email=from_email,
         subject='Activate Your Account',
         template_name='recordtransfer/email/activate_account.html',
-        context = {
+        context= {
             'user': new_user,
             'base_url': domain,
             'uid': urlsafe_base64_encode(force_bytes(new_user.pk)),
@@ -351,7 +351,7 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
         LOGGER.info(msg='FROM: {0}'.format(from_email))
         LOGGER.info(msg='Rendering HTML email from {0}'.format(template_name))
         context['site_domain'] = Site.objects.get_current().domain
-        msg_html = render_to_string(template_name, context=context)
+        msg_html = render_to_string(template_name, context)
         LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
         msg_plain = html_to_text(msg_html)
         LOGGER.info('Sending...')

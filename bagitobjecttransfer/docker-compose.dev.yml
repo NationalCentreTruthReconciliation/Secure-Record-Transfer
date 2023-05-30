@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  email:
+    image: mailhog/mailhog
+    user: root
+    container_name: recordtransfer_mailhog
+    logging:
+      driver: 'none' # disable saving logs
+    ports:
+      - 1025:1025
+      - 8025:8025
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: '/home/mailhog/mail'
+    volumes:
+      - mailhog:/home/mailhog/mail
+
+  rq:
+    build: .
+    container_name: recordtransfer_rq_workers
+    command: python manage.py rqworker default
+    volumes:
+      - ./:/app
+      - temp-directory:/tmp
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
+    env_file:
+      - .dev.env
+    environment:
+      - ENV=dev
+    depends_on:
+      - redis
+
+  app:
+    build: .
+    container_name: recordtransfer_django_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/app
+      - temp-directory:/tmp
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
+    ports:
+      - 8000:8000
+    env_file:
+      - .dev.env
+    environment:
+      - ENV=dev
+    depends_on:
+      - rq
+      - email
+      - clamav
+
+volumes:
+  mailhog:
