@@ -29,7 +29,6 @@ def initialize_debugger():
         config('ENABLE_DEBUGPY', default='0') == '1' and \
         not os.getenv('RUN_MAIN'):
 
-        print(sys.argv)
         command = config('ENABLE_DEBUGPY_ON_COMMAND', default='runserver')
 
         if command in sys.argv:
