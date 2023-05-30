@@ -11,21 +11,32 @@ def initialize_debugger():
     - The Django DEBUG setting is True
     - The ENABLE_DEBUGPY environment variable is "1"
     - This is the main Django process (i.e., this is not the reloader process
-      Django runs to check for code changes)
+      Django runs to check for code changes - RUN_MAIN is checked for this
+      condition)
+    - This is a "runserver" command or other command set by the variable
+      "ENABLE_DEBUGPY_ON_COMMAND". This is to avoid clashing with other
+      manage.py commands like migrate or shell or makemigrations.
 
     You may also set the port debugpy uses. Otherwise, the port 8009 is used.
 
-    See:
+    See below for info related to RUN_MAIN:
     - https://stackoverflow.com/a/73437126
     - https://stackoverflow.com/a/62944426
     '''
     from django.conf import settings
 
-    if settings.DEBUG and config('ENABLE_DEBUGPY', default='0') == '1' and not os.getenv('RUN_MAIN'):
-        import debugpy
-        port = config('DEBUGPY_PORT', default=8009, cast=int)
-        print(f'Attaching debugger to port {port}')
-        debugpy.listen(('0.0.0.0', port))
+    if settings.DEBUG and \
+        config('ENABLE_DEBUGPY', default='0') == '1' and \
+        not os.getenv('RUN_MAIN'):
+
+        print(sys.argv)
+        command = config('ENABLE_DEBUGPY_ON_COMMAND', default='runserver')
+
+        if command in sys.argv:
+            import debugpy
+            port = config('DEBUGPY_PORT', default=8009, cast=int)
+            print(f'Attaching debugger to port {port}')
+            debugpy.listen(('0.0.0.0', port))
 
 
 def main():

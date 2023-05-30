@@ -25,10 +25,16 @@ services:
       - temp-directory:/tmp
       - ./docker/logs/django-rq:/var/log/django-rq/
       - ./docker/logs/django:/var/log/django/
+    ports:
+      - 8010:8010
     env_file:
       - .dev.env
+    # See manage.py for debugger setup
     environment:
       - ENV=dev
+      - ENABLE_DEBUGPY=1
+      - ENABLE_DEBUGPY_ON_COMMAND=rqworker
+      - DEBUGPY_PORT=8010
     depends_on:
       - redis
 
@@ -50,6 +56,7 @@ services:
     environment:
       - ENV=dev
       - ENABLE_DEBUGPY=1
+      - ENABLE_DEBUGPY_ON_COMMAND=runserver
       - DEBUGPY_PORT=8009
     depends_on:
       - rq
