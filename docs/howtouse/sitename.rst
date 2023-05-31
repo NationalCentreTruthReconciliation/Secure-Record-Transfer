@@ -24,24 +24,12 @@ like /admin/sites/site/**2**/change. The important part to note is the number. T
 **SITE_ID**.
 
 To change which site the app uses, you need to change the **SITE_ID** Django setting. This setting
-is controlled by the environment variable file. If running with Docker, the environment variable
-file is found at:
-
-::
-
-    bagitobjecttransfer/.dockerenv
-
-
-If running in production using the recommended installation instructions in these docs, the
-environment variable file will be here:
-
-::
-
-    /opt/NCTR-Bagit-Record-Transfer/.env
-
+is controlled by the environment variable file. If running in development, this file is
+:code:`.dev.env` and if running in production, this file is :code:`.prod.env`.
 
 If you want to change to Site 3, the **SITE_ID** should be set like this:
 
-::
+.. code-block::
 
+    # file .dev.env OR .prod.env
     SITE_ID=3
