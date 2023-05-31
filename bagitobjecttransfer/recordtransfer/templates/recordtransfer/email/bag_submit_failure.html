@@ -1,16 +1,46 @@
-{% extends 'recordtransfer/email/_base_email.html' %}
 {% load i18n %}
-
-{% block title %}
-{% blocktrans %}
-Transfer Submitted by {{ user.username }} Failed
-{% endblocktrans %}
-{% endblock %}
-
-{% block message %}
-<p>
-    {{ user.first_name }} {{ user.last_name }} ({{ user.username }}) attempted to
-    submit a new transfer at {{ form_data.action_date }} using the NCTR Record Transfer
-    Portal, but an error occurred.
-</p>
-{% endblock %}
+<!DOCTYPE html>
+<html style="
+    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;">
+    <body style="
+        margin: 0;">
+        <div style="
+            color: #333333;
+            font-size: 20pt;
+            padding: 6px 20px;
+            background-color: #eeeeee;
+            margin-bottom: 15px;">
+            {% blocktrans %}Transfer Submitted by {{ username }} Failed{% endblocktrans %}
+        </div>
+        <div style="
+            padding: 0px 20px;">
+            <p>
+                {{ first_name }} {{ last_name }} ({{ username }}) attempted to
+                submit a new transfer at {{ action_date }} using the NCTR Record Transfer
+                Portal, but an error occurred.
+            </p>
+            {% block postscript %}
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% blocktrans %}
+                This email address is not monitored, do not reply to this message.
+                {% endblocktrans %}
+                </i>
+            </div>
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% url 'recordtransfer:userprofile' as profile_url %}
+                {% blocktrans %}
+                If you do not want to receive these emails anymore, you can change the
+                "Receive notification emails?" setting in
+                <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
+                {% endblocktrans %}
+                </i>
+            </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>
