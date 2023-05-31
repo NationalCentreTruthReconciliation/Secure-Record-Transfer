@@ -197,8 +197,10 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
         subject=subject,
         template_name='recordtransfer/email/bag_submit_success.html',
         context={
-            'user': user_submitted,
-            'form_data': form_data,
+            'username': user_submitted.username,
+            'first_name': user_submitted.first_name,
+            'last_name': user_submitted.last_name,
+            'action_date': form_data.action_date,
             'submission_url': submission_url,
         }
     )
@@ -225,8 +227,10 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
         subject=subject,
         template_name='recordtransfer/email/bag_submit_failure.html',
         context={
-            'user': user_submitted,
-            'form_data': form_data,
+            'username': user_submitted.username,
+            'first_name': user_submitted.first_name,
+            'last_name': user_submitted.last_name,
+            'action_date': form_data.action_date,
         }
     )
 
@@ -250,8 +254,6 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
             subject='Thank You For Your Transfer',
             template_name='recordtransfer/email/transfer_success.html',
             context={
-                'user': user_submitted,
-                'form_data': form_data,
                 'archivist_email': ARCHIVIST_EMAIL,
             }
         )
@@ -275,8 +277,9 @@ def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User)
             subject='Issue With Your Transfer',
             template_name='recordtransfer/email/transfer_failure.html',
             context={
-                'user': user_submitted,
-                'form_data': form_data,
+                'username': user_submitted.username,
+                'first_name': user_submitted.first_name,
+                'last_name': user_submitted.last_name,
                 'archivist_email': ARCHIVIST_EMAIL,
             }
         )
@@ -293,7 +296,7 @@ def send_user_activation_email(new_user: User):
     from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
 
     token = account_activation_token.make_token(new_user)
-    LOGGER.info(msg='Generated token for activation link: {0}'.format(token))
+    LOGGER.info('Generated token for activation link: %s', token)
 
     send_mail_with_logs(
         recipients=[new_user.email],
@@ -301,7 +304,7 @@ def send_user_activation_email(new_user: User):
         subject='Activate Your Account',
         template_name='recordtransfer/email/activate_account.html',
         context= {
-            'user': new_user,
+            'username': new_user.username,
             'base_url': domain,
             'uid': urlsafe_base64_encode(force_bytes(new_user.pk)),
             'token': token,

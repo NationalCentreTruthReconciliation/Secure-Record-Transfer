@@ -1,26 +1,55 @@
-{% extends 'recordtransfer/email/_base_email.html' %}
 {% load i18n %}
-
-{% block title %}
-{{ subject }}
-{% endblock %}
-
-{% block message %}
-<p>
-    {% blocktrans %}
-    Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.
-    {% endblocktrans %}
-</p>
-{% if changed_list %}
-    <p>
-        {% blocktrans %}
-        The following changes have been made to your account:
-        {% endblocktrans %}
-    </p>
-    <ul>
-        {% for change in changed_list %}
-            <li>{{ change }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-{% endblock %}
+<!DOCTYPE html>
+<html style="
+    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;">
+    <body style="
+        margin: 0;">
+        <div style="
+            color: #333333;
+            font-size: 20pt;
+            padding: 6px 20px;
+            background-color: #eeeeee;
+            margin-bottom: 15px;">
+            {{ subject }}
+        </div>
+        <div style="
+            padding: 0px 20px;">
+            <p>
+                {% blocktrans %}
+                Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.
+                {% endblocktrans %}
+            </p>
+            {% if changed_list %}
+            <p>
+                {% trans "The following changes have been made to your account:" %}
+            </p>
+            <ul>
+                {% for change in changed_list %}
+                    <li>{{ change }}</li>
+                {% endfor %}
+            </ul>
+            {% block postscript %}
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% blocktrans %}
+                This email address is not monitored, do not reply to this message.
+                {% endblocktrans %}
+                </i>
+            </div>
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% url 'recordtransfer:userprofile' as profile_url %}
+                {% blocktrans %}
+                If you do not want to receive these emails anymore, you can change the
+                "Receive notification emails?" setting in
+                <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
+                {% endblocktrans %}
+                </i>
+            </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>
