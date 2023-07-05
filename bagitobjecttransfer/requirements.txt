@@ -7,7 +7,7 @@ colorama==0.4.4
 dateparser==1.1.1
 debugpy==1.6.7
 Deprecated==1.2.13
-Django==3.2.19
+Django==3.2.20
 django-countries==7.2.1
 django-formtools==2.3
 django-override-storage==0.3.2
