@@ -391,23 +391,3 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
             'Error when sending email to user, %s: %s',
             exc.__class__.__name__, str(exc)
         )
-
-@django_rq.job
-def clean_undeleted_temp_files(hours=12):
-    ''' Deletes every temp file tracked in the database older than a specified number of hours.
-
-    Args:
-        hours (int): The threshold number of hours in the past required to delete a file
-    '''
-    time_threshold = timezone.now() - timedelta(hours=hours)
-
-    old_undeleted_files = UploadedFile.objects.filter(
-        old_copy_removed=False
-    ).filter(
-        session__started_at__lt=time_threshold
-    )
-
-    LOGGER.info('Running cleaning')
-
-    for upload in old_undeleted_files:
-        upload.remove()
