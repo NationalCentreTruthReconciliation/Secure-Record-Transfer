@@ -297,11 +297,6 @@ class Submission(models.Model):
         view_name = f'admin:{self._meta.app_label}_{self._meta.model_name}_zip'
         return reverse(view_name, args=(self.pk,))
 
-    def get_admin_regen_zip_url(self):
-        """ Get the URL to regenerate a zipped bag for this object in the admin """
-        view_name = f'admin:{self._meta.app_label}_{self._meta.model_name}_rezip'
-        return reverse(view_name, args=(self.pk,))
-
     def __str__(self):
         return f'Submission by {self.user} at {self.submission_date}'
 
@@ -503,6 +498,12 @@ class Job(models.Model):
     attached_file = models.FileField(upload_to='jobs/zipped_bags', storage=OverwriteStorage,
                                      blank=True, null=True)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, null=True, related_name="job")
+
+    def get_admin_change_url(self):
+        ''' Get the URL to change this object in the admin
+        '''
+        view_name = 'admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.model_name)
+        return reverse(view_name, args=(self.pk,))
 
     def get_admin_download_url(self):
         ''' Get the URL to download the attached file from the admin
