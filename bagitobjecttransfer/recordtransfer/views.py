@@ -199,6 +199,13 @@ class TransferFormWizard(SessionWizardView):
                 "Add any final notes you would like to add, and upload your files"
             )
         },
+        "finalnotes": {
+            "templateref": "recordtransfer/transferform_standard.html",
+            "formtitle": gettext("Final Notes"),
+            "infomessage": gettext(
+                "Add any final notes that may not have fit in previous steps"
+            )
+        }
     }
 
     def get(self, request, *args, **kwargs):
@@ -315,15 +322,18 @@ class TransferFormWizard(SessionWizardView):
         cleaned_data = super().get_all_cleaned_data()
 
         # Get quantity and type of files for extent
-        session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
-        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
-        count = get_human_readable_file_count(
-            [f.name for f in session.get_existing_file_set()],
-            settings.ACCEPTED_FILE_FORMATS,
-            LOGGER
-        )
-
-        cleaned_data['quantity_and_type_of_units'] = '{0}, totalling {1}'.format(count, size)
+        if settings.FILE_UPLOAD_ENABLED:
+            session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
+            size = get_human_readable_size(session.upload_size, base=1024, precision=2)
+            count = get_human_readable_file_count(
+                [f.name for f in session.get_existing_file_set()],
+                settings.ACCEPTED_FILE_FORMATS,
+                LOGGER
+            )
+            cleaned_data['quantity_and_type_of_units'] = gettext('{0}, totalling {1}').format(count, size)
+        else:
+            if not cleaned_data['quantity_and_type_of_units']:
+                cleaned_data['quantity_and_type_of_units'] = gettext('No file information provided.')
 
         start_date = cleaned_data['start_date_of_material']
         end_date = cleaned_data['end_date_of_material']
