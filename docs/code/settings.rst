@@ -10,6 +10,7 @@ the :code:`.env` environment file. By category, these settings are:
 
 **File Upload Controls**
 
+- :ref:`FILE_UPLOAD_ENABLED`
 - :ref:`ACCEPTED_FILE_FORMATS`
 - :ref:`MAX_TOTAL_UPLOAD_SIZE`
 - :ref:`MAX_SINGLE_UPLOAD_SIZE`
@@ -27,9 +28,6 @@ the :code:`.env` environment file. By category, these settings are:
 **Application Features**
 
 - :ref:`ALLOW_BAG_CHANGES`
-- :ref:`CLAMAV_ENABLED`
-- :ref:`CLAMAV_HOST`
-- :ref:`CLAMAV_PORT`
 - :ref:`MAX_SAVED_TRANSFER_COUNT`
 - :ref:`SIGN_UP_ENABLED`
 - :ref:`USE_DATE_WIDGETS`
@@ -39,10 +37,41 @@ the :code:`.env` environment file. By category, these settings are:
 - :ref:`ARCHIVIST_EMAIL`
 - :ref:`DO_NOT_REPLY_USERNAME`
 
+**ClamAV Virus Checking**
+
+- :ref:`CLAMAV_ENABLED`
+- :ref:`CLAMAV_HOST`
+- :ref:`CLAMAV_PORT`
+
 **Data Formatting**
 
 - :ref:`APPROXIMATE_DATE_FORMAT`
 - :ref:`DEFAULT_DATA`
+
+
+FILE_UPLOAD_ENABLED
+-------------------
+
+    *Choose whether to allow file uploads*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        True          bool       YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets whether file uploads are allowed. If they are *not* allowed (disabled), then only metadata
+    is submitted to the application.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        FILE_UPLOAD_ENABLED=false
+
 
 
 ACCEPTED_FILE_FORMATS
@@ -69,6 +98,8 @@ ACCEPTED_FILE_FORMATS
     The file extensions are used to determine what a user is allowed to upload. The group name is
     used to create a human-readable extent statement about the quantity and type of files the user
     uploaded.
+
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
 
     **settings.py Example:**
 
@@ -114,35 +145,14 @@ MAX_SINGLE_UPLOAD_SIZE
     Sets the maximum allowed size a single file can be when uploaded with the transfer form. The
     size is expressed in **MiB**, *not* MB.
 
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
     **.env Example:**
 
     ::
 
         #file: .env
         MAX_SINGLE_UPLOAD_SIZE=512
-
-
-MAX_TOTAL_UPLOAD_COUNT
-----------------------
-
-    *Choose the maximum number of files can be transferred*
-
-    .. table::
-
-        ========  ============  =========  ==================  =========================
-        Required  Default       Type       Can be set in .env  Can be set in settings.py
-        ========  ============  =========  ==================  =========================
-        NO        40            int        YES                 YES
-        ========  ============  =========  ==================  =========================
-
-    Sets the maximum number of files that can be transferred at one time with the transfer form.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        MAX_TOTAL_UPLOAD_COUNT=10
 
 
 MAX_TOTAL_UPLOAD_SIZE
@@ -161,12 +171,39 @@ MAX_TOTAL_UPLOAD_SIZE
     Sets the maximum allowed total size of all files being transferred at one time. The size is
     expressed in **MiB**, *not* MB.
 
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
     **.env Example:**
 
     ::
 
         #file: .env
         MAX_TOTAL_UPLOAD_SIZE=1024
+
+
+MAX_TOTAL_UPLOAD_COUNT
+----------------------
+
+    *Choose the maximum number of files can be transferred*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        40            int        YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    Sets the maximum number of files that can be transferred at one time with the transfer form.
+
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_TOTAL_UPLOAD_COUNT=10
 
 
 BAG_STORAGE_FOLDER
@@ -268,6 +305,30 @@ ALLOW_BAG_CHANGES
         ALLOW_BAG_CHANGES=true
 
 
+MAX_SAVED_TRANSFER_COUNT
+------------------------
+
+    *Choose maximum saved transfers per user*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        2                       int        YES                 YES
+        ========  ======================  =========  ==================  =========================
+
+    The maximum number of transfers a user can save to resume later. Must be a non-negative integer.
+    Set to 0 to disable saving transfers.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        MAX_SAVED_TRANSFER_COUNT=5
+
+
 SIGN_UP_ENABLED
 ---------------
 
@@ -364,6 +425,79 @@ DO_NOT_REPLY_USERNAME
         DO_NOT_REPLY_USERNAME=donotreply
 
 
+CLAMAV_ENABLED
+--------------
+
+    *Whether ClamAV checking is enabled*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       False            bool       YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Enables/disables whether ClamAV malware checking is enabled.
+
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_ENABLED=True
+
+CLAMAV_HOST
+-----------
+
+    *Hostname of ClamAV instance*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       None             string     YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Hostname of the server running ClamAV.
+
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_HOST='example.server.org'
+
+CLAMAV_PORT
+-----------
+
+    *Port of ClamAV instance*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       3310             int        YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Port of the Clamd instance on the server running ClamAV.
+
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_PORT=8181
+
+
 APPROXIMATE_DATE_FORMAT
 -----------------------
 
@@ -386,30 +520,6 @@ APPROXIMATE_DATE_FORMAT
 
         #file: .env
         APPROXIMATE_DATE_FORMAT='Circa. {date}'
-
-
-MAX_SAVED_TRANSFER_COUNT
-------------------------
-
-    *Choose maximum saved transfers per user*
-
-    .. table::
-
-        ========  ======================  =========  ==================  =========================
-        Required  Default                 Type       Can be set in .env  Can be set in settings.py
-        ========  ======================  =========  ==================  =========================
-        NO        2                       int        YES                 YES
-        ========  ======================  =========  ==================  =========================
-
-    The maximum number of transfers a user can save to resume later. Must be a non-negative integer. 
-    Set to 0 to disable saving transfers.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        MAX_SAVED_TRANSFER_COUNT=5
 
 
 DEFAULT_DATA
@@ -479,69 +589,3 @@ DEFAULT_DATA
                 'language_of_accession_record': 'en',
             }
         }
-
-CLAMAV_ENABLED
------------
-
-    *Whether ClamAV checking is enabled*
-
-    .. table::
-
-        ========  ===============  =========  ==================  =========================
-        Required  Default          Type       Can be set in .env  Can be set in settings.py
-        ========  ===============  =========  ==================  =========================
-        YES       False            bool       YES                 YES
-        ========  ===============  =========  ==================  =========================
-
-    Whether ClamAV malware checking is enabled.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CLAMAV_ENABLED=True
-
-CLAMAV_HOST
------------
-
-    *Hostname of ClamAV instance*
-
-    .. table::
-
-        ========  ===============  =========  ==================  =========================
-        Required  Default          Type       Can be set in .env  Can be set in settings.py
-        ========  ===============  =========  ==================  =========================
-        YES       None             string     YES                 YES
-        ========  ===============  =========  ==================  =========================
-
-    Hostname of the server running ClamAV.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CLAMAV_HOST='example.server.org'
-
-CLAMAV_PORT
------------
-
-    *Port of ClamAV instance*
-
-    .. table::
-
-        ========  ===============  =========  ==================  =========================
-        Required  Default          Type       Can be set in .env  Can be set in settings.py
-        ========  ===============  =========  ==================  =========================
-        YES       3310             int        YES                 YES
-        ========  ===============  =========  ==================  =========================
-
-    Port of the Clamd instance on the server running ClamAV.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CLAMAV_PORT=8181
