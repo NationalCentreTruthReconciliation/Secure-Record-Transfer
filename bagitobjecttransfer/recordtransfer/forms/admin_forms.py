@@ -122,10 +122,11 @@ class SubmissionForm(RecordTransferModelForm):
             'submission_date',
             'bag',
             'user',
-            'review_status'
+            'review_status',
+            'upload_session',
         )
 
-    disabled_fields = ['submission_date', 'bag', 'user']
+    disabled_fields = ['submission_date', 'bag', 'upload_session', 'user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

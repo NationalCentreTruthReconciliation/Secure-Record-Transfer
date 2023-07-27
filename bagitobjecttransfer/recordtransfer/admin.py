@@ -450,6 +450,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         'submission_date',
         'id',
         'review_status',
+        'number_of_files_uploaded',
         linkify('user'),
         linkify('bag'),
     ]
@@ -461,7 +462,14 @@ class SubmissionAdmin(admin.ModelAdmin):
     readonly_fields = [
         'submission_date',
         'user',
+        'upload_session',
     ]
+
+
+    def number_of_files_uploaded(self, obj):
+        if not obj.upload_session:
+            return 0
+        return obj.upload_session.number_of_files_uploaded()
 
     def has_add_permission(self, request):
         return False
