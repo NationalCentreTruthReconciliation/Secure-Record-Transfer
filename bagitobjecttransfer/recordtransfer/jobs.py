@@ -27,13 +27,16 @@ LOGGER = logging.getLogger('rq.worker')
 
 
 def _get_admin_recipient_list(subject):
-    LOGGER.info(msg='Finding Users to send "{0}" email to'.format(subject))
+    LOGGER.info('Finding Users to send "%s" email to', subject)
     recipients = User.objects.filter(gets_bag_email_updates=True)
     if not recipients:
-        LOGGER.warning(msg='There are no users configured to receive transfer update emails.')
+        LOGGER.warning('There are no users configured to receive transfer update emails.')
         return
     user_list = list(recipients)
-    LOGGER.info(msg=('Found {0} Users(s) to send email to: {1}'.format(len(user_list), user_list)))
+    LOGGER.info(
+        'Found %d Users(s) to send email to: %s',
+        len(user_list), str(user_list)
+    )
     return [str(e) for e in recipients.values_list('email', flat=True)]
 
 
@@ -46,9 +49,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
         user_submitted (User): The user who submitted the data and files.
     '''
-    LOGGER.info(msg='Creating a submission from the transfer submitted by {0}'.format(
-        str(user_submitted))
-    )
+    LOGGER.info('Creating a submission from the transfer submitted by %s', str(user_submitted))
 
     if settings.FILE_UPLOAD_ENABLED:
         token = form_data['session_token']
