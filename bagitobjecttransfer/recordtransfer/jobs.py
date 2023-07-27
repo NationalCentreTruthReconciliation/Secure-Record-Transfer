@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 
 from recordtransfer.caais import convert_form_data_to_metadata
 from recordtransfer.models import BagGroup, UploadedFile, UploadSession, User, Job, Submission
-from recordtransfer.settings import DO_NOT_REPLY_USERNAME, ARCHIVIST_EMAIL, BAG_CHECKSUMS
+from recordtransfer import settings
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text, zip_directory
 
@@ -50,11 +50,18 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         str(user_submitted))
     )
 
-    token = form_data['session_token']
-    LOGGER.info(msg=('Fetching session with the token {0}'.format(token)))
-    upload_session = UploadSession.objects.filter(token=token).first()
+    if settings.FILE_UPLOAD_ENABLED:
+        token = form_data['session_token']
+        LOGGER.info('Fetching session with the token %s', token)
+        upload_session = UploadSession.objects.filter(token=token).first()
+    else:
+        LOGGER.info((
+            'No file upload session will be linked to submission due to '
+            'FILE_UPLOAD_ENABLED=false'
+        ))
+        upload_session = None
 
-    LOGGER.info(msg='Creating serializable CAAIS metadata from form data')
+    LOGGER.info('Creating serializable CAAIS metadata from form data')
     metadata = convert_form_data_to_metadata(form_data)
 
     title = form_data['accession_title']
@@ -64,7 +71,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         datetime=timezone.localtime(timezone.now()).strftime(r'%Y%m%d-%H%M%S'),
         title=slugify(abbrev_title))
 
-    LOGGER.info(msg=('Created name for bag: "{0}"'.format(bag_name)))
+    LOGGER.info('Created name for bag: "%s"', bag_name)
 
     LOGGER.info('Creating Submission object linked to new metadata')
     new_submission = Submission(
@@ -85,16 +92,16 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
                                                             description=description,
                                                             created_by=user_submitted)
             if created:
-                LOGGER.info(msg='Created "{0}" BagGroup'.format(new_group_name))
+                LOGGER.info('Created "%s" BagGroup', new_group_name)
         else:
             group = BagGroup.objects.get(name=group_name, created_by=user_submitted)
 
         if group:
-            LOGGER.info(msg='Associating Submission with "{0}" BagGroup'.format(group.name))
+            LOGGER.info('Associating Submission with "%s" BagGroup', group.name)
             new_submission.part_of_group = group
             new_submission.save()
         else:
-            LOGGER.warning(msg='Could not find "{0}" BagGroup'.format(group.name))
+            LOGGER.warning('Could not find "%s" BagGroup', group.name)
 
     LOGGER.info('Sending transfer success email to administrators')
     send_bag_creation_success.delay(form_data, new_submission)
@@ -119,7 +126,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
 
     if not os.path.exists(bag.location):
         LOGGER.info(msg=f'No bag exists at {bag.location}, creating it now.')
-        result = bag.make_bag(algorithms=BAG_CHECKSUMS)
+        result = bag.make_bag(algorithms=settings.BAG_CHECKSUMS)
         if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
                 result['time_created'] is None:
             # Because we didn't generate the bag directory, exit.
@@ -181,7 +188,7 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
     '''
     subject = 'New Transfer Ready for Review'
     domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    from_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, domain)
     submission_url = 'http://{domain}/{change_url}'.format(
         domain=domain.rstrip(' /'),
         change_url=submission.get_admin_change_url().lstrip(' /')
@@ -217,7 +224,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
     '''
     subject = 'Bag Creation Failed'
     domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    from_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, domain)
 
     recipient_emails = _get_admin_recipient_list(subject)
 
@@ -245,7 +252,7 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
     '''
     if submission.user.gets_notification_emails:
         domain = Site.objects.get_current().domain
-        from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+        from_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, domain)
 
         user_submitted = submission.user
         send_mail_with_logs(
@@ -254,7 +261,7 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
             subject='Thank You For Your Transfer',
             template_name='recordtransfer/email/transfer_success.html',
             context={
-                'archivist_email': ARCHIVIST_EMAIL,
+                'archivist_email': settings.ARCHIVIST_EMAIL,
             }
         )
 
@@ -269,7 +276,7 @@ def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User)
     '''
     if user_submitted.gets_notification_emails:
         domain = Site.objects.get_current().domain
-        from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+        from_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, domain)
 
         send_mail_with_logs(
             recipients=[user_submitted.email],
@@ -280,7 +287,7 @@ def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User)
                 'username': user_submitted.username,
                 'first_name': user_submitted.first_name,
                 'last_name': user_submitted.last_name,
-                'archivist_email': ARCHIVIST_EMAIL,
+                'archivist_email': settings.ARCHIVIST_EMAIL,
             }
         )
 
@@ -293,7 +300,7 @@ def send_user_activation_email(new_user: User):
         new_user (User): The new user who requested an account
     '''
     domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    from_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, domain)
 
     token = account_activation_token.make_token(new_user)
     LOGGER.info('Generated token for activation link: %s', token)
@@ -322,7 +329,7 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
     """
 
     domain = Site.objects.get_current().domain
-    from_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, domain)
+    from_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, domain)
 
     send_mail_with_logs(
         recipients=[user_updated.email],
@@ -337,13 +344,13 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
                         context: dict):
     try:
         if Site.objects.get_current().domain == '127.0.0.1:8000':
-            new_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, 'example.com')
+            new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, 'example.com')
             msg = 'Changing FROM email for local development. Using {0} instead of {1}'
             LOGGER.info(msg=msg.format(new_email, from_email))
             from_email = new_email
         elif ":" in Site.objects.get_current().domain:
             new_domain = Site.objects.get_current().domain.split(":")[0]
-            new_email = '{0}@{1}'.format(DO_NOT_REPLY_USERNAME, new_domain)
+            new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, new_domain)
             msg = 'Changing FROM email to remove port number. Using {0} instead of {1}'
             LOGGER.info(msg=msg.format(new_email, from_email))
             from_email = new_email
