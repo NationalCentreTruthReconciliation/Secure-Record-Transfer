@@ -117,7 +117,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         bag (Submission): The submission to zip up for users to download
         user_triggered (User): The user who triggered this new Job creation
     '''
-    LOGGER.info(msg='Creating zipped bag from {0}'.format(str(bag.location)))
+    LOGGER.info('Creating zipped bag from %s', str(bag.location))
 
     description = (
         '{user} triggered this job to generate a download link for the bag '
@@ -125,7 +125,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
     ).format(user=str(user_triggered), name=bag.bag_name)
 
     if not os.path.exists(bag.location):
-        LOGGER.info(msg=f'No bag exists at {bag.location}, creating it now.')
+        LOGGER.info('No bag exists at %s, creating it now.', str(bag.location))
         result = bag.make_bag(algorithms=settings.BAG_CHECKSUMS)
         if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
                 result['time_created'] is None:
@@ -147,17 +147,17 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         new_job.job_status = Job.JobStatus.IN_PROGRESS
         new_job.save()
 
-        LOGGER.info(msg='Zipping directory to an in-memory file ...')
+        LOGGER.info('Zipping directory to an in-memory file ...')
         zipf = BytesIO()
         zipped_bag = zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False)
         zip_directory(bag.location, zipped_bag)
         zipped_bag.close()
-        LOGGER.info(msg='Zipped directory successfully')
+        LOGGER.info('Zipped directory successfully')
 
         file_name = f'{user_triggered.username}-{bag.bag_name}.zip'
-        LOGGER.info(msg='Saving zip file as {0} ...'.format(file_name))
+        LOGGER.info('Saving zip file as %s ...', file_name)
         new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
-        LOGGER.info(msg='Saved file successfully')
+        LOGGER.info('Saved file successfully')
 
         new_job.job_status = Job.JobStatus.COMPLETE
         new_job.end_time = timezone.now()
@@ -167,12 +167,15 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
     except Exception as exc:
         new_job.job_status = Job.JobStatus.FAILED
         new_job.save()
-        LOGGER.error(msg=('Creating zipped bag failed: {0}'.format(str(exc))))
+        LOGGER.error(
+            'Creating zipped bag failed due to exception, %s: %s',
+            exc.__class__.__name__, str(exc)
+        )
     finally:
         if zipf is not None:
             zipf.close()
         if os.path.exists(bag.location):
-            LOGGER.info(msg="Removing bag from disk after zip generation.")
+            LOGGER.info("Removing bag from disk after zip generation.")
             shutil.rmtree(bag.location)
 
 
@@ -193,7 +196,7 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
         domain=domain.rstrip(' /'),
         change_url=submission.get_admin_change_url().lstrip(' /')
     )
-    LOGGER.info(msg='Generated submission change URL: {0}'.format(submission_url))
+    LOGGER.info('Generated submission change URL: %s', submission_url)
 
     recipient_emails = _get_admin_recipient_list(subject)
 
@@ -345,21 +348,25 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
     try:
         if Site.objects.get_current().domain == '127.0.0.1:8000':
             new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, 'example.com')
-            msg = 'Changing FROM email for local development. Using {0} instead of {1}'
-            LOGGER.info(msg=msg.format(new_email, from_email))
+            LOGGER.info(
+                'Changing FROM email for local development. Using %s instead of %s',
+                new_email, from_email
+            )
             from_email = new_email
         elif ":" in Site.objects.get_current().domain:
             new_domain = Site.objects.get_current().domain.split(":")[0]
             new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, new_domain)
-            msg = 'Changing FROM email to remove port number. Using {0} instead of {1}'
-            LOGGER.info(msg=msg.format(new_email, from_email))
+            LOGGER.info(
+                'Changing FROM email to remove port number. Using {0} instead of {1}',
+                new_email, from_email
+            )
             from_email = new_email
 
         LOGGER.info('Setting up new email:')
-        LOGGER.info(msg='SUBJECT: {0}'.format(subject))
-        LOGGER.info(msg='TO: {0}'.format(recipients))
-        LOGGER.info(msg='FROM: {0}'.format(from_email))
-        LOGGER.info(msg='Rendering HTML email from {0}'.format(template_name))
+        LOGGER.info('SUBJECT: %s', subject)
+        LOGGER.info('TO: %s', recipients)
+        LOGGER.info('FROM: %s', from_email)
+        LOGGER.info('Rendering HTML email from %s', template_name)
         context['site_domain'] = Site.objects.get_current().domain
         msg_html = render_to_string(template_name, context)
         LOGGER.info('Stripping tags from rendered HTML to create a plaintext email')
@@ -377,9 +384,12 @@ def send_mail_with_logs(recipients: list, from_email: str, subject, template_nam
         if num_recipients == 1:
             LOGGER.info('1 email sent')
         else:
-            LOGGER.info(msg='{0} emails sent'.format(num_recipients))
+            LOGGER.info('%d emails sent', num_recipients)
     except smtplib.SMTPException as exc:
-        LOGGER.error(msg=('Error when sending email to user: {0}'.format(str(exc))))
+        LOGGER.error(
+            'Error when sending email to user, %s: %s',
+            exc.__class__.__name__, str(exc)
+        )
 
 @django_rq.job
 def clean_undeleted_temp_files(hours=12):
