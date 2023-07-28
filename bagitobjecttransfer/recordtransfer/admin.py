@@ -20,10 +20,11 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 from caais.export import ExportVersion
+from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import InlineBagGroupForm, SubmissionForm, \
     InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
     UploadedFileForm, InlineUploadedFileForm
-from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
+from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import User, UploadSession, UploadedFile, BagGroup, Appraisal, \
     Submission, Job
 from recordtransfer.settings import ALLOW_BAG_CHANGES

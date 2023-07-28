@@ -20,7 +20,8 @@ from formtools.wizard.views import SessionWizardView
 from caais.models import RightsType, SourceRole, SourceType
 from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Submission, SavedTransfer
-from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
+from recordtransfer.emails import send_user_activation_email
+from recordtransfer.jobs import bag_user_metadata_and_files
 from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED, MAX_SAVED_TRANSFER_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
