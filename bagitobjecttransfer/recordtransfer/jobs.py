@@ -1,4 +1,5 @@
 import logging
+import re
 import shutil
 import smtplib
 import zipfile
@@ -345,18 +346,21 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
 def send_mail_with_logs(recipients: list, from_email: str, subject, template_name: str,
                         context: dict):
     try:
-        if Site.objects.get_current().domain == '127.0.0.1:8000':
+        domain = Site.objects.get_current().domain
+        matched = re.match('^(?P<domain>[^:]+)(?::(?P<port>\d+))?$', domain)
+
+        if matched and matched.group('domain').lower() in ('127.0.0.1', 'localhost'):
             new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, 'example.com')
             LOGGER.info(
                 'Changing FROM email for local development. Using %s instead of %s',
                 new_email, from_email
             )
             from_email = new_email
-        elif ":" in Site.objects.get_current().domain:
-            new_domain = Site.objects.get_current().domain.split(":")[0]
-            new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, new_domain)
+
+        elif matched and matched.group('port') is not None:
+            new_email = '{0}@{1}'.format(settings.DO_NOT_REPLY_USERNAME, matched.group('name'))
             LOGGER.info(
-                'Changing FROM email to remove port number. Using {0} instead of {1}',
+                'Changing FROM email to remove port number. Using %s instead of %s',
                 new_email, from_email
             )
             from_email = new_email
