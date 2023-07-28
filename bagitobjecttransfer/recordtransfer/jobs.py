@@ -130,7 +130,7 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         description=description,
         start_time=timezone.now(),
         user_triggered=user_triggered,
-        job_status=Job.JobStatus.NOT_STARTED,
+        job_status=Job.JobStatus.IN_PROGRESS,
         submission=bag
     )
     new_job.save()
@@ -140,14 +140,12 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         result = bag.make_bag(algorithms=settings.BAG_CHECKSUMS)
         if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
                 result['time_created'] is None:
-            # Because we didn't generate the bag directory, exit.
+            new_job.job_status = Job.JobStatus.FAILED
+            new_job.save()
             return
 
     zipf = None
     try:
-        new_job.job_status = Job.JobStatus.IN_PROGRESS
-        new_job.save()
-
         LOGGER.info('Zipping directory to an in-memory file ...')
         zipf = BytesIO()
         zipped_bag = zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False)
@@ -211,7 +209,7 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
             'username': user_submitted.username,
             'first_name': user_submitted.first_name,
             'last_name': user_submitted.last_name,
-            'action_date': form_data.action_date,
+            'action_date': form_data['action_date'],
             'submission_url': submission_url,
         }
     )
@@ -241,7 +239,7 @@ def send_bag_creation_failure(form_data: dict, user_submitted: User):
             'username': user_submitted.username,
             'first_name': user_submitted.first_name,
             'last_name': user_submitted.last_name,
-            'action_date': form_data.action_date,
+            'action_date': form_data['action_date'],
         }
     )
 
