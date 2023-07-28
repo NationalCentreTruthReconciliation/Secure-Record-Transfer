@@ -6,11 +6,9 @@ from . import views
 from . import forms
 from . import settings
 
-app_name = 'recordtransfer'
-urlpatterns = [
-    path('', views.Index.as_view(), name='index'),
-
-    path('transfer/', login_required(views.TransferFormWizard.as_view([
+# Set up transfer forms depending on whether file uploads are enabled or disabled
+if settings.FILE_UPLOAD_ENABLED:
+    _transfer_forms = [
         ('acceptlegal', forms.AcceptLegal),
         ('contactinfo', forms.ContactInfoForm),
         ('sourceinfo', forms.SourceInfoForm),
@@ -19,10 +17,24 @@ urlpatterns = [
         ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=1)),
         ('grouptransfer', forms.GroupTransferForm),
         ('uploadfiles', forms.UploadFilesForm),
-        ])), name='transfer'),
+    ]
+else:
+    _transfer_forms = [
+        ('acceptlegal', forms.AcceptLegal),
+        ('contactinfo', forms.ContactInfoForm),
+        ('sourceinfo', forms.SourceInfoForm),
+        ('recorddescription', forms.ExtendedRecordDescriptionForm), # Different
+        ('rights', formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
+        ('otheridentifiers', formset_factory(forms.OtherIdentifiersForm, extra=1)),
+        ('grouptransfer', forms.GroupTransferForm),
+        ('finalnotes', forms.FinalStepFormNoUpload), # Different
+    ]
 
-    path('transfer/checkfile/', login_required(views.accept_file), name='checkfile'),
-    path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),
+app_name = 'recordtransfer'
+urlpatterns = [
+    path('', views.Index.as_view(), name='index'),
+
+    path('transfer/', login_required(views.TransferFormWizard.as_view(_transfer_forms)), name='transfer'),
     path('transfer/error/', login_required(views.SystemErrorPage.as_view()), name="systemerror"),
     path('transfer/sent/', views.TransferSent.as_view(), name='transfersent'),
     path('transfer/delete/<int:transfer_id>/', login_required(views.DeleteTransfer.as_view()), name="transferdelete"),
@@ -30,6 +42,12 @@ urlpatterns = [
     path('about/', views.About.as_view(), name='about'),
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
 ]
+
+if settings.FILE_UPLOAD_ENABLED:
+    urlpatterns.extend([
+        path('transfer/checkfile/', login_required(views.accept_file), name='checkfile'),
+        path('transfer/uploadfile/', login_required(views.uploadfiles), name='uploadfile'),
+    ])
 
 if settings.SIGN_UP_ENABLED:
     urlpatterns.extend([

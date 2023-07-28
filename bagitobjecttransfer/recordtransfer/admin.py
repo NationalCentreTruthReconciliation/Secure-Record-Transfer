@@ -20,10 +20,11 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 from caais.export import ExportVersion
+from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import InlineBagGroupForm, SubmissionForm, \
     InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
     UploadedFileForm, InlineUploadedFileForm
-from recordtransfer.jobs import create_downloadable_bag, send_user_account_updated
+from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import User, UploadSession, UploadedFile, BagGroup, Appraisal, \
     Submission, Job
 from recordtransfer.settings import ALLOW_BAG_CHANGES
@@ -450,6 +451,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         'submission_date',
         'id',
         'review_status',
+        'number_of_files_uploaded',
         linkify('user'),
         linkify('bag'),
     ]
@@ -461,7 +463,14 @@ class SubmissionAdmin(admin.ModelAdmin):
     readonly_fields = [
         'submission_date',
         'user',
+        'upload_session',
     ]
+
+
+    def number_of_files_uploaded(self, obj):
+        if not obj.upload_session:
+            return 0
+        return obj.upload_session.number_of_files_uploaded()
 
     def has_add_permission(self, request):
         return False
@@ -484,9 +493,6 @@ class SubmissionAdmin(admin.ModelAdmin):
             path('<path:object_id>/zip/',
                  self.admin_site.admin_view(self.create_zipped_bag),
                  name='%s_%s_zip' % info),
-            path('<path:object_id>/rezip/',
-                 self.admin_site.admin_view(self.recreate_zipped_bag),
-                 name='%s_%s_rezip' % info),
         ]
         return report_url + urls
 
@@ -602,18 +608,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         obj.bag.save()
         super().save_model(request, obj, form, change)
 
-    def recreate_zipped_bag(self, request, object_id):
-        """ Remove the existing bag for this submission and user, then recreate it.
-
-        Args:
-            request: The originating request
-            object_id: The ID for the submission
-        """
-        job = Job.objects.filter(Q(submission_id=object_id) & Q(user_triggered=request.user)).first()
-        if job:
-            job.delete()
-        return self.create_zipped_bag(request, object_id)
-
     def create_zipped_bag(self, request, object_id):
         ''' Start a background job to create a downloadable bag
 
@@ -621,27 +615,29 @@ class SubmissionAdmin(admin.ModelAdmin):
             request: The originating request
             object_id: The ID for the submission
         '''
-        bag = Submission.objects.filter(id=object_id).first()
-        if bag:
-            job = Job.objects.filter(Q(submission_id=object_id) & Q(user_triggered=request.user)).first()
-            if job:
-                # You should not get here, reload the submission page.
-                self.message_user(request, mark_safe(gettext(
-                    'A downloadable bag already exists for you. Check the Submission page for links to download and '
-                    'regenerate the bag.'
-                )))
-                return HttpResponseRedirect(bag.get_admin_change_url())
-            create_downloadable_bag.delay(bag, request.user)
-            self.message_user(request, mark_safe(gettext(
-                'A downloadable bag is being generated. Check the Submission page for links access the bag.'
-            )))
-            url = reverse('admin:recordtransfer_submission_changelist', current_app=self.admin_site.name)
-            return HttpResponseRedirect(url)
+        submission = Submission.objects.filter(id=object_id).first()
+
+        if submission and submission.upload_session:
+            create_downloadable_bag.delay(submission, request.user)
+
+            self.message_user(request, mark_safe(gettext((
+                'A downloadable bag is being generated. Visit the <a href="{url}">jobs page</a> for '
+                'the status of the bag generation, or check the Submission page for a download link'
+            )).format(url=reverse('admin:recordtransfer_job_changelist'))))
+
+            return HttpResponseRedirect(submission.get_admin_change_url())
+
+        elif submission and not submission.upload_session:
+            self.message_user(request, gettext((
+                'There are no files associated with this submission, it is not possible to '
+                'create a Bag'
+            )), messages.WARNING)
+
+            return HttpResponseRedirect(submission.get_admin_change_url())
+
         # Error response
-        msg = gettext('Bag with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
-            'key': object_id,
-        }
-        self.message_user(request, msg, messages.WARNING)
+        msg = gettext(f"Submission with ID '{object_id}' doesn't exist. Perhaps it was deleted?")
+        self.message_user(request, msg, messages.ERROR)
         admin_url = reverse('admin:index', current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
 

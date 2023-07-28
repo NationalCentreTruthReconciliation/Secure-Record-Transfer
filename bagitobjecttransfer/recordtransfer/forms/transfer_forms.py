@@ -477,6 +477,24 @@ class RecordDescriptionForm(TransferForm):
     )
 
 
+class ExtendedRecordDescriptionForm(RecordDescriptionForm):
+    ''' Adds quantity and type of units to record description form. Intended to be used when file
+    uploads are disabled.
+    '''
+
+    quantity_and_type_of_units = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '2',
+            'placeholder': gettext('Record how many files and of what type they are that you '
+                                   'are planning on transferring (optional)')
+        }),
+        help_text=gettext('For example, "200 PDF documents, totalling 2.0GB"'),
+        label=gettext('Quantity and type of files'),
+    )
+
+
 class RightsFormSet(BaseFormSet):
     """ Special formset to enforce at least one rights form to have a value """
     def __init__(self, *args, **kwargs):
@@ -669,3 +687,22 @@ class UploadFilesForm(TransferForm):
     )
 
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label='hidden')
+
+
+class FinalStepFormNoUpload(TransferForm):
+    ''' The form where users write any final notes. Intended to be used in place of UploadFilesForm
+    when file uploads are disabled.
+    '''
+
+    general_note = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record any general notes you have about the records here '
+                                   '(optional)')
+        }),
+        help_text=gettext('These should be notes that did not fit in any of the previous steps of '
+                          'this form'),
+        label=gettext('Other notes'),
+    )

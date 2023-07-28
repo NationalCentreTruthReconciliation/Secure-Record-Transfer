@@ -8,7 +8,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
-    <script src="{% static 'recordtransfer/js/dropzoneForm.js'%}"></script>
+    {% if FILE_UPLOAD_ENABLED %}
+        <script src="{% static 'recordtransfer/js/dropzoneForm.js'%}"></script>
+    {% endif %}
     <script src="{% static 'recordtransfer/js/forms.js'%}"></script>
     <script src="{% static 'recordtransfer/js/navbar.js'%}"></script>
     <script src="{% static 'recordtransfer/js/widgetconfig.js'%}"></script>
