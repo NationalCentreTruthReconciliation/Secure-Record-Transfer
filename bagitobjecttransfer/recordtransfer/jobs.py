@@ -125,16 +125,8 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         '{name}'
     ).format(user=str(user_triggered), name=bag.bag_name)
 
-    if not os.path.exists(bag.location):
-        LOGGER.info('No bag exists at %s, creating it now.', str(bag.location))
-        result = bag.make_bag(algorithms=settings.BAG_CHECKSUMS)
-        if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
-                result['time_created'] is None:
-            # Because we didn't generate the bag directory, exit.
-            return
-
     new_job = Job(
-        name=f'Generate Download Link for {str(bag)}',
+        name=f'Generate Downloadable Bag for {str(bag)}',
         description=description,
         start_time=timezone.now(),
         user_triggered=user_triggered,
@@ -142,6 +134,14 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         submission=bag
     )
     new_job.save()
+
+    if not os.path.exists(bag.location):
+        LOGGER.info('No bag exists at %s, creating it now.', str(bag.location))
+        result = bag.make_bag(algorithms=settings.BAG_CHECKSUMS)
+        if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
+                result['time_created'] is None:
+            # Because we didn't generate the bag directory, exit.
+            return
 
     zipf = None
     try:
