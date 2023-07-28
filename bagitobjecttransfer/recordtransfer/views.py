@@ -335,6 +335,7 @@ class TransferFormWizard(SessionWizardView):
         else:
             if not cleaned_data['quantity_and_type_of_units']:
                 cleaned_data['quantity_and_type_of_units'] = gettext('No file information provided.')
+            cleaned_data['extent_statement_note'] = 'Extent provided by user'
 
         start_date = cleaned_data['start_date_of_material']
         end_date = cleaned_data['end_date_of_material']
