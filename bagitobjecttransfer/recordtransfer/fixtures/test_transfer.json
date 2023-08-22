@@ -13,7 +13,7 @@
       "is_staff": true,
       "is_active": true,
       "date_joined": "2022-10-21T16:43:07.029Z",
-      "gets_bag_email_updates": false,
+      "gets_submission_email_updates": false,
       "confirmed_email": false,
       "gets_notification_emails": true,
       "groups": [],
