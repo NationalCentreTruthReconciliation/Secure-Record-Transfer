@@ -38,6 +38,22 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'
 
+
+# django-dbtemplates configuration
+DBTEMPLATES_ENABLED = config('DBTEMPLATES_ENABLED', default=False, cast=bool)
+DBTEMPLATES_USE_CODEMIRROR = True
+DBTEMPLATES_AUTO_POPULATE_CONTENT = False
+
+
+loaders = [
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+]
+
+if DBTEMPLATES_ENABLED:
+    loaders.append('dbtemplates.loader.Loader')
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -55,11 +71,7 @@ TEMPLATES = [
                 'recordtransfer.context_processors.file_upload_status',
                 'recordtransfer.context_processors.file_uploads',
             ],
-            'loaders': [
-                'dbtemplates.loader.Loader',
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ]
+            'loaders': loaders,
         },
     },
 ]
@@ -128,11 +140,6 @@ COUNTRIES_FIRST = [
 ]
 
 COUNTRIES_FLAG_URL = 'flags/{code}.gif'
-
-# django-dbtemplates configuration
-# https://github.com/NationalCentreTruthReconciliation/django-dbtemplates
-
-DBTEMPLATES_USE_CODEMIRROR = True
 
 # Media and Static files (CSS, JavaScript, Images)
 
