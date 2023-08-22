@@ -1,5 +1,6 @@
 #pylint: disable=too-many-public-methods
 from unittest.mock import patch
+from unittest import skipIf
 import logging
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -11,8 +12,25 @@ from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
 from recordtransfer.models import UploadSession, UploadedFile, User
+from recordtransfer import settings
 
 
+class TestHomepage(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    def test_index(self):
+        response = self.client.get(reverse('recordtransfer:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Welcome')
+
+
+@skipIf(
+    settings.FILE_UPLOAD_ENABLED == False,
+    'FILE_UPLOAD_ENABLED is False - the recordtransfer:uploadfile view is not available'
+)
 @patch('recordtransfer.settings.ACCEPTED_FILE_FORMATS', {
     'Document': ['docx', 'pdf'], 'Spreadsheet': ['xlsx']
 })
@@ -149,6 +167,10 @@ class TestUploadFileView(TestCase):
         UploadSession.objects.all().delete()
 
 
+@skipIf(
+    settings.FILE_UPLOAD_ENABLED == False,
+    'FILE_UPLOAD_ENABLED is False - the recordtransfer:checkfile view is not available'
+)
 @patch('recordtransfer.settings.ACCEPTED_FILE_FORMATS', {
     'Document': ['docx', 'pdf'], 'Spreadsheet': ['xlsx']
 })
