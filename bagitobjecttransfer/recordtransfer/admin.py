@@ -217,8 +217,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
 
 
 class SubmissionInline(admin.TabularInline):
-    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
-    with a Submission. Deletions are not allowed.
+    ''' Inline admin for the Submission model.
 
     Permissions:
         - add: Not allowed
