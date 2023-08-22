@@ -216,6 +216,32 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ]
 
 
+class SubmissionInline(admin.TabularInline):
+    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
+    with a Submission. Deletions are not allowed.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed - go to Submission page for change ability
+        - delete: Only by superusers
+    '''
+    model = Submission
+    max_num = 0
+    show_change_link = True
+    form = InlineSubmissionForm
+
+    ordering = ['-submission_date']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return obj and request.user.is_superuser
+
+
 @admin.register(SubmissionGroup)
 class SubmissionGroupAdmin(ReadOnlyAdmin):
     ''' Admin for the SubmissionGroup model. Submissions can be viewed in-line.
@@ -230,6 +256,10 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         'name',
         linkify('created_by'),
         'number_of_submissions_in_group',
+    ]
+
+    inlines = [
+        SubmissionInline
     ]
 
     search_fields = [
@@ -436,6 +466,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         'submission_date',
         'user',
         'upload_session',
+        'part_of_group',
     ]
 
 
@@ -590,32 +621,6 @@ class SubmissionAdmin(admin.ModelAdmin):
     def export_atom_2_1_csv(self, request, queryset):
         return export_submission_csv(queryset, ExportVersion.ATOM_2_1)
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
-
-
-class SubmissionInline(admin.TabularInline):
-    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
-    with a Submission. Deletions are not allowed.
-
-    Permissions:
-        - add: Not allowed
-        - change: Not allowed - go to Submission page for change ability
-        - delete: Only by superusers
-    '''
-    model = Submission
-    max_num = 0
-    show_change_link = True
-    form = InlineSubmissionForm
-
-    ordering = ['-submission_date']
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
 
 
 @admin.register(Job)
