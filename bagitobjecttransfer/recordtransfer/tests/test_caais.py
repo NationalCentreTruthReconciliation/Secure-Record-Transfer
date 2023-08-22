@@ -13,6 +13,8 @@ class TestCaaisMethods(TransactionTestCase):
 
     expected_metadata = None
 
+    maxDiff = None
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -80,8 +82,12 @@ class TestCaaisMethods(TransactionTestCase):
         self.expected_metadata = OrderedDict({
             'section_1': OrderedDict({
                 'repository': 'Test Repository',
-                'accession_identifier': 'Example identifier',
                 'identifiers': [
+                    OrderedDict({
+                        'identifier_type': 'Accession Identifier',
+                        'identifier_value': 'Example identifier',
+                        'identifier_note': '',
+                    }),
                     OrderedDict({
                         'identifier_type': 'ARK ID',
                         'identifier_value': 'https://n2t.net/ark:/99999/12345',
@@ -215,13 +221,13 @@ class TestCaaisMethods(TransactionTestCase):
         start_time = datetime.datetime.now()
         metadata = convert_form_data_to_metadata(self.form_data)
         self.assertEqual(self.form_data['accession_title'], metadata.accession_title)
-        self.assertEqual('Not assigned', metadata.accession_identifier)
+        self.assertEqual('Not assigned', metadata.identifiers.accession_identifier().identifier_value)
         self.assertEqual('en', metadata.language_of_record)
         self.assertEqual(self.form_data['scope_and_content'], metadata.scope_and_content)
         self.assertEqual(self.form_data['custodial_history'], metadata.custodial_history)
         self.assertEqual(self.form_data['date_of_material'], metadata.date_of_material)
         self.assertEqual('Canadian Archival Accession Information Standards v1.0', metadata.rules_or_conventions)
-        self.assertEqual('', metadata.level_of_detail)
+        self.assertEqual('Not Specified', metadata.level_of_detail.label)
         self.assertEqual(self.form_data['repository'], metadata.repository)
 
         self.assertEqual(1, metadata.source_of_materials.count())

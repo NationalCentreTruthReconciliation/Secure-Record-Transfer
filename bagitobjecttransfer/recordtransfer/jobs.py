@@ -11,10 +11,10 @@ from django.utils.text import slugify
 
 from recordtransfer.caais import convert_form_data_to_metadata
 from recordtransfer.emails import (
-    send_bag_creation_success,
+    send_submission_creation_success,
     send_thank_you_for_your_transfer,
 )
-from recordtransfer.models import BagGroup, UploadSession, User, Job, Submission
+from recordtransfer.models import SubmissionGroup, UploadSession, User, Job, Submission
 from recordtransfer import settings
 from recordtransfer.utils import zip_directory
 
@@ -22,9 +22,9 @@ from recordtransfer.utils import zip_directory
 LOGGER = logging.getLogger('rq.worker')
 
 @django_rq.job
-def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
-    ''' Create database models for the submitted form. Sends an email
-    to the submitting user and the staff members who receive submission email updates.
+def create_and_save_submission(form_data: dict, user_submitted: User):
+    ''' Create database models for the submitted form. Sends an email to the
+    submitting user and the staff members who receive submission email updates.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form.
@@ -59,7 +59,7 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
     new_submission = Submission(
         submission_date=timezone.now(),
         user=user_submitted,
-        bag=metadata,
+        metadata=metadata,
         upload_session=upload_session,
         bag_name=bag_name,
     )
@@ -70,55 +70,55 @@ def bag_user_metadata_and_files(form_data: dict, user_submitted: User):
         if group_name == 'Add New Group':
             new_group_name = form_data['new_group_name']
             description = form_data['group_description']
-            group, created = BagGroup.objects.get_or_create(name=new_group_name,
-                                                            description=description,
-                                                            created_by=user_submitted)
+            group, created = SubmissionGroup.objects.get_or_create(name=new_group_name,
+                                                                   description=description,
+                                                                   created_by=user_submitted)
             if created:
-                LOGGER.info('Created "%s" BagGroup', new_group_name)
+                LOGGER.info('Created "%s" SubmissionGroup', new_group_name)
         else:
-            group = BagGroup.objects.get(name=group_name, created_by=user_submitted)
+            group = SubmissionGroup.objects.get(name=group_name, created_by=user_submitted)
 
         if group:
-            LOGGER.info('Associating Submission with "%s" BagGroup', group.name)
+            LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
             new_submission.part_of_group = group
             new_submission.save()
         else:
-            LOGGER.warning('Could not find "%s" BagGroup', group.name)
+            LOGGER.warning('Could not find "%s" SubmissionGroup', group.name)
 
     LOGGER.info('Sending transfer success email to administrators')
-    send_bag_creation_success.delay(form_data, new_submission)
+    send_submission_creation_success.delay(form_data, new_submission)
     LOGGER.info('Sending thank you email to user')
     send_thank_you_for_your_transfer.delay(form_data, new_submission)
 
 
 @django_rq.job
-def create_downloadable_bag(bag: Submission, user_triggered: User):
-    ''' Create a zipped bag that a user can download using a Job model.
+def create_downloadable_bag(submission: Submission, user_triggered: User):
+    ''' Create a zipped BagIt bag that a user can download through a Job.
 
     Args:
-        bag (Submission): The submission to zip up for users to download
+        submission (Submission): The submission to create a BagIt bag for
         user_triggered (User): The user who triggered this new Job creation
     '''
-    LOGGER.info('Creating zipped bag from %s', str(bag.location))
+    LOGGER.info('Creating zipped bag from %s', submission.location)
 
     description = (
-        '{user} triggered this job to generate a download link for the bag '
-        '{name}'
-    ).format(user=str(user_triggered), name=bag.bag_name)
+        f'{str(user_triggered)} triggered this job to generate a download link '
+        'for a submission'
+    )
 
     new_job = Job(
-        name=f'Generate Downloadable Bag for {str(bag)}',
+        name=f'Generate Downloadable Bag for {str(submission)}',
         description=description,
         start_time=timezone.now(),
         user_triggered=user_triggered,
         job_status=Job.JobStatus.IN_PROGRESS,
-        submission=bag
+        submission=submission
     )
     new_job.save()
 
-    if not os.path.exists(bag.location):
-        LOGGER.info('No bag exists at %s, creating it now.', str(bag.location))
-        result = bag.make_bag(algorithms=settings.BAG_CHECKSUMS)
+    if not os.path.exists(submission.location):
+        LOGGER.info('No bag exists at %s, creating it now.', str(submission.location))
+        result = submission.make_bag(algorithms=settings.BAG_CHECKSUMS, logger=LOGGER)
         if len(result['missing_files']) != 0 or not result['bag_created'] or not result['bag_valid'] or \
                 result['time_created'] is None:
             new_job.job_status = Job.JobStatus.FAILED
@@ -130,11 +130,11 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
         LOGGER.info('Zipping directory to an in-memory file ...')
         zipf = BytesIO()
         zipped_bag = zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False)
-        zip_directory(bag.location, zipped_bag)
+        zip_directory(submission.location, zipped_bag)
         zipped_bag.close()
         LOGGER.info('Zipped directory successfully')
 
-        file_name = f'{user_triggered.username}-{bag.bag_name}.zip'
+        file_name = f'{user_triggered.username}-{submission.bag_name}.zip'
         LOGGER.info('Saving zip file as %s ...', file_name)
         new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
         LOGGER.info('Saved file successfully')
@@ -154,6 +154,6 @@ def create_downloadable_bag(bag: Submission, user_triggered: User):
     finally:
         if zipf is not None:
             zipf.close()
-        if os.path.exists(bag.location):
+        if os.path.exists(submission.location):
             LOGGER.info("Removing bag from disk after zip generation.")
-            shutil.rmtree(bag.location)
+            shutil.rmtree(submission.location)

@@ -3,8 +3,7 @@ from django import forms
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
-from recordtransfer.models import Appraisal, BagGroup, Submission, UploadSession, UploadedFile, User
-from recordtransfer.settings import ALLOW_BAG_CHANGES
+from recordtransfer.models import Appraisal, SubmissionGroup, Submission, UploadSession, UploadedFile, User
 
 
 class RecordTransferModelForm(forms.ModelForm):
@@ -112,35 +111,33 @@ class UploadSessionForm(RecordTransferModelForm):
 
 
 class SubmissionForm(RecordTransferModelForm):
-    ''' Form for editing Submissions. Adds a help_text to the bag with a link to the bag, if the
-    bag exists.
+    ''' Form for editing Submissions.
     '''
 
     class Meta:
         model = Submission
         fields = (
             'submission_date',
-            'bag',
+            'metadata',
             'user',
             'review_status',
             'upload_session',
+            'part_of_group',
         )
 
-    disabled_fields = ['submission_date', 'bag', 'upload_session', 'user']
+    disabled_fields = ['submission_date', 'metadata', 'upload_session', 'user', 'part_of_group']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if hasattr(self, 'instance') and self.instance.bag:
+        if hasattr(self, 'instance') and self.instance.metadata:
             # TODO: This makes the tiny link by the Metadata title in the Submission form.
-            #self.fields['bag'].help_text = ' | '.join([
-            #    format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
-            #        (self.instance.get_admin_report_url(), 'View Bag metadata'),
-            #    ]
-            #])
-            pass
-
-        self.fields['bag'].widget.can_add_related = False
+            self.fields['metadata'].help_text = ' | '.join([
+                format_html('<a href="{}">{}</a>', url, gettext(text)) for url, text in [
+                    (self.instance.get_admin_metadata_change_url(), 'View or Change Metadata'),
+                ]
+            ])
+        self.fields['metadata'].widget.can_add_related = False
 
 
 class InlineSubmissionForm(RecordTransferModelForm):
@@ -151,24 +148,25 @@ class InlineSubmissionForm(RecordTransferModelForm):
         model = Submission
         fields = (
             'submission_date',
-            'bag',
+            'metadata',
             'review_status',
+            'part_of_group',
         )
 
 
-class InlineBagGroupForm(RecordTransferModelForm):
-    ''' Form used to view BagGroups in-line. This form should not be used to provide edit
-    capabilities in-line for a BagGroup.
+class InlineSubmissionGroupForm(RecordTransferModelForm):
+    ''' Form used to view SubmissionGroups in-line. This form should not be used to provide edit
+    capabilities in-line for a SubmissionGroup.
     '''
 
     class Meta:
-        model = BagGroup
+        model = SubmissionGroup
         fields = (
             'name',
             'description',
         )
 
-    number_of_bags_in_group = forms.IntegerField(required=False)
+    number_of_submissions_in_group = forms.IntegerField(required=False)
 
 
 class UserProfileForm(forms.ModelForm):

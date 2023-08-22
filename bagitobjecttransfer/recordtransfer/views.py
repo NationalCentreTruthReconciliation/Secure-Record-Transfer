@@ -19,9 +19,9 @@ from formtools.wizard.views import SessionWizardView
 
 from caais.models import RightsType, SourceRole, SourceType
 from recordtransfer import settings
-from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Submission, SavedTransfer
+from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
 from recordtransfer.emails import send_user_activation_email
-from recordtransfer.jobs import bag_user_metadata_and_files
+from recordtransfer.jobs import create_and_save_submission
 from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED, MAX_SAVED_TRANSFER_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
@@ -49,7 +49,7 @@ class SystemErrorPage(TemplateView):
 class UserProfile(UpdateView):
     ''' This view shows two things:
     - The user's profile information
-    - A list of the Bags a user has created via transfer
+    - A list of the Submissions a user has created via transfer
     '''
 
     template_name = 'recordtransfer/profile.html'
@@ -111,7 +111,7 @@ class CreateAccount(FormView):
     def form_valid(self, form):
         new_user = form.save(commit=False)
         new_user.is_active = False
-        new_user.gets_bag_email_updates = False
+        new_user.gets_submission_email_updates = False
         new_user.save()
         send_user_activation_email.delay(new_user)
         return super().form_valid(form)
@@ -273,7 +273,7 @@ class TransferFormWizard(SessionWizardView):
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
         if step == 'grouptransfer':
-            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             kwargs['users_groups'] = users_groups
         return kwargs
 
@@ -292,7 +292,7 @@ class TransferFormWizard(SessionWizardView):
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
         if step_name == 'grouptransfer':
-            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
         elif step_name == 'rights':
             all_rights = RightsType.objects.all().exclude(name='Other')
@@ -374,7 +374,8 @@ class TransferFormWizard(SessionWizardView):
         return form_data
 
     def done(self, form_list, **kwargs):
-        ''' Retrieves all of the form data, and creates a bag from it asynchronously.
+        ''' Retrieves all of the form data, and creates a Submission from it
+        asynchronously.
 
         Args:
             form_list: The list of forms the user filled out.
@@ -383,7 +384,7 @@ class TransferFormWizard(SessionWizardView):
             HttpResponseRedirect: Redirects the user to the Transfer Sent page.
         '''
         form_data = self.get_all_cleaned_data()
-        bag_user_metadata_and_files.delay(form_data, self.request.user)
+        create_and_save_submission.delay(form_data, self.request.user)
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 

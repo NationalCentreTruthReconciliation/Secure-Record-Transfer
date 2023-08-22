@@ -22,16 +22,17 @@ LOGGER = logging.getLogger('rq.worker')
 
 
 @django_rq.job
-def send_bag_creation_success(form_data: dict, submission: Submission):
-    ''' Send an email to users who get bag email updates that a user submitted a new bag and there
-    were no errors.
+def send_submission_creation_success(form_data: dict, submission: Submission):
+    ''' Send an email to users who get submission email updates that a user submitted a new
+    submission and there were no errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
     '''
-    subject = 'New Transfer Ready for Review'
+    subject = 'New Submission Ready for Review'
+
     domain = Site.objects.get_current().domain
     submission_url = 'http://{domain}/{change_url}'.format(
         domain=domain.rstrip(' /'),
@@ -46,7 +47,7 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
         recipients=recipient_emails,
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
-        template_name='recordtransfer/email/bag_submit_success.html',
+        template_name='recordtransfer/email/submission_submit_success.html',
         context={
             'username': user_submitted.username,
             'first_name': user_submitted.first_name,
@@ -58,23 +59,23 @@ def send_bag_creation_success(form_data: dict, submission: Submission):
 
 
 @django_rq.job
-def send_bag_creation_failure(form_data: dict, user_submitted: User):
-    ''' Send an email to users who get bag email updates that a user submitted a new bag and there
-    WERE errors.
+def send_submission_creation_failure(form_data: dict, user_submitted: User):
+    ''' Send an email to users who get submission email updates that a user submitted a new
+    submission and there WERE errors.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
             the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
     '''
-    subject = 'Bag Creation Failed'
+    subject = 'Submission Failed'
     recipient_emails = _get_admin_recipient_list(subject)
 
     _send_mail_with_logs(
         recipients=recipient_emails,
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
-        template_name='recordtransfer/email/bag_submit_failure.html',
+        template_name='recordtransfer/email/submission_submit_failure.html',
         context={
             'username': user_submitted.username,
             'first_name': user_submitted.first_name,
@@ -181,7 +182,7 @@ def _get_admin_recipient_list(subject: str) -> List[str]:
         (List[str]): A list of email addresses
     '''
     LOGGER.info('Finding Users to send "%s" email to', subject)
-    recipients = User.objects.filter(gets_bag_email_updates=True)
+    recipients = User.objects.filter(gets_submission_email_updates=True)
     if not recipients:
         LOGGER.warning('There are no users configured to receive transfer update emails.')
         return
