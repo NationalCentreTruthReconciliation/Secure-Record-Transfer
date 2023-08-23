@@ -39,7 +39,14 @@
                         {% trans "Previous Step" %}
                     </button>
                 {% endif %}
-                <button {% block submitbuttonattributes %}{% endblock %} type="submit" class="blue-button">
+                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_state|stringformat:'s' != 'off' %}
+                <button class="blue-button margin-left-20px margin-right-20px" formnovalidate="formnovalidate"
+                        name="save_form_step"
+                        value="{{ wizard.steps.current }}" {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
+                    {% trans "Save form" %}
+                </button>
+                {% endif %}
+                <button {% block submitbuttonattributes %}{% endblock %} type="{% block submitbuttontype %}submit{% endblock %}" class="blue-button">
                     {% if wizard.steps.step1 == wizard.steps.count %}
                         {% trans "Submit" %}
                     {% else%}

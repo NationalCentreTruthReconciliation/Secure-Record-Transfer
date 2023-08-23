@@ -1,4 +1,5 @@
 ''' Forms specific to transferring files with a new submission '''
+from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
@@ -12,7 +13,11 @@ from caais.models import SourceType, SourceRole, RightsType
 from recordtransfer.settings import USE_DATE_WIDGETS
 
 
-class AcceptLegal(forms.Form):
+class TransferForm(forms.Form):
+    required_css_class = 'required-field'
+
+
+class AcceptLegal(TransferForm):
     def clean(self):
         cleaned_data = super().clean()
         if not cleaned_data['agreement_accepted']:
@@ -25,7 +30,7 @@ class AcceptLegal(forms.Form):
     )
 
 
-class ContactInfoForm(forms.Form):
+class ContactInfoForm(TransferForm):
     ''' The Contact Information portion of the form. Contains fields from Section 2 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -206,7 +211,7 @@ class ContactInfoForm(forms.Form):
     )
 
 
-class SourceInfoForm(forms.Form):
+class SourceInfoForm(TransferForm):
     ''' The Source Information portion of the form. Contains fields from Section 2 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -249,7 +254,7 @@ class SourceInfoForm(forms.Form):
     )
 
     source_type = forms.ModelChoiceField(
-        required=False,
+        required=True,
         queryset=SourceType.objects.all()\
             .annotate(
                 sort_order_other_first=Case(
@@ -282,7 +287,7 @@ class SourceInfoForm(forms.Form):
     )
 
     source_role = forms.ModelChoiceField(
-        required=False,
+        required=True,
         queryset=SourceRole.objects.all()\
             .annotate(
                 sort_order_other_first=Case(
@@ -337,7 +342,7 @@ class SourceInfoForm(forms.Form):
     )
 
 
-class RecordDescriptionForm(forms.Form):
+class RecordDescriptionForm(TransferForm):
     ''' The Description Information portion of the form. Contains fields from Section 3 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -472,6 +477,24 @@ class RecordDescriptionForm(forms.Form):
     )
 
 
+class ExtendedRecordDescriptionForm(RecordDescriptionForm):
+    ''' Adds quantity and type of units to record description form. Intended to be used when file
+    uploads are disabled.
+    '''
+
+    quantity_and_type_of_units = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '2',
+            'placeholder': gettext('Record how many files and of what type they are that you '
+                                   'are planning on transferring (optional)')
+        }),
+        help_text=gettext('For example, "200 PDF documents, totalling 2.0GB"'),
+        label=gettext('Quantity and type of files'),
+    )
+
+
 class RightsFormSet(BaseFormSet):
     """ Special formset to enforce at least one rights form to have a value """
     def __init__(self, *args, **kwargs):
@@ -479,7 +502,7 @@ class RightsFormSet(BaseFormSet):
         self.forms[0].empty_permitted = False
 
 
-class RightsForm(forms.Form):
+class RightsForm(TransferForm):
     ''' The Rights portion of the form. Contains fields from Section 4 of CAAIS '''
 
     def clean(self):
@@ -536,7 +559,7 @@ class RightsForm(forms.Form):
     )
 
 
-class OtherIdentifiersForm(forms.Form):
+class OtherIdentifiersForm(TransferForm):
     ''' The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS '''
     def clean(self):
         cleaned_data = super().clean()
@@ -588,7 +611,7 @@ class OtherIdentifiersForm(forms.Form):
     )
 
 
-class GroupTransferForm(forms.Form):
+class GroupTransferForm(TransferForm):
     def __init__(self, *args, **kwargs):
         users_groups = kwargs.pop('users_groups')
         super().__init__(*args, **kwargs)
@@ -642,7 +665,7 @@ class GroupTransferForm(forms.Form):
     )
 
 
-class UploadFilesForm(forms.Form):
+class UploadFilesForm(TransferForm):
     ''' The form where users upload their files and write any final notes '''
     general_note = forms.CharField(
         required=False,
@@ -663,4 +686,23 @@ class UploadFilesForm(forms.Form):
         label='hidden'
     )
 
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label='hidden')
+
+
+class FinalStepFormNoUpload(TransferForm):
+    ''' The form where users write any final notes. Intended to be used in place of UploadFilesForm
+    when file uploads are disabled.
+    '''
+
+    general_note = forms.CharField(
+        required=False,
+        min_length=4,
+        widget=forms.Textarea(attrs={
+            'rows': '6',
+            'placeholder': gettext('Record any general notes you have about the records here '
+                                   '(optional)')
+        }),
+        help_text=gettext('These should be notes that did not fit in any of the previous steps of '
+                          'this form'),
+        label=gettext('Other notes'),
+    )

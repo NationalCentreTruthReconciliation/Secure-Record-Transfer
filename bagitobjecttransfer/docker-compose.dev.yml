@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  email:
+    image: mailhog/mailhog
+    user: root
+    container_name: recordtransfer_mailhog
+    logging:
+      driver: 'none' # disable saving logs
+    ports:
+      - 1025:1025
+      - 8025:8025
+    environment:
+      MH_STORAGE: maildir
+      MH_MAILDIR_PATH: '/home/mailhog/mail'
+    volumes:
+      - mailhog:/home/mailhog/mail
+
+  rq:
+    build: .
+    container_name: recordtransfer_rq_workers
+    command: python manage.py rqworker default
+    volumes:
+      - ./:/app
+      - temp-directory:/tmp
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
+    ports:
+      - 8010:8010
+    env_file:
+      - .dev.env
+    # See manage.py for debugger setup
+    environment:
+      - ENV=dev
+      - ENABLE_DEBUGPY=1
+      - ENABLE_DEBUGPY_ON_COMMAND=rqworker
+      - DEBUGPY_PORT=8010
+    depends_on:
+      - redis
+
+  app:
+    build: .
+    container_name: recordtransfer_django_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/app
+      - temp-directory:/tmp
+      - ./docker/logs/django-rq:/var/log/django-rq/
+      - ./docker/logs/django:/var/log/django/
+    ports:
+      - 8000:8000
+      - 8009:8009
+    env_file:
+      - .dev.env
+    # See manage.py for debugger setup
+    environment:
+      - ENV=dev
+      - ENABLE_DEBUGPY=1
+      - ENABLE_DEBUGPY_ON_COMMAND=runserver
+      - DEBUGPY_PORT=8009
+    depends_on:
+      - rq
+      - email
+      - clamav
+
+volumes:
+  mailhog:

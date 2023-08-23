@@ -1,1 +1,2 @@
 *.sh text=auto eol=lf
+*.conf text=auto eol=lf

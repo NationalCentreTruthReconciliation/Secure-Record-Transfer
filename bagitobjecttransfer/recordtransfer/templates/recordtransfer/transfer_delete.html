@@ -1,0 +1,16 @@
+{% extends 'recordtransfer/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete Transfer?" %}{% endblock %}
+
+{% block content %}
+<div class="title-text">{% block trans %}Do you wish to delete the transfer from {{ last_updated|date:"F j, Y g:ia" }}?{% endblock %}</div>
+<form id="delete-transfer-form" action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="transfer_id" value="{{ transfer_id }}" />
+    <p>
+    <input type="submit" name="yes_delete" value="Yes - Delete" />
+    <input type="submit" name="no_cancel" value="No - Cancel" />
+    </p>
+</form>
+{% endblock %}

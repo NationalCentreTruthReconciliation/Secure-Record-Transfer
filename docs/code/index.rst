@@ -22,6 +22,7 @@ Code Files
     forms
     views
     jobs
+    emails
     caais
     models
     utils

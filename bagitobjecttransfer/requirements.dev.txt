@@ -1,7 +1,7 @@
 alabaster==0.7.12
 astroid==2.9.3
 Babel==2.9.1
-certifi==2021.10.8
+certifi==2023.7.22
 charset-normalizer==2.0.10
 docutils==0.17.1
 Faker==5.0.1
@@ -13,7 +13,7 @@ lazy-object-proxy==1.7.1
 MarkupSafe==2.0.1
 mccabe==0.6.1
 platformdirs==2.4.1
-Pygments==2.11.2
+Pygments==2.15.0
 pylint==2.12.2
 pylint-django==2.3.0
 pylint-plugin-utils==0.7

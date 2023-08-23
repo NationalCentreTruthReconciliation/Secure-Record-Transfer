@@ -1,8 +1,8 @@
 # Secure Record Transfer Application
 
-Please, [read the docs!](https://nctr-bagit-record-transfer.readthedocs.io/en/latest/)
+Please, [read the docs!](https://secure-record-transfer.readthedocs.io/en/latest/)
 
-The secure record transfer application has been designed for the purpose of transferring files and metadata over the internet to an institution before securing the files in a [BagIt](https://datatracker.ietf.org/doc/html/rfc8493) bag. This application attempts to closely follow the [Canadian Archival Accession Information Standard (CAAIS)](http://archivescanada.ca/CWG_AccessionStandard). As such, most of the fields in the Accession Standard are captured when a user submits files and metadata through the application's [transfer form](https://nctr-bagit-record-transfer.readthedocs.io/en/latest/howtouse/transferform.html). A suite of administrative tools is also provided with the app to allow staff members to view, appraise, download, an export submissions made by users.
+The secure record transfer application has been designed for the purpose of transferring files and standardized metadata over the internet to an institution. This application attempts to closely follow the [Canadian Archival Accession Information Standard (CAAIS)](http://archivescanada.ca/CWG_AccessionStandard). As such, most of the fields in the Accession Standard are captured when a user submits files and metadata through the application's [transfer form](https://nctr-bagit-record-transfer.readthedocs.io/en/latest/howtouse/transferform.html). A suite of administrative tools is also provided with the app to allow staff members to view, appraise, download, an export submissions made by users. Submissions can be downloaded by administrators in the [BagIt](https://datatracker.ietf.org/doc/html/rfc8493) format.
 
 ## AtoM Compatibility
 
@@ -10,7 +10,7 @@ This application is compatible with version 2.x of [AtoM](https://www.accesstome
 
 ## Quickstart
 
-The simplest way to run the application is using Docker. To run the app in this way, ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed on your system. You will also need [Python 3](https://python.org) and [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+This application is run using Docker or Podman. Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) or [Podman Desktop](https://podman-desktop.io/) installed on your system before running the app. If you want to use Podman, you will also need [Podman Compose](https://github.com/containers/podman-compose) and [Python](https://python.org) as well.
 
 From a terminal, clone the repository:
 
@@ -18,29 +18,53 @@ From a terminal, clone the repository:
 git clone https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git
 ```
 
-Enter the `Secure-Record-Transfer/bagitobjecttransfer` directory:
+Enter the `Secure-Record-Transfer/bagitobjecttransfer` directory, and make a copy of the `.dev.env` file before running the application for the first time.
 
 ```shell
 cd Secure-Record-Transfer/bagitobjecttransfer
+cp example.dev.env .dev.env
 ```
 
-Create a default `.dockerenv` file and run the application in Docker:
+Then, run the application:
 
 ```shell
-python manage.py dockerenv
-docker-compose up -d
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
-After the containers are built, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. If you run into an error the first time your run the app where the MySQL database hasn't been initialized yet, simply restart the application and that should fix the problem. To restart the app:
+After the containers are built and running, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. For example, if you sign up using the sign-up form, you can find those at http://localhost:8025.
+
+After starting the app for the first time, run these commands to make sure the database is set up.
 
 ```shell
-docker-compose down
-docker-compose up -d
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
 ```
 
-If you'd like to be able to log in to the record transfer app, you can create a superuser with these commands:
+To restart the application, run these commands.
 
 ```shell
-docker-compose exec app sh
-python3 manage.py createsuperuser
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml down
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+If you'd like to be able to log in to the record transfer app as an administrator, use the following command, and follow the prompts you are given.
+
+```shell
+# If using docker:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
+
+# If using podman + podman compose:
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
 ```

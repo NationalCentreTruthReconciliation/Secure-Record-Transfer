@@ -5,6 +5,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 SECRET_KEY = config('SECRET_KEY', default='q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz1$g=i$wp2r!s-')
 
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
 INSTALLED_APPS = [
     'caais.apps.CaaisConfig',
     'recordtransfer.apps.RecordTransferConfig',
@@ -16,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_countries',
+    'django.forms',
     'formtools',
     'django_rq',
     'captcha',
@@ -35,6 +38,22 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'
 
+
+# django-dbtemplates configuration
+DBTEMPLATES_ENABLED = config('DBTEMPLATES_ENABLED', default=False, cast=bool)
+DBTEMPLATES_USE_CODEMIRROR = True
+DBTEMPLATES_AUTO_POPULATE_CONTENT = False
+
+
+loaders = [
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+]
+
+if DBTEMPLATES_ENABLED:
+    loaders.append('dbtemplates.loader.Loader')
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -49,13 +68,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'recordtransfer.context_processors.signup_status',
+                'recordtransfer.context_processors.file_upload_status',
                 'recordtransfer.context_processors.file_uploads',
             ],
-            'loaders': [
-                'dbtemplates.loader.Loader',
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ]
+            'loaders': loaders,
         },
     },
 ]
@@ -124,11 +140,6 @@ COUNTRIES_FIRST = [
 ]
 
 COUNTRIES_FLAG_URL = 'flags/{code}.gif'
-
-# django-dbtemplates configuration
-# https://github.com/NationalCentreTruthReconciliation/django-dbtemplates
-
-DBTEMPLATES_USE_CODEMIRROR = True
 
 # Media and Static files (CSS, JavaScript, Images)
 

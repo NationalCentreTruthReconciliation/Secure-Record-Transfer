@@ -1,9 +1,13 @@
+import datetime
+import pickle
 from typing import Union
 import logging
 
+import clamd
 from django.contrib import messages
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_text
@@ -15,8 +19,10 @@ from formtools.wizard.views import SessionWizardView
 
 from caais.models import RightsType, SourceRole, SourceType
 from recordtransfer import settings
-from recordtransfer.models import UploadedFile, UploadSession, User, BagGroup, Submission
-from recordtransfer.jobs import bag_user_metadata_and_files, send_user_activation_email
+from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
+from recordtransfer.emails import send_user_activation_email
+from recordtransfer.jobs import create_and_save_submission
+from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED, MAX_SAVED_TRANSFER_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
@@ -35,10 +41,15 @@ class TransferSent(TemplateView):
     template_name = 'recordtransfer/transfersent.html'
 
 
+class SystemErrorPage(TemplateView):
+    """ The page a user sees when there is some system error. """
+    template_name = 'recordtransfer/systemerror.html'
+
+
 class UserProfile(UpdateView):
     ''' This view shows two things:
     - The user's profile information
-    - A list of the Bags a user has created via transfer
+    - A list of the Submissions a user has created via transfer
     '''
 
     template_name = 'recordtransfer/profile.html'
@@ -50,7 +61,9 @@ class UserProfile(UpdateView):
         return self.request.user
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(UserProfile, self).get_context_data(**kwargs)
+        context['in_process_submissions'] = SavedTransfer.objects.filter(user=self.request.user)\
+            .order_by('-last_updated')
         context['user_submissions'] = Submission.objects.filter(user=self.request.user).order_by('-submission_date')
         return context
 
@@ -98,7 +111,7 @@ class CreateAccount(FormView):
     def form_valid(self, form):
         new_user = form.save(commit=False)
         new_user.is_active = False
-        new_user.gets_bag_email_updates = False
+        new_user.gets_submission_email_updates = False
         new_user.save()
         send_user_activation_email.delay(new_user)
         return super().form_valid(form)
@@ -187,7 +200,55 @@ class TransferFormWizard(SessionWizardView):
                 "Add any final notes you would like to add, and upload your files"
             )
         },
+        "finalnotes": {
+            "templateref": "recordtransfer/transferform_standard.html",
+            "formtitle": gettext("Final Notes"),
+            "infomessage": gettext(
+                "Add any final notes that may not have fit in previous steps"
+            )
+        }
     }
+
+    def get(self, request, *args, **kwargs):
+        if self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
+            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
+            try:
+                clamd_socket.ping()
+            except clamd.ClamdError as exc:
+                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
+                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
+        resume_id = request.GET.get('resume_transfer', None)
+        if resume_id:
+            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            if transfer is None:
+                LOGGER.error(
+                    f"Expected at least 1 saved transfers for user {self.request.user} and ID {resume_id}, found 0"
+                )
+            else:
+                self.storage.data = pickle.loads(transfer.step_data)['past']
+                self.storage.current_step = transfer.current_step
+                return self.render(self.get_form())
+        return super().get(self, request, *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        save_form_step = self.request.POST.get('save_form_step', None)
+        if save_form_step and save_form_step in self.steps.all:
+            resume_id = self.request.GET.get('resume_transfer', None)
+            if resume_id:
+                transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            else:
+                transfer = SavedTransfer()
+            transfer.current_step = save_form_step
+            # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
+            current_data = {f.replace(save_form_step + "-", ""): self.request.POST[f] for f in self.request.POST.keys()
+                            if f.startswith(save_form_step + "-")}
+            transfer.user = self.request.user
+            transfer.last_updated = datetime.datetime.now(timezone.get_current_timezone())
+            transfer.step_data = pickle.dumps({'past': self.storage.data, 'current': current_data })
+            transfer.save()
+            return redirect('recordtransfer:userprofile')
+        else:
+            return super().post(*args, **kwargs)
 
     def get_template_names(self):
         ''' Retrieve the name of the template for the current step '''
@@ -196,6 +257,13 @@ class TransferFormWizard(SessionWizardView):
 
     def get_form_initial(self, step):
         initial = self.initial_dict.get(step, {})
+        resume_id = self.request.GET.get('resume_transfer', None)
+        if resume_id is not None:
+            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            if step == transfer.current_step:
+                data = pickle.loads(transfer.step_data)['current']
+                for (k, v) in data.items():
+                    initial[k] = v
         if step == 'contactinfo':
             curr_user = self.request.user
             initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
@@ -205,7 +273,7 @@ class TransferFormWizard(SessionWizardView):
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
         if step == 'grouptransfer':
-            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             kwargs['users_groups'] = users_groups
         return kwargs
 
@@ -224,7 +292,7 @@ class TransferFormWizard(SessionWizardView):
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
         if step_name == 'grouptransfer':
-            users_groups = BagGroup.objects.filter(created_by=self.request.user)
+            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
         elif step_name == 'rights':
             all_rights = RightsType.objects.all().exclude(name='Other')
@@ -236,21 +304,38 @@ class TransferFormWizard(SessionWizardView):
                 'source_roles': all_roles,
                 'source_types': all_types,
             })
+        resume_id = self.request.GET.get('resume_transfer', None)
+        max_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+        if MAX_SAVED_TRANSFER_COUNT == 0:
+            # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
+            save_form_state = 'off'
+        elif resume_id is None and max_saves >= MAX_SAVED_TRANSFER_COUNT:
+            # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
+            # transfer, disable the save form button.
+            save_form_state = 'disabled'
+        else:
+            # else enable the button.
+            save_form_state = 'on'
+        context.update({'save_form_state': save_form_state})
         return context
 
     def get_all_cleaned_data(self):
         cleaned_data = super().get_all_cleaned_data()
 
         # Get quantity and type of files for extent
-        session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
-        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
-        count = get_human_readable_file_count(
-            [f.name for f in session.get_existing_file_set()],
-            settings.ACCEPTED_FILE_FORMATS,
-            LOGGER
-        )
-
-        cleaned_data['quantity_and_type_of_units'] = '{0}, totalling {1}'.format(count, size)
+        if settings.FILE_UPLOAD_ENABLED:
+            session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
+            size = get_human_readable_size(session.upload_size, base=1024, precision=2)
+            count = get_human_readable_file_count(
+                [f.name for f in session.get_existing_file_set()],
+                settings.ACCEPTED_FILE_FORMATS,
+                LOGGER
+            )
+            cleaned_data['quantity_and_type_of_units'] = gettext('{0}, totalling {1}').format(count, size)
+        else:
+            if not cleaned_data['quantity_and_type_of_units']:
+                cleaned_data['quantity_and_type_of_units'] = gettext('No file information provided.')
+            cleaned_data['extent_statement_note'] = 'Extent provided by user'
 
         start_date = cleaned_data['start_date_of_material']
         end_date = cleaned_data['end_date_of_material']
@@ -289,7 +374,8 @@ class TransferFormWizard(SessionWizardView):
         return form_data
 
     def done(self, form_list, **kwargs):
-        ''' Retrieves all of the form data, and creates a bag from it asynchronously.
+        ''' Retrieves all of the form data, and creates a Submission from it
+        asynchronously.
 
         Args:
             form_list: The list of forms the user filled out.
@@ -298,7 +384,7 @@ class TransferFormWizard(SessionWizardView):
             HttpResponseRedirect: Redirects the user to the Transfer Sent page.
         '''
         form_data = self.get_all_cleaned_data()
-        bag_user_metadata_and_files.delay(form_data, self.request.user)
+        create_and_save_submission.delay(form_data, self.request.user)
         return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
 
 
@@ -351,11 +437,22 @@ def uploadfiles(request):
                 issues.append({'file': _file.name, **session_check})
                 continue
 
-            content_check = _accept_contents(_file)
-            if not content_check['accepted']:
-                _file.close()
-                raise NotImplementedError(
-                    'file malware check with clamav has not been fully implemented'
+            try:
+                content_check = _accept_contents(_file)
+                if not content_check['accepted']:
+                    _file.close()
+                    issues.append({'file': _file.name, **content_check})
+                    continue
+            except clamd.ClamdError as exc:
+                LOGGER.error("Unable to scan file (%s)", uploadfiles, exc_info=exc)
+                session.remove_session_uploads()
+                return JsonResponse(
+                    {'uploadSessionToken': session.token,
+                     'error': gettext('500 Internal Server Error'),
+                     'verboseError': gettext('500 Internal Server Error'),
+                     'fatalError': True,
+                     'redirect': reverse('recordtransfer:systemerror')
+                     }, status=500
                 )
 
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
@@ -609,22 +706,42 @@ def _accept_contents(file_upload):
             accepted is False. The 'clamav' key is a dict itself that has a
             'reason' and a 'status' key.
     '''
-    # TODO: Implement with clamd, like so:
-    '''
-    scan_results = clamd_socket.instream(file_upload)
-    status, reason = scan_results['stream']
-    if (status != 'OK'):
-        return {
-            'accepted': False,
-            'error': 'Malware found in file',
-            'verboseError': gettext(
-                'The file "{0}" was identified to contain malware! This issue '
-                'will be sent to the administrator'
-            ),
-            'clamav': {
-                'reason': reason
-                'status': status
+    if CLAMAV_ENABLED:
+        clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
+        scan_results = clamd_socket.instream(file_upload.file)
+        status, reason = scan_results['stream']
+        if status != 'OK':
+            return {
+                'accepted': False,
+                'error': 'Malware found in file',
+                'verboseError': gettext(
+                    'The file "{0}" was identified to contain malware! This issue '
+                    'will be sent to the administrator'.format(file_upload)
+                ),
+                'clamav': {
+                    'reason': reason,
+                    'status': status,
+                }
             }
-        }
-    '''
     return {'accepted': True}
+
+
+class DeleteTransfer(TemplateView):
+
+    template_name = 'recordtransfer/transfer_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        transfer = SavedTransfer.objects.filter(user=self.request.user, id=context['transfer_id']).first()
+        context['last_updated'] = transfer.last_updated
+        return context
+
+    def post(self, request, *args, **kwargs):
+        try:
+            if 'yes_delete' in request.POST:
+                transfer_id = request.POST['transfer_id']
+                transfer = SavedTransfer.objects.filter(user=self.request.user, id=transfer_id).first()
+                transfer.delete()
+        except KeyError:
+            LOGGER.error("Tried to render DeleteTransfer view without a transfer_id")
+        return redirect('recordtransfer:userprofile')

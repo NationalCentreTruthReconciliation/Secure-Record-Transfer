@@ -32,8 +32,8 @@ archive.
 This application also provides an administrator website for archivists and administrators. Some of
 the functions you can do with the administrator site are:
 
-* Generate HTML metadata reports for 1 or more generated Bags
-* Export CSV information about 1 or more generated Bags
+* Generate HTML metadata reports for 1 or more submissions
+* Export CSV information about 1 or more submissions
 * Set the "Review Status" of a Bag
 * Make decisions about the accession
 * Manage user accounts

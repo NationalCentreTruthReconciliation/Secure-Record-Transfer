@@ -5,6 +5,10 @@ from decouple import config
 
 SIGN_UP_ENABLED = config('SIGN_UP_ENABLED', default=True, cast=bool)
 
+# Enable or disable the file upload ability
+
+FILE_UPLOAD_ENABLED = config('FILE_UPLOAD_ENABLED', default=True, cast=bool)
+
 # The location where bags will be stored
 
 BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
@@ -37,6 +41,16 @@ MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
 # Use Date widgets for record dates or use free text fields.
 
 USE_DATE_WIDGETS = config('USE_DATE_WIDGETS', default=True, cast=bool)
+
+# CLAMAV configuration.
+
+CLAMAV_ENABLED = config('CLAMAV_ENABLED', default=True, cast=bool)
+CLAMAV_HOST = config('CLAMAV_HOST', default=None)
+CLAMAV_PORT = config('CLAMAV_PORT', default=3310, cast=int)
+
+# Maximum number of saved transfers per user.
+
+MAX_SAVED_TRANSFER_COUNT = config('MAX_SAVED_TRANSFER_COUNT', default=2, cast=int)
 
 # Default data to inject into metadata, after the user enters their own metadata
 

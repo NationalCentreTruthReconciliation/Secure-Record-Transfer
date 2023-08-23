@@ -15,7 +15,7 @@
         {% endif %}
         {% if field.label != 'hidden' %}
             <div class="flex-item">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
                 {{ field }}
                 {# Help tooltip #}
                 {% if field.help_text %}

@@ -10,7 +10,7 @@ $(function() {
         if (href.includes('media/')) {
             link.setAttribute('href', '#')
             link.addEventListener('click', function(e) {
-                alert('Files can only be downloaded through the Bag change page.')
+                alert('Files can only be downloaded by creating a BagIt Bag for a submission')
             })
         }
     }

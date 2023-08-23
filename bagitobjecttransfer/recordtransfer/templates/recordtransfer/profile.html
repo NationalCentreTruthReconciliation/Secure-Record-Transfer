@@ -32,6 +32,29 @@
     </div>
     </form>
     <div class="flex-full-width-item margin-top-25px">
+        <label class="past-transfer-label">{% trans "Ongoing Transfers"%}</label>
+    </div>
+    <div class="flex-full-width-item">
+        {% if in_process_submissions %}
+        <table class="full-width-table standard-table" cellspacing="0">
+            <tr>
+                <th>{% trans "Last Updated" %}</th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for in_process in in_process_submissions %}
+            <tr>
+                <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
+                <td><a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a></td>
+                <td><a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        None
+        {% endif %}
+    </div>
+    <div class="flex-full-width-item margin-top-25px">
         <label class="past-transfer-label">{% trans "Past Transfers"%}</label>
     </div>
     <div class="flex-full-width-item">
@@ -46,8 +69,8 @@
                 {% for submission in user_submissions %}
                     <tr>
                         <td>{{ submission.submission_date }}</td>
-                        <td>{{ submission.bag.title }}</td>
-                        <td>{{ submission.bag.extent }}</td>
+                        <td>{{ submission.metadata.accession_title }}</td>
+                        <td>{{ submission.extent_statements }}</td>
                         <td>{{ submission.get_review_status_display }}</td>
                     </tr>
                 {% endfor %}

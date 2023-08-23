@@ -12,17 +12,21 @@
 import os
 import sys
 import django
+import tempfile
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../bagitobjecttransfer'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bagitobjecttransfer.settings.sphinx'
+os.environ['BAG_STORAGE_FOLDER'] = tempfile.gettempdir()
+os.environ['UPLOAD_STORAGE_FOLDER'] = tempfile.gettempdir()
+os.environ['ARCHIVIST_EMAIL'] = 'archivist@example.com'
 django.setup()
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'NCTR Bagit Record Transfer'
-copyright = '2020, Daniel Lovegrove, National Centre for Truth and Reconciliation'
+copyright = '2023, National Centre for Truth and Reconciliation'
 author = 'Daniel Lovegrove, National Centre for Truth and Reconciliation'
 
 
