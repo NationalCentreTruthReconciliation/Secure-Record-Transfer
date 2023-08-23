@@ -5,7 +5,7 @@ from .base import *
 
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 DEBUG = False
-SITE_ID = config('SITE_ID', default=2, cast=int)
+SITE_ID = config('SITE_ID', default=1, cast=int)
 
 ALLOWED_HOSTS = re.split(r'\s+', config('HOST_DOMAINS'))
 
