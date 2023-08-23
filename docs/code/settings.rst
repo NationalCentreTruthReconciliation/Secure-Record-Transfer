@@ -6,51 +6,66 @@ recordtransfer.settings - Application Settings
 
 These settings control the behaviour of the application. All options can be set by directly
 modifying the :code:`recordtransfer/settings.py` file, and some may be changed by setting a value in
-the :code:`.env` environment file. By category, these settings are:
+the :code:`.env` environment file. These settings are organized by category below.
 
-**File Upload Controls**
+.. contents:: List of Settings
 
-- :ref:`FILE_UPLOAD_ENABLED`
-- :ref:`ACCEPTED_FILE_FORMATS`
-- :ref:`MAX_TOTAL_UPLOAD_SIZE`
-- :ref:`MAX_SINGLE_UPLOAD_SIZE`
-- :ref:`MAX_TOTAL_UPLOAD_COUNT`
 
-**Storage Locations**
+Application Features
+--------------------
 
-- :ref:`BAG_STORAGE_FOLDER`
-- :ref:`UPLOAD_STORAGE_FOLDER`
 
-**Checksums**
+MAX_SAVED_TRANSFER_COUNT
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-- :ref:`BAG_CHECKSUMS`
+    *Choose maximum saved transfers per user*
 
-**Application Features**
+    .. table::
 
-- :ref:`ALLOW_BAG_CHANGES`
-- :ref:`MAX_SAVED_TRANSFER_COUNT`
-- :ref:`SIGN_UP_ENABLED`
-- :ref:`USE_DATE_WIDGETS`
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        2                       int        YES                 YES
+        ========  ======================  =========  ==================  =========================
 
-**Emailing**
+    The maximum number of transfers a user can save to resume later. Must be a non-negative integer.
+    Set to 0 to disable saving transfers.
 
-- :ref:`ARCHIVIST_EMAIL`
-- :ref:`DO_NOT_REPLY_USERNAME`
+    **.env Example:**
 
-**ClamAV Virus Checking**
+    ::
 
-- :ref:`CLAMAV_ENABLED`
-- :ref:`CLAMAV_HOST`
-- :ref:`CLAMAV_PORT`
+        #file: .env
+        MAX_SAVED_TRANSFER_COUNT=5
 
-**Data Formatting**
 
-- :ref:`APPROXIMATE_DATE_FORMAT`
-- :ref:`DEFAULT_DATA`
+SIGN_UP_ENABLED
+^^^^^^^^^^^^^^^
+
+    *Choose whether new users can sign up*
+
+    .. table::
+
+        ========  ============  =========  ==================  =========================
+        Required  Default       Type       Can be set in .env  Can be set in settings.py
+        ========  ============  =========  ==================  =========================
+        NO        True          bool       YES                 YES
+        ========  ============  =========  ==================  =========================
+
+    You may want to create users manually to tightly control who has access to the application. In
+    this case, you will want to disable signing up so that no new users can be created without an
+    admin creating them.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        SIGN_UP_ENABLED=false
 
 
 FILE_UPLOAD_ENABLED
--------------------
+^^^^^^^^^^^^^^^^^^^
 
     *Choose whether to allow file uploads*
 
@@ -73,9 +88,88 @@ FILE_UPLOAD_ENABLED
         FILE_UPLOAD_ENABLED=false
 
 
+USE_DATE_WIDGETS
+^^^^^^^^^^^^^^^^
+
+  *Use javascript date widgets*
+
+  .. table::
+
+      ========  ============  =========  ==================  =========================
+      Required  Default       Type       Can be set in .env  Can be set in settings.py
+      ========  ============  =========  ==================  =========================
+      NO        True          bool       YES                 YES
+      ========  ============  =========  ==================  =========================
+
+  By default you must enter full dates in the format YYYY-MM-DD for records start and end dates.
+  Setting this to False allows users to enter free text for the start and end date fields.
+
+  **.env Example:**
+
+  ::
+
+      #file: .env
+      USE_DATE_WIDGETS=false
+
+
+DBTEMPLATES_ENABLED
+^^^^^^^^^^^^^^^^^^^
+
+  *Enable or disable changing templates from Django admin*
+
+  .. table::
+
+      ========  ============  =========  ==================  =========================
+      Required  Default       Type       Can be set in .env  Can be set in settings.py
+      ========  ============  =========  ==================  =========================
+      NO        False         bool       YES                 NO
+      ========  ============  =========  ==================  =========================
+
+  It is possible to enable this setting so that site templates can be changed without having to
+  re-deploy the application. Be careful with enabling this - it is very easy to break templates,
+  hence why it is **disabled** by default.
+
+  **.env Example:**
+
+  ::
+
+      #file: .env
+      DBTEMPLATES_ENABLED=false
+
+
+CLAMAV_ENABLED
+^^^^^^^^^^^^^^
+
+    *Whether ClamAV checking is enabled*
+
+    .. table::
+
+        ========  ===============  =========  ==================  =========================
+        Required  Default          Type       Can be set in .env  Can be set in settings.py
+        ========  ===============  =========  ==================  =========================
+        YES       True             bool       YES                 YES
+        ========  ===============  =========  ==================  =========================
+
+    Enables/disables whether ClamAV malware checking is enabled.
+
+    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_ENABLED=True
+
+
+File Upload Controls
+--------------------
+
+These settings have no effect if :ref:`FILE_UPLOAD_ENABLED` is False.
+
 
 ACCEPTED_FILE_FORMATS
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
     *Choose what files (by extension) can be uploaded*
 
@@ -130,7 +224,7 @@ ACCEPTED_FILE_FORMATS
 
 
 MAX_SINGLE_UPLOAD_SIZE
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
     *Choose the maximum size (in MiB) an uploaded file is allowed to be*
 
@@ -156,7 +250,7 @@ MAX_SINGLE_UPLOAD_SIZE
 
 
 MAX_TOTAL_UPLOAD_SIZE
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
     *Choose the maximum total size (in MiB) of a file transfer*
 
@@ -182,7 +276,7 @@ MAX_TOTAL_UPLOAD_SIZE
 
 
 MAX_TOTAL_UPLOAD_COUNT
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
     *Choose the maximum number of files can be transferred*
 
@@ -206,8 +300,12 @@ MAX_TOTAL_UPLOAD_COUNT
         MAX_TOTAL_UPLOAD_COUNT=10
 
 
+Storage Locations
+-----------------
+
+
 BAG_STORAGE_FOLDER
-------------------
+^^^^^^^^^^^^^^^^^^
 
     *Choose where BagIt bags are stored*
 
@@ -230,7 +328,7 @@ BAG_STORAGE_FOLDER
 
 
 UPLOAD_STORAGE_FOLDER
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
     *Choose storage location for uploaded files*
 
@@ -254,8 +352,12 @@ UPLOAD_STORAGE_FOLDER
         UPLOAD_STORAGE_FOLDER=/path/to/upload/folder
 
 
+Checksums
+---------
+
+
 BAG_CHECKSUMS
--------------
+^^^^^^^^^^^^^
 
     *Choose the checksum algorithms used to create BagIt manifests*
 
@@ -281,105 +383,12 @@ BAG_CHECKSUMS
         BAG_CHECKSUMS=sha1,blake2b,md5
 
 
-ALLOW_BAG_CHANGES
------------------
-
-    *Choose whether BagIt bags can be modified*
-
-    .. table::
-
-        ========  =======  =========  ==================  =========================
-        Required  Default  Type       Can be set in .env  Can be set in settings.py
-        ========  =======  =========  ==================  =========================
-        NO        True     bool       YES                 YES
-        ========  =======  =========  ==================  =========================
-
-    Allow changes to be made to a BagIt bag from the admin page. If set to false, a warning will be
-    posted when a change is made that would have made a change to a BagIt bag. Defaults to true.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        ALLOW_BAG_CHANGES=true
-
-
-MAX_SAVED_TRANSFER_COUNT
-------------------------
-
-    *Choose maximum saved transfers per user*
-
-    .. table::
-
-        ========  ======================  =========  ==================  =========================
-        Required  Default                 Type       Can be set in .env  Can be set in settings.py
-        ========  ======================  =========  ==================  =========================
-        NO        2                       int        YES                 YES
-        ========  ======================  =========  ==================  =========================
-
-    The maximum number of transfers a user can save to resume later. Must be a non-negative integer.
-    Set to 0 to disable saving transfers.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        MAX_SAVED_TRANSFER_COUNT=5
-
-
-SIGN_UP_ENABLED
----------------
-
-    *Choose whether new users can sign up*
-
-    .. table::
-
-        ========  ============  =========  ==================  =========================
-        Required  Default       Type       Can be set in .env  Can be set in settings.py
-        ========  ============  =========  ==================  =========================
-        NO        True          bool       YES                 YES
-        ========  ============  =========  ==================  =========================
-
-    You may want to create users manually to tightly control who has access to the application. In
-    this case, you will want to disable signing up so that no new users can be created without an
-    admin creating them.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        SIGN_UP_ENABLED=false
-
-
-USE_DATE_WIDGETS
-----------------
-
-  *Use javascript date widgets*
-
-  .. table::
-
-      ========  ============  =========  ==================  =========================
-      Required  Default       Type       Can be set in .env  Can be set in settings.py
-      ========  ============  =========  ==================  =========================
-      NO        True          bool       YES                 YES
-      ========  ============  =========  ==================  =========================
-
-  By default you must enter full dates in the format YYYY-MM-DD for records start and end dates.
-  Setting this to False allows users to enter free text for the start and end date fields.
-
-  **.env Example:**
-
-  ::
-
-      #file: .env
-      USE_DATE_WIDGETS=false
+Emailing
+--------
 
 
 ARCHIVIST_EMAIL
----------------
+^^^^^^^^^^^^^^^
 
     *Choose contact email address*
 
@@ -402,7 +411,7 @@ ARCHIVIST_EMAIL
 
 
 DO_NOT_REPLY_USERNAME
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
     *Choose username for do not reply emails*
 
@@ -425,32 +434,15 @@ DO_NOT_REPLY_USERNAME
         DO_NOT_REPLY_USERNAME=donotreply
 
 
-CLAMAV_ENABLED
---------------
+ClamAV Virus Checking
+---------------------
 
-    *Whether ClamAV checking is enabled*
+These settings have no effect is :ref:`CLAMAV_ENABLED` is False, or if :ref:`FILE_UPLOAD_ENABLED` is
+False.
 
-    .. table::
-
-        ========  ===============  =========  ==================  =========================
-        Required  Default          Type       Can be set in .env  Can be set in settings.py
-        ========  ===============  =========  ==================  =========================
-        YES       False            bool       YES                 YES
-        ========  ===============  =========  ==================  =========================
-
-    Enables/disables whether ClamAV malware checking is enabled.
-
-    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CLAMAV_ENABLED=True
 
 CLAMAV_HOST
------------
+^^^^^^^^^^^
 
     *Hostname of ClamAV instance*
 
@@ -473,8 +465,9 @@ CLAMAV_HOST
         #file: .env
         CLAMAV_HOST='example.server.org'
 
+
 CLAMAV_PORT
------------
+^^^^^^^^^^^
 
     *Port of ClamAV instance*
 
@@ -498,8 +491,12 @@ CLAMAV_PORT
         CLAMAV_PORT=8181
 
 
+Data Formatting
+---------------
+
+
 APPROXIMATE_DATE_FORMAT
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
     *Choose estimated date format*
 
@@ -523,7 +520,7 @@ APPROXIMATE_DATE_FORMAT
 
 
 DEFAULT_DATA
-------------
+^^^^^^^^^^^^
 
     *Choose default form data*
 
@@ -589,3 +586,74 @@ DEFAULT_DATA
                 'language_of_accession_record': 'en',
             }
         }
+
+
+CAAIS_UNKNOWN_DATE_TEXT
+^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Change the "Unknown date" text*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        Unknown date            string     YES                 NO
+        ========  ======================  =========  ==================  =========================
+
+    A string to use in the CAAIS metadata when a user indicates that a date is not known.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CAAIS_UNKNOWN_DATE_TEXT='Not known'
+
+
+CAAIS_UNKNOWN_START_DATE
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Change the unknown start date*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        1800-01-01              string     YES                 NO
+        ========  ======================  =========  ==================  =========================
+
+    A yyyy-mm-dd formatted date that is used for the start of a date range when an unknown date is
+    encountered when parsing a date for CAAIS.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CAAIS_UNKNOWN_START_DATE='1900-01-01'
+
+
+CAAIS_UNKNOWN_END_DATE
+^^^^^^^^^^^^^^^^^^^^^^
+
+    *Change the unknown end date*
+
+    .. table::
+
+        ========  ======================  =========  ==================  =========================
+        Required  Default                 Type       Can be set in .env  Can be set in settings.py
+        ========  ======================  =========  ==================  =========================
+        NO        2010-01-01              string     YES                 NO
+        ========  ======================  =========  ==================  =========================
+
+    A yyyy-mm-dd formatted date that is used for the end of a date range when an unknown date is
+    encountered when parsing a date for CAAIS.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CAAIS_UNKNOWN_END_DATE='1999-12-31'
