@@ -38,7 +38,7 @@ class ExportVersion(Enum):
                 'identifierValues',               # 1.2.2 Identifiers => Identifier Value
                 'identifierNotes',                # 1.2.3 Identifiers => Identifier Note
                 'accessionTitle',                 # 1.3 Accession Title
-                'archivalUnit',                   # 1.4 Archival Unit
+                'archivalUnits',                  # 1.4 Archival Unit
                 'acquisitionMethod',              # 1.5 Acquisition Method
                 'dispositionAuthority',           # 1.6 Disposition Authority
                 'status',                         # 1.7 Status

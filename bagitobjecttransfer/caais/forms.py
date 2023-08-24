@@ -7,6 +7,9 @@ from django_countries.widgets import CountrySelectWidget
 from caais.models import (
     Identifier,
     ArchivalUnit,
+    PreliminaryCustodialHistory,
+    DispositionAuthority,
+    PreliminaryScopeAndContent,
     SourceOfMaterial,
     ExtentStatement,
     LanguageOfMaterial,
@@ -181,3 +184,21 @@ class InlineRightsForm(forms.ModelForm):
                 'class': 'inline-textarea',
             }),
         }
+
+
+class InlinePreliminaryCustodialHistoryForm(forms.ModelForm):
+    class Meta:
+        model = PreliminaryCustodialHistory
+        fields = '__all__'
+
+
+class InlineDispositionAuthorityForm(forms.ModelForm):
+    class Meta:
+        model = DispositionAuthority
+        fields = '__all__'
+
+
+class InlinePreliminaryScopeAndContentForm(forms.ModelForm):
+    class Meta:
+        model = PreliminaryScopeAndContent
+        fields = '__all__'
