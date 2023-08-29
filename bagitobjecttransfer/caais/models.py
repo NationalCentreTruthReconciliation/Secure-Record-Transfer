@@ -4,74 +4,18 @@ http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
 '''
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Union, Iterable
 
 from django.conf import settings
-from django.db import models, connection
-from django.db.models import Q, CharField, Aggregate, Value, Case, When, Value, F
+from django.db import models
+from django.db.models import Q, CharField, Value, Case, When, Value, F
 from django.db.models.functions import Coalesce, Concat
 from django.utils.translation import gettext, gettext_lazy as _
 from django_countries.fields import CountryField
 
 from caais.dates import EventDateParser, UnknownDateFormat
+from caais.db import DefaultConcat
 from caais.export import ExportVersion
 
-
-MULTI_VALUE_SEPARATOR = '|'
-
-
-# MySQL and SQLite have slightly different syntax for GROUP_CONCAT
-if connection.vendor == 'sqlite':
-    SEPARATOR_TEMPLATE = ', "{separator}"'
-elif connection.vendor == 'mysql':
-    SEPARATOR_TEMPLATE = ' SEPARATOR "{separator}"'
-else:
-    raise ValueError(f'The database type "{connection.vendor}" is not supported!')
-
-
-class GroupConcat(Aggregate):
-    function = 'GROUP_CONCAT'
-    template = '%(function)s(%(expressions)s%(separator)s)'
-
-    def __init__(self, expression, separator=',', **extra):
-        super(GroupConcat, self).__init__(
-            expression,
-            separator=SEPARATOR_TEMPLATE.format(separator=separator),
-            output_field=CharField(),
-            **extra
-        )
-
-
-class DefaultConcat(GroupConcat):
-    ''' Aggregate values by concatenating them into one string using the
-    MULTI_VALUE_SEPARATOR character as a separator.
-    '''
-    def __init__(self, expression, **extra):
-        super().__init__(expression, separator=MULTI_VALUE_SEPARATOR, **extra)
-
-
-def get_nested_attr(model, attrs: Union[str, Iterable]):
-    ''' Get one or more nested attributes as a string value from a model. If
-    value does not exist or is Falsy, returns None.
-
-    Args:
-        model: Some model or object with attributes
-        attrs (Union[str, Iterable]): A list of strings or a comma-delimited
-            string of properties
-    '''
-    obj = model
-    if isinstance(attrs, str):
-        attr_list = map(str.strip, attrs.split(','))
-    else:
-        attr_list = attrs
-    for attr in attr_list:
-        try:
-            obj = getattr(obj, attr)
-        except AttributeError:
-            return None
-    if obj:
-        return str(obj) or None
-    return None
 
 
 class CaaisModelManager(models.Manager, ABC):
