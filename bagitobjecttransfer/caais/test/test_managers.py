@@ -1348,7 +1348,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
-        self.assertEqual(flat['archivalHistory'], 'HISTORY 1|HISTORY 2')
+        self.assertEqual(flat['archivalHistory'], '* HISTORY 1\n* HISTORY 2')
 
         history_1.delete()
         history_2.delete()
@@ -1395,7 +1395,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
-        self.assertEqual(flat['archivalHistory'], 'HISTORY 1|HISTORY 2')
+        self.assertEqual(flat['archivalHistory'], '* HISTORY 1\n* HISTORY 2')
 
         history_1.delete()
         history_2.delete()
@@ -1442,7 +1442,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
-        self.assertEqual(flat['archivalHistory'], 'HISTORY 1|HISTORY 2')
+        self.assertEqual(flat['archivalHistory'], '* HISTORY 1\n* HISTORY 2')
 
         history_1.delete()
         history_2.delete()
@@ -1489,7 +1489,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
-        self.assertEqual(flat['archivalHistory'], 'HISTORY 1|HISTORY 2')
+        self.assertEqual(flat['archivalHistory'], '* HISTORY 1\n* HISTORY 2')
 
         history_1.delete()
         history_2.delete()
@@ -1672,7 +1672,7 @@ class TestExtentStatementManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['receivedExtentUnits'], '3 FILES|10 PDFs')
+        self.assertEqual(flat['receivedExtentUnits'], '* 3 FILES\n* 10 PDFs')
 
         for obj in objects:
             obj.delete()
@@ -1744,7 +1744,7 @@ class TestExtentStatementManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['receivedExtentUnits'], '3 FILES|10 PDFs')
+        self.assertEqual(flat['receivedExtentUnits'], '* 3 FILES\n* 10 PDFs')
 
         for obj in objects:
             obj.delete()
@@ -1816,7 +1816,7 @@ class TestExtentStatementManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['receivedExtentUnits'], '3 FILES|10 PDFs')
+        self.assertEqual(flat['receivedExtentUnits'], '* 3 FILES\n* 10 PDFs')
 
         for obj in objects:
             obj.delete()
@@ -1888,7 +1888,7 @@ class TestExtentStatementManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['receivedExtentUnits'], '3 FILES|10 PDFs')
+        self.assertEqual(flat['receivedExtentUnits'], '* 3 FILES\n* 10 PDFs')
 
         for obj in objects:
             obj.delete()
@@ -2568,7 +2568,7 @@ class TestStorageLocationManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
-        self.assertEqual(flat['locationInformation'], 'LOCATION 1; LOCATION 2')
+        self.assertEqual(flat['locationInformation'], '* LOCATION 1\n* LOCATION 2')
 
         location_1.delete()
         location_2.delete()
@@ -2615,7 +2615,7 @@ class TestStorageLocationManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
-        self.assertEqual(flat['locationInformation'], 'LOCATION 1; LOCATION 2')
+        self.assertEqual(flat['locationInformation'], '* LOCATION 1\n* LOCATION 2')
 
         location_1.delete()
         location_2.delete()
@@ -2662,7 +2662,7 @@ class TestStorageLocationManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
-        self.assertEqual(flat['locationInformation'], 'LOCATION 1; LOCATION 2')
+        self.assertEqual(flat['locationInformation'], '* LOCATION 1\n* LOCATION 2')
 
         location_1.delete()
         location_2.delete()
@@ -2709,7 +2709,7 @@ class TestStorageLocationManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
-        self.assertEqual(flat['locationInformation'], 'LOCATION 1; LOCATION 2')
+        self.assertEqual(flat['locationInformation'], '* LOCATION 1\n* LOCATION 2')
 
         location_1.delete()
         location_2.delete()
@@ -2994,7 +2994,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1')
+        self.assertEqual(flat['processingNotes'], 'VALUE 1. NOTE 1')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3027,7 +3027,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1|VALUE 2')
+        self.assertEqual(flat['processingNotes'], '* VALUE 1. NOTE 1\n* VALUE 2')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3058,7 +3058,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1')
+        self.assertEqual(flat['processingNotes'], 'VALUE 1. NOTE 1')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3091,7 +3091,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1|VALUE 2')
+        self.assertEqual(flat['processingNotes'], '* VALUE 1. NOTE 1\n* VALUE 2')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3122,7 +3122,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1')
+        self.assertEqual(flat['processingNotes'], 'VALUE 1. NOTE 1')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3155,7 +3155,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1|VALUE 2')
+        self.assertEqual(flat['processingNotes'], '* VALUE 1. NOTE 1\n* VALUE 2')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3186,7 +3186,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1')
+        self.assertEqual(flat['processingNotes'], 'VALUE 1. NOTE 1')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3219,7 +3219,7 @@ class TestPreservationRequirementsManager(TestCase):
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
-        self.assertEqual(flat['physicalCondition'], 'VALUE 1|VALUE 2')
+        self.assertEqual(flat['processingNotes'], '* VALUE 1. NOTE 1\n* VALUE 2')
 
         requirements_type.delete()
         requirements_1.delete()
@@ -3349,7 +3349,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1')
+        self.assertEqual(flat['appraisal'], 'APPRAISAL 1. NOTE 1')
 
         appraisal_1.delete()
         appraisal_type.delete()
@@ -3382,7 +3382,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1|APPRAISAL 2')
+        self.assertEqual(flat['appraisal'], '* APPRAISAL 1. NOTE 1\n* APPRAISAL 2')
 
         appraisal_1.delete()
         appraisal_2.delete()
@@ -3413,7 +3413,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1')
+        self.assertEqual(flat['appraisal'], 'APPRAISAL 1. NOTE 1')
 
         appraisal_1.delete()
         appraisal_type.delete()
@@ -3446,7 +3446,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1|APPRAISAL 2')
+        self.assertEqual(flat['appraisal'], '* APPRAISAL 1. NOTE 1\n* APPRAISAL 2')
 
         appraisal_1.delete()
         appraisal_2.delete()
@@ -3477,7 +3477,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1')
+        self.assertEqual(flat['appraisal'], 'APPRAISAL 1. NOTE 1')
 
         appraisal_1.delete()
         appraisal_type.delete()
@@ -3510,7 +3510,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1|APPRAISAL 2')
+        self.assertEqual(flat['appraisal'], '* APPRAISAL 1. NOTE 1\n* APPRAISAL 2')
 
         appraisal_1.delete()
         appraisal_2.delete()
@@ -3541,7 +3541,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1')
+        self.assertEqual(flat['appraisal'], 'APPRAISAL 1. NOTE 1')
 
         appraisal_1.delete()
         appraisal_type.delete()
@@ -3574,7 +3574,7 @@ class TestAppraisalManager(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
 
-        self.assertEqual(flat['appraisal'], 'APPRAISAL 1|APPRAISAL 2')
+        self.assertEqual(flat['appraisal'], '* APPRAISAL 1. NOTE 1\n* APPRAISAL 2')
 
         appraisal_1.delete()
         appraisal_2.delete()

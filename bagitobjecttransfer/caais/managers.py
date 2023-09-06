@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import re
 
 from django.db import models
 from django.db.models import Q, CharField, Value, Case, When, Value, F
@@ -6,6 +7,9 @@ from django.db.models.functions import Concat
 
 from caais.db import DefaultConcat, GroupConcat, CharFieldOrDefault
 from caais.export import ExportVersion
+
+
+PUNCTUATION_END = re.compile(r'(?:\?|!|\.|,|;)\s*$')
 
 
 class MetadataManager(models.Manager):
@@ -250,9 +254,22 @@ class SourceOfMaterialManager(CaaisModelManager):
 
 class PreliminaryCustodialHistoryManager(CaaisModelManager):
     def flatten_atom(self, version: ExportVersion) -> dict:
-        return self.get_queryset().aggregate(
-            archivalHistory=DefaultConcat('preliminary_custodial_history')
-        )
+        ''' Include single custodial history if there is only one, otherwise
+        create a bullet point list of all received extents.
+        '''
+        histories = self.get_queryset()\
+                        .values_list('preliminary_custodial_history', flat=True)
+
+        if len(histories) == 1:
+            archival_history = histories[0]
+        elif len(histories) > 1:
+            archival_history = '\n'.join(f'* {h}' for h in histories)
+        else:
+            archival_history = ''
+
+        if archival_history:
+            return {'archivalHistory': archival_history}
+        return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
         return self.get_queryset().aggregate(
@@ -262,17 +279,25 @@ class PreliminaryCustodialHistoryManager(CaaisModelManager):
 
 class ExtentStatementManager(CaaisModelManager):
     def flatten_atom(self, version: ExportVersion) -> dict:
-        super().flatten_atom(version)
+        ''' Include single extent if there is only one, otherwise create a
+        bullet point list of all received extents.
+        '''
+        extents = self.get_queryset()\
+                      .exclude(quantity_and_unit_of_measure='')\
+                      .values_list('quantity_and_unit_of_measure', flat=True)
 
-        return self.get_queryset().exclude(quantity_and_unit_of_measure='').aggregate(
-            receivedExtentUnits=DefaultConcat(
-                CharFieldOrDefault(field_name='quantity_and_unit_of_measure')
-            )
-        )
+        if len(extents) == 1:
+            received_extent = extents[0]
+        elif len(extents) > 1:
+            received_extent = '\n'.join(f'* {e}' for e in extents)
+        else:
+            received_extent = ''
+
+        if received_extent:
+            return {'receivedExtentUnits': received_extent}
+        return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
-        super().flatten_caais(version)
-
         return self.get_queryset().aggregate(
             extentTypes=DefaultConcat(Case(
                 When(Q(extent_type__isnull=False), then=F('extent_type__name')),
@@ -330,9 +355,22 @@ class LanguageOfMaterialManager(CaaisModelManager):
 
 class StorageLocationManager(CaaisModelManager):
     def flatten_atom(self, version: ExportVersion) -> dict:
-        return self.get_queryset().aggregate(
-            locationInformation=GroupConcat('storage_location', separator='; ')
-        )
+        ''' Include single location if there is only one, otherwise create a
+        bullet point list of all location values.
+        '''
+        locations = self.get_queryset()\
+                      .values_list('storage_location', flat=True)
+
+        if len(locations) == 1:
+            location = locations[0]
+        elif len(locations) > 1:
+            location = '\n'.join(f'* {l}' for l in locations)
+        else:
+            location = ''
+
+        if location:
+            return {'locationInformation': location}
+        return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
         return self.get_queryset().aggregate(
@@ -363,10 +401,39 @@ class RightsManager(CaaisModelManager):
 
 class PreservationRequirementsManager(CaaisModelManager):
     def flatten_atom(self, version: ExportVersion) -> dict:
-        # Not ideal - notes and types are dropped.
-        return self.get_queryset().exclude(preservation_requirements_value='').aggregate(
-            physicalCondition=DefaultConcat('preservation_requirements_value')
-        )
+        ''' Include first value + note if there is only one, otherwise include
+        every value + note in a bullet point list.
+        '''
+        processing_notes = []
+        for req in self.get_queryset():
+            value = req.preservation_requirements_value
+            note = req.preservation_requirements_note
+
+            if value and note:
+                if not PUNCTUATION_END.search(value):
+                    list_item = f'{value}. {note}'
+                else:
+                    list_item = f'{value} {note}'
+            elif value:
+                list_item = value
+            elif note:
+                list_item = note
+            else:
+                list_item = ''
+
+            if list_item:
+                processing_notes.append(list_item)
+
+        if len(processing_notes) == 1:
+            note = processing_notes[0]
+        elif len(processing_notes) > 1:
+            note = '\n'.join(f'* {n}' for n in processing_notes)
+        else:
+            note = ''
+
+        if note:
+            return {'processingNotes': note}
+        return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
         return self.get_queryset().aggregate(
@@ -386,10 +453,40 @@ class PreservationRequirementsManager(CaaisModelManager):
 
 class AppraisalManager(CaaisModelManager):
     def flatten_atom(self, version: ExportVersion) -> dict:
-        # Not ideal - notes and types are dropped.
-        return self.get_queryset().exclude(appraisal_value='').aggregate(
-            appraisal=DefaultConcat('appraisal_value')
-        )
+        ''' Include single appraisal value + note if there is only one,
+        otherwise create a bullet point list of all appraisals' value + note.
+        '''
+        appraisals = []
+        for app in self.get_queryset():
+            value = app.appraisal_value
+            note = app.appraisal_note
+
+            if value and note:
+                if not PUNCTUATION_END.search(value):
+                    list_item = f'{value}. {note}'
+                else:
+                    list_item = f'{value} {note}'
+            elif value:
+                list_item = value
+            elif note:
+                list_item = note
+            else:
+                list_item = ''
+
+            if list_item:
+                appraisals.append(list_item)
+
+        if len(appraisals) == 1:
+            appraisal = appraisals[0]
+        elif len(appraisals) > 1:
+            appraisal = '\n'.join(f'* {n}' for n in appraisals)
+        else:
+            appraisal = ''
+
+        if appraisal:
+            return {'appraisal': appraisal}
+        return {}
+
 
     def flatten_caais(self, version: ExportVersion) -> dict:
         return self.get_queryset().aggregate(
