@@ -1,5 +1,5 @@
 from django.db import connection
-from django.db.models import CharField, Aggregate
+from django.db.models import CharField, Aggregate, Case, When, Q, F, Value
 
 
 MULTI_VALUE_SEPARATOR = '|'
@@ -37,3 +37,24 @@ class DefaultConcat(GroupConcat):
 
     def __init__(self, expression, **extra):
         super().__init__(expression, separator=MULTI_VALUE_SEPARATOR, **extra)
+
+
+class CharFieldOrDefault(Case):
+    ''' Return char field, or default_str if field is NULL or empty.
+    '''
+
+    def __init__(self, field_name, default_str='NULL'):
+        # field_name=''
+        empty = {
+            field_name: ''
+        }
+        # field_name__isnull=True
+        isnull = {
+            f'{field_name}__isnull': True
+        }
+
+        super().__init__(
+            When(~Q(**empty) & ~Q(**isnull), then=F(field_name)),
+            default=Value('NULL'),
+            output_field=CharField(),
+        )

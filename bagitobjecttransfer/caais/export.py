@@ -40,7 +40,7 @@ class ExportVersion(Enum):
                 'accessionTitle',                 # 1.3 Accession Title
                 'archivalUnits',                  # 1.4 Archival Unit
                 'acquisitionMethod',              # 1.5 Acquisition Method
-                'dispositionAuthority',           # 1.6 Disposition Authority
+                'dispositionAuthorities',         # 1.6 Disposition Authority
                 'status',                         # 1.7 Status
 
                 # Section 2
@@ -48,6 +48,7 @@ class ExportVersion(Enum):
                 'sourceName',                     # 2.1.2 Source of material => Source Name
                 'sourceContactPerson',            # 2.1.3 Source of material => Source Contact Information
                 'sourceJobTitle',                 # "
+                'sourceOrganization',             # "
                 'sourceStreetAddress',            # "
                 'sourceCity',                     # "
                 'sourceRegion',                   # "
@@ -58,32 +59,32 @@ class ExportVersion(Enum):
                 'sourceRole',                     # 2.1.4 Source of material => Source Role
                 'sourceNote',                     # 2.1.5 Source of material => Source Note
                 'sourceConfidentiality',          # 2.1.6 Source of material => Source Confidentiality
-                'preliminaryCustodialHistories',  # 2.2 Preliminary Custodial History
+                'preliminaryCustodialHistory',    # 2.2 Preliminary Custodial History
 
                 # Section 3
                 'dateOfMaterials',                # 3.1 Date of Materials
-                'extentStatementTypes',           # 3.2.1 Extent Statement => Extent Type
+                'extentTypes',                    # 3.2.1 Extent Statement => Extent Type
                 'quantityAndUnitOfMeasure',       # 3.2.2 Extent Statement => Quantity and Unit of Measure
                 'contentTypes',                   # 3.2.3 Extent Statement => Content Type
                 'carrierTypes',                   # 3.2.4 Extent Statement => Carrier Type
                 'extentNotes',                    # 3.2.5 Extent Statement => Extent Note
-                'preliminaryScopeAndContents',    # 3.3 Preliminary Scope and Content
+                'preliminaryScopeAndContent',     # 3.3 Preliminary Scope and Content
                 'languageOfMaterials',            # 3.4 Language of Material
 
                 # Section 4
                 'storageLocation',                # 4.1 Storage Location
-                'rightsStatementType',            # 4.2.1 Rights => Rights Type
-                'rightsStatementValue',           # 4.2.2 Rights => Rights Value
-                'rightsStatementNote',            # 4.2.3 Rights => Rights Note
+                'rightsTypes',                    # 4.2.1 Rights => Rights Type
+                'rightsValues',                   # 4.2.2 Rights => Rights Value
+                'rightsNotes',                    # 4.2.3 Rights => Rights Note
                 'preservationRequirementsTypes',  # 4.3.1 Preservation Requirements => Preservation Requirements Type
                 'preservationRequirementsValues', # 4.3.2 Preservation Requirements => Preservation Requirements Value
-                'preservarionRequirementsNotes',  # 4.3.3 Preservation Requirements => Preservation Requirements Note
-                'appraisalStatementType',         # 4.4.1 Appraisal => Appraisal Types
-                'appraisalStatementValue',        # 4.4.2 Appraisal => Appraisal Values
-                'appraisalStatementNote',         # 4.4.3 Appraisal => Appraisal Notes
+                'preservationRequirementsNotes',  # 4.3.3 Preservation Requirements => Preservation Requirements Note
+                'appraisalTypes',                 # 4.4.1 Appraisal => Appraisal Types
+                'appraisalValues',                # 4.4.2 Appraisal => Appraisal Values
+                'appraisalNotes',                 # 4.4.3 Appraisal => Appraisal Notes
                 'associatedDocumentationTypes',   # 4.5.1 Associated Documentation => Associated Documentation Type
                 'associatedDocumentationTitles',  # 4.5.2 Associated Documentation => Associated Documentation Title
-                'associatedDocumentationNote',    # 4.5.3 Associated Documentation => Assocaited Documentation Note
+                'associatedDocumentationNotes',   # 4.5.3 Associated Documentation => Assocaited Documentation Note
 
                 # Section 5
                 'eventTypes',                     # 5.1.1 Events => Event Type
