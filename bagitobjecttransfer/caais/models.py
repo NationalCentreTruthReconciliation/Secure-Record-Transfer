@@ -1,6 +1,20 @@
 ''' Models describing the Canadian Archival Accession Information Standard v1.0:
 
-http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
+https://archivescanada.ca/wp-content/uploads/2022/12/CAAIS_2019May15_EN.pdf
+
+Note that there are **seven** sections of CAAIS that organize the fields by
+related information. These sections are:
+
+1. Identity Information Section
+2. Source Information Section
+3. Materials Information Section
+4. Management Information Section
+5. Event Information Section
+6. General Information Section
+7. Control Information Section
+
+The models here are not in the exact *order* as in the CAAIS document, but each
+field in the standard is defined in a model.
 '''
 from abc import ABC, abstractmethod
 from functools import partial
@@ -66,14 +80,16 @@ class TermManager(models.Manager):
 class AbstractTerm(models.Model):
     ''' An abstract class that can be used to define any term that consists of
     a name and a description.
+
+    Attributes:
+        name (CharField): The name of the term. Terms must have unique names
+        description (TextField): A description for the term
     '''
 
     class Meta:
         abstract = True
 
-    objects = TermManager()
-
-    name = models.CharField(max_length=128, null=False, blank=False)
+    name = models.CharField(max_length=128, null=False, blank=False, unique=True)
     description = models.TextField(blank=True, default='')
 
     def __str__(self):

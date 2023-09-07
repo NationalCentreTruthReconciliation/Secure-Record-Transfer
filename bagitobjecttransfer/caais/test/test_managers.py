@@ -14,8 +14,8 @@ from caais.models import (
     AssociatedDocumentationType,
     CarrierType,
     ContentType,
+    CreationOrRevisionType,
     DateOfCreationOrRevision,
-    DateOfCreationOrRevisionType,
     DispositionAuthority,
     Event,
     EventType,
@@ -2757,7 +2757,7 @@ class TestRightsManager(TestCase):
 
 
     def test_flatten_single_rights_caais_1_0(self):
-        rights_type = RightsType(name='Copyright')
+        rights_type, created = RightsType.objects.get_or_create(name='Copyright')
         rights_type.save()
         rights_1 = Rights(
             metadata=self.metadata,
@@ -2777,9 +2777,13 @@ class TestRightsManager(TestCase):
         self.assertEqual(flat['rightsValues'], 'RIGHTS VALUE')
         self.assertEqual(flat['rightsNotes'], 'RIGHTS NOTE')
 
+        rights_1.delete()
+        if created:
+            rights_type.delete()
+
 
     def test_flatten_multiple_rights_caais_1_0(self):
-        rights_type = RightsType(name='Copyright')
+        rights_type, created = RightsType.objects.get_or_create(name='Copyright')
         rights_type.save()
         rights_1 = Rights(
             metadata=self.metadata,
@@ -2804,6 +2808,11 @@ class TestRightsManager(TestCase):
         self.assertEqual(flat['rightsTypes'], 'Copyright|Copyright')
         self.assertEqual(flat['rightsValues'], 'RIGHTS VALUE 1|RIGHTS VALUE 2')
         self.assertEqual(flat['rightsNotes'], 'RIGHTS NOTE|NULL')
+
+        rights_1.delete()
+        rights_2.delete()
+        if created:
+            rights_type.delete()
 
 
     def test_flatten_no_data_atom_2_6(self):
@@ -4151,7 +4160,7 @@ class TestDateOfCreationOrRevisionManager(TestCase):
 
     @patch.object(timezone, 'now', return_value=datetime(2023, 9, 30, 12, 0, 0, tzinfo=timezone.get_current_timezone()))
     def test_flatten_single_date_caais_1_0(self, timezone_now__patch):
-        date_type = DateOfCreationOrRevisionType(name='Creation')
+        date_type = CreationOrRevisionType(name='Creation')
         date_type.save()
 
         date_1 = DateOfCreationOrRevision(
@@ -4179,8 +4188,8 @@ class TestDateOfCreationOrRevisionManager(TestCase):
 
     @patch.object(timezone, 'now', return_value=datetime(2023, 5, 13, 12, 0, 0, tzinfo=timezone.get_current_timezone()))
     def test_flatten_multiple_date_caais_1_0(self, timezone_now__patch):
-        creation_type = DateOfCreationOrRevisionType(name='Creation')
-        revision_type = DateOfCreationOrRevisionType(name='Revision')
+        creation_type = CreationOrRevisionType(name='Creation')
+        revision_type = CreationOrRevisionType(name='Revision')
         creation_type.save()
         revision_type.save()
 
