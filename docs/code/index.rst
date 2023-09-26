@@ -19,6 +19,7 @@ Code Files
 .. toctree::
     :maxdepth: 1
 
+    caaismodels
     forms
     views
     jobs
