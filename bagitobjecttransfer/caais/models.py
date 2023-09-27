@@ -23,6 +23,7 @@ from django.db import models
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
 
+from caais.citation import cite_caais
 from caais.dates import EventDateParser, UnknownDateFormat
 from caais.export import ExportVersion
 from caais.managers import (
@@ -77,10 +78,12 @@ class AcquisitionMethod(AbstractTerm):
         description (TextField): A description of the acquisition method
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = gettext('Acquisition Methods')
-        verbose_name = gettext('Acquisition Method')
-AcquisitionMethod._meta.get_field('name').help_text = gettext(
-    "Record the acquisition method in accordance with a controlled vocabulary"
+        verbose_name_plural = gettext('Acquisition methods')
+        verbose_name = gettext('Acquisition method')
+AcquisitionMethod._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the acquisition method in accordance with a controlled vocabulary"
+    ), section=(1, 5)
 )
 
 
@@ -99,10 +102,12 @@ class Status(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Statuses')
         verbose_name = gettext('Status')
-Status._meta.get_field('name').help_text = gettext(
-    "Record the current position of the material with respect to the "
-    "repository's workflows and business processes using a controlled "
-    "vocabulary"
+Status._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the current position of the material with respect to the "
+        "repository's workflows and business processes using a controlled "
+        "vocabulary"
+    ), section=(1, 7)
 )
 
 
@@ -203,23 +208,35 @@ class Metadata(models.Model):
             accession record.*
     '''
     class Meta:
-        verbose_name_plural = gettext('CAAIS Metadata')
-        verbose_name = gettext('CAAIS Metadata')
+        verbose_name_plural = gettext('CAAIS metadata')
+        verbose_name = gettext('CAAIS metadata')
 
     objects = MetadataManager()
 
+    @property
+    def accession_identifier(self) -> str:
+        if self.identifiers:
+            accession_id = self.identifiers.accession_identifier()
+            if accession_id:
+                return accession_id.identifier_value
+        return ''
+
     repository = models.CharField(
-        null=False, max_length=512, blank=True, default='', help_text=gettext(
-            "Give the authorized form(s) of the name of the institution in "
-            "accordance with the repository's naming standard"
+        null=False, max_length=512, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Give the authorized form(s) of the name of the institution in "
+                "accordance with the repository's naming standard"
+            ), section=(1, 1)
         )
     )
 
     accession_title = models.CharField(
-        null=False, max_length=512, blank=True, default='', help_text=gettext(
-            "Supply an accession title in accordance with the repository's "
-            "descriptive standard, typically consisting of the creator's name(s) "
-            "and the type of material"
+        null=False, max_length=512, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Supply an accession title in accordance with the repository's "
+                "descriptive standard, typically consisting of the creator's name(s) "
+                "and the type of material"
+            ), section=(1, 3)
         )
     )
 
@@ -230,23 +247,29 @@ class Metadata(models.Model):
     status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True)
 
     date_of_materials = models.CharField(
-        null=False, max_length=512, blank=True, default='', help_text=gettext(
-            "Provide a preliminary estimate of the date range or explicitly "
-            "indicate if not it has yet been determined"
+        null=False, max_length=512, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Provide a preliminary estimate of the date range or explicitly "
+                "indicate if not it has yet been determined"
+            ), section=(3, 1)
         )
     )
 
     rules_or_conventions = models.CharField(
-        null=False, max_length=256, blank=True, default='', help_text=gettext(
-            "Record information about the standards, rules or conventions that "
-            "were followed when creating or maintaining the accession record."
+        null=False, max_length=256, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record information about the standards, rules or conventions that "
+                "were followed when creating or maintaining the accession record."
+            ), section=(7, 1)
         )
     )
 
     language_of_accession_record = models.CharField(
-        null=False, max_length=256, blank=True, default='en', help_text=gettext(
-            "Record the language(s) and script(s) used to create the accession "
-            "record."
+        null=False, max_length=256, blank=True, default='en', help_text=cite_caais(
+            gettext(
+                "Record the language(s) and script(s) used to create the accession "
+                "record."
+            ), section=(7, 3)
         )
     )
 
@@ -442,22 +465,31 @@ class Identifier(models.Model):
                                  related_name='identifiers')
 
     identifier_type = models.CharField(
-        max_length=128, null=False, blank=True, default='', help_text=gettext(
-        "Record the identifier type in accordance with a controlled vocabulary "
-        "maintained by the repository"
-    ))
+        max_length=128, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the identifier type in accordance with a controlled vocabulary "
+                "maintained by the repository"
+            ), section=(1, 2, 1)
+        )
+    )
 
     identifier_value = models.CharField(
-        max_length=128, null=False, blank=False, help_text=gettext(
-        "Record the other identifier value as received or generated by the "
-        "repository"
-    ))
+        max_length=128, null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record the other identifier value as received or generated by the "
+                "repository"
+            ), section=(1, 2, 2)
+        )
+    )
 
     identifier_note = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-        "Record any additional information that clarifies the purpose, use or "
-        "generation of the identifier."
-    ))
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any additional information that clarifies the purpose, use or "
+                "generation of the identifier."
+            ), section=(1, 2, 3)
+        )
+    )
 
     def __str__(self):
         if self.identifier_type:
@@ -479,17 +511,19 @@ class ArchivalUnit(models.Model):
             The text content of CAAIS, Section 1.4.
     '''
     class Meta:
-        verbose_name_plural = gettext('Archival Units')
-        verbose_name = gettext('Archival Unit')
+        verbose_name_plural = gettext('Archival units')
+        verbose_name = gettext('Archival unit')
 
     objects = ArchivalUnitManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='archival_units')
 
-    archival_unit = models.TextField(null=False, blank=False, help_text=gettext(
-        "Record the reference code and/or title of the archival unit to which "
-        "the accession belongs"
+    archival_unit = models.TextField(null=False, blank=False, help_text=cite_caais(
+        gettext(
+            "Record the reference code and/or title of the archival unit to which "
+            "the accession belongs"
+        ), section=(1, 4)
     ))
 
     def __str__(self):
@@ -510,8 +544,8 @@ class DispositionAuthority(models.Model):
             The text content of CAAIS, Section 1.6.
     '''
     class Meta:
-        verbose_name_plural = gettext('Disposition Authorities')
-        verbose_name = gettext('Disposition Authority')
+        verbose_name_plural = gettext('Disposition authorities')
+        verbose_name = gettext('Disposition authority')
 
     objects = DispositionAuthorityManager()
 
@@ -519,10 +553,12 @@ class DispositionAuthority(models.Model):
                                  related_name='disposition_authorities')
 
     disposition_authority = models.TextField(
-        null=False, blank=False, help_text=gettext(
-            "Record information about any legal instruments that apply to the "
-            "accessioned material. Legal instruments include statutes, records "
-            "schedules or disposition authorities, and donor agreements"
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record information about any legal instruments that apply to the "
+                "accessioned material. Legal instruments include statutes, records "
+                "schedules or disposition authorities, and donor agreements"
+            ), section=(1, 6)
         )
     )
 
@@ -542,11 +578,13 @@ class SourceType(AbstractTerm):
         description (TextField): A description of the source type
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = gettext('Source Types')
-        verbose_name = gettext('Source Type')
-SourceType._meta.get_field('name').help_text = gettext(
-    "Record the source in accordance with a controlled vocabulary maintained "
-    "by the repository"
+        verbose_name_plural = gettext('Source types')
+        verbose_name = gettext('Source type')
+SourceType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the source in accordance with a controlled vocabulary maintained "
+        "by the repository"
+    ), section=(2, 1, 1)
 )
 
 
@@ -562,11 +600,13 @@ class SourceRole(AbstractTerm):
         description (TextField): A description of the source role
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = gettext('Source Roles')
-        verbose_name = gettext('Source Role')
-SourceRole._meta.get_field('name').help_text = gettext(
-    "Record the source role (when known) in accordance with a controlled "
-    "vocabulary maintained by the repository"
+        verbose_name_plural = gettext('Source roles')
+        verbose_name = gettext('Source role')
+SourceRole._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the source role (when known) in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ), section=(2, 1, 4)
 )
 
 
@@ -583,13 +623,15 @@ class SourceConfidentiality(AbstractTerm):
         description (TextField): A description of the source confidentiality
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = gettext('Source Confidentialities')
-        verbose_name = gettext('Source Confidentiality')
-SourceConfidentiality._meta.get_field('name').help_text = gettext(
-    "Record source statements or source information that is for internal use "
-    "only by the repository. Repositories should develop a controlled "
-    "vocabulary with terms that can be translated into clear rules for "
-    "handling source information"
+        verbose_name_plural = gettext('Source confidentialities')
+        verbose_name = gettext('Source confidentiality')
+SourceConfidentiality._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record source statements or source information that is for internal use "
+        "only by the repository. Repositories should develop a controlled "
+        "vocabulary with terms that can be translated into clear rules for "
+        "handling source information"
+    ), section=(2, 1, 6)
 )
 
 
@@ -655,8 +697,8 @@ class SourceOfMaterial(models.Model):
             2.1.6]
     '''
     class Meta:
-        verbose_name_plural = gettext('Sources of Material')
-        verbose_name = gettext('Source of Material')
+        verbose_name_plural = gettext('Sources of material')
+        verbose_name = gettext('Source of material')
 
     objects = SourceOfMaterialManager()
 
@@ -667,10 +709,13 @@ class SourceOfMaterial(models.Model):
                                     null=True, related_name='source_of_materials')
 
     source_name = models.CharField(
-        max_length=256, null=False, blank=True, default='', help_text=gettext(
-        "Record the source name in accordance with the repository's "
-        "descriptive standard"
-    ))
+        max_length=256, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the source name in accordance with the repository's "
+                "descriptive standard"
+            ), section=(2, 1, 2)
+        )
+    )
 
     contact_name = models.CharField(max_length=256, blank=True, default='')
     job_title = models.CharField(max_length=256, blank=True, default='')
@@ -689,11 +734,13 @@ class SourceOfMaterial(models.Model):
         related_name='source_of_materials'
     )
 
-    source_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any other information about the source of the accessioned "
-        "materials. If the source performed the role for only a specific "
-        "period of time (e.g. was a custodian for several years), record the "
-        "dates in this element"
+    source_note = models.TextField(blank=True, default='', help_text=cite_caais(
+        gettext(
+            "Record any other information about the source of the accessioned "
+            "materials. If the source performed the role for only a specific "
+            "period of time (e.g. was a custodian for several years), record the "
+            "dates in this element"
+        ), section=(2, 1, 5)
     ))
 
     source_confidentiality = models.ForeignKey(
@@ -720,8 +767,8 @@ class PreliminaryCustodialHistory(models.Model):
             The text content of CAAIS, Section 2.2.
     '''
     class Meta:
-        verbose_name_plural = gettext('Preliminary Custodial Histories')
-        verbose_name = gettext('Preliminary Custodial History')
+        verbose_name_plural = gettext('Preliminary custodial histories')
+        verbose_name = gettext('Preliminary custodial history')
 
     objects = PreliminaryCustodialHistoryManager()
 
@@ -729,11 +776,13 @@ class PreliminaryCustodialHistory(models.Model):
                                  related_name='preliminary_custodial_histories')
 
     preliminary_custodial_history = models.TextField(
-        null=False, blank=False, help_text=gettext(
-            "Provide relevant custodial history information in accordance with "
-            "the repository's descriptive standard. Record the successive "
-            "transfers of ownership, responsibility and/or custody of the "
-            "accessioned material prior to its transfer to the repository"
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Provide relevant custodial history information in accordance with "
+                "the repository's descriptive standard. Record the successive "
+                "transfers of ownership, responsibility and/or custody of the "
+                "accessioned material prior to its transfer to the repository"
+            ), section=(2, 2)
         )
     )
 
@@ -755,9 +804,11 @@ class ExtentType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Extent types')
         verbose_name = gettext('Extent type')
-ExtentType._meta.get_field('name').help_text = gettext(
-    "Record the extent statement type in accordance with a controlled "
-    "vocabulary maintained by the repository"
+ExtentType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the extent statement type in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ), section=(3, 2, 1)
 )
 
 
@@ -776,9 +827,11 @@ class ContentType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Content types')
         verbose_name = gettext('Content type')
-ContentType._meta.get_field('name').help_text = gettext(
-    "Record the type of material contained in the units measured, i.e., the "
-    "genre of the material"
+ContentType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the type of material contained in the units measured, i.e., the "
+        "genre of the material"
+    ), section=(3, 2, 3)
 )
 
 
@@ -797,9 +850,11 @@ class CarrierType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Carrier types')
         verbose_name = gettext('Carrier type')
-CarrierType._meta.get_field('name').help_text = gettext(
-    "Record the physical format of an object that supports or carries archival "
-    "materials using a controlled vocabulary maintained by the repository"
+CarrierType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the physical format of an object that supports or carries archival "
+        "materials using a controlled vocabulary maintained by the repository"
+    ), section=(3, 2, 4)
 )
 
 
@@ -828,8 +883,8 @@ class ExtentStatement(models.Model):
             retained, or removed not otherwise recorded.*
     '''
     class Meta:
-        verbose_name = gettext('Extent Statement')
-        verbose_name_plural = gettext('Extent Statements')
+        verbose_name = gettext('Extent statement')
+        verbose_name_plural = gettext('Extent statements')
 
     objects = ExtentStatementManager()
 
@@ -840,25 +895,21 @@ class ExtentStatement(models.Model):
 
     extent_type = models.ForeignKey(
         ExtentType, on_delete=models.SET_NULL, null=True,
-        related_name='extent_statements', help_text=gettext(
-            "Record the extent statement type in accordance with a controlled "
-            "vocabulary maintained by the repository."
-        )
+        related_name='extent_statements'
     )
 
     quantity_and_unit_of_measure = models.TextField(
-        null=False, blank=True, default='',
-        help_text=gettext((
-        "Record the number and unit of measure expressing the quantity of the "
-        "extent (e.g., 5 files, totalling 2.5MB)"
-    )))
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the number and unit of measure expressing the quantity of the "
+                "extent (e.g., 5 files, totalling 2.5MB)"
+            ), section=(3, 2, 2)
+        )
+    )
 
     content_type = models.ForeignKey(
         ContentType, on_delete=models.SET_NULL, null=True,
-        related_name='extent_statements', help_text=gettext(
-            "Record the type of material contained in the units measured, "
-            "considered as a form of communication or documentary genre."
-        )
+        related_name='extent_statements'
     )
 
     carrier_type = models.ForeignKey(
@@ -867,9 +918,11 @@ class ExtentStatement(models.Model):
     )
 
     extent_note = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Record additional information related to the number and type of "
-            "units received, retained, or removed not otherwise recorded"
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record additional information related to the number and type of "
+                "units received, retained, or removed not otherwise recorded"
+            ), section=(3, 2, 5)
         )
     )
 
@@ -893,8 +946,8 @@ class PreliminaryScopeAndContent(models.Model):
             The text content of CAAIS, Section 3.3.
     '''
     class Meta:
-        verbose_name_plural = gettext('Preliminary Scope and Content')
-        verbose_name = gettext('Preliminary Scope and Content')
+        verbose_name_plural = gettext('Preliminary scope and content')
+        verbose_name = gettext('Preliminary scope and content')
 
     objects = PreliminaryScopeAndContentManager()
 
@@ -902,11 +955,13 @@ class PreliminaryScopeAndContent(models.Model):
                                  related_name='preliminary_scope_and_contents')
 
     preliminary_scope_and_content = models.TextField(
-        null=False, blank=False, help_text=gettext(
-            "Record a preliminary description that may include: functions and "
-            "activities that resulted in the material's generation, dates, the "
-            "geographic area to which the material pertains, subject matter, "
-            "arrangement, classification, and documentary forms"
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record a preliminary description that may include: functions and "
+                "activities that resulted in the material's generation, dates, the "
+                "geographic area to which the material pertains, subject matter, "
+                "arrangement, classification, and documentary forms"
+            ), section=(3, 3)
         )
     )
 
@@ -937,9 +992,11 @@ class LanguageOfMaterial(models.Model):
                                  related_name='language_of_materials')
 
     language_of_material = models.TextField(
-        null=False, blank=False, help_text=gettext(
-            "Record, at a minimum, the language that is predominantly found in "
-            "the accessioned material"
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record, at a minimum, the language that is predominantly found in "
+                "the accessioned material"
+            ), section=(3, 4)
         )
     )
 
@@ -960,8 +1017,8 @@ class StorageLocation(models.Model):
             The text content of CAAIS, Section 4.1.
     '''
     class Meta:
-        verbose_name_plural = 'Storage Locations'
-        verbose_name = 'Storage Location'
+        verbose_name_plural = 'Storage locations'
+        verbose_name = 'Storage location'
 
     objects = StorageLocationManager()
 
@@ -969,9 +1026,11 @@ class StorageLocation(models.Model):
                                  related_name='storage_locations')
 
     storage_location = models.TextField(
-        null=False, blank=False, help_text=gettext(
-            "Record the physical and/or digital location(s) within the "
-            "repository in which the accessioned material is stored"
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record the physical and/or digital location(s) within the "
+                "repository in which the accessioned material is stored"
+            ), section=(4, 1)
         )
     )
 
@@ -992,10 +1051,12 @@ class RightsType(AbstractTerm):
     '''
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = 'Rights types'
-        verbose_name = 'Rights'
-RightsType._meta.get_field('name').help_text = gettext(
-    "Record the rights statement type in accordance with a controlled "
-    "vocabulary maintained by the repository"
+        verbose_name = 'Type of rights'
+RightsType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the rights statement type in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ), section=(4, 2, 1)
 )
 
 
@@ -1020,7 +1081,7 @@ class Rights(models.Model):
     '''
     class Meta:
         verbose_name_plural = 'Rights'
-        verbose_name = 'Rights'
+        verbose_name = 'Rights statement'
 
     objects = RightsManager()
 
@@ -1031,15 +1092,19 @@ class Rights(models.Model):
                                     null=True, related_name='rights_type')
 
 
-    rights_value = models.TextField(blank=True, default='', help_text=gettext(
-        "Record the nature and duration of the permission granted or "
-        "restriction imposed. Specify where the condition applies only to part "
-        "of the accession"
+    rights_value = models.TextField(blank=True, default='', help_text=cite_caais(
+        gettext(
+            "Record the nature and duration of the permission granted or "
+            "restriction imposed. Specify where the condition applies only to part "
+            "of the accession"
+        ), section=(4, 2, 2)
     ))
 
-    rights_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any other information relevant to describing the rights "
-        "statement"
+    rights_note = models.TextField(blank=True, default='', help_text=cite_caais(
+        gettext(
+            "Record any other information relevant to describing the rights "
+            "statement"
+        ), section=(4, 2, 3)
     ))
 
     def __str__(self):
@@ -1059,11 +1124,13 @@ class PreservationRequirementsType(AbstractTerm):
         description (TextField): A description of the preservation requirements type
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = 'Preservation Requirements Types'
-        verbose_name = 'Preservation Requirements Type'
-PreservationRequirementsType._meta.get_field('name').help_text = gettext(
-    "Record information about the assessment of the material with respect to "
-    "its physical condition, dependencies, processing or access."
+        verbose_name_plural = 'Preservation requirements types'
+        verbose_name = 'Preservation requirements type'
+PreservationRequirementsType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the type of preservation requirement in accordance with a "
+        "controlled vocabulary maintained by the repository."
+    ), section=(4, 3, 1)
 )
 
 
@@ -1091,8 +1158,8 @@ class PreservationRequirements(models.Model):
             requirement not otherwise recorded.*
     '''
     class Meta:
-        verbose_name_plural = 'Preservation Requirements'
-        verbose_name = 'Preservation Requirements'
+        verbose_name_plural = 'Preservation requirements'
+        verbose_name = 'Preservation requirement'
 
     objects = PreservationRequirementsManager()
 
@@ -1105,17 +1172,21 @@ class PreservationRequirements(models.Model):
     )
 
     preservation_requirements_value = models.TextField(
-        blank=True, default='', help_text=gettext(
-            "Record information about the assessment of the material with "
-            "respect to its physical condition, dependencies, processing or "
-            "access"
+        blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record information about the assessment of the material with "
+                "respect to its physical condition, dependencies, processing or "
+                "access"
+            ), section=(4, 3, 2)
         )
     )
 
     preservation_requirements_note = models.TextField(
-        blank=True, default='', help_text=gettext(
-            "Record any other information relevant to the long-term "
-            "preservation of the material"
+        blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to the long-term "
+                "preservation of the material"
+            ), section=(4, 3, 3)
         )
     )
 
@@ -1135,11 +1206,13 @@ class AppraisalType(AbstractTerm):
         description (TextField): A description of the appraisal type
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = 'Appraisal Types'
-        verbose_name = 'Appraisal Type'
-AppraisalType._meta.get_field('name').help_text = gettext(
-    "Record the appraisal type in accordance with a controlled vocabulary "
-    "maintained by the repository"
+        verbose_name_plural = 'Appraisal types'
+        verbose_name = 'Appraisal type'
+AppraisalType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the appraisal type in accordance with a controlled vocabulary "
+        "maintained by the repository"
+    ), section=(4, 4, 1)
 )
 
 
@@ -1178,16 +1251,20 @@ class Appraisal(models.Model):
     )
 
     appraisal_value = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Where the accession process includes appraisal activities, record "
-            "the appraisal statement value."
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Where the accession process includes appraisal activities, record "
+                "the appraisal statement value."
+            ), section=(4, 4, 2)
         )
     )
 
     appraisal_note = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Record any other information relevant to describing the appraisal "
-            "activities."
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to describing the appraisal "
+                "activities."
+            ), section=(4, 4, 3)
         )
     )
 
@@ -1207,12 +1284,14 @@ class AssociatedDocumentationType(AbstractTerm):
         description (TextField): A description of the associated documentation type
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = 'Appraisal Types'
-        verbose_name = 'Appraisal Type'
-AssociatedDocumentationType._meta.get_field('name').help_text = gettext(
-    "Where the accession process generates associated documents, record the "
-    "associated documentation type in accordance with a controlled vocabulary "
-    "maintained by the repository."
+        verbose_name_plural = 'Associated documentation types'
+        verbose_name = 'Associated documentation type'
+AssociatedDocumentationType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Where the accession process generates associated documents, record the "
+        "associated documentation type in accordance with a controlled vocabulary "
+        "maintained by the repository."
+    ), section=(4, 5, 1)
 )
 
 
@@ -1239,8 +1318,8 @@ class AssociatedDocumentation(models.Model):
             documentation not otherwise recorded*
     '''
     class Meta:
-        verbose_name_plural = 'Associated Documentation'
-        verbose_name = 'Associated Documentation'
+        verbose_name_plural = 'Associated documentation'
+        verbose_name = 'Associated document'
 
     objects = AssociatedDocumentationManager()
 
@@ -1253,15 +1332,19 @@ class AssociatedDocumentation(models.Model):
     )
 
     associated_documentation_title = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Record the title of the associated documentation"
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the title of the associated documentation"
+            ), section=(4, 5, 2)
         )
     )
 
     associated_documentation_note = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Record any other information relevant to describing documentation "
-            "associated to the accessioned material"
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to describing documentation "
+                "associated to the accessioned material"
+            ), section=(4, 5, 3)
         )
     )
 
@@ -1282,11 +1365,13 @@ class EventType(AbstractTerm):
         description (TextField): A description of the event type
     '''
     class Meta:
-        verbose_name = 'Event Type'
-        verbose_name_plural = 'Event Types'
-EventType._meta.get_field('name').help_text = gettext(
-    "Record the event type in accordance with a controlled vocabulary "
-    "maintained by the repository"
+        verbose_name = 'Event type'
+        verbose_name_plural = 'Event types'
+EventType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the event type in accordance with a controlled vocabulary "
+        "maintained by the repository"
+    ), section=(5, 1, 1)
 )
 
 
@@ -1330,15 +1415,19 @@ class Event(models.Model):
     event_date = models.DateTimeField(auto_now_add=True)
 
     event_agent = models.CharField(
-        max_length=256, null=False, blank=True, default='', help_text=gettext(
-            "Record the name of the staff member or application responsible "
-            "for the event"
+        max_length=256, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the name of the staff member or application responsible "
+                "for the event"
+            ), section=(5, 1, 3)
         )
     )
 
     event_note = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Record any other information relevant to describing the event."
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to describing the event."
+            ), section=(5, 1, 4)
         )
     )
 
@@ -1361,8 +1450,8 @@ class GeneralNote(models.Model):
             The text content of CAAIS, Section 6.1.
     '''
     class Meta:
-        verbose_name = 'General Note'
-        verbose_name_plural = 'General Notes'
+        verbose_name = 'General note'
+        verbose_name_plural = 'General notes'
 
     objects = GeneralNoteManager()
 
@@ -1370,9 +1459,11 @@ class GeneralNote(models.Model):
                                  related_name='general_notes')
 
     general_note = models.TextField(
-        null=False, blank=False, help_text=gettext(
-            "Record any other information relevant to the accession record or "
-            "accessioning process"
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to the accession record or "
+                "accessioning process"
+            ), section=(6, 1)
         )
     )
 
@@ -1393,11 +1484,13 @@ class CreationOrRevisionType(AbstractTerm):
         description (TextField): A description of the creation or revision type
     '''
     class Meta:
-        verbose_name = 'Date of Creation or Revision Type'
-        verbose_name_plural = 'Date of Creation or Revision Types'
-CreationOrRevisionType._meta.get_field('name').help_text = gettext(
-    "Record the action type in accordance with a controlled vocabulary "
-    "maintained by the repository."
+        verbose_name = 'Date of creation or revision type'
+        verbose_name_plural = 'Date of creation or revision types'
+CreationOrRevisionType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the action type in accordance with a controlled vocabulary "
+        "maintained by the repository."
+    ), section=(7, 2, 1)
 )
 
 
@@ -1428,8 +1521,8 @@ class DateOfCreationOrRevision(models.Model):
             accession record.*
     '''
     class Meta:
-        verbose_name = 'Date of Creation or Revision'
-        verbose_name_plural = 'Dates of Creation or Revision'
+        verbose_name = 'Date of creation or revision'
+        verbose_name_plural = 'Dates of creation or revision'
 
     objects = DateOfCreationOrRevisionManager()
 
@@ -1441,23 +1534,22 @@ class DateOfCreationOrRevision(models.Model):
         related_name='dates_of_creation_or_revision'
     )
 
-    creation_or_revision_date = models.DateTimeField(
-        auto_now_add=True, help_text=gettext(
-            "Record the date on which the action (creation or revision) "
-            "occurred."
-        )
-    )
+    creation_or_revision_date = models.DateTimeField(auto_now_add=True)
 
     creation_or_revision_agent = models.CharField(
-        max_length=256, null=False, blank=True, default='', help_text=gettext(
-            "Record the name of the staff member who performed the action "
-            "(creation or revision) on the accession record"
+        max_length=256, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the name of the staff member who performed the action "
+                "(creation or revision) on the accession record"
+            ), section=(7, 2, 3)
         )
     )
 
     creation_or_revision_note = models.TextField(
-        null=False, blank=True, default='', help_text=gettext(
-            "Record any information summarizing actions applied to the "
-            "accession record."
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any information summarizing actions applied to the "
+                "accession record."
+            ), section=(7, 2, 4)
         )
     )
