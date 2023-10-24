@@ -331,11 +331,7 @@ class TransferFormWizard(SessionWizardView):
                 settings.ACCEPTED_FILE_FORMATS,
                 LOGGER
             )
-            cleaned_data['quantity_and_type_of_units'] = gettext('{0}, totalling {1}').format(count, size)
-        else:
-            if not cleaned_data['quantity_and_type_of_units']:
-                cleaned_data['quantity_and_type_of_units'] = gettext('No file information provided.')
-            cleaned_data['extent_statement_note'] = 'Extent provided by user'
+            cleaned_data['quantity_and_unit_of_measure'] = gettext('{0}, totalling {1}').format(count, size)
 
         start_date = cleaned_data['start_date_of_material']
         end_date = cleaned_data['end_date_of_material']
@@ -348,8 +344,8 @@ class TransferFormWizard(SessionWizardView):
             if cleaned_data['end_date_is_approximate']:
                 end_date = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date)
 
-        date_of_material = start_date if start_date == end_date else f'{start_date} - {end_date}'
-        cleaned_data['date_of_material'] = date_of_material
+        date_of_materials = start_date if start_date == end_date else f'{start_date} - {end_date}'
+        cleaned_data['date_of_materials'] = date_of_materials
         cleaned_data = TransferFormWizard.delete_keys(cleaned_data, [
             'start_date_is_approximate',
             'start_date_of_material',
@@ -358,11 +354,6 @@ class TransferFormWizard(SessionWizardView):
             'end_date_of_material',
             'end_date_of_material_text'
         ])
-
-        # Add dates for events
-        current_time = timezone.localtime(timezone.now()).strftime(r'%Y-%m-%d %H:%M:%S %Z')
-        cleaned_data['action_date'] = current_time
-        cleaned_data['event_date'] = current_time
 
         return cleaned_data
 
