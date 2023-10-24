@@ -3,7 +3,7 @@ from django import forms
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
-from recordtransfer.models import Appraisal, SubmissionGroup, Submission, UploadSession, UploadedFile, User
+from recordtransfer.models import SubmissionGroup, Submission, UploadSession, UploadedFile, User
 
 
 class RecordTransferModelForm(forms.ModelForm):
@@ -42,57 +42,6 @@ class InlineUploadedFileForm(RecordTransferModelForm):
         )
 
     exists = forms.BooleanField()
-
-
-class InlineAppraisalFormSet(forms.models.BaseInlineFormSet):
-    ''' Formset for inline Appraisal editing. Sets the initial user for the form based on the
-    current logged in user.
-    '''
-
-    model = Appraisal
-    request = None
-
-    @property
-    def empty_form(self):
-        form = super().empty_form
-        if 'user' in form.fields:
-            form.initial['user'] = self.request.user
-            # form.fields['user'].initial = self.request.user
-        return form
-
-
-class AppraisalForm(RecordTransferModelForm):
-    ''' Form for editing Appraisals. Hides the user select field using display:none, as this field
-    should be set automatically by whatever controls this form. Adds submission help_text if the
-    submission field exists (i.e., if the appraisal is not being edited in-line).
-    '''
-
-    class Meta:
-        model = Appraisal
-        fields = (
-            'appraisal_type',
-            'statement',
-            'note',
-            'submission',
-            'user',
-        )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'note' in self.fields:
-            self.fields['note'].required = False
-
-        if 'user' in self.fields:
-            self.fields['user'].required = False
-            self.fields['user'].widget.can_add_related = False
-            self.fields['user'].widget.can_change_related = False
-            self.fields['user'].widget.attrs['style'] = 'display:none'
-
-        if hasattr(self, 'instance') and hasattr(self.instance, 'submission') and \
-           'submission' in self.fields:
-            self.fields['submission'].help_text = gettext(
-                '<a href="{0}">Click to view submission</a>'
-            ).format(self.instance.submission.get_admin_change_url())
 
 
 class UploadSessionForm(RecordTransferModelForm):

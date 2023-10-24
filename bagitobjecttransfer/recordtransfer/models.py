@@ -261,7 +261,7 @@ class Submission(models.Model):
     def extent_statements(self):
         """ Return the first extent statement for this submission. """
         for e in self.metadata.extent_statements.get_queryset().all():
-            return e.quantity_and_type_of_units
+            return e.quantity_and_unit_of_measure
         return ''
 
     def get_report(self):
@@ -405,77 +405,6 @@ class Submission(models.Model):
         """ Remove the BagIt bag if it exists. """
         if os.path.exists(self.location):
             os.unlink(self.location)
-
-
-class AppraisalManager(models.Manager):
-    """ Custom manager for Appraisals """
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        if self.get_queryset().count() == 0:
-            return {}
-
-        appraisal_types = []
-        appraisal_values = []
-        appraisal_notes = []
-        for appraisal in self.get_queryset().all():
-            appraisal_types.append(appraisal.appraisal_type)
-            appraisal_values.append(appraisal.statement)
-            appraisal_notes.append(appraisal.note or 'NULL')
-
-        if version == ExportVersion.CAAIS_1_0:
-            return {
-                'appraisalStatementType': '|'.join(appraisal_types),
-                'appraisalStatementValue': '|'.join(appraisal_values),
-                'appraisalStatementNote': '|'.join(appraisal_notes),
-            }
-        else:
-            return {
-                'appraisal': '|'.join([
-                    f'Appraisal Type: {x}; Statement: {y}; Notes: {z}' if z != 'NULL' else
-                    f'Appraisal Type: {x}; Statement: {y}' for
-                    x, y, z in zip(appraisal_types, appraisal_values, appraisal_notes)
-                ])
-            }
-
-    def get_caais_metadata(self):
-        appraisals = []
-        for appraisal in self.get_queryset().all():
-            appraisals.append({
-                'appraisal_statement_type': Appraisal.AppraisalType(appraisal.appraisal_type).label,
-                'appraisal_statement_value': appraisal.statement,
-                'appraisal_statement_note':  appraisal.note,
-            })
-        return appraisals
-
-
-class Appraisal(models.Model):
-    ''' An appraisal made by an administrator for a submission
-    '''
-    class AppraisalType(models.TextChoices):
-        ''' The type of the appraisal being made '''
-        ARCHIVAL_APPRAISAL = 'AP', _('Archival Appraisal')
-        MONETARY_APPRAISAL = 'MP', _('Monetary Appraisal')
-
-    objects = AppraisalManager()
-
-    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='appraisals')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
-    appraisal_type = models.CharField(max_length=2, choices=AppraisalType.choices)
-    appraisal_date = models.DateTimeField(auto_now=True)
-    statement = models.TextField(null=False)
-    note = models.TextField(default='', null=True)
-
-    def to_serializable(self):
-        obj = OrderedDict()
-        obj['_id'] = self.id
-        obj['appraisal_statement_type'] = str(self.AppraisalType(self.appraisal_type).label)
-        obj['appraisal_statement_value'] = str(self.statement)
-        obj['appraisal_statement_note'] = str(self.note)
-        return obj
-
-    def __str__(self):
-        return f'{self.get_appraisal_type_display()} by {self.user} on {self.appraisal_date}'
 
 
 class Job(models.Model):

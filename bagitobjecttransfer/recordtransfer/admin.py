@@ -24,12 +24,10 @@ from django.utils.translation import gettext
 from caais.export import ExportVersion
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import InlineSubmissionGroupForm, SubmissionForm, \
-    InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
-    UploadedFileForm, InlineUploadedFileForm
+    InlineSubmissionForm, UploadSessionForm, UploadedFileForm, InlineUploadedFileForm
 from recordtransfer.jobs import create_downloadable_bag
-from recordtransfer.models import User, UploadSession, UploadedFile, SubmissionGroup, Appraisal, \
+from recordtransfer.models import User, UploadSession, UploadedFile, SubmissionGroup, \
     Submission, Job
-from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
 
@@ -339,83 +337,6 @@ class SubmissionGroupInline(admin.TabularInline):
         return False
 
 
-@admin.register(Appraisal)
-class AppraisalAdmin(admin.ModelAdmin):
-    ''' Admin for the Appraisal model
-
-    Permissions:
-        - add: Not allowed (must be done from the Appraisal inline)
-        - change: Allowed if editor created the appraisal
-        - delete: Allowed if editor created the appraisal, or if editor is a superuser
-    '''
-    form = AppraisalForm
-
-    actions = [
-        'delete_selected'
-    ]
-
-    list_display = [
-        'appraisal_type',
-        'appraisal_date',
-        linkify('user'),
-        linkify('submission'),
-    ]
-
-    ordering = [
-        '-appraisal_date',
-    ]
-
-    readonly_fields = [
-        'user',
-        'appraisal_date'
-    ]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return obj and request.user == obj.user
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser or (obj and request.user == obj.user)
-
-
-class AppraisalInline(admin.TabularInline):
-    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
-    with a Submission. Deletions are not allowed.
-
-    Permissions:
-        - add: Allowed
-        - change: Not allowed - go to Appraisal page for change ability
-        - delete: Not allowed - go to Appraisal page for delete ability
-    '''
-    model = Appraisal
-    max_num = 64
-    extra = 0
-    show_change_link = True
-
-    form = AppraisalForm
-    formset = InlineAppraisalFormSet
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.can_delete = False
-
-    def has_add_permission(self, request, obj=None):
-        return True
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        formset.request = request
-        return formset
-
-
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
     ''' Admin for the Submission model. Adds a view to view the transfer report
@@ -430,10 +351,6 @@ class SubmissionAdmin(admin.ModelAdmin):
     change_form_template = 'admin/submission_change_form.html'
 
     form = SubmissionForm
-
-    inlines = [
-        AppraisalInline,
-    ]
 
     actions = [
         'export_caais_reports',
@@ -559,28 +476,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         zipf.close()
         return response
     export_reports.short_description = 'Export CAAIS submission reports for Selected'
-
-    def save_related(self, request, form, formsets, change):
-        ''' Update Submission in case an Appraisal is added. Deleting inline Appraisals
-        is not allowed, so the case of deleting from the formset is not handled.
-        '''
-        for formset in formsets:
-            if formset.model != Appraisal:
-                continue
-
-            obj = form.instance
-            appraisals = formset.save(commit=False)
-
-            if not appraisals:
-                continue
-
-            for appraisal in appraisals:
-                appraisal.user = request.user
-                appraisal.save()
-
-            obj.save()
-            formset.save_m2m()
-        super().save_related(request, form, formsets, change)
 
     def create_zipped_bag(self, request, object_id):
         ''' Start a background job to create a downloadable bag
