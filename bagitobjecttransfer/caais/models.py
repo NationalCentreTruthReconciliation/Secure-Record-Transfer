@@ -65,6 +65,9 @@ class AbstractTerm(models.Model):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(name='{self.name}')>"
+
 
 class AcquisitionMethod(AbstractTerm):
     ''' **Acquisition Method** [CAAIS, Section 1.5]

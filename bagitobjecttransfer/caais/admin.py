@@ -233,9 +233,8 @@ class MetadataAdmin(admin.ModelAdmin):
 
     list_display = [
         'accession_title',
-        'repository',
+        'accession_identifier',
         'acquisition_method',
-        'id',
     ]
 
     inlines = [
