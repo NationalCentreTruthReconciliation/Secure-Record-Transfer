@@ -71,16 +71,6 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
-        'rqworker_file': {
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/django-rq/rqworker.log',
-            'formatter': 'standard',
-        },
-        'recordtransfer_file': {
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/django/recordtransfer.log',
-            'formatter': 'standard',
-        }
     },
     'loggers': {
         'django': {
@@ -88,12 +78,12 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO')
         },
         'recordtransfer': {
-            'handlers': ['recordtransfer_file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'rq.worker': {
-            'handlers': ['rqworker_file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         }

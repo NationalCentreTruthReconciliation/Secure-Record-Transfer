@@ -10,9 +10,15 @@ This application is compatible with version 2.x of [AtoM](https://www.accesstome
 
 ## Quickstart
 
-This application is run using Docker or Podman. Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) or [Podman Desktop](https://podman-desktop.io/) installed on your system before running the app. If you want to use Podman, you will also need [Podman Compose](https://github.com/containers/podman-compose) and [Python](https://python.org) as well.
+This application is run using Podman or Docker. If you are using Podman, ensure you have these packages installed on your system:
 
-From a terminal, clone the repository:
+- [Podman Desktop](https://podman-desktop.io/)
+- [Python](https://python.org)
+- [Podman Compose](https://github.com/containers/podman-compose)
+
+If you would prefer to use Docker, ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed on your system.
+
+To start, clone the repository:
 
 ```shell
 git clone https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git
@@ -25,46 +31,25 @@ cd Secure-Record-Transfer/bagitobjecttransfer
 cp example.dev.env .dev.env
 ```
 
-Then, run the application:
+**For the following commands, substitute `docker compose` for `podman-compose` if you're using Docker instead of Podman.**
+
+To start up the application, run the following command:
 
 ```shell
-# If using docker:
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-
-# If using podman + podman compose:
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+podman-compose -f compose.dev.yml up -d
 ```
 
 After the containers are built and running, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. For example, if you sign up using the sign-up form, you can find those at http://localhost:8025.
 
-After starting the app for the first time, run these commands to make sure the database is set up.
+To restart the application, run these commands:
 
 ```shell
-# If using docker:
-docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
-
-# If using podman + podman compose:
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
-```
-
-To restart the application, run these commands.
-
-```shell
-# If using docker:
-docker compose -f docker-compose.yml -f docker-compose.dev.yml down
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-
-# If using podman + podman compose:
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml down
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+podman-compose -f compose.dev.yml down
+podman-compose -f compose.dev.yml up -d
 ```
 
 If you'd like to be able to log in to the record transfer app as an administrator, use the following command, and follow the prompts you are given.
 
 ```shell
-# If using docker:
-docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
-
-# If using podman + podman compose:
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
+podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
 ```

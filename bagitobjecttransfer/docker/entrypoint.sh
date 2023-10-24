@@ -26,6 +26,16 @@ END
     # wait for 5 seconds before check again
     sleep 5
   done
+
+  # Each of these tasks should only be run once
+  if [ "$IS_RQ" = 'yes' ]; then
+    echo ">> Running database migrations."
+    python manage.py migrate --no-input
+  else
+    echo ">> Collecting static files."
+    python manage.py collectstatic --no-input
+  fi
 fi
 
+echo ">> Starting app."
 exec "$@"

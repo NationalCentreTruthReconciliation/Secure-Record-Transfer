@@ -15,15 +15,11 @@ def populate_permissions(apps, schema_editor):
     existing_permissions = group.permissions.all()
 
     for codename in (
-        # Appraisal
-        'add_appraisal',
-        'change_appraisal',
-        'view_appraisal',
-        # Submission
-        'change_submission',
-        'view_submission',
+            # Submission
+            'change_submission',
+            'view_submission',
         ):
-        permission = Permission.objects.get(codename=codename)
+        permission = Permission.objects.filter(codename=codename).first()
         if permission not in existing_permissions:
             group.permissions.add(permission)
 
