@@ -222,70 +222,19 @@ def verify_accepted_file_formats():
             inverted_formats[extension] = group_name
 
 
-def verify_default_data():
+def verify_caais_defaults():
     ''' Verifies the setting:
 
-    - DEFAULT_DATA
+    - CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
+    - CAAIS_DEFAULT_CREATION_TYPE
 
     Ensures that all required defaults exist, raises an ImproperlyConfigured
     exception if a default does not exist.
     '''
-    defaults = settings.DEFAULT_DATA
-
-    if not isinstance(defaults, dict):
-        raise ImproperlyConfigured((
-            'The DEFAULT_DATA setting is the wrong type (currently: {0}), '
-            'should be dict'
-        ).format(type(defaults)))
-
-    if not defaults:
-        raise ImproperlyConfigured('The DEFAULT_DATA setting is empty')
-
-    for required_section, required_defaults in {
-            'section_1': [
-                'accession_identifier',
-                'repository',
-                'archival_unit',
-                'acquisition_method',
-            ],
-            'section_3': [
-                'extent_statement_type',
-                'extent_statement_note',
-            ],
-            'section_4': [
-                'storage_location',
-                'material_assessment_statement_type',
-                'material_assessment_statement_value',
-            ],
-            'section_5': [
-                'event_type',
-                'event_agent',
-            ],
-            'section_7': [
-                'rules_or_conventions',
-                'action_type',
-                'action_agent',
-                'language_of_accession_record',
-            ],
-        }.items():
-        if required_section not in defaults:
-            raise ImproperlyConfigured((
-                'The key "{0}" is missing from the DEFAULT_DATA setting '
-                'dictionary. One or more defaults is required in that section'
-            ).format(required_section))
-
-        if not isinstance(defaults[required_section], dict):
-            raise ImproperlyConfigured((
-                'The object at the key "{0}" in the DEFAULT_DATA setting is '
-                'the wrong type (currently: {1}), should be dict'
-            ).format(required_section, type(defaults[required_section])))
-
-        for required_default in required_defaults:
-            if required_default not in defaults[required_section]:
-                raise ImproperlyConfigured((
-                    'A default for "{0}" is required in "{1}" of the '
-                    'DEFAULT_DATA setting, but one was not found'
-                ).format(required_default, required_section))
+    if not settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
+        raise ImproperlyConfigured('CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set')
+    if not settings.CAAIS_DEFAULT_CREATION_TYPE:
+        raise ImproperlyConfigured('CAAIS_DEFAULT_CREATION_TYPE is not set')
 
 
 def verify_saved_transfer_settings():
@@ -316,7 +265,7 @@ class RecordTransferConfig(AppConfig):
             verify_storage_folder_settings()
             verify_max_upload_size()
             verify_accepted_file_formats()
-            verify_default_data()
+            verify_caais_defaults()
             verify_saved_transfer_settings()
 
         except AttributeError as exc:

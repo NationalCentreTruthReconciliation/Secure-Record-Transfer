@@ -14,4 +14,4 @@ specifically for administrators that should be referred to for tasks involving B
     acceptedfiletypes
     sitename
 
-See also: :ref:`recordtransfer.settings - Application Settings`.
+See also: :ref:`Application Settings`.

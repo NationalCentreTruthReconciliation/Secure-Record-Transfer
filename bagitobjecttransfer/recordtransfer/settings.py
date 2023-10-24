@@ -52,39 +52,48 @@ CLAMAV_PORT = config('CLAMAV_PORT', default=3310, cast=int)
 
 MAX_SAVED_TRANSFER_COUNT = config('MAX_SAVED_TRANSFER_COUNT', default=2, cast=int)
 
-# Default data to inject into metadata, after the user enters their own metadata
+# Defaults to use in place of form data, or to supplement form data with when converted to CAAIS
+# metadata
 
-DEFAULT_DATA = {
-    'section_1': {
-        'accession_identifier': 'Not assigned',
-        'repository': 'NCTR',
-        'archival_unit': 'NCTR Archives',
-        'acquisition_method': 'Digital Transfer',
-    },
-    'section_2': {
-    },
-    'section_3': {
-        'extent_statement_type': 'Extent received',
-        'extent_statement_note': 'Files counted automatically by application',
-    },
-    'section_4': {
-        'storage_location': 'Placeholder',
-        'material_assessment_statement_type': 'Physical Condition',
-        'material_assessment_statement_value': 'Record is digital, physical assessment is not possible'
-    },
-    'section_5': {
-        'event_type': 'Digital Object Transfer',
-        'event_agent': 'NCTR Record Transfer Portal',
-    },
-    'section_6': {
-    },
-    'section_7': {
-        'rules_or_conventions': 'Canadian Archival Accession Information Standards v1.0',
-        'action_type': 'Creation',
-        'action_agent': 'NCTR Record Transfer Portal',
-        'language_of_accession_record': 'en',
-    }
-}
+CAAIS_DEFAULT_REPOSITORY = config('CAAIS_DEFAULT_REPOSITORY', default='')
+CAAIS_DEFAULT_ACCESSION_TITLE = config('CAAIS_DEFAULT_ACCESSION_TITLE', default='')
+CAAIS_DEFAULT_ARCHIVAL_UNIT = config('CAAIS_DEFAULT_ARCHIVAL_UNIT', default='')
+CAAIS_DEFAULT_ACQUISITION_METHOD = config('CAAIS_DEFAULT_ACQUISITION_METHOD', default='')
+CAAIS_DEFAULT_DISPOSITION_AUTHORITY = config('CAAIS_DEFAULT_DISPOSITION_AUTHORITY', default='')
+CAAIS_DEFAULT_STATUS = config('CAAIS_DEFAULT_STATUS', default='')
+CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY = config('CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY', default='')
+CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY = config('CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY', default='')
+CAAIS_DEFAULT_DATE_OF_MATERIALS = config('CAAIS_DEFAULT_DATE_OF_MATERIALS', default='')
+CAAIS_DEFAULT_EXTENT_TYPE = config('CAAIS_DEFAULT_EXTENT_TYPE', default='')
+CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE = config('CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_UNITS', default='')
+CAAIS_DEFAULT_CONTENT_TYPE = config('CAAIS_DEFAULT_CONTENT_TYPE', default='')
+CAAIS_DEFAULT_CARRIER_TYPE = config('CAAIS_DEFAULT_CARRIER_TYPE', default='')
+CAAIS_DEFAULT_EXTENT_NOTE = config('CAAIS_DEFAULT_EXTENT_NOTE', default='')
+CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT = config('CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT', default='')
+CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL = config('CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL', default='')
+CAAIS_DEFAULT_STORAGE_LOCATION = config('CAAIS_DEFAULT_STORAGE_LOCATION', default='')
+CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE = config('CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE', default='')
+CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE = config('CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE', default='')
+CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE = config('CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE', default='')
+CAAIS_DEFAULT_APPRAISAL_TYPE = config('CAAIS_DEFAULT_APPRAISAL_TYPE', default='')
+CAAIS_DEFAULT_APPRAISAL_VALUE = config('CAAIS_DEFAULT_APPRAISAL_VALUE', default='')
+CAAIS_DEFAULT_APPRAISAL_NOTE = config('CAAIS_DEFAULT_APPRAISAL_NOTE', default='')
+CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE = config('CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE', default='')
+CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE = config('CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE', default='')
+CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE = config('CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE', default='')
+CAAIS_DEFAULT_GENERAL_NOTE = config('CAAIS_DEFAULT_GENERAL_NOTE', default='')
+CAAIS_DEFAULT_RULES_OR_CONVENTIONS = config('CAAIS_DEFAULT_RULES_OR_CONVENTIONS', default='')
+CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD = config('CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD', default='')
+
+# Special variables for default "Submission" type event when metadata is first created
+CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE = config('CAAIS_DEFAULT_EVENT_TYPE', default='Transfer Submitted')
+CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT = config('CAAIS_DEFAULT_EVENT_TYPE', default='')
+CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE = config('CAAIS_DEFAULT_EVENT_TYPE', default='')
+
+# Special variables for default "Creation" type event when metadata is first created
+CAAIS_DEFAULT_CREATION_TYPE = config('CAAIS_DEFAULT_CREATION_TYPE', default='Creation')
+CAAIS_DEFAULT_CREATION_AGENT = config('CAAIS_DEFAULT_CREATION_AGENT', default='')
+CAAIS_DEFAULT_CREATION_NOTE = config('CAAIS_DEFAULT_CREATION_NOTE', default='')
 
 
 APPROXIMATE_DATE_FORMAT = config('APPROXIMATE_DATE_FORMAT', default='[ca. {date}]')
