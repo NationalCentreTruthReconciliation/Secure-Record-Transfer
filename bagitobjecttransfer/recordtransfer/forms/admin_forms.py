@@ -98,7 +98,6 @@ class InlineSubmissionForm(RecordTransferModelForm):
         fields = (
             'submission_date',
             'metadata',
-            'review_status',
             'part_of_group',
         )
 

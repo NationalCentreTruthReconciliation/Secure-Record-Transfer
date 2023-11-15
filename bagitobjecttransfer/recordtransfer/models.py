@@ -230,18 +230,9 @@ class SubmissionGroup(models.Model):
 class Submission(models.Model):
     ''' The top-level object representing a user's submission.
     '''
-    class ReviewStatus(models.TextChoices):
-        ''' The status of the submission's review
-        '''
-        NOT_REVIEWED = 'NR', _('Not Reviewed')
-        REVIEW_STARTED = 'RS', _('Review Started')
-        REVIEW_COMPLETE = 'RC', _('Review Complete')
-
     submission_date = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     metadata = models.OneToOneField(Metadata, on_delete=models.CASCADE, null=True, related_name='submission')
-    review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
-                                     default=ReviewStatus.NOT_REVIEWED)
     part_of_group = models.ForeignKey(SubmissionGroup, on_delete=models.SET_NULL, blank=True, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)

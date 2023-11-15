@@ -71,7 +71,7 @@
                         <td>{{ submission.submission_date }}</td>
                         <td>{{ submission.metadata.accession_title }}</td>
                         <td>{{ submission.extent_statements }}</td>
-                        <td>{{ submission.get_review_status_display }}</td>
+                        <td>{{ submission.metadata.status.name }}</td>
                     </tr>
                 {% endfor %}
             </table>
