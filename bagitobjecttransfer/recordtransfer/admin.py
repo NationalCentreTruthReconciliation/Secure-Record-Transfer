@@ -75,7 +75,7 @@ def export_submission_csv(queryset, version: ExportVersion, filename_prefix: str
     csv_file = StringIO()
     writer = csv.writer(csv_file)
     for i, submission in enumerate(queryset, 0):
-        new_row = submission.flatten(version)
+        new_row = submission.metadata.create_flat_representation(version)
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())

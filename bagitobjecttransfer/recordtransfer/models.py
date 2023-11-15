@@ -305,12 +305,6 @@ class Submission(models.Model):
     def __str__(self):
         return f'Submission by {self.user} at {self.submission_date}'
 
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        new_row = self.metadata.flatten(version)
-        new_row['status'] = self.ReviewStatus(self.review_status).label if self.review_status else ''
-        new_row.update(self.appraisals.flatten(version))
-        return new_row
-
     def make_bag(self, algorithms: Union[str, list] = 'sha512', file_perms: str = '644',
                  logger=None):
         """ Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
@@ -371,8 +365,7 @@ class Submission(models.Model):
         logger.info('Creating BagIt bag at "%s"', self.location)
         logger.info('Using these checksum algorithm(s): %s', ', '.join(algorithms))
 
-        bagit_info = self.metadata.flatten()
-        bagit_info.update(self.appraisals.flatten())
+        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
         bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
 
         logger.info('Setting file mode for bag payload files to %s', file_perms)
