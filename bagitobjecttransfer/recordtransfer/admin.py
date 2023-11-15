@@ -339,9 +339,7 @@ class SubmissionGroupInline(admin.TabularInline):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    ''' Admin for the Submission model. Adds a view to view the transfer report
-    associated with the submission. The report view can be accessed at
-    code:`submission/<id>/report/`
+    ''' Admin for the Submission model.
 
     Permissions:
         - add: Not allowed
@@ -353,13 +351,11 @@ class SubmissionAdmin(admin.ModelAdmin):
     form = SubmissionForm
 
     actions = [
-        'export_caais_reports',
         'export_caais_csv',
         'export_atom_2_6_csv',
         'export_atom_2_3_csv',
         'export_atom_2_2_csv',
         'export_atom_2_1_csv',
-        'export_reports',
     ]
 
     search_fields = [
@@ -370,7 +366,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = [
         'submission_date',
         'id',
-        'review_status',
+        'uuid',
         'number_of_files_uploaded',
         linkify('user'),
         linkify('metadata'),
@@ -385,6 +381,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         'user',
         'upload_session',
         'part_of_group',
+        'uuid',
     ]
 
 
@@ -403,19 +400,14 @@ class SubmissionAdmin(admin.ModelAdmin):
         return obj and request.user.is_superuser
 
     def get_urls(self):
-        ''' Add report/ view to admin
-        '''
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        report_url = [
-            path('<path:object_id>/report/',
-                 self.admin_site.admin_view(self.view_report),
-                 name='%s_%s_report' % info),
-            path('<path:object_id>/zip/',
-                 self.admin_site.admin_view(self.create_zipped_bag),
-                 name='%s_%s_zip' % info),
-        ]
-        return report_url + urls
+        ''' Add extra views to admin '''
+        return [
+            path(
+                '<path:object_id>/zip/',
+                self.admin_site.admin_view(self.create_zipped_bag),
+                name=f'{self.model._meta.app_label}_{self.model._meta.model_name}_zip',
+            ),
+        ] + super().get_urls()
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         job = Job.objects.get_queryset().filter(Q(user_triggered=request.user) & Q(submission_id=object_id)).first()
@@ -425,57 +417,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         if job is not None:
             extra_context['generated_bag_url'] = job.get_admin_download_url()
         return super().changeform_view(request, object_id, form_url, extra_context)
-
-    def view_report(self, request, object_id):
-        ''' Redirect to the submission's report if the submission exists
-
-        Args:
-            request: The originating request
-            object_id: The ID for the submission
-        '''
-        submission = Submission.objects.filter(id=object_id).first()
-        if submission:
-            return HttpResponse(submission.get_report())
-        # Error response
-        msg = gettext('Submission with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
-            'key': object_id,
-        }
-        self.message_user(request, msg, messages.WARNING)
-        url = reverse('admin:index', current_app=self.admin_site.name)
-        return HttpResponseRedirect(url)
-
-    def get_urls(self):
-        ''' Add zip/ view to admin
-        '''
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        download_url = [
-            path('<path:object_id>/zip/',
-                 self.admin_site.admin_view(self.create_zipped_bag),
-                 name='%s_%s_zip' % info),
-        ]
-        return download_url + urls
-
-    def export_reports(self, request, queryset):
-        ''' Download an application/x-zip-compressed file containing reports
-        for each of the selected submissions.
-
-        Args:
-            request: The originating request
-            queryset: One or more submissions
-        '''
-        zipf = BytesIO()
-        with zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False) as zipped_reports:
-            for submission in queryset:
-                if submission and submission.metadata:
-                    report = submission.get_report()
-                    zipped_reports.writestr(f'{submission.bag_name}.html', report)
-        zipf.seek(0)
-        response = HttpResponse(zipf, content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = 'attachment; filename=exported-submission-reports.zip'
-        zipf.close()
-        return response
-    export_reports.short_description = 'Export CAAIS submission reports for Selected'
 
     def create_zipped_bag(self, request, object_id):
         ''' Start a background job to create a downloadable bag

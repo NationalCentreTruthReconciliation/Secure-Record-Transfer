@@ -264,21 +264,6 @@ class Submission(models.Model):
             return e.quantity_and_unit_of_measure
         return ''
 
-    def get_report(self):
-        ''' Create an HTML report for this submission
-
-        Returns:
-            (str): A string containing the report markup
-        '''
-        report_metadata = self.metadata.get_caais_metadata()
-        report_metadata['section_1']['status'] = self.ReviewStatus(self.review_status).label
-        report_metadata['section_4']['appraisal_statement'] = self.appraisals.get_caais_metadata()
-        return render_to_string('recordtransfer/report/metadata_report.html', context={
-            'submission': self,
-            'current_date': timezone.now(),
-            'metadata': report_metadata,
-        })
-
     def get_admin_metadata_change_url(self):
         ''' Get the URL to change the metadata object in the admin
         '''

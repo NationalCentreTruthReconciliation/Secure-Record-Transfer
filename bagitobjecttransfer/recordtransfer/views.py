@@ -1,12 +1,13 @@
 import datetime
 import pickle
-from typing import Union
+from typing import Any, Union
 import logging
 
 import clamd
 from django.contrib import messages
 from django.contrib.auth import login
-from django.http import HttpResponseRedirect, JsonResponse
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -14,7 +15,7 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, UpdateView
+from django.views.generic import TemplateView, FormView, UpdateView, DetailView
 from formtools.wizard.views import SessionWizardView
 
 from caais.models import RightsType, SourceRole, SourceType
@@ -736,3 +737,24 @@ class DeleteTransfer(TemplateView):
         except KeyError:
             LOGGER.error("Tried to render DeleteTransfer view without a transfer_id")
         return redirect('recordtransfer:userprofile')
+
+
+class SubmissionDetail(UserPassesTestMixin, DetailView):
+    model = Submission
+    template_name = 'recordtransfer/submission_detail.html'
+    context_object_name = 'submission'
+
+    def get_object(self):
+        return Submission.objects.get(uuid=self.kwargs.get("uuid"))
+
+    def test_func(self):
+        # Check if the user is the creator of the submission or is a staff member
+        return self.request.user.is_staff or self.get_object().user == self.request.user
+
+    def handle_no_permission(self):
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['current_date'] = timezone.now()
+        return context
