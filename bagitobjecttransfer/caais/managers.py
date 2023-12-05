@@ -4,6 +4,7 @@ import re
 from django.db import models
 from django.db.models import Q, CharField, Value, Case, When, Value, F
 from django.db.models.functions import Concat
+from django.db.models.query import QuerySet
 
 from caais.db import DefaultConcat, GroupConcat, CharFieldOrDefault
 from caais.export import ExportVersion
@@ -526,6 +527,9 @@ class AssociatedDocumentationManager(CaaisModelManager):
 
 
 class EventManager(CaaisModelManager):
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().order_by('event_date')
+
     def flatten_atom(self, version: ExportVersion) -> dict:
         # There is no equivalent field in AtoM for non-Creation events
         return {}
@@ -567,6 +571,9 @@ class GeneralNoteManager(CaaisModelManager):
 
 
 class DateOfCreationOrRevisionManager(CaaisModelManager):
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().order_by('creation_or_revision_date')
+
     def flatten_atom(self, version: ExportVersion) -> dict:
         # Take only the first date, and treat as a date of acquisition
         date = self.get_queryset().first()

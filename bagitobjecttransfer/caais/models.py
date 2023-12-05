@@ -183,7 +183,7 @@ class Metadata(models.Model):
 
     * :py:class:`~caais.models.DateOfCreationOrRevision` [CAAIS, Section 7.2]
 
-        * Accessible via related with :code:`self.date_of_creation_or_revisions`
+        * Accessible via related with :code:`self.dates_of_creation_or_revision`
 
     Attributes:
         repository (CharField):
