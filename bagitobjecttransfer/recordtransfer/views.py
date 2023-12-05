@@ -757,4 +757,5 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['current_date'] = timezone.now()
+        context['metadata'] = context['submission'].metadata
         return context
