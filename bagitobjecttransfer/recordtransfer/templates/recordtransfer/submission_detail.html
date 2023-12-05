@@ -85,7 +85,7 @@
             <div class="name-field">1.4 Archival Unit</div>
             <div class="value-field">
                 {% if metadata.archival_units.all %}
-                    <ul>
+                    <ul class="no-ul-margin">
                     {% for archival_unit in metadata.archival_units.all %}
                         <li id="archival-unit-{{ forloop.counter }}">{{ archival_unit.archival_unit }}</li>
                     {% endfor %}
@@ -261,11 +261,17 @@
             </div>
 
             <div class="name-field">3.4 Language of Material</div>
-            <div class="value-field" id="status">
-                {% if metadata.language_of_material %}
-                    {{ metadata.language_of_material }}
+            <div class="value-field">
+                {% if metadata.language_of_materials.all %}
+                    <ul class="no-ul-margin">
+                    {% for language_of_material in metadata.language_of_materials.all %}
+                        <li id="language-of-material-{{ forloop.counter }}">
+                            {{ language_of_material.language_of_material }}
+                        </li>
+                    {% endfor %}
+                    </ul>
                 {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
+                    <i>{% trans "(None specified)" %}</i>
                 {% endif %}
             </div>
         </section>
@@ -273,11 +279,17 @@
         <h2 class="section-heading">4. Management Information Section</h2>
         <section>
             <div class="name-field">4.1 Storage Location</div>
-            <div class="value-field" id="status">
-                {% if metadata.storage_location %}
-                    {{ metadata.storage_location }}
+            <div class="value-field">
+                {% if metadata.storage_locations.all %}
+                    <ul class="no-ul-margin">
+                    {% for storage_location in metadata.storage_locations.all %}
+                        <li id="storage-location-{{ forloop.counter }}">
+                            {{ storage_location.storage_location }}
+                        </li>
+                    {% endfor %}
+                    </ul>
                 {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
+                    <i>{% trans "(None specified)" %}</i>
                 {% endif %}
             </div>
 
@@ -318,7 +330,7 @@
                     <ul class="no-ul-margin">
                         <li>
                             <b>4.2.1 Preservation Requirements Type:</b>
-                            <span id="preservation-requirements-type-{{ forloop.counter }}">{{ requirement.preservation_requirements.name }}</span>
+                            <span id="preservation-requirements-type-{{ forloop.counter }}">{{ requirement.preservation_requirements_type.name }}</span>
                         </li>
                         <li>
                             <b>4.2.2 Preservation Requirements Value:</b>
@@ -336,7 +348,7 @@
             {% endif %}
 
             <div class="name-field">4.4 Appraisal</div>
-            {% if metadata.appraisal.all %}
+            {% if metadata.appraisals.all %}
                 {% for appraisal in metadata.appraisals.all %}
                 <div class="value-field">
                     <div class="repeatable-field-counter">
