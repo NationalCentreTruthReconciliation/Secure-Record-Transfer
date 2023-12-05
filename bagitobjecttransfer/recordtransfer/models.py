@@ -1,8 +1,6 @@
 ''' Record Transfer application models '''
 import os
-from collections import OrderedDict
 from pathlib import Path
-import json
 import logging
 import shutil
 import uuid
@@ -11,7 +9,6 @@ from typing import Union
 import bagit
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -254,6 +251,12 @@ class Submission(models.Model):
         for e in self.metadata.extent_statements.get_queryset().all():
             return e.quantity_and_unit_of_measure
         return ''
+
+    def get_admin_metadata_change_url(self):
+        ''' Get the URL to change the metadata object in the admin
+        '''
+        view_name = 'admin:{0}_{1}_change'.format(self.metadata._meta.app_label, self.metadata._meta.model_name)
+        return reverse(view_name, args=(self.metadata.pk,))
 
     def get_admin_metadata_change_url(self):
         ''' Get the URL to change the metadata object in the admin

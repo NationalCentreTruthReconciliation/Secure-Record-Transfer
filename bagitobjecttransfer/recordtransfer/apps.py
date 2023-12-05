@@ -251,6 +251,20 @@ def verify_saved_transfer_settings():
         )
 
 
+def verify_saved_transfer_settings():
+    """ Verifies the setting
+
+    - MAX_SAVED_TRANSFER_COUNT
+
+    Ensure the setting is a non-negative integer, raises an ImproperlyConfigured exception if not.
+    """
+    max_transfer = settings.MAX_SAVED_TRANSFER_COUNT
+    if max_transfer < 0:
+        raise ImproperlyConfigured(
+            'The MAX_SAVED_TRANSFER_COUNT must be non-negative integer, but is currently {}'.format(max_transfer)
+        )
+
+
 class RecordTransferConfig(AppConfig):
     ''' Top-level application config for the recordtransfer app
     '''

@@ -52,6 +52,16 @@ CLAMAV_PORT = config('CLAMAV_PORT', default=3310, cast=int)
 
 MAX_SAVED_TRANSFER_COUNT = config('MAX_SAVED_TRANSFER_COUNT', default=2, cast=int)
 
+# Default data to inject into metadata, after the user enters their own metadata
+
+CLAMAV_ENABLED = config('CLAMAV_ENABLED', default=True, cast=bool)
+CLAMAV_HOST = config('CLAMAV_HOST', default=None)
+CLAMAV_PORT = config('CLAMAV_PORT', default=3310, cast=int)
+
+# Maximum number of saved transfers per user.
+
+MAX_SAVED_TRANSFER_COUNT = config('MAX_SAVED_TRANSFER_COUNT', default=2, cast=int)
+
 # Defaults to use in place of form data, or to supplement form data with when converted to CAAIS
 # metadata
 

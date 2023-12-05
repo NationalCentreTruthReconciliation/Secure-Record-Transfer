@@ -571,7 +571,6 @@ class RightsForm(TransferForm):
         label='hidden'
     )
 
-
 class OtherIdentifiersForm(TransferForm):
     ''' The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS '''
     def clean(self):

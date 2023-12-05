@@ -1,13 +1,9 @@
 ''' Custom administration code for the admin site '''
 import csv
 import logging
-import os
-import zipfile
-from io import StringIO, BytesIO
+from io import StringIO
 from pathlib import Path
-from typing import Union
 
-import bagit
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
