@@ -122,7 +122,7 @@
                 {% if metadata.status %}
                     {{ metadata.status.name }}
                 {% else %}
-                    {% trans "(Not specified)" %}
+                    <i>{% trans "(Not specified)" %}</i>
                 {% endif %}
             </div>
         </section>
@@ -206,7 +206,7 @@
                 {% if metadata.date_of_materials %}
                     {{ metadata.date_of_materials }}
                 {% else %}
-                    {% trans "(Not specified)" %}
+                    <i>{% trans "(Not specified)" %}</i>
                 {% endif %}
             </div>
 
