@@ -565,11 +565,13 @@ class RightsForm(TransferForm):
         label=gettext('Notes for rights')
     )
 
+    '''
     rights_note = forms.CharField(
         required=False,
         widget=forms.HiddenInput(),
         label='hidden'
     )
+    '''
 
 class OtherIdentifiersForm(TransferForm):
     ''' The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS '''

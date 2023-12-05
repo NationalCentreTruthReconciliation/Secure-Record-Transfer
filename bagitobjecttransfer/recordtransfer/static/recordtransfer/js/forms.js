@@ -370,32 +370,6 @@ $(() => {
     /***************************************************************************
      * Expandable Forms Setup
      **************************************************************************/
-    const sourceInfoFlexItems = [
-        '#id_sourceinfo-source_note',
-        '#id_sourceinfo-custodial_history',
-    ]
-
-    const sourceInfoExpandButton = [
-        '.add-extra-source-info'
-    ]
-
-
-    if (sourceInfoFlexItems.some((selector) => elementExists(selector))) {
-        let dirtySourceInfo = (
-            $('#id_sourceinfo-source_note').val() ||
-            $('#id_sourceinfo-custodial_history').val()
-        )
-        let fieldState = dirtySourceInfo ? 'on' : 'off'
-        let buttonState = dirtySourceInfo ? 'off' : 'on'
-        toggleFlexItems(sourceInfoFlexItems, fieldState)
-        toggleFlexItems(sourceInfoExpandButton, buttonState)
-
-        $('.add-extra-source-info').on('click', (event) => {
-            event.preventDefault()
-            toggleFlexItems(sourceInfoFlexItems, 'on')
-            toggleFlexItems(sourceInfoExpandButton, 'off')
-        })
-    }
 
     const transferGroupFlexItems = [
         '#id_grouptransfer-new_group_name',
