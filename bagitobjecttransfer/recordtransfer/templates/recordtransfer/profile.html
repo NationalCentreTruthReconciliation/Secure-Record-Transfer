@@ -65,6 +65,7 @@
                     <th>{% trans "Transfer Title" %}</th>
                     <th>{% trans "Files Transferred" %}</th>
                     <th>{% trans "Review Status" %}</th>
+                    <th>{% trans "Link to Report" %}</th>
                 </tr>
                 {% for submission in user_submissions %}
                     <tr>
@@ -72,6 +73,7 @@
                         <td>{{ submission.metadata.accession_title }}</td>
                         <td>{{ submission.extent_statements }}</td>
                         <td>{{ submission.metadata.status.name }}</td>
+                        <td><a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Link" %}</a></td>
                     </tr>
                 {% endfor %}
             </table>
