@@ -5,7 +5,6 @@ import clamd
 from clamav import settings
 from clamav.connection import get_clamd_socket
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser, CommandError
 
 
