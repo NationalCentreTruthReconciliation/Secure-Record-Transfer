@@ -9,6 +9,7 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 INSTALLED_APPS = [
     'caais.apps.CaaisConfig',
+    'clamav.apps.ClamavConfig',
     'recordtransfer.apps.RecordTransferConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -154,3 +155,10 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 CAAIS_UNKNOWN_DATE_TEXT = config('CAAIS_UNKNOWN_DATE_TEXT', cast=str, default='Unknown date')
 CAAIS_UNKNOWN_START_DATE = config('CAAIS_UNKNOWN_START_DATE', cast=str, default='1800-01-01')
 CAAIS_UNKNOWN_END_DATE = config('CAAIS_UNKNOWN_END_DATE', cast=str, default='2020-01-01')
+
+
+# ClamAV Setup
+
+CLAMAV_ENABLED = config('CLAMAV_ENABLED', cast=bool, default=True)
+CLAMAV_HOST = config('CLAMAV_HOST', default='clamav')
+CLAMAV_PORT = config('CLAMAV_PORT', cast=int, default=3310)

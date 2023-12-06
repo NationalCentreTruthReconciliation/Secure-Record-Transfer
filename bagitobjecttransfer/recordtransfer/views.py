@@ -3,10 +3,10 @@ import pickle
 from typing import Any, Union
 import logging
 
-import clamd
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -19,11 +19,11 @@ from django.views.generic import TemplateView, FormView, UpdateView, DetailView
 from formtools.wizard.views import SessionWizardView
 
 from caais.models import RightsType, SourceRole, SourceType
+from clamav.scan import check_for_malware
 from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.jobs import create_and_save_submission
-from recordtransfer.settings import CLAMAV_HOST, CLAMAV_PORT, CLAMAV_ENABLED, MAX_SAVED_TRANSFER_COUNT
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
@@ -211,13 +211,6 @@ class TransferFormWizard(SessionWizardView):
     }
 
     def get(self, request, *args, **kwargs):
-        if self.steps.current == 'acceptlegal' and CLAMAV_ENABLED:
-            clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
-            try:
-                clamd_socket.ping()
-            except clamd.ClamdError as exc:
-                LOGGER.error("Unable to ping ClamAV", exc_info=exc)
-                return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
         resume_id = request.GET.get('resume_transfer', None)
         if resume_id:
             transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
@@ -307,10 +300,10 @@ class TransferFormWizard(SessionWizardView):
             })
         resume_id = self.request.GET.get('resume_transfer', None)
         max_saves = SavedTransfer.objects.filter(user=self.request.user).count()
-        if MAX_SAVED_TRANSFER_COUNT == 0:
+        if settings.MAX_SAVED_TRANSFER_COUNT == 0:
             # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
             save_form_state = 'off'
-        elif resume_id is None and max_saves >= MAX_SAVED_TRANSFER_COUNT:
+        elif resume_id is None and max_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
             # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
             # transfer, disable the save form button.
             save_form_state = 'disabled'
@@ -430,22 +423,18 @@ def uploadfiles(request):
                 continue
 
             try:
-                content_check = _accept_contents(_file)
-                if not content_check['accepted']:
-                    _file.close()
-                    issues.append({'file': _file.name, **content_check})
-                    continue
-            except clamd.ClamdError as exc:
-                LOGGER.error("Unable to scan file (%s)", uploadfiles, exc_info=exc)
-                session.remove_session_uploads()
-                return JsonResponse(
-                    {'uploadSessionToken': session.token,
-                     'error': gettext('500 Internal Server Error'),
-                     'verboseError': gettext('500 Internal Server Error'),
-                     'fatalError': True,
-                     'redirect': reverse('recordtransfer:systemerror')
-                     }, status=500
-                )
+                check_for_malware(_file)
+
+            except ValidationError as exc:
+                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+                _file.close()
+                issues.append({
+                    'file': _file.name,
+                    'accepted': False,
+                    'error': gettext('Malware detected in file'),
+                    'verboseError': gettext(f'Malware was detected in the file "{_file.name}"'),
+                })
+                continue
 
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
             new_file.save()
@@ -682,39 +671,6 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         }
 
     # All checks succeded
-    return {'accepted': True}
-
-
-def _accept_contents(file_upload):
-    ''' Scan the contents of the file to ensure it does not contain malware.
-
-    Args:
-        file_upload: File object from request.FILES
-
-    Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the file did not contain malware, or False if not. The dictionary
-            also contains an 'error', 'verboseError', and 'clamav' key if
-            accepted is False. The 'clamav' key is a dict itself that has a
-            'reason' and a 'status' key.
-    '''
-    if CLAMAV_ENABLED:
-        clamd_socket = clamd.ClamdNetworkSocket(CLAMAV_HOST, CLAMAV_PORT)
-        scan_results = clamd_socket.instream(file_upload.file)
-        status, reason = scan_results['stream']
-        if status != 'OK':
-            return {
-                'accepted': False,
-                'error': 'Malware found in file',
-                'verboseError': gettext(
-                    'The file "{0}" was identified to contain malware! This issue '
-                    'will be sent to the administrator'.format(file_upload)
-                ),
-                'clamav': {
-                    'reason': reason,
-                    'status': status,
-                }
-            }
     return {'accepted': True}
 
 
