@@ -55,6 +55,6 @@ class CharFieldOrDefault(Case):
 
         super().__init__(
             When(~Q(**empty) & ~Q(**isnull), then=F(field_name)),
-            default=Value('NULL'),
+            default=Value(default_str),
             output_field=CharField(),
         )
