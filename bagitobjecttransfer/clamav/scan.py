@@ -28,7 +28,7 @@ def check_for_malware(file):
         status, reason = output['stream']
 
         if status != 'OK':
-            LOGGER.warning('The given file contains Malware!')
+            LOGGER.warning('The given file contains Malware! Status: %s, Reason: %s', status, reason)
             raise ValidationError(f'File contained malware. Reason: {reason}')
 
     except clamd.BufferTooLongError as exc:

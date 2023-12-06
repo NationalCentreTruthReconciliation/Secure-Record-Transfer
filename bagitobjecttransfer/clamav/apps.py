@@ -28,5 +28,5 @@ class ClamavConfig(AppConfig):
 
         except AttributeError as exc:
             raise ImproperlyConfigured(
-                f'The "{exc.name}" settings is not defined! Ensure it exists in Django\'s configuration'
+                f'The "{exc.name}" setting is not defined! Ensure it exists in Django\'s configuration'
             ) from exc
