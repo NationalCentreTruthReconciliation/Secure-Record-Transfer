@@ -40,8 +40,6 @@ services:
     environment:
       - ENV=prod
       - IS_RQ=yes
-      - MYSQL_HOST=db
-      - MYSQL_PORT=3306
     depends_on:
       - db
       - redis
@@ -58,8 +56,6 @@ services:
     environment:
       - ENV=prod
       - IS_RQ=no
-      - MYSQL_HOST=db
-      - MYSQL_PORT=3306
     depends_on:
       - db
       - rq
