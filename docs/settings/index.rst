@@ -137,17 +137,26 @@ DBTEMPLATES_ENABLED
       DBTEMPLATES_ENABLED=false
 
 
+Services
+--------
+
+These settings control connections to services external to the Django application. This include:
+
+- `ClamAV <https://www.clamav.net/>`_ for virus checking
+- `MySQL <https://www.mysql.com/>`_ Database
+- `Redis <https://redis.io/>`_ task broker
+
 CLAMAV_ENABLED
 ^^^^^^^^^^^^^^
 
-    *Whether ClamAV checking is enabled*
+    *Whether ClamAV malware checking is enabled*
 
     .. table::
 
         ========  ===============  =========
         Required  Default          Type
         ========  ===============  =========
-        YES       True             bool
+        NO        True             bool
         ========  ===============  =========
 
     Enables/disables whether ClamAV malware checking is enabled.
@@ -160,6 +169,54 @@ CLAMAV_ENABLED
 
         #file: .env
         CLAMAV_ENABLED=True
+
+
+CLAMAV_HOST
+^^^^^^^^^^^
+
+    *The name of the host ClamAV is running on*
+
+    .. table::
+
+        ===========  ===============  =========
+        Required     Default          Type
+        ===========  ===============  =========
+        NO           clamav           string
+        ===========  ===============  =========
+
+    Chooses the host where ClamAV is running. If :ref:`CLAMAV_ENABLED` is FALSE, this setting does
+    not have any effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_HOST=clamav
+
+
+CLAMAV_PORT
+^^^^^^^^^^^
+
+    *The port ClamAV is running on*
+
+    .. table::
+
+        ===========  ===============  =========
+        Required     Default          Type
+        ===========  ===============  =========
+        NO           3310             int
+        ===========  ===============  =========
+
+    Chooses the port where ClamAV is accessible on the :ref:`CLAMAV_HOST`. If :ref:`CLAMAV_ENABLED`
+    is FALSE, this setting does not have any effect.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CLAMAV_PORT=3310
 
 
 File Upload Controls
@@ -432,63 +489,6 @@ DO_NOT_REPLY_USERNAME
 
         #file: .env
         DO_NOT_REPLY_USERNAME=donotreply
-
-
-ClamAV Virus Checking
----------------------
-
-These settings have no effect is :ref:`CLAMAV_ENABLED` is False, or if :ref:`FILE_UPLOAD_ENABLED` is
-False.
-
-
-CLAMAV_HOST
-^^^^^^^^^^^
-
-    *Hostname of ClamAV instance*
-
-    .. table::
-
-        ========  ===============  =========
-        Required  Default          Type
-        ========  ===============  =========
-        YES       None             string
-        ========  ===============  =========
-
-    Hostname of the server running ClamAV.
-
-    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CLAMAV_HOST='example.server.org'
-
-
-CLAMAV_PORT
-^^^^^^^^^^^
-
-    *Port of ClamAV instance*
-
-    .. table::
-
-        ========  ===============  =========
-        Required  Default          Type
-        ========  ===============  =========
-        YES       3310             int
-        ========  ===============  =========
-
-    Port of the Clamd instance on the server running ClamAV.
-
-    If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CLAMAV_PORT=8181
 
 
 Data Formatting and Defaults
