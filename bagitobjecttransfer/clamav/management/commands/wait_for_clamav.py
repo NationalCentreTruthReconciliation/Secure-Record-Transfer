@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand, CommandParser, CommandError
 
 
 class Command(BaseCommand):
-    ''' Wait for the database to become available '''
+    ''' Wait for ClamAV to become available '''
 
     help = 'Waits for clamav to be available (by pinging the service) before returning'
 
