@@ -16,6 +16,12 @@ services:
     image: docker.io/redis:7-alpine
     command: /usr/local/etc/redis/redis.conf
     restart: unless-stopped
+    healthcheck:
+      test: redis-cli --raw incr ping
+      interval: 1m00s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - redis-net
     volumes:
@@ -27,6 +33,12 @@ services:
     image: docker.io/mysql:8
     command: --defaults-extra-file=/etc/mysql/mysqld.cnf
     restart: unless-stopped
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      interval: 1m00s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - db-net
     env_file:
