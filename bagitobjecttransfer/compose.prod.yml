@@ -3,7 +3,9 @@ version: "3.8"
 services:
   clamav:
     image: docker.io/clamav/clamav
-    container_name: recordtransfer_clamav
+    restart: unless-stopped
+    networks:
+      - clamav-net
     volumes:
       - clamav-virusdb:/var/lib/clamav
       - temp-directory:/tmp
@@ -12,8 +14,10 @@ services:
 
   redis:
     image: docker.io/redis:7-alpine
-    container_name: redis_server
     command: /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - redis-net
     volumes:
       - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     environment:
@@ -21,20 +25,24 @@ services:
 
   db:
     image: docker.io/mysql:8
-    container_name: recordtransfer_mysqldb
-    command: --defaults-extra-file=/etc/mysql/mysqld.cnf --default-authentication-plugin=mysql_native_password --mysqlx=0
-    restart: always
+    command: --defaults-extra-file=/etc/mysql/mysqld.cnf
+    restart: unless-stopped
+    networks:
+      - db-net
     env_file:
       - .prod.env
     volumes:
       - mysql-database:/var/lib/mysql
       - ./docker/logs/mysql:/var/log/mysql
-      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
+      - ./docker/nginx/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
 
   rq:
     build: .
-    container_name: recordtransfer_rq_workers
     command: python manage.py rqworker default
+    restart: unless-stopped
+    networks:
+      - db-net
+      - redis-net
     env_file:
       - .prod.env
     environment:
@@ -46,9 +54,12 @@ services:
 
   app:
     build: .
-    container_name: recordtransfer_django_app
-    command: gunicorn bagitobjecttransfer.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn bagitobjecttransfer.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
+    networks:
+      - clamav-net
+      - db-net
+      - frontend-net
     expose:
       - 8000
     env_file:
@@ -67,11 +78,11 @@ services:
   nginx:
     image: docker.io/nginx:stable
     restart: unless-stopped
+    networks:
+      - frontend-net
     ports:
       - 1337:81
     depends_on:
-      - app
-    links:
       - app
     volumes:
       - static-volume:/app/static/
@@ -84,3 +95,9 @@ volumes:
   media-volume:
   temp-directory:
   clamav-virusdb:
+
+networks:
+  clamav-net:
+  db-net:
+  redis-net:
+  frontend-net:
