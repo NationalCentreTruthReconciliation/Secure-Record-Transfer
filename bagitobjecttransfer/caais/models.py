@@ -1,301 +1,428 @@
 ''' Models describing the Canadian Archival Accession Information Standard v1.0:
 
-http://archivescanada.ca/uploads/files/Documents/CAAIS_2019May15_EN.pdf
+https://archivescanada.ca/wp-content/uploads/2022/12/CAAIS_2019May15_EN.pdf
+
+Note that there are **seven** sections of CAAIS that organize the fields by
+related information. These sections are:
+
+1. Identity Information Section
+2. Source Information Section
+3. Materials Information Section
+4. Management Information Section
+5. Event Information Section
+6. General Information Section
+7. Control Information Section
+
+The models here are not in the exact *order* as in the CAAIS document, but each
+field in the standard is defined in a model.
 '''
-from functools import partial
-from typing import Union, Iterable
+from collections import OrderedDict
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
-from django.urls import reverse
-from django.utils.translation import gettext, gettext_lazy as _
-
+from django.utils.translation import gettext
 from django_countries.fields import CountryField
 
+from caais.citation import cite_caais
 from caais.dates import EventDateParser, UnknownDateFormat
 from caais.export import ExportVersion
-
-
-def get_nested_attr(model, attrs: Union[str, Iterable]):
-    ''' Get one or more nested attributes as a string value from a model. If
-    value does not exist or is Falsy, returns None.
-
-    Args:
-        model: Some model or object with attributes
-        attrs (Union[str, Iterable]): A list of strings or a comma-delimited
-            string of properties
-    '''
-    obj = model
-    if isinstance(attrs, str):
-        attr_list = map(str.strip, attrs.split(','))
-    else:
-        attr_list = attrs
-    for attr in attr_list:
-        try:
-            obj = getattr(obj, attr)
-        except AttributeError:
-            return None
-    if obj:
-        return str(obj) or None
-    return None
+from caais.managers import (
+    MetadataManager,
+    IdentifierManager,
+    ArchivalUnitManager,
+    DispositionAuthorityManager,
+    SourceOfMaterialManager,
+    PreliminaryCustodialHistoryManager,
+    ExtentStatementManager,
+    PreliminaryScopeAndContentManager,
+    LanguageOfMaterialManager,
+    StorageLocationManager,
+    RightsManager,
+    PreservationRequirementsManager,
+    AppraisalManager,
+    AssociatedDocumentationManager,
+    EventManager,
+    GeneralNoteManager,
+    DateOfCreationOrRevisionManager,
+)
 
 
 class AbstractTerm(models.Model):
     ''' An abstract class that can be used to define any term that consists of
     a name and a description.
+
+    Attributes:
+        name (CharField): The name of the term. Terms must have unique names
+        description (TextField): A description for the term
     '''
 
     class Meta:
         abstract = True
 
-    name = models.CharField(max_length=128, null=False, blank=False)
+    name = models.CharField(max_length=128, null=False, blank=False, unique=True)
     description = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(name='{self.name}')>"
 
-class Status(AbstractTerm):
-    ''' 1.7 Status (Non-repeatable)
+
+class AcquisitionMethod(AbstractTerm):
+    ''' **Acquisition Method** [CAAIS, Section 1.5]
+
+    Definition: *The process by which a repository acquires material.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the acquisition method
+        description (TextField): A description of the acquisition method
     '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = gettext('Accession statuses')
-        verbose_name = gettext('Accession status')
-Status._meta.get_field('name').help_text = gettext(
-    "Record the current position of the material with respect to the "
-    "repository's workflows and business processes using a controlled "
-    "vocabulary"
+        verbose_name_plural = gettext('Acquisition methods')
+        verbose_name = gettext('Acquisition method')
+AcquisitionMethod._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the acquisition method in accordance with a controlled vocabulary"
+    ), section=(1, 5)
 )
 
 
-class MetadataManager(models.Manager):
-    ''' Custom metadata manager that provides a function to flatten metadata
-    objects to be able to write them to a CSV.
-    '''
+class Status(AbstractTerm):
+    ''' **Status** [CAAIS, Section 1.7]
 
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten metadata objects in queryset to be exported as CSV rows.
-        '''
-        return [
-            metadata.flatten(version) for metadata in self.get_queryset().all()
-        ]
+    Definition: *The current position of the material with respect to the
+    repository's workflows and business processes.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the status
+        description (TextField): A description for the status term
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Statuses')
+        verbose_name = gettext('Status')
+Status._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the current position of the material with respect to the "
+        "repository's workflows and business processes using a controlled "
+        "vocabulary"
+    ), section=(1, 7)
+)
 
 
 class Metadata(models.Model):
     ''' Top-level container for all CAAIS metadata. Contains all simple
     non-repeatable fields. Any repeatable field is represented by a separate
     model with a ForeignKey.
-    '''
 
+    For **repeatable fields** associated with this model, see:
+
+    * :py:class:`~caais.models.Identifier` [CAAIS, Section 1.2]
+
+        * Access via related with :code:`self.identifiers`
+
+    * :py:class:`~caais.models.ArchivalUnit` [CAAIS, Section 1.4]
+
+        * Access via related with :code:`self.archival_units`
+
+    * :py:class:`~caais.models.DispositionAuthority` [CAAIS, Section 1.6]
+
+        * Access via related with :code:`self.disposition_authorities`
+
+    * :py:class:`~caais.models.SourceOfMaterial` [CAAIS, Section 2.1]
+
+        * Access via related with :code:`self.source_of_materials`
+
+    * :py:class:`~caais.models.PreliminaryCustodialHistory` [CAAIS, Section 2.2]
+
+        * Accessible via related with :code:`self.preliminary_custodial_histories`
+
+    * :py:class:`~caais.models.ExtentStatement` [CAAIS, Section 3.2]
+
+        * Accessible via related with :code:`self.extent_statements`
+
+    * :py:class:`~caais.models.PreliminaryScopeAndContent` [CAAIS, Section 3.3]
+
+        * Accessible via related with :code:`self.preliminary_scope_and_contents`
+
+    * :py:class:`~caais.models.LanguageOfMaterials` [CAAIS, Section 3.4]
+
+        * Accessible via related with :code:`self.language_of_materials`
+
+    * :py:class:`~caais.models.StorageLocation` [CAAIS, Section 4.1]
+
+        * Accessible via related with :code:`self.storage_locations`
+
+    * :py:class:`~caais.models.Rights` [CAAIS, Section 4.2]
+
+        * Accessible via related with :code:`self.rights`
+
+    * :py:class:`~caais.models.PreservationRequirements` [CAAIS, Section 4.3]
+
+        * Accessible via related with :code:`self.preservation_requirements`
+
+    * :py:class:`~caais.models.Appraisal` [CAAIS, Section 4.4]
+
+        * Accessible via related with :code:`self.appraisals`
+
+    * :py:class:`~caais.models.AssociatedDocumentation` [CAAIS, Section 4.5]
+
+        * Accessible via related with :code:`self.associated_documentation`
+
+    * :py:class:`~caais.models.Events` [CAAIS, Section 5.1]
+
+        * Accessible via related with :code:`self.events`
+
+    * :py:class:`~caais.models.GeneralNote` [CAAIS, Section 6.1]
+
+        * Accessible via related with :code:`self.general_notes`
+
+    * :py:class:`~caais.models.DateOfCreationOrRevision` [CAAIS, Section 7.2]
+
+        * Accessible via related with :code:`self.dates_of_creation_or_revision`
+
+    Attributes:
+        repository (CharField):
+            **Repository** [CAAIS, Section 1.1]. Definition: *The name of the
+            institution that accepts legal responsibility for the accessioned
+            material.*
+        accession_title (CharField):
+            **Accession Title** [CAAIS, Section 1.3]. Definition: *The name
+            assigned to the material.*
+        acquisition_method (ForeignKey):
+            See :py:class:`~caais.models.AcquisitionMethod` [CAAIS, Section 1.5]
+        status (ForeignKey):
+            See :py:class:`~caais.models.Status` [CAAIS, Section 1.7]
+        date_of_materials (CharField):
+            **Date of Materials** [CAAIS, Section 3.1]. Definition: *A date or
+            date range indicating when the materials were known or thought to
+            have been created.*
+        rules_or_conventions (CharField):
+            **Rules or Conventions** [CAAIS, Section 7.1]. Definition: *The
+            rules, conventions or templates that were used in creating or
+            maintaining the accession record.*
+        language_of_accession_record (CharField):
+            **Language of Accession Record** [CAAIS, Section 7.2]. Definition:
+            *The language(s) and script(s) used to record information in the
+            accession record.*
+    '''
     class Meta:
         verbose_name_plural = gettext('CAAIS metadata')
         verbose_name = gettext('CAAIS metadata')
 
-    class LevelOfDetail(models.TextChoices):
-        ''' The level of detail of the submission
-        '''
-        NOT_SPECIFIED = 'NS', _('Not Specified')
-        MINIMAL = 'ML', _('Minimal')
-        PARTIAL = 'PL', _('Partial')
-        FULL = 'FL', _('Full')
-
     objects = MetadataManager()
 
-    repository = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Give the authorized form(s) of the name of the institution in "
-        "accordance with the repository's naming standard"
-    ))
-    accession_title = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Supply an accession title in accordance with the repository's "
-        "descriptive standard, typically consisting of the creator's name(s) "
-        "and the type of material"
-    ))
-    acquisition_method = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Record the acquisition method in accordance with a controlled "
-        "vocabulary"
-    ))
-    # 1.7 Disposition Authority
-    disposition_authority = models.TextField(null=True, help_text=gettext(
-        "Record information about any legal instruments that apply to the "
-        "accessioned material. Legal instruments include statutes, records "
-        "schedules or disposition authorities, and donor agreements"
-    ))
-    # 2.2 Custodial History
-    custodial_history = models.TextField(null=True, help_text=gettext(
-        "Provide relevant custodial history information in accordance with the "
-        "repository's descriptive standard. Record the successive transfers of "
-        "ownership, responsibility and/or custody of the accessioned material "
-        "prior to its transfer to the repository"
-    ))
+    @property
+    def accession_identifier(self) -> str:
+        if self.identifiers:
+            accession_id = self.identifiers.accession_identifier()
+            if accession_id:
+                return accession_id.identifier_value
+        return ''
 
-    # 3.1 Date of Material
-    date_of_material = models.CharField(max_length=128, null=True, help_text=gettext(
-        "Provide a preliminary estimate of the date range or explicitly "
-        "indicate if not it has yet been determined"
-    ))
-    # 3.3 Scope and Content
-    scope_and_content = models.TextField(null=True, help_text=gettext(
-        "Record a summary that includes: functions and activities that resulted in the material’s generation, dates, "
-        "the geographic area to which the material pertains, subject matter, arrangement, classification, and "
-        "documentary forms. This is recorded as a free text statement."
-    ))
+    repository = models.CharField(
+        null=False, max_length=512, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Give the authorized form(s) of the name of the institution in "
+                "accordance with the repository's naming standard"
+            ), section=(1, 1)
+        )
+    )
 
-    # 7.1 Rules or Conventions
-    rules_or_conventions = models.CharField(max_length=255, blank=True, default='', help_text=gettext(
-        "Record information about the standards, rules or conventions that were followed when creating or maintaining "
-        "the accession record. Indicate the software application if the accession record is based on a data entry "
-        "template in a database or other automated system. Give the version number of the standard or software "
-        "application where applicable."
-    ))
-    # 7.2 Level of detail
-    level_of_detail = models.CharField(max_length=2, choices=LevelOfDetail.choices, default=LevelOfDetail.NOT_SPECIFIED,
-                                       help_text=gettext("Record the level of detail in accordance with a controlled "
-                                                         "vocabulary maintained by the repository."
-                                                         ))
-    # 7.4 Language of record
-    language_of_record = models.CharField(max_length=20, blank=True, default='en', help_text=gettext(
-        "Record the language(s) and script(s) used to create the accession record. If the content has been translated "
-        "and is available in other languages, give those languages. Provide information about script only where it is "
-        "common to use multiple scripts to represent a language and it is important to know which script is employed."
-    ))
+    accession_title = models.CharField(
+        null=False, max_length=512, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Supply an accession title in accordance with the repository's "
+                "descriptive standard, typically consisting of the creator's name(s) "
+                "and the type of material"
+            ), section=(1, 3)
+        )
+    )
 
-    #pylint: disable=no-member
-    def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
-        ''' Convert this model and all related models into a flat dictionary
-        suitable to be written to a CSV or used as the metadata fields for a
-        BagIt bag.
-        '''
+    acquisition_method = models.ForeignKey(
+        AcquisitionMethod, on_delete=models.SET_NULL, null=True
+    )
 
-        row = {c: '' for c in version.fieldnames}
+    status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True)
 
-        if version == ExportVersion.CAAIS_1_0:
-            row['repository'] = self.repository or ''
-            row['accessionTitle'] = self.accession_title or 'No title'
-            row['acquisitionMethod'] = self.acquisition_method or ''
-            row['dateOfMaterial'] = self.date_of_material or ''
-            row['dispositionAuthority'] = self.disposition_authority or ''
-            row['scopeAndContent'] = self.scope_and_content or ''
-            row['custodialHistory'] = self.custodial_history or ''
-            row['rulesOrConventions'] = self.rules_or_conventions or ''
-            row['levelOfDetail'] = self.LevelOfDetail(self.level_of_detail).label or ''
-            row.update(self.language_of_materials.flatten(version))
-            row['languageOfAccessionRecord'] = self.language_of_record or ''
-        else:
-            row['title'] = self.accession_title or 'No title'
-            row['acquisitionType'] = self.acquisition_method or ''
+    date_of_materials = models.CharField(
+        null=False, max_length=512, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Provide a preliminary estimate of the date range or explicitly "
+                "indicate if not it has yet been determined"
+            ), section=(3, 1)
+        )
+    )
 
-            row['accessionNumber'] = self.identifiers.accession_identifier().identifier_value if \
-                self.identifiers.accession_identifier() is not None else ''
+    rules_or_conventions = models.CharField(
+        null=False, max_length=256, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record information about the standards, rules or conventions that "
+                "were followed when creating or maintaining the accession record."
+            ), section=(7, 1)
+        )
+    )
 
-            if self.date_of_material:
-                try:
-                    parser = EventDateParser(
-                        unknown_date=settings.CAAIS_UNKNOWN_DATE_TEXT,
-                        unknown_start_date=settings.CAAIS_UNKNOWN_START_DATE,
-                        unknown_end_date=settings.CAAIS_UNKNOWN_END_DATE,
-                        timid=False
-                    )
-                    parsed_date, date_range = parser.parse_date(self.date_of_material)
-                    if len(date_range) == 1:
-                        start_date, end_date = date_range[0], date_range[0]
-                    else:
-                        start_date, end_date = date_range[0], date_range[1]
+    language_of_accession_record = models.CharField(
+        null=False, max_length=256, blank=True, default='en', help_text=cite_caais(
+            gettext(
+                "Record the language(s) and script(s) used to create the accession "
+                "record."
+            ), section=(7, 3)
+        )
+    )
 
-                    if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2):
-                        row['creationDatesType'] = 'Creation'
-                        row['creationDates'] = parsed_date
-                        row['creationDatesStart'] = str(start_date)
-                        row['creationDatesEnd'] = str(end_date)
-                    else:
-                        row['eventTypes'] = 'Creation'
-                        row['eventDates'] = parsed_date
-                        row['eventStartDates'] = str(start_date)
-                        row['eventEndDates'] = str(end_date)
-                except UnknownDateFormat:
-                    if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2):
-                        row['creationDatesType'] = 'Creation'
-                        row['creationDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
-                        row['creationDatesStart'] = settings.CAAIS_UNKNOWN_START_DATE
-                        row['creationDatesEnd'] = settings.CAAIS_UNKNOWN_END_DATE
-                    else:
-                        row['eventTypes'] = 'Creation'
-                        row['eventDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
-                        row['eventStartDates'] = settings.CAAIS_UNKNOWN_START_DATE
-                        row['eventEndDates'] = settings.CAAIS_UNKNOWN_END_DATE
-            language_updates = self.language_of_materials.flatten(version)
-            if language_updates or self.scope_and_content:
-                combined_updates = {
-                    'scopeAndContent': '. '.join([
-                        self.scope_and_content.rstrip('. '),
-                        language_updates['scopeAndContent'].rstrip('. '),
-                    ])
-                }
-                row.update(combined_updates)
-            row['archivalHistory'] = self.custodial_history
-
+    def _create_flat_atom_representation(self, row: dict, version: ExportVersion):
         row.update(self.identifiers.flatten(version))
         row.update(self.archival_units.flatten(version))
+        row.update(self.disposition_authorities.flatten(version))
         row.update(self.source_of_materials.flatten(version))
+        row.update(self.preliminary_custodial_histories.flatten(version))
         row.update(self.extent_statements.flatten(version))
         row.update(self.storage_locations.flatten(version))
         row.update(self.rights.flatten(version))
-        row.update(self.material_assessments.flatten(version))
+        row.update(self.preservation_requirements.flatten(version))
+        row.update(self.appraisals.flatten(version))
+        row.update(self.associated_documentation.flatten(version))
         row.update(self.events.flatten(version))
         row.update(self.general_notes.flatten(version))
-        row.update(self.date_creation_revisions.flatten(version))
+        row.update(self.dates_of_creation_or_revision.flatten(version))
+
+        row['title'] = self.accession_title or 'No title'
+        row['acquisitionType'] = self.acquisition_method.name if self.acquisition_method else ''
+        row['processingStatus'] = self.status.name if self.status else ''
+
+        # Special case - both related objects return scope and content - combine them
+        scope_1 = self.preliminary_scope_and_contents.flatten(version).get('scopeAndContent', '')
+        scope_2 = self.language_of_materials.flatten(version).get('scopeAndContent', '')
+        row['scopeAndContent'] = '\n\n'.join(s for s in [
+            scope_1,
+            scope_2,
+        ] if s)
+
+        accession_id = self.identifiers.accession_identifier()
+        row['accessionNumber'] = accession_id.identifier_value if accession_id else ''
+
+        row['culture'] = 'en'
+
+        if self.date_of_materials and not version == ExportVersion.ATOM_2_1:
+            try:
+                parser = EventDateParser(
+                    unknown_date=settings.CAAIS_UNKNOWN_DATE_TEXT,
+                    unknown_start_date=settings.CAAIS_UNKNOWN_START_DATE,
+                    unknown_end_date=settings.CAAIS_UNKNOWN_END_DATE,
+                    timid=False
+                )
+                parsed_date, date_range = parser.parse_date(self.date_of_materials)
+                if len(date_range) == 1:
+                    start_date, end_date = date_range[0], date_range[0]
+                else:
+                    start_date, end_date = date_range[0], date_range[1]
+
+                if version == ExportVersion.ATOM_2_2:
+                    row['creationDatesType'] = 'Creation'
+                    row['creationDates'] = parsed_date
+                    row['creationDatesStart'] = str(start_date)
+                    row['creationDatesEnd'] = str(end_date)
+                else:
+                    row['eventTypes'] = 'Creation'
+                    row['eventDates'] = parsed_date
+                    row['eventStartDates'] = str(start_date)
+                    row['eventEndDates'] = str(end_date)
+
+            except UnknownDateFormat:
+                if version == ExportVersion.ATOM_2_2:
+                    row['creationDatesType'] = 'Creation'
+                    row['creationDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
+                    row['creationDatesStart'] = settings.CAAIS_UNKNOWN_START_DATE
+                    row['creationDatesEnd'] = settings.CAAIS_UNKNOWN_END_DATE
+                else:
+                    row['eventTypes'] = 'Creation'
+                    row['eventDates'] = settings.CAAIS_UNKNOWN_DATE_TEXT
+                    row['eventStartDates'] = settings.CAAIS_UNKNOWN_START_DATE
+                    row['eventEndDates'] = settings.CAAIS_UNKNOWN_END_DATE
+
+
+    def _create_flat_caais_representation(self, row: dict, version: ExportVersion):
+        # Section 1
+        row['repository'] = self.repository or ''
+        row.update(self.identifiers.flatten(version))
+        row['accessionTitle'] = self.accession_title or 'No title'
+        row.update(self.archival_units.flatten(version))
+        row['acquisitionMethod'] = self.acquisition_method.name if self.acquisition_method else ''
+        row.update(self.disposition_authorities.flatten(version))
+        row['status'] = self.status.name if self.status else ''
+
+        # Section 2
+        row.update(self.source_of_materials.flatten(version))
+        row.update(self.preliminary_custodial_histories.flatten(version))
+
+        # Section 3
+        row['dateOfMaterials'] = self.date_of_materials or ''
+        row.update(self.extent_statements.flatten(version))
+        row.update(self.preliminary_scope_and_contents.flatten(version))
+        row.update(self.language_of_materials.flatten(version))
+
+        # Section 4
+        row.update(self.storage_locations.flatten(version))
+        row.update(self.rights.flatten(version))
+        row.update(self.preservation_requirements.flatten(version))
+        row.update(self.appraisals.flatten(version))
+        row.update(self.associated_documentation.flatten(version))
+
+        # Section 5
+        row.update(self.events.flatten(version))
+
+        # Section 6
+        row.update(self.general_notes.flatten(version))
+
+        # Section 7
+        row['rulesOrConventions'] = self.rules_or_conventions or ''
+        row.update(self.dates_of_creation_or_revision.flatten(version))
+        row['languageOfAccessionRecord'] = self.language_of_accession_record or ''
+
+
+    def create_flat_representation(self, version=ExportVersion.CAAIS_1_0) -> dict:
+        ''' Convert this model and all related models into a flat dictionary
+        suitable to be written to a CSV or used as the metadata fields for a
+        BagIt bag.
+
+        Note that some CAAIS fields do not map well to AtoM fields, so some
+        information is dropped when using an AtoM export version. For maximum
+        compatibility, convert using the CAAIS export version when possible.
+
+        Args:
+            version (ExportVersion):
+                The flat representation type to export. Can be a CAAIS version
+                or an AtoM version.
+
+        Returns:
+            (dict):
+                A dictionary containing all fields in this model as well as all
+                related models (where possible).
+        '''
+        row = OrderedDict()
+        for col in version.fieldnames:
+            row[col] = ''
+        if ExportVersion.is_atom(version):
+            self._create_flat_atom_representation(row, version)
+        else:
+            self._create_flat_caais_representation(row, version)
         return row
 
-    def __str__(self):
-        return self.accession_title or 'No title'
-
-    def get_caais_metadata(self):
-        """Return a structured dict of the CAAIS metadata elements."""
-        data = {
-            'section_1': {
-                'repository': self.repository,
-                'accession_identifier': self.identifiers.accession_identifier().identifier_value,
-                'accession_title': self.accession_title,
-                'acquisition_method': self.acquisition_method,
-                'disposition_authority': self.disposition_authority,
-                'other_identifiers': self.identifiers.get_caais_metadata(),
-                'archival_units': self.archival_units.get_caais_metadata(),
-            },
-            'section_2': {
-                'source_of_material': self.source_of_materials.get_caais_metadata(),
-                'custodial_history': self.custodial_history,
-            },
-            'section_3': {
-                'date_of_material': self.date_of_material,
-                'extent_statement': self.extent_statements.get_caais_metadata(),
-                'scope_and_content': self.scope_and_content,
-                'language_of_materials': self.language_of_materials.get_caais_metadata(),
-            },
-            'section_4': {
-                'storage_location': self.storage_locations.get_caais_metadata(),
-                'rights_statement': self.rights.get_caais_metadata(),
-                'material_assessment_statement': self.material_assessments.get_caais_metadata(),
-                'appraisals_statement': [],
-            },
-            'section_5': {
-                'event_statement': self.events.get_caais_metadata(),
-            },
-            'section_6': {
-                'general_note': self.general_notes.get_caais_metadata(),
-            },
-            'section_7': {
-                'date_of_creation_or_revision': self.date_creation_revisions.get_caais_metadata(),
-            },
-        }
-        if self.rules_or_conventions:
-            data['section_7']['rules_or_conventions'] = self.rules_or_conventions
-        if self.level_of_detail:
-            data['section_7']['level_of_detail'] = self.LevelOfDetail(self.level_of_detail).label
-        if self.language_of_record:
-            data['section_7']['language_of_accession_record'] = self.language_of_record
-        return data
 
     def update_accession_id(self, accession_id: str, commit: bool = True):
+        ''' Update the accession identifier value, if an accession identifier
+        exists.
+
+        Args:
+            accession_id (str): The new accession identifier
+            commit (bool): Saves this model if a change is made if True
+        '''
         a_id = self.identifiers.accession_identifier()
         if a_id is not None:
             a_id.identifier_value = accession_id
@@ -303,338 +430,275 @@ class Metadata(models.Model):
                 a_id.save()
 
 
-class IdentifierManager(models.Manager):
-    ''' Custom identifier related manager
-    '''
-
-    def accession_identifier(self):
-        ''' Get the first identifier with Accession Identifier or Accession
-        Number as the type, or None if an identifier like this does not exist.
-        '''
-        return self.get_queryset().filter(
-            Q(identifier_type__icontains='Accession Identifier') |
-            Q(identifier_type__icontains='Accession Number')
-        ).first()
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten identifiers in queryset to export them in a CSV.
-        '''
-        # alternativeIdentifiers were added in AtoM v2.6
-        if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2, ExportVersion.ATOM_2_3):
-            return {}
-
-        if version == ExportVersion.CAAIS_1_0:
-            identifiers = self.get_queryset().all()
-            return {
-                'identifierTypes': '|'.join([
-                    id.identifier_type or 'NULL' for id in identifiers
-                ]),
-                'identifierValues': '|'.join([
-                    id.identifier_value or 'NULL' for id in identifiers
-                ]),
-                'identifierNotes': '|'.join([
-                    id.identifier_note or 'NULL' for id in identifiers
-                ]),
-            }
-
-        if version == ExportVersion.ATOM_2_6:
-            identifiers = self.get_queryset().filter(
-                Q(identifier_type__icontains='Accession Identifier', _negated=True) &
-                Q(identifier_type__icontains='Accession Number', _negated=True)
-            ).all()
-
-            return {
-                'alternativeIdentifiers': '|'.join([
-                    id.identifier_value or 'NULL' for id in identifiers
-                ]),
-                'alternativeIdentifierTypes': '|'.join([
-                    id.identifier_type or 'NULL' for id in identifiers
-                ]),
-                'alternativeIdentifierNotes': '|'.join([
-                    id.identifier_note or 'NULL' for id in identifiers
-                ]),
-            }
-
-        return {}
-
-    def get_caais_metadata(self):
-        identifiers = []
-        for identifier in self.get_queryset().filter(
-                Q(identifier_type__icontains='Accession Identifier', _negated=True) &
-                Q(identifier_type__icontains='Accession Number', _negated=True)
-        ).all():
-            identifiers.append({
-                'other_identifier_type': identifier.identifier_type,
-                'other_identifier_value': identifier.identifier_value,
-                'other_identifier_note': identifier.identifier_note,
-            })
-        return identifiers
+    def __str__(self):
+        return self.accession_title or 'No title'
 
 
 class Identifier(models.Model):
-    ''' 1.2 Identifiers (Repeatable field)
+    ''' **Identifiers** [CAAIS, Section 1.2]
+
+    Definition: *Alphabetic, numeric, or alpha-numeric codes assigned to
+    accessioned material, parts of the material, or accruals for purposes of
+    unique for purposes of identification.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.identifiers`
+        identifier_type (CharField):
+            **Identifier Type** [CAAIS, Section 1.2.1]. Definition: *A term or
+            phrase that characterizes the nature of the identifier*
+        identifier_value (CharField):
+            **Identifier Value** [CAAIS, Section 1.2.2]. Definition: *A code
+            that is assigned to the material to support identification in the
+            course of processes and activities such as acquisition, transfer,
+            ingest, and conservation.*
+        identifier_note (CharField):
+            **Identifier Note** [CAAIS, Section 1.2.3]. Definition: *Additional
+            information about the identifier, including contextual information
+            on the purpose of the identifier.*
     '''
+    class Meta:
+        verbose_name_plural = gettext('Identifiers')
+        verbose_name = gettext('Identifier')
 
     objects = IdentifierManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='identifiers')
-    identifier_type = models.CharField(max_length=128, null=False, help_text=gettext(
-        "Record the identifier type in accordance with a controlled vocabulary "
-        "maintained by the repository"
-    ))
-    identifier_value = models.CharField(max_length=128, null=False, help_text=gettext(
-        "Record the other identifier value as received or generated by the "
-        "repository"
-    ))
-    identifier_note = models.TextField(null=True, help_text=gettext(
-        "Record any additional information that clarifies the purpose, use or "
-        "generation of the identifier."
-    ))
+
+    identifier_type = models.CharField(
+        max_length=128, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the identifier type in accordance with a controlled vocabulary "
+                "maintained by the repository"
+            ), section=(1, 2, 1)
+        )
+    )
+
+    identifier_value = models.CharField(
+        max_length=128, null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record the other identifier value as received or generated by the "
+                "repository"
+            ), section=(1, 2, 2)
+        )
+    )
+
+    identifier_note = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any additional information that clarifies the purpose, use or "
+                "generation of the identifier."
+            ), section=(1, 2, 3)
+        )
+    )
 
     def __str__(self):
-        return f'{self.identifier_value} ({self.identifier_type})'
-
-
-class ArchivalUnitManager(models.Manager):
-    ''' Custom archival unit manager
-    '''
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten archival units in queryset to export them in a CSV.
-        '''
-        # No equivalent for archival unit in AtoM
-        if version != ExportVersion.CAAIS_1_0:
-            return {}
-
-        # Don't bother including NULL for empty archival units, just skip them
-        units = self.get_queryset().exclude(
-            Q(archival_unit__exact='') |
-            Q(archival_unit__isnull=True)
-        ).values_list('archival_unit', flat=True)
-
-        return {'archivalUnit': '|'.join(units)}
-
-    def get_caais_metadata(self):
-        units = []
-        for unit in self.get_queryset().all():
-            units.append({
-                'archival_unit': unit.archival_unit,
-            })
-        return units
+        if self.identifier_type:
+            return f'{self.identifier_value} ({self.identifier_type})'
+        return self.identifier_value
 
 
 class ArchivalUnit(models.Model):
-    ''' 1.4 Archival Unit (Repeatable field)
+    '''**Archival Unit** [CAAIS, Section 1.4]
+
+    Definition: *The archival unit or the aggregate to which the accessioned
+    material belongs.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.archival_units`
+        archival_unit (TextField):
+            The text content of CAAIS, Section 1.4.
     '''
+    class Meta:
+        verbose_name_plural = gettext('Archival units')
+        verbose_name = gettext('Archival unit')
 
     objects = ArchivalUnitManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='archival_units')
-    archival_unit = models.TextField(null=False, help_text=gettext(
-        "Record the reference code and/or title of the archival unit to which the accession belongs."
+
+    archival_unit = models.TextField(null=False, blank=False, help_text=cite_caais(
+        gettext(
+            "Record the reference code and/or title of the archival unit to which "
+            "the accession belongs"
+        ), section=(1, 4)
     ))
 
     def __str__(self):
-        return f'Archival Unit #{self.id}'
+        return f'{self.__class__.__name__} #{self.id}'
+
+
+class DispositionAuthority(models.Model):
+    ''' **Disposition Authority** [CAAIS, Section 1.6]
+
+    Definition: *A reference to policies, directives, and agreements that
+    prescribe and allow for the transfer of material to a repository.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.disposition_authorities`
+        disposition_authority (TextField):
+            The text content of CAAIS, Section 1.6.
+    '''
+    class Meta:
+        verbose_name_plural = gettext('Disposition authorities')
+        verbose_name = gettext('Disposition authority')
+
+    objects = DispositionAuthorityManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='disposition_authorities')
+
+    disposition_authority = models.TextField(
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record information about any legal instruments that apply to the "
+                "accessioned material. Legal instruments include statutes, records "
+                "schedules or disposition authorities, and donor agreements"
+            ), section=(1, 6)
+        )
+    )
+
+    def __str__(self):
+        return f'{self.__class__.__name__} #{self.id}'
 
 
 class SourceType(AbstractTerm):
-    ''' 2.1.1 Source Type (Non-repeatable)
+    ''' **Source Type** [CAAIS, Section 2.1.1]
+
+    Definition: *A term describing the nature of the source.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the source type
+        description (TextField): A description of the source type
     '''
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Source types')
         verbose_name = gettext('Source type')
-SourceType._meta.get_field('name').help_text = gettext(
-    "Record the source in accordance with a controlled vocabulary maintained "
-    "by the repository"
+SourceType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the source in accordance with a controlled vocabulary maintained "
+        "by the repository"
+    ), section=(2, 1, 1)
 )
 
 
 class SourceRole(AbstractTerm):
-    ''' 2.1.4 Source Role (Non-repeatable)
+    ''' **Source Role** [CAAIS, Section 2.1.4]
+
+    Definition: *The relationship of the named source to the material.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the source role
+        description (TextField): A description of the source role
     '''
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Source roles')
         verbose_name = gettext('Source role')
-SourceRole._meta.get_field('name').help_text = gettext(
-    "Record the source role (when known) in accordance with a controlled "
-    "vocabulary maintained by the repository"
+SourceRole._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the source role (when known) in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ), section=(2, 1, 4)
 )
 
 
 class SourceConfidentiality(AbstractTerm):
-    ''' 2.1.6 Source Confidentiality (Non-repeatable)
+    ''' **Source Confidentiality** [CAAIS, Section 2.1.6]
+
+    Definition: *An instruction to maintain information about the source in
+    confidence.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the source confidentiality
+        description (TextField): A description of the source confidentiality
     '''
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Source confidentialities')
         verbose_name = gettext('Source confidentiality')
-SourceConfidentiality._meta.get_field('name').help_text = gettext(
-    "Record source statements or source information that is for internal use "
-    "only by the repository. Repositories should develop a controlled "
-    "vocabulary with terms that can be translated into clear rules for "
-    "handling source information"
+SourceConfidentiality._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record source statements or source information that is for internal use "
+        "only by the repository. Repositories should develop a controlled "
+        "vocabulary with terms that can be translated into clear rules for "
+        "handling source information"
+    ), section=(2, 1, 6)
 )
 
 
-class SourceOfMaterialManager(models.Manager):
-    ''' Custom source of material manager
-    '''
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten source of material info in queryset to export them in a CSV.
-        '''
-        if self.get_queryset().count() == 0:
-            return {}
-
-        types = []
-        names = []
-        contact_persons = []
-        job_titles = []
-        street_addresses = []
-        cities = []
-        regions = []
-        postal_codes = []
-        countries = []
-        phone_numbers = []
-        emails = []
-        roles = []
-        notes = []
-        confidentialities = []
-
-        is_atom = ExportVersion.is_atom(version)
-
-        def get_source_attr(src, attrs):
-            value = get_nested_attr(src, attrs)
-            if value:
-                return value
-            return '' if is_atom else 'NULL'
-
-        for source in self.get_queryset().all():
-            get_field = partial(get_source_attr, source)
-
-            types.append(get_field('source_type,name'))
-            names.append(get_field('source_name'))
-            contact_persons.append(get_field('contact_name'))
-            job_titles.append(get_field('job_title'))
-
-            # Join address line 1 and 2
-            if source.address_line_1 and source.address_line_2:
-                street_addresses.append(', '.join([
-                    source.address_line_1,
-                    source.address_line_2,
-                ]))
-            elif source.address_line_1:
-                street_addresses.append(source.address_line_1)
-            elif source.address_line_2:
-                street_addresses.append(source.address_line_2)
-            else:
-                street_addresses.append('' if is_atom else 'NULL')
-
-            cities.append(get_field('city'))
-            regions.append(get_field('region'))
-            postal_codes.append(get_field('postal_or_zip_code'))
-            countries.append(get_field('country,name'))
-            phone_numbers.append(get_field('phone_number'))
-            emails.append(get_field('email_address'))
-            roles.append(get_field('source_role,name'))
-            notes.append(get_field('source_note'))
-            confidentialities.append(get_field('source_confidentiality,name'))
-
-            # AtoM can only handle one source!
-            if is_atom:
-                break
-
-        flat = {}
-
-        if not is_atom:
-            flat['sourceType'] = '|'.join(types)
-            flat['sourceName'] = '|'.join(names)
-            flat['sourceContactPerson'] = '|'.join(contact_persons)
-            flat['sourceJobTitle'] = '|'.join(job_titles)
-            flat['sourceStreetAddress'] = '|'.join(street_addresses)
-            flat['sourceCity'] = '|'.join(cities)
-            flat['sourceRegion'] = '|'.join(regions)
-            flat['sourcePostalCode'] = '|'.join(postal_codes)
-            flat['sourceCountry'] = '|'.join(countries)
-            flat['sourcePhoneNumber'] = '|'.join(phone_numbers)
-            flat['sourceEmail'] = '|'.join(emails)
-            flat['sourceRole'] = '|'.join(roles)
-            flat['sourceNote'] = '|'.join(notes)
-            flat['sourceConfidentiality'] = '|'.join(confidentialities)
-
-        else:
-            flat = {}
-
-            note = notes[0]
-            role = roles[0]
-            type_ = types[0]
-            confidentiality = confidentialities[0]
-
-            # donorNote added in AtoM 2.6
-            # donorContactPerson added in AtoM 2.6
-            if version == ExportVersion.ATOM_2_6 and any((note, role, type_, confidentiality)):
-                donor_narrative = []
-                if type_:
-                    if type_[0].lower() in ('a', 'e', 'i', 'o', 'u'):
-                        donor_narrative.append(f'The donor is an {type_}')
-                    else:
-                        donor_narrative.append(f'The donor is a {type_}')
-                if role:
-                    donor_narrative.append((
-                        'The donor\'s relationship to the records is: '
-                        f'{role}'
-                    ))
-                if confidentiality:
-                    donor_narrative.append((
-                        'The donor\'s confidentiality has been noted as: '
-                        f'{confidentiality}'
-                    ))
-                if note:
-                    donor_narrative.append(note)
-                flat['donorNote'] = '. '.join(donor_narrative)
-                flat['donorContactPerson'] = contact_persons[0]
-
-            flat['donorName'] = names[0]
-            flat['donorStreetAddress'] = street_addresses[0]
-            flat['donorCity'] = cities[0]
-            flat['donorRegion'] = regions[0]
-            flat['donorPostalCode'] = postal_codes[0]
-            flat['donorCountry'] = countries[0]
-            flat['donorTelephone'] = phone_numbers[0]
-            flat['donorEmail'] = emails[0]
-
-        return flat
-
-    def get_caais_metadata(self):
-        sources = []
-        for source in self.get_queryset().all():
-            sources.append({
-                'source_type': str(source.source_type.name),
-                'source_name': source.source_name,
-                'source_role': str(source.source_role.name),
-                'source_contact_information': {
-                    'contact_name': source.contact_name,
-                    'job_title': source.job_title,
-                    'phone_number': source.phone_number,
-                    'email': source.email_address,
-                    'address_line_1': source.address_line_1,
-                    'address_line_2': source.address_line_2,
-                    'city': source.city,
-                    'province_or_state': source.region,
-                    'postal_or_zip_code': source.postal_or_zip_code,
-                    'country': source.country,
-                },
-                'source_note': source.source_note,
-            })
-        return sources
-
-
 class SourceOfMaterial(models.Model):
-    ''' 2.1 Source of Material (Repeatable)
-    '''
+    ''' **Source of Material** [CAAIS, Section 2.1]
 
+    Definition: *A corporate body, person or family responsible for the
+    creation, use or transfer of the accessioned material.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.source_of_materials`
+        source_type (ForeignKey):
+            See :py:class:`~caais.models.SourceType` [CAAIS, Section 2.1.1]
+        source_name (CharField):
+            **Source Name** [CAAIS, Section 2.1.2]. Definition: *The proper name
+            of the source of the material.*
+        contact_name (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The name of the contact person
+        job_title (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The job title of the contact person
+        organization (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The organization the source is a member of, or the organization the
+            source *is*
+        phone_number (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The phone number the source can be contacted with
+        email_address (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The email address the source can be contacted with
+        address_line_1 (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The first line of the address where the source resides or operates in
+        address_line_2 (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The second line of the address where the source resides or operates
+            in
+        city (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The city the source resides or operates in
+        region (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The region the source resides or operates in, i.e., the province or
+            state
+        postal_or_zip_code (CharField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The source's postal or zip code
+        country (CountryField):
+            An extension of **Source Contact Information** [CAAIS, Section 2.1.3]
+            The country the source resides or operates in
+        source_role (ForeignKey):
+            See :py:class:`~caais.models.SourceRole` [CAAIS, Section 2.1.4]
+        source_note (TextField):
+            **Source Note** [CAAIS, Section 2.1.5]. Definition: *An open element
+            to capture any additional information about the source, or
+            circumstances surrounding their role.*
+        source_confidentiality (ForeignKey):
+            See :py:class:`~caais.models.SourceConfidentiality` [CAAIS, Section
+            2.1.6]
+    '''
     class Meta:
         verbose_name_plural = gettext('Sources of material')
         verbose_name = gettext('Source of material')
@@ -647,21 +711,20 @@ class SourceOfMaterial(models.Model):
     source_type = models.ForeignKey(SourceType, on_delete=models.SET_NULL,
                                     null=True, related_name='source_of_materials')
 
-    source_name = models.CharField(max_length=256, null=False, default='', help_text=gettext(
-        "Record the source name in accordance with the repository's "
-        "descriptive standard"
-    ))
-
-    source_role = models.ForeignKey(SourceRole, on_delete=models.SET_NULL,
-                                    null=True, related_name='source_of_materials')
-
-    source_confidentiality = models.ForeignKey(SourceConfidentiality, on_delete=models.SET_NULL,
-                                               null=True, related_name='source_of_materials')
+    source_name = models.CharField(
+        max_length=256, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the source name in accordance with the repository's "
+                "descriptive standard"
+            ), section=(2, 1, 2)
+        )
+    )
 
     contact_name = models.CharField(max_length=256, blank=True, default='')
     job_title = models.CharField(max_length=256, blank=True, default='')
-    phone_number = models.CharField(max_length=32, null=False)
-    email_address = models.CharField(max_length=256, null=False)
+    organization = models.CharField(max_length=256, blank=True, default='')
+    phone_number = models.CharField(max_length=32, blank=True, default='')
+    email_address = models.CharField(max_length=256, blank=True, default='')
     address_line_1 = models.CharField(max_length=256, blank=True, default='')
     address_line_2 = models.CharField(max_length=256, blank=True, default='')
     city = models.CharField(max_length=128, blank=True, default='')
@@ -669,149 +732,259 @@ class SourceOfMaterial(models.Model):
     postal_or_zip_code = models.CharField(max_length=16, blank=True, default='')
     country = CountryField(null=True)
 
-    source_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any other information about the source of the accessioned "
-        "materials. If the source performed the role for only a specific "
-        "period of time (e.g. was a custodian for several years), record the "
-        "dates in this element"
+    source_role = models.ForeignKey(
+        SourceRole, on_delete=models.SET_NULL, null=True,
+        related_name='source_of_materials'
+    )
+
+    source_note = models.TextField(blank=True, default='', help_text=cite_caais(
+        gettext(
+            "Record any other information about the source of the accessioned "
+            "materials. If the source performed the role for only a specific "
+            "period of time (e.g. was a custodian for several years), record the "
+            "dates in this element"
+        ), section=(2, 1, 5)
     ))
 
+    source_confidentiality = models.ForeignKey(
+        SourceConfidentiality, on_delete=models.SET_NULL, null=True,
+        related_name='source_of_materials'
+    )
+
     def __str__(self):
-        return f'{self.source_name} (Phone: {self.phone_number})'
+        return f'{self.__class__.__name__} #{self.id}'
+
+
+class PreliminaryCustodialHistory(models.Model):
+    ''' **Preliminary Custodial History** [CAAIS, Section 2.2]
+
+    Definition: *Information about the chain of agents, in addition to the
+    creator(s), that have exercised custody or control over the material at all
+    stages in its existence.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.preliminary_custodial_histories`
+        preliminary_custodial_history (TextField):
+            The text content of CAAIS, Section 2.2.
+    '''
+    class Meta:
+        verbose_name_plural = gettext('Preliminary custodial histories')
+        verbose_name = gettext('Preliminary custodial history')
+
+    objects = PreliminaryCustodialHistoryManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='preliminary_custodial_histories')
+
+    preliminary_custodial_history = models.TextField(
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Provide relevant custodial history information in accordance with "
+                "the repository's descriptive standard. Record the successive "
+                "transfers of ownership, responsibility and/or custody of the "
+                "accessioned material prior to its transfer to the repository"
+            ), section=(2, 2)
+        )
+    )
+
+    def __str__(self):
+        return f'{self.__class__.__name__} #{self.id}'
 
 
 class ExtentType(AbstractTerm):
-    ''' 3.2.1 Extent Type (Non-repeatable)
+    ''' **Extent Type** [CAAIS, Section 3.2.1]
+
+    Definition: *A term that characterizes the nature of each extent statement.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the extent type
+        description (TextField): A description of the extent type
     '''
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = gettext('Extent types')
         verbose_name = gettext('Extent type')
-ExtentType._meta.get_field('name').help_text = gettext(
-    "Record the extent statement type in accordance with a controlled "
-    "vocabulary maintained by the repository"
+ExtentType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the extent statement type in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ), section=(3, 2, 1)
 )
 
 
-class ExtentStatementManager(models.Manager):
-    ''' Custom manager for extent statements
+class ContentType(AbstractTerm):
+    ''' **Content Type** [CAAIS, Section 3.2.3]
+
+    Definition: *The type of material contained in the units measured,
+    considered as a form of communication or documentary genre.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the content type
+        description (TextField): A description of the content type
     '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Content types')
+        verbose_name = gettext('Content type')
+ContentType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the type of material contained in the units measured, i.e., the "
+        "genre of the material"
+    ), section=(3, 2, 3)
+)
 
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Convert the extent statements into a flat dictionary structure
-        '''
 
-        if self.get_queryset().count() == 0:
-            return {}
+class CarrierType(AbstractTerm):
+    ''' **Carrier Type** [CAAIS, Section 3.2.4]
 
-        extent_types = []
-        quantities = []
-        extent_notes = []
+    Definition: *The physical format of an object that supports or carries
+    archival materials.*
 
-        is_atom = ExportVersion.is_atom(version)
+    Inherits :py:class:`~caais.models.AbstractTerm`
 
-        def get_extent_attr(extent, attrs):
-            value = get_nested_attr(extent, attrs)
-            if value:
-                return value
-            return '' if is_atom else 'NULL'
-
-        for extent in self.get_queryset().all():
-            get_field = partial(get_extent_attr, extent)
-
-            extent_types.append(get_field('extent_type,name'))
-            quantities.append(get_field('quantity_and_type_of_units'))
-            extent_notes.append(get_field('extent_note'))
-
-        if not is_atom:
-            return {
-                'extentStatementType': '|'.join(extent_types),
-                'quantityAndTypeOfUnits': '|'.join(quantities),
-                'extentStatementNote': '|'.join(extent_notes),
-            }
-        else:
-            return {
-                'receivedExtentUnits': '|'.join(quantities)
-            }
-
-    def get_caais_metadata(self):
-        extents = []
-        for extent in self.get_queryset().all():
-            extents.append({
-                'extent_statement_type': str(extent.extent_type.name),
-                'quantity_and_type_of_units': extent.quantity_and_type_of_units,
-                'extent_statement_note': extent.extent_note,
-            })
-        return extents
+    Attributes:
+        name (CharField): The name of the carrier type
+        description (TextField): A description of the carrier type
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = gettext('Carrier types')
+        verbose_name = gettext('Carrier type')
+CarrierType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the physical format of an object that supports or carries archival "
+        "materials using a controlled vocabulary maintained by the repository"
+    ), section=(3, 2, 4)
+)
 
 
 class ExtentStatement(models.Model):
-    ''' 3.2 Extent Statement (repeatable)
-    '''
+    ''' **Extent Statement** [CAAIS, Section 3.2]
 
+    Definition: *The physical or logical quantity and type of material.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.preliminary_custodial_histories`
+        extent_type (ForeignKey):
+            See :py:class:`~caais.models.ExtentType` [CAAIS, Section 3.2.1]
+        quantity_and_unit_of_measure (TextField):
+            **Quantity and Unit of Measure** [CAAIS, Section 3.2.2]. Definition:
+            *The number and unit of measure expressing the quantity of the
+            extent.*
+        content_type (ForeignKey):
+            See :py:class:`~caais.models.ContentType` [CAAIS, Section 3.2.3]
+        carrier_type (ForeignKey):
+            See :py:class:`~caais.models.CarrierType` [CAAIS, Section 3.2.4]
+        extent_note (TextField):
+            **Extent Note** [CAAIS, Section 3.2.5]. Definition: *Additional
+            information related to the number and type of units received,
+            retained, or removed not otherwise recorded.*
+    '''
     class Meta:
         verbose_name = gettext('Extent statement')
         verbose_name_plural = gettext('Extent statements')
 
     objects = ExtentStatementManager()
 
-    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
-                                 related_name='extent_statements')
+    metadata = models.ForeignKey(
+        Metadata, on_delete=models.CASCADE, null=False,
+        related_name='extent_statements'
+    )
 
-    extent_type = models.ForeignKey(ExtentType, on_delete=models.SET_NULL,
-                                    null=True, related_name='extent_statements')
+    extent_type = models.ForeignKey(
+        ExtentType, on_delete=models.SET_NULL, null=True,
+        related_name='extent_statements'
+    )
 
-    quantity_and_type_of_units = models.CharField(max_length=256, null=False, blank=False,
-                                                  default=gettext('Not specified'),
-                                                  help_text=gettext((
-                                                        "Record the number and unit of measure expressing the quantity "
-                                                        "of the extent (e.g., 5 files, totalling 2.5MB)"
-                                                    )))
+    quantity_and_unit_of_measure = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the number and unit of measure expressing the quantity of the "
+                "extent (e.g., 5 files, totalling 2.5MB)"
+            ), section=(3, 2, 2)
+        )
+    )
 
-    extent_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record additional information related to the number and type of units "
-        "received, retained, or removed not otherwise recorded"
-    ))
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.SET_NULL, null=True,
+        related_name='extent_statements'
+    )
+
+    carrier_type = models.ForeignKey(
+        CarrierType, on_delete=models.SET_NULL, null=True,
+        related_name='extent_statements'
+    )
+
+    extent_note = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record additional information related to the number and type of "
+                "units received, retained, or removed not otherwise recorded"
+            ), section=(3, 2, 5)
+        )
+    )
 
     def __str__(self):
-        return f'Extent Statement #{self.id}'
+        return f'{self.__class__.__name__} #{self.id}'
 
 
-class LanguageOfMaterialManager(models.Manager):
-    ''' Custom manager for language of material
+class PreliminaryScopeAndContent(models.Model):
+    ''' **Preliminary Scope and Content** [CAAIS, Section 3.3]
+
+    Definition: *A preliminary description of the functions and activities that
+    generated the accessioned material as well as information about its
+    arrangement (organizational structure or relationships) and documentary
+    forms.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.preliminary_scope_and_contents`
+        preliminary_scope_and_content (TextField):
+            The text content of CAAIS, Section 3.3.
     '''
+    class Meta:
+        verbose_name_plural = gettext('Preliminary scope and content')
+        verbose_name = gettext('Preliminary scope and content')
 
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten languages into a dict so that they can be exported in a CSV.
-        '''
+    objects = PreliminaryScopeAndContentManager()
 
-        languages = self.get_queryset().values_list(
-            'language_of_material', flat=True,
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='preliminary_scope_and_contents')
+
+    preliminary_scope_and_content = models.TextField(
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record a preliminary description that may include: functions and "
+                "activities that resulted in the material's generation, dates, the "
+                "geographic area to which the material pertains, subject matter, "
+                "arrangement, classification, and documentary forms"
+            ), section=(3, 3)
         )
+    )
 
-        if not languages:
-            return {}
-
-        if version == ExportVersion.CAAIS_1_0:
-            return {
-                'languageOfMaterial': '|'.join(languages)
-            }
-        else:
-            language_list = ', '.join(languages)
-            return {
-                'scopeAndContent': f"Language of material: {language_list}"
-            }
-
-    def get_caais_metadata(self):
-        languages = []
-        for lang in self.get_queryset().all():
-            languages.append(lang.language_of_material)
-        return languages
+    def __str__(self):
+        return f'{self.__class__.__name__} #{self.id}'
 
 
 class LanguageOfMaterial(models.Model):
-    ''' 3.4 Language of Material (Repeatable)
-    '''
+    ''' **Language of Material** [CAAIS, Section 3.4]
 
+    Definition: *The language(s) and script(s) represented in the accessioned
+    materials.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.language_of_materials`
+        language_of_material (TextField):
+            The text content of CAAIS, Section 3.4.
+    '''
     class Meta:
         verbose_name_plural = gettext('Language of materials')
         verbose_name = gettext('Language of material')
@@ -821,47 +994,31 @@ class LanguageOfMaterial(models.Model):
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='language_of_materials')
 
-    language_of_material = models.CharField(max_length=128, null=False, help_text=gettext(
-        "Record, at a minimum, the language that is predominantly found in the "
-        "accessioned material"
-    ))
+    language_of_material = models.TextField(
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record, at a minimum, the language that is predominantly found in "
+                "the accessioned material"
+            ), section=(3, 4)
+        )
+    )
 
     def __str__(self):
-        return f'Language of Material #{self.id}'
-
-
-class StorageLocationManager(models.Manager):
-    ''' Custom manager for storage locations
-    '''
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Flatten storage locations into a dictionary
-        '''
-        if self.get_queryset().count() == 0:
-            return {}
-
-        locations = self.get_queryset().values_list(
-            'storage_location', flat=True
-        )
-
-        if version == ExportVersion.CAAIS_1_0:
-            return {'storageLocation': '|'.join(locations)}
-        else:
-            return {'locationInformation': '. '.join([
-                l.rstrip('. ') for l in locations
-            ])}
-
-    def get_caais_metadata(self):
-        locations = []
-        for location in self.get_queryset().all():
-            locations.append(location.storage_location)
-        return locations
+        return f'{self.__class__.__name__} #{self.id}'
 
 
 class StorageLocation(models.Model):
-    ''' 4.1 Storage Location (Repeatable)
-    '''
+    ''' **Storage Location** [CAAIS, Section 4.1]
 
+    Definition: *The physical or logical location where the material resides.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.storage_locations`
+        storage_location (TextField):
+            The text content of CAAIS, Section 4.1.
+    '''
     class Meta:
         verbose_name_plural = 'Storage locations'
         verbose_name = 'Storage location'
@@ -871,74 +1028,63 @@ class StorageLocation(models.Model):
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='storage_locations')
 
-    storage_location = models.TextField(null=False, help_text=gettext(
-        "Record the physical and/or digital location(s) within the repository "
-        "in which the accessioned material is stored"
-    ))
+    storage_location = models.TextField(
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record the physical and/or digital location(s) within the "
+                "repository in which the accessioned material is stored"
+            ), section=(4, 1)
+        )
+    )
 
     def __str__(self):
-        return f'Storage Location #{self.id}'
+        return f'{self.__class__.__name__} #{self.id}'
 
 
 class RightsType(AbstractTerm):
-    ''' 4.2.1 Rights Type (Non-repeatable)
+    ''' **Rights Type** [CAAIS, Section 4.2.1]
+
+    Definition: *A term that characterizes the nature of a rights statement.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the rights type
+        description (TextField): A description of the rights type
     '''
     class Meta(AbstractTerm.Meta):
         verbose_name_plural = 'Rights types'
-        verbose_name = 'Rights'
-RightsType._meta.get_field('name').help_text = gettext(
-    "Record the rights statement type in accordance with a controlled "
-    "vocabulary maintained by the repository"
+        verbose_name = 'Type of rights'
+RightsType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the rights statement type in accordance with a controlled "
+        "vocabulary maintained by the repository"
+    ), section=(4, 2, 1)
 )
 
 
-class RightsManager(models.Manager):
-    ''' Custom manager for rights
-    '''
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        ''' Convert rights in queryset to a flat dictionary
-        '''
-        # There is no equivalent field in AtoM for rights
-        if ExportVersion.is_atom(version) or self.get_queryset().count() == 0:
-            return {}
-
-        types = []
-        values = []
-        notes = []
-
-        for rights in self.get_queryset().all():
-            if rights.rights_type and rights.rights_type.name:
-                types.append(str(rights.rights_type.name))
-            else:
-                types.append('NULL')
-            values.append(rights.rights_value or 'NULL')
-            notes.append(rights.rights_note or 'NULL')
-
-        return {
-            'rightsStatementType': '|'.join(types),
-            'rightsStatementValue': '|'.join(values),
-            'rightsStatementNote': '|'.join(notes),
-        }
-
-    def get_caais_metadata(self):
-        rights = []
-        for right in self.get_queryset().all():
-            rights.append({
-                'rights_statement_type': str(right.rights_type.name),
-                'rights_statement_value': right.rights_value,
-                'rights_statement_note': right.rights_note,
-            })
-        return rights
-
-
 class Rights(models.Model):
-    ''' 4.2 Rights (Repeatable)
-    '''
+    ''' **Rights** [CAAIS, Section 4.2]
 
+    Definition: *The assertion of one or more rights pertaining to the
+    material.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.rights`
+        rights_type (ForeignKey):
+            See :py:class:`~caais.models.RightsType` [CAAIS, Section 4.2.1]
+        rights_value (TextField):
+            **Rights Value** [CAAIS, Section 4.2.2]. Definition: *The parameters
+            and conditions pertaining to the rights statement.*
+        rights_note (TextField):
+            **Rights Note** [CAAIS, Section 4.2.3]. Definition: *Additional
+            information related to the rights statement not otherwise recorded.*
+    '''
     class Meta:
         verbose_name_plural = 'Rights'
-        verbose_name = 'Rights'
+        verbose_name = 'Rights statement'
 
     objects = RightsManager()
 
@@ -948,169 +1094,313 @@ class Rights(models.Model):
     rights_type = models.ForeignKey(RightsType, on_delete=models.SET_NULL,
                                     null=True, related_name='rights_type')
 
-    rights_value = models.TextField(blank=True, default='', help_text=gettext(
-        "Record the nature and duration of the permission granted or "
-        "restriction imposed. Specify where the condition applies only to part "
-        "of the accession"
+
+    rights_value = models.TextField(blank=True, default='', help_text=cite_caais(
+        gettext(
+            "Record the nature and duration of the permission granted or "
+            "restriction imposed. Specify where the condition applies only to part "
+            "of the accession"
+        ), section=(4, 2, 2)
     ))
 
-    rights_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any other information relevant to describing the rights "
-        "statement"
+    rights_note = models.TextField(blank=True, default='', help_text=cite_caais(
+        gettext(
+            "Record any other information relevant to describing the rights "
+            "statement"
+        ), section=(4, 2, 3)
     ))
 
     def __str__(self):
-        return f'Rights Statement #{self.id}'
+        return f'{self.__class__.__name__} #{self.id}'
 
 
-class MaterialAssessmentType(AbstractTerm):
-    """ 4.3.1 Material Assessment Type (Repeatable)
-    """
+class PreservationRequirementsType(AbstractTerm):
+    ''' **Preservation Requirements Type** [CAAIS, Section 4.3.1]
+
+    Definition: *A description of the material's physical state, dependency or
+    preservation concerns identified.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the preservation requirements type
+        description (TextField): A description of the preservation requirements type
+    '''
     class Meta(AbstractTerm.Meta):
-        verbose_name_plural = 'Material Assessment Types'
-        verbose_name = 'Material Assessment Type'
-
-MaterialAssessmentType._meta.get_field('name').help_text = gettext(
-    "Record the material assessment statement type in accordance with a controlled "
-    "vocabulary maintained by the repository."
+        verbose_name_plural = 'Preservation requirements types'
+        verbose_name = 'Preservation requirements type'
+PreservationRequirementsType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the type of preservation requirement in accordance with a "
+        "controlled vocabulary maintained by the repository."
+    ), section=(4, 3, 1)
 )
 
 
-class MaterialAssessmentManager(models.Manager):
-    """ Custom manager for preservation requirements
-    """
+class PreservationRequirements(models.Model):
+    ''' **Preservation Requirements** [CAAIS, Section 4.3]
 
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        """ Convert preservation in queryset to a flat dictionary
-        """
-        if self.get_queryset().count() == 0:
-            return {}
+    Definition: *Information about physical condition and / or logical
+    dependencies that need to be addressed by the repository to ensure the
+    long-term preservation of the materials.*
 
-        types = []
-        values = []
-        notes = []
-        plans = []
-
-        for assessments in self.get_queryset().all():
-            if assessments.assessment_type and assessments.assessment_type.name:
-                types.append(str(assessments.assessment_type.name))
-            else:
-                types.append('NULL')
-            values.append(assessments.assessment_value or 'NULL')
-            notes.append(assessments.assessment_note or 'NULL')
-            plans.append(assessments.assessment_plan or 'NULL')
-
-        if version == ExportVersion.CAAIS_1_0:
-            return {
-                'materialAssessmentStatementType': '|'.join(types),
-                'materialAssessmentStatementValue': '|'.join(values),
-                'materialAssessmentStatementNote': '|'.join(notes),
-                'materialAssessmentActionPlan': '|'.join(plans),
-            }
-        else:
-            return {
-                'physicalCondition': '|'.join([f'Assessment Type: {x}; Statement: {y}' for
-                                               x, y in zip(types, values)])
-            }
-
-    def get_caais_metadata(self):
-        material_assessments = []
-        for assessment in self.get_queryset().all():
-            material_assessments.append({
-                'material_assessment_statement_type': str(assessment.assessment_type.name),
-                'material_assessment_statement_value': assessment.assessment_value,
-                'material_assessment_action_plan': assessment.assessment_plan,
-                'material_assessment_statement_note': assessment.assessment_note,
-            })
-        return material_assessments
-
-
-class MaterialAssessmentStatement(models.Model):
-    """ 4.3 Material Assessment Statement (Repeatable)
-    """
-
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.preservation_requirements`
+        preservation_requirements_type (ForeignKey):
+            See :py:class:`~caais.models.PreservationRequirementsType` [CAAIS,
+            Section 4.3.1]
+        preservation_requirements_value (TextField):
+            **Preservation Requirements Value** [CAAIS, Section 4.3.2].
+            Definition: *A description of the material's physical state,
+            dependency or preservation concerns identified.*
+        preservation_requirements_note (TextField):
+            **Preservation Requirements Note** [CAAIS, Section 4.3.3].
+            Definition: *Additional information related to the preservation
+            requirement not otherwise recorded.*
+    '''
     class Meta:
-        verbose_name_plural = 'Material Assessment Statements'
-        verbose_name = 'Material Assessment Statement'
+        verbose_name_plural = 'Preservation requirements'
+        verbose_name = 'Preservation requirement'
 
-    objects = MaterialAssessmentManager()
+    objects = PreservationRequirementsManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
-                                 related_name='material_assessments')
+                                 related_name='preservation_requirements')
 
-    assessment_type = models.ForeignKey(MaterialAssessmentType, on_delete=models.SET_NULL, null=True,
-                                        related_name='material_assessment_types')
+    preservation_requirements_type = models.ForeignKey(
+        PreservationRequirementsType, on_delete=models.SET_NULL, null=True,
+        related_name='preservation_requirements'
+    )
 
-    assessment_value = models.TextField(blank=True, default='', help_text=gettext(
-        "Record information about the assessment of the material with respect to its physical "
-        "condition, dependencies, processing or access."
-    ))
+    preservation_requirements_value = models.TextField(
+        blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record information about the assessment of the material with "
+                "respect to its physical condition, dependencies, processing or "
+                "access"
+            ), section=(4, 3, 2)
+        )
+    )
 
-    assessment_plan = models.TextField(blank=True, default='', help_text=gettext(
-        "Record the planned response to each of the physical requirements for preservation "
-        "and access to the material."
-    ))
-
-    assessment_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any other information relevant to the long-term preservation of the material."
-    ))
+    preservation_requirements_note = models.TextField(
+        blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to the long-term "
+                "preservation of the material"
+            ), section=(4, 3, 3)
+        )
+    )
 
     def __str__(self):
-        return f'Preservation Requirement #{self.id}'
+        return f'{self.__class__.__name__} #{self.id}'
+
+
+class AppraisalType(AbstractTerm):
+    ''' **Appraisal Type** [CAAIS, Section 4.4.1]
+
+    Definition: *A term that characterizes the nature of the appraisal.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the appraisal type
+        description (TextField): A description of the appraisal type
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = 'Appraisal types'
+        verbose_name = 'Appraisal type'
+AppraisalType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the appraisal type in accordance with a controlled vocabulary "
+        "maintained by the repository"
+    ), section=(4, 4, 1)
+)
+
+
+class Appraisal(models.Model):
+    ''' **Appraisal** [CAAIS, Section 4.4]
+
+    Definition: *Information about the assessment of value of the materials
+    accessioned.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.appraisals`
+        appraisal_type (ForeignKey):
+            See :py:class:`~caais.models.AppraisalType` [CAAIS, Section 4.4.1]
+        appraisal_value (TextField):
+            **Appraisal Value** [CAAIS, Section 4.4.2]. Definition: *A statement
+            identifying any decisions made on the appraisal and selection of
+            material, or outlining monetary appraisal details.*
+        appraisal_note (TextField):
+            **Appraisal Note** [CAAIS, Section 4.4.3]. Definition: *Additional
+            information related to the appraisal not otherwise recorded.*
+    '''
+    class Meta:
+        verbose_name_plural = 'Appraisals'
+        verbose_name = 'Appraisal'
+
+    objects = AppraisalManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='appraisals')
+
+    appraisal_type = models.ForeignKey(
+        AppraisalType, on_delete=models.SET_NULL, null=True,
+        related_name='appraisals'
+    )
+
+    appraisal_value = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Where the accession process includes appraisal activities, record "
+                "the appraisal statement value."
+            ), section=(4, 4, 2)
+        )
+    )
+
+    appraisal_note = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to describing the appraisal "
+                "activities."
+            ), section=(4, 4, 3)
+        )
+    )
+
+    def __str__(self):
+        return f'{self.__class__.__name__} #{self.id}'
+
+
+class AssociatedDocumentationType(AbstractTerm):
+    ''' **Associated Documentation Type** [CAAIS, Section 4.5.1]
+
+    Definition: *A term that characterizes the nature of the appraisal.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the associated documentation type
+        description (TextField): A description of the associated documentation type
+    '''
+    class Meta(AbstractTerm.Meta):
+        verbose_name_plural = 'Associated documentation types'
+        verbose_name = 'Associated documentation type'
+AssociatedDocumentationType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Where the accession process generates associated documents, record the "
+        "associated documentation type in accordance with a controlled vocabulary "
+        "maintained by the repository."
+    ), section=(4, 5, 1)
+)
+
+
+class AssociatedDocumentation(models.Model):
+    ''' **Associated Documentation** [CAAIS, Section 4.5]
+
+    Definition: *A reference to any documentation related to the material in the
+    accession.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.appraisals`
+        associated_documentation_type (ForeignKey):
+            See :py:class:`~caais.models.AssociatedDocumentationType` [CAAIS,
+            Section 4.5.1]
+        associated_documentation_title (TextField):
+            **Associated Documentation Title** [CAAIS, Section 4.5.2].
+            Definition: *Name of the documentation related to the accessioned
+            material*
+        associated_documentation_note (TextField):
+            **Associated Documentation Note** [CAAIS, Section 4.5.3].
+            Definition: *Additional information related to associated
+            documentation not otherwise recorded*
+    '''
+    class Meta:
+        verbose_name_plural = 'Associated documentation'
+        verbose_name = 'Associated document'
+
+    objects = AssociatedDocumentationManager()
+
+    metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
+                                 related_name='associated_documentation')
+
+    associated_documentation_type = models.ForeignKey(
+        AssociatedDocumentationType, on_delete=models.SET_NULL, null=True,
+        related_name='associated_documentation'
+    )
+
+    associated_documentation_title = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the title of the associated documentation"
+            ), section=(4, 5, 2)
+        )
+    )
+
+    associated_documentation_note = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to describing documentation "
+                "associated to the accessioned material"
+            ), section=(4, 5, 3)
+        )
+    )
+
+    def __str__(self):
+        return f'{self.__class__.__name__} #{self.id}'
 
 
 class EventType(AbstractTerm):
-    """ 5.1.1 Event Type """
+    ''' **Event Type** [CAAIS, Section 5.1.1]
+
+    Definition: *A term that characterizes the type of event documented in the
+    accession process.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the event type
+        description (TextField): A description of the event type
+    '''
     class Meta:
-        verbose_name = 'Event Type'
-        verbose_name_plural = 'Event Types'
-EventType._meta.get_field('name').help_text = gettext(
-    "Record the event type in accordance with a controlled vocabulary maintained by the repository"
+        verbose_name = 'Event type'
+        verbose_name_plural = 'Event types'
+EventType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the event type in accordance with a controlled vocabulary "
+        "maintained by the repository"
+    ), section=(5, 1, 1)
 )
 
 
-class EventManager(models.Manager):
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        # There is no equivalent for event in AtoM
-        if self.get_queryset().count() == 0 or ExportVersion.is_atom(version):
-            return {}
-
-        types = []
-        dates = []
-        agents = []
-        notes = []
-
-        for events in self.get_queryset().all():
-            if events.event_type and events.event_type.name:
-                types.append(str(events.event_type.name))
-            else:
-                types.append('NULL')
-            dates.append(events.event_date.strftime(r'%Y-%m-%d %H:%M:%S %Z') or 'NULL')
-            agents.append(events.event_agent or 'NULL')
-            notes.append(events.event_note or 'NULL')
-
-        return {
-            'eventType': '|'.join(types),
-            'eventDate': '|'.join(dates),
-            'eventAgent': '|'.join(agents),
-            'eventNote': '|'.join(notes),
-        }
-
-    def get_caais_metadata(self):
-        events = []
-        for event in self.get_queryset().all():
-            events.append({
-                'event_type': str(event.event_type.name),
-                'event_date': event.event_date.strftime(r'%Y-%m-%d %H:%M:%S %Z'),
-                'event_agent': event.event_agent,
-                'event_note': event.event_note,
-            })
-        return events
-
-
 class Event(models.Model):
-    """ 5.1 Event (Repeatable) """
+    ''' **Event** [CAAIS, Section 5.1]
+
+    Definition: *The actions taken by repository staff throughout the accession
+    process.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.events`
+        event_type (ForeignKey):
+            See :py:class:`~caais.models.EventType` [CAAIS, Section 5.1.1]
+        event_date (DateTimeField):
+            **Event Date** [CAAIS, Section 5.1.2]. Definition: *The calendar
+            date on which the event occurred.* Time is automatically set to the
+            current time when a new :code:`Event` is created.
+        event_agent (TextField):
+            **Event Agent** [CAAIS, Section 5.1.3]. Definition: *The repository
+            staff member responsible for the event.*
+        event_note (TextField):
+            **Event Note** [CAAIS, Section 5.1.4]. Definition: *Additional
+            information related to the event not otherwise recorded.*
+    '''
     class Meta:
         verbose_name_plural = 'Events'
         verbose_name = 'Event'
@@ -1119,145 +1409,150 @@ class Event(models.Model):
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='events')
-    event_type = models.ForeignKey(EventType, on_delete=models.SET_NULL, null=True, related_name='event_type')
+
+    event_type = models.ForeignKey(
+        EventType, on_delete=models.SET_NULL, null=True,
+        related_name='event_type'
+    )
+
     event_date = models.DateTimeField(auto_now_add=True)
-    event_agent = models.CharField(max_length=256, null=False, help_text=gettext(
-        "Record the name of the staff member or application responsible for the event."
-    ))
-    event_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any other information relevant to describing the event."
-    ))
+
+    event_agent = models.CharField(
+        max_length=256, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the name of the staff member or application responsible "
+                "for the event"
+            ), section=(5, 1, 3)
+        )
+    )
+
+    event_note = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to describing the event."
+            ), section=(5, 1, 4)
+        )
+    )
 
     def __str__(self):
-        return f'Event: #{self.id}'
+        return f'{self.__class__.__name__} #{self.id} @ {str(self.event_date)}'
 
-
-class GeneralNoteManager(models.Manager):
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        # There is no equivalent for generalNote in AtoM
-        if self.get_queryset().count() == 0 or ExportVersion.is_atom(version):
-            return {}
-
-        notes = []
-        for note in self.get_queryset().all():
-            notes.append(note.note or 'NULL')
-        return {
-            'generalNote': '|'.join(notes)
-        }
-
-    def get_caais_metadata(self):
-        notes = []
-        for note in self.get_queryset().all():
-            notes.append(note.note)
-        return notes
 
 
 class GeneralNote(models.Model):
-    """ 6.1 General Note """
+    ''' **General Note** [CAAIS, Section 6.1]
+
+    Definition: *Additional information relating to the accession process or
+    material that is not otherwise captured.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.general_notes`
+        general_note (TextField):
+            The text content of CAAIS, Section 6.1.
+    '''
     class Meta:
-        verbose_name = 'General Note'
-        verbose_name_plural = 'General Notes'
+        verbose_name = 'General note'
+        verbose_name_plural = 'General notes'
 
     objects = GeneralNoteManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
                                  related_name='general_notes')
-    note = models.TextField(blank=True, default='', help_text=gettext(
-        "To provide an open text element for repositories to record any relevant information not accommodated "
-        "elsewhere in this standard."
-    ))
+
+    general_note = models.TextField(
+        null=False, blank=False, help_text=cite_caais(
+            gettext(
+                "Record any other information relevant to the accession record or "
+                "accessioning process"
+            ), section=(6, 1)
+        )
+    )
+
+    def __str__(self):
+        return f'{self.__class__.__name__} #{self.id}'
 
 
-class DateOfCreationOrRevisionType(AbstractTerm):
+class CreationOrRevisionType(AbstractTerm):
+    ''' **Creation or Revision Type** [CAAIS, Section 7.2.1]
+
+    Definition: *A term characterizing the nature of the action applied to the
+    accession record.*
+
+    Inherits :py:class:`~caais.models.AbstractTerm`
+
+    Attributes:
+        name (CharField): The name of the creation or revision type
+        description (TextField): A description of the creation or revision type
+    '''
     class Meta:
-        verbose_name = 'Date of Creation or Revision Type'
-        verbose_name_plural = 'Date of Creation or Revision Types'
-DateOfCreationOrRevisionType._meta.get_field('name').help_text = gettext(
-    "Record the action type in accordance with a controlled vocabulary maintained by the repository."
+        verbose_name = 'Date of creation or revision type'
+        verbose_name_plural = 'Date of creation or revision types'
+CreationOrRevisionType._meta.get_field('name').help_text = cite_caais(
+    gettext(
+        "Record the action type in accordance with a controlled vocabulary "
+        "maintained by the repository."
+    ), section=(7, 2, 1)
 )
 
 
-class DateOfCreationOrRevisionManager(models.Manager):
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        if self.get_queryset().count() == 0:
-            return {}
-
-        types = []
-        dates = []
-        agents = []
-        notes = []
-
-        date_format = r'%Y-%m-%d %H:%M:%S %Z' if version == ExportVersion.CAAIS_1_0 else r'%Y-%m-%d'
-
-        for revision in self.get_queryset().all():
-            types.append(revision.action_type.name or 'NULL')
-            dates.append(revision.action_date.strftime(date_format) or 'NULL')
-            agents.append(revision.action_agent or 'NULL')
-            notes.append(revision.action_note or 'NULL')
-
-        if version == ExportVersion.CAAIS_1_0:
-            return {
-                'actionType': '|'.join(types),
-                'actionDate': '|'.join(dates),
-                'actionAgent': '|'.join(agents),
-                'actionNote': '|'.join(notes)
-            }
-        elif version == ExportVersion.ATOM_2_1:
-            return {
-                'creators': '|'.join(agents)
-            }
-        elif version == ExportVersion.ATOM_2_2:
-            return {
-                'creators': '|'.join(agents),
-                'creationDatesType': '|'.join(types),
-                'creationDates': '|'.join(dates),
-                'creationDatesStart': '|'.join(dates),
-                'creationDatesEnd': '|'.join(dates),
-            }
-        else:
-            return {
-                'creators': '|'.join(agents),
-                'eventTypes': '|'.join(types),
-                'eventDates': '|'.join(dates),
-                'eventStartDates': '|'.join(dates),
-                'eventEndDates': '|'.join(dates),
-            }
-
-    def __str__(self):
-        return f'DateOfCreationOrRevision #{self.id}'
-
-    def get_caais_metadata(self):
-        revisions = []
-        for revision in self.get_queryset().all():
-            revisions.append({
-                'action_type': revision.action_type.name,
-                'action_date': revision.action_date.strftime(r'%Y-%m-%d %H:%M:%S %Z'),
-                'action_agent': revision.action_agent,
-                'action_note': revision.action_note,
-            })
-        return revisions
-
-
 class DateOfCreationOrRevision(models.Model):
-    """ 7.3 Date of Creation or Revision """
+    ''' **Date of Creation or Revision** [CAAIS, Section 7.2]
+
+    Definition: *Date(s) on which the accession record was created or revised.*
+
+    Attributes:
+        metadata (ForeignKey):
+            Link to :py:class:`~caais.models.Metadata` object. Access instances
+            of this model with :code:`metadata.dates_of_creation_or_revision`
+        creation_or_revision_type (ForeignKey):
+            See :py:class:`~caais.models.CreationOrRevisionType` [CAAIS, Section
+            7.2.1]
+        creation_or_revision_date (DateTimeField):
+            **Creation or Revision Date** [CAAIS, Section 7.2.2]. Definition:
+            *The date on which the action was applied to the accession record.*
+            Time is automatically set to the current time when a new
+            :code:`DateOfCreationOrRevision` is created.
+        creation_or_revision_agent (CharField):
+            **Creation or Revision Agent** [CAAIS, Section 7.2.3]. Definition:
+            *The repository staff member responsible for the action applied to
+            the accession record.*
+        creation_or_revision_note (TextField):
+            **Creation or Revision Note** [CAAIS, Section 7.2.4]. Definition:
+            *Additional information describing the action performed on the
+            accession record.*
+    '''
     class Meta:
-        verbose_name = 'Date of Creation or Revision'
-        verbose_name_plural = 'Dates of Creation or Revision'
+        verbose_name = 'Date of creation or revision'
+        verbose_name_plural = 'Dates of creation or revision'
 
     objects = DateOfCreationOrRevisionManager()
 
     metadata = models.ForeignKey(Metadata, on_delete=models.CASCADE, null=False,
-                                 related_name='date_creation_revisions')
-    action_type = models.ForeignKey(DateOfCreationOrRevisionType, on_delete=models.SET_NULL, null=True,
-                                    related_name='action_type')
-    action_date = models.DateTimeField(auto_now_add=True, help_text=gettext(
-        "Record the date on which the action (creation or revision) occurred."
-    ))
-    action_agent = models.CharField(max_length=255, blank=False, default='', help_text=gettext(
-        "Record the name of the staff member who performed the action (creation or revision) on the accession record."
-    ))
-    action_note = models.TextField(blank=True, default='', help_text=gettext(
-        "Record any information summarizing actions applied to the accession record."
-    ))
+                                 related_name='dates_of_creation_or_revision')
+
+    creation_or_revision_type = models.ForeignKey(
+        CreationOrRevisionType, on_delete=models.SET_NULL, null=True,
+        related_name='dates_of_creation_or_revision'
+    )
+
+    creation_or_revision_date = models.DateTimeField(auto_now_add=True)
+
+    creation_or_revision_agent = models.CharField(
+        max_length=256, null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record the name of the staff member who performed the action "
+                "(creation or revision) on the accession record"
+            ), section=(7, 2, 3)
+        )
+    )
+
+    creation_or_revision_note = models.TextField(
+        null=False, blank=True, default='', help_text=cite_caais(
+            gettext(
+                "Record any information summarizing actions applied to the "
+                "accession record."
+            ), section=(7, 2, 4)
+        )
+    )

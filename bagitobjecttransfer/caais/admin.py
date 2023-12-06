@@ -3,46 +3,66 @@
 from django.contrib import admin
 
 from caais.forms import (
+    MetadataForm,
     InlineIdentifierForm,
     InlineArchivalUnitForm,
+    InlineDispositionAuthorityForm,
     InlineSourceOfMaterialForm,
+    InlinePreliminaryCustodialHistoryForm,
     InlineExtentStatementForm,
+    InlinePreliminaryScopeAndContentForm,
     InlineLanguageOfMaterialForm,
     InlineStorageLocationForm,
     InlineRightsForm,
+    InlinePreservationRequirementsForm,
+    InlineAppraisalForm,
+    InlineAssociatedDocumentationForm,
+    InlineGeneralNoteForm,
 )
 from caais.models import (
+    AcquisitionMethod,
     Status,
     Metadata,
     Identifier,
     ArchivalUnit,
-    SourceRole,
+    DispositionAuthority,
     SourceType,
+    SourceRole,
     SourceConfidentiality,
     SourceOfMaterial,
-    ExtentStatement,
+    PreliminaryCustodialHistory,
     ExtentType,
+    ContentType,
+    CarrierType,
+    ExtentStatement,
+    PreliminaryScopeAndContent,
     LanguageOfMaterial,
     StorageLocation,
     RightsType,
-    Rights, EventType,
+    Rights,
+    PreservationRequirementsType,
+    PreservationRequirements,
+    AppraisalType,
+    Appraisal,
+    AssociatedDocumentationType,
+    AssociatedDocumentation,
+    GeneralNote,
 )
 
 
-class IdentifierInlineAdmin(admin.TabularInline):
+class IdentifierInlineAdmin(admin.StackedInline):
     ''' Admin for editing identifiers inline
     '''
+
     model = Identifier
     form = InlineIdentifierForm
     show_change_link = False
     max_num = 64
     extra = 0
 
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        formset.form.base_fields['identifier_value'].required = True
-        formset.form.base_fields['identifier_note'].required = False
-        return formset
+    def get_queryset(self, request):
+        ids = super().get_queryset(request).exclude(identifier_type='Accession Identifier')
+        return ids
 
 
 class ArchivalUnitInlineAdmin(admin.TabularInline):
@@ -50,6 +70,16 @@ class ArchivalUnitInlineAdmin(admin.TabularInline):
     '''
     model = ArchivalUnit
     form = InlineArchivalUnitForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class DispositionAuthorityInlineAdmin(admin.TabularInline):
+    ''' Admin for editing disposition authorities inline
+    '''
+    model = DispositionAuthority
+    form = InlineDispositionAuthorityForm
     show_change_link = False
     max_num = 64
     extra = 0
@@ -69,24 +99,19 @@ class SourceOfMaterialInlineAdmin(admin.StackedInline):
     model = SourceOfMaterial
     form = InlineSourceOfMaterialForm
     show_change_link = False
+    min_num = 1
     max_num = 64
     extra = 0
 
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        for field_name, model in (
-                ('source_role', SourceRole),
-                ('source_type', SourceType),
-                ('source_confidentiality', SourceConfidentiality),
-            ):
-            field = formset.form.base_fields[field_name]
-            field.required = False
-            field.widget.can_add_related = True
-            field.widget.can_change_related = True
-            field.widget.can_delete_related = True
-            field.widget.attrs.update({'class': 'vTextField'})
-            field.help_text = model._meta.get_field('name').help_text
-        return formset
+
+class PreliminaryCustodialHistoryInlineAdmin(admin.TabularInline):
+    ''' Admin for editing preliminary custodial histories inline
+    '''
+    model = PreliminaryCustodialHistory
+    form = InlinePreliminaryCustodialHistoryForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
 
 
 class ExtentStatementInlineAdmin(admin.StackedInline):
@@ -97,21 +122,19 @@ class ExtentStatementInlineAdmin(admin.StackedInline):
     form = InlineExtentStatementForm
     show_change_link = False
     max_num = 64
+    min_num = 1
     extra = 0
 
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        for field_name, model, required in (
-                ('extent_type', ExtentType, True),
-            ):
-            field = formset.form.base_fields[field_name]
-            field.required = required
-            field.widget.can_add_related = True
-            field.widget.can_change_related = True
-            field.widget.can_delete_related = True
-            field.widget.attrs.update({'class': 'vTextField'})
-            field.help_text = model._meta.get_field('name').help_text
-        return formset
+
+class PreliminaryScopeAndContentInlineAdmin(admin.TabularInline):
+    ''' Admin for editing preliminary scope and contents inline
+    '''
+
+    model = PreliminaryScopeAndContent
+    form = InlinePreliminaryScopeAndContentForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
 
 
 class LanguageOfMaterialInlineAdmin(admin.TabularInline):
@@ -136,7 +159,7 @@ class StorageLocationInlineAdmin(admin.TabularInline):
     extra = 0
 
 
-class RightsInlineAdmin(admin.TabularInline):
+class RightsInlineAdmin(admin.StackedInline):
     ''' Admin for editing rights inline
     '''
 
@@ -146,21 +169,49 @@ class RightsInlineAdmin(admin.TabularInline):
     max_num = 64
     extra = 0
 
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        for field_name, model, required in (
-                ('rights_type', RightsType, True),
-            ):
-            field = formset.form.base_fields[field_name]
-            field.required = required
-            field.widget.can_add_related = True
-            field.widget.can_change_related = True
-            field.widget.can_delete_related = True
-            field.widget.attrs.update({'class': 'vTextField'})
-            field.help_text = model._meta.get_field('name').help_text
-        formset.form.base_fields['rights_value'].required = True
-        formset.form.base_fields['rights_note'].required = False
-        return formset
+
+class PreservationRequirementsInlineAdmin(admin.StackedInline):
+    ''' Admin for editing preservation requirements inline
+    '''
+
+    model = PreservationRequirements
+    form = InlinePreservationRequirementsForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class AppraisalInlineAdmin(admin.StackedInline):
+    ''' Admin for editing appraisals inline
+    '''
+
+    model = Appraisal
+    form = InlineAppraisalForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class AssociatedDocumentationInlineAdmin(admin.StackedInline):
+    ''' Admin for editing associated documentation inline
+    '''
+
+    model = AssociatedDocumentation
+    form = InlineAssociatedDocumentationForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
+
+
+class GeneralNoteInlineAdmin(admin.TabularInline):
+    ''' Admin for editing general notes inline
+    '''
+
+    model = GeneralNote
+    form = InlineGeneralNoteForm
+    show_change_link = False
+    max_num = 64
+    extra = 0
 
 
 @admin.register(Metadata)
@@ -172,37 +223,50 @@ class MetadataAdmin(admin.ModelAdmin):
     class Media:
         css = {
             'all': (
-                'caais/css/inlineTextInputs.css',
+                'caais/css/metadataChangeForm.css',
             )
         }
 
+    change_form_template = 'admin/metadata_change_form.html'
+
+    form = MetadataForm
+
     list_display = [
         'accession_title',
-        'repository',
+        'accession_identifier',
         'acquisition_method',
-        'id',
     ]
 
     inlines = [
         IdentifierInlineAdmin,
         ArchivalUnitInlineAdmin,
+        DispositionAuthorityInlineAdmin,
         SourceOfMaterialInlineAdmin,
+        PreliminaryCustodialHistoryInlineAdmin,
         ExtentStatementInlineAdmin,
+        PreliminaryScopeAndContentInlineAdmin,
         LanguageOfMaterialInlineAdmin,
         StorageLocationInlineAdmin,
         RightsInlineAdmin,
+        PreservationRequirementsInlineAdmin,
+        AppraisalInlineAdmin,
+        AssociatedDocumentationInlineAdmin,
+        GeneralNoteInlineAdmin,
     ]
 
-    def get_form(self, request, obj=None, **kwargs):
-        """ Some fields are not populated in the form but seem required. """
-        form = super().get_form(request, obj, **kwargs)
-        for field_name, required in (
-                ('disposition_authority', False),
-            ):
-            form.base_fields[field_name].required = required
-        return form
 
-
+@admin.register(AcquisitionMethod)
+@admin.register(Status)
+@admin.register(SourceType)
+@admin.register(SourceRole)
+@admin.register(SourceConfidentiality)
+@admin.register(ExtentType)
+@admin.register(ContentType)
+@admin.register(CarrierType)
+@admin.register(RightsType)
+@admin.register(PreservationRequirementsType)
+@admin.register(AppraisalType)
+@admin.register(AssociatedDocumentationType)
 class TermAdmin(admin.ModelAdmin):
     ''' Generic administrator for models inheriting from AbstractTerm
     '''
@@ -212,45 +276,4 @@ class TermAdmin(admin.ModelAdmin):
         'id',
     ]
 
-    ordering = ['-id']
-
-
-@admin.register(Status)
-class StatusAdmin(TermAdmin):
-    ''' Administrator to add/change accession statuses
-    '''
-
-
-@admin.register(SourceRole)
-class SourceRoleAdmin(TermAdmin):
-    ''' Administrator to add/change source roles
-    '''
-
-
-@admin.register(SourceType)
-class SourceTypeAdmin(TermAdmin):
-    ''' Administrator to add/change source types
-    '''
-
-
-@admin.register(SourceConfidentiality)
-class SourceConfidentialityAdmin(TermAdmin):
-    ''' Administrator to add/change source confidentialies
-    '''
-
-
-@admin.register(ExtentType)
-class ExtentTypeAdmin(TermAdmin):
-    ''' Administrator to add/change extent types
-    '''
-
-
-@admin.register(RightsType)
-class RightsTypeAdmin(TermAdmin):
-    ''' Administrator add/change rights types
-    '''
-
-
-@admin.register(EventType)
-class EventTypeAdmin(TermAdmin):
-    """Administrator add/change event types"""
+    ordering = ['name']

@@ -199,7 +199,7 @@ def _get_do_not_reply_email_address() -> str:
     DO_NOT_REPLY_USERNAME.
     '''
     domain = Site.objects.get_current().domain
-    matched = re.match('^(?P<domain>[^:]+)(?::(?P<port>\d+))?$', domain)
+    matched = re.match(r'^(?P<domain>[^:]+)(?::(?P<port>\d+))?$', domain)
 
     if matched and matched.group('domain').lower() in ('127.0.0.1', 'localhost'):
         clean_domain = 'example.com'

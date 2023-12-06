@@ -1,9 +1,7 @@
 ''' Custom administration code for the admin site '''
 import csv
 import logging
-import os
-import zipfile
-from io import StringIO, BytesIO
+from io import StringIO
 from pathlib import Path
 
 from django.contrib import admin, messages
@@ -22,12 +20,10 @@ from django.utils.translation import gettext
 from caais.export import ExportVersion
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import InlineSubmissionGroupForm, SubmissionForm, \
-    InlineSubmissionForm, AppraisalForm, InlineAppraisalFormSet, UploadSessionForm, \
-    UploadedFileForm, InlineUploadedFileForm
+    InlineSubmissionForm, UploadSessionForm, UploadedFileForm, InlineUploadedFileForm
 from recordtransfer.jobs import create_downloadable_bag
-from recordtransfer.models import User, UploadSession, UploadedFile, SubmissionGroup, Appraisal, \
+from recordtransfer.models import User, UploadSession, UploadedFile, SubmissionGroup, \
     Submission, Job
-from recordtransfer.settings import ALLOW_BAG_CHANGES
 
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
 
@@ -75,7 +71,7 @@ def export_submission_csv(queryset, version: ExportVersion, filename_prefix: str
     csv_file = StringIO()
     writer = csv.writer(csv_file)
     for i, submission in enumerate(queryset, 0):
-        new_row = submission.flatten(version)
+        new_row = submission.metadata.create_flat_representation(version)
         # Write the headers on the first loop
         if i == 0:
             writer.writerow(new_row.keys())
@@ -337,88 +333,9 @@ class SubmissionGroupInline(admin.TabularInline):
         return False
 
 
-@admin.register(Appraisal)
-class AppraisalAdmin(admin.ModelAdmin):
-    ''' Admin for the Appraisal model
-
-    Permissions:
-        - add: Not allowed (must be done from the Appraisal inline)
-        - change: Allowed if editor created the appraisal
-        - delete: Allowed if editor created the appraisal, or if editor is a superuser
-    '''
-    form = AppraisalForm
-
-    actions = [
-        'delete_selected'
-    ]
-
-    list_display = [
-        'appraisal_type',
-        'appraisal_date',
-        linkify('user'),
-        linkify('submission'),
-    ]
-
-    ordering = [
-        '-appraisal_date',
-    ]
-
-    readonly_fields = [
-        'user',
-        'appraisal_date'
-    ]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return obj and request.user == obj.user
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser or (obj and request.user == obj.user)
-
-
-class AppraisalInline(admin.TabularInline):
-    ''' Inline admin for the Appraisal model. Used to edit Appraisals associated
-    with a Submission. Deletions are not allowed.
-
-    Permissions:
-        - add: Allowed
-        - change: Not allowed - go to Appraisal page for change ability
-        - delete: Not allowed - go to Appraisal page for delete ability
-    '''
-    model = Appraisal
-    max_num = 64
-    extra = 0
-    show_change_link = True
-
-    form = AppraisalForm
-    formset = InlineAppraisalFormSet
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.can_delete = False
-
-    def has_add_permission(self, request, obj=None):
-        return True
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        formset.request = request
-        return formset
-
-
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    ''' Admin for the Submission model. Adds a view to view the transfer report
-    associated with the submission. The report view can be accessed at
-    code:`submission/<id>/report/`
+    ''' Admin for the Submission model.
 
     Permissions:
         - add: Not allowed
@@ -429,18 +346,12 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     form = SubmissionForm
 
-    inlines = [
-        AppraisalInline,
-    ]
-
     actions = [
-        'export_caais_reports',
         'export_caais_csv',
         'export_atom_2_6_csv',
         'export_atom_2_3_csv',
         'export_atom_2_2_csv',
         'export_atom_2_1_csv',
-        'export_reports',
     ]
 
     search_fields = [
@@ -451,7 +362,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = [
         'submission_date',
         'id',
-        'review_status',
+        'uuid',
         'number_of_files_uploaded',
         linkify('user'),
         linkify('metadata'),
@@ -466,6 +377,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         'user',
         'upload_session',
         'part_of_group',
+        'uuid',
     ]
 
 
@@ -484,19 +396,14 @@ class SubmissionAdmin(admin.ModelAdmin):
         return obj and request.user.is_superuser
 
     def get_urls(self):
-        ''' Add report/ view to admin
-        '''
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        report_url = [
-            path('<path:object_id>/report/',
-                 self.admin_site.admin_view(self.view_report),
-                 name='%s_%s_report' % info),
-            path('<path:object_id>/zip/',
-                 self.admin_site.admin_view(self.create_zipped_bag),
-                 name='%s_%s_zip' % info),
-        ]
-        return report_url + urls
+        ''' Add extra views to admin '''
+        return [
+            path(
+                '<path:object_id>/zip/',
+                self.admin_site.admin_view(self.create_zipped_bag),
+                name=f'{self.model._meta.app_label}_{self.model._meta.model_name}_zip',
+            ),
+        ] + super().get_urls()
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         job = Job.objects.get_queryset().filter(Q(user_triggered=request.user) & Q(submission_id=object_id)).first()
@@ -506,67 +413,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         if job is not None:
             extra_context['generated_bag_url'] = job.get_admin_download_url()
         return super().changeform_view(request, object_id, form_url, extra_context)
-
-    def view_report(self, request, object_id):
-        ''' Redirect to the submission's report if the submission exists
-
-        Args:
-            request: The originating request
-            object_id: The ID for the submission
-        '''
-        submission = Submission.objects.filter(id=object_id).first()
-        if submission:
-            return HttpResponse(submission.get_report())
-        # Error response
-        msg = gettext('Submission with ID “%(key)s” doesn’t exist. Perhaps it was deleted?') % {
-            'key': object_id,
-        }
-        self.message_user(request, msg, messages.WARNING)
-        url = reverse('admin:index', current_app=self.admin_site.name)
-        return HttpResponseRedirect(url)
-
-    def export_reports(self, request, queryset):
-        ''' Download an application/x-zip-compressed file containing reports
-        for each of the selected submissions.
-
-        Args:
-            request: The originating request
-            queryset: One or more submissions
-        '''
-        zipf = BytesIO()
-        with zipfile.ZipFile(zipf, 'w', zipfile.ZIP_DEFLATED, False) as zipped_reports:
-            for submission in queryset:
-                if submission and submission.metadata:
-                    report = submission.get_report()
-                    zipped_reports.writestr(f'{submission.bag_name}.html', report)
-        zipf.seek(0)
-        response = HttpResponse(zipf, content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = 'attachment; filename=exported-submission-reports.zip'
-        zipf.close()
-        return response
-    export_reports.short_description = 'Export CAAIS submission reports for Selected'
-
-    def save_related(self, request, form, formsets, change):
-        ''' Update Submission in case an Appraisal is added. Deleting inline Appraisals
-        is not allowed, so the case of deleting from the formset is not handled.
-        '''
-        for formset in formsets:
-            if formset.model != Appraisal:
-                continue
-
-            obj = form.instance
-            appraisals = formset.save(commit=False)
-
-            if not appraisals:
-                continue
-
-            for appraisal in appraisals:
-                appraisal.user = request.user
-                appraisal.save()
-
-            obj.save()
-            formset.save_m2m()
-        super().save_related(request, form, formsets, change)
 
     def create_zipped_bag(self, request, object_id):
         ''' Start a background job to create a downloadable bag

@@ -9,7 +9,9 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 from django.utils.text import slugify
 
-from recordtransfer.caais import convert_form_data_to_metadata
+from caais.models import Metadata
+
+from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.emails import (
     send_submission_creation_success,
     send_thank_you_for_your_transfer,
@@ -43,10 +45,10 @@ def create_and_save_submission(form_data: dict, user_submitted: User):
         ))
         upload_session = None
 
-    LOGGER.info('Creating serializable CAAIS metadata from form data')
-    metadata = convert_form_data_to_metadata(form_data)
+    LOGGER.info('Mapping form data to CAAIS metadata')
+    metadata: Metadata = map_form_to_metadata(form_data)
 
-    title = form_data['accession_title']
+    title = metadata.accession_title
     abbrev_title = title if len(title) <= 20 else title[0:20]
     bag_name = '{username}_{datetime}_{title}'.format(
         username=slugify(user_submitted),

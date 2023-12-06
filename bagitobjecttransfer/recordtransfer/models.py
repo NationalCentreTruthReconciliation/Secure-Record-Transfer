@@ -1,8 +1,6 @@
 ''' Record Transfer application models '''
 import os
-from collections import OrderedDict
 from pathlib import Path
-import json
 import logging
 import shutil
 import uuid
@@ -11,7 +9,6 @@ from typing import Union
 import bagit
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -230,18 +227,9 @@ class SubmissionGroup(models.Model):
 class Submission(models.Model):
     ''' The top-level object representing a user's submission.
     '''
-    class ReviewStatus(models.TextChoices):
-        ''' The status of the submission's review
-        '''
-        NOT_REVIEWED = 'NR', _('Not Reviewed')
-        REVIEW_STARTED = 'RS', _('Review Started')
-        REVIEW_COMPLETE = 'RC', _('Review Complete')
-
     submission_date = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     metadata = models.OneToOneField(Metadata, on_delete=models.CASCADE, null=True, related_name='submission')
-    review_status = models.CharField(max_length=2, choices=ReviewStatus.choices,
-                                     default=ReviewStatus.NOT_REVIEWED)
     part_of_group = models.ForeignKey(SubmissionGroup, on_delete=models.SET_NULL, blank=True, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
@@ -261,23 +249,14 @@ class Submission(models.Model):
     def extent_statements(self):
         """ Return the first extent statement for this submission. """
         for e in self.metadata.extent_statements.get_queryset().all():
-            return e.quantity_and_type_of_units
+            return e.quantity_and_unit_of_measure
         return ''
 
-    def get_report(self):
-        ''' Create an HTML report for this submission
-
-        Returns:
-            (str): A string containing the report markup
+    def get_admin_metadata_change_url(self):
+        ''' Get the URL to change the metadata object in the admin
         '''
-        report_metadata = self.metadata.get_caais_metadata()
-        report_metadata['section_1']['status'] = self.ReviewStatus(self.review_status).label
-        report_metadata['section_4']['appraisal_statement'] = self.appraisals.get_caais_metadata()
-        return render_to_string('recordtransfer/report/metadata_report.html', context={
-            'submission': self,
-            'current_date': timezone.now(),
-            'metadata': report_metadata,
-        })
+        view_name = 'admin:{0}_{1}_change'.format(self.metadata._meta.app_label, self.metadata._meta.model_name)
+        return reverse(view_name, args=(self.metadata.pk,))
 
     def get_admin_metadata_change_url(self):
         ''' Get the URL to change the metadata object in the admin
@@ -304,12 +283,6 @@ class Submission(models.Model):
 
     def __str__(self):
         return f'Submission by {self.user} at {self.submission_date}'
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        new_row = self.metadata.flatten(version)
-        new_row['status'] = self.ReviewStatus(self.review_status).label if self.review_status else ''
-        new_row.update(self.appraisals.flatten(version))
-        return new_row
 
     def make_bag(self, algorithms: Union[str, list] = 'sha512', file_perms: str = '644',
                  logger=None):
@@ -371,8 +344,7 @@ class Submission(models.Model):
         logger.info('Creating BagIt bag at "%s"', self.location)
         logger.info('Using these checksum algorithm(s): %s', ', '.join(algorithms))
 
-        bagit_info = self.metadata.flatten()
-        bagit_info.update(self.appraisals.flatten())
+        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
         bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
 
         logger.info('Setting file mode for bag payload files to %s', file_perms)
@@ -405,77 +377,6 @@ class Submission(models.Model):
         """ Remove the BagIt bag if it exists. """
         if os.path.exists(self.location):
             os.unlink(self.location)
-
-
-class AppraisalManager(models.Manager):
-    """ Custom manager for Appraisals """
-
-    def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0):
-        if self.get_queryset().count() == 0:
-            return {}
-
-        appraisal_types = []
-        appraisal_values = []
-        appraisal_notes = []
-        for appraisal in self.get_queryset().all():
-            appraisal_types.append(appraisal.appraisal_type)
-            appraisal_values.append(appraisal.statement)
-            appraisal_notes.append(appraisal.note or 'NULL')
-
-        if version == ExportVersion.CAAIS_1_0:
-            return {
-                'appraisalStatementType': '|'.join(appraisal_types),
-                'appraisalStatementValue': '|'.join(appraisal_values),
-                'appraisalStatementNote': '|'.join(appraisal_notes),
-            }
-        else:
-            return {
-                'appraisal': '|'.join([
-                    f'Appraisal Type: {x}; Statement: {y}; Notes: {z}' if z != 'NULL' else
-                    f'Appraisal Type: {x}; Statement: {y}' for
-                    x, y, z in zip(appraisal_types, appraisal_values, appraisal_notes)
-                ])
-            }
-
-    def get_caais_metadata(self):
-        appraisals = []
-        for appraisal in self.get_queryset().all():
-            appraisals.append({
-                'appraisal_statement_type': Appraisal.AppraisalType(appraisal.appraisal_type).label,
-                'appraisal_statement_value': appraisal.statement,
-                'appraisal_statement_note':  appraisal.note,
-            })
-        return appraisals
-
-
-class Appraisal(models.Model):
-    ''' An appraisal made by an administrator for a submission
-    '''
-    class AppraisalType(models.TextChoices):
-        ''' The type of the appraisal being made '''
-        ARCHIVAL_APPRAISAL = 'AP', _('Archival Appraisal')
-        MONETARY_APPRAISAL = 'MP', _('Monetary Appraisal')
-
-    objects = AppraisalManager()
-
-    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='appraisals')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
-    appraisal_type = models.CharField(max_length=2, choices=AppraisalType.choices)
-    appraisal_date = models.DateTimeField(auto_now=True)
-    statement = models.TextField(null=False)
-    note = models.TextField(default='', null=True)
-
-    def to_serializable(self):
-        obj = OrderedDict()
-        obj['_id'] = self.id
-        obj['appraisal_statement_type'] = str(self.AppraisalType(self.appraisal_type).label)
-        obj['appraisal_statement_value'] = str(self.statement)
-        obj['appraisal_statement_note'] = str(self.note)
-        return obj
-
-    def __str__(self):
-        return f'{self.get_appraisal_type_display()} by {self.user} on {self.appraisal_date}'
 
 
 class Job(models.Model):

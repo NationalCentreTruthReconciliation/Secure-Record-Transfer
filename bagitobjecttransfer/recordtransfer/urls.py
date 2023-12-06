@@ -41,6 +41,7 @@ urlpatterns = [
 
     path('about/', views.About.as_view(), name='about'),
     path('profile/', login_required(views.UserProfile.as_view()), name='userprofile'),
+    path('submission/<uuid:uuid>/', login_required(views.SubmissionDetail.as_view()), name="submissiondetail"),
 ]
 
 if settings.FILE_UPLOAD_ENABLED:

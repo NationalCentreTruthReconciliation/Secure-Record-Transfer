@@ -53,8 +53,15 @@ class ContactInfoForm(TransferForm):
     job_title = forms.CharField(
         max_length=64,
         min_length=2,
-        required=True,
+        required=False,
         label=gettext('Job title'),
+    )
+
+    organization = forms.CharField(
+        max_length=64,
+        min_length=2,
+        required=False,
+        label=gettext('Organization'),
     )
 
     phone_number = forms.RegexField(
@@ -216,33 +223,33 @@ class SourceInfoForm(TransferForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        source_type = cleaned_data.get('source_type')
-        if source_type is None or source_type in forms.Field.empty_values:
-            self.add_error('source_type', gettext('The source type is required'))
-        else:
-            if source_type.name.lower().strip() == 'other':
-                source_type_other = cleaned_data.get('other_source_type')
-                if source_type_other in forms.Field.empty_values:
-                    self.add_error('other_source_type',
-                                   gettext('When source type is "Other", you must fill out '
-                                           'this field.'))
-                else:
-                    cleaned_data['source_type'] = source_type_other
+        source_type = cleaned_data.get('source_type', None)
+        other_source_type = cleaned_data.get('other_source_type', '')
 
-        source_role = cleaned_data.get('source_role')
-        if source_role is None or source_role in forms.Field.empty_values:
-            self.add_error('source_role', gettext('The source role is required'))
-        else:
-            if source_role.name.lower().strip() == 'other':
-                source_role_other = cleaned_data.get('other_source_role')
-                if source_role_other in forms.Field.empty_values:
-                    self.add_error('other_source_role',
-                                   gettext('When source role is "Other", you must fill out '
-                                           'this field.'))
-                else:
-                    cleaned_data['source_role'] = source_role_other
+        if (not source_type or source_type.name.lower() == 'other') and not other_source_type:
+            self.add_error('source_type', gettext(
+                'If "Other source type" is empty, you must choose one of the '
+                'Source types here'
+            ))
+            self.add_error('other_rights_type', gettext(
+                'If "Source type" is Other, you must enter a different type '
+                'here'
+            ))
+
+        source_role = cleaned_data.get('source_role', None)
+        other_source_role = cleaned_data.get('other_source_role', '')
+        if (not source_role or source_role.name.lower() == 'other') and not other_source_role:
+            self.add_error('source_role', gettext(
+                'If "Other source role" is empty, you must choose one of the '
+                'Source roles here'
+            ))
+            self.add_error('other_source_role', gettext(
+                'If "Source role" is Other, you must enter a different type '
+                'here'
+            ))
 
         return cleaned_data
+
 
     source_name = forms.CharField(
         max_length=64,
@@ -299,7 +306,7 @@ class SourceInfoForm(TransferForm):
             .order_by('sort_order_other_first'),
         empty_label=gettext('Please select one'),
         label=gettext('Source role **'),
-        help_text=gettext('How would you describe <b>how</b> the source relates to the records? '),
+        help_text=gettext('How does the source relate to the records? '),
         widget=forms.Select(
             attrs={
                 'class': 'reduce-form-field-width',
@@ -328,7 +335,7 @@ class SourceInfoForm(TransferForm):
         help_text=gettext('e.g., The donor wishes to remain anonymous')
     )
 
-    custodial_history = forms.CharField(
+    preliminary_custodial_history = forms.CharField(
         required=False,
         max_length=2000,
         widget=forms.Textarea(attrs={
@@ -451,7 +458,7 @@ class RecordDescriptionForm(TransferForm):
         label=gettext('Language(s)')
     )
 
-    scope_and_content = forms.CharField(
+    preliminary_scope_and_content = forms.CharField(
         required=True,
         min_length=4,
         max_length=2000,
@@ -482,7 +489,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
     uploads are disabled.
     '''
 
-    quantity_and_type_of_units = forms.CharField(
+    quantity_and_unit_of_measure = forms.CharField(
         required=False,
         min_length=4,
         widget=forms.Textarea(attrs={
@@ -508,22 +515,22 @@ class RightsForm(TransferForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        rights_type = cleaned_data.get('rights_statement_type')
-        if rights_type is not None:
-            if rights_type.name.lower().strip() == 'other':
-                rights_type_other = cleaned_data.get('other_rights_statement_type')
-                if rights_type_other in forms.Field.empty_values:
-                    self.add_error('other_rights_statement_type',
-                                   gettext('When "Type of Rights" is "Other", you must fill out '
-                                           'this field.'))
-                else:
-                    cleaned_data['rights_statement_type'] = rights_type_other
+        rights_type = cleaned_data.get('rights_type', None)
+        other_rights_type = cleaned_data.get('other_rights_type', '')
 
-        # Rights Statement Note is required for CAAIS compliance, but is not used
-        cleaned_data['rights_statement_note'] = ''
+        if not rights_type and not other_rights_type:
+            self.add_error('rights_type', gettext(
+                'If "Other type of rights" is empty, you must choose one of the '
+                'Rights types here'
+            ))
+            self.add_error('other_rights_type', gettext(
+                'If "Type of rights" is empty, you must enter a different type '
+                'here'
+            ))
+
         return cleaned_data
 
-    rights_statement_type = forms.ModelChoiceField(
+    rights_type = forms.ModelChoiceField(
         queryset=RightsType.objects.all()\
             .annotate(
                 sort_order_other_first=Case(
@@ -537,7 +544,7 @@ class RightsForm(TransferForm):
         empty_label=gettext('Please select one')
     )
 
-    other_rights_statement_type = forms.CharField(
+    other_rights_type = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
             'placeholder': gettext('Other type of rights not covered by other choices'),
@@ -547,7 +554,7 @@ class RightsForm(TransferForm):
         label=gettext('Other type of rights'),
     )
 
-    rights_statement_value = forms.CharField(
+    rights_value = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
             'rows': '2',
@@ -558,6 +565,13 @@ class RightsForm(TransferForm):
         label=gettext('Notes for rights')
     )
 
+    '''
+    rights_note = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        label='hidden'
+    )
+    '''
 
 class OtherIdentifiersForm(TransferForm):
     ''' The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS '''
