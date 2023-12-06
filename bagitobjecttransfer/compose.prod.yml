@@ -46,7 +46,7 @@ services:
     volumes:
       - mysql-database:/var/lib/mysql
       - ./docker/logs/mysql:/var/log/mysql
-      - ./docker/nginx/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
+      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
 
   rq:
     build: .
