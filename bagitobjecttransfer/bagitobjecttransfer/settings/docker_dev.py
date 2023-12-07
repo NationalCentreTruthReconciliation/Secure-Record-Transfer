@@ -27,10 +27,10 @@ DATABASES = {
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'redis',
-        'PORT': 6379,
+        'HOST': config('REDIS_HOST', default='redis'),
+        'PORT': config('REDIS_PORT', cast=int, default=6379),
         'DB': 0, # Redis database index
-        'PASSWORD': '',
+        'PASSWORD': config('REDIS_PASSWORD', ''),
         'DEFAULT_TIMEOUT': 500,
     },
 }

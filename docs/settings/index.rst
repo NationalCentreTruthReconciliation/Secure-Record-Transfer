@@ -219,6 +219,78 @@ CLAMAV_PORT
         CLAMAV_PORT=3310
 
 
+REDIS_HOST
+^^^^^^^^^^
+
+    *The name of the host Redis is running on*
+
+    .. table::
+
+        ===========  ===============  =========
+        Required     Default          Type
+        ===========  ===============  =========
+        NO           redis            string
+        ===========  ===============  =========
+
+    Chooses the host where Redis is running. Redis is used in tandem with RQ to store ephemeral info
+    about asynchronous jobs.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        REDIS_HOST=my-redis
+
+
+REDIS_PORT
+^^^^^^^^^^
+
+    *The port Redis is running on*
+
+    .. table::
+
+        ===========  ===============  =========
+        Required     Default          Type
+        ===========  ===============  =========
+        NO           6379             int
+        ===========  ===============  =========
+
+    Chooses the port where Redis is accessible on the :ref:`REDIS_HOST`.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        REDIS_PORT=6379
+
+
+REDIS_PASSWORD
+^^^^^^^^^^^^^^
+
+    *The password required to connect to Redis*
+
+    .. table::
+
+        ===========  ===============  =========
+        Required     Default          Type
+        ===========  ===============  =========
+        NO           ""               string
+        ===========  ===============  =========
+
+    By default, Redis **does not require a password**. If you would prefer to set one up, you can,
+    and then use this setting to control the password. The default empty value is fine if you are
+    using the application's default Redis configuration.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        REDIS_PASSWORD=a-strong-password-here
+
+
 File Upload Controls
 --------------------
 
