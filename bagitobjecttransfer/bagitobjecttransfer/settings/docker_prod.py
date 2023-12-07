@@ -16,7 +16,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
         'HOST': config('MYSQL_HOST'),
-        'PORT': config('MYSQL_PORT'),
+        'PORT': config('MYSQL_PORT', cast=int, default=3306),
         'USER': config('MYSQL_USER'),
         'PASSWORD': config('MYSQL_PASSWORD'),
         'NAME': config('MYSQL_DATABASE'),
@@ -44,7 +44,7 @@ RQ_SHOW_ADMIN_LINK = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_PORT = config('EMAIL_PORT', cast=int, default=25)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
