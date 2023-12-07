@@ -16,7 +16,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
         'HOST': config('MYSQL_HOST'),
-        'PORT': config('MYSQL_PORT'),
+        'PORT': config('MYSQL_PORT', cast=int, default=3306),
         'USER': config('MYSQL_USER'),
         'PASSWORD': config('MYSQL_PASSWORD'),
         'NAME': config('MYSQL_DATABASE'),
@@ -29,10 +29,10 @@ DATABASES = {
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'redis',
-        'PORT': 6379,
+        'HOST': config('REDIS_HOST', default='redis'),
+        'PORT': config('REDIS_PORT', cast=int, default=6379),
         'DB': 0, # Redis database index
-        'PASSWORD': '',
+        'PASSWORD': config('REDIS_PASSWORD', default=''),
         'DEFAULT_TIMEOUT': 500,
     },
 }
@@ -44,7 +44,7 @@ RQ_SHOW_ADMIN_LINK = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_PORT = config('EMAIL_PORT', cast=int, default=25)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
