@@ -68,6 +68,7 @@
 
 .flex-item > textarea {
     resize: none;
+    font-size: 10.5pt;
 }
 
 .flex-error > div {
