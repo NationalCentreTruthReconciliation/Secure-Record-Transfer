@@ -393,11 +393,11 @@ class TransferFormWizard(SessionWizardView):
             form_list: The list of forms the user filled out.
 
         Returns:
-            HttpResponseRedirect: Redirects the user to the Transfer Sent page.
+            HttpResponseRedirect: Redirects the user to their User Profile page.
         '''
         form_data = self.get_all_cleaned_data()
         create_and_save_submission.delay(form_data, self.request.user)
-        return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
+        return HttpResponseRedirect(reverse('recordtransfer:userprofile'))
 
 
 @require_http_methods(['POST'])
