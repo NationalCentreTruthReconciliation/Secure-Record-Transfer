@@ -6,20 +6,23 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden, Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
+from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, UpdateView, DetailView
+from django.views.generic import TemplateView, FormView, UpdateView, DetailView, View
 from formtools.wizard.views import SessionWizardView
 
+from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from recordtransfer import settings
+from recordtransfer.admin import export_submission_csv
 from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.jobs import create_and_save_submission
@@ -742,3 +745,29 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         context['current_date'] = timezone.now()
         context['metadata'] = context['submission'].metadata
         return context
+
+
+class SubmissionCsv(UserPassesTestMixin, View):
+    ''' Generates a CSV containing the submission, downloads that CSV, and redirects to the user's
+    profile.
+    '''
+
+    def get_object(self):
+        self.get_queryset().first()
+
+    def get_queryset(self):
+        uuid = self.kwargs['uuid']
+        try:
+            return Submission.objects.filter(uuid=str(uuid))
+        except Submission.DoesNotExist:
+            raise Http404
+
+    def test_func(self):
+        submission = self.get_object()
+        # Check if the user is the creator of the submission or is a staff member
+        return self.request.user.is_staff or submission.user == self.request.user
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        prefix = slugify(queryset.first().user.username) + '_export-'
+        return export_submission_csv(queryset, ExportVersion.CAAIS_1_0, prefix)
