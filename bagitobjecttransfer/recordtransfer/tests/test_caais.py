@@ -403,6 +403,9 @@ class TestFormToSourceOfMaterial(TestCase):
 
     def setUp(self):
         self.metadata = Metadata.objects.create()
+        self.other_source_role, _ = SourceRole.objects.get_or_create(name='Other')
+        self.other_source_type, _ = SourceType.objects.get_or_create(name='Other')
+
 
     @patch('recordtransfer.settings.CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY', '')
     def test_populate_source_of_material_no_data(self):
@@ -472,25 +475,10 @@ class TestFormToSourceOfMaterial(TestCase):
         self.assertEqual(source.source_note, 'Notes notes notes.')
         self.assertFalse(source.source_confidentiality)
 
-    def test_populate_source_of_material_incorrect_source_type(self):
-        ''' Test case where a string is specified instead of a SourceType object
-        in the source_type field
-        '''
-        form_data = {
-            'source_type': 'Not known', # Should be a SourceType object, but string *is* allowed
-        }
-
-        add_source_of_materials(form_data, self.metadata)
-
-        self.assertEqual(self.metadata.source_of_materials.count(), 1)
-        source = self.metadata.source_of_materials.first()
-        self.assertFalse(source.source_type)
-        self.assertEqual(source.source_note, "Source type was noted as 'Not known'")
-
 
     def test_populate_source_of_material_other_source_type(self):
         form_data = {
-            'source_type': None,
+            'source_type': self.other_source_type,
             'other_source_type': 'Committee',
         }
 
@@ -498,12 +486,12 @@ class TestFormToSourceOfMaterial(TestCase):
 
         self.assertEqual(self.metadata.source_of_materials.count(), 1)
         source = self.metadata.source_of_materials.first()
-        self.assertFalse(source.source_type)
+        self.assertEqual(source.source_type, self.other_source_type)
         self.assertEqual(source.source_note, "Source type was noted as 'Committee'")
 
     def test_populate_source_of_materials_other_source_type_with_note(self):
         form_data = {
-            'source_type': None,
+            'source_type': self.other_source_type,
             'other_source_type': 'Organization',
             'source_note': 'Test test test',
         }
@@ -512,7 +500,7 @@ class TestFormToSourceOfMaterial(TestCase):
 
         self.assertEqual(self.metadata.source_of_materials.count(), 1)
         source = self.metadata.source_of_materials.first()
-        self.assertFalse(source.source_type)
+        self.assertEqual(source.source_type, self.other_source_type)
         self.assertEqual(
             source.source_note,
             "Source type was noted as 'Organization'. Test test test"
@@ -536,25 +524,9 @@ class TestFormToSourceOfMaterial(TestCase):
         if created:
             source_type.delete()
 
-    def test_populate_source_of_material_incorrect_source_role(self):
-        ''' Test case where a string is specified instead of a SourceRole object
-        in the source_role field
-        '''
-        form_data = {
-            'source_role': 'Not known', # Should be a SourceRole object, but string *is* allowed
-        }
-
-        add_source_of_materials(form_data, self.metadata)
-
-        self.assertEqual(self.metadata.source_of_materials.count(), 1)
-        source = self.metadata.source_of_materials.first()
-        self.assertFalse(source.source_role)
-        self.assertEqual(source.source_note, "Source role was noted as 'Not known'")
-
-
     def test_populate_source_of_material_other_source_role(self):
         form_data = {
-            'source_role': None,
+            'source_role': self.other_source_role,
             'other_source_role': 'Data steward',
         }
 
@@ -562,12 +534,12 @@ class TestFormToSourceOfMaterial(TestCase):
 
         self.assertEqual(self.metadata.source_of_materials.count(), 1)
         source = self.metadata.source_of_materials.first()
-        self.assertFalse(source.source_role)
+        self.assertEqual(source.source_role, self.other_source_role)
         self.assertEqual(source.source_note, "Source role was noted as 'Data steward'")
 
     def test_populate_source_of_materials_other_source_role_with_note(self):
         form_data = {
-            'source_role': None,
+            'source_role': self.other_source_role,
             'other_source_role': 'Data custodian',
             'source_note': 'Test test test',
         }
@@ -576,7 +548,7 @@ class TestFormToSourceOfMaterial(TestCase):
 
         self.assertEqual(self.metadata.source_of_materials.count(), 1)
         source = self.metadata.source_of_materials.first()
-        self.assertFalse(source.source_role)
+        self.assertEqual(source.source_role, self.other_source_role)
         self.assertEqual(
             source.source_note,
             "Source role was noted as 'Data custodian'. Test test test"
@@ -860,6 +832,7 @@ class TestFormToRights(TestCase):
 
     def setUp(self):
         self.metadata = Metadata.objects.create()
+        self.other_rights_type, _ = RightsType.objects.get_or_create(name='Other')
 
     def test_no_rights(self):
         form_data = {}
@@ -998,26 +971,6 @@ class TestFormToRights(TestCase):
         if created:
             rights_type.delete()
 
-    def test_populate_rights_incorrect_rights_type(self):
-        ''' Test case where a string is specified instead of a RightsType object
-        in the rights_type field
-        '''
-        form_data = {
-            'formset-rights': [
-                {
-                    'rights_type': 'RIGHTS TYPE', # Should be a RightsType object, but string *is* allowed
-                    'rights_value': 'Value',
-                },
-            ]
-        }
-
-        add_rights(form_data, self.metadata)
-
-        self.assertEqual(self.metadata.rights.count(), 1)
-        rights = self.metadata.rights.first()
-        self.assertFalse(rights.rights_type)
-        self.assertEqual(rights.rights_note, "Type of rights was noted as 'RIGHTS TYPE'")
-
     def test_populate_rights_no_rights_type(self):
         form_data = {
             'formset-rights': [
@@ -1039,7 +992,7 @@ class TestFormToRights(TestCase):
         form_data = {
             'formset-rights': [
                 {
-                    'rights_type': None,
+                    'rights_type': self.other_rights_type,
                     'other_rights_type': 'Test Type',
                 },
             ]
@@ -1049,7 +1002,7 @@ class TestFormToRights(TestCase):
 
         self.assertEqual(self.metadata.rights.count(), 1)
         rights = self.metadata.rights.first()
-        self.assertFalse(rights.rights_type)
+        self.assertEqual(rights.rights_type, self.other_rights_type)
         self.assertEqual(rights.rights_value, '')
         self.assertEqual(rights.rights_note, "Type of rights was noted as 'Test Type'")
 
@@ -1057,7 +1010,7 @@ class TestFormToRights(TestCase):
         form_data = {
             'formset-rights': [
                 {
-                    'rights_type': None,
+                    'rights_type': self.other_rights_type,
                     'other_rights_type': 'Test Type',
                     'rights_note': 'Could not determine rights at this time.'
                 },
@@ -1068,7 +1021,7 @@ class TestFormToRights(TestCase):
 
         self.assertEqual(self.metadata.rights.count(), 1)
         rights = self.metadata.rights.first()
-        self.assertFalse(rights.rights_type)
+        self.assertEqual(rights.rights_type, self.other_rights_type)
         self.assertEqual(rights.rights_value, '')
         self.assertEqual(
             rights.rights_note,

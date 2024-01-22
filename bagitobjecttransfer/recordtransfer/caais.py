@@ -439,55 +439,34 @@ def coalesce_other_term_field(form_data: dict, field_name: str, TermClass: Type[
                               notes: Optional[list] = None) -> Optional[AbstractTerm]:
     ''' Attempt to coalesce an other_<TERM FIELD> field into a term, if a term
     does not already exist.
+
+    There are two cases:
+
+    - term is the Other Term, and other_term is filled
+    - term is not the Other Term
     '''
     term = form_data.get(field_name, None)
-    other_term_str = form_data.get(f'other_{field_name}', '')
+    other_term = form_data.get(f'other_{field_name}', '')
 
-    if not term and other_term_str:
+    if not term and not other_term:
+        return None
+
+    if term.name.lower().strip() != 'other' and other_term:
+        LOGGER.warning((
+            'Both %s (%s) and other_%s (%s) were specified. Ignoring the latter'
+        ), field_name, repr(term), field_name, repr(other_term))
+
+    elif other_term:
         try:
-            term = TermClass.objects.get(name=other_term_str)
+            term = TermClass.objects.get(name=other_term)
             LOGGER.info((
                 'Found existing %s for other_%s: %s'
             ), TermClass.__name__, field_name, repr(term))
-            other_term_str = None
 
         except TermClass.DoesNotExist:
             if isinstance(notes, list):
                 notes.append(gettext(
-                    f'{TermClass._meta.verbose_name} was noted as {repr(other_term_str)}'
+                    f'{TermClass._meta.verbose_name} was noted as {repr(other_term)}'
                 ))
-
-    elif term and not isinstance(term, TermClass):
-        if isinstance(term, str):
-            LOGGER.warning((
-                "%s was not an instance of %s, got type: str"
-            ), field_name, TermClass.__name__)
-
-            try:
-                term = TermClass.objects.get(name=term)
-                LOGGER.info((
-                    'Found existing %s for str-type %s: %s'
-                ), TermClass.__name__, field_name, repr(term))
-
-            except TermClass.DoesNotExist:
-                if isinstance(notes, list):
-                    LOGGER.info((
-                        'Could not find a %s term with the name %s, adding term to notes instead '
-                        'of %s field'
-                    ), TermClass.__name__, repr(term), field_name)
-                    notes.append(gettext(
-                        f'{TermClass._meta.verbose_name} was noted as {repr(term)}'
-                    ))
-                term = None
-        else:
-            LOGGER.error((
-                "%s was not an instance of %s, got un-handle-able type: %s"
-            ), field_name, TermClass.__name__, type(term).__name__)
-            term = None
-
-    if term and other_term_str:
-        LOGGER.warning((
-            'Both %s (%s) and other_%s (%s) were specified. Ignoring the latter'
-        ), field_name, repr(term), field_name, repr(other_term_str))
 
     return term
