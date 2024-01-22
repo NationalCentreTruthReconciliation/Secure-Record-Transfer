@@ -63,19 +63,19 @@
         <div class="flex-full-width-item">
             <table class="full-width-table standard-table" cellspacing="0">
                 <tr>
+                    <th>{% trans "Submission ID" %}</th>
                     <th>{% trans "Date Transferred" %}</th>
                     <th>{% trans "Transfer Title" %}</th>
                     <th>{% trans "Files Transferred" %}</th>
-                    <th>{% trans "Review Status" %}</th>
                     <th>{% trans "View Report" %}</th>
                     <th>{% trans "Download CSV" %}</th>
                 </tr>
                 {% for submission in user_submissions %}
                     <tr>
+                        <td>{{ submission.uuid }}</td>
                         <td>{{ submission.submission_date }}</td>
                         <td>{{ submission.metadata.accession_title }}</td>
                         <td>{{ submission.extent_statements }}</td>
-                        <td>{{ submission.metadata.status.name }}</td>
                         <td><a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a></td>
                         <td><a href="{% url "recordtransfer:submissioncsv" uuid=submission.uuid %}">{% trans "Click to download" %}</a></td>
                     </tr>
