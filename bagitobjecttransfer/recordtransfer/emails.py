@@ -8,6 +8,7 @@ from typing import List
 import django_rq
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
@@ -52,7 +53,7 @@ def send_submission_creation_success(form_data: dict, submission: Submission):
             'username': user_submitted.username,
             'first_name': user_submitted.first_name,
             'last_name': user_submitted.last_name,
-            'action_date': form_data['action_date'],
+            'action_date': submission.submission_date,
             'submission_url': submission_url,
         }
     )
@@ -80,7 +81,7 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
             'username': user_submitted.username,
             'first_name': user_submitted.first_name,
             'last_name': user_submitted.last_name,
-            'action_date': form_data['action_date'],
+            'action_date': timezone.now(),
         }
     )
 

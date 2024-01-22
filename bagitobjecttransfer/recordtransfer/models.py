@@ -18,10 +18,11 @@ from django.utils.translation import gettext_lazy as _
 from caais.export import ExportVersion
 from caais.models import Metadata
 from recordtransfer import settings
+from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 class User(AbstractUser):
@@ -225,15 +226,61 @@ class SubmissionGroup(models.Model):
 
 
 class Submission(models.Model):
-    ''' The top-level object representing a user's submission.
+    ''' The object that represents a user's submission, including metadata, and
+    the files they submitted.
+
+    Attributes:
+        submission_date (DateTimeField):
+            The date and time the submission was made
+        user (User):
+            The user who submitted the metadata (and optionally, files)
+        raw_form (BinaryField):
+            A pickled object containing the transfer form as it was submitted
+        metadata (OneToOneField):
+            Foreign key to a :py:class:`~caais.models.Metadata` object. The
+            metadata object is generated from the form metadata, and any
+            defaults that have been set in the settings
+        part_of_group (ForeignKey):
+            The group that this submission is a part of
+        upload_session (UploadSession):
+            The upload session associated with this submission. If file uploads
+            are disabled, this will always be NULL/None
+        uuid (UUIDField):
+            A unique ID for the submission
+        bag_name (str):
+            A name that is used when the Submission is to be dumped to the file
+            system as a BagIt bag
     '''
-    submission_date = models.DateTimeField()
+    submission_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    raw_form = models.BinaryField(default=b'', null=True) # A raw capture of the form before submission
     metadata = models.OneToOneField(Metadata, on_delete=models.CASCADE, null=True, related_name='submission')
     part_of_group = models.ForeignKey(SubmissionGroup, on_delete=models.SET_NULL, blank=True, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
     bag_name = models.CharField(max_length=256, null=True)
+
+    objects = SubmissionQuerySet.as_manager()
+
+
+    def generate_bag_name(self):
+        ''' Generate a name suitable for a submission bag, and set self.bag_name to that name.
+        '''
+        if self.bag_name:
+            LOGGER.warning('generate_bag_name() was called, but self.bag_name is already set')
+            return
+
+        title = self.metadata.accession_title or 'No title'
+        abbrev_title = title if len(title) <= 20 else title[0:20]
+
+        bag_name = '{username}_{datetime}_{title}'.format(
+            username=slugify(self.user.username),
+            datetime=timezone.localtime(timezone.now()).strftime(r'%Y%m%d-%H%M%S'),
+            title=slugify(abbrev_title)
+        )
+
+        self.bag_name = bag_name
+        self.save()
 
     @property
     def user_folder(self):
@@ -243,6 +290,8 @@ class Submission(models.Model):
     def location(self):
         """ Get the location on the file system for the BagIt bag for this submission
         """
+        if not self.bag_name:
+            self.make_bag_name()
         return os.path.join(self.user_folder, self.bag_name)
 
     @property
@@ -420,7 +469,7 @@ class Job(models.Model):
 class SavedTransfer(models.Model):
     """ A saved transfer """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    last_updated = models.DateTimeField(unique=True)
+    last_updated = models.DateTimeField(auto_now_add=True)
     current_step = models.CharField(max_length=20, null=False)
     step_data = models.BinaryField(default=b'')
 

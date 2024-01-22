@@ -66,7 +66,6 @@ class SubmissionForm(RecordTransferModelForm):
     class Meta:
         model = Submission
         fields = (
-            'submission_date',
             'metadata',
             'user',
             'upload_session',
@@ -74,7 +73,7 @@ class SubmissionForm(RecordTransferModelForm):
             'uuid',
         )
 
-    disabled_fields = ['submission_date', 'metadata', 'upload_session', 'user', 'part_of_group', 'uuid']
+    disabled_fields = ['metadata', 'upload_session', 'user', 'part_of_group', 'uuid']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,7 +95,7 @@ class InlineSubmissionForm(RecordTransferModelForm):
     class Meta:
         model = Submission
         fields = (
-            'submission_date',
+            'uuid',
             'metadata',
             'part_of_group',
         )

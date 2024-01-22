@@ -11,15 +11,15 @@
     </script>
 {% endblock %}
 
-{% block buttonarrayclass %}flex-full-width-item{% endblock %}
+{% block buttonarrayclass %}flex-med-width-item{% endblock %}
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block submitbuttontype %}button{% endblock %}
 {% block formfields %}
     {{ block.super }}
-    <p class="flex-full-width-item margin-top-25px">
+    <p class="flex-med-width-item margin-top-25px">
         <i>Upload your files</i>
     <p>
-    <p class="flex-full-width-item">
+    <p class="flex-med-width-item">
         {% blocktrans %}
         You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
         {{ MAX_TOTAL_UPLOAD_SIZE }}MiB of files</b>. Any <b>one file may not exceed
@@ -28,7 +28,7 @@
         {% endblocktrans %}
     </p>
     <div id="dropzone-errors" class="flex-full-width-error"></div>
-    <div class="flex-full-width-item">
+    <div class="flex-med-width-item">
         <div id="file-dropzone" class="dz-clickable custom-dropzone dropzone">
             <div class="dz-message">
                 <table class="dz-message-table">
@@ -44,7 +44,7 @@
             </div>
         </div>
     </div>
-    <div class="flex-full-width-item">
+    <div class="flex-med-width-item">
         <div>
             {% trans "Total size of transfer:" %}
             <span id="total-size">0</span> {% trans "MiB" %}

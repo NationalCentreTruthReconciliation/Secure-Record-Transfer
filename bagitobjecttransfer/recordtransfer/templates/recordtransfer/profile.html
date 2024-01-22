@@ -26,59 +26,63 @@
         {{ form.gets_notification_emails }}
     </div>
     <div class="flex-item">
+        <label></label>
         <button type="submit" class="blue-button">
             {% trans "Save" %}
         </button>
     </div>
     </form>
-    <div class="flex-full-width-item margin-top-25px">
-        <label class="past-transfer-label">{% trans "Ongoing Transfers"%}</label>
-    </div>
-    <div class="flex-full-width-item">
-        {% if in_process_submissions %}
-        <table class="full-width-table standard-table" cellspacing="0">
-            <tr>
-                <th>{% trans "Last Updated" %}</th>
-                <th></th>
-                <th></th>
-            </tr>
-            {% for in_process in in_process_submissions %}
-            <tr>
-                <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
-                <td><a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a></td>
-                <td><a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a></td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% else %}
-        None
-        {% endif %}
-    </div>
-    <div class="flex-full-width-item margin-top-25px">
-        <label class="past-transfer-label">{% trans "Past Transfers"%}</label>
-    </div>
-    <div class="flex-full-width-item">
-        {% if user_submissions %}
+
+    <br>
+
+    {% if in_process_submissions %}
+        <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
+            <label class="medium-text">{% trans "Ongoing Transfers"%}</label>
+        </div>
+        <div class="flex-med-width-item">
             <table class="full-width-table standard-table" cellspacing="0">
                 <tr>
+                    <th>{% trans "Last Updated" %}</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                {% for in_process in in_process_submissions %}
+                <tr>
+                    <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
+                    <td><a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a></td>
+                    <td><a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+    <div class="flex-med-width-item margin-top-25px" id="past-transfers">
+        <label class="medium-text">{% trans "Past Transfers"%}</label>
+    </div>
+    {% if user_submissions %}
+        <div class="flex-full-width-item">
+            <table class="full-width-table standard-table" cellspacing="0">
+                <tr>
+                    <th>{% trans "Submission ID" %}</th>
                     <th>{% trans "Date Transferred" %}</th>
                     <th>{% trans "Transfer Title" %}</th>
                     <th>{% trans "Files Transferred" %}</th>
-                    <th>{% trans "Review Status" %}</th>
-                    <th>{% trans "Link to Report" %}</th>
+                    <th>{% trans "View Report" %}</th>
+                    <th>{% trans "Download CSV" %}</th>
                 </tr>
                 {% for submission in user_submissions %}
                     <tr>
+                        <td>{{ submission.uuid }}</td>
                         <td>{{ submission.submission_date }}</td>
                         <td>{{ submission.metadata.accession_title }}</td>
                         <td>{{ submission.extent_statements }}</td>
-                        <td>{{ submission.metadata.status.name }}</td>
-                        <td><a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Link" %}</a></td>
+                        <td><a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a></td>
+                        <td><a href="{% url "recordtransfer:submissioncsv" uuid=submission.uuid %}">{% trans "Click to download" %}</a></td>
                     </tr>
                 {% endfor %}
             </table>
             {% if is_paginated %}
-                <div class="flex-full-width-item margin-top-25px">
+                <div class="flex-med-width-item margin-top-25px">
                     <div class="button-array">
                         <span class="margin-right-20px">
                             Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
@@ -118,16 +122,18 @@
                     </div>
                 </div>
             {% endif %}
-        {% else %}
-            <span>
+        </div>
+    {% else %}
+        <div class="flex-med-width-item">
+            <p>
                 {% url 'recordtransfer:transfer' as transfer_url %}
                 {% blocktrans %}
                     You have not sent any records to the NCTR.
                     <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
                 {% endblocktrans %}
-            </span>
-        {% endif %}
-    </div>
+            </p>
+        </div>
+    {% endif %}
 {% else %}
     {% url 'login' as login %}
     <p>

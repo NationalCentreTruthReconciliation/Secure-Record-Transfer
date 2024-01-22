@@ -1,35 +1,36 @@
-import datetime
 import pickle
-from typing import Any, Union
+from typing import Any, Optional, Union
 import logging
 
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden, Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
+from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, UpdateView, DetailView
+from django.views.generic import TemplateView, FormView, UpdateView, DetailView, View
 from formtools.wizard.views import SessionWizardView
 
+from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from recordtransfer import settings
+from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
-from recordtransfer.emails import send_user_activation_email
-from recordtransfer.jobs import create_and_save_submission
+from recordtransfer.emails import *
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 class Index(TemplateView):
@@ -210,47 +211,63 @@ class TransferFormWizard(SessionWizardView):
         }
     }
 
+
     def get(self, request, *args, **kwargs):
         resume_id = request.GET.get('resume_transfer', None)
+
         if resume_id:
             transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+
             if transfer is None:
-                LOGGER.error(
-                    f"Expected at least 1 saved transfers for user {self.request.user} and ID {resume_id}, found 0"
-                )
+                LOGGER.error((
+                    "Expected at least 1 saved transfer for user %s and ID %s, found 0"
+                ), self.request.user, resume_id)
+
             else:
                 self.storage.data = pickle.loads(transfer.step_data)['past']
                 self.storage.current_step = transfer.current_step
                 return self.render(self.get_form())
+
         return super().get(self, request, *args, **kwargs)
+
 
     def post(self, *args, **kwargs):
         save_form_step = self.request.POST.get('save_form_step', None)
+
         if save_form_step and save_form_step in self.steps.all:
             resume_id = self.request.GET.get('resume_transfer', None)
+
             if resume_id:
                 transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+                transfer.last_updated = timezone.now()
             else:
                 transfer = SavedTransfer()
+
             transfer.current_step = save_form_step
             # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
             current_data = {f.replace(save_form_step + "-", ""): self.request.POST[f] for f in self.request.POST.keys()
                             if f.startswith(save_form_step + "-")}
             transfer.user = self.request.user
-            transfer.last_updated = datetime.datetime.now(timezone.get_current_timezone())
             transfer.step_data = pickle.dumps({'past': self.storage.data, 'current': current_data })
             transfer.save()
             return redirect('recordtransfer:userprofile')
+
         else:
             return super().post(*args, **kwargs)
+
 
     def get_template_names(self):
         ''' Retrieve the name of the template for the current step '''
         step_name = self.steps.current
         return [self._TEMPLATES[step_name]["templateref"]]
 
+
     def get_form_initial(self, step):
+        ''' Populate form with saved transfer data (if a "resume" request was received), and add the
+        user's name and email from their user profile.
+        '''
         initial = self.initial_dict.get(step, {})
+
         resume_id = self.request.GET.get('resume_transfer', None)
         if resume_id is not None:
             transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
@@ -258,11 +275,15 @@ class TransferFormWizard(SessionWizardView):
                 data = pickle.loads(transfer.step_data)['current']
                 for (k, v) in data.items():
                     initial[k] = v
+
         if step == 'contactinfo':
             curr_user = self.request.user
-            initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
+            if curr_user.first_name and curr_user.last_name:
+                initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
             initial['email'] = str(curr_user.email)
+
         return initial
+
 
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
@@ -270,6 +291,7 @@ class TransferFormWizard(SessionWizardView):
             users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             kwargs['users_groups'] = users_groups
         return kwargs
+
 
     def get_context_data(self, form, **kwargs):
         ''' Retrieve context data for the current form template.
@@ -282,15 +304,20 @@ class TransferFormWizard(SessionWizardView):
         '''
         context = super().get_context_data(form, **kwargs)
         step_name = self.steps.current
+
         context.update({'form_title': self._TEMPLATES[step_name]['formtitle']})
+
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
+
         if step_name == 'grouptransfer':
             users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
+
         elif step_name == 'rights':
             all_rights = RightsType.objects.all().exclude(name='Other')
             context.update({'rights': all_rights})
+
         elif step_name == 'sourceinfo':
             all_roles = SourceRole.objects.all().exclude(name='Other')
             all_types = SourceType.objects.all().exclude(name='Other')
@@ -298,79 +325,148 @@ class TransferFormWizard(SessionWizardView):
                 'source_roles': all_roles,
                 'source_types': all_types,
             })
+
+        context['save_form_state'] = self.get_save_form_state()
+
+        return context
+
+
+    def get_save_form_state(self):
+        ''' Get the state required to update the "save form" button.
+        '''
         resume_id = self.request.GET.get('resume_transfer', None)
-        max_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+        num_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+
         if settings.MAX_SAVED_TRANSFER_COUNT == 0:
             # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
             save_form_state = 'off'
-        elif resume_id is None and max_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
+
+        elif resume_id is None and num_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
             # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
             # transfer, disable the save form button.
             save_form_state = 'disabled'
+
         else:
             # else enable the button.
             save_form_state = 'on'
-        context.update({'save_form_state': save_form_state})
-        return context
+
+        return save_form_state
+
 
     def get_all_cleaned_data(self):
+        ''' Clean data, and populate CAAIS fields that are deferred to being created until after the
+        submission is completed.
+        '''
         cleaned_data = super().get_all_cleaned_data()
-
-        # Get quantity and type of files for extent
-        if settings.FILE_UPLOAD_ENABLED:
-            session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
-            size = get_human_readable_size(session.upload_size, base=1024, precision=2)
-            count = get_human_readable_file_count(
-                [f.name for f in session.get_existing_file_set()],
-                settings.ACCEPTED_FILE_FORMATS,
-                LOGGER
-            )
-            cleaned_data['quantity_and_unit_of_measure'] = gettext('{0}, totalling {1}').format(count, size)
-
-        start_date = cleaned_data['start_date_of_material']
-        end_date = cleaned_data['end_date_of_material']
-        if settings.USE_DATE_WIDGETS:
-            # Convert the four date-related fields to a single date
-            start_date = start_date.strftime(r'%Y-%m-%d')
-            end_date = end_date.strftime(r'%Y-%m-%d')
-            if cleaned_data['start_date_is_approximate']:
-                start_date = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date)
-            if cleaned_data['end_date_is_approximate']:
-                end_date = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date)
-
-        date_of_materials = start_date if start_date == end_date else f'{start_date} - {end_date}'
-        cleaned_data['date_of_materials'] = date_of_materials
-        cleaned_data = TransferFormWizard.delete_keys(cleaned_data, [
-            'start_date_is_approximate',
-            'start_date_of_material',
-            'start_date_of_material_text',
-            'end_date_is_approximate',
-            'end_date_of_material',
-            'end_date_of_material_text'
-        ])
-
+        self.set_quantity_and_unit_of_measure(cleaned_data)
         return cleaned_data
 
-    @staticmethod
-    def delete_keys(form_data, keys):
-        for key in keys:
-            if key in form_data:
-                del form_data[key]
-        return form_data
 
-    def done(self, form_list, **kwargs):
-        ''' Retrieves all of the form data, and creates a Submission from it
-        asynchronously.
+    def set_quantity_and_unit_of_measure(self, cleaned_data):
+        ''' Create a summary for the quantity_and_unit_of_measure from the type of files submitted.
 
         Args:
-            form_list: The list of forms the user filled out.
+            cleaned_data (dict): The cleaned data submitted by the user
 
         Returns:
-            HttpResponseRedirect: Redirects the user to the Transfer Sent page.
+            (None): The cleaned form data is modified in-place
         '''
-        form_data = self.get_all_cleaned_data()
-        create_and_save_submission.delay(form_data, self.request.user)
-        return HttpResponseRedirect(reverse('recordtransfer:transfersent'))
+        if not settings.FILE_UPLOAD_ENABLED:
+            return
+
+        session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
+
+        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
+
+        count = get_human_readable_file_count(
+            [f.name for f in session.get_existing_file_set()],
+            settings.ACCEPTED_FILE_FORMATS,
+            LOGGER
+        )
+
+        cleaned_data['quantity_and_unit_of_measure'] = gettext('{0}, totalling {1}').format(count, size)
+
+
+    def done(self, form_list, **kwargs):
+        ''' Retrieves all of the form data, and creates a Submission from it.
+
+        Returns:
+            HttpResponseRedirect: Redirects the user to their User Profile page.
+        '''
+        try:
+            form_data = self.get_all_cleaned_data()
+
+            submission = Submission.objects.create(
+                user=self.request.user,
+                raw_form=pickle.dumps(form_data)
+            )
+
+            LOGGER.info('Mapping form data to CAAIS metadata')
+            submission.metadata = map_form_to_metadata(form_data)
+
+            if settings.FILE_UPLOAD_ENABLED:
+                token = form_data['session_token']
+                LOGGER.info('Fetching session with the token %s', token)
+                submission.upload_session = UploadSession.objects.filter(token=token).first()
+            else:
+                LOGGER.info((
+                    'No file upload session will be linked to submission due to '
+                    'FILE_UPLOAD_ENABLED=false'
+                ))
+
+            submission.part_of_group = self.get_submission_group(form_data)
+
+            LOGGER.info('Saving Submission with UUID %s', str(submission.uuid))
+            submission.save()
+
+            send_submission_creation_success.delay(form_data, submission)
+            send_thank_you_for_your_transfer.delay(form_data, submission)
+
+            return HttpResponseRedirect(reverse('recordtransfer:userprofile'))
+
+        except Exception as exc:
+            LOGGER.error('Encountered error creating Submission object', exc_info=exc)
+
+            send_your_transfer_did_not_go_through.delay(form_data, self.request.user)
+            send_submission_creation_failure.delay(form_data, self.request.user)
+
+            return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
+
+
+    def get_submission_group(self, cleaned_form_data: dict) -> Optional[SubmissionGroup]:
+        ''' Get a submission group to associate the submission with, depending on how the user
+        filled out the submission group section of the form.
+        '''
+        group = None
+
+        group_name = cleaned_form_data['group_name']
+        if group_name != 'No Group':
+            if group_name == 'Add New Group':
+                new_group_name = cleaned_form_data['new_group_name']
+                description = cleaned_form_data['group_description']
+
+                group, created = SubmissionGroup.objects.get_or_create(
+                    name=new_group_name,
+                    description=description,
+                    created_by=self.request.user,
+                )
+                if created:
+                    LOGGER.info('Created "%s" SubmissionGroup', new_group_name)
+
+                LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
+
+            else:
+                try:
+                    group = SubmissionGroup.objects.get(name=group_name, created_by=self.request.user)
+                    LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
+
+                except SubmissionGroup.DoesNotExist as exc:
+                    LOGGER.error('Could not find "%s" SubmissionGroup', group.name, exc_info=exc)
+                    group = None
+        else:
+            LOGGER.info('Not associating submission with a group')
+
+        return group
 
 
 @require_http_methods(['POST'])
@@ -696,6 +792,9 @@ class DeleteTransfer(TemplateView):
 
 
 class SubmissionDetail(UserPassesTestMixin, DetailView):
+    ''' Generates a report for a given submission.
+    '''
+
     model = Submission
     template_name = 'recordtransfer/submission_detail.html'
     context_object_name = 'submission'
@@ -715,3 +814,28 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         context['current_date'] = timezone.now()
         context['metadata'] = context['submission'].metadata
         return context
+
+
+class SubmissionCsv(UserPassesTestMixin, View):
+    ''' Generates a CSV containing the submission and downloads that CSV.
+    '''
+
+    def get_object(self):
+        self.get_queryset().first()
+
+    def get_queryset(self):
+        uuid = self.kwargs['uuid']
+        try:
+            return Submission.objects.filter(uuid=str(uuid))
+        except Submission.DoesNotExist:
+            raise Http404
+
+    def test_func(self):
+        submission = self.get_object()
+        # Check if the user is the creator of the submission or is a staff member
+        return self.request.user.is_staff or submission.user == self.request.user
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        prefix = slugify(queryset.first().user.username) + '_export-'
+        return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
