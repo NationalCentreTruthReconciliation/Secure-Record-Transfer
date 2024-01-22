@@ -1,32 +1,23 @@
 Running the App
 ===============
 
-It is recommended to run this application with `Docker <https://www.docker.com/>`_ or with
-`Podman <https://podman.io/>`_. Both Docker and Podman allow you to run "containerized"
-applications.
+It is recommended to run this application with  `Podman <https://podman.io/>`_ (or alternately
+`Docker <https://www.docker.com/>`_). The following documentation assumes you are using Podman, but
+if you are using Docker, substitute the relevant Docker commands.
 
-If you are running Windows, the you will need to make sure that you have
-`WSL Enabled <https://learn.microsoft.com/en-us/windows/wsl/install>`_. Docker and Podman both run
-*Linux* containers, which require Windows Sub-system for Linux (WSL). Mac and Linux do not require
-this step.
+Before running the application, make sure you have these tools installed:
 
-If you would like to use Podman, you will also need to install
-`Podman Compose <https://github.com/containers/podman-compose>`_, which requires you to have
-`Python <https://python.org>`_ installed on your computer.
-
-You might also want `Docker Desktop <https://www.docker.com/products/docker-desktop/>`_ or
-`Podman Desktop <https://podman-desktop.io/>`_, since these applications provide a nice visual
-interface for interacting with containers.
-
-The following documentation assumes you have either Docker or Podman installed. It is also assumed
-that you have rudimentary knowledge of what is required to run a command in a shell.
+- `Podman <https://podman.io>`_
+- `Podman Desktop <https://podman-desktop.io/>`_ (Optional, but recommended)
+- `Python 3 <https://python.org>`_
+- `Podman Compose <https://github.com/containers/podman-compose>`_
 
 
 Development Application
 -----------------------
 
-The simplest way to run the application is in "development" mode. This mode uses all local services,
-**if you just want to try the application out, follow these steps**.
+The simplest way to run the application is in "development" mode. **If you just want to try the
+application out, follow these steps**.
 
 From the root of the repository, run the following commands before running the application for the
 first time.
@@ -37,34 +28,31 @@ first time.
     cp example.dev.env .dev.env
 
 
-To start up the application, run one of these commands, depending on whether you are using Docker or
-Podman.
+To start up the application, run this command:
 
 .. code-block:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+    podman-compose -f compose.dev.yml up -d
 
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+To stop the application, run the :code:`down` command:
+
+.. code-block:: bash
+
+    podman-compose -f compose.dev.yml down
 
 
 Visit http://localhost:8000 to see the application running.
 
-If you are using `Docker Desktop <https://www.docker.com/products/docker-desktop/>`_ or
-`Podman Desktop <https://podman-desktop.io/>`_, you should now see the application and all of its
-services running there, too.
+If you are using `Podman Desktop <https://podman-desktop.io/>`_, you should now see the application
+and all of its services running there, too.
 
 The application will not work at first, since the database is not populated. To populate the
 database, you can run the following command.
 
 .. code-block:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
-
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py migrate --no-input
+    podman-compose -f compose.dev.yml exec app python manage.py migrate --no-input
 
 
 You will also find that you cannot log in to the application. You can create a new administrator
@@ -72,11 +60,7 @@ user by running the following command.
 
 .. code-block:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
-
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py createsuperuser
+    podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
 
 
 The development application uses a simple `MailHog <https://github.com/mailhog/MailHog>`_ server to
@@ -92,31 +76,26 @@ Finding Logs in the Development Application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The logging configuration for the application can be found in the file
-:code:`bagitobjecttransfer/settings/docker_dev.py`. The logs are written to files, which are mapped
-to folders in the repository. The paths in the following table are relative to the path
-:code:`bagitobjecttransfer/` from the root of the repository.
+:code:`bagitobjecttransfer/settings/docker_dev.py`. The logs are all written to stdout, which is
+captured by Podman (or Docker).
 
-.. list-table:: Log Locations for Development Application
-    :header-rows: 1
+To view logs for a given container (the *app* container, in this case), you may run a command like
+this:
 
-    * - Name of log
-      - Log location
-    * - App Log
-      - :code:`docker/logs/django/recordtransfer.log`
-    * - Async Job Queue Log
-      - :code:`docker/logs/django-rq/rqworker.log`
-    * - Redis Log
-      - :code:`docker/logs/redis/redis-server.log`
-    * - ClamAV Log
-      - :code:`docker/logs/clamav/clamd.log`
-        :code:`docker/logs/clamav/freshclam.log`
+.. code-block:: bash
+
+    podman-compose -f compose.dev.yml logs -f app
+
+
+The logs can also be found easily in Podman Desktop by clicking on a specific container.
 
 
 Debugging the Development Application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are interested in debugging the application, the ports 8009 and 8010 are exposed to allow you
-to debug the web application, and the asynchronous job queue, respectively.
+to debug the web application, and the asynchronous job queue, respectively. This functionality is
+only available if you are running the **dev** application (via :code:`compose.dev.yml`).
 
 In VS Code, you may create a :code:`launch.json` file with these contents:
 
@@ -181,11 +160,7 @@ but pass it the production compose file instead.
 
 .. code-block:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+    podman-compose -f compose.prod.yml up -d
 
 
 After starting the application up, you will need to update the database, and you will need to
@@ -195,24 +170,15 @@ using Nginx + Gunicorn in the prod environment.
 
 .. code-block:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py migrate --noinput
-    docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py collectstatic --noinput
-
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py migrate --noinput
-    podman-compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py collectstatic --noinput
+    podman-compose -f compose.prod.yml exec app python manage.py migrate --noinput
+    podman-compose -f compose.prod.yml exec app python manage.py collectstatic --noinput
 
 
 To create an admin superuser, you can run the following command, and follow the prompts.
 
 .. code-block:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py createsuperuser
-
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py createsuperuser
+    podman-compose -f compose.prod.yml exec app python manage.py createsuperuser
 
 
 Admin Set-up with Django Admin
@@ -264,11 +230,7 @@ using a terminal. Open a shell in the app container using the following command:
 
 .. code:: bash
 
-    # If using docker:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py shell
-
-    # If using podman:
-    podman-compose -f docker-compose.yml -f docker-compose.dev.yml exec app python manage.py shell
+    podman-compose -f compose.prod.yml exec app python manage.py shell
 
 
 Your terminal will change to a Python shell with this command. Input the following lines of *Python*

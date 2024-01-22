@@ -725,6 +725,9 @@ class DeleteTransfer(TemplateView):
 
 
 class SubmissionDetail(UserPassesTestMixin, DetailView):
+    ''' Generates a report for a given submission.
+    '''
+
     model = Submission
     template_name = 'recordtransfer/submission_detail.html'
     context_object_name = 'submission'
@@ -747,8 +750,7 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
 
 
 class SubmissionCsv(UserPassesTestMixin, View):
-    ''' Generates a CSV containing the submission, downloads that CSV, and redirects to the user's
-    profile.
+    ''' Generates a CSV containing the submission and downloads that CSV.
     '''
 
     def get_object(self):
