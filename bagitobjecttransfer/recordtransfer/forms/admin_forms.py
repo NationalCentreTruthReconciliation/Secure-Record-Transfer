@@ -95,6 +95,7 @@ class InlineSubmissionForm(RecordTransferModelForm):
     class Meta:
         model = Submission
         fields = (
+            'uuid',
             'metadata',
             'part_of_group',
         )

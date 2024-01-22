@@ -319,17 +319,18 @@ class SubmissionAdmin(admin.ModelAdmin):
     ]
 
     search_fields = [
-        'id',
+        'uuid',
         'metadata__accession_title',
+        'user__username',
+        'user__email',
     ]
 
     list_display = [
         'submission_date',
-        'id',
         'uuid',
         'number_of_files_uploaded',
-        linkify('user'),
         linkify('metadata'),
+        linkify('user'),
     ]
 
     ordering = [
