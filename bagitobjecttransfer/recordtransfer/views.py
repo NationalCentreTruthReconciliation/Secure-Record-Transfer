@@ -1,5 +1,5 @@
 import pickle
-from typing import Any, Union
+from typing import Any, Optional, Union
 import logging
 
 from django.contrib import messages
@@ -22,9 +22,9 @@ from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from recordtransfer import settings
+from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
-from recordtransfer.emails import send_user_activation_email
-from recordtransfer.jobs import create_and_save_submission
+from recordtransfer.emails import *
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
@@ -388,18 +388,85 @@ class TransferFormWizard(SessionWizardView):
 
 
     def done(self, form_list, **kwargs):
-        ''' Retrieves all of the form data, and creates a Submission from it
-        asynchronously.
-
-        Args:
-            form_list: The list of forms the user filled out.
+        ''' Retrieves all of the form data, and creates a Submission from it.
 
         Returns:
             HttpResponseRedirect: Redirects the user to their User Profile page.
         '''
-        form_data = self.get_all_cleaned_data()
-        create_and_save_submission.delay(form_data, self.request.user)
-        return HttpResponseRedirect(reverse('recordtransfer:userprofile'))
+        try:
+            form_data = self.get_all_cleaned_data()
+
+            submission = Submission.objects.create(
+                user=self.request.user,
+                raw_form=pickle.dumps(form_data)
+            )
+
+            LOGGER.info('Mapping form data to CAAIS metadata')
+            submission.metadata = map_form_to_metadata(form_data)
+
+            if settings.FILE_UPLOAD_ENABLED:
+                token = form_data['session_token']
+                LOGGER.info('Fetching session with the token %s', token)
+                submission.upload_session = UploadSession.objects.filter(token=token).first()
+            else:
+                LOGGER.info((
+                    'No file upload session will be linked to submission due to '
+                    'FILE_UPLOAD_ENABLED=false'
+                ))
+
+            submission.part_of_group = self.get_submission_group(form_data)
+
+            LOGGER.info('Saving Submission with UUID %s', str(submission.uuid))
+            submission.save()
+
+            send_submission_creation_success.delay(form_data, submission)
+            send_thank_you_for_your_transfer.delay(form_data, submission)
+
+            return HttpResponseRedirect(reverse('recordtransfer:userprofile'))
+
+        except Exception as exc:
+            LOGGER.error('Encountered error creating Submission object', exc_info=exc)
+
+            send_your_transfer_did_not_go_through.delay(form_data, self.request.user)
+            send_submission_creation_failure.delay(form_data, self.request.user)
+
+            return HttpResponseRedirect(reverse('recordtransfer:systemerror'))
+
+
+    def get_submission_group(self, cleaned_form_data: dict) -> Optional[SubmissionGroup]:
+        ''' Get a submission group to associate the submission with, depending on how the user
+        filled out the submission group section of the form.
+        '''
+        group = None
+
+        group_name = cleaned_form_data['group_name']
+        if group_name != 'No Group':
+            if group_name == 'Add New Group':
+                new_group_name = cleaned_form_data['new_group_name']
+                description = cleaned_form_data['group_description']
+
+                group, created = SubmissionGroup.objects.get_or_create(
+                    name=new_group_name,
+                    description=description,
+                    created_by=self.request.user,
+                )
+                if created:
+                    LOGGER.info('Created "%s" SubmissionGroup', new_group_name)
+
+                LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
+
+            else:
+                try:
+                    group = SubmissionGroup.objects.get(name=group_name, created_by=self.request.user)
+                    LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
+
+                except SubmissionGroup.DoesNotExist as exc:
+                    LOGGER.error('Could not find "%s" SubmissionGroup', group.name, exc_info=exc)
+                    group = None
+        else:
+            LOGGER.info('Not associating submission with a group')
+
+        return group
 
 
 @require_http_methods(['POST'])

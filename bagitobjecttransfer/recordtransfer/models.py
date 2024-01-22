@@ -262,6 +262,26 @@ class Submission(models.Model):
 
     objects = SubmissionQuerySet.as_manager()
 
+
+    def generate_bag_name(self):
+        ''' Generate a name suitable for a submission bag, and set self.bag_name to that name.
+        '''
+        if self.bag_name:
+            LOGGER.warning('generate_bag_name() was called, but self.bag_name is already set')
+            return
+
+        title = self.metadata.accession_title or 'No title'
+        abbrev_title = title if len(title) <= 20 else title[0:20]
+
+        bag_name = '{username}_{datetime}_{title}'.format(
+            username=slugify(self.user.username),
+            datetime=timezone.localtime(timezone.now()).strftime(r'%Y%m%d-%H%M%S'),
+            title=slugify(abbrev_title)
+        )
+
+        self.bag_name = bag_name
+        self.save()
+
     @property
     def user_folder(self):
         return os.path.join(settings.BAG_STORAGE_FOLDER, slugify(self.user.username))
@@ -270,6 +290,8 @@ class Submission(models.Model):
     def location(self):
         """ Get the location on the file system for the BagIt bag for this submission
         """
+        if not self.bag_name:
+            self.make_bag_name()
         return os.path.join(self.user_folder, self.bag_name)
 
     @property

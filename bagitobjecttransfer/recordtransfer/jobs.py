@@ -8,88 +8,13 @@ import os.path
 import django_rq
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from django.utils.text import slugify
 
-from recordtransfer.caais import map_form_to_metadata
-from recordtransfer.emails import (
-    send_submission_creation_success,
-    send_thank_you_for_your_transfer,
-)
-from recordtransfer.models import SubmissionGroup, UploadSession, User, Job, Submission
+from recordtransfer.models import User, Job, Submission
 from recordtransfer import settings
 from recordtransfer.utils import zip_directory
 
 
 LOGGER = logging.getLogger('rq.worker')
-
-@django_rq.job
-def create_and_save_submission(form_data: dict, user_submitted: User):
-    ''' Create database models for the submitted form. Sends an email to the
-    submitting user and the staff members who receive submission email updates.
-
-    Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form.
-        user_submitted (User): The user who submitted the data and files.
-    '''
-    LOGGER.info('Creating a Submission from the transfer submitted by %s', str(user_submitted))
-
-    new_submission = Submission(
-        user=user_submitted,
-        raw_form=pickle.dumps(form_data),
-    )
-    new_submission.save()
-
-    if settings.FILE_UPLOAD_ENABLED:
-        token = form_data['session_token']
-        LOGGER.info('Fetching session with the token %s', token)
-        new_submission.upload_session = UploadSession.objects.filter(token=token).first()
-    else:
-        LOGGER.info((
-            'No file upload session will be linked to submission due to '
-            'FILE_UPLOAD_ENABLED=false'
-        ))
-
-    LOGGER.info('Mapping form data to CAAIS metadata')
-    metadata = map_form_to_metadata(form_data)
-    new_submission.metadata = metadata
-
-    LOGGER.info('Creating a bag name for the submission')
-    title = metadata.accession_title
-    abbrev_title = title if len(title) <= 20 else title[0:20]
-    bag_name = '{username}_{datetime}_{title}'.format(
-        username=slugify(user_submitted),
-        datetime=timezone.localtime(timezone.now()).strftime(r'%Y%m%d-%H%M%S'),
-        title=slugify(abbrev_title))
-    LOGGER.info('Generated the bag name: "%s"', bag_name)
-    new_submission.bag_name = bag_name
-
-    group_name = form_data['group_name']
-    if group_name != 'No Group':
-        if group_name == 'Add New Group':
-            new_group_name = form_data['new_group_name']
-            description = form_data['group_description']
-            group, created = SubmissionGroup.objects.get_or_create(
-                name=new_group_name,
-                description=description,
-                created_by=user_submitted
-            )
-            if created:
-                LOGGER.info('Created "%s" SubmissionGroup', new_group_name)
-        else:
-            group = SubmissionGroup.objects.get(name=group_name, created_by=user_submitted)
-
-        if group:
-            LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
-            new_submission.part_of_group = group
-        else:
-            LOGGER.warning('Could not find "%s" SubmissionGroup', group.name)
-
-    new_submission.save()
-
-    LOGGER.info('Sending transfer success email to administrators')
-    send_submission_creation_success.delay(form_data, new_submission)
-    LOGGER.info('Sending thank you email to user')
-    send_thank_you_for_your_transfer.delay(form_data, new_submission)
 
 
 @django_rq.job
