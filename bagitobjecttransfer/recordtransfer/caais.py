@@ -13,7 +13,7 @@ from caais.models import *
 from recordtransfer import settings
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 get_setting_name = lambda field_name: f'CAAIS_DEFAULT_{field_name.upper().strip()}'

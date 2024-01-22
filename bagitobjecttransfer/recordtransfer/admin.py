@@ -25,7 +25,7 @@ from recordtransfer.models import User, UploadSession, UploadedFile, SubmissionG
 from bagitobjecttransfer.settings.base import MEDIA_ROOT
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 def linkify(field_name):

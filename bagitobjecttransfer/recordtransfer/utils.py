@@ -7,7 +7,7 @@ from recordtransfer.exceptions import FolderNotFoundError
 from django.utils.html import strip_tags
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 def zip_directory(directory: str, zipf: ZipFile):
     ''' Zip a directory structure into a zip file.

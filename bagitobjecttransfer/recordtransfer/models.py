@@ -22,7 +22,7 @@ from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 class User(AbstractUser):

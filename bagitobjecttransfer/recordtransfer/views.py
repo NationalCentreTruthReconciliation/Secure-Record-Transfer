@@ -30,7 +30,7 @@ from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 class Index(TemplateView):

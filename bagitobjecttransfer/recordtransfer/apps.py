@@ -11,7 +11,7 @@ from bagit import CHECKSUM_ALGOS
 from recordtransfer import settings
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('recordtransfer')
 
 
 def verify_email_settings():
