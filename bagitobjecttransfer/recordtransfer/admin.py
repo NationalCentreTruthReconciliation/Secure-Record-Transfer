@@ -1,7 +1,5 @@
 ''' Custom administration code for the admin site '''
-import csv
 import logging
-from io import StringIO
 from pathlib import Path
 
 from django.contrib import admin, messages
@@ -12,7 +10,6 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, path
-from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
@@ -54,39 +51,6 @@ def linkify(field_name):
 
     _linkify.short_description = field_name.replace('_', ' ') # Sets column name
     return _linkify
-
-
-def export_submission_csv(queryset, version: ExportVersion, filename_prefix: str = None):
-    ''' Export one or more submissions to a CSV file
-
-    Args:
-        queryset: The set of one or more submissions
-        version: The version of CSV to export
-        filename_prefix: The prefix of the file to create. If none specifed, one
-            is created
-
-    Returns:
-        HttpResponse: A text/csv response to download the CSV file
-    '''
-    csv_file = StringIO()
-    writer = csv.writer(csv_file)
-    for i, submission in enumerate(queryset, 0):
-        new_row = submission.metadata.create_flat_representation(version)
-        # Write the headers on the first loop
-        if i == 0:
-            writer.writerow(new_row.keys())
-        writer.writerow(new_row.values())
-    csv_file.seek(0)
-
-    response = HttpResponse(csv_file, content_type='text/csv')
-    local_time = timezone.localtime(timezone.now()).strftime(r'%Y%m%d_%H%M%S')
-    if not filename_prefix:
-        version_bits = str(version).split('_')
-        filename_prefix = '{0}_v{1}_'.format(version_bits[0], '.'.join([str(x) for x in version_bits[1:]]))
-    filename = f"{filename_prefix}{local_time}.csv"
-    response['Content-Disposition'] = f'attachment; filename={filename}'
-    csv_file.close()
-    return response
 
 
 @receiver(pre_delete, sender=Job)
@@ -285,27 +249,27 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
 
     def export_caais_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return export_submission_csv(related_submissions, ExportVersion.CAAIS_1_0)
+        return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
     export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Submissions in Selected'
 
     def export_atom_2_6_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return export_submission_csv(related_submissions, ExportVersion.ATOM_2_6)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
     export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Submissions in Selected'
 
     def export_atom_2_3_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return export_submission_csv(related_submissions, ExportVersion.ATOM_2_3)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
     export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Submissions in Selected'
 
     def export_atom_2_2_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return export_submission_csv(related_submissions, ExportVersion.ATOM_2_2)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
     export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Submissions in Selected'
 
     def export_atom_2_1_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return export_submission_csv(related_submissions, ExportVersion.ATOM_2_1)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Submissions in Selected'
 
 
@@ -448,23 +412,23 @@ class SubmissionAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(admin_url)
 
     def export_caais_csv(self, request, queryset):
-        return export_submission_csv(queryset, ExportVersion.CAAIS_1_0)
+        return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
     export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
 
     def export_atom_2_6_csv(self, request, queryset):
-        return export_submission_csv(queryset, ExportVersion.ATOM_2_6)
+        return queryset.export_csv(version=ExportVersion.ATOM_2_6)
     export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
 
     def export_atom_2_3_csv(self, request, queryset):
-        return export_submission_csv(queryset, ExportVersion.ATOM_2_3)
+        return queryset.export_csv(version=ExportVersion.ATOM_2_3)
     export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
 
     def export_atom_2_2_csv(self, request, queryset):
-        return export_submission_csv(queryset, ExportVersion.ATOM_2_2)
+        return queryset.export_csv(version=ExportVersion.ATOM_2_2)
     export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
 
     def export_atom_2_1_csv(self, request, queryset):
-        return export_submission_csv(queryset, ExportVersion.ATOM_2_1)
+        return queryset.export_csv(version=ExportVersion.ATOM_2_1)
     export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
 
 

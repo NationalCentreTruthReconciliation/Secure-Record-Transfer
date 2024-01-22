@@ -22,7 +22,6 @@ from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from recordtransfer import settings
-from recordtransfer.admin import export_submission_csv
 from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.jobs import create_and_save_submission
@@ -770,4 +769,4 @@ class SubmissionCsv(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + '_export-'
-        return export_submission_csv(queryset, ExportVersion.CAAIS_1_0, prefix)
+        return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)

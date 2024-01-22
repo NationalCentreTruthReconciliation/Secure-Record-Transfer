@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from caais.export import ExportVersion
 from caais.models import Metadata
 from recordtransfer import settings
+from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
 
@@ -234,6 +235,8 @@ class Submission(models.Model):
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
     bag_name = models.CharField(max_length=256, null=True)
+
+    objects = SubmissionQuerySet.as_manager()
 
     @property
     def user_folder(self):
