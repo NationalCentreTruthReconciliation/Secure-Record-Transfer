@@ -209,47 +209,63 @@ class TransferFormWizard(SessionWizardView):
         }
     }
 
+
     def get(self, request, *args, **kwargs):
         resume_id = request.GET.get('resume_transfer', None)
+
         if resume_id:
             transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+
             if transfer is None:
-                LOGGER.error(
-                    f"Expected at least 1 saved transfers for user {self.request.user} and ID {resume_id}, found 0"
-                )
+                LOGGER.error((
+                    "Expected at least 1 saved transfer for user %s and ID %s, found 0"
+                ), self.request.user, resume_id)
+
             else:
                 self.storage.data = pickle.loads(transfer.step_data)['past']
                 self.storage.current_step = transfer.current_step
                 return self.render(self.get_form())
+
         return super().get(self, request, *args, **kwargs)
+
 
     def post(self, *args, **kwargs):
         save_form_step = self.request.POST.get('save_form_step', None)
+
         if save_form_step and save_form_step in self.steps.all:
             resume_id = self.request.GET.get('resume_transfer', None)
+
             if resume_id:
                 transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+                transfer.last_updated = timezone.now()
             else:
                 transfer = SavedTransfer()
+
             transfer.current_step = save_form_step
             # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
             current_data = {f.replace(save_form_step + "-", ""): self.request.POST[f] for f in self.request.POST.keys()
                             if f.startswith(save_form_step + "-")}
             transfer.user = self.request.user
-            transfer.last_updated = datetime.datetime.now(timezone.get_current_timezone())
             transfer.step_data = pickle.dumps({'past': self.storage.data, 'current': current_data })
             transfer.save()
             return redirect('recordtransfer:userprofile')
+
         else:
             return super().post(*args, **kwargs)
+
 
     def get_template_names(self):
         ''' Retrieve the name of the template for the current step '''
         step_name = self.steps.current
         return [self._TEMPLATES[step_name]["templateref"]]
 
+
     def get_form_initial(self, step):
+        ''' Populate form with saved transfer data (if a "resume" request was received), and add the
+        user's name and email from their user profile.
+        '''
         initial = self.initial_dict.get(step, {})
+
         resume_id = self.request.GET.get('resume_transfer', None)
         if resume_id is not None:
             transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
@@ -257,11 +273,15 @@ class TransferFormWizard(SessionWizardView):
                 data = pickle.loads(transfer.step_data)['current']
                 for (k, v) in data.items():
                     initial[k] = v
+
         if step == 'contactinfo':
             curr_user = self.request.user
-            initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
+            if curr_user.first_name and curr_user.last_name:
+                initial['contact_name'] = f'{curr_user.first_name} {curr_user.last_name}'
             initial['email'] = str(curr_user.email)
+
         return initial
+
 
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
@@ -269,6 +289,7 @@ class TransferFormWizard(SessionWizardView):
             users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             kwargs['users_groups'] = users_groups
         return kwargs
+
 
     def get_context_data(self, form, **kwargs):
         ''' Retrieve context data for the current form template.
@@ -281,15 +302,20 @@ class TransferFormWizard(SessionWizardView):
         '''
         context = super().get_context_data(form, **kwargs)
         step_name = self.steps.current
+
         context.update({'form_title': self._TEMPLATES[step_name]['formtitle']})
+
         if 'infomessage' in self._TEMPLATES[step_name]:
             context.update({'info_message': self._TEMPLATES[step_name]['infomessage']})
+
         if step_name == 'grouptransfer':
             users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             context.update({'users_groups': users_groups})
+
         elif step_name == 'rights':
             all_rights = RightsType.objects.all().exclude(name='Other')
             context.update({'rights': all_rights})
+
         elif step_name == 'sourceinfo':
             all_roles = SourceRole.objects.all().exclude(name='Other')
             all_types = SourceType.objects.all().exclude(name='Other')
@@ -297,20 +323,33 @@ class TransferFormWizard(SessionWizardView):
                 'source_roles': all_roles,
                 'source_types': all_types,
             })
+
+        context['save_form_state'] = self.get_save_form_state()
+
+        return context
+
+
+    def get_save_form_state(self):
+        ''' Get the state required to update the "save form" button.
+        '''
         resume_id = self.request.GET.get('resume_transfer', None)
-        max_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+        num_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+
         if settings.MAX_SAVED_TRANSFER_COUNT == 0:
             # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
             save_form_state = 'off'
-        elif resume_id is None and max_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
+
+        elif resume_id is None and num_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
             # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
             # transfer, disable the save form button.
             save_form_state = 'disabled'
+
         else:
             # else enable the button.
             save_form_state = 'on'
-        context.update({'save_form_state': save_form_state})
-        return context
+
+        return save_form_state
+
 
     def get_all_cleaned_data(self):
         ''' Clean data, and populate CAAIS fields that are deferred to being created until after the
