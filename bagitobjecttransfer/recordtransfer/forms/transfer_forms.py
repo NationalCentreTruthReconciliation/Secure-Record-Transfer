@@ -10,7 +10,7 @@ from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
 from caais.models import SourceType, SourceRole, RightsType
-from recordtransfer.settings import USE_DATE_WIDGETS
+from recordtransfer import settings
 
 
 class TransferForm(forms.Form):
@@ -351,24 +351,54 @@ class SourceInfoForm(TransferForm):
 
 class RecordDescriptionForm(TransferForm):
     ''' The Description Information portion of the form. Contains fields from Section 3 of CAAIS '''
+
     def clean(self):
+        ''' Clean form data, and create a date_of_materials field derived from the start and end
+        date fields.
+        '''
         cleaned_data = super().clean()
 
-        if not USE_DATE_WIDGETS:
-            cleaned_data['start_date_of_material'] = cleaned_data.get('start_date_of_material_text')
-            cleaned_data['end_date_of_material'] = cleaned_data.get('end_date_of_material_text')
+        err = False
+
+        if not settings.USE_DATE_WIDGETS:
+            start_date_text = cleaned_data['start_date_of_material_text']
+            end_date_text = cleaned_data['end_date_of_material_text']
+
         else:
-            start_date_of_material = cleaned_data.get('start_date_of_material')
-            end_date_of_material = cleaned_data.get('end_date_of_material')
-            if not start_date_of_material:
+            start_date = cleaned_data.get('start_date_of_material')
+            end_date = cleaned_data.get('end_date_of_material')
+
+            err = False
+
+            if not start_date:
                 self.add_error('start_date_of_material', 'Start date was not valid')
-            if not end_date_of_material:
+                err = True
+
+            if not end_date:
                 self.add_error('end_date_of_material', 'End date was not valid')
-            if start_date_of_material and end_date_of_material:
-                if end_date_of_material < start_date_of_material:
-                    msg = 'End date cannot be before start date'
-                    self.add_error('end_date_of_material', msg)
+                err = True
+
+            if start_date and end_date and end_date < start_date:
+                self.add_error('end_date_of_material', 'End date cannot be before start date')
+                err = True
+
+            if not err:
+                start_date_text = start_date.strftime(r'%Y-%m-%d')
+                end_date_text = end_date.strftime(r'%Y-%m-%d')
+
+        if not err:
+            if cleaned_data.get('start_date_is_approximate', False):
+                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date_text)
+            if cleaned_data.get('end_date_is_approximate', False):
+                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date_text)
+
+            if start_date == end_date:
+                cleaned_data['date_of_materials'] = start_date
+            else:
+                cleaned_data['date_of_materials'] = f'{start_date} - {end_date}'
+
         return cleaned_data
+
 
     accession_title = forms.CharField(
         min_length=2,
@@ -380,7 +410,7 @@ class RecordDescriptionForm(TransferForm):
         label=gettext('Title')
     )
 
-    if not USE_DATE_WIDGETS:
+    if not settings.USE_DATE_WIDGETS:
         # Use _text to avoid jQuery input masks
         start_date_of_material_text = forms.CharField(
             min_length=2,
@@ -404,6 +434,7 @@ class RecordDescriptionForm(TransferForm):
         )
         start_date_is_approximate = False
         end_date_is_approximate = False
+
     else:
         start_date_of_material = forms.DateField(
             input_formats=[r'%Y-%m-%d'],

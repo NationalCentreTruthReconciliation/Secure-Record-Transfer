@@ -1,4 +1,3 @@
-import datetime
 import pickle
 from typing import Any, Union
 import logging
@@ -314,49 +313,38 @@ class TransferFormWizard(SessionWizardView):
         return context
 
     def get_all_cleaned_data(self):
+        ''' Clean data, and populate CAAIS fields that are deferred to being created until after the
+        submission is completed.
+        '''
         cleaned_data = super().get_all_cleaned_data()
-
-        # Get quantity and type of files for extent
-        if settings.FILE_UPLOAD_ENABLED:
-            session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
-            size = get_human_readable_size(session.upload_size, base=1024, precision=2)
-            count = get_human_readable_file_count(
-                [f.name for f in session.get_existing_file_set()],
-                settings.ACCEPTED_FILE_FORMATS,
-                LOGGER
-            )
-            cleaned_data['quantity_and_unit_of_measure'] = gettext('{0}, totalling {1}').format(count, size)
-
-        start_date = cleaned_data['start_date_of_material']
-        end_date = cleaned_data['end_date_of_material']
-        if settings.USE_DATE_WIDGETS:
-            # Convert the four date-related fields to a single date
-            start_date = start_date.strftime(r'%Y-%m-%d')
-            end_date = end_date.strftime(r'%Y-%m-%d')
-            if cleaned_data['start_date_is_approximate']:
-                start_date = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date)
-            if cleaned_data['end_date_is_approximate']:
-                end_date = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date)
-
-        date_of_materials = start_date if start_date == end_date else f'{start_date} - {end_date}'
-        cleaned_data['date_of_materials'] = date_of_materials
-        cleaned_data = TransferFormWizard.delete_keys(cleaned_data, [
-            'start_date_is_approximate',
-            'start_date_of_material',
-            'start_date_of_material_text',
-            'end_date_is_approximate',
-            'end_date_of_material',
-            'end_date_of_material_text'
-        ])
-
+        self.set_quantity_and_unit_of_measure(cleaned_data)
         return cleaned_data
 
-    @staticmethod
-    def delete_keys(form_data, keys):
-        for key in keys:
-            if key in form_data:
-                del form_data[key]
-        return form_data
+
+    def set_quantity_and_unit_of_measure(self, cleaned_data):
+        ''' Create a summary for the quantity_and_unit_of_measure from the type of files submitted.
+
+        Args:
+            cleaned_data (dict): The cleaned data submitted by the user
+
+        Returns:
+            (None): The cleaned form data is modified in-place
+        '''
+        if not settings.FILE_UPLOAD_ENABLED:
+            return
+
+        session = UploadSession.objects.filter(token=cleaned_data['session_token']).first()
+
+        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
+
+        count = get_human_readable_file_count(
+            [f.name for f in session.get_existing_file_set()],
+            settings.ACCEPTED_FILE_FORMATS,
+            LOGGER
+        )
+
+        cleaned_data['quantity_and_unit_of_measure'] = gettext('{0}, totalling {1}').format(count, size)
+
 
     def done(self, form_list, **kwargs):
         ''' Retrieves all of the form data, and creates a Submission from it
