@@ -39,7 +39,9 @@ services:
       - mailhog:/home/mailhog/mail
 
   rq:
-    build: .
+    build:
+      context: .
+      dockerfile: Containerfile
     container_name: recordtransfer_rq_workers
     command: python manage.py rqworker default
     volumes:
@@ -60,7 +62,9 @@ services:
       - redis
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Containerfile
     container_name: recordtransfer_django_app
     command: python manage.py runserver 0.0.0.0:8000
     volumes:

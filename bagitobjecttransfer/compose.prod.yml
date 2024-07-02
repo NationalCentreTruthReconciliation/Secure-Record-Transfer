@@ -49,7 +49,9 @@ services:
       - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
 
   rq:
-    build: .
+    build:
+      context: .
+      dockerfile: Containerfile
     command: python manage.py rqworker default
     restart: unless-stopped
     networks:
@@ -65,7 +67,9 @@ services:
       - redis
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Containerfile
     command: gunicorn bagitobjecttransfer.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
     networks:
