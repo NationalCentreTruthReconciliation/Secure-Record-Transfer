@@ -13,7 +13,7 @@ django-formtools==2.3
 django-override-storage==0.3.2
 django-recaptcha==2.0.6
 django-rq==2.5.1
-gunicorn==20.1.0
+gunicorn==22.0.0
 importlib-metadata==4.8.3
 mysql-connector-python==8.0.24
 packaging==23.2
