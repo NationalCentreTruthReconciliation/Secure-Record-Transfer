@@ -37,11 +37,11 @@ STATICFILES_FINDERS = (
 
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
+    'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
     'STYLESHEETS': {
         'caais_styles': {
             'source_filenames': (
-                'caais/css/inlineTextInputs.css',
-                'caais/css/metadataChangeForm.css',
+                'caais/css/*.css'
             ),
             'output_filename': 'css/caais_styles.css',
             'extra_context': {
@@ -50,8 +50,7 @@ PIPELINE = {
         },
         'recordtransfer_styles': {
             'source_filenames': (
-                'recordtransfer/css/accounts.css',
-                'recordtransfer/css/banner.css',
+                'recordtransfer/css/*.css'
             ),
             'output_filename': 'css/recordtransfer_styles.css',
             'extra_context': {
@@ -62,16 +61,21 @@ PIPELINE = {
     'JAVASCRIPT': {
         'caais_js': {
             'source_filenames': (
-                'caais/js/phoneNumberMask.js',
+                'caais/js/*.js'
             ),
-            'output_filename': 'js/caais_js.js',
+            'output_filename': 'js/caais.js',
         },
-        'recordtransfer_js': {
+        'recordtransfer_base_js': {
             'source_filenames': (
-                'recordtransfer/js/dropzoneForm.js',
-                'recordtransfer/js/forms.js',
+                'recordtransfer/js/base/*.js'
             ),
-            'output_filename': 'js/recordtransfer_js.js',
+            'output_filename': 'js/recordtransfer_base.js',
+        },
+        'recordtransfer_dropzone_js': {
+            'source_filenames': (
+                'recordtransfer/js/dropzone/*.js'
+            ),
+            'output_filename': 'js/recordtransfer_dropzone.js',
         },
     }
 }
@@ -85,6 +89,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
+    'pipeline.middleware.MinifyHTMLMiddleware',
 ]
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'
