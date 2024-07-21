@@ -24,7 +24,57 @@ INSTALLED_APPS = [
     'django_rq',
     'captcha',
     'dbtemplates',
+    'pipeline'
 ]
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
+# create separate minified stylesheets and javascript files for each app
+PIPELINE = {
+    'STYLESHEETS': {
+        'caais_styles': {
+            'source_filenames': (
+                'caais/css/inlineTextInputs.css',
+                'caais/css/metadataChangeForm.css',
+            ),
+            'output_filename': 'css/caais_styles.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+        'recordtransfer_styles': {
+            'source_filenames': (
+                'recordtransfer/css/accounts.css',
+                'recordtransfer/css/banner.css',
+            ),
+            'output_filename': 'css/recordtransfer_styles.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+    },
+    'JAVASCRIPT': {
+        'caais_js': {
+            'source_filenames': (
+                'caais/js/phoneNumberMask.js',
+            ),
+            'output_filename': 'js/caais_js.js',
+        },
+        'recordtransfer_js': {
+            'source_filenames': (
+                'recordtransfer/js/dropzoneForm.js',
+                'recordtransfer/js/forms.js',
+            ),
+            'output_filename': 'js/recordtransfer_js.js',
+        },
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
