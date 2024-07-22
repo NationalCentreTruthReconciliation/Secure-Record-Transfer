@@ -24,70 +24,70 @@ INSTALLED_APPS = [
     'django_rq',
     'captcha',
     'dbtemplates',
-    'pipeline'
+    # 'pipeline'
 ]
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
+# STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
 
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
-)
+# STATICFILES_FINDERS = (
+#     'django.contrib.staticfiles.finders.FileSystemFinder',
+#     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#     'pipeline.finders.PipelineFinder',
+# )
 
-STATIC_URL = '/static/'
+# STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'recordtransfer/static'),
-    os.path.join(BASE_DIR, 'caais/static'),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'recordtransfer/static'),
+#     os.path.join(BASE_DIR, 'caais/static'),
+# ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# create separate minified stylesheets and javascript files for each app
-PIPELINE = {
-    'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
-    'STYLESHEETS': {
-        'caais_styles': {
-            'source_filenames': (
-                'caais/css/*.css'
-            ),
-            'output_filename': 'caais/css/caais_styles.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
-        'recordtransfer_styles': {
-            'source_filenames': (
-                'recordtransfer/css/*.css'
-            ),
-            'output_filename': 'recordtransfer/css/recordtransfer_styles.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
-    },
-    'JAVASCRIPT': {
-        'caais_js': {
-            'source_filenames': (
-                'caais/js/*.js'
-            ),
-            'output_filename': 'caais/js/caais.js',
-        },
-        'recordtransfer_base_js': {
-            'source_filenames': (
-                'recordtransfer/js/base/*.js'
-            ),
-            'output_filename': 'recordtransfer/js/recordtransfer_base.js',
-        },
-        'recordtransfer_dropzone_js': {
-            'source_filenames': (
-                'recordtransfer/js/dropzone/*.js'
-            ),
-            'output_filename': 'recordtransfer/js/dropzone/recordtransfer_dropzone.js',
-        },
-    }
-}
+# # create separate minified stylesheets and javascript files for each app
+# PIPELINE = {
+#     'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
+#     'STYLESHEETS': {
+#         'caais_styles': {
+#             'source_filenames': (
+#                 'caais/css/*.css',
+#             ),
+#             'output_filename': 'caais_styles.css',
+#             'extra_context': {
+#                 'media': 'screen,projection',
+#             },
+#         },
+#         'recordtransfer_styles': {
+#             'source_filenames': (
+#                 'recordtransfer/css/*.css',
+#             ),
+#             'output_filename': 'recordtransfer_styles.css',
+#             'extra_context': {
+#                 'media': 'screen,projection',
+#             },
+#         },
+#     },
+#     'JAVASCRIPT': {
+#         'caais_js': {
+#             'source_filenames': (
+#                 'caais/js/*.js',
+#             ),
+#             'output_filename': 'caais.js',
+#         },
+#         'recordtransfer_base_js': {
+#             'source_filenames': (
+#                 'recordtransfer/js/base/*.js',
+#             ),
+#             'output_filename': 'recordtransfer_base.js',
+#         },
+#         'recordtransfer_dropzone_js': {
+#             'source_filenames': (
+#                 'recordtransfer/js/dropzone/*.js',
+#             ),
+#             'output_filename': 'recordtransfer_dropzone.js',
+#         },
+#     }
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -98,8 +98,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.gzip.GZipMiddleware',
-    'pipeline.middleware.MinifyHTMLMiddleware',
+    # 'django.middleware.gzip.GZipMiddleware',
+    # 'pipeline.middleware.MinifyHTMLMiddleware',
 ]
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'

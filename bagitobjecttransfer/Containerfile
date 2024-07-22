@@ -18,7 +18,7 @@ RUN pip install --upgrade setuptools wheel \
     && bash nodesource_setup.sh \
     && apt-get install -y nodejs \
     && npm install -g npm \
-    && npm install \
+    && cd /app && npm install \
     && sed -i 's/\r$//g' /app/docker/entrypoint.sh \
     && chmod +x /app/docker/entrypoint.sh
 

@@ -89,3 +89,68 @@ LOGGING = {
         }
     }
 }
+
+INSTALLED_APPS.append('pipeline')
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
+# create separate minified stylesheets and javascript files for each app
+PIPELINE = {
+    'PIPELINE_ENABLED': True,
+    'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
+    'STYLESHEETS': {
+        'caais_styles': {
+            'source_filenames': (
+                'caais/css/*.css',
+            ),
+            'output_filename': 'caais_styles.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+        'recordtransfer_styles': {
+            'source_filenames': (
+                'recordtransfer/css/*.css',
+            ),
+            'output_filename': 'recordtransfer_styles.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+    },
+    'JAVASCRIPT': {
+        'caais_js': {
+            'source_filenames': (
+                'caais/js/*.js',
+            ),
+            'output_filename': 'caais.js',
+        },
+        'recordtransfer_base_js': {
+            'source_filenames': (
+                'recordtransfer/js/base/*.js',
+            ),
+            'output_filename': 'recordtransfer_base.js',
+        },
+        'recordtransfer_dropzone_js': {
+            'source_filenames': (
+                'recordtransfer/js/dropzone/*.js',
+            ),
+            'output_filename': 'recordtransfer_dropzone.js',
+        },
+    }
+}
+
+# STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MIDDLEWARE.extend([
+    'django.middleware.gzip.GZipMiddleware',
+    'pipeline.middleware.MinifyHTMLMiddleware',
+])
