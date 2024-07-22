@@ -13,11 +13,20 @@
     {% if FILE_UPLOAD_ENABLED %}
         {% javascript 'recordtransfer_dropzone_js' %}
     {% endif %}
-    <% javascript 'recordtransfer_base_js' %>
+    <script src="{% static 'recordtransfer/js/forms.js'%}"></script>
+    <script src="{% static 'recordtransfer/js/navbar.js'%}"></script>
+    <script src="{% static 'recordtransfer/js/widgetconfig.js'%}"></script>
     {% endblock %}
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    {% stylesheet 'recordtransfer_styles' %}
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/banner.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/footer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transferform.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/widget.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
 
     <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}"/>
 

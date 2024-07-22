@@ -35,6 +35,15 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'recordtransfer/static'),
+    os.path.join(BASE_DIR, 'caais/static'),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
     'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
@@ -43,7 +52,7 @@ PIPELINE = {
             'source_filenames': (
                 'caais/css/*.css'
             ),
-            'output_filename': 'css/caais_styles.css',
+            'output_filename': 'caais/css/caais_styles.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
@@ -52,7 +61,7 @@ PIPELINE = {
             'source_filenames': (
                 'recordtransfer/css/*.css'
             ),
-            'output_filename': 'css/recordtransfer_styles.css',
+            'output_filename': 'recordtransfer/css/recordtransfer_styles.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
@@ -63,19 +72,19 @@ PIPELINE = {
             'source_filenames': (
                 'caais/js/*.js'
             ),
-            'output_filename': 'js/caais.js',
+            'output_filename': 'caais/js/caais.js',
         },
         'recordtransfer_base_js': {
             'source_filenames': (
                 'recordtransfer/js/base/*.js'
             ),
-            'output_filename': 'js/recordtransfer_base.js',
+            'output_filename': 'recordtransfer/js/recordtransfer_base.js',
         },
         'recordtransfer_dropzone_js': {
             'source_filenames': (
                 'recordtransfer/js/dropzone/*.js'
             ),
-            'output_filename': 'js/recordtransfer_dropzone.js',
+            'output_filename': 'recordtransfer/js/dropzone/recordtransfer_dropzone.js',
         },
     }
 }
