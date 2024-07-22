@@ -102,14 +102,14 @@ STATICFILES_FINDERS = (
 
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
-    'PIPELINE_ENABLED': True,
+    'PIPELINE_ENABLED': False,
     'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
     'STYLESHEETS': {
         'caais_styles': {
             'source_filenames': (
                 'caais/css/*.css',
             ),
-            'output_filename': 'caais_styles.css',
+            'output_filename': 'caais/css/min.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
@@ -118,7 +118,7 @@ PIPELINE = {
             'source_filenames': (
                 'recordtransfer/css/*.css',
             ),
-            'output_filename': 'recordtransfer_styles.css',
+            'output_filename': 'recordtransfer/css/min.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
@@ -135,13 +135,13 @@ PIPELINE = {
             'source_filenames': (
                 'recordtransfer/js/base/*.js',
             ),
-            'output_filename': 'recordtransfer_base.js',
+            'output_filename': 'recordtransfer/js/base_min.js',
         },
         'recordtransfer_dropzone_js': {
             'source_filenames': (
                 'recordtransfer/js/dropzone/*.js',
             ),
-            'output_filename': 'recordtransfer_dropzone.js',
+            'output_filename': 'recordtransfer/js/dropzone_min.js',
         },
     }
 }

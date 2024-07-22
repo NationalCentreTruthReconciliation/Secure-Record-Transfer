@@ -3,7 +3,7 @@
 
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/submission_detail.css' %}">
+    {% stylesheet 'recordtransfer_styles' %}
 </head>
 <body>
     <div class="main-title">Transfer Report for "{{ metadata.accession_title }}"</div>
