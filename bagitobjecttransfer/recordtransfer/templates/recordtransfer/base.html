@@ -11,13 +11,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
     
     {% if FILE_UPLOAD_ENABLED %}
-        <% javascript 'recordtransfer_dropzone_js' %>
+        {% javascript 'recordtransfer_dropzone_js' %}
     {% endif %}
     <% javascript 'recordtransfer_base_js' %>
     {% endblock %}
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    {% load pipeline %}
     {% stylesheet 'recordtransfer_styles' %}
 
     <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}"/>
