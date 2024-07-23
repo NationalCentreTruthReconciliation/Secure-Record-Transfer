@@ -3,22 +3,26 @@
 
 <html>
 <head>
-    {% load pipeline %}
+    <!-- JS -->
     {% block javascript %}
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
     
     {% if FILE_UPLOAD_ENABLED %}
-        {% javascript 'recordtransfer_dropzone_js' %}
+        {% include 'includes/dropzone_js.html' %}
     {% endif %}
-    {% javascript 'recordtransfer_base_js' %}
+    {% include 'includes/base_js.html' %}
+
     {% endblock %}
 
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    {% stylesheet 'recordtransfer_styles' %}
+    {% include 'includes/base_css.html' %}
 
+    <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}"/>
 
     <title>{% block title %}{% endblock %}</title>

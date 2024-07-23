@@ -1,0 +1,14 @@
+{% if DEBUG %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/banner.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/footer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transferform.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/widget.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
+{% else %}
+    {% load pipeline %}
+    {% stylesheet 'recordtransfer_styles' %}
+{% endif %}

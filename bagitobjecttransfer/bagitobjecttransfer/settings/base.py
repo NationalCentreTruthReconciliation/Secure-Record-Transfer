@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django_rq',
     'captcha',
     'dbtemplates',
+    'pipeline',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,4 @@ CAAIS_UNKNOWN_END_DATE = config('CAAIS_UNKNOWN_END_DATE', cast=str, default='202
 CLAMAV_ENABLED = config('CLAMAV_ENABLED', cast=bool, default=True)
 CLAMAV_HOST = config('CLAMAV_HOST', default='clamav')
 CLAMAV_PORT = config('CLAMAV_PORT', cast=int, default=3310)
+

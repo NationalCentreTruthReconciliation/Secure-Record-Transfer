@@ -90,8 +90,6 @@ LOGGING = {
     }
 }
 
-INSTALLED_APPS.append('pipeline')
-
 STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
 
 STATICFILES_FINDERS = (
@@ -102,7 +100,6 @@ STATICFILES_FINDERS = (
 
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
-    'PIPELINE_ENABLED': True,
     'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
     'STYLESHEETS': {
         'caais_styles': {
