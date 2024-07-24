@@ -182,9 +182,9 @@ PIPELINE = {
     'STYLESHEETS': {
         'caais_styles': {
             'source_filenames': (
-                'caais/css/*.css',
+                'caais/css/base/*.css',
             ),
-            'output_filename': 'caais/css/min.css',
+            'output_filename': 'caais/css/base/min.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
@@ -211,21 +211,21 @@ PIPELINE = {
     'JAVASCRIPT': {
         'caais_js': {
             'source_filenames': (
-                'caais/js/*.js',
+                'caais/js/base/*.js',
             ),
-            'output_filename': 'caais.js',
+            'output_filename': 'caais/js/base/min.js',
         },
         'recordtransfer_base_js': {
             'source_filenames': (
                 'recordtransfer/js/base/*.js',
             ),
-            'output_filename': 'recordtransfer/js/base_min.js',
+            'output_filename': 'recordtransfer/js/base/min.js',
         },
         'recordtransfer_dropzone_js': {
             'source_filenames': (
                 'recordtransfer/js/dropzone/*.js',
             ),
-            'output_filename': 'recordtransfer/js/dropzone_min.js',
+            'output_filename': 'recordtransfer/js/dropzone/min.js',
         },
     }
 }
