@@ -100,3 +100,7 @@ bagitobjecttransfer/static/
 env/
 package-lock.json
 node_modules
+
+# Temporary ARM docker compose files to be removed later
+compose-arm.dev.yml
+compose-arm.prod.yml
