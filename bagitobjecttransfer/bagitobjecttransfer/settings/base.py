@@ -191,9 +191,9 @@ PIPELINE = {
         },
         'recordtransfer_base_styles': {
             'source_filenames': (
-                'recordtransfer/css/*.css',
+                'recordtransfer/css/base/*.css',
             ),
-            'output_filename': 'recordtransfer/css/min.css',
+            'output_filename': 'recordtransfer/css/base/min.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
