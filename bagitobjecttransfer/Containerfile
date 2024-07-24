@@ -12,6 +12,13 @@ COPY . .
 # Make directories, install dependencies and prepare entrypoint script
 RUN pip install --upgrade setuptools wheel \
     && pip install -r requirements.txt \
+    && apt-get update \
+    && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh \
+    && bash nodesource_setup.sh \
+    && apt-get install -y nodejs \
+    && npm install -g npm \
+    && cd /app && npm install \
     && sed -i 's/\r$//g' /app/docker/entrypoint.sh \
     && chmod +x /app/docker/entrypoint.sh
 

@@ -1,0 +1,22 @@
+{
+  "name": "bagitobjecttransfer",
+  "version": "1.0.0",
+  "description": "The secure record transfer application has been designed for the purpose of transferring files and standardized metadata over the internet to an institution.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "yuglify": "2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer/issues"
+  },
+  "homepage": "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer#readme"
+}

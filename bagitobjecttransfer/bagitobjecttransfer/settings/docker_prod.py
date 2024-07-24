@@ -23,7 +23,6 @@ DATABASES = {
     }
 }
 
-
 # Asynchronous Redis Task Queue Manager
 # https://github.com/rq/django-rq
 
@@ -90,3 +89,4 @@ LOGGING = {
         }
     }
 }
+

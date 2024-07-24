@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django_rq',
     'captcha',
     'dbtemplates',
+    'pipeline',
 ]
 
 MIDDLEWARE = [
@@ -35,6 +36,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
+    'pipeline.middleware.MinifyHTMLMiddleware',
 ]
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'
@@ -162,3 +165,69 @@ CAAIS_UNKNOWN_END_DATE = config('CAAIS_UNKNOWN_END_DATE', cast=str, default='202
 CLAMAV_ENABLED = config('CLAMAV_ENABLED', cast=bool, default=True)
 CLAMAV_HOST = config('CLAMAV_HOST', default='clamav')
 CLAMAV_PORT = config('CLAMAV_PORT', cast=int, default=3310)
+
+# Pipeline configuration
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
+# create separate minified stylesheets and javascript files for each app
+PIPELINE = {
+    'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
+    'STYLESHEETS': {
+        'caais_styles': {
+            'source_filenames': (
+                'caais/css/base/*.css',
+            ),
+            'output_filename': 'caais/css/base/min.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+        'recordtransfer_base_styles': {
+            'source_filenames': (
+                'recordtransfer/css/base/*.css',
+            ),
+            'output_filename': 'recordtransfer/css/base/min.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+        'recordtransfer_submission_detail_styles': {
+            'source_filenames': (
+                'recordtransfer/css/submission_detail/*.css',
+            ),
+            'output_filename': 'recordtransfer/css/submission_detail/min.css',
+            'extra_context': {
+                'media': 'screen,projection',
+            },
+        },
+    },
+    'JAVASCRIPT': {
+        'caais_js': {
+            'source_filenames': (
+                'caais/js/base/*.js',
+            ),
+            'output_filename': 'caais/js/base/min.js',
+        },
+        'recordtransfer_base_js': {
+            'source_filenames': (
+                'recordtransfer/js/base/*.js',
+            ),
+            'output_filename': 'recordtransfer/js/base/min.js',
+        },
+        'recordtransfer_dropzone_js': {
+            'source_filenames': (
+                'recordtransfer/js/dropzone/*.js',
+            ),
+            'output_filename': 'recordtransfer/js/dropzone/min.js',
+        },
+    }
+}
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')

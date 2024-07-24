@@ -3,29 +3,26 @@
 
 <html>
 <head>
+    <!-- JS -->
     {% block javascript %}
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
+    
     {% if FILE_UPLOAD_ENABLED %}
-        <script src="{% static 'recordtransfer/js/dropzoneForm.js'%}"></script>
+        {% include 'includes/dropzone_js.html' %}
     {% endif %}
-    <script src="{% static 'recordtransfer/js/forms.js'%}"></script>
-    <script src="{% static 'recordtransfer/js/navbar.js'%}"></script>
-    <script src="{% static 'recordtransfer/js/widgetconfig.js'%}"></script>
+    {% include 'includes/base_js.html' %}
+
     {% endblock %}
 
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/banner.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/footer.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transferform.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/widget.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
+    {% include 'includes/base_css.html' %}
 
+    <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}"/>
 
     <title>{% block title %}{% endblock %}</title>
