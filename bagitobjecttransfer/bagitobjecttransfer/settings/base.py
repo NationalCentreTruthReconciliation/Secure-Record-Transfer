@@ -189,7 +189,7 @@ PIPELINE = {
                 'media': 'screen,projection',
             },
         },
-        'recordtransfer_styles': {
+        'recordtransfer_base_styles': {
             'source_filenames': (
                 'recordtransfer/css/*.css',
             ),
