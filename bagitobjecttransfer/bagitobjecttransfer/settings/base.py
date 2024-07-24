@@ -200,9 +200,9 @@ PIPELINE = {
         },
         'recordtransfer_submission_detail_styles': {
             'source_filenames': (
-                'recordtransfer/css/submission_detail.css',
+                'recordtransfer/css/submission_detail/*.css',
             ),
-            'output_filename': 'recordtransfer/css/submission_detail_min.css',
+            'output_filename': 'recordtransfer/css/submission_detail/min.css',
             'extra_context': {
                 'media': 'screen,projection',
             },
