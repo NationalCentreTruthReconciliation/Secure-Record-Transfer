@@ -176,7 +176,6 @@ STATICFILES_FINDERS = (
 
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
-    'PIPELINE_ENABLED': False,
     'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
     'STYLESHEETS': {
         'caais_styles': {
@@ -219,6 +218,8 @@ PIPELINE = {
         },
     }
 }
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MIDDLEWARE.extend([
     'django.middleware.gzip.GZipMiddleware',
