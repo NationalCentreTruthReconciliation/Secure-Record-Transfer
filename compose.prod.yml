@@ -9,8 +9,8 @@ services:
     volumes:
       - clamav-virusdb:/var/lib/clamav
       - temp-directory:/tmp
-      - ./docker/clamav/clamd.conf:/etc/clamav/clamd.conf:ro
-      - ./docker/clamav/freshclam.conf:/etc/clamav/freshclam.conf:ro
+      - ./docker/clamav/clamd.conf:/etc/clamav/clamd.conf:z
+      - ./docker/clamav/freshclam.conf:/etc/clamav/freshclam.conf:z
 
   redis:
     image: docker.io/redis:7-alpine
@@ -25,7 +25,7 @@ services:
     networks:
       - redis-net
     volumes:
-      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:z
     environment:
       REDIS_REPLICATION_MODE: master
 
@@ -45,8 +45,8 @@ services:
       - .prod.env
     volumes:
       - mysql-database:/var/lib/mysql
-      - ./docker/logs/mysql:/var/log/mysql
-      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:ro
+      - ./docker/logs/mysql:/var/log/mysql:z
+      - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:z
 
   rq:
     build:
@@ -103,7 +103,7 @@ services:
     volumes:
       - static-volume:/app/static/
       - media-volume:/app/media/
-      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:z
 
 volumes:
   mysql-database:
