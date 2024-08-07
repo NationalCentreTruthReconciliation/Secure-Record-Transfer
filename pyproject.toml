@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "secure-record-transfer"
+version = "2024.8.7"
+description = "Transfer files and metadata to an archive based on accession standards"
+repository = "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer"
+documentation = "https://secure-record-transfer.readthedocs.io/en/latest/"
+authors = ["Daniel Lovegrove <Daniel.Lovegrove@umanitoba.ca>"]
+readme = "README.md"
+packages = [{include = "bagitobjecttransfer"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+bagit = "^1.8.1"
+clamd = "^1.0.2"
+dateparser = "^1.2.0"
+debugpy = "^1.8.2"
+Django = "3.2.*"
+django-countries = "^7.6.1"
+django-dbtemplates = "^4.0"
+django-formtools = "^2.5.1"
+django-override-storage = "^0.3.2"
+django-pipeline = "^3.1.0"
+django-recaptcha = "^3.0.0"
+django-rq = "^2.10.2"
+gunicorn = "^22.0.0"
+mysql-connector-python = "^9.0.0"
+python-decouple = "^3.8"
+setuptools = "^72.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pylint-django = "^2.5.5"
+Sphinx = "^8.0.2"
+sphinx-rtd-theme = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
