@@ -34,6 +34,8 @@ EMAIL_USE_TLS = False
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
