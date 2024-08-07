@@ -6,6 +6,5 @@ Dockerfile
 example.dev.env
 example.prod.env
 node_modules
-package-lock.json
 development_database.sqlite3
 ./static/
