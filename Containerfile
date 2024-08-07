@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-WORKDIR /tmp
+WORKDIR /app/
 
 COPY package*.json .
 
@@ -14,8 +14,6 @@ RUN python -c "from urllib.request import urlretrieve; urlretrieve('https://deb.
 
 # Set Environment Variables
 ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app/
 
 # Copy files to container
 COPY pyproject.toml README.md ./docker/entrypoint.sh ./bagitobjecttransfer/ /app/
