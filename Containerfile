@@ -1,26 +1,33 @@
-FROM python:3.10-slim
+#
+# Builder image
+#
+FROM node:20 AS builder
 
-WORKDIR /app/
+WORKDIR /build/
 
 COPY package*.json .
 
-# Install NodeJS
-RUN python -c "from urllib.request import urlretrieve; urlretrieve('https://deb.nodesource.com/setup_22.x', 'nodesource_setup.sh')" \
-    && bash nodesource_setup.sh \
-    && apt-get install -y nodejs \
-    && npm install -g npm \
-    && npm install \
-    && rm nodesource_setup.sh
+# Create binary for minifying assets
+RUN npm install && npm run compile
 
-# Set Environment Variables
+
+#
+# Main image
+#
+FROM python:3.10-slim
+
 ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app/
 
 # Copy files to container
 COPY pyproject.toml README.md ./docker/entrypoint.sh ./bagitobjecttransfer/ /app/
 
+# Copy built binary from builder
+COPY --from=builder /build/node_modules/yuglify/dist/* node_modules/yuglify/dist/
+
 # Install Python dependencies
-RUN pip install --upgrade pip wheel setuptools \
-    && pip install .
+RUN pip install .
 
 WORKDIR /app/bagitobjecttransfer/
 
