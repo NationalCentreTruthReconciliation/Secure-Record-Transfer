@@ -1,5 +1,6 @@
-from decouple import config
+from decouple import config, UndefinedValueError
 import os
+import platform
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -176,9 +177,19 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
+
+try:
+    YUGLIFY_BINARY = config('YUGLIFY_BINARY')
+
+except UndefinedValueError:
+    # Node modules are installed one directory above this application if "npm run compile" is used
+    _root_dir = os.path.dirname(BASE_DIR)
+    _suffix = 'arm64' if 'arm64' in platform.platform() else 'x64'
+    YUGLIFY_BINARY = os.path.join(_root_dir, f'node_modules/yuglify/dist/yuglify-{_suffix}')
+
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
-    'YUGLIFY_BINARY': os.path.join(BASE_DIR, 'node_modules/.bin/yuglify'),
+    'YUGLIFY_BINARY': YUGLIFY_BINARY,
     'STYLESHEETS': {
         'caais_styles': {
             'source_filenames': (
