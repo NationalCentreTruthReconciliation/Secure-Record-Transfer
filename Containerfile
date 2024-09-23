@@ -21,7 +21,8 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app/
 
 # Copy files to container
-COPY pyproject.toml README.md ./docker/entrypoint.sh ./bagitobjecttransfer/ /app/
+COPY pyproject.toml README.md ./docker/entrypoint.sh /app/
+COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
 # Copy built binary from builder
 COPY --from=builder /build/node_modules/yuglify/dist/* node_modules/yuglify/dist/
