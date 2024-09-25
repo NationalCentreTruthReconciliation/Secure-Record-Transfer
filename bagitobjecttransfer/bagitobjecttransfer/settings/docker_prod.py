@@ -5,6 +5,10 @@ from decouple import config
 from .base import *
 import re
 
+# Overwrite base.py settings for media and static roots
+MEDIA_ROOT = "/app/media"
+STATIC_ROOT = "/app/static"
+
 DEBUG = False
 SITE_ID = config('SITE_ID', default=1, cast=int)
 
