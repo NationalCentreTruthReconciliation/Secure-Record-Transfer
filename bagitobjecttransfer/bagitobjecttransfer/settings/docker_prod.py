@@ -86,7 +86,12 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
-        }
+        },
+        'clamav': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     }
 }
 
