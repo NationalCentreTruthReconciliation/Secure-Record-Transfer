@@ -123,7 +123,7 @@ FILE_UPLOAD_HANDLERS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'America/Winnipeg'
+TIME_ZONE = config('TIME_ZONE', default='America/Winnipeg')
 
 USE_I18N = True
 
