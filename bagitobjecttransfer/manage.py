@@ -54,10 +54,10 @@ def check_yuglify_binary():
 
 
 def main():
-    if 'DJANGO_SETTINGS_MODULE' not in os.environ:
-        os.environ['DJANGO_SETTINGS_MODULE'] = config(
-            'DJANGO_SETTINGS_MODULE',
-            default='bagitobjecttransfer.settings.sphinx',
+    if "DJANGO_SETTINGS_MODULE" not in os.environ:
+        os.environ["DJANGO_SETTINGS_MODULE"] = config(
+            "DJANGO_SETTINGS_MODULE",
+            default="bagitobjecttransfer.settings.test",
         )
 
     try:
@@ -70,9 +70,14 @@ def main():
         ) from exc
 
     initialize_debugger()
-    check_yuglify_binary()
+
+    from django.conf import settings
+
+    if not settings.DEBUG:
+        check_yuglify_binary()
+
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
