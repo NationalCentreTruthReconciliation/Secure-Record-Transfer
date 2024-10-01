@@ -6,7 +6,7 @@ repository = "https://github.com/NationalCentreTruthReconciliation/Secure-Record
 documentation = "https://secure-record-transfer.readthedocs.io/en/latest/"
 authors = ["Daniel Lovegrove <Daniel.Lovegrove@umanitoba.ca>"]
 readme = "README.md"
-packages = [{include = "bagitobjecttransfer"}]
+packages = [{ include = "bagitobjecttransfer" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -27,8 +27,7 @@ mysql-connector-python = "^9.0.0"
 python-decouple = "^3.8"
 setuptools = "^72.1.0"
 
-[tool.poetry.group.dev.dependencies]
-pylint-django = "^2.5.5"
+[tool.poetry.group.docs.dependencies]
 Sphinx = "^8.0.2"
 sphinx-rtd-theme = "^2.0.0"
 
