@@ -100,3 +100,4 @@ bagitobjecttransfer/static/
 env/
 package-lock.json
 node_modules
+ruff.toml
