@@ -1,6 +1,7 @@
 name: Build and push image to ghcr.io
 
 on:
+  pull_request:
   workflow_dispatch:
   release:
     types: [published]
