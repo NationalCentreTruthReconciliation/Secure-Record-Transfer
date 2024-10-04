@@ -177,15 +177,12 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
+# Set up yuglify binary location
 
-try:
-    YUGLIFY_BINARY = config('YUGLIFY_BINARY')
+_YUGLIFY_BINARY_NAME = "yuglify" if os.name != "nt" else "yuglify.exe"
+_YUGLIFY_BINARY_DIR = os.path.join(os.path.dirname(BASE_DIR), "node_modules/yuglify/dist/")
+YUGLIFY_BINARY = config("YUGLIFY_BINARY", os.path.join(_YUGLIFY_BINARY_DIR, _YUGLIFY_BINARY_NAME))
 
-except UndefinedValueError:
-    # Node modules are installed one directory above this application if "npm run compile" is used
-    _root_dir = os.path.dirname(BASE_DIR)
-    _suffix = 'arm64' if 'arm64' in platform.platform() else 'x64'
-    YUGLIFY_BINARY = os.path.join(_root_dir, f'node_modules/yuglify/dist/yuglify-{_suffix}')
 
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
