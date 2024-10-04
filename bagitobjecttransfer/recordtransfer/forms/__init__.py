@@ -6,6 +6,7 @@ from captcha.fields import ReCaptchaField
 
 from recordtransfer.forms.admin_forms import *
 from recordtransfer.forms.transfer_forms import *
+from recordtransfer.forms.user_forms import *
 from recordtransfer.models import User
 
 
