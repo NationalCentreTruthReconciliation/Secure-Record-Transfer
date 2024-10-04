@@ -114,13 +114,3 @@ class InlineSubmissionGroupForm(RecordTransferModelForm):
         )
 
     number_of_submissions_in_group = forms.IntegerField(required=False)
-
-
-class UserProfileForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = (
-            'gets_notification_emails',
-        )
-
-    gets_notification_emails = forms.CheckboxInput()
