@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import forms
 from django.contrib.auth import password_validation
 from django.utils.translation import ugettext_lazy as _
@@ -6,6 +8,8 @@ from recordtransfer.models import User
 
 
 class UserProfileForm(forms.ModelForm):
+    """Form for editing user profile."""
+
     gets_notification_emails = forms.BooleanField(
         required=False, label=_("Receive notification emails?")
     )
@@ -23,10 +27,13 @@ class UserProfileForm(forms.ModelForm):
     )
 
     class Meta:
+        """Meta class for UserProfileForm."""
+
         model = User
         fields = ("gets_notification_emails",)
 
-    def clean(self):
+    def clean(self) -> "dict[str, Any]":
+        """Clean the form data."""
         cleaned_data = super().clean()
         current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
@@ -42,8 +49,9 @@ class UserProfileForm(forms.ModelForm):
 
         return cleaned_data
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
+    def save(self, commit: bool = True) -> User:
+        """Save the form data."""
+        user: User = super().save(commit=False)
         new_password = self.cleaned_data.get("new_password")
         if new_password:
             user.set_password(new_password)
