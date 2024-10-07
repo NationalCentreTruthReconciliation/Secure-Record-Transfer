@@ -115,13 +115,15 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         'name'
     ]
 
+    @admin.action(
+        description=gettext('Remove temp files on filesystem')
+    )
     def clean_temp_files(self, request, queryset):
         ''' Remove temporary files stored on the file system by the uploaded
         files
         '''
         for uploaded_file in queryset:
             uploaded_file.remove()
-    clean_temp_files.short_description = gettext('Remove temp files on filesystem')
 
 
 class UploadedFileInline(admin.TabularInline):
@@ -247,30 +249,40 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
 
+    @admin.action(
+        description='Export CAAIS 1.0 CSV for Submissions in Selected'
+    )
     def export_caais_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
-    export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Submissions in Selected'
 
+    @admin.action(
+        description='Export AtoM 2.6 Accession CSV for Submissions in Selected'
+    )
     def export_atom_2_6_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
-    export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Submissions in Selected'
 
+    @admin.action(
+        description='Export AtoM 2.3 Accession CSV for Submissions in Selected'
+    )
     def export_atom_2_3_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
-    export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Submissions in Selected'
 
+    @admin.action(
+        description='Export AtoM 2.2 Accession CSV for Submissions in Selected'
+    )
     def export_atom_2_2_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
-    export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Submissions in Selected'
 
+    @admin.action(
+        description='Export AtoM 2.1 Accession CSV for Submissions in Selected'
+    )
     def export_atom_2_1_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
-    export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Submissions in Selected'
 
 
 class SubmissionGroupInline(admin.TabularInline):
@@ -412,25 +424,35 @@ class SubmissionAdmin(admin.ModelAdmin):
         admin_url = reverse('admin:index', current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
 
+    @admin.action(
+        description='Export CAAIS 1.0 CSV for Selected'
+    )
     def export_caais_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
-    export_caais_csv.short_description = 'Export CAAIS 1.0 CSV for Selected'
 
+    @admin.action(
+        description='Export AtoM 2.6 Accession CSV for Selected'
+    )
     def export_atom_2_6_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_6)
-    export_atom_2_6_csv.short_description = 'Export AtoM 2.6 Accession CSV for Selected'
 
+    @admin.action(
+        description='Export AtoM 2.3 Accession CSV for Selected'
+    )
     def export_atom_2_3_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_3)
-    export_atom_2_3_csv.short_description = 'Export AtoM 2.3 Accession CSV for Selected'
 
+    @admin.action(
+        description='Export AtoM 2.2 Accession CSV for Selected'
+    )
     def export_atom_2_2_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_2)
-    export_atom_2_2_csv.short_description = 'Export AtoM 2.2 Accession CSV for Selected'
 
+    @admin.action(
+        description='Export AtoM 2.1 Accession CSV for Selected'
+    )
     def export_atom_2_1_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_1)
-    export_atom_2_1_csv.short_description = 'Export AtoM 2.1 Accession CSV for Selected'
 
 
 @admin.register(Job)

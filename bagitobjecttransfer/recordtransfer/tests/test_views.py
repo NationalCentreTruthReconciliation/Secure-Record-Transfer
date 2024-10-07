@@ -53,13 +53,11 @@ class TestUploadFileView(TestCase):
         cls.test_user_1 = User.objects.create_user(username='testuser1', password='1X<ISRUkw+tuK')
 
     def setUp(self):
-        _ = self.client.login(username='testuser1', password='1X<ISRUkw+tuK')
-        self.patch__accept_file = patch('recordtransfer.views._accept_file').start()
-        self.patch__accept_session = patch('recordtransfer.views._accept_session').start()
-        self.patch__accept_contents = patch('recordtransfer.views._accept_contents').start()
-        self.patch__accept_file.return_value = {'accepted': True}
-        self.patch__accept_session.return_value = {'accepted': True}
-        self.patch__accept_contents.return_value = {'accepted': True}
+        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.patch__accept_file = patch("recordtransfer.views._accept_file").start()
+        self.patch__accept_session = patch("recordtransfer.views._accept_session").start()
+        self.patch__accept_file.return_value = {"accepted": True}
+        self.patch__accept_session.return_value = {"accepted": True}
 
     def test_logged_out_error(self):
         self.client.logout()
@@ -145,15 +143,18 @@ class TestUploadFileView(TestCase):
         session.delete()
 
     def test_content_issue_flagged(self):
+        """
+        TODO: accept contents logic not complete yet
+
         self.patch__accept_contents.return_value = {
-            'accepted': False,
-            'error': 'ISSUE',
-            'clamav': {
-                'reason': 'Virus',
-                'status': 'FOUND',
-            }
+            "accepted": False,
+            "error": "ISSUE",
+            "clamav": {
+                "reason": "Virus",
+                "status": "FOUND",
+            },
         }
-        # accept contents logic not complete yet
+        """
 
     def tearDown(self):
         self.client.logout()

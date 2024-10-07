@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidde
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -121,7 +121,7 @@ class CreateAccount(FormView):
 
 def activate_account(request, uidb64, token):
     try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
+        uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None

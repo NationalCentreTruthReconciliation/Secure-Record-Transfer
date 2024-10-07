@@ -42,7 +42,7 @@ def check_yuglify_binary():
     from django.conf import settings
     from django.core.exceptions import ImproperlyConfigured
 
-    if settings.DEBUG and not os.path.exists(settings.YUGLIFY_BINARY):
+    if not settings.DEBUG and not os.path.exists(settings.YUGLIFY_BINARY):
         raise ImproperlyConfigured(
             f"Could not find yuglify binary at '{settings.YUGLIFY_BINARY}'. Did you forget "
             "to execute 'npm run compile'?"

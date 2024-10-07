@@ -1,11 +1,12 @@
-''' Forms specific to transferring files with a new submission '''
-from captcha.widgets import ReCaptchaV2Invisible
+"""Forms specific to transferring files with a new submission"""
+
+from django_recaptcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
 from django.utils.translation import gettext
 
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
