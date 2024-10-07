@@ -6,9 +6,8 @@ from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
@@ -89,8 +88,17 @@ class UserProfile(UpdateView):
         return context
 
     def form_valid(self, form):
+        response = super().form_valid(form)
+        update_session_auth_hash(self.request, form.instance)
         messages.success(self.request, "Preferences updated")
-        return super().form_valid(form)
+        return response
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            "There was an error updating your preferences. Please check the form and try again.",
+        )
+        return super().form_invalid(form)
 
 
 class About(TemplateView):
