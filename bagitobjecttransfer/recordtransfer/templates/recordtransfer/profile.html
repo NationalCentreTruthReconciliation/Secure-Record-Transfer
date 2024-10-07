@@ -26,6 +26,9 @@
                 {{ form.gets_notification_emails }}
             </div>
             <br>
+            {% if form.current_password.errors %}
+                <div class="error-message">{% trans form.current_password.errors.0 %}</div>
+            {% endif %}
             <div class="flex-item">
                 <label for="{{ form.current_password.id_for_label }}">{% trans form.current_password.label %}</label>
                 <input type="password"
@@ -33,12 +36,18 @@
                        id="{{ form.current_password.id_for_label }}"
                        autocomplete="off">
             </div>
+            {% if form.new_password.errors %}
+                <div class="error-message">{{ form.new_password.errors.0 }}</div>
+            {% endif %}
             <div class="flex-item">
                 <label for="{{ form.new_password.id_for_label }}">{% trans form.new_password.label %}</label>
                 <input type="password"
                        name="{{ form.new_password.name }}"
                        id="{{ form.new_password.id_for_label }}">
             </div>
+            {% if form.confirm_new_password.errors %}
+                <div class="error-message">{{ form.confirm_new_password.errors.0 }}</div>
+            {% endif %}
             <div class="flex-item">
                 <label for="{{ form.confirm_new_password.id_for_label }}">{% trans form.confirm_new_password.label %}</label>
                 <input type="password"
