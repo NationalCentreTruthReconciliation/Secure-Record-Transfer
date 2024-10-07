@@ -1,51 +1,50 @@
 {% load static %}
 {% load i18n %}
-
 <html>
-<head>
-    <!-- JS -->
-    {% block javascript %}
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
-    
-    {% if FILE_UPLOAD_ENABLED %}
-        {% include 'includes/dropzone_js.html' %}
-    {% endif %}
-    {% include 'includes/base_js.html' %}
-
-    {% endblock %}
-
-    <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-    {% include 'includes/base_css.html' %}
-
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}"/>
-
-    <title>{% block title %}{% endblock %}</title>
-</head>
-<body>
-    <div class="flex-wrapper">
-        {% block banner %}
-            {% include "recordtransfer/banner.html" %}
-        {% endblock %}
-        {% block header %}
-            {% include "recordtransfer/header.html" %}
-        {% endblock %}
-        <div class="main-container">
-            <div class="focused-content">
-                {% block focused_content %}{% endblock %}
+    <head>
+        <!-- JS -->
+        {% block javascript %}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
+            {% if FILE_UPLOAD_ENABLED %}
+                {% include "includes/dropzone_js.html" %}
+            {% endif %}
+            {% include "includes/base_js.html" %}
+        {% endblock javascript %}
+        <!-- CSS -->
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+        {% include "includes/base_css.html" %}
+        <!-- Favicon -->
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static "recordtransfer/img/favicon.ico" %}" />
+        <title>
+            {% block title %}{% endblock title %}
+        </title>
+    </head>
+    <body>
+        <div class="flex-wrapper">
+            {% block banner %}
+                {% include "recordtransfer/banner.html" %}
+            {% endblock banner %}
+            {% block header %}
+                {% include "recordtransfer/header.html" %}
+            {% endblock header %}
+            <div class="main-container">
+                <div class="focused-content">
+                    {% block focused_content %}{% endblock focused_content %}
+                </div>
+                <div class="main-content">
+                    {% block content %}{% endblock content %}
+                </div>
             </div>
-            <div class="main-content">
-                {% block content %}{% endblock %}
-            </div>
+            {% block footer %}
+                {% include "recordtransfer/footer.html" %}
+            {% endblock footer %}
         </div>
-        {% block footer %}
-            {% include "recordtransfer/footer.html" %}
-        {% endblock %}
-    </div>
-</body>
+    </body>
 </html>

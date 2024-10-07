@@ -1,0 +1,9 @@
+{% if DEBUG %}
+    {% load static %}
+    <link rel="stylesheet"
+          type="text/css"
+          href="{% static 'recordtransfer/css/submission_detail/submission_detail.css' %}">
+{% else %}
+    {% load pipeline %}
+    {% stylesheet 'recordtransfer_submission_detail_styles' %}
+{% endif %}
