@@ -38,11 +38,22 @@ def initialize_debugger():
             debugpy.listen(('0.0.0.0', port))
 
 
+def check_yuglify_binary():
+    from django.conf import settings
+    from django.core.exceptions import ImproperlyConfigured
+
+    if settings.DEBUG and not os.path.exists(settings.YUGLIFY_BINARY):
+        raise ImproperlyConfigured(
+            f"Could not find yuglify binary at '{settings.YUGLIFY_BINARY}'. Did you forget "
+            "to execute 'npm run compile'?"
+        )
+
+
 def main():
-    if 'DJANGO_SETTINGS_MODULE' not in os.environ:
-        os.environ['DJANGO_SETTINGS_MODULE'] = config(
-            'DJANGO_SETTINGS_MODULE',
-            default='bagitobjecttransfer.settings.sphinx',
+    if "DJANGO_SETTINGS_MODULE" not in os.environ:
+        os.environ["DJANGO_SETTINGS_MODULE"] = config(
+            "DJANGO_SETTINGS_MODULE",
+            default="bagitobjecttransfer.settings.test",
         )
 
     try:
@@ -55,8 +66,10 @@ def main():
         ) from exc
 
     initialize_debugger()
+    check_yuglify_binary()
+
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

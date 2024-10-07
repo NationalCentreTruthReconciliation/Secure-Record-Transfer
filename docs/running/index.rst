@@ -24,7 +24,6 @@ first time.
 
 .. code-block:: bash
 
-    cd bagitobjecttransfer
     cp example.dev.env .dev.env
 
 
@@ -145,7 +144,6 @@ From the root of the repository, run the following commands before running the a
 
 .. code-block:: bash
 
-    cd bagitobjecttransfer
     cp example.prod.env .prod.env
 
 

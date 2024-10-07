@@ -24,10 +24,9 @@ To start, clone the repository:
 git clone https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git
 ```
 
-Enter the `Secure-Record-Transfer/bagitobjecttransfer` directory, and make a copy of the `.dev.env` file before running the application for the first time.
+From the root of the repository, make a copy of the dev environment variable file.
 
 ```shell
-cd Secure-Record-Transfer/bagitobjecttransfer
 cp example.dev.env .dev.env
 ```
 
@@ -37,6 +36,12 @@ To start up the application, run the following command:
 
 ```shell
 podman-compose -f compose.dev.yml up -d
+```
+
+The database will not be populated at first. To migrate the database, run this command:
+
+```shell
+podman-compose -f compose.dev.yml exec app python manage.py migrate
 ```
 
 After the containers are built and running, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. For example, if you sign up using the sign-up form, you can find those at http://localhost:8025.
