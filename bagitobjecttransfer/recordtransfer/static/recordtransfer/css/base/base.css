@@ -196,3 +196,10 @@ body {
     background-color: #d00;
 }
 
+.error-message {
+    color: #d00;
+    font-size: 12pt;
+    font-style: italic;
+    padding: 10px;
+}
+
