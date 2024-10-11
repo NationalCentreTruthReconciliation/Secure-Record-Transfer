@@ -89,8 +89,13 @@ class UserProfile(UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        update_session_auth_hash(self.request, form.instance)
-        messages.success(self.request, "Preferences updated")
+        success_message = "Preferences updated"
+
+        if form.cleaned_data.get("new_password"):
+            update_session_auth_hash(self.request, form.instance)
+            success_message = "Password updated"
+
+        messages.success(self.request, success_message)
         return response
 
     def form_invalid(self, form):
