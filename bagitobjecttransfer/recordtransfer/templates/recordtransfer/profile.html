@@ -5,10 +5,10 @@
 {% endblock title %}
 {% block content %}
     {% if user.is_authenticated %}
+        {% include "recordtransfer/messages.html" %}
         <div class="title-text">{% trans "Your Profile" %}</div>
         <form method="post" action="{% url 'recordtransfer:userprofile' %}">
             {% csrf_token %}
-            {% include "recordtransfer/messages.html" %}
             <div class="flex-item margin-top-25px">
                 <label>{% trans "Name" %}</label>
                 <input disabled value="{{ user.get_full_name }}">

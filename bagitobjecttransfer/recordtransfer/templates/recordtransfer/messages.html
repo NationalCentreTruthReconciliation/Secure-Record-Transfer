@@ -1,10 +1,11 @@
 {% if messages %}
+  {% load static %}
   {% for message in messages %}
     <div class="alert alert-dismissible {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">
-      <button type="button" class="close" data-dismiss="alert">
-      ×
+      <div>{{ message }}</div>
+      <button class="close alert-dismiss" data-dismiss="alert">
+          <img height="14" src="{% static 'recordtransfer/img/close_menu_64x64px.png'%}">
       </button>
-      <strong>{{ message }}</strong>
     </div>
  {% endfor %}
 {% endif %}
