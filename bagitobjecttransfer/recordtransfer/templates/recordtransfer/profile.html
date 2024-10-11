@@ -24,7 +24,7 @@
                 <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans "Receive notification emails?" %}</label>
                 {{ form.gets_notification_emails }}
             </div>
-            <br>
+            <div class="medium-text margin-bottom-25px margin-top-25px">{% trans "Password Reset" %}</div>
             {% if form.current_password.errors %}
                 <div class="error-message">{% trans form.current_password.errors.0 %}</div>
             {% endif %}
