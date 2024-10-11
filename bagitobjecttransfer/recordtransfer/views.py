@@ -27,6 +27,7 @@ from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
     send_thank_you_for_your_transfer,
+    send_user_account_updated,
     send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
@@ -94,6 +95,13 @@ class UserProfile(UpdateView):
         if form.cleaned_data.get("new_password"):
             update_session_auth_hash(self.request, form.instance)
             success_message = "Password updated"
+
+            context = {
+                'subject': gettext("Password updated"),
+                'changed_item': gettext("password"),
+                'changed_status': gettext("updated")
+            }
+            send_user_account_updated.delay(self.get_object(), context)
 
         messages.success(self.request, success_message)
         return response
