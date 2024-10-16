@@ -6,21 +6,28 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     const saveButton = form.querySelector("button[type='submit']");
-    const inputFields = form.querySelectorAll("input");
-
-    // Store initial values of input fields
-    const initialValues = Array.from(inputFields).map(input => input.value);
+    const inputFields = form.elements;
+    const initialValues = Array.from(inputFields).map(input => {
+        // Store initial values of text inputs and the checked state of checkboxes
+        if (input.type === "checkbox") {
+            return input.checked;
+        }
+        return input.value;
+    });
 
     function checkForChanges() {
-        const hasChanged = Array.from(inputFields).some((input, index) => input.value !== initialValues[index]);
+        const hasChanged = Array.from(inputFields).some((input, index) => {
+            if (input.type === "checkbox") {
+                return input.checked !== initialValues[index];
+            }
+            return input.value !== initialValues[index];
+        });
         saveButton.disabled = !hasChanged;
     }
 
-    // Add event listeners to input fields
-    inputFields.forEach(input => {
-        input.addEventListener("input", checkForChanges);
+    Array.from(inputFields).forEach(input => {
+        input.addEventListener(input.type === "checkbox" ? "change" : "input", checkForChanges);
     });
 
-    // Initial check to disable the button if no changes
     checkForChanges();
 });
