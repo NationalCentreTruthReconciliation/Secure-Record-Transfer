@@ -12,23 +12,23 @@ class UserProfileForm(forms.ModelForm):
     """Form for editing user profile."""
 
     gets_notification_emails = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={"id": "id_gets_notification_emails"}),
+        widget=forms.CheckboxInput,
         label=_("Receive notification emails?"),
         required=False,
     )
     current_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"id": "current_password"}),
+        widget=forms.PasswordInput,
         label=_("Current Password"),
         required=False,
     )
     new_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"id": "new_password"}),
+        widget=forms.PasswordInput,
         label=_("New Password"),
         required=False,
         validators=[password_validation.validate_password],
     )
     confirm_new_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"id": "confirm_new_password"}),
+        widget=forms.PasswordInput,
         label=_("Confirm New Password"),
         required=False,
     )
