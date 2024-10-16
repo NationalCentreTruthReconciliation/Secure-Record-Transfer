@@ -59,6 +59,7 @@
                 <button type="submit" class="blue-button">{% trans "Save" %}</button>
             </div>
         </form>
+        {% include "includes/profile_js.html" %}
         <br>
         {% if in_process_submissions %}
             <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
@@ -174,4 +175,4 @@
     {% endblocktrans %}
         </p>
     {% endif %}
-{% endblock %}
+{% endblock content %}
