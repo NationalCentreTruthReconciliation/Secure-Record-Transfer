@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from recordtransfer.forms import UserProfileForm
@@ -28,7 +27,6 @@ class UserProfileFormTest(TestCase):
 
     def test_form_invalid_current_password(self):
         form_data = {
-            'gets_notification_emails': True,
             'current_password': 'wrong_password',
             'new_password': 'new_password123',
             'confirm_new_password': 'new_password123',
@@ -39,7 +37,6 @@ class UserProfileFormTest(TestCase):
 
     def test_form_passwords_do_not_match(self):
         form_data = {
-            'gets_notification_emails': True,
             'current_password': 'old_password',
             'new_password': 'new_password123',
             'confirm_new_password': 'different_password',
@@ -49,17 +46,27 @@ class UserProfileFormTest(TestCase):
         self.assertIn('confirm_new_password', form.errors)
 
     def test_form_no_changes(self):
-        form_data = {
-            'gets_notification_emails': self.user.gets_notification_emails,
-        }
+        form_data = {}
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertIn('No fields have been changed.', form.errors['__all__'])
 
-    def test_form_save_without_password_change(self):
+    def test_form_email_notification_initial_false(self):
         form_data = {
             'gets_notification_emails': True,
         }
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
-        self.assertTrue(user.check_password('old_password'))
+        self.assertTrue(user.gets_notification_emails)
+
+    def test_form_email_notification_initial_true(self):
+        self.user.gets_notification_emails = True
+        self.user.save()
+
+        form_data = {
+            'gets_notification_emails': False,
+        }
+        form = UserProfileForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertFalse(user.gets_notification_emails)
