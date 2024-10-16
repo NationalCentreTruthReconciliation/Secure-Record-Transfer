@@ -12,19 +12,25 @@ class UserProfileForm(forms.ModelForm):
     """Form for editing user profile."""
 
     gets_notification_emails = forms.BooleanField(
-        required=False, label=_("Receive notification emails?")
+        widget=forms.CheckboxInput(attrs={"id": "id_gets_notification_emails"}),
+        label=_("Receive notification emails?"),
+        required=False,
     )
     current_password = forms.CharField(
-        widget=forms.PasswordInput, label=_("Current Password"), required=False
+        widget=forms.PasswordInput(attrs={"id": "current_password"}),
+        label=_("Current Password"),
+        required=False,
     )
     new_password = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={"id": "new_password"}),
         label=_("New Password"),
         required=False,
         validators=[password_validation.validate_password],
     )
     confirm_new_password = forms.CharField(
-        widget=forms.PasswordInput, label=_("Confirm New Password"), required=False
+        widget=forms.PasswordInput(attrs={"id": "confirm_new_password"}),
+        label=_("Confirm New Password"),
+        required=False,
     )
 
     class Meta:
@@ -40,47 +46,51 @@ class UserProfileForm(forms.ModelForm):
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
 
-        if not current_password:
-            raise ValidationError(
-                {
-                    "current_password": [
-                        _("Required"),
-                    ]
-                }
-            )
-        if not new_password:
-            raise ValidationError(
-                {
-                    "new_password": [
-                        _("Required"),
-                    ]
-                }
-            )
-        if not confirm_new_password:
-            raise ValidationError(
-                {
-                    "confirm_new_password": [
-                        _("Required"),
-                    ]
-                }
-            )
+        if current_password or new_password or confirm_new_password:
+            if not current_password:
+                raise ValidationError(
+                    {
+                        "current_password": [
+                            _("Required"),
+                        ]
+                    }
+                )
+            if not new_password:
+                raise ValidationError(
+                    {
+                        "new_password": [
+                            _("Required"),
+                        ]
+                    }
+                )
+            if not confirm_new_password:
+                raise ValidationError(
+                    {
+                        "confirm_new_password": [
+                            _("Required"),
+                        ]
+                    }
+                )
 
-        if not self.instance.check_password(current_password):
-            raise ValidationError(
-                {
-                    "current_password": [
-                        _("Password is incorrect."),
-                    ]
-                }
-            )
-        if new_password != confirm_new_password:
-            raise ValidationError(
-                {
-                    "confirm_new_password": [
-                        _("The new passwords do not match."),
-                    ]
-                }
-            )
+            if not self.instance.check_password(current_password):
+                raise ValidationError(
+                    {
+                        "current_password": [
+                            _("Password is incorrect."),
+                        ]
+                    }
+                )
+            if new_password != confirm_new_password:
+                raise ValidationError(
+                    {
+                        "confirm_new_password": [
+                            _("The new passwords do not match."),
+                        ]
+                    }
+                )
+
+        if not self.has_changed():
+            raise ValidationError(_("No fields have been changed."))
 
         return cleaned_data
 
