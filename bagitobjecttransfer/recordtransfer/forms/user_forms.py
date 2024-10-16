@@ -2,6 +2,7 @@ from typing import Any
 
 from django import forms
 from django.contrib.auth import password_validation
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from recordtransfer.models import User
@@ -39,13 +40,47 @@ class UserProfileForm(forms.ModelForm):
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
 
-        if current_password or new_password or confirm_new_password:
-            if not self.instance.check_password(current_password):
-                self.add_error("current_password", _("Current password is incorrect."))
-            if new_password != confirm_new_password:
-                self.add_error(
-                    "confirm_new_password", _("The new passwords do not match.")
-                )
+        if not current_password:
+            raise ValidationError(
+                {
+                    "current_password": [
+                        _("Required"),
+                    ]
+                }
+            )
+        if not new_password:
+            raise ValidationError(
+                {
+                    "new_password": [
+                        _("Required"),
+                    ]
+                }
+            )
+        if not confirm_new_password:
+            raise ValidationError(
+                {
+                    "confirm_new_password": [
+                        _("Required"),
+                    ]
+                }
+            )
+
+        if not self.instance.check_password(current_password):
+            raise ValidationError(
+                {
+                    "current_password": [
+                        _("Password is incorrect."),
+                    ]
+                }
+            )
+        if new_password != confirm_new_password:
+            raise ValidationError(
+                {
+                    "confirm_new_password": [
+                        _("The new passwords do not match."),
+                    ]
+                }
+            )
 
         return cleaned_data
 
