@@ -39,12 +39,20 @@ class UserProfileForm(forms.ModelForm):
         model = User
         fields = ("gets_notification_emails",)
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['gets_notification_emails'].initial = user.gets_notification_emails
+
     def clean(self) -> "dict[str, Any]":
         """Clean the form data."""
         cleaned_data = super().clean()
         current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
+
+        password_change = False
 
         if current_password or new_password or confirm_new_password:
             if not current_password:
@@ -89,7 +97,9 @@ class UserProfileForm(forms.ModelForm):
                     }
                 )
 
-        if not self.has_changed():
+            password_change = True
+
+        if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
 
         return cleaned_data
