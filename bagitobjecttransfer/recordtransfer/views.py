@@ -88,6 +88,12 @@ class UserProfile(UpdateView):
         )
         return context
 
+    def get_form_kwargs(self):
+        """Pass User instance to form as a keyword argument."""
+        kwargs = super(UserProfile, self).get_form_kwargs()
+        kwargs['user'] = self.get_object()
+        return kwargs
+
     def form_valid(self, form):
         response = super().form_valid(form)
         success_message = "Preferences updated"
