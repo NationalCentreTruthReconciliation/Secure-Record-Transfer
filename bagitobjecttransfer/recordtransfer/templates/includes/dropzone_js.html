@@ -1,6 +1,6 @@
 {% if DEBUG %}
     {% load static %}
-    <script src="{% static 'recordtransfer/js/base/dropzoneForm.js' %}"></script>
+    <script src="{% static 'recordtransfer/js/dropzone/dropzoneForm.js' %}"></script>
 {% else %}
     {% load pipeline %}
     {% javascript 'recordtransfer_dropzone_js' %}
