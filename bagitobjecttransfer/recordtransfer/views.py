@@ -2,11 +2,20 @@ import pickle
 from typing import Any, Optional, Union
 import logging
 
+from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden, Http404
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+    JsonResponse,
+    HttpResponseForbidden,
+    Http404,
+)
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -23,7 +32,14 @@ from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from recordtransfer import settings
 from recordtransfer.caais import map_form_to_metadata
-from recordtransfer.models import UploadedFile, UploadSession, User, SubmissionGroup, Submission, SavedTransfer
+from recordtransfer.models import (
+    UploadedFile,
+    UploadSession,
+    User,
+    SubmissionGroup,
+    Submission,
+    SavedTransfer,
+)
 from recordtransfer.emails import *
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 from recordtransfer.forms import SignUpForm, UserProfileForm
@@ -34,8 +50,32 @@ LOGGER = logging.getLogger('recordtransfer')
 
 
 class Index(TemplateView):
-    ''' The homepage '''
-    template_name = 'recordtransfer/home.html'
+    """The homepage"""
+
+    template_name = "recordtransfer/home.html"
+
+
+def media_request(request, path: str) -> HttpResponse:
+    """Respond to whether a media request is allowed or not."""
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("You do not have permission to access this resource.")
+
+    if not path:
+        return HttpResponseNotFound("The requested resource could not be found")
+
+    user = request.user
+    allowed = False
+
+    if user.is_staff:
+        allowed = True
+
+    if not allowed:
+        return HttpResponseForbidden("You do not have permission to access this resource.")
+
+    response = HttpResponse()
+    del response["Content-Type"]  # Content-type will be detected by nginx
+    response["X-Accel-Redirect"] = "/media/" + path.lstrip("/")
+    return response
 
 
 class TransferSent(TemplateView):
