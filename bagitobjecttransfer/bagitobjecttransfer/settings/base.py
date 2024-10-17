@@ -4,6 +4,8 @@ import platform
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+TESTING = False
+
 SECRET_KEY = config('SECRET_KEY', default='q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz1$g=i$wp2r!s-')
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
