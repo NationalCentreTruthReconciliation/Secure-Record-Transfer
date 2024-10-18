@@ -92,6 +92,7 @@ services:
       - static-volume:/app/static/
       - media-volume:/app/media/
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:z
+      - ./bagitobjecttransfer/templates/:/var/www/html/:z
 
 volumes:
   mysql-database:
