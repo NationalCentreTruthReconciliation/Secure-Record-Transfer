@@ -70,7 +70,7 @@ Ensure that you've installed the `dev` dependencies locally (preferably in a vir
 pip install .[dev]
 ```
 
-If using VSCode for development, use these settings so that tests are discovered correctly:
+Use these settings in your [VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) so that tests are discovered correctly in the Testing menu:
 
 ```json
 {
