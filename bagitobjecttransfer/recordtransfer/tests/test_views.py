@@ -533,7 +533,10 @@ class TestAcceptFileView(TestCase):
 class TestUserProfileView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username="testuser", email="testuser@example.com", password="old_password"
+            username="testuser",
+            email="testuser@example.com",
+            password="old_password",
+            gets_notification_emails=True,
         )
         self.client.login(username="testuser", password="old_password")
         self.url = reverse("recordtransfer:userprofile")
@@ -550,7 +553,7 @@ class TestUserProfileView(TestCase):
 
     def test_valid_form_submission_no_password_change(self):
         form_data = {
-            "gets_notification_emails": True,
+            "gets_notification_emails": False,
             "current_password": "",
             "new_password": "",
             "confirm_new_password": "",
@@ -589,3 +592,11 @@ class TestUserProfileView(TestCase):
             str(messages[0]),
             "There was an error updating your preferences. Please check the form and try again.",
         )
+
+    def test_submission_with_no_changes(self):
+        form_data = {}
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), "No fields have been changed.")
