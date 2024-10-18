@@ -80,6 +80,9 @@ class UserProfile(UpdateView):
     paginate_by = 10
     form_class = UserProfileForm
     success_url = reverse_lazy("recordtransfer:userprofile")
+    success_message = gettext("Preferences updated")
+    password_change_success_message = gettext("Password updated")
+    error_message = gettext("There was an error updating your preferences. Please try again.")
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -107,11 +110,10 @@ class UserProfile(UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        success_message = gettext("Preferences updated")
-
+        message = self.success_message
         if form.cleaned_data.get("new_password"):
             update_session_auth_hash(self.request, form.instance)
-            success_message = gettext("Password updated")
+            message = self.password_change_success_message
 
             context = {
                 "subject": gettext("Password updated"),
@@ -120,13 +122,13 @@ class UserProfile(UpdateView):
             }
             send_user_account_updated.delay(self.get_object(), context)
 
-        messages.success(self.request, success_message)
+        messages.success(self.request, message)
         return response
 
     def form_invalid(self, form):
         messages.error(
             self.request,
-            "There was an error updating your preferences. Please check the form and try again.",
+            self.error_message,
         )
         return super().form_invalid(form)
 
