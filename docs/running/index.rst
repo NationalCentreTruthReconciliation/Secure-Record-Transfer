@@ -92,45 +92,7 @@ The logs can also be found easily in Podman Desktop by clicking on a specific co
 Debugging the Development Application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are interested in debugging the application, the ports 8009 and 8010 are exposed to allow you
-to debug the web application, and the asynchronous job queue, respectively. This functionality is
-only available if you are running the **dev** application (via :code:`compose.dev.yml`).
-
-In VS Code, you may create a :code:`launch.json` file with these contents:
-
-.. code-block:: json
-
-    {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "Debug Django",
-                "type": "python",
-                "request": "attach",
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}/bagitobjecttransfer/",
-                        "remoteRoot": "/app/"
-                    }
-                ],
-                "port": 8009,
-                "host": "127.0.0.1"
-            },
-            {
-                "name": "Debug RQ",
-                "type": "python",
-                "request": "attach",
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}/bagitobjecttransfer/",
-                        "remoteRoot": "/app/"
-                    }
-                ],
-                "port": 8010,
-                "host": "127.0.0.1"
-            }
-        ]
-    }
+To debug the application, `view the setup in the DEVELOPERS.md file <https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer/blob/master/DEVELOPERS.md>`_.
 
 
 Production Application
