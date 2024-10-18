@@ -204,7 +204,7 @@ class TestMediaRequestView(TestCase):
 
         response = self.client.get(uri)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_200_returned_staff(self) -> None:
         """Check that 200 is returned if the user is staff."""
