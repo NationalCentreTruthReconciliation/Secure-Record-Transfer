@@ -1,12 +1,13 @@
-''' Record Transfer application models '''
-import os
-from pathlib import Path
 import logging
+import os
 import shutil
 import uuid
+from pathlib import Path
 from typing import Union
 
 import bagit
+from caais.export import ExportVersion
+from caais.models import Metadata
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
@@ -15,14 +16,11 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from caais.export import ExportVersion
-from caais.models import Metadata
 from recordtransfer import settings
 from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
-
-LOGGER = logging.getLogger('recordtransfer')
+LOGGER = logging.getLogger("recordtransfer")
 
 
 class User(AbstractUser):
@@ -423,9 +421,9 @@ class Submission(models.Model):
         }
 
     def remove_bag(self):
-        """ Remove the BagIt bag if it exists. """
+        """Remove the BagIt bag if it exists."""
         if os.path.exists(self.location):
-            os.unlink(self.location)
+            shutil.rmtree(self.location)
 
 
 class Job(models.Model):

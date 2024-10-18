@@ -46,7 +46,7 @@ from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.tokens import account_activation_token
 
 
-LOGGER = logging.getLogger('recordtransfer')
+LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
@@ -72,9 +72,18 @@ def media_request(request, path: str) -> HttpResponse:
     if not allowed:
         return HttpResponseForbidden("You do not have permission to access this resource.")
 
-    response = HttpResponse()
-    del response["Content-Type"]  # Content-type will be detected by nginx
-    response["X-Accel-Redirect"] = "/media/" + path.lstrip("/")
+    response = HttpResponse(
+        headers={"X-Accel-Redirect": djangosettings.MEDIA_URL + path.lstrip("/")}
+    )
+
+    # Nginx will assign its own headers for the following:
+    del response["Content-Type"]
+    del response["Content-Disposition"]
+    del response["Accept-Ranges"]
+    del response["Set-Cookie"]
+    del response["Cache-Control"]
+    del response["Expires"]
+
     return response
 
 
