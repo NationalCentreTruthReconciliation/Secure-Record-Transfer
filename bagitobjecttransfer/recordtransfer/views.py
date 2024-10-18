@@ -107,11 +107,11 @@ class UserProfile(UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        success_message = "Preferences updated"
+        success_message = gettext("Preferences updated")
 
         if form.cleaned_data.get("new_password"):
             update_session_auth_hash(self.request, form.instance)
-            success_message = "Password updated"
+            success_message = gettext("Password updated")
 
             context = {
                 "subject": gettext("Password updated"),
