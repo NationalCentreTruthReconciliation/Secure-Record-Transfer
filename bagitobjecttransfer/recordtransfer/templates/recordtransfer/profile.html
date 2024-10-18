@@ -1,145 +1,185 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Your Profile" %}{% endblock %}
-
+{% block title %}
+    {% trans "Your Profile" %}
+{% endblock title %}
 {% block content %}
-{% if user.is_authenticated %}
-    <div class="title-text">{% trans "Your Profile" %}</div>
-    <form method="post" action="{% url 'recordtransfer:userprofile' %}">
-    {% csrf_token %}
-    {% include 'recordtransfer/messages.html' %}
-    <div class="flex-item margin-top-25px">
-        <label>{% trans "Name" %}</label>
-        <input disabled value="{{ user.get_full_name }}">
-    </div>
-    <div class="flex-item">
-        <label>{% trans "Email" %}</label>
-        <input disabled value="{{ user.email }}">
-    </div>
-    <div class="flex-item">
-        <label>{% trans "Username" %}</label>
-        <input disabled value="{{ user.username }}">
-    </div>
-    <div class="flex-item">
-        <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans "Receive notification emails?" %}</label>
-        {{ form.gets_notification_emails }}
-    </div>
-    <div class="flex-item">
-        <label></label>
-        <button type="submit" class="blue-button">
-            {% trans "Save" %}
-        </button>
-    </div>
-    </form>
-
-    <br>
-
-    {% if in_process_submissions %}
-        <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
-            <label class="medium-text">{% trans "Ongoing Transfers"%}</label>
-        </div>
-        <div class="flex-med-width-item">
-            <table class="full-width-table standard-table" cellspacing="0">
-                <tr>
-                    <th>{% trans "Last Updated" %}</th>
-                    <th></th>
-                    <th></th>
-                </tr>
-                {% for in_process in in_process_submissions %}
-                <tr>
-                    <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
-                    <td><a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a></td>
-                    <td><a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a></td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    {% endif %}
-    <div class="flex-med-width-item margin-top-25px" id="past-transfers">
-        <label class="medium-text">{% trans "Past Transfers"%}</label>
-    </div>
-    {% if user_submissions %}
-        <div class="flex-full-width-item">
-            <table class="full-width-table standard-table" cellspacing="0">
-                <tr>
-                    <th>{% trans "Submission ID" %}</th>
-                    <th>{% trans "Date Transferred" %}</th>
-                    <th>{% trans "Transfer Title" %}</th>
-                    <th>{% trans "Files Transferred" %}</th>
-                    <th>{% trans "View Report" %}</th>
-                    <th>{% trans "Download CSV" %}</th>
-                </tr>
-                {% for submission in user_submissions %}
-                    <tr>
-                        <td>{{ submission.uuid }}</td>
-                        <td>{{ submission.submission_date }}</td>
-                        <td>{{ submission.metadata.accession_title }}</td>
-                        <td>{{ submission.extent_statements }}</td>
-                        <td><a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a></td>
-                        <td><a href="{% url "recordtransfer:submissioncsv" uuid=submission.uuid %}">{% trans "Click to download" %}</a></td>
-                    </tr>
-                {% endfor %}
-            </table>
-            {% if is_paginated %}
-                <div class="flex-med-width-item margin-top-25px">
-                    <div class="button-array">
-                        <span class="margin-right-20px">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                        </span>
-                        {# First #}
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1" class="no-decoration">
-                                <button class="blue-button">{% trans "&laquo; First" %}</button>
-                            </a>
-                        {% else %}
-                            <button disabled class="blue-button">{% trans "&laquo; First" %}</button>
-                        {% endif %}
-                        {# Previous #}
-                        {% if page_obj.has_previous %}
-                            <a href="?page={{ page_obj.previous_page_number }}" class="no-decoration">
-                                <button class="blue-button">{% trans "Previous" %}</button>
-                            </a>
-                        {% else %}
-                            <button disabled class="blue-button">{% trans "Previous" %}</button>
-                        {% endif %}
-                        {# Next #}
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}" class="no-decoration">
-                                <button class="blue-button">{% trans "Next" %}</button>
-                            </a>
-                        {% else %}
-                            <button disabled class="blue-button">{% trans "Next" %}</button>
-                        {% endif %}
-                        {# Last #}
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.paginator.num_pages }}" class="no-decoration">
-                                <button class="blue-button">{% trans "Last &raquo;" %}</button>
-                            </a>
-                        {% else %}
-                            <button disabled class="blue-button">{% trans "Last &raquo;" %}</button>
-                        {% endif %}
-                    </div>
-                </div>
+    {% if user.is_authenticated %}
+        {% include "recordtransfer/messages.html" %}
+        <script>
+            // Pass constants to JavaScript
+            const ID_GETS_NOTIFICATION_EMAILS = "{{ ID_GETS_NOTIFICATION_EMAILS }}";
+            const ID_CURRENT_PASSWORD = "{{ ID_CURRENT_PASSWORD }}";
+            const ID_NEW_PASSWORD = "{{ ID_NEW_PASSWORD }}";
+            const ID_CONFIRM_NEW_PASSWORD = "{{ ID_CONFIRM_NEW_PASSWORD }}";
+        </script>
+        <div class="title-text">{% trans "Your Profile" %}</div>
+        <form method="post" action="{% url 'recordtransfer:userprofile' %}">
+            {% csrf_token %}
+            <div class="flex-item margin-top-25px">
+                <label>{% trans "Name" %}</label>
+                <input disabled value="{{ user.get_full_name }}">
+            </div>
+            <div class="flex-item">
+                <label>{% trans "Email" %}</label>
+                <input disabled value="{{ user.email }}">
+            </div>
+            <div class="flex-item">
+                <label>{% trans "Username" %}</label>
+                <input disabled value="{{ user.username }}">
+            </div>
+            <div class="flex-item">
+                <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans "Receive notification emails?" %}</label>
+                {{ form.gets_notification_emails }}
+            </div>
+            <div class="medium-text margin-bottom-25px margin-top-25px">{% trans "Password Reset" %}</div>
+            {% if form.current_password.errors %}
+                <div class="error-message">{% trans form.current_password.errors.0 %}</div>
             {% endif %}
+            <div class="flex-item">
+                <label for="{{ form.current_password.id_for_label }}">{% trans form.current_password.label %}</label>
+                <input type="password"
+                       name="{{ form.current_password.name }}"
+                       id="{{ form.current_password.id_for_label }}"
+                       autocomplete="off">
+            </div>
+            {% if form.new_password.errors %}
+                <div class="error-message">{{ form.new_password.errors.0 }}</div>
+            {% endif %}
+            <div class="flex-item">
+                <label for="{{ form.new_password.id_for_label }}">{% trans form.new_password.label %}</label>
+                <input type="password"
+                       name="{{ form.new_password.name }}"
+                       id="{{ form.new_password.id_for_label }}">
+            </div>
+            {% if form.confirm_new_password.errors %}
+                <div class="error-message">{{ form.confirm_new_password.errors.0 }}</div>
+            {% endif %}
+            <div class="flex-item">
+                <label for="{{ form.confirm_new_password.id_for_label }}">{% trans form.confirm_new_password.label %}</label>
+                <input type="password"
+                       name="{{ form.confirm_new_password.name }}"
+                       id="{{ form.confirm_new_password.id_for_label }}">
+            </div>
+            <div class="flex-item">
+                <label></label>
+                <button type="submit" class="blue-button" id="id_save_button">{% trans "Save" %}</button>
+            </div>
+        </form>
+        {% include "includes/profile_js.html" %}
+        <br>
+        {% if in_process_submissions %}
+            <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
+                <label class="medium-text">{% trans "Ongoing Transfers" %}</label>
+            </div>
+            <div class="flex-med-width-item">
+                <table class="full-width-table standard-table" cellspacing="0">
+                    <tr>
+                        <th>{% trans "Last Updated" %}</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    {% for in_process in in_process_submissions %}
+                        <tr>
+                            <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
+                            <td>
+                                <a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+        <div class="flex-med-width-item margin-top-25px" id="past-transfers">
+            <label class="medium-text">{% trans "Past Transfers" %}</label>
         </div>
-    {% else %}
-        <div class="flex-med-width-item">
-            <p>
-                {% url 'recordtransfer:transfer' as transfer_url %}
-                {% blocktrans %}
+        {% if user_submissions %}
+            <div class="flex-full-width-item">
+                <table class="full-width-table standard-table" cellspacing="0">
+                    <tr>
+                        <th>{% trans "Submission ID" %}</th>
+                        <th>{% trans "Date Transferred" %}</th>
+                        <th>{% trans "Transfer Title" %}</th>
+                        <th>{% trans "Files Transferred" %}</th>
+                        <th>{% trans "View Report" %}</th>
+                        <th>{% trans "Download CSV" %}</th>
+                    </tr>
+                    {% for submission in user_submissions %}
+                        <tr>
+                            <td>{{ submission.uuid }}</td>
+                            <td>{{ submission.submission_date }}</td>
+                            <td>{{ submission.metadata.accession_title }}</td>
+                            <td>{{ submission.extent_statements }}</td>
+                            <td>
+                                <a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a>
+                            </td>
+                            <td>
+                                <a href="{% url "recordtransfer:submissioncsv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                {% if is_paginated %}
+                    <div class="flex-med-width-item margin-top-25px">
+                        <div class="button-array">
+                            <span class="margin-right-20px">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                            {# First #}
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1" class="no-decoration">
+                                    <button class="blue-button">{% trans "&laquo; First" %}</button>
+                                </a>
+                            {% else %}
+                                <button disabled class="blue-button">{% trans "&laquo; First" %}</button>
+                            {% endif %}
+                            {# Previous #}
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}"
+                                   class="no-decoration">
+                                    <button class="blue-button">{% trans "Previous" %}</button>
+                                </a>
+                            {% else %}
+                                <button disabled class="blue-button">{% trans "Previous" %}</button>
+                            {% endif %}
+                            {# Next #}
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="no-decoration">
+                                    <button class="blue-button">{% trans "Next" %}</button>
+                                </a>
+                            {% else %}
+                                <button disabled class="blue-button">{% trans "Next" %}</button>
+                            {% endif %}
+                            {# Last #}
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.paginator.num_pages }}" class="no-decoration">
+                                    <button class="blue-button">{% trans "Last &raquo;" %}</button>
+                                </a>
+                            {% else %}
+                                <button disabled class="blue-button">{% trans "Last &raquo;" %}</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="flex-med-width-item">
+                <p>
+                    {% url 'recordtransfer:transfer' as transfer_url %}
+                    {% blocktrans %}
                     You have not sent any records to the NCTR.
                     <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
                 {% endblocktrans %}
-            </p>
-        </div>
-    {% endif %}
-{% else %}
-    {% url 'login' as login %}
-    <p>
-    {% blocktrans %}
+                </p>
+            </div>
+        {% endif %}
+    {% else %}
+        {% url 'login' as login %}
+        <p>
+            {% blocktrans %}
         <a href="{{ login }}">Log in</a> to see your profile.
     {% endblocktrans %}
-    </p>
-{% endif %}
-{% endblock %}
+        </p>
+    {% endif %}
+{% endblock content %}

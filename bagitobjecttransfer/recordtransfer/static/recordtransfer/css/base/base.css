@@ -127,6 +127,10 @@ body {
     margin-top: 25px;
 }
 
+.margin-bottom-25px {
+    margin-bottom: 25px;
+}
+
 .standard-table {
     text-align: left;
     font-size: 11pt;
@@ -176,23 +180,32 @@ body {
 
 .alert {
     display: flex;
-    width: 100%;
-    padding: 7px;
-    margin: 5px 0px;
+    flex-grow: 1;
+    padding: 12px;
+    margin: 8px 0px;
     border-radius: 10px;
 }
 
-.alert > button {
-    margin: 0px 4px;
+.alert-dismiss {
+    /* unset default button styles */
+    all: unset;
+    cursor: pointer;
+    margin-left: auto;
 }
 
 .alert-success {
-    border: 1px #080 solid;
-    background-color: #0d0;
+    color: #053f00;
+    background-color: #c9ffc6;
 }
 
 .alert-error {
-    border: 1px #800 solid;
-    background-color: #d00;
+    color: #690000;
+    background-color: #ffc1c1;
 }
 
+.error-message {
+    color: #d00;
+    font-size: 12pt;
+    font-style: italic;
+    padding: 10px;
+}
