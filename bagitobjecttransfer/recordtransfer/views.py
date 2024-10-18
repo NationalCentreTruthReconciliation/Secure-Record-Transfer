@@ -23,6 +23,12 @@ from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import settings
 from recordtransfer.caais import map_form_to_metadata
+from recordtransfer.constants import (
+    ID_CONFIRM_NEW_PASSWORD,
+    ID_CURRENT_PASSWORD,
+    ID_GETS_NOTIFICATION_EMAILS,
+    ID_NEW_PASSWORD,
+)
 from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
@@ -86,12 +92,17 @@ class UserProfile(UpdateView):
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
             "-submission_date"
         )
+
+        context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
+        context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
+        context["ID_NEW_PASSWORD"] = ID_NEW_PASSWORD
+        context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
         return context
 
     def get_form_kwargs(self):
         """Pass User instance to form as a keyword argument."""
         kwargs = super(UserProfile, self).get_form_kwargs()
-        kwargs['user'] = self.get_object()
+        kwargs["user"] = self.get_object()
         return kwargs
 
     def form_valid(self, form):
@@ -103,9 +114,9 @@ class UserProfile(UpdateView):
             success_message = "Password updated"
 
             context = {
-                'subject': gettext("Password updated"),
-                'changed_item': gettext("password"),
-                'changed_status': gettext("updated")
+                "subject": gettext("Password updated"),
+                "changed_item": gettext("password"),
+                "changed_status": gettext("updated"),
             }
             send_user_account_updated.delay(self.get_object(), context)
 
