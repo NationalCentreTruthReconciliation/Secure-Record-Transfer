@@ -2,6 +2,10 @@
 
 The developer documentation here assumes you are using [VSCode](https://code.visualstudio.com/).
 
+## Contributions
+
+Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. The only difference is that the `ruff.toml` is automatically pulled when the git pre-commit hook is set up in the following section.
+
 ## Linting + Formatting
 
 Before beginning development, please configure git to use the git hooks (`.git/hooks`) provided in the repository. This will ensure that the linting configuration is updated before each commit.
