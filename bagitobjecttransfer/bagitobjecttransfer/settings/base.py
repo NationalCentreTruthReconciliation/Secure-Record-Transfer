@@ -1,6 +1,6 @@
-from decouple import config, UndefinedValueError
 import os
-import platform
+
+from decouple import config
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
