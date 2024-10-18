@@ -540,6 +540,11 @@ class TestUserProfileView(TestCase):
         )
         self.client.login(username="testuser", password="old_password")
         self.url = reverse("recordtransfer:userprofile")
+        self.error_message = (
+            "There was an error updating your preferences. Please check the form and try again."
+        )
+        self.success_message = "Preferences updated"
+        self.password_change_success_message = "Password updated"
 
     def test_access_authenticated_user(self):
         response = self.client.get(self.url)
@@ -551,7 +556,7 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
-    def test_valid_form_submission_no_password_change(self):
+    def test_valid_notification_setting_change(self):
         form_data = {
             "gets_notification_emails": False,
             "current_password": "",
@@ -561,9 +566,25 @@ class TestUserProfileView(TestCase):
         response = self.client.post(self.url, data=form_data)
         self.assertRedirects(response, self.url)
         messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "Preferences updated")
+        self.assertEqual(str(messages[0]), self.success_message)
 
-    def test_valid_form_submission_with_password_change(self):
+    def test_invalid_notification_setting_change(self):
+        form_data = {
+            "gets_notification_emails": True,
+            "current_password": "",
+            "new_password": "",
+            "confirm_new_password": "",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_valid_password_change(self):
         form_data = {
             "gets_notification_emails": True,
             "current_password": "old_password",
@@ -577,7 +598,7 @@ class TestUserProfileView(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("new_password123"))
 
-    def test_invalid_form_submission(self):
+    def test_wrong_password(self):
         form_data = {
             "gets_notification_emails": True,
             "current_password": "wrong_password",
@@ -590,13 +611,106 @@ class TestUserProfileView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(
             str(messages[0]),
-            "There was an error updating your preferences. Please check the form and try again.",
+            self.error_message,
         )
 
-    def test_submission_with_no_changes(self):
+    def test_passwords_do_not_match(self):
+        form_data = {
+            "gets_notification_emails": True,
+            "current_password": "old_password",
+            "new_password": "new_password123",
+            "confirm_new_password": "different_password",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_same_password(self):
+        form_data = {
+            "gets_notification_emails": True,
+            "current_password": "old_password",
+            "new_password": "old_password",
+            "confirm_new_password": "old_password",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_missing_current_password(self):
+        form_data = {
+            "gets_notification_emails": True,
+            "new_password": "new_password123",
+            "confirm_new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_missing_new_password(self):
+        form_data = {
+            "gets_notification_emails": True,
+            "current_password": "old_password",
+            "confirm_new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_missing_confirm_new_password(self):
+        form_data = {
+            "gets_notification_emails": True,
+            "current_password": "old_password",
+            "new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_no_changes(self):
+        form_data = {
+            "gets_notification_emails": True,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_empty_form_submission(self):
         form_data = {}
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/profile.html")
         messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "No fields have been changed.")
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
