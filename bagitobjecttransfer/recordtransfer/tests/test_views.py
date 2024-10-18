@@ -12,7 +12,7 @@ from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
 from recordtransfer import settings
-from recordtransfer.models import SavedTransfer, Submission, UploadedFile, UploadSession, User
+from recordtransfer.models import UploadedFile, UploadSession, User
 
 
 class TestHomepage(TestCase):
