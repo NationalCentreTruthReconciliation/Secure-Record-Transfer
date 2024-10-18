@@ -62,6 +62,21 @@ Use this `launch.json` configuration in VSCode to debug the application:
 }
 ```
 
-## Debugging Tests
+## Testing Setup
 
-(Coming soon)
+Ensure that you've installed the `dev` dependencies locally (preferably in a virtual environment):
+
+```shell
+pip install .[dev]
+```
+
+If using VSCode for development, use these settings so that tests are discovered correctly:
+
+```json
+{
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./bagitobjecttransfer"
+    ],
+}
+```

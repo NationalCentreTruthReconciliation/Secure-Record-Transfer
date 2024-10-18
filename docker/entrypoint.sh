@@ -13,7 +13,7 @@ if [ "$ENV" != 'dev' ]; then
     python manage.py migrate --no-input
   else
     echo ">> Collecting static files."
-    python manage.py collectstatic --no-input
+    python manage.py collectstatic --no-input --clear
   fi
 fi
 

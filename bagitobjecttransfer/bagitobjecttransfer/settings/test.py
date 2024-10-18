@@ -3,6 +3,8 @@ from .base import *
 
 DEBUG = True
 
+TESTING = True
+
 TEST_RUNNER = "override_storage.LocMemStorageDiscoverRunner"
 
 SITE_ID = 1
