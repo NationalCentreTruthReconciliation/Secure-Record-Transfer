@@ -10,7 +10,7 @@ class UserProfileFormTest(TestCase):
             username="testuser",
             email="testuser@example.com",
             password="old_password",
-            gets_notification_emails=False,
+            gets_notification_emails=True,
         )
 
     def test_form_valid_data(self):
@@ -45,12 +45,15 @@ class UserProfileFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
-    def test_form_no_changes(self):
+    def test_form_empty(self):
         form_data = {}
         form = UserProfileForm(data=form_data, instance=self.user)
-        self.assertIn("No fields have been changed.", form.errors["__all__"])
+        self.assertIn("Form is empty.", form.errors["__all__"])
 
     def test_form_email_notification_initial_false(self):
+        self.user.gets_notification_emails = False
+        self.user.save()
+
         form_data = {
             "gets_notification_emails": True,
         }
@@ -60,9 +63,6 @@ class UserProfileFormTest(TestCase):
         self.assertTrue(user.gets_notification_emails)
 
     def test_form_email_notification_initial_true(self):
-        self.user.gets_notification_emails = True
-        self.user.save()
-
         form_data = {
             "gets_notification_emails": False,
         }
