@@ -173,6 +173,57 @@ class TestUploadFileView(TestCase):
         UploadSession.objects.all().delete()
 
 
+class TestMediaRequestView(TestCase):
+    """Test the recordtransfer:media view."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Disable logging."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Create user accounts."""
+        cls.non_admin_user = User.objects.create_user(
+            username="non-admin", password="1X<ISRUkw+tuK"
+        )
+        cls.staff_user = User.objects.create_user(
+            username="admin", password="3&SAjfTYZQ", is_staff=True
+        )
+
+    def test_302_returned_logged_out(self) -> None:
+        """Check that 302 is returned if the client is logged out.
+
+        A 302 is returned because of the login_required() validator.
+        """
+        uri = reverse("recordtransfer:media", kwargs={"path": "test.txt"})
+
+        response = self.client.get(uri)
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_403_returned_not_staff(self) -> None:
+        """Check that 403 is returned if the user is not staff."""
+        self.client.login(username="non-admin", password="1X<ISRUkw+tuK")
+        uri = reverse("recordtransfer:media", kwargs={"path": "test.txt"})
+
+        response = self.client.get(uri)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_200_returned_staff(self) -> None:
+        """Check that 200 is returned if the user is staff."""
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+        uri = reverse("recordtransfer:media", kwargs={"path": "test.txt"})
+
+        response = self.client.get(uri)
+
+        self.assertTrue(response.has_header("X-Accel-Redirect"))
+        self.assertFalse(response.has_header("Content-Type"))
+        self.assertEqual(response.status_code, 200)
+
+
 @skipIf(
     settings.FILE_UPLOAD_ENABLED == False,
     "FILE_UPLOAD_ENABLED is False - the recordtransfer:checkfile view is not available",
@@ -530,6 +581,7 @@ class TestAcceptFileView(TestCase):
         UploadSession.objects.all().delete()
 
 
+@patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
 class TestUserProfileView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -540,9 +592,7 @@ class TestUserProfileView(TestCase):
         )
         self.client.login(username="testuser", password="old_password")
         self.url = reverse("recordtransfer:userprofile")
-        self.error_message = (
-            "There was an error updating your preferences. Please check the form and try again."
-        )
+        self.error_message = "There was an error updating your preferences. Please try again."
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
 

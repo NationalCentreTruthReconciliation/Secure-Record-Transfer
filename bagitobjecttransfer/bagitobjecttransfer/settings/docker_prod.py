@@ -17,13 +17,16 @@ ALLOWED_HOSTS = re.split(r'\s+', config('ALLOWED_HOSTS'))
 # MySQL Database
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'mysql.connector.django',
-        'HOST': config('MYSQL_HOST'),
-        'PORT': config('MYSQL_PORT', cast=int, default=3306),
-        'USER': config('MYSQL_USER'),
-        'PASSWORD': config('MYSQL_PASSWORD'),
-        'NAME': config('MYSQL_DATABASE'),
+    "default": {
+        "ENGINE": "mysql.connector.django",
+        "HOST": config("MYSQL_HOST"),
+        "PORT": config("MYSQL_PORT", cast=int, default=3306),
+        "USER": config("MYSQL_USER"),
+        "PASSWORD": config("MYSQL_PASSWORD"),
+        "NAME": config("MYSQL_DATABASE"),
+        "OPTIONS": {
+            "converter_str_fallback": True,
+        },
     }
 }
 
