@@ -111,7 +111,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
     """
 
     class Media(PipelineFormMedia):
-        js_packages = ("recordtransfer_base_js",)
+        js_packages = ("recordtransfer_admin_js",)
 
     change_form_template = "admin/readonly_change_form.html"
 
