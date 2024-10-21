@@ -75,12 +75,7 @@ def media_request(request, path: str) -> HttpResponse:
         return HttpResponseNotFound("The requested resource could not be found")
 
     user = request.user
-    allowed = False
-
-    if user.is_staff:
-        allowed = True
-
-    if not allowed:
+    if not user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this resource.")
 
     response = HttpResponse(
