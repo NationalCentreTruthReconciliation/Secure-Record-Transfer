@@ -1,7 +1,10 @@
-''' Custom administration code for the admin site '''
+"""Custom administration code for the admin site"""
+
 import logging
 from pathlib import Path
 
+from caais.export import ExportVersion
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
@@ -9,23 +12,31 @@ from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse, path
+from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
-from caais.export import ExportVersion
 from recordtransfer.emails import send_user_account_updated
-from recordtransfer.forms import InlineSubmissionGroupForm, SubmissionForm, \
-    InlineSubmissionForm, UploadSessionForm, UploadedFileForm, InlineUploadedFileForm
+from recordtransfer.forms import (
+    InlineSubmissionForm,
+    InlineSubmissionGroupForm,
+    InlineUploadedFileForm,
+    SubmissionForm,
+    UploadedFileForm,
+    UploadSessionForm,
+)
 from recordtransfer.jobs import create_downloadable_bag
-from recordtransfer.models import User, UploadSession, UploadedFile, SubmissionGroup, \
-    Submission, Job
+from recordtransfer.models import (
+    Job,
+    Submission,
+    SubmissionGroup,
+    UploadedFile,
+    UploadSession,
+    User,
+)
 
-from bagitobjecttransfer.settings.base import MEDIA_ROOT
-
-
-LOGGER = logging.getLogger('recordtransfer')
+LOGGER = logging.getLogger("recordtransfer")
 
 
 def linkify(field_name):
@@ -485,7 +496,7 @@ class JobAdmin(ReadOnlyAdmin):
         '''
         job = Job.objects.filter(id=object_id).first()
         if job and job.attached_file:
-            file_path = Path(MEDIA_ROOT) / job.attached_file.name
+            file_path = Path(settings.MEDIA_ROOT) / job.attached_file.name
             file_handle = open(file_path, "rb")
             response = HttpResponse(file_handle, content_type='application/x-zip-compressed')
             response['Content-Disposition'] = f'attachment; filename="{file_path.name}"'

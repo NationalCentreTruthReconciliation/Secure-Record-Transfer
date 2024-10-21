@@ -4,8 +4,6 @@ services:
   clamav:
     image: docker.io/clamav/clamav
     restart: unless-stopped
-    networks:
-      - clamav-net
     volumes:
       - clamav-virusdb:/var/lib/clamav
       - temp-directory:/tmp
@@ -22,8 +20,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    networks:
-      - redis-net
     volumes:
       - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:z
     environment:
@@ -39,8 +35,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    networks:
-      - db-net
     env_file:
       - .prod.env
     volumes:
@@ -54,9 +48,6 @@ services:
       dockerfile: Containerfile
     command: python manage.py rqworker default
     restart: unless-stopped
-    networks:
-      - db-net
-      - redis-net
     env_file:
       - .prod.env
     environment:
@@ -65,6 +56,9 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - static-volume:/app/static/
+      - media-volume:/app/media/
 
   app:
     build:
@@ -72,10 +66,6 @@ services:
       dockerfile: Containerfile
     command: gunicorn bagitobjecttransfer.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
-    networks:
-      - clamav-net
-      - db-net
-      - frontend-net
     expose:
       - 8000
     env_file:
@@ -94,8 +84,6 @@ services:
   nginx:
     image: docker.io/nginx:stable
     restart: unless-stopped
-    networks:
-      - frontend-net
     ports:
       - 1337:81
     depends_on:
@@ -104,6 +92,7 @@ services:
       - static-volume:/app/static/
       - media-volume:/app/media/
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:z
+      - ./bagitobjecttransfer/templates/:/var/www/html/:z
 
 volumes:
   mysql-database:
@@ -111,9 +100,3 @@ volumes:
   media-volume:
   temp-directory:
   clamav-virusdb:
-
-networks:
-  clamav-net:
-  db-net:
-  redis-net:
-  frontend-net:

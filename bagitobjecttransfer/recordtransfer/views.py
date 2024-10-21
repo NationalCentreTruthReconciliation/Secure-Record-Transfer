@@ -5,11 +5,19 @@ from typing import Any, Optional, Union
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
+from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
-from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -49,13 +57,40 @@ from recordtransfer.models import (
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
-LOGGER = logging.getLogger("recordtransfer")
+LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
     """The homepage"""
 
     template_name = "recordtransfer/home.html"
+
+
+def media_request(request, path: str) -> HttpResponse:
+    """Respond to whether a media request is allowed or not."""
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("You do not have permission to access this resource.")
+
+    if not path:
+        return HttpResponseNotFound("The requested resource could not be found")
+
+    user = request.user
+    if not user.is_staff:
+        return HttpResponseForbidden("You do not have permission to access this resource.")
+
+    response = HttpResponse(
+        headers={"X-Accel-Redirect": djangosettings.MEDIA_URL + path.lstrip("/")}
+    )
+
+    # Nginx will assign its own headers for the following:
+    del response["Content-Type"]
+    del response["Content-Disposition"]
+    del response["Accept-Ranges"]
+    del response["Set-Cookie"]
+    del response["Cache-Control"]
+    del response["Expires"]
+
+    return response
 
 
 class TransferSent(TemplateView):
