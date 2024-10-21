@@ -224,7 +224,7 @@ class SubmissionGroup(models.Model):
 
 
 class Submission(models.Model):
-    ''' The object that represents a user's submission, including metadata, and
+    """The object that represents a user's submission, including metadata, and
     the files they submitted.
 
     Attributes:
@@ -248,7 +248,8 @@ class Submission(models.Model):
         bag_name (str):
             A name that is used when the Submission is to be dumped to the file
             system as a BagIt bag
-    '''
+    """
+
     submission_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     raw_form = models.BinaryField(default=b'', null=True) # A raw capture of the form before submission
@@ -260,37 +261,60 @@ class Submission(models.Model):
 
     objects = SubmissionQuerySet.as_manager()
 
+    def generate_bag_name(self) -> None:
+        """Generate a name suitable for a submission bag, and set self.bag_name to that name.
 
-    def generate_bag_name(self):
-        ''' Generate a name suitable for a submission bag, and set self.bag_name to that name.
-        '''
+        Raises:
+            ValueError: If there is no metadata or no user associated with this submission.
+        """
         if self.bag_name:
-            LOGGER.warning('generate_bag_name() was called, but self.bag_name is already set')
             return
 
-        title = self.metadata.accession_title or 'No title'
+        if not self.metadata:
+            raise ValueError(
+                "There is no metadata associated with this submission, cannot generate a bag name"
+            )
+        if not self.user:
+            raise ValueError("There is no user associated with this submission")
+
+        title = self.metadata.accession_title or "No title"
         abbrev_title = title if len(title) <= 20 else title[0:20]
 
-        bag_name = '{username}_{datetime}_{title}'.format(
+        bag_name = "{username}_{datetime}_{title}".format(
             username=slugify(self.user.username),
-            datetime=timezone.localtime(timezone.now()).strftime(r'%Y%m%d-%H%M%S'),
-            title=slugify(abbrev_title)
+            datetime=timezone.localtime(timezone.now()).strftime(r"%Y%m%d-%H%M%S"),
+            title=slugify(abbrev_title),
         )
 
         self.bag_name = bag_name
         self.save()
 
     @property
-    def user_folder(self):
-        return os.path.join(settings.BAG_STORAGE_FOLDER, slugify(self.user.username))
+    def user_folder(self) -> str:
+        """Get the location of the submission user's bag storage folder.
+
+        Raises:
+            FileNotFoundError: If BAG_STORAGE_FOLDER is not set.
+            ValueError: If there is no user associated with this submission.
+        """
+        if not settings.BAG_STORAGE_FOLDER:
+            raise FileNotFoundError("BAG_STORAGE_FOLDER is not set")
+        if not self.user:
+            raise ValueError("There is no user associated with this submission")
+        return os.path.join(str(settings.BAG_STORAGE_FOLDER), slugify(self.user.username))
 
     @property
-    def location(self):
-        """ Get the location on the file system for the BagIt bag for this submission
+    def location(self) -> str:
+        """Get the location on the file system for the BagIt bag for this submission.
+
+        Raises:
+            ValueError: If there is no user associated with this submission.
         """
+        if not self.user:
+            raise ValueError("There is no user associated with this submission")
         if not self.bag_name:
-            self.make_bag_name()
-        return os.path.join(self.user_folder, self.bag_name)
+            self.generate_bag_name()
+        return os.path.join(self.user_folder, self.bag_name)  # type: ignore
 
     @property
     def extent_statements(self):
