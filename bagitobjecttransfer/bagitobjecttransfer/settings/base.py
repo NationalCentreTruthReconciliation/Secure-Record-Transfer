@@ -1,6 +1,6 @@
-from decouple import config, UndefinedValueError
 import os
-import platform
+
+from decouple import config
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -219,11 +219,11 @@ PIPELINE = {
         },
     },
     'JAVASCRIPT': {
-        'caais_js': {
+        'caais_admin_js': {
             'source_filenames': (
-                'caais/js/base/*.js',
+                'caais/js/admin/*.js',
             ),
-            'output_filename': 'caais/js/base/min.js',
+            'output_filename': 'caais/js/admin/min.js',
         },
         'recordtransfer_base_js': {
             'source_filenames': (
@@ -242,6 +242,12 @@ PIPELINE = {
                 'recordtransfer/js/profile/*.js',
             ),
             'output_filename': 'recordtransfer/js/profile/min.js',
+        },
+        'recordtransfer_admin_js': {
+            'source_filenames': (
+                'recordtransfer/js/admin/*.js',
+            ),
+            'output_filename': 'recordtransfer/js/admin/min.js',
         },
     }
 }
