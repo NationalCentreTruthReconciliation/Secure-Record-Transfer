@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from caais.export import ExportVersion
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
@@ -17,7 +18,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from pipeline.forms import PipelineFormMedia
 
-from bagitobjecttransfer.settings.base import MEDIA_ROOT
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
     InlineSubmissionForm,
@@ -533,7 +533,7 @@ class JobAdmin(ReadOnlyAdmin):
         """
         job = Job.objects.filter(id=object_id).first()
         if job and job.attached_file:
-            file_path = Path(MEDIA_ROOT) / job.attached_file.name
+            file_path = Path(settings.MEDIA_ROOT) / job.attached_file.name
             file_handle = open(file_path, "rb")
             response = HttpResponse(file_handle, content_type="application/x-zip-compressed")
             response["Content-Disposition"] = f'attachment; filename="{file_path.name}"'
