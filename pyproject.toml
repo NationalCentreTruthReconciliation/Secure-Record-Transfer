@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "secure-record-transfer"
-version = "2024.10.2"
+version = "2024.10.22"
 description = "Transfer files and metadata to an archive based on accession standards"
 repository = "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer"
 documentation = "https://secure-record-transfer.readthedocs.io/en/latest/"

@@ -1,6 +1,6 @@
 {
   "name": "bagitobjecttransfer",
-  "version": "2024.10.2",
+  "version": "2024.10.22",
   "description": "The secure record transfer application has been designed for the purpose of transferring files and standardized metadata over the internet to an institution.",
   "scripts": {
     "compile": "pkg node_modules/yuglify/ --output node_modules/yuglify/dist/yuglify"
