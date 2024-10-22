@@ -219,11 +219,11 @@ PIPELINE = {
         },
     },
     'JAVASCRIPT': {
-        'caais_js': {
+        'caais_admin_js': {
             'source_filenames': (
-                'caais/js/base/*.js',
+                'caais/js/admin/*.js',
             ),
-            'output_filename': 'caais/js/base/min.js',
+            'output_filename': 'caais/js/admin/min.js',
         },
         'recordtransfer_base_js': {
             'source_filenames': (

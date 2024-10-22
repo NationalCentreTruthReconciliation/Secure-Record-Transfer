@@ -87,15 +87,13 @@ class DispositionAuthorityInlineAdmin(admin.TabularInline):
 
 
 class SourceOfMaterialInlineAdmin(admin.StackedInline):
-    """Admin for editing source(s) of material inline"""
+    """Admin for editing source(s) of material inline."""
 
     class Media(PipelineFormMedia):
-        """JavaScript to load for inline form"""
+        """JavaScript to load for inline form."""
 
-        js = (
-            "https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",
-            "caais/js/phoneNumberMask.js",
-        )
+        js_packages = ("caais_admin_js",)
+        js = ("https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",)
 
     model = SourceOfMaterial
     form = InlineSourceOfMaterialForm
