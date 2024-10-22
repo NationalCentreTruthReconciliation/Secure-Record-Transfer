@@ -1,5 +1,6 @@
 {% load static %}
 {% load i18n %}
+<!DOCTYPE html>
 <html>
     <head>
         <!-- JS -->
@@ -10,6 +11,7 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.1/dropzone.min.js"></script>
             {% if FILE_UPLOAD_ENABLED %}
                 {% include "includes/dropzone_js.html" %}
+                {% include "captcha/js_v2_invisible.html" %}
             {% endif %}
             {% include "includes/base_js.html" %}
         {% endblock javascript %}

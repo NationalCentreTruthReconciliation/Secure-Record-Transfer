@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django.forms',
     'formtools',
     'django_rq',
-    'captcha',
+    'django_recaptcha',
     'dbtemplates',
     'pipeline',
 ]
@@ -130,7 +130,6 @@ TIME_ZONE = config('TIME_ZONE', default='America/Winnipeg')
 
 USE_I18N = True
 
-USE_L10N = True
 
 USE_TZ = True
 
@@ -171,7 +170,14 @@ CLAMAV_PORT = config('CLAMAV_PORT', cast=int, default=3310)
 
 # Pipeline configuration
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineManifestStorage'
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": 'pipeline.storage.PipelineManifestStorage',
+    },
+}
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

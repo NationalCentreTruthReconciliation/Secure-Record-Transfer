@@ -1,13 +1,13 @@
 ''' Forms specific to transferring files with a new submission '''
-from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
 from django.utils.translation import gettext
 
-from captcha.fields import ReCaptchaField
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from caais.models import SourceType, SourceRole, RightsType
 from recordtransfer import settings
@@ -22,6 +22,7 @@ class AcceptLegal(TransferForm):
         cleaned_data = super().clean()
         if not cleaned_data['agreement_accepted']:
             self.add_error('agreement_accepted', 'You must accept before continuing')
+        return cleaned_data
 
     agreement_accepted = forms.BooleanField(
         required=True,
