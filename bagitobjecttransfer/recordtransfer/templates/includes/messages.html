@@ -4,8 +4,11 @@
     <div class="alert alert-dismissible {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">
       <div>{{ message }}</div>
       <button class="close alert-dismiss" data-dismiss="alert">
-          <img height="14" src="{% static 'recordtransfer/img/close_menu_64x64px.png'%}">
+        <img height="14"
+             width="14"
+             alt="Close"
+             src="{% static 'recordtransfer/img/close_menu_64x64px.png' %}">
       </button>
     </div>
- {% endfor %}
+  {% endfor %}
 {% endif %}
