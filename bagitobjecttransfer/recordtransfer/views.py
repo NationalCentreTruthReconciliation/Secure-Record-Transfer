@@ -2,6 +2,9 @@ import logging
 import pickle
 from typing import Any, Optional, Union
 
+from django.db.models.base import Model as Model
+from django.db.models.query import QuerySet
+
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
@@ -10,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.forms import BaseModelForm
 from django.http import (
     Http404,
     HttpResponse,
@@ -18,7 +22,7 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_text
@@ -122,14 +126,18 @@ class UserProfile(UpdateView):
     def get_object(self, queryset=None):
         return self.request.user
 
-    def get_context_data(self, **kwargs):
-        context = super(UserProfile, self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add context data for the user profile view."""
+        context = super().get_context_data(**kwargs)
         context["in_process_submissions"] = SavedTransfer.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
             "-submission_date"
         )
+        context["submission_groups"] = SubmissionGroup.objects.filter(
+            created_by=self.request.user
+        ).order_by("name")
 
         context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
         context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
@@ -137,13 +145,14 @@ class UserProfile(UpdateView):
         context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
         return context
 
-    def get_form_kwargs(self):
-        """Pass User instance to form as a keyword argument."""
-        kwargs = super(UserProfile, self).get_form_kwargs()
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.get_object()
         return kwargs
 
-    def form_valid(self, form):
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
         response = super().form_valid(form)
         message = self.success_message
         if form.cleaned_data.get("new_password"):
@@ -160,7 +169,8 @@ class UserProfile(UpdateView):
         messages.success(self.request, message)
         return response
 
-    def form_invalid(self, form):
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
         messages.error(
             self.request,
             self.error_message,
@@ -908,11 +918,12 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
     template_name = "recordtransfer/submission_detail.html"
     context_object_name = "submission"
 
-    def get_object(self):
+    def get_object(self, queryset=None) -> Submission:
+        """Retrieve the Submission object based on the UUID in the URL."""
         return Submission.objects.get(uuid=self.kwargs.get("uuid"))
 
-    def test_func(self):
-        # Check if the user is the creator of the submission or is a staff member
+    def test_func(self) -> bool:
+        """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
     def handle_no_permission(self):
@@ -947,3 +958,26 @@ class SubmissionCsv(UserPassesTestMixin, View):
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + "_export-"
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+
+
+class SubmissionGroupView(UserPassesTestMixin, DetailView):
+    """Displays the associated submissions for a given submission group."""
+
+    model = SubmissionGroup
+    template_name = "recordtransfer/submission_group.html"
+    context_object_name = "group"
+
+    def get_object(self):
+        return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
+
+    def test_func(self):
+        """Check if the user is the creator of the submission group or is a staff member."""
+        return self.request.user.is_staff or self.get_object().created_by == self.request.user
+
+    def handle_no_permission(self):
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
+        return context
