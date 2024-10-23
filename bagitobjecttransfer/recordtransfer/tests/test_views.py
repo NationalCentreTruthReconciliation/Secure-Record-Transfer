@@ -100,7 +100,7 @@ class TestUploadFileView(TestCase):
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
-            HTTP_Upload_Session_Token=session.token,
+            headers={"upload-session-token": session.token}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -460,7 +460,7 @@ class TestAcceptFileView(TestCase):
                             "filename": "My File.pdf",
                             "filesize": size,
                         },
-                        HTTP_Upload_Session_Token="test_session_1",
+                        headers={"upload-session-token": "test_session_1"}
                     )
                     self.assertEqual(response.status_code, 200)
                     response_json = response.json()
@@ -490,7 +490,7 @@ class TestAcceptFileView(TestCase):
                     "filename": "My File.pdf",
                     "filesize": "1024",
                 },
-                HTTP_Upload_Session_Token="test_session_1",
+                headers={"upload-session-token": "test_session_1"}
             )
 
             self.assertEqual(response.status_code, 200)
@@ -525,7 +525,7 @@ class TestAcceptFileView(TestCase):
                     "filename": "My File.pdf",
                     "filesize": len(self.one_mib),
                 },
-                HTTP_Upload_Session_Token="test_session_1",
+                headers={"upload-session-token": "test_session_1"}
             )
 
             self.assertEqual(response.status_code, 200)
@@ -558,7 +558,7 @@ class TestAcceptFileView(TestCase):
                             "filename": name,
                             "filesize": "1024",
                         },
-                        HTTP_Upload_Session_Token="test_session_1",
+                        headers={"upload-session-token": "test_session_1"}
                     )
 
                     self.assertEqual(response.status_code, 200)

@@ -12,7 +12,8 @@ STATIC_ROOT = "/app/static"
 DEBUG = False
 SITE_ID = config('SITE_ID', default=1, cast=int)
 
-ALLOWED_HOSTS = re.split(r'\s+', config('ALLOWED_HOSTS'))
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=str).split(",")
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
 
 # MySQL Database
 
@@ -59,7 +60,7 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 
 # Captcha
 
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 
 # Logging
