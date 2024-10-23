@@ -1,0 +1,61 @@
+{% load i18n %}
+{% include "includes/messages.html" %}
+<script>
+    // Pass constants to JavaScript
+    const ID_GETS_NOTIFICATION_EMAILS = "{{ ID_GETS_NOTIFICATION_EMAILS }}";
+    const ID_CURRENT_PASSWORD = "{{ ID_CURRENT_PASSWORD }}";
+    const ID_NEW_PASSWORD = "{{ ID_NEW_PASSWORD }}";
+    const ID_CONFIRM_NEW_PASSWORD = "{{ ID_CONFIRM_NEW_PASSWORD }}";
+</script>
+<div class="title-text">{% trans "Your Profile" %}</div>
+<form method="post" action="{% url 'recordtransfer:userprofile' %}">
+    {% csrf_token %}
+    <div class="flex-item margin-top-25px">
+        <label>{% trans "Name" %}</label>
+        <input disabled value="{{ user.get_full_name }}">
+    </div>
+    <div class="flex-item">
+        <label>{% trans "Email" %}</label>
+        <input disabled value="{{ user.email }}">
+    </div>
+    <div class="flex-item">
+        <label>{% trans "Username" %}</label>
+        <input disabled value="{{ user.username }}">
+    </div>
+    <div class="flex-item">
+        <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans "Receive notification emails?" %}</label>
+        {{ form.gets_notification_emails }}
+    </div>
+    <div class="medium-text margin-bottom-25px margin-top-25px">{% trans "Password Reset" %}</div>
+    {% if form.current_password.errors %}
+        <div class="error-message">{% trans form.current_password.errors.0 %}</div>
+    {% endif %}
+    <div class="flex-item">
+        <label for="{{ form.current_password.id_for_label }}">{% trans form.current_password.label %}</label>
+        <input type="password"
+               name="{{ form.current_password.name }}"
+               id="{{ form.current_password.id_for_label }}"
+               autocomplete="off">
+    </div>
+    {% if form.new_password.errors %}<div class="error-message">{{ form.new_password.errors.0 }}</div>{% endif %}
+    <div class="flex-item">
+        <label for="{{ form.new_password.id_for_label }}">{% trans form.new_password.label %}</label>
+        <input type="password"
+               name="{{ form.new_password.name }}"
+               id="{{ form.new_password.id_for_label }}">
+    </div>
+    {% if form.confirm_new_password.errors %}
+        <div class="error-message">{{ form.confirm_new_password.errors.0 }}</div>
+    {% endif %}
+    <div class="flex-item">
+        <label for="{{ form.confirm_new_password.id_for_label }}">{% trans form.confirm_new_password.label %}</label>
+        <input type="password"
+               name="{{ form.confirm_new_password.name }}"
+               id="{{ form.confirm_new_password.id_for_label }}">
+    </div>
+    <div class="flex-item">
+        <label></label>
+        <button type="submit" class="blue-button" id="id_save_button">{% trans "Save" %}</button>
+    </div>
+</form>
+{% include "includes/profile_js.html" %}
