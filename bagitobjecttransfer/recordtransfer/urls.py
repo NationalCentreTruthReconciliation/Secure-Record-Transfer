@@ -65,7 +65,7 @@ if settings.TESTING or not settings.DEBUG:
         re_path(r"media/(?P<path>.*)", login_required(views.media_request), name="media")
     )
 
-if recordtransfersettings.FILE_UPLOAD_ENABLED:
+if settings.TESTING or recordtransfersettings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path("transfer/checkfile/", login_required(views.accept_file), name="checkfile"),
@@ -73,7 +73,7 @@ if recordtransfersettings.FILE_UPLOAD_ENABLED:
         ]
     )
 
-if recordtransfersettings.SIGN_UP_ENABLED:
+if settings.TESTING or recordtransfersettings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path("createaccount/", views.CreateAccount.as_view(), name="createaccount"),
