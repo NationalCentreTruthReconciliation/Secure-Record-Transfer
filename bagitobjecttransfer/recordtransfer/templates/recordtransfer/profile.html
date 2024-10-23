@@ -43,9 +43,7 @@
                        id="{{ form.current_password.id_for_label }}"
                        autocomplete="off">
             </div>
-            {% if form.new_password.errors %}
-                <div class="error-message">{{ form.new_password.errors.0 }}</div>
-            {% endif %}
+            {% if form.new_password.errors %}<div class="error-message">{{ form.new_password.errors.0 }}</div>{% endif %}
             <div class="flex-item">
                 <label for="{{ form.new_password.id_for_label }}">{% trans form.new_password.label %}</label>
                 <input type="password"
@@ -172,6 +170,34 @@
                     <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
                 {% endblocktrans %}
                 </p>
+            </div>
+        {% endif %}
+        <div class="flex-med-width-item margin-top-25px" id="submission-groups">
+            <label class="medium-text">{% trans "Submission Groups" %}</label>
+        </div>
+        {% if submission_groups %}
+            <div class="flex-full-width-item">
+                <table class="full-width-table standard-table" cellspacing="0">
+                    <tr>
+                        <th>{% trans "Group ID" %}</th>
+                        <th>{% trans "Group Name" %}</th>
+                        <th>{% trans "Group Description" %}</th>
+                        <th>{% trans "Transfers in Group" %}</th>
+                        <th>{% trans "View Group" %}</th>
+                    </tr>
+                    {% for group in submission_groups %}
+                        <tr>
+                            <td>{{ group.uuid }}</td>
+                            <td>{{ group.name }}</td>
+                            <td>{{ group.description }}</td>
+                            <td>{{ group.number_of_submissions_in_group }}</td>
+                            <td>
+                                {% comment %} <a href="{% url "recordtransfer:submissiongroup" uuid=group.uuid %}">{% trans "Click to view group" %}</a> {% endcomment %}
+                                <a href="/">{% trans "Click to view group" %}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
         {% endif %}
     {% else %}
