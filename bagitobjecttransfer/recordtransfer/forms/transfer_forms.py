@@ -232,7 +232,7 @@ class SourceInfoForm(TransferForm):
                 'If "Other source type" is empty, you must choose one of the '
                 'Source types here'
             ))
-            self.add_error('other_rights_type', gettext(
+            self.add_error('other_source_type', gettext(
                 'If "Source type" is Other, you must enter a different type '
                 'here'
             ))
