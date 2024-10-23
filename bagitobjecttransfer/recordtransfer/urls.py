@@ -58,6 +58,11 @@ urlpatterns = [
         login_required(views.SubmissionCsv.as_view()),
         name="submissioncsv",
     ),
+    path(
+        "submission_group/<uuid:uuid>/",
+        login_required(views.SubmissionGroupView.as_view()),
+        name="submissiongroup",
+    )
 ]
 
 if settings.TESTING or not settings.DEBUG:

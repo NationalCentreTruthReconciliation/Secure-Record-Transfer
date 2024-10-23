@@ -2,7 +2,8 @@ import logging
 import pickle
 from typing import Any, Optional, Union
 
-from django.forms import BaseModelForm
+from django.db.models.base import Model as Model
+from django.db.models.query import QuerySet
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
@@ -12,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.forms import BaseModelForm
 from django.http import (
     Http404,
     HttpResponse,
@@ -20,7 +22,7 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -916,11 +918,12 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
     template_name = "recordtransfer/submission_detail.html"
     context_object_name = "submission"
 
-    def get_object(self):
+    def get_object(self, queryset=None) -> Submission:
+        """Retrieve the Submission object based on the UUID in the URL."""
         return Submission.objects.get(uuid=self.kwargs.get("uuid"))
 
-    def test_func(self):
-        # Check if the user is the creator of the submission or is a staff member
+    def test_func(self) -> bool:
+        """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
     def handle_no_permission(self):
@@ -955,3 +958,26 @@ class SubmissionCsv(UserPassesTestMixin, View):
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + "_export-"
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+
+
+class SubmissionGroupView(UserPassesTestMixin, DetailView):
+    """Displays the associated submissions for a given submission group."""
+
+    model = SubmissionGroup
+    template_name = "recordtransfer/submission_group.html"
+    context_object_name = "group"
+
+    def get_object(self):
+        return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
+
+    def test_func(self):
+        """Check if the user is the creator of the submission group or is a staff member."""
+        return self.request.user.is_staff or self.get_object().created_by == self.request.user
+
+    def handle_no_permission(self):
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
+        return context

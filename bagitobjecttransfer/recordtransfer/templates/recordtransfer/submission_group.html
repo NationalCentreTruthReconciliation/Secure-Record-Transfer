@@ -1,0 +1,21 @@
+{% extends "recordtransfer/base.html" %}
+{% load i18n %}
+{% block title %}
+    {% trans "Submission Group: " %} {{ group.name }}
+{% endblock title %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="title-text">{% trans "Submission Group: " %} {{ group.name }}</div>
+        {% if submissions %}
+        {% include "includes/submission_table.html" with submissions=submissions %}
+        {% else %}
+        <div class="flex-med-width-item">
+            <p>
+                {% blocktrans %}
+                No submissions have been made under this group yet.
+                {% endblocktrans %}
+            </p>
+        </div>
+        {% endif %}
+    {% endif %}
+{% endblock content %}
