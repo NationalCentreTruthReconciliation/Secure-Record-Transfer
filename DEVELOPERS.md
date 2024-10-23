@@ -80,3 +80,20 @@ Use these settings in your [local VSCode settings.json](https://code.visualstudi
     ],
 }
 ```
+
+To run tests from the command line, use Django's [test](https://docs.djangoproject.com/en/4.2/topics/testing/overview/#running-tests) command. You will need to first set the DJANGO_SETTINGS_MODULE which is done differently in PowerShell or Bash.
+
+To run the tests from the command line in PowerShell:
+
+```powershell
+$env:DJANGO_SETTINGS_MODULE = 'bagitobjecttransfer.settings.test'
+Set-Location bagitobjecttransfer
+python manage.py test
+```
+
+Or, in Bash (or any POSIX-like terminal):
+
+```shell
+cd bagitobjecttransfer
+DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.test python manage.py test
+```

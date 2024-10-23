@@ -1,4 +1,3 @@
-# pylint: disable=too-many-public-methods
 import logging
 from unittest import skipIf
 from unittest.mock import patch
@@ -11,7 +10,6 @@ from django.utils import timezone
 from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
-from recordtransfer import settings
 from recordtransfer.models import UploadedFile, UploadSession, User
 
 
@@ -27,10 +25,6 @@ class TestHomepage(TestCase):
         self.assertContains(response, "Welcome")
 
 
-@skipIf(
-    settings.FILE_UPLOAD_ENABLED == False,
-    "FILE_UPLOAD_ENABLED is False - the recordtransfer:uploadfile view is not available",
-)
 @patch(
     "recordtransfer.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
@@ -40,7 +34,7 @@ class TestHomepage(TestCase):
 @patch("recordtransfer.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 @override_storage(storage=LocMemStorage())
 class TestUploadFileView(TestCase):
-    """Tests for recordtransfer:uploadfile view"""
+    """Tests for recordtransfer:uploadfile view."""
 
     @classmethod
     def setUpClass(cls):
@@ -56,10 +50,8 @@ class TestUploadFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.patch__accept_file = patch("recordtransfer.views._accept_file").start()
         self.patch__accept_session = patch("recordtransfer.views._accept_session").start()
-        self.patch__accept_contents = patch("recordtransfer.views._accept_contents").start()
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
-        self.patch__accept_contents.return_value = {"accepted": True}
 
     def test_logged_out_error(self):
         self.client.logout()
@@ -150,7 +142,9 @@ class TestUploadFileView(TestCase):
         session.uploadedfile_set.all().delete()
         session.delete()
 
+    @skipIf(True, "File content scanning is not implemented yet")
     def test_content_issue_flagged(self):
+        """
         self.patch__accept_contents.return_value = {
             "accepted": False,
             "error": "ISSUE",
@@ -159,7 +153,7 @@ class TestUploadFileView(TestCase):
                 "status": "FOUND",
             },
         }
-        # accept contents logic not complete yet
+        """
 
     def tearDown(self):
         self.client.logout()
@@ -224,10 +218,6 @@ class TestMediaRequestView(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-@skipIf(
-    settings.FILE_UPLOAD_ENABLED == False,
-    "FILE_UPLOAD_ENABLED is False - the recordtransfer:checkfile view is not available",
-)
 @patch(
     "recordtransfer.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
