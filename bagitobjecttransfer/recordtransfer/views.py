@@ -2,6 +2,8 @@ import logging
 import pickle
 from typing import Any, Optional, Union
 
+from django.forms import BaseModelForm
+
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
@@ -122,14 +124,18 @@ class UserProfile(UpdateView):
     def get_object(self, queryset=None):
         return self.request.user
 
-    def get_context_data(self, **kwargs):
-        context = super(UserProfile, self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add context data for the user profile view."""
+        context = super().get_context_data(**kwargs)
         context["in_process_submissions"] = SavedTransfer.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
             "-submission_date"
         )
+        context["submission_groups"] = SubmissionGroup.objects.filter(
+            created_by=self.request.user
+        ).order_by("name")
 
         context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
         context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
@@ -137,13 +143,14 @@ class UserProfile(UpdateView):
         context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
         return context
 
-    def get_form_kwargs(self):
-        """Pass User instance to form as a keyword argument."""
-        kwargs = super(UserProfile, self).get_form_kwargs()
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.get_object()
         return kwargs
 
-    def form_valid(self, form):
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
         response = super().form_valid(form)
         message = self.success_message
         if form.cleaned_data.get("new_password"):
@@ -160,7 +167,8 @@ class UserProfile(UpdateView):
         messages.success(self.request, message)
         return response
 
-    def form_invalid(self, form):
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
         messages.error(
             self.request,
             self.error_message,
