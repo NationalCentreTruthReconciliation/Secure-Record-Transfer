@@ -12,7 +12,8 @@ STATIC_ROOT = "/app/static"
 DEBUG = False
 SITE_ID = config('SITE_ID', default=1, cast=int)
 
-ALLOWED_HOSTS = re.split(r'\s+', config('ALLOWED_HOSTS'))
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=str).split(",")
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
 
 # MySQL Database
 
