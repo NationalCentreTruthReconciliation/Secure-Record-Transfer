@@ -16,15 +16,12 @@
             {% include "includes/submission_table.html" with submissions=user_submissions %}
         {% else %}
             <div class="flex-med-width-item">
-                <p>
-                    {% url 'recordtransfer:transfer' as transfer_url %}
-                    {% blocktrans %}
-                    You have not sent any records to the NCTR.
-                    <a href="{{ transfer_url }}">Start a new transfer</a> to get started.
-                    {% endblocktrans %}
-                </p>
+                <p>{% trans "You have not sent any records to the NCTR." %}</p>
             </div>
         {% endif %}
+        <div class="margin-top-25px">
+            <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
+        </div>
         <div class="flex-med-width-item margin-top-25px" id="submission-groups">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
         </div>
@@ -32,13 +29,12 @@
             {% include "includes/submission_group_table.html" with groups=submission_groups %}
         {% else %}
             <div class="flex-med-width-item">
-                <p>
-                    {% blocktrans %}
-                    Click here to create a new submission group.
-                    {% endblocktrans %}
-                </p>
+                <p>{% trans "You have not made any submission groups." %}</p>
             </div>
         {% endif %}
+        <div class="margin-top-25px">
+            <a href="{% url 'recordtransfer:submissiongroupnew' %}">{% trans "Click to add new group" %}</a>
+        </div>
     {% else %}
         {% url 'login' as login %}
         <p>
