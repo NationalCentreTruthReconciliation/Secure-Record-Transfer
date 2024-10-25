@@ -3,6 +3,10 @@ from typing import Any, ClassVar
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from recordtransfer.constants import (
+    ID_SUBMISSION_GROUP_DESCRIPTION,
+    ID_SUBMISSION_GROUP_NAME,
+)
 from recordtransfer.models import SubmissionGroup
 
 
@@ -10,12 +14,16 @@ class SubmissionGroupForm(forms.ModelForm):
     """Form for creating and updating SubmissionGroup instances."""
 
     name = forms.CharField(
-        widget=forms.TextInput(attrs={"placeholder": "Enter group name"}),
+        widget=forms.TextInput(
+            attrs={"placeholder": "Enter group name", "id": ID_SUBMISSION_GROUP_NAME}
+        ),
         label="Group Name",
         required=True,
     )
     description = forms.CharField(
-        widget=forms.Textarea(attrs={"placeholder": "Enter group description"}),
+        widget=forms.Textarea(
+            attrs={"placeholder": "Enter group description", "id": ID_SUBMISSION_GROUP_DESCRIPTION}
+        ),
         label="Group Description",
         required=False,
     )

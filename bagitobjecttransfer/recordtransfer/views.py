@@ -50,6 +50,7 @@ from recordtransfer.emails import (
     send_your_transfer_did_not_go_through,
 )
 from recordtransfer.forms import SignUpForm, UserProfileForm
+from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
     SavedTransfer,
     Submission,
@@ -960,12 +961,15 @@ class SubmissionCsv(UserPassesTestMixin, View):
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
-class SubmissionGroupView(UserPassesTestMixin, DetailView):
+class SubmissionGroupView(UserPassesTestMixin, UpdateView):
     """Displays the associated submissions for a given submission group."""
 
     model = SubmissionGroup
+    form_class = SubmissionGroupForm
     template_name = "recordtransfer/submission_group.html"
     context_object_name = "group"
+    success_message = gettext("Group updated")
+    error_message = gettext("There was an error updating the group")
 
     def get_object(self):
         return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
@@ -974,10 +978,29 @@ class SubmissionGroupView(UserPassesTestMixin, DetailView):
         """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
-    def handle_no_permission(self):
+    def handle_no_permission(self) -> HttpResponseForbidden:
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         return context
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
+        response = super().form_valid(form)
+        messages.success(self.request, self.success_message)
+        return response
+
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
+        messages.error(
+            self.request,
+            self.error_message,
+        )
+        return super().form_invalid(form)
+
+    def get_success_url(self) -> str:
+        """Redirect back to the same page after updating the group."""
+        return self.request.path

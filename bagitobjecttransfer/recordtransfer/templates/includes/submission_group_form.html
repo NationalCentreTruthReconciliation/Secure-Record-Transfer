@@ -1,0 +1,15 @@
+{% load i18n %}
+{% include "includes/messages.html" %}
+<form method="post"
+      action="{% url 'recordtransfer:submissiongroup' uuid=group.uuid %}"
+      class="margin-top-25px">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="error-message">{{ field.errors.0 }}</div>
+        <div class="flex-item">{{ field.label_tag }} {{ field }}</div>
+    {% endfor %}
+    <div class="flex-item">
+        <label></label>
+        <button type="submit" class="blue-button" id="id_save_button">{% trans "Save" %}</button>
+    </div>
+</form>
