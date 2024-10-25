@@ -40,6 +40,8 @@ from recordtransfer.constants import (
     ID_CURRENT_PASSWORD,
     ID_GETS_NOTIFICATION_EMAILS,
     ID_NEW_PASSWORD,
+    ID_SUBMISSION_GROUP_DESCRIPTION,
+    ID_SUBMISSION_GROUP_NAME,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -985,6 +987,10 @@ class SubmissionGroupView(UserPassesTestMixin, UpdateView):
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
+
+        # Pass element IDs
+        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
+        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
         return context
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:

@@ -1,5 +1,10 @@
 {% load i18n %}
 {% include "includes/messages.html" %}
+<script>
+    // Pass constants to JavaScript
+    const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
+    const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
+</script>
 <form method="post"
       action="{% url 'recordtransfer:submissiongroup' uuid=group.uuid %}"
       class="margin-top-25px">
@@ -13,3 +18,4 @@
         <button type="submit" class="blue-button" id="id_save_button">{% trans "Save" %}</button>
     </div>
 </form>
+{% include "includes/submission_group_js.html" %}
