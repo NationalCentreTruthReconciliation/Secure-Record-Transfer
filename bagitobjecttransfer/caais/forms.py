@@ -83,7 +83,7 @@ class CaaisModelForm(forms.ModelForm):
 class MetadataForm(CaaisModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance:
+        if self.instance and self.instance.pk:
             accession_id = self.instance.accession_identifier
             self.fields['accession_identifier'].initial = accession_id
 
@@ -132,10 +132,13 @@ class MetadataForm(CaaisModelForm):
         ''' Save the accession identifier input as an Identifier with the type
         name "Accession Identifier"
         '''
-        metadata = super().save(commit=commit)
+        metadata: Metadata = super().save(commit=commit)
 
         accession_id = self.cleaned_data['accession_identifier']
-        if not metadata.accession_identifier:
+
+        if accession_id and not metadata.accession_identifier:
+            # Need to save model in case commit=False
+            metadata.save()
             new_id = Identifier(
                 metadata=metadata,
                 identifier_type='Accession Identifier',
