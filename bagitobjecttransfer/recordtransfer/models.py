@@ -231,6 +231,10 @@ class SubmissionGroup(models.Model):
     def number_of_submissions_in_group(self):
         return len(self.submission_set.all())
 
+    def get_absolute_url(self) -> str:
+        """Return the URL to access a detail view of this submission group."""
+        return reverse("recordtransfer:submissiongroupdetail", kwargs={"uuid": self.uuid})
+
     def __str__(self):
         return f'{self.name} ({self.created_by})'
 

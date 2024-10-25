@@ -6,7 +6,7 @@
     const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
 </script>
 <form method="post"
-      action="{% url 'recordtransfer:submissiongroup' uuid=group.uuid %}"
+      action="{% if not IS_NEW %}{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submissiongroupnew' %}{% endif %}"
       class="margin-top-25px">
     {% csrf_token %}
     {% for field in form %}
@@ -15,7 +15,13 @@
     {% endfor %}
     <div class="flex-item">
         <label></label>
-        <button type="submit" class="blue-button" id="id_save_button">{% trans "Save" %}</button>
+        <button type="submit" class="blue-button" id="id_save_button">
+            {% if IS_NEW %}
+                {% trans "Create" %}
+            {% else %}
+                {% trans "Save" %}
+            {% endif %}
+        </button>
     </div>
 </form>
 {% include "includes/submission_group_js.html" %}

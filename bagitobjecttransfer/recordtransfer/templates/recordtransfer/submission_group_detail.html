@@ -6,11 +6,11 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="title-text">{% trans "Submission Group: " %} {{ group.name }}</div>
-        {% if submissions %}
         {% include "includes/submission_group_form.html" %}
         <div class="flex-med-width-item margin-top-25px" id="past-transfers-in-group">
             <label class="medium-text">{% trans "Past Transfers in this Group" %}</label>
         </div>
+        {% if submissions %}
         {% include "includes/submission_table.html" with submissions=submissions %}
         {% else %}
         <div class="flex-med-width-item">
@@ -21,5 +21,8 @@
             </p>
         </div>
         {% endif %}
+        <div class="margin-top-25px">
+            <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
+        </div>
     {% endif %}
 {% endblock content %}

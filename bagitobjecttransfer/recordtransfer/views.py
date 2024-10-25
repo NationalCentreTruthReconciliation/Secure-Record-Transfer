@@ -2,9 +2,6 @@ import logging
 import pickle
 from typing import Any, Optional, Union
 
-from django.db.models.base import Model as Model
-from django.db.models.query import QuerySet
-
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
@@ -13,6 +10,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.db.models.base import Model as Model
 from django.forms import BaseModelForm
 from django.http import (
     Http404,
@@ -30,7 +28,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import DetailView, FormView, TemplateView, UpdateView, View
+from django.views.generic import CreateView, DetailView, FormView, TemplateView, UpdateView, View
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import settings
@@ -963,12 +961,14 @@ class SubmissionCsv(UserPassesTestMixin, View):
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
-class SubmissionGroupView(UserPassesTestMixin, UpdateView):
-    """Displays the associated submissions for a given submission group."""
+class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
+    """Displays the associated submissions for a given submission group, and allows modification
+    of submission group details.
+    """
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group.html"
+    template_name = "recordtransfer/submission_group_detail.html"
     context_object_name = "group"
     success_message = gettext("Group updated")
     error_message = gettext("There was an error updating the group")
@@ -987,6 +987,7 @@ class SubmissionGroupView(UserPassesTestMixin, UpdateView):
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
+        context["IS_NEW"] = False
 
         # Pass element IDs
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
@@ -1010,3 +1011,39 @@ class SubmissionGroupView(UserPassesTestMixin, UpdateView):
     def get_success_url(self) -> str:
         """Redirect back to the same page after updating the group."""
         return self.request.path
+
+
+class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
+    """Creates a new submission group."""
+
+    model = SubmissionGroup
+    form_class = SubmissionGroupForm
+    template_name = "recordtransfer/submission_group_create.html"
+    success_message = gettext("Group created")
+    error_message = gettext("There was an error creating the group")
+
+    def test_func(self):
+        """Check if the user is authenticated."""
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self) -> HttpResponseForbidden:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["IS_NEW"] = True
+        return context
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
+        response = super().form_valid(form)
+        messages.success(self.request, self.success_message)
+        return response
+
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
+        messages.error(
+            self.request,
+            self.error_message,
+        )
+        return super().form_invalid(form)

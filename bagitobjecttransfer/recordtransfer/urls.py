@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.urls import path, re_path
-from django.forms import formset_factory
 from django.contrib.auth.decorators import login_required
+from django.forms import formset_factory
+from django.urls import path, re_path
 
-from . import views
-from . import forms
+from . import forms, views
 from . import settings as recordtransfersettings
 
 # Set up transfer forms depending on whether file uploads are enabled or disabled
@@ -59,10 +58,15 @@ urlpatterns = [
         name="submissioncsv",
     ),
     path(
+        "submission_group/new",
+        login_required(views.SubmissionGroupCreateView.as_view()),
+        name="submissiongroupnew",
+    ),
+    path(
         "submission_group/<uuid:uuid>/",
-        login_required(views.SubmissionGroupView.as_view()),
-        name="submissiongroup",
-    )
+        login_required(views.SubmissionGroupDetailView.as_view()),
+        name="submissiongroupdetail",
+    ),
 ]
 
 if settings.TESTING or not settings.DEBUG:
