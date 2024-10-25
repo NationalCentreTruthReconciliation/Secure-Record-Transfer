@@ -38,9 +38,9 @@ RQ_QUEUES = {
 RQ_SHOW_ADMIN_LINK = True
 
 
-# Emailing - Uses MailHog to intercept emails
-# MailHog web UI runs at localhost:8025
-# More information: https://github.com/mailhog/MailHog
+# Emailing - Uses Mailpit to intercept emails
+# Mailpit web UI runs at localhost:8025
+# More information: https://github.com/axllent/mailpit
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'email'

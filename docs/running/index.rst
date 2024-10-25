@@ -62,13 +62,13 @@ user by running the following command.
     podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
 
 
-The development application uses a simple `MailHog <https://github.com/mailhog/MailHog>`_ server to
+The development application uses a simple `Mailpit <https://github.com/axllent/mailpit>`_ server to
 intercept messages coming from the application. Visiting http://localhost:8025 when the app is
-running allows you to visit the MailHog dashboard, which lets you view all of the emails sent by the
-app.
+running allows you to visit the Mailpit dashboard, which lets you view all of the emails sent by
+the app.
 
 If you would like to create new users via the sign-up page, you can find the account activation
-emails in MailHog.
+emails in Mailpit.
 
 
 Finding Logs in the Development Application

@@ -70,7 +70,7 @@ After clicking Sign Up, an email will be sent to the email the user entered. The
 link in the email to activate their account.
 
 .. image:: images/activation_email.png
-    :alt: User activation email in MailHog
+    :alt: User activation email
 
 When the user clicks the link or copies and pastes the link into their browser, their account will
 now be activated, and they will be logged in.

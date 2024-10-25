@@ -21,20 +21,21 @@ services:
     environment:
       REDIS_REPLICATION_MODE: master
 
+  # See: https://mailpit.axllent.org/docs/install/docker/
   email:
-    image: docker.io/mailhog/mailhog
-    user: root
-    container_name: recordtransfer_mailhog
-    logging:
-      driver: 'none' # disable saving logs
+    image: docker.io/axllent/mailpit:latest
+    container_name: recordtransfer_mailpit
+    restart: unless-stopped
     ports:
       - 1025:1025
       - 8025:8025
-    environment:
-      MH_STORAGE: maildir
-      MH_MAILDIR_PATH: '/home/mailhog/mail'
     volumes:
-      - mailhog:/home/mailhog/mail
+      - mailpit-data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
   rq:
     build:
@@ -88,4 +89,4 @@ services:
 volumes:
   temp-directory:
   clamav-virusdb:
-  mailhog:
+  mailpit-data:
