@@ -7,7 +7,6 @@
     const ID_NEW_PASSWORD = "{{ ID_NEW_PASSWORD }}";
     const ID_CONFIRM_NEW_PASSWORD = "{{ ID_CONFIRM_NEW_PASSWORD }}";
 </script>
-<div class="title-text">{% trans "Your Profile" %}</div>
 <form method="post" action="{% url 'recordtransfer:userprofile' %}">
     {% csrf_token %}
     <div class="flex-item margin-top-25px">
