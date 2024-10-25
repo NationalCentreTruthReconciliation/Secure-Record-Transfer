@@ -65,13 +65,13 @@
     color: white;
 }
 
-.contact-link-container > svg {
-    height: 18;
+.contact-link-icon {
+    height: 18px;
     width: 18px;
     fill: currentColor;
 }
 
-.contact-link-container > a {
+.contact-link-link {
     text-decoration: none;
     margin-left: 8px;
     color: currentColor;
