@@ -69,3 +69,9 @@ class TestAcceptedFileTypeParser(TestCase):
         parser = AcceptedFileTypes()
         parsed = parser("Image:png|Image:jpg|Image:gif")
         self.assertEqual(parsed, {"Image": {"png", "jpg", "gif"}})
+
+    def test_duplicates_combined(self) -> None:
+        """Test that duplicate file types in a group are combined."""
+        parser = AcceptedFileTypes()
+        parsed = parser("Image:jpg,.JPG,jpg")
+        self.assertEqual(parsed, {"Image": {"jpg"}})
