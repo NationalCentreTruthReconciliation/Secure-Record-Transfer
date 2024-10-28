@@ -663,7 +663,6 @@ class GroupTransferForm(TransferForm):
         super().__init__(*args, **kwargs)
         self.fields['group_name'].choices = [
             ('No Group', gettext('-- None Selected --')),
-            ('Add New Group', gettext('-- Add New Group --')),
             *[(x.name, x.name) for x in users_groups],
         ]
         self.allowed_group_names = [x[0] for x in self.fields['group_name'].choices]
@@ -674,10 +673,6 @@ class GroupTransferForm(TransferForm):
         group_name = cleaned_data['group_name']
         if group_name not in self.allowed_group_names:
             self.add_error('group_name', f'Group name "{group_name}" was not in list')
-        if group_name == 'Add New Group' and not cleaned_data['new_group_name']:
-            self.add_error('new_group_name', 'Group name cannot be empty')
-        if group_name == 'Add New Group' and not cleaned_data['group_description']:
-            self.add_error('group_description', 'Group description cannot be empty')
         return cleaned_data
 
     group_name = forms.ChoiceField(
@@ -688,16 +683,6 @@ class GroupTransferForm(TransferForm):
             }
         ),
         label=gettext('Assigned group')
-    )
-
-    new_group_name = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={
-                'placeholder': gettext('e.g., My Group'),
-            }
-        ),
-        label=gettext('New group name'),
     )
 
     group_description = forms.CharField(

@@ -549,30 +549,15 @@ class TransferFormWizard(SessionWizardView):
 
         group_name = cleaned_form_data["group_name"]
         if group_name != "No Group":
-            if group_name == "Add New Group":
-                new_group_name = cleaned_form_data["new_group_name"]
-                description = cleaned_form_data["group_description"]
-
-                group, created = SubmissionGroup.objects.get_or_create(
-                    name=new_group_name,
-                    description=description,
-                    created_by=self.request.user,
+            try:
+                group = SubmissionGroup.objects.get(
+                    name=group_name, created_by=self.request.user
                 )
-                if created:
-                    LOGGER.info('Created "%s" SubmissionGroup', new_group_name)
-
                 LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
-            else:
-                try:
-                    group = SubmissionGroup.objects.get(
-                        name=group_name, created_by=self.request.user
-                    )
-                    LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
-
-                except SubmissionGroup.DoesNotExist as exc:
-                    LOGGER.error('Could not find "%s" SubmissionGroup', group.name, exc_info=exc)
-                    group = None
+            except SubmissionGroup.DoesNotExist as exc:
+                LOGGER.error('Could not find "%s" SubmissionGroup', group.name, exc_info=exc)
+                group = None
         else:
             LOGGER.info("Not associating submission with a group")
 
