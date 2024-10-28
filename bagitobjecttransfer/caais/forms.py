@@ -85,7 +85,7 @@ class MetadataForm(CaaisModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
             accession_id = self.instance.accession_identifier
-            self.fields['accession_identifier'].initial = accession_id
+            self.fields["accession_identifier"].initial = accession_id
 
     class Meta:
         model = Metadata
@@ -128,25 +128,33 @@ class MetadataForm(CaaisModelForm):
         )
     )
 
-    def save(self, commit=True):
-        ''' Save the accession identifier input as an Identifier with the type
-        name "Accession Identifier"
-        '''
+    def save(self, commit: bool = True) -> Metadata:
+        """Save the accession identifier input as an Identifier on the metadata object.
+
+        The Identifier is given the reserved name "Accession Identifier".
+        """
         metadata: Metadata = super().save(commit=commit)
 
-        accession_id = self.cleaned_data['accession_identifier']
+        accession_id = self.cleaned_data["accession_identifier"]
 
-        if accession_id and not metadata.accession_identifier:
-            # Need to save model in case commit=False
+        # No changes required - return early
+        if not accession_id or accession_id == metadata.accession_identifier:
+            return metadata
+
+        # The metadata needs to be saved before updating the accession identifier if it hasn't
+        # already been saved
+        if not metadata.pk:
             metadata.save()
+
+        if not metadata.accession_identifier:
             new_id = Identifier(
                 metadata=metadata,
-                identifier_type='Accession Identifier',
+                identifier_type="Accession Identifier",
                 identifier_value=accession_id,
             )
             new_id.save()
 
-        elif accession_id != metadata.accession_identifier:
+        else:
             metadata.update_accession_id(accession_id)
 
         return metadata
