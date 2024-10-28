@@ -97,3 +97,19 @@ Or, in Bash (or any POSIX-like terminal):
 cd bagitobjecttransfer
 DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.test python manage.py test
 ```
+
+## Building the Documentation
+
+The documentation for this repository is built with [Sphinx](https://sphinx-doc.org).
+
+Before building the documentation, ensure you have the `dev` dependencies installed.
+
+To build the docs, run:
+
+```shell
+sphinx-build docs docs/_build
+```
+
+The built documentation will be available in `docs/_build`. Open the `index.html` in your browser to view the docs.
+
+The Sphinx configuration can be found in `docs/conf.py`. The documentation is also built automatically by [Read The Docs](https://about.readthedocs.com/) based on the configuration in `.readthedocs.yaml` and is published [here](https://secure-record-transfer.readthedocs.io/en/latest/) when changes are made to the default branch.
