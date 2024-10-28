@@ -83,7 +83,7 @@ class CaaisModelForm(forms.ModelForm):
 class MetadataForm(CaaisModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
+        if self.instance.pk:
             accession_id = self.instance.accession_identifier
             self.fields['accession_identifier'].initial = accession_id
 
