@@ -45,7 +45,9 @@
             {% endfor %}
         {% endif %}
     {% endfor %}
+{% endblock formfields %}
+{% block dialog %}
     <div id="add-new-group-dialog" title="Create New Submission Group">
         {% include "includes/submission_group_form.html" with form=new_group_form %}
     </div>
-{% endblock %}
+{% endblock dialog %}

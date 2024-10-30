@@ -366,7 +366,7 @@ $(() => {
         sourceTypesDialog.dialog("moveToTop")
     })
 
-    sourceTypesDialog = $('#add-new-group-dialog').dialog({
+    addNewGroupDialog = $('#add-new-group-dialog').dialog({
         autoOpen: false,
         modal: true,
         width: 700,
@@ -374,15 +374,15 @@ $(() => {
         buttons: [
             {
                 text: "OK",
-                click: () => { sourceTypesDialog.dialog("close") }
+                click: () => { addNewGroupDialog.dialog("close") }
             }
         ],
     })
 
     $('#show-add-new-group-dialog').on("click", (event) => {
         event.preventDefault()
-        sourceTypesDialog.dialog("open")
-        sourceTypesDialog.dialog("moveToTop")
+        addNewGroupDialog.dialog("open")
+        addNewGroupDialog.dialog("moveToTop")
     })
 
     /***************************************************************************

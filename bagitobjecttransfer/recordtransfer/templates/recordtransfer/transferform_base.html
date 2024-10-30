@@ -15,7 +15,8 @@
     </div>
     {% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
 
-    {% block form_explanation %}{% endblock %}
+    {% block form_explanation %}{% endblock form_explanation %}
+    {% block dialog %}{% endblock dialog %}
 
     <form id="transfer-form" action="" method="post">
         {% csrf_token %}

@@ -422,7 +422,7 @@ class TransferFormWizard(SessionWizardView):
         if step_name == "grouptransfer":
             users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
             context.update({"users_groups": users_groups, "IS_NEW": True})
-            context['new_group_form'] = SubmissionGroupForm(prefix='new_group')
+            context['new_group_form'] = SubmissionGroupForm()
 
         elif step_name == "rights":
             all_rights = RightsType.objects.all().exclude(name="Other")
