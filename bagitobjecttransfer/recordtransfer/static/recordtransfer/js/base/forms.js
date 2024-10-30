@@ -366,6 +366,24 @@ $(() => {
         sourceTypesDialog.dialog("moveToTop")
     })
 
+    sourceTypesDialog = $('#add-new-group-dialog').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 700,
+        position: { my: "center", at: "top", of: window },
+        buttons: [
+            {
+                text: "OK",
+                click: () => { sourceTypesDialog.dialog("close") }
+            }
+        ],
+    })
+
+    $('#show-add-new-group-dialog').on("click", (event) => {
+        event.preventDefault()
+        sourceTypesDialog.dialog("open")
+        sourceTypesDialog.dialog("moveToTop")
+    })
 
     /***************************************************************************
      * Expandable Forms Setup
