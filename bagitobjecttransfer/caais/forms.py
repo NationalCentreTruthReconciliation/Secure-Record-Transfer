@@ -133,7 +133,7 @@ class MetadataForm(CaaisModelForm):
 
         The Identifier is given the reserved name "Accession Identifier".
         """
-        metadata: Metadata = super().save(commit=commit)
+        metadata: Metadata = super().save(commit)
 
         accession_id = self.cleaned_data["accession_identifier"]
 
@@ -143,7 +143,7 @@ class MetadataForm(CaaisModelForm):
 
         # The metadata needs to be saved before updating the accession identifier if it hasn't
         # already been saved
-        if not metadata.pk:
+        if commit and not metadata.pk:
             metadata.save()
 
         if not metadata.accession_identifier:
@@ -152,10 +152,12 @@ class MetadataForm(CaaisModelForm):
                 identifier_type="Accession Identifier",
                 identifier_value=accession_id,
             )
-            new_id.save()
+
+            if commit:
+                new_id.save()
 
         else:
-            metadata.update_accession_id(accession_id)
+            metadata.update_accession_id(accession_id, commit)
 
         return metadata
 
