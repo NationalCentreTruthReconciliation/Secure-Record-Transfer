@@ -224,7 +224,7 @@ class SubmissionGroup(models.Model):
 
     name = models.CharField(max_length=256, null=False)
     description = models.TextField(default='')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     uuid = models.UUIDField(default=uuid.uuid4)
 
     @property

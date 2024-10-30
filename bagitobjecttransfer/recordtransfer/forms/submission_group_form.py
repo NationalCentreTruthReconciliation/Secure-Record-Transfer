@@ -34,6 +34,10 @@ class SubmissionGroupForm(forms.ModelForm):
         model = SubmissionGroup
         fields: ClassVar[list[str]] = ["name", "description"]
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
     def clean(self) -> "dict[str, Any]":
         """Clean the form data."""
         if not self.data:
@@ -55,3 +59,12 @@ class SubmissionGroupForm(forms.ModelForm):
             raise forms.ValidationError(_("No changes detected."))
 
         return cleaned_data
+
+    def save(self, commit: bool = True) -> SubmissionGroup:
+        """Save the form data to a SubmissionGroup instance."""
+        group = super().save(commit = False)
+        group.created_by = self.user
+        if commit:
+            group.save()
+
+        return group

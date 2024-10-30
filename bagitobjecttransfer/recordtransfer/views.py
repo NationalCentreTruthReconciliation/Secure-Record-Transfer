@@ -979,6 +979,12 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
         return context
 
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         response = super().form_valid(form)
@@ -1018,6 +1024,12 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["IS_NEW"] = True
         return context
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
