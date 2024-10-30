@@ -1,5 +1,8 @@
-''' Application-specific settings for the recordtransfer app '''
-from decouple import config
+"""Application-specific settings for the recordtransfer app."""
+
+from decouple import Csv, config
+
+from recordtransfer.configuration import AcceptedFileTypes
 
 # Enable or disable the sign-up ability
 
@@ -28,9 +31,7 @@ ARCHIVIST_EMAIL = config('ARCHIVIST_EMAIL')
 
 # Checksum types
 
-BAG_CHECKSUMS = [
-    algorithm.strip() for algorithm in config('BAG_CHECKSUMS', default='sha512').split(',')
-]
+BAG_CHECKSUMS = config("BAG_CHECKSUMS", default="sha512", cast=Csv())
 
 # Maximum upload thresholds
 
@@ -92,55 +93,10 @@ CAAIS_DEFAULT_CREATION_NOTE = config('CAAIS_DEFAULT_CREATION_NOTE', default='')
 
 APPROXIMATE_DATE_FORMAT = config('APPROXIMATE_DATE_FORMAT', default='[ca. {date}]')
 
-# File types allowed to be uploaded to the backend. Do not use periods before the extension, and
-# ensure that all file extensions are lowercase.
+# File types allowed to be uploaded. See documentation for how to customize this list.
 
-ACCEPTED_FILE_FORMATS = {
-    'Archive': [
-        'zip',
-    ],
-    'Audio': [
-        'acc',
-        'flac',
-        'm4a',
-        'mp3',
-        'ogg',
-        'wav',
-        'wma',
-    ],
-    'Document': [
-        'doc',
-        'docx',
-        'odt',
-        'pdf',
-        'rtf',
-        'txt',
-        'html',
-    ],
-    'Image': [
-        'jpg',
-        'jpeg',
-        'gif',
-        'png',
-    ],
-    'Presentation': [
-        'ppt',
-        'pptx',
-        'pps',
-        'ppsx',
-    ],
-    'Spreadsheet': [
-        'xls',
-        'xlsx',
-        'csv',
-    ],
-    'Video': [
-        'avi',
-        'mkv',
-        'mov',
-        'mp4',
-        'mpeg4',
-        'mpg',
-        'wmv',
-    ],
-}
+ACCEPTED_FILE_FORMATS = config(
+    "ACCEPTED_FILE_TYPES",
+    cast=AcceptedFileTypes(),
+    default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
+)

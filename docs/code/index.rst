@@ -14,4 +14,5 @@ part of this application.
     emails
     caais
     models
+    configuration
     utils

@@ -307,16 +307,44 @@ ACCEPTED_FILE_FORMATS
         ========  ===============  =========
         Required  Default          Type
         ========  ===============  =========
-        NO        See settings.py  dict
+        NO        See below        str
         ========  ===============  =========
 
-    .. seealso::
+    Accepted files are grouped by type of file. The default accepted file extensions are:
 
-        See also the section of the docs on :ref:`Accepted File Types`.
+    - Archive
+        - zip
+    - Audio
+        - mp3
+        - wav
+        - flac
+    - Document
+        - docx
+        - odt
+        - pdf
+        - txt
+        - html
+    - Image
+        - jpg
+        - jpeg
+        - png
+        - gif
+    - Spreadsheet
+        - xlsx
+        - csv
+    - Video
+        - mkv
+        - mp4
 
-    A dictionary of accepted file formats, each within a named group. You may name the groups
-    anything you like. Make sure that file extensions do not start with a period, and that they
-    are all lowercase. Group names should not be plural.
+    This setting has a special structured syntax, that looks like:
+
+    ::
+
+        File Group Name:ext,ext,ext|Other Group Name:ext,ext
+
+
+    File extensions are grouped by name. File groups are split by the pipe | character, and file
+    extensions are split by comma.
 
     The file extensions are used to determine what a user is allowed to upload. The group name is
     used to create a human-readable extent statement about the quantity and type of files the user
@@ -324,32 +352,25 @@ ACCEPTED_FILE_FORMATS
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
 
-    **settings.py Example:**
+    Here are some examples based on what you might want to accept (note that you can only specify
+    the ACCEPTED_FILE_FORMATS variable *once*):
 
-    .. code-block:: python
+    ::
 
-        #file: settings.py
-        # There is no limit to the number of groups or the number of extensions in a group.
-        ACCEPTED_FILE_FORMATS = {
-            'Archive': [
-                'zip',
-                '7z',
-                'rar',
-            ],
-            'Document': [
-                'doc',
-                'docx',
-            ],
-            'Database': [
-                'db',
-                'sqlite3',
-            ]
-            'Photo': [
-                'jpg',
-                'jpeg',
-                'png',
-            ],
-        }
+        #file: .env
+
+        # Only PDFs
+        ACCEPTED_FILE_FORMATS="PDF:pdf"
+
+        # Audio or Video
+        ACCEPTED_FILE_FORMATS="Audio:mp3,wav|Video:mkv,mp4"
+
+        # Excel spreadsheets
+        ACCEPTED_FILE_FORMATS="Excel Workbook:xlsx|Excel Macro Workbook:xlsm|Excel 1997-2003 Workbook:xls"
+
+        # Images and documents
+        ACCEPTED_FILE_FORMATS="PDF:pdf,docx,txt|Image:jpeg,jpg,png,gif,tif,tiff"
+
 
 
 MAX_SINGLE_UPLOAD_SIZE
