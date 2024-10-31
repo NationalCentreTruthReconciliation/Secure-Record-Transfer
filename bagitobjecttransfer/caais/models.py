@@ -218,7 +218,8 @@ class Metadata(models.Model):
 
     @property
     def accession_identifier(self) -> str:
-        if self.identifiers:
+        # We check self.pk here in case the model is not saved yet
+        if self.pk and self.identifiers.count() > 0:
             accession_id = self.identifiers.accession_identifier()
             if accession_id:
                 return accession_id.identifier_value
