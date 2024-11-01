@@ -401,13 +401,7 @@ $(() => {
         autoOpen: false,
         modal: true,
         width: 700,
-        position: { my: "center", at: "top", of: window },
-        buttons: [
-            {
-                text: "OK",
-                click: () => { addNewGroupDialog.dialog("close") }
-            }
-        ],
+        position: { my: "center", at: "center", of: window },
     })
 
     $('#show-add-new-group-dialog').on("click", (event) => {
@@ -453,6 +447,18 @@ $(() => {
             success: function (response) {
                 populateGroupOptions();
                 $('#add-new-group-dialog').dialog("close");
+
+                if (response.messages) {
+                    const messagesContainer = $('.messages');
+                    messagesContainer.empty(); // Clear existing messages
+                    response.messages.forEach(function (message) {
+                        const messageDiv = $('<div></div>')
+                            .addClass('message')
+                            .addClass(message.tags)
+                            .text(message.message);
+                        messagesContainer.append(messageDiv);
+                    });
+                }
             },
             error: function (response) {
                 alert(response.responseJSON.message);
