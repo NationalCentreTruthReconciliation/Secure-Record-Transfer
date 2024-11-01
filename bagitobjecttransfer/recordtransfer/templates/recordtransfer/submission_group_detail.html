@@ -22,7 +22,7 @@
         </div>
         {% endif %}
         <div class="margin-top-25px">
-            <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
+            <a href="{% url 'recordtransfer:transfer_with_group' group.uuid %}">{% trans "Click to add new transfer" %}</a>
         </div>
     {% endif %}
 {% endblock content %}

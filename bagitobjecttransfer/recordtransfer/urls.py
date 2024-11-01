@@ -38,6 +38,11 @@ urlpatterns = [
         login_required(views.TransferFormWizard.as_view(_transfer_forms)),
         name="transfer",
     ),
+    path(
+        "transfer/<uuid:group_id>/",
+        login_required(views.TransferFormWizard.as_view(_transfer_forms)),
+        name="transfer_with_group",
+    ),
     path("transfer/error/", login_required(views.SystemErrorPage.as_view()), name="systemerror"),
     path("transfer/sent/", views.TransferSent.as_view(), name="transfersent"),
     path(
