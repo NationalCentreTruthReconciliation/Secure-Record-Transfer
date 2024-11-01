@@ -258,7 +258,7 @@ function toggleFlexItems(selectors, state) {
 /**
  * Update the group description text to display based on the selected submission group.
  */
-const checkGroupChange = () => {
+const updateGroupDescription = () => {
     const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION);
     const selectedGroupId = document.getElementById(ID_SUBMISSION_GROUP_SELECTION).value;
     let description = groupDescriptions[selectedGroupId];
@@ -283,6 +283,7 @@ function populateGroupOptions() {
                 groupDescriptions[group.uuid] = group.description;
             });
             selectField.val(groups[groups.length - 1].uuid).change();
+            updateGroupDescription()
         },
         error: function () {
             alert('Failed to update group options.');
@@ -435,8 +436,7 @@ $(() => {
     **************************************************************************/
     populateGroupOptions();
     const groupSelectionInput = document.getElementById(ID_SUBMISSION_GROUP_SELECTION);
-    groupSelectionInput.addEventListener('change', checkGroupChange);
-    checkGroupChange();
+    groupSelectionInput.addEventListener('change', updateGroupDescription);
 
     /***************************************************************************
      * New Group Creation Submission
