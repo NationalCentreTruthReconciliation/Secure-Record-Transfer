@@ -42,6 +42,7 @@ from recordtransfer.constants import (
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
+    ID_SUBMISSION_GROUP_SELECTION,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -434,6 +435,7 @@ class TransferFormWizard(SessionWizardView):
                     "new_group_form": SubmissionGroupForm(),
                     "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
+                    "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
                 }
             )
 

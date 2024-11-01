@@ -1,4 +1,7 @@
 ''' Forms specific to transferring files with a new submission '''
+from typing import Iterable
+from uuid import UUID
+from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
@@ -11,6 +14,8 @@ from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from caais.models import SourceType, SourceRole, RightsType
 from recordtransfer import settings
+from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
+from recordtransfer.models import SubmissionGroup
 
 
 class TransferForm(forms.Form):
@@ -659,27 +664,28 @@ class OtherIdentifiersForm(TransferForm):
 
 class GroupTransferForm(TransferForm):
     def __init__(self, *args, **kwargs):
-        users_groups = kwargs.pop('users_groups')
+        users_groups: Iterable[SubmissionGroup] = kwargs.pop('users_groups')
         super().__init__(*args, **kwargs)
-        self.fields['group_name'].choices = [
-            ('No Group', gettext('-- None Selected --')),
-            *[(x.name, x.name) for x in users_groups],
+        self.fields['group_id'].choices = [
+            *[(x.uuid, x.name) for x in users_groups],
         ]
-        self.allowed_group_names = [x[0] for x in self.fields['group_name'].choices]
-        self.fields['group_name'].initial = 'No Group'
+        self.allowed_group_ids = [group.uuid for group in users_groups]
+        self.fields['group_id'].initial = None
 
     def clean(self):
         cleaned_data = super().clean()
-        group_name = cleaned_data['group_name']
-        if group_name not in self.allowed_group_names:
-            self.add_error('group_name', f'Group name "{group_name}" was not in list')
+        group_id = cleaned_data['group_id']
+        if group_id and group_id not in self.allowed_group_ids:
+            self.add_error('group_id', 'Invalid group selected.')
         return cleaned_data
 
-    group_name = forms.ChoiceField(
+    group_id = forms.TypedChoiceField(
         required=False,
+        coerce=UUID,
         widget=forms.Select(
             attrs={
                 'class': 'reduce-form-field-width',
+                'id': ID_SUBMISSION_GROUP_SELECTION,
             }
         ),
         label=gettext('Assigned group')
