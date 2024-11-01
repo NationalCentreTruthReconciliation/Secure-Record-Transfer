@@ -387,38 +387,8 @@ $(() => {
 
     /***************************************************************************
      * Expandable Forms Setup
-     **************************************************************************/
+    **************************************************************************/
 
-    const transferGroupFlexItems = [
-        '#id_grouptransfer-new_group_name',
-        '#id_grouptransfer-group_description',
-    ]
-
-    var groupDescriptionFlexItems = [
-        ...$('[id^=id_groupname-').map(function() { return `[id='${this.id}']` })
-    ]
-
-    if (transferGroupFlexItems.some((selector) => elementExists(selector))) {
-        let groupName = $('#id_grouptransfer-group_name').val()
-        let currentGroupDescId = `[id='id_groupname-${groupName}']`
-        toggleFlexItems(groupDescriptionFlexItems.filter(id => id !== currentGroupDescId), 'off')
-        if (elementExists(currentGroupDescId)) {
-            toggleFlexItems([currentGroupDescId], 'on')
-        }
-        let state = groupName.toLowerCase().trim() === 'add new group' ? 'on' : 'off'
-        toggleFlexItems(transferGroupFlexItems, state)
-
-        $('#id_grouptransfer-group_name').change(function() {
-            let groupName = $(this).val()
-            let currentGroupDescId = `[id='id_groupname-${groupName}']`
-            toggleFlexItems(groupDescriptionFlexItems.filter(id => id !== currentGroupDescId), 'off')
-            if (elementExists(currentGroupDescId)) {
-                toggleFlexItems([currentGroupDescId], 'on')
-            }
-            let state = groupName.toLowerCase().trim() === 'add new group' ? 'on' : 'off'
-            toggleFlexItems(transferGroupFlexItems, state)
-        })
-    }
 
     setupSelectOtherToggle(['#id_contactinfo-other_province_or_state'], removeOther);
 
