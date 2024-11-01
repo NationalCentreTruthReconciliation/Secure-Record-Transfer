@@ -1,4 +1,3 @@
-import json
 import logging
 import pickle
 from typing import Any, Optional, Union
@@ -9,7 +8,6 @@ from clamav.scan import check_for_malware
 from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models.base import Model as Model
@@ -1044,9 +1042,15 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         """Handle valid form submission."""
         response = super().form_valid(form)
         referer = self.request.META.get("HTTP_REFERER", "")
-        if "transfer" in referer:
-            return JsonResponse({"message": self.success_message, "status": "success"}, status=200)
         messages.success(self.request, self.success_message)
+        if "transfer" in referer:
+            return JsonResponse(
+                {
+                    "message": self.success_message,
+                    "status": "success",
+                },
+                status=200,
+            )
         return response
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
@@ -1060,10 +1064,13 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         )
         return super().form_invalid(form)
 
+
 def get_users_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
     if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
-        return JsonResponse({'error': 'You do not have permission to view these groups.'}, status=403)
+        return JsonResponse(
+            {"error": "You do not have permission to view these groups."}, status=403
+        )
 
     users_groups = SubmissionGroup.objects.filter(created_by=user_id)
     groups = [

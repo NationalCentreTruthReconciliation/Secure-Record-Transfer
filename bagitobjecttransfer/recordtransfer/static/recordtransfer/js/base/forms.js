@@ -255,7 +255,9 @@ function toggleFlexItems(selectors, state) {
     }
 }
 
-// Update the group description text to display based on selected submission group
+/**
+ * Update the group description text to display based on the selected submission group.
+ */
 const checkGroupChange = () => {
     const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION);
     const selectedGroupId = document.getElementById(ID_SUBMISSION_GROUP_SELECTION).value;
@@ -266,8 +268,10 @@ const checkGroupChange = () => {
     groupDescription.textContent = description;
 }
 
-// Asynchronously update the group options in the submission group selection dropdown
-// after a new submission group is created.
+/**
+ * Asynchronously update the group options in the submission group selection dropdown
+ * after a new submission group is created.
+ */
 function populateGroupOptions() {
     $.ajax({
         url: fetchUsersGroupsUrl,
@@ -447,18 +451,6 @@ $(() => {
             success: function (response) {
                 populateGroupOptions();
                 $('#add-new-group-dialog').dialog("close");
-
-                if (response.messages) {
-                    const messagesContainer = $('.messages');
-                    messagesContainer.empty(); // Clear existing messages
-                    response.messages.forEach(function (message) {
-                        const messageDiv = $('<div></div>')
-                            .addClass('message')
-                            .addClass(message.tags)
-                            .text(message.message);
-                        messagesContainer.append(messageDiv);
-                    });
-                }
             },
             error: function (response) {
                 alert(response.responseJSON.message);
