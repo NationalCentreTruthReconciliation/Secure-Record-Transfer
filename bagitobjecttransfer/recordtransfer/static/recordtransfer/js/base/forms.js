@@ -105,8 +105,8 @@ function incrementInputAttributes(form) {
             'name': newName,
             'id': newId
         })
-        .val('')
-        .removeAttr('checked')
+            .val('')
+            .removeAttr('checked')
     })
 }
 
@@ -196,9 +196,9 @@ function updateElementIndex(element, index, prefix) {
  */
 function setupSelectOtherToggle(otherField, choiceFieldFn) {
     if (otherField.some((selector) => $(selector).length)) {
-        $.each(otherField, function(_, v) {
+        $.each(otherField, function (_, v) {
             // Use each as a single value in the otherField array could result in multiple objects, ie. class selector
-            $(v).each(function() {
+            $(v).each(function () {
                 let currentId = "#" + $(this).attr("id");
                 let choiceField = choiceFieldFn(currentId);
                 let value = $(choiceField + " option:selected").text().toLowerCase().trim()
@@ -207,7 +207,7 @@ function setupSelectOtherToggle(otherField, choiceFieldFn) {
                 // Remove any current event handlers
                 $(choiceField).off('change');
                 // Add the new event handlers
-                $(choiceField).change(function() {onSelectChange.call(this, currentId)});
+                $(choiceField).change(function () { onSelectChange.call(this, currentId) });
             });
         });
     }
@@ -229,7 +229,7 @@ function onSelectChange(currentId) {
  * @param id : the id of the other text field.
  */
 function removeOther(id) {
-    let newId = id.replace('other_','');
+    let newId = id.replace('other_', '');
     if (!/^#/.test(newId)) {
         newId = "#" + newId;
     }
@@ -243,12 +243,12 @@ function removeOther(id) {
  */
 function toggleFlexItems(selectors, state) {
     if (state === 'on') {
-        selectors.forEach(function(sel) {
+        selectors.forEach(function (sel) {
             $(sel).closest('div.flex-item').show()
         })
     }
     else if (state === 'off') {
-        selectors.forEach(function(sel) {
+        selectors.forEach(function (sel) {
             $(sel).closest('div.flex-item').hide()
         })
     }
@@ -418,12 +418,33 @@ $(() => {
 
     groupSelectionInput.addEventListener('change', checkGroupChange);
     checkGroupChange();
+
+    /***************************************************************************
+     * New Group Creation Submission
+    **************************************************************************/
+    $(document).ready(function () {
+        $('#submission-group-form').on('submit', function (event) {
+            event.preventDefault();
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: $(this).attr('method'),
+                data: $(this).serialize(),
+                success: function (response) {
+                    $('#add-new-group-dialog').dialog("close");
+                },
+                error: function (response) {
+                    alert(response.responseJSON.message);
+                }
+            });
+        });
+    });
 })
 
 
 $(() => {
-    $(document).ready(function() {
-        $("button.close[data-dismiss=alert]").on("click", function(evt) {
+    $(document).ready(function () {
+        $("button.close[data-dismiss=alert]").on("click", function (evt) {
             $(evt.currentTarget).parents(".alert-dismissible").hide();
         });
     });

@@ -7,6 +7,7 @@
 </script>
 <form method="post"
       action="{% if not IS_NEW %}{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submissiongroupnew' %}{% endif %}"
+      id="submission-group-form"
       class="margin-top-25px">
     {% csrf_token %}
     {% for field in form %}
