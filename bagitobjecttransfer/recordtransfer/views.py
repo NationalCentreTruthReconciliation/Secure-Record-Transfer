@@ -9,12 +9,14 @@ from clamav.scan import check_for_malware
 from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models.base import Model as Model
 from django.forms import BaseModelForm
 from django.http import (
     Http404,
+    HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
@@ -401,8 +403,7 @@ class TransferFormWizard(SessionWizardView):
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
         if step == "grouptransfer":
-            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
-            kwargs["users_groups"] = users_groups
+            kwargs["user"] = self.request.user
         return kwargs
 
     def get_context_data(self, form, **kwargs):
@@ -423,15 +424,9 @@ class TransferFormWizard(SessionWizardView):
             context.update({"info_message": self._TEMPLATES[step_name]["infomessage"]})
 
         if step_name == "grouptransfer":
-            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
-            description_json = json.dumps(
-                {str(group.uuid): group.description for group in users_groups}
-            )
             context.update(
                 {
-                    "users_groups": users_groups,
                     "IS_NEW": True,
-                    "description_json": description_json,
                     "new_group_form": SubmissionGroupForm(),
                     "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
@@ -1048,19 +1043,31 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         response = super().form_valid(form)
-        referer = self.request.META.get('HTTP_REFERER', '')
-        if 'transfer' in referer:
-            return JsonResponse({'message': self.success_message, 'status': 'success'}, status=200)
+        referer = self.request.META.get("HTTP_REFERER", "")
+        if "transfer" in referer:
+            return JsonResponse({"message": self.success_message, "status": "success"}, status=200)
         messages.success(self.request, self.success_message)
         return response
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        referer = self.request.META.get('HTTP_REFERER', '')
-        if 'transfer' in referer:
-            return JsonResponse({'message': self.error_message, 'status': 'error'}, status=400)
+        referer = self.request.META.get("HTTP_REFERER", "")
+        if "transfer" in referer:
+            return JsonResponse({"message": self.error_message, "status": "error"}, status=400)
         messages.error(
             self.request,
             self.error_message,
         )
         return super().form_invalid(form)
+
+def get_users_groups(request: HttpRequest, user_id: int) -> JsonResponse:
+    """Retrieve the groups associated with the current user."""
+    if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
+        return JsonResponse({'error': 'You do not have permission to view these groups.'}, status=403)
+
+    users_groups = SubmissionGroup.objects.filter(created_by=user_id)
+    groups = [
+        {"uuid": str(group.uuid), "name": group.name, "description": group.description}
+        for group in users_groups
+    ]
+    return JsonResponse(groups, safe=False)

@@ -9,6 +9,7 @@
 const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea, select'
 const ID_NUM_REGEX = new RegExp('-(\\d+)-')
 
+let groupDescriptions = {};
 
 /**
  * Test if an element exists on the page.
@@ -254,6 +255,36 @@ function toggleFlexItems(selectors, state) {
     }
 }
 
+// Update the group description text to display based on selected submission group
+const checkGroupChange = () => {
+    const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION);
+    const selectedGroupId = document.getElementById(ID_SUBMISSION_GROUP_SELECTION).value;
+    let description = groupDescriptions[selectedGroupId];
+    if (!description) {
+        description = "No description available";
+    }
+    groupDescription.textContent = description;
+}
+
+// Asynchronously update the group options in the submission group selection dropdown
+// after a new submission group is created.
+function populateGroupOptions() {
+    $.ajax({
+        url: fetchUsersGroupsUrl,
+        success: function (groups) {
+            const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+            selectField.empty();
+            groups.forEach(function (group) {
+                selectField.append(new Option(group.name, group.uuid));
+                groupDescriptions[group.uuid] = group.description;
+            });
+            selectField.val(groups[groups.length - 1].uuid).change();
+        },
+        error: function () {
+            alert('Failed to update group options.');
+        }
+    });
+}
 
 $(() => {
 
@@ -404,39 +435,28 @@ $(() => {
     /***************************************************************************
      * Group Description Display
     **************************************************************************/
-    const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION)
-    const groupSelectionInput = document.getElementById(ID_SUBMISSION_GROUP_SELECTION)
-
-    const checkGroupChange = () => {
-        const selectedGroupId = groupSelectionInput.value;
-        let description = description_json[selectedGroupId];
-        if (!description) {
-            description = "No description available";
-        }
-        groupDescription.textContent = description;
-    }
-
+    populateGroupOptions();
+    const groupSelectionInput = document.getElementById(ID_SUBMISSION_GROUP_SELECTION);
     groupSelectionInput.addEventListener('change', checkGroupChange);
     checkGroupChange();
 
     /***************************************************************************
      * New Group Creation Submission
     **************************************************************************/
-    $(document).ready(function () {
-        $('#submission-group-form').on('submit', function (event) {
-            event.preventDefault();
+    $('#submission-group-form').off('submit').on('submit', function (event) {
+        event.preventDefault();
 
-            $.ajax({
-                url: $(this).attr('action'),
-                type: $(this).attr('method'),
-                data: $(this).serialize(),
-                success: function (response) {
-                    $('#add-new-group-dialog').dialog("close");
-                },
-                error: function (response) {
-                    alert(response.responseJSON.message);
-                }
-            });
+        $.ajax({
+            url: $(this).attr('action'),
+            type: $(this).attr('method'),
+            data: $(this).serialize(),
+            success: function (response) {
+                populateGroupOptions();
+                $('#add-new-group-dialog').dialog("close");
+            },
+            error: function (response) {
+                alert(response.responseJSON.message);
+            }
         });
     });
 })

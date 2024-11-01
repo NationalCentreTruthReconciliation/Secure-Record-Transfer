@@ -67,6 +67,11 @@ urlpatterns = [
         login_required(views.SubmissionGroupDetailView.as_view()),
         name="submissiongroupdetail",
     ),
+    path(
+        "api/users/<int:user_id>/groups/",
+        login_required(views.get_users_groups),
+        name="get_users_groups"
+    ),
 ]
 
 if settings.TESTING or not settings.DEBUG:

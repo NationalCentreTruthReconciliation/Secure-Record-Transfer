@@ -16,6 +16,7 @@ from caais.models import SourceType, SourceRole, RightsType
 from recordtransfer import settings
 from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
 from recordtransfer.models import SubmissionGroup
+from django.contrib.auth.models import User
 
 
 class TransferForm(forms.Form):
@@ -664,18 +665,17 @@ class OtherIdentifiersForm(TransferForm):
 
 class GroupTransferForm(TransferForm):
     def __init__(self, *args, **kwargs):
-        users_groups: Iterable[SubmissionGroup] = kwargs.pop('users_groups')
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['group_id'].choices = [
-            *[(x.uuid, x.name) for x in users_groups],
-        ]
-        self.allowed_group_ids = [group.uuid for group in users_groups]
         self.fields['group_id'].initial = None
 
     def clean(self):
         cleaned_data = super().clean()
         group_id = cleaned_data['group_id']
-        if group_id and group_id not in self.allowed_group_ids:
+
+        users_groups = SubmissionGroup.objects.filter(created_by=self.user)
+
+        if group_id and group_id not in users_groups.values_list('uuid', flat=True):
             self.add_error('group_id', 'Invalid group selected.')
         return cleaned_data
 
@@ -690,6 +690,7 @@ class GroupTransferForm(TransferForm):
         ),
         label=gettext('Assigned group')
     )
+
 
 class UploadFilesForm(TransferForm):
     ''' The form where users upload their files and write any final notes '''
