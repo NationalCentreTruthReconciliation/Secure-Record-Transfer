@@ -3,6 +3,10 @@
 {% load i18n %}
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
+    <script>
+        const ID_DISPLAY_GROUP_DESCRIPTION = "{{ ID_DISPLAY_GROUP_DESCRIPTION }}";
+        const description_json = {{ description_json | safe }};
+    </script>
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
@@ -12,39 +16,25 @@
                 </div>
             {% endfor %}
         {% endif %}
-        {% if field.label != 'hidden' %}
-            <div class="flex-item">
-                <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
-                {{ field }}
-                {# Help tooltip #}
-                {% if field.help_text %}
-                    <div tooltip-content="{{ field.help_text }}"
-                         class="help-tooltip help-icon">
-                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
-                    </div>
-                {% endif %}
-                {% if field.name == 'group_name' %}
-                    <button id="show-add-new-group-dialog" class="green-button" type="button">Add new group</button>
-                {% endif %}
-            </div>
-        {% else %}
-            {# Render hidden field #}
+        <div class="flex-item">
+            <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
             {{ field }}
-        {% endif %}
-        {% if field.name == 'group_name' %}
-            {# Render hidden descriptions after the group_name field #}
-            {% for group in users_groups %}
-                <div class="flex-item" style="display: none;">
-                    <label for="id_groupname-{{ group.name }}">Group description</label>
-                    <textarea id="id_groupname-{{ group.name }}" name="{{ group.name }}" disabled>{{ group.description }}</textarea>
-                    <div tooltip-content="{% trans 'This is the description you previously provided for this group, you cannot edit it' %}"
-                         class="help-tooltip help-icon">
-                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
-                    </div>
+            {# Help tooltip #}
+            {% if field.help_text %}
+                <div tooltip-content="{{ field.help_text }}"
+                     class="help-tooltip help-icon">
+                    <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
                 </div>
-            {% endfor %}
-        {% endif %}
+            {% endif %}
+            {% if field.name == 'group_name' %}
+                <button id="show-add-new-group-dialog" class="green-button" type="button">Add new group</button>
+            {% endif %}
+        </div>
     {% endfor %}
+    <div class="flex-item">
+        <label for="group_description">Group Description</label>
+        <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}">Describe the group and its purpose.</p>
+    </div>
 {% endblock formfields %}
 {% block dialog %}
     <div id="add-new-group-dialog" title="Create New Submission Group">

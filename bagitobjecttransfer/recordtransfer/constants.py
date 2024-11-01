@@ -7,3 +7,5 @@ ID_CONFIRM_NEW_PASSWORD = "id_confirm_new_password"
 # Submission Group Form Field IDs
 ID_SUBMISSION_GROUP_NAME = "id_submission_group_name"
 ID_SUBMISSION_GROUP_DESCRIPTION = "id_submission_group_description"
+# Submission Group Detail Display Element IDs
+ID_DISPLAY_GROUP_DESCRIPTION = "id_display_group_description"

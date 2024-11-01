@@ -1,3 +1,4 @@
+import json
 import logging
 import pickle
 from typing import Any, Optional, Union
@@ -36,6 +37,7 @@ from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
+    ID_DISPLAY_GROUP_DESCRIPTION,
     ID_GETS_NOTIFICATION_EMAILS,
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_DESCRIPTION,
@@ -421,8 +423,19 @@ class TransferFormWizard(SessionWizardView):
 
         if step_name == "grouptransfer":
             users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
-            context.update({"users_groups": users_groups, "IS_NEW": True})
-            context['new_group_form'] = SubmissionGroupForm()
+            description_json = json.dumps(
+                {str(group.uuid): group.description for group in users_groups}
+            )
+            context.update(
+                {
+                    "users_groups": users_groups,
+                    "IS_NEW": True,
+                    "description_json": description_json,
+                    "new_group_form": SubmissionGroupForm(),
+                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+                    "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
+                }
+            )
 
         elif step_name == "rights":
             all_rights = RightsType.objects.all().exclude(name="Other")
@@ -551,9 +564,7 @@ class TransferFormWizard(SessionWizardView):
         group_name = cleaned_form_data["group_name"]
         if group_name != "No Group":
             try:
-                group = SubmissionGroup.objects.get(
-                    name=group_name, created_by=self.request.user
-                )
+                group = SubmissionGroup.objects.get(name=group_name, created_by=self.request.user)
                 LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
             except SubmissionGroup.DoesNotExist as exc:
