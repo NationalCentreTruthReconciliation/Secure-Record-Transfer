@@ -685,17 +685,6 @@ class GroupTransferForm(TransferForm):
         label=gettext('Assigned group')
     )
 
-    group_description = forms.CharField(
-        required=False,
-        min_length=4,
-        widget=forms.Textarea(attrs={
-            'rows': '2',
-            'placeholder': gettext('e.g., this group represents all of the records from...'),
-        }),
-        label=gettext('New group description'),
-    )
-
-
 class UploadFilesForm(TransferForm):
     ''' The form where users upload their files and write any final notes '''
     general_note = forms.CharField(
