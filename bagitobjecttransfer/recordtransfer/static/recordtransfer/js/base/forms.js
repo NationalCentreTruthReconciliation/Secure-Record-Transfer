@@ -389,7 +389,6 @@ $(() => {
      * Expandable Forms Setup
     **************************************************************************/
 
-
     setupSelectOtherToggle(['#id_contactinfo-other_province_or_state'], removeOther);
 
     setupSelectOtherToggle(['.rights-select-other'], removeOther);
@@ -401,6 +400,24 @@ $(() => {
     $('.add-form-row', '#transfer-form').on('click.transfer-form', (event) => {
         setupSelectOtherToggle(['.rights-select-other'], removeOther);
     })
+
+    /***************************************************************************
+     * Group Description Display
+    **************************************************************************/
+    const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION)
+    const groupSelectionInput = document.getElementById(ID_SUBMISSION_GROUP_SELECTION)
+
+    const checkGroupChange = () => {
+        const selectedGroupId = groupSelectionInput.value;
+        let description = description_json[selectedGroupId];
+        if (!description) {
+            description = "No description available";
+        }
+        groupDescription.textContent = description;
+    }
+
+    groupSelectionInput.addEventListener('change', checkGroupChange);
+    checkGroupChange();
 })
 
 
