@@ -300,6 +300,11 @@ function selectDefaultGroup(groupId) {
     }
 }
 
+async function initializeGroupTransferForm() {
+    await populateGroupOptions();
+    selectDefaultGroup(DEFAULT_GROUP_ID);
+}
+
 $(() => {
 
     var rightsDialog = undefined
@@ -445,7 +450,7 @@ $(() => {
     **************************************************************************/
     const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
     selectField.on('change', updateGroupDescription);
-    selectDefaultGroup(DEFAULT_GROUP_ID);
+    initializeGroupTransferForm();
 
     /***************************************************************************
      * New Group Creation Submission
