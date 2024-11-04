@@ -557,15 +557,14 @@ class TransferFormWizard(SessionWizardView):
         """
         group = None
 
-        group_name = cleaned_form_data["group_name"]
-        if group_name != "No Group":
+        group_id = cleaned_form_data["group_id"]
+        if group_id:
             try:
-                group = SubmissionGroup.objects.get(name=group_name, created_by=self.request.user)
+                group = SubmissionGroup.objects.get(uuid=group_id, created_by=self.request.user)
                 LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
             except SubmissionGroup.DoesNotExist as exc:
-                LOGGER.error('Could not find "%s" SubmissionGroup', group.name, exc_info=exc)
-                group = None
+                LOGGER.error('Could not find SubmissionGroup with ID %d', group_id, exc_info=exc)
         else:
             LOGGER.info("Not associating submission with a group")
 
