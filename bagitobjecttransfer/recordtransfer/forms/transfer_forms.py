@@ -664,15 +664,16 @@ class GroupTransferForm(TransferForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['group_id'].initial = None
+        users_groups = SubmissionGroup.objects.filter(created_by=self.user)
+        self.fields['group_id'].choices = [(group.uuid, group.name) for group in users_groups]
 
     def clean(self):
         cleaned_data = super().clean()
-        group_id = cleaned_data['group_id']
+        group_id = cleaned_data.get('group_id')
 
         users_groups = SubmissionGroup.objects.filter(created_by=self.user)
-
-        if group_id and group_id not in users_groups.values_list('uuid', flat=True):
+        valid_group_ids = users_groups.values_list('uuid', flat=True)
+        if group_id and group_id not in valid_group_ids:
             self.add_error('group_id', 'Invalid group selected.')
         return cleaned_data
 

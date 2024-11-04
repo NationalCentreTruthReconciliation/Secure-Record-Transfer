@@ -294,21 +294,9 @@ async function populateGroupOptions() {
 }
 
 function selectDefaultGroup(groupId) {
-    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
     if (groupId) {
+        const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
         selectField.val(groupId).change();
-    }
-    else {
-        selectField.val(groups[groups.length - 1].uuid).change();
-    }
-}
-
-async function initializeGroupOptions() {
-    try {
-        await populateGroupOptions();
-        selectDefaultGroup(INITIAL_GROUP_ID);
-    } catch (error) {
-        console.log("Failed to initialize group options");
     }
 }
 
@@ -457,7 +445,7 @@ $(() => {
     **************************************************************************/
     const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
     selectField.on('change', updateGroupDescription);
-    initializeGroupOptions();
+    selectDefaultGroup(INITIAL_GROUP_ID);
 
     /***************************************************************************
      * New Group Creation Submission
