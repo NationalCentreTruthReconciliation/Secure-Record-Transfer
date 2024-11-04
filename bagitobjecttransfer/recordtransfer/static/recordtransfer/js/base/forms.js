@@ -272,23 +272,44 @@ const updateGroupDescription = () => {
  * Asynchronously update the group options in the submission group selection dropdown
  * after a new submission group is created.
  */
-function populateGroupOptions() {
-    $.ajax({
-        url: fetchUsersGroupsUrl,
-        success: function (groups) {
-            const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
-            selectField.empty();
-            groups.forEach(function (group) {
-                selectField.append(new Option(group.name, group.uuid));
-                groupDescriptions[group.uuid] = group.description;
-            });
-            selectField.val(groups[groups.length - 1].uuid).change();
-            updateGroupDescription()
-        },
-        error: function () {
-            alert('Failed to update group options.');
-        }
+async function populateGroupOptions() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: fetchUsersGroupsUrl,
+            success: function (groups) {
+                const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+                selectField.empty();
+                groups.forEach(function (group) {
+                    selectField.append(new Option(group.name, group.uuid));
+                    groupDescriptions[group.uuid] = group.description;
+                });
+                resolve();
+            },
+            error: function () {
+                alert('Failed to update group options.');
+                reject();
+            }
+        });
     });
+}
+
+function selectDefaultGroup(groupId) {
+    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+    if (groupId) {
+        selectField.val(groupId).change();
+    }
+    else {
+        selectField.val(groups[groups.length - 1].uuid).change();
+    }
+}
+
+async function initializeGroupOptions() {
+    try {
+        await populateGroupOptions();
+        selectDefaultGroup(INITIAL_GROUP_ID);
+    } catch (error) {
+        console.log("Failed to initialize group options");
+    }
 }
 
 $(() => {
@@ -434,9 +455,9 @@ $(() => {
     /***************************************************************************
      * Group Description Display
     **************************************************************************/
-    populateGroupOptions();
-    const groupSelectionInput = document.getElementById(ID_SUBMISSION_GROUP_SELECTION);
-    groupSelectionInput.addEventListener('change', updateGroupDescription);
+    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+    selectField.on('change', updateGroupDescription);
+    initializeGroupOptions();
 
     /***************************************************************************
      * New Group Creation Submission
@@ -448,9 +469,15 @@ $(() => {
             url: $(this).attr('action'),
             type: $(this).attr('method'),
             data: $(this).serialize(),
-            success: function (response) {
-                populateGroupOptions();
-                $('#add-new-group-dialog').dialog("close");
+            success: async function (response) {
+                try {
+                    await populateGroupOptions();
+                    selectDefaultGroup(response.uuid);
+                    $('#add-new-group-dialog').dialog("close");
+                }
+                catch (error) {
+                    alert("Failed to update group options.");
+                }
             },
             error: function (response) {
                 alert(response.responseJSON.message);

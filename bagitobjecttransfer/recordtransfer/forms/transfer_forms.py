@@ -1,7 +1,5 @@
 ''' Forms specific to transferring files with a new submission '''
-from typing import Iterable
 from uuid import UUID
-from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.db.models import Case, When, Value, CharField
 from django.forms import BaseFormSet
@@ -16,7 +14,6 @@ from caais.models import SourceType, SourceRole, RightsType
 from recordtransfer import settings
 from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
 from recordtransfer.models import SubmissionGroup
-from django.contrib.auth.models import User
 
 
 class TransferForm(forms.Form):
