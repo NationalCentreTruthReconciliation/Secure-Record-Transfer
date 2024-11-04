@@ -445,7 +445,7 @@ $(() => {
     **************************************************************************/
     const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
     selectField.on('change', updateGroupDescription);
-    selectDefaultGroup(INITIAL_GROUP_ID);
+    selectDefaultGroup(DEFAULT_GROUP_ID);
 
     /***************************************************************************
      * New Group Creation Submission

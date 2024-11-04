@@ -429,7 +429,7 @@ class TransferFormWizard(SessionWizardView):
                     "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
-                    "INITIAL_GROUP_ID": self.kwargs.get("group_id", None),
+                    "DEFAULT_GROUP_ID": self.kwargs.get("group_id", None),
                 }
             )
 
