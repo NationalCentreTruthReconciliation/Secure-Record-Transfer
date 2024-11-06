@@ -56,7 +56,7 @@ class SubmissionGroupForm(forms.ModelForm):
             )
 
         # Check if a SubmissionGroup with the same name already exists for the user
-        if SubmissionGroup.objects.filter(name=name, created_by=self.user).exists():
+        if SubmissionGroup.objects.filter(name=name, created_by=self.user).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(
                 {
                     "name": [
