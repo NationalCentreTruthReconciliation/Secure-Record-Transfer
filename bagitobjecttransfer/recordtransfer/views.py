@@ -1074,7 +1074,7 @@ def get_users_group_descriptions(request: HttpRequest, user_id: int) -> JsonResp
     """Retrieve the groups associated with the current user."""
     if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
         return JsonResponse(
-            {"error": "You do not have permission to view these groups."}, status=403
+            {"error": gettext("You do not have permission to view these groups.")}, status=403
         )
 
     users_groups = SubmissionGroup.objects.filter(created_by=user_id)
