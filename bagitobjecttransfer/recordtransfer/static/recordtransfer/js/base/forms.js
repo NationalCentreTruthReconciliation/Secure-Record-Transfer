@@ -302,6 +302,7 @@ function selectDefaultGroup(groupId) {
 async function initializeGroupTransferForm() {
     await populateGroupDescriptions();
     selectDefaultGroup(DEFAULT_GROUP_ID);
+    updateGroupDescription();
 }
 
 /**
