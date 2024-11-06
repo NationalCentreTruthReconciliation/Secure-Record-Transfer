@@ -1061,8 +1061,9 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
         referer = self.request.META.get("HTTP_REFERER", "")
+        error_message = next(iter(form.errors.values()))[0]
         if "transfer" in referer:
-            return JsonResponse({"message": self.error_message, "status": "error"}, status=400)
+            return JsonResponse({"message": error_message, "status": "error"}, status=400)
         messages.error(
             self.request,
             self.error_message,
