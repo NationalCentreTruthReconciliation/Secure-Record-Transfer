@@ -1,7 +1,6 @@
 {% load i18n %}
-{% include "includes/messages.html" %}
 <script>
-    // Pass constants to JavaScript
+    // Pass IDs of form fields elements to JavaScript
     const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
     const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
 </script>
@@ -11,7 +10,6 @@
       class="margin-top-25px">
     {% csrf_token %}
     {% for field in form %}
-        <div class="error-message">{{ field.errors.0 }}</div>
         <div class="flex-item">{{ field.label_tag }} {{ field }}</div>
     {% endfor %}
     <div class="flex-item">

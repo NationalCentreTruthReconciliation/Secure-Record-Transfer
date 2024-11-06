@@ -427,6 +427,7 @@ class TransferFormWizard(SessionWizardView):
                     "IS_NEW": True,
                     "new_group_form": SubmissionGroupForm(),
                     "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+                    "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
                     "DEFAULT_GROUP_ID": self.kwargs.get("group_id", None),

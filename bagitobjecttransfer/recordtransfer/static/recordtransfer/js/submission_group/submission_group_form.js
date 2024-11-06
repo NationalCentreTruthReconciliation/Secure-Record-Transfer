@@ -22,5 +22,5 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("input", checkForChanges);
     });
 
-    checkForChanges();    
+    checkForChanges();
 });
