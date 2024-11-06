@@ -565,7 +565,7 @@ class TransferFormWizard(SessionWizardView):
                 LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
             except SubmissionGroup.DoesNotExist as exc:
-                LOGGER.error('Could not find SubmissionGroup with ID %d', group_id, exc_info=exc)
+                LOGGER.error("Could not find SubmissionGroup with UUID %s", group_id, exc_info=exc)
         else:
             LOGGER.info("Not associating submission with a group")
 
@@ -1049,10 +1049,10 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
                     "message": self.success_message,
                     "status": "success",
                     "group": {
-                        "uuid" : str(self.object.uuid),
+                        "uuid": str(self.object.uuid),
                         "name": self.object.name,
                         "description": self.object.description,
-                    }
+                    },
                 },
                 status=200,
             )
@@ -1071,6 +1071,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         )
         return super().form_invalid(form)
 
+
 def get_users_group_descriptions(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
     if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
@@ -1080,7 +1081,6 @@ def get_users_group_descriptions(request: HttpRequest, user_id: int) -> JsonResp
 
     users_groups = SubmissionGroup.objects.filter(created_by=user_id)
     groups = [
-        {"uuid": str(group.uuid), "description": group.description}
-        for group in users_groups
+        {"uuid": str(group.uuid), "description": group.description} for group in users_groups
     ]
     return JsonResponse(groups, safe=False)
