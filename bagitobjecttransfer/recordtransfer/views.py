@@ -55,7 +55,7 @@ from recordtransfer.emails import (
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
-    SavedTransfer,
+    InProgressSubmission,
     Submission,
     SubmissionGroup,
     UploadedFile,
@@ -133,7 +133,7 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-        context["in_process_submissions"] = SavedTransfer.objects.filter(
+        context["in_process_submissions"] = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
@@ -326,7 +326,9 @@ class TransferFormWizard(SessionWizardView):
         resume_id = request.GET.get("resume_transfer", None)
 
         if resume_id:
-            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            transfer = InProgressSubmission.objects.filter(
+                user=self.request.user, id=resume_id
+            ).first()
 
             if transfer is None:
                 LOGGER.error(
@@ -349,12 +351,12 @@ class TransferFormWizard(SessionWizardView):
             resume_id = self.request.GET.get("resume_transfer", None)
 
             if resume_id:
-                transfer = SavedTransfer.objects.filter(
+                transfer = InProgressSubmission.objects.filter(
                     user=self.request.user, id=resume_id
                 ).first()
                 transfer.last_updated = timezone.now()
             else:
-                transfer = SavedTransfer()
+                transfer = InProgressSubmission()
 
             transfer.current_step = save_form_step
             # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
@@ -384,7 +386,9 @@ class TransferFormWizard(SessionWizardView):
 
         resume_id = self.request.GET.get("resume_transfer", None)
         if resume_id is not None:
-            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
+            transfer = InProgressSubmission.objects.filter(
+                user=self.request.user, id=resume_id
+            ).first()
             if step == transfer.current_step:
                 data = pickle.loads(transfer.step_data)["current"]
                 for k, v in data.items():
@@ -456,7 +460,7 @@ class TransferFormWizard(SessionWizardView):
     def get_save_form_state(self):
         """Get the state required to update the "save form" button."""
         resume_id = self.request.GET.get("resume_transfer", None)
-        num_saves = SavedTransfer.objects.filter(user=self.request.user).count()
+        num_saves = InProgressSubmission.objects.filter(user=self.request.user).count()
 
         if settings.MAX_SAVED_TRANSFER_COUNT == 0:
             # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
@@ -887,7 +891,7 @@ class DeleteTransfer(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        transfer = SavedTransfer.objects.filter(
+        transfer = InProgressSubmission.objects.filter(
             user=self.request.user, id=context["transfer_id"]
         ).first()
         context["last_updated"] = transfer.last_updated
@@ -897,7 +901,7 @@ class DeleteTransfer(TemplateView):
         try:
             if "yes_delete" in request.POST:
                 transfer_id = request.POST["transfer_id"]
-                transfer = SavedTransfer.objects.filter(
+                transfer = InProgressSubmission.objects.filter(
                     user=self.request.user, id=transfer_id
                 ).first()
                 transfer.delete()
