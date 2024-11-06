@@ -464,10 +464,11 @@ $(() => {
      * Group Description Display
     **************************************************************************/
     // Add a change event listener to the group selection field
-    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
-    selectField.on('change', updateGroupDescription);
-    
-    initializeGroupTransferForm();
+    if (typeof ID_SUBMISSION_GROUP_SELECTION !== 'undefined') {
+        const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+        selectField.on('change', updateGroupDescription);
+        initializeGroupTransferForm();
+    }
 
     /***************************************************************************
      * New Group Creation Submission
