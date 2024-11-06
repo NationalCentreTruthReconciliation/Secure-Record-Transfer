@@ -673,10 +673,9 @@ class GroupTransferForm(TransferForm):
         cleaned_data = super().clean()
         group_id = cleaned_data.get('group_id')
 
-        users_groups = SubmissionGroup.objects.filter(created_by=self.user)
-        valid_group_ids = users_groups.values_list('uuid', flat=True)
-        if group_id and group_id not in valid_group_ids:
+        if group_id and not SubmissionGroup.objects.filter(created_by=self.user, uuid=group_id).exists():
             self.add_error('group_id', 'Invalid group selected.')
+
         return cleaned_data
 
     group_id = forms.TypedChoiceField(
