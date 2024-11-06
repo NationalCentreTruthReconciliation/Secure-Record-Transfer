@@ -1047,7 +1047,11 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
                 {
                     "message": self.success_message,
                     "status": "success",
-                    "uuid": str(self.object.uuid),
+                    "group": {
+                        "uuid" : str(self.object.uuid),
+                        "name": self.object.name,
+                        "description": self.object.description,
+                    }
                 },
                 status=200,
             )
@@ -1065,8 +1069,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         )
         return super().form_invalid(form)
 
-
-def get_users_groups(request: HttpRequest, user_id: int) -> JsonResponse:
+def get_users_group_descriptions(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
     if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
         return JsonResponse(
@@ -1075,7 +1078,7 @@ def get_users_groups(request: HttpRequest, user_id: int) -> JsonResponse:
 
     users_groups = SubmissionGroup.objects.filter(created_by=user_id)
     groups = [
-        {"uuid": str(group.uuid), "name": group.name, "description": group.description}
+        {"uuid": str(group.uuid), "description": group.description}
         for group in users_groups
     ]
     return JsonResponse(groups, safe=False)

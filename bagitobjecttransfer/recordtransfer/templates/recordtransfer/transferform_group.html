@@ -6,7 +6,7 @@
     <script>
         const ID_DISPLAY_GROUP_DESCRIPTION = "{{ ID_DISPLAY_GROUP_DESCRIPTION }}";
         const ID_SUBMISSION_GROUP_SELECTION = "{{ ID_SUBMISSION_GROUP_SELECTION }}";
-        const fetchUsersGroupsUrl = "{% url 'recordtransfer:get_users_groups' user_id=request.user.id %}";
+        const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_users_group_descriptions' user_id=request.user.id %}";
         const DEFAULT_GROUP_ID = "{{ DEFAULT_GROUP_ID }}";
     </script>
     {% for field in wizard.form %}

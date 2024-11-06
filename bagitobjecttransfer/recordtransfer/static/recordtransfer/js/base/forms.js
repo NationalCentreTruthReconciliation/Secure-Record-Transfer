@@ -269,24 +269,23 @@ const updateGroupDescription = () => {
 }
 
 /**
- * Asynchronously update the group options in the submission group selection dropdown
- * after a new submission group is created.
+ * Asynchronously populates group descriptions by making an AJAX request to fetch user group descriptions.
+ * 
+ * @returns {Promise<void>} A promise that resolves when the group descriptions have been successfully populated, 
+ * or rejects if the AJAX request fails.
  */
-async function populateGroupOptions() {
+async function populateGroupDescriptions() {
     return new Promise((resolve, reject) => {
         $.ajax({
-            url: fetchUsersGroupsUrl,
+            url: fetchUsersGroupDescriptionsUrl,
             success: function (groups) {
-                const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
-                selectField.empty();
                 groups.forEach(function (group) {
-                    selectField.append(new Option(group.name, group.uuid));
                     groupDescriptions[group.uuid] = group.description;
                 });
                 resolve();
             },
             error: function () {
-                alert('Failed to update group options.');
+                alert('Failed to populate group descriptions.');
                 reject();
             }
         });
@@ -301,8 +300,23 @@ function selectDefaultGroup(groupId) {
 }
 
 async function initializeGroupTransferForm() {
-    await populateGroupOptions();
+    await populateGroupDescriptions();
     selectDefaultGroup(DEFAULT_GROUP_ID);
+}
+
+/**
+ * Handles the addition of a new group to the selection field.
+ *
+ * @param {Object} group - The group object containing details of the new group.
+ * @param {string} group.name - The name of the new group.
+ * @param {string} group.uuid - The unique identifier of the new group.
+ * @param {string} group.description - The description of the new group.
+ */
+function handleNewGroupAdded(group) {
+    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+    selectField.append(new Option(group.name, group.uuid));
+    groupDescriptions[group.uuid] = group.description;
+    selectField.val(group.uuid).change();
 }
 
 $(() => {
@@ -448,8 +462,10 @@ $(() => {
     /***************************************************************************
      * Group Description Display
     **************************************************************************/
+    // Add a change event listener to the group selection field
     const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
     selectField.on('change', updateGroupDescription);
+    
     initializeGroupTransferForm();
 
     /***************************************************************************
@@ -464,8 +480,7 @@ $(() => {
             data: $(this).serialize(),
             success: async function (response) {
                 try {
-                    await populateGroupOptions();
-                    selectDefaultGroup(response.uuid);
+                    handleNewGroupAdded(response.group);
                     $('#add-new-group-dialog').dialog("close");
                 }
                 catch (error) {

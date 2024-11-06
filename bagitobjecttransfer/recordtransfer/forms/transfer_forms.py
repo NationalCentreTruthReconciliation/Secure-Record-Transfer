@@ -665,7 +665,9 @@ class GroupTransferForm(TransferForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         users_groups = SubmissionGroup.objects.filter(created_by=self.user)
-        self.fields['group_id'].choices = [(group.uuid, group.name) for group in users_groups]
+        choices = [(None, 'Select a group')] + [(group.uuid, group.name) for group in users_groups]
+        self.fields['group_id'].choices = choices
+        self.fields['group_id'].initial = None
 
     def clean(self):
         cleaned_data = super().clean()
