@@ -56,7 +56,11 @@ class SubmissionGroupForm(forms.ModelForm):
             )
 
         # Check if a SubmissionGroup with the same name already exists for the user
-        if SubmissionGroup.objects.filter(name=name, created_by=self.user).exclude(pk=self.instance.pk).exists():
+        if (
+            SubmissionGroup.objects.filter(name=name, created_by=self.user)
+            .exclude(pk=self.instance.pk)
+            .exists()
+        ):
             raise forms.ValidationError(
                 {
                     "name": [
@@ -72,7 +76,7 @@ class SubmissionGroupForm(forms.ModelForm):
 
     def save(self, commit: bool = True) -> SubmissionGroup:
         """Save the form data to a SubmissionGroup instance."""
-        group = super().save(commit = False)
+        group = super().save(commit=False)
         group.created_by = self.user
         if commit:
             group.save()
