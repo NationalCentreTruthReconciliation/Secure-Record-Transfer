@@ -13,12 +13,15 @@ from recordtransfer.models import SubmissionGroup
 class SubmissionGroupForm(forms.ModelForm):
     """Form for creating and updating SubmissionGroup instances."""
 
+    required_css_class = 'required-field'
+
     name = forms.CharField(
         widget=forms.TextInput(
             attrs={"placeholder": "Enter group name", "id": ID_SUBMISSION_GROUP_NAME}
         ),
         label="Group Name",
         required=True,
+        label_suffix="",
     )
     description = forms.CharField(
         widget=forms.Textarea(
@@ -26,6 +29,7 @@ class SubmissionGroupForm(forms.ModelForm):
         ),
         label="Group Description",
         required=False,
+        label_suffix="",
     )
 
     class Meta:
