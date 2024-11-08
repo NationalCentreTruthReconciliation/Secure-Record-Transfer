@@ -73,9 +73,9 @@ urlpatterns = [
         name="submissiongroupdetail",
     ),
     path(
-        "user/<int:user_id>/group-descriptions/",
-        login_required(views.get_users_group_descriptions),
-        name="get_users_group_descriptions",
+        "user/<int:user_id>/submission_groups/",
+        login_required(views.get_user_submission_groups),
+        name="get_user_submission_groups",
     ),
 ]
 

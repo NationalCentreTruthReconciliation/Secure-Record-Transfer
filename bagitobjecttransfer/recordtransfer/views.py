@@ -1072,15 +1072,16 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         return super().form_invalid(form)
 
 
-def get_users_group_descriptions(request: HttpRequest, user_id: int) -> JsonResponse:
+def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
     if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
         return JsonResponse(
             {"error": gettext("You do not have permission to view these groups.")}, status=403
         )
 
-    users_groups = SubmissionGroup.objects.filter(created_by=user_id)
+    submission_groups = SubmissionGroup.objects.filter(created_by=user_id)
     groups = [
-        {"uuid": str(group.uuid), "description": group.description} for group in users_groups
+        {"uuid": str(group.uuid), "name": group.name, "description": group.description}
+        for group in submission_groups
     ]
     return JsonResponse(groups, safe=False)

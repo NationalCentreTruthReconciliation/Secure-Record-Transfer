@@ -8,7 +8,7 @@
     const ID_SUBMISSION_GROUP_SELECTION = "{{ ID_SUBMISSION_GROUP_SELECTION }}";
     const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
     const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
-    const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_users_group_descriptions' user_id=request.user.id %}";
+    const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_user_submission_groups' user_id=request.user.id %}";
     const DEFAULT_GROUP_ID = {% if DEFAULT_GROUP_ID is not None %}"{{ DEFAULT_GROUP_ID }}"{% else %}null{% endif %};
     </script>
 {% endblock javascript %}
