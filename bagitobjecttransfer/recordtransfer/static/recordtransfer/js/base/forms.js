@@ -339,9 +339,10 @@ function initializeModalMode() {
  * Handles the addition of a new group to the selection field.
  *
  * @param {Object} group - The group object containing details of the new group.
- * @param {string} group.name - The name of the new group.
- * @param {string} group.uuid - The unique identifier of the new group.
- * @param {string} group.description - The description of the new group.
+ * The `group` object should have the following properties:
+ * - `name` (String): The name of the group.
+ * - `uuid` (String): The UUID of the group.
+ * - `description` (String): The description of the group.
  */
 function handleNewGroupAdded(group) {
     const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
