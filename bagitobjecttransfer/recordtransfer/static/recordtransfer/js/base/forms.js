@@ -320,6 +320,13 @@ function handleNewGroupAdded(group) {
     selectField.val(group.uuid).change();
 }
 
+function clearCreateGroupForm() {
+    const submissionGroupName = document.getElementById(ID_SUBMISSION_GROUP_NAME);
+    const submissionGroupDescription = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
+    submissionGroupName.value = '';
+    submissionGroupDescription.value = '';
+}
+
 $(() => {
 
     var rightsDialog = undefined
@@ -483,6 +490,7 @@ $(() => {
             success: async function (response) {
                 try {
                     handleNewGroupAdded(response.group);
+                    clearCreateGroupForm();
                     $('#add-new-group-dialog').dialog("close");
                 }
                 catch (error) {
