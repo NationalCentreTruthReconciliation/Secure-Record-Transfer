@@ -1,6 +1,6 @@
 services:
   clamav:
-    image: docker.io/clamav/clamav
+    image: docker.io/clamav/clamav-debian
     container_name: recordtransfer_clamav
     ports:
       - 3310:3310

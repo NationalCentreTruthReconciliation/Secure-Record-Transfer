@@ -1,6 +1,6 @@
 services:
   clamav:
-    image: docker.io/clamav/clamav
+    image: docker.io/clamav/clamav-debian
     restart: unless-stopped
     volumes:
       - clamav-virusdb:/var/lib/clamav
