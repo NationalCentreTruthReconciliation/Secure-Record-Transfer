@@ -1,5 +1,5 @@
 {% load i18n %}
-{% if in_process_submissions %}
+{% if in_progress_submissions %}
     <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
         <label class="medium-text">{% trans "In Progress Transfers" %}</label>
     </div>
@@ -10,14 +10,14 @@
                 <th></th>
                 <th></th>
             </tr>
-            {% for in_process in in_process_submissions %}
+            {% for submission in in_progress_submissions %}
                 <tr>
-                    <td>{{ in_process.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
+                    <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
                     <td>
-                        <a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ in_process.id }}">Resume</a>
+                        <a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ submission.id }}">Resume</a>
                     </td>
                     <td>
-                        <a href="{% url 'recordtransfer:transferdelete' in_process.id %}">Delete</a>
+                        <a href="{% url 'recordtransfer:transferdelete' submission.uuid %}">Delete</a>
                     </td>
                 </tr>
             {% endfor %}

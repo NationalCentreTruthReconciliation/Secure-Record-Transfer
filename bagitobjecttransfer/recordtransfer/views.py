@@ -133,7 +133,7 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-        context["in_process_submissions"] = InProgressSubmission.objects.filter(
+        context["in_progress_submissions"] = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
@@ -892,19 +892,18 @@ class DeleteTransfer(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         transfer = InProgressSubmission.objects.filter(
-            user=self.request.user, id=context["transfer_id"]
+            user=self.request.user, uuid=context["uuid"]
         ).first()
         context["last_updated"] = transfer.last_updated
         return context
 
     def post(self, request, *args, **kwargs):
         try:
-            if "yes_delete" in request.POST:
-                transfer_id = request.POST["transfer_id"]
-                transfer = InProgressSubmission.objects.filter(
-                    user=self.request.user, id=transfer_id
-                ).first()
-                transfer.delete()
+            uuid = self.kwargs["uuid"]
+            transfer = InProgressSubmission.objects.filter(
+                user=self.request.user, uuid=uuid
+            ).first()
+            transfer.delete()
         except KeyError:
             LOGGER.error("Tried to render DeleteTransfer view without a transfer_id")
         return redirect("recordtransfer:userprofile")
