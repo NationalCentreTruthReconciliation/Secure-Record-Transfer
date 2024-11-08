@@ -1,10 +1,5 @@
 {% load i18n %}
 {% include "includes/messages.html" %}
-<script>
-    // Pass IDs of form fields elements to JavaScript
-    const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
-    const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
-</script>
 <form method="post"
       action="{% if not IS_NEW %}{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submissiongroupnew' %}{% endif %}"
       id="submission-group-form"
