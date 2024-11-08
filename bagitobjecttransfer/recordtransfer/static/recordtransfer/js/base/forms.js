@@ -306,6 +306,36 @@ async function initializeGroupTransferForm() {
 }
 
 /**
+ * Prevents the submission group form from submitting and instead sends an AJAX request to create a
+ * new group. If the group is successfully created, the new group is added to the selection field,
+ * and the description updated.
+ */
+function initializeModalMode() {
+    $('#submission-group-form').off('submit').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: $(this).attr('method'),
+            data: $(this).serialize(),
+            success: async function (response) {
+                clearCreateGroupForm();
+                try {
+                    handleNewGroupAdded(response.group);
+                    $('#add-new-group-dialog').dialog("close");
+                }
+                catch (error) {
+                    alert("Failed to update group options.");
+                }
+            },
+            error: function (response) {
+                alert(response.responseJSON.message);
+            }
+        });
+    });
+}
+
+/**
  * Handles the addition of a new group to the selection field.
  *
  * @param {Object} group - The group object containing details of the new group.
@@ -480,28 +510,9 @@ $(() => {
     /***************************************************************************
      * New Group Creation Submission
     **************************************************************************/
-    $('#submission-group-form').off('submit').on('submit', function (event) {
-        event.preventDefault();
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: $(this).attr('method'),
-            data: $(this).serialize(),
-            success: async function (response) {
-                try {
-                    handleNewGroupAdded(response.group);
-                    clearCreateGroupForm();
-                    $('#add-new-group-dialog').dialog("close");
-                }
-                catch (error) {
-                    alert("Failed to update group options.");
-                }
-            },
-            error: function (response) {
-                alert(response.responseJSON.message);
-            }
-        });
-    });
+    if (typeof MODAL_MODE !== 'undefined' && MODAL_MODE) {
+        initializeModalMode();
+    }
 })
 
 

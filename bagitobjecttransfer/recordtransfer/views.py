@@ -431,6 +431,7 @@ class TransferFormWizard(SessionWizardView):
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
                     "DEFAULT_GROUP_ID": self.kwargs.get("group_id", None),
+                    "MODAL_MODE": True,
                 }
             )
 
@@ -983,6 +984,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         context["IS_NEW"] = False
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
         context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
+        context["MODAL_MODE"] = False
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -1031,6 +1033,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         context["IS_NEW"] = True
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
         context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
+        context["MODAL_MODE"] = False
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
