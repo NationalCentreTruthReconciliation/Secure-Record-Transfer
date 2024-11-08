@@ -209,15 +209,31 @@ class UploadedFile(models.Model):
 
 
 class SubmissionGroup(models.Model):
-    ''' Represents a group of submissions.
-    '''
+    """Represents a group of submissions.
+
+    Attributes:
+        name (CharField):
+            The name of the group
+        description (TextField):
+            A description of the group
+        created_by (ForeignKey):
+            The user who created the group
+        uuid (UUIDField):
+            A unique ID for the group
+    """
+
     name = models.CharField(max_length=256, null=False)
     description = models.TextField(default='')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    uuid = models.UUIDField(default=uuid.uuid4)
 
     @property
     def number_of_submissions_in_group(self):
         return len(self.submission_set.all())
+
+    def get_absolute_url(self) -> str:
+        """Return the URL to access a detail view of this submission group."""
+        return reverse("recordtransfer:submissiongroupdetail", kwargs={"uuid": self.uuid})
 
     def __str__(self):
         return f'{self.name} ({self.created_by})'

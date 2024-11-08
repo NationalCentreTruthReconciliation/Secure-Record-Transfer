@@ -56,6 +56,10 @@
     padding: 2px 2px 2px 2px;
 }
 
+.flex-item > select {
+    margin-right: 10px;
+}
+
 .full-width-table {
     flex: 1 1 auto;
     width: 100%;

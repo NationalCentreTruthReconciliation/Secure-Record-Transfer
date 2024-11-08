@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.urls import path, re_path
-from django.forms import formset_factory
 from django.contrib.auth.decorators import login_required
+from django.forms import formset_factory
+from django.urls import path, re_path
 
-from . import views
-from . import forms
+from . import forms, views
 from . import settings as recordtransfersettings
 
 # Set up transfer forms depending on whether file uploads are enabled or disabled
@@ -39,6 +38,11 @@ urlpatterns = [
         login_required(views.TransferFormWizard.as_view(_transfer_forms)),
         name="transfer",
     ),
+    path(
+        "transfer/<uuid:group_id>/",
+        login_required(views.TransferFormWizard.as_view(_transfer_forms)),
+        name="transfer_with_group",
+    ),
     path("transfer/error/", login_required(views.SystemErrorPage.as_view()), name="systemerror"),
     path("transfer/sent/", views.TransferSent.as_view(), name="transfersent"),
     path(
@@ -57,6 +61,21 @@ urlpatterns = [
         "submission/<uuid:uuid>/csv",
         login_required(views.SubmissionCsv.as_view()),
         name="submissioncsv",
+    ),
+    path(
+        "submission_group/new",
+        login_required(views.SubmissionGroupCreateView.as_view()),
+        name="submissiongroupnew",
+    ),
+    path(
+        "submission_group/<uuid:uuid>/",
+        login_required(views.SubmissionGroupDetailView.as_view()),
+        name="submissiongroupdetail",
+    ),
+    path(
+        "user/<int:user_id>/submission_groups/",
+        login_required(views.get_user_submission_groups),
+        name="get_user_submission_groups",
     ),
 ]
 

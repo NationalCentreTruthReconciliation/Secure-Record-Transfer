@@ -1,0 +1,23 @@
+{% load i18n %}
+<div class="flex-full-width-item">
+    <table class="full-width-table standard-table" cellspacing="0">
+        <tr>
+            <th>{% trans "Group ID" %}</th>
+            <th>{% trans "Group Name" %}</th>
+            <th>{% trans "Group Description" %}</th>
+            <th>{% trans "Transfers in Group" %}</th>
+            <th>{% trans "View Group" %}</th>
+        </tr>
+        {% for group in groups %}
+            <tr>
+                <td>{{ group.uuid }}</td>
+                <td>{{ group.name }}</td>
+                <td>{{ group.description }}</td>
+                <td>{{ group.number_of_submissions_in_group }}</td>
+                <td>
+                    <a href="{% url "recordtransfer:submissiongroupdetail" uuid=group.uuid %}">{% trans "Click to view group" %}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

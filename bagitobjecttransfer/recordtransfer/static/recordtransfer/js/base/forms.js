@@ -9,6 +9,7 @@
 const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea, select'
 const ID_NUM_REGEX = new RegExp('-(\\d+)-')
 
+let groupDescriptions = {};
 
 /**
  * Test if an element exists on the page.
@@ -105,8 +106,8 @@ function incrementInputAttributes(form) {
             'name': newName,
             'id': newId
         })
-        .val('')
-        .removeAttr('checked')
+            .val('')
+            .removeAttr('checked')
     })
 }
 
@@ -196,9 +197,9 @@ function updateElementIndex(element, index, prefix) {
  */
 function setupSelectOtherToggle(otherField, choiceFieldFn) {
     if (otherField.some((selector) => $(selector).length)) {
-        $.each(otherField, function(_, v) {
+        $.each(otherField, function (_, v) {
             // Use each as a single value in the otherField array could result in multiple objects, ie. class selector
-            $(v).each(function() {
+            $(v).each(function () {
                 let currentId = "#" + $(this).attr("id");
                 let choiceField = choiceFieldFn(currentId);
                 let value = $(choiceField + " option:selected").text().toLowerCase().trim()
@@ -207,7 +208,7 @@ function setupSelectOtherToggle(otherField, choiceFieldFn) {
                 // Remove any current event handlers
                 $(choiceField).off('change');
                 // Add the new event handlers
-                $(choiceField).change(function() {onSelectChange.call(this, currentId)});
+                $(choiceField).change(function () { onSelectChange.call(this, currentId) });
             });
         });
     }
@@ -229,7 +230,7 @@ function onSelectChange(currentId) {
  * @param id : the id of the other text field.
  */
 function removeOther(id) {
-    let newId = id.replace('other_','');
+    let newId = id.replace('other_', '');
     if (!/^#/.test(newId)) {
         newId = "#" + newId;
     }
@@ -243,17 +244,119 @@ function removeOther(id) {
  */
 function toggleFlexItems(selectors, state) {
     if (state === 'on') {
-        selectors.forEach(function(sel) {
+        selectors.forEach(function (sel) {
             $(sel).closest('div.flex-item').show()
         })
     }
     else if (state === 'off') {
-        selectors.forEach(function(sel) {
+        selectors.forEach(function (sel) {
             $(sel).closest('div.flex-item').hide()
         })
     }
 }
 
+/**
+ * Update the group description text to display based on the selected submission group.
+ */
+const updateGroupDescription = () => {
+    const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION);
+    const selectedGroupId = document.getElementById(ID_SUBMISSION_GROUP_SELECTION).value;
+    let description = groupDescriptions[selectedGroupId];
+    if (!description) {
+        description = "No description available";
+    }
+    groupDescription.textContent = description;
+}
+
+/**
+ * Asynchronously populates group descriptions by making an AJAX request to fetch user group descriptions.
+ * 
+ * @returns {Promise<void>} A promise that resolves when the group descriptions have been successfully populated, 
+ * or rejects if the AJAX request fails.
+ */
+async function populateGroupDescriptions() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: fetchUsersGroupDescriptionsUrl,
+            success: function (groups) {
+                groups.forEach(function (group) {
+                    groupDescriptions[group.uuid] = group.description;
+                });
+                resolve();
+            },
+            error: function () {
+                alert('Failed to populate group descriptions.');
+                reject();
+            }
+        });
+    });
+}
+
+function selectDefaultGroup(groupId) {
+    if (groupId) {
+        const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+        selectField.val(groupId).change();
+    }
+}
+
+async function initializeGroupTransferForm() {
+    await populateGroupDescriptions();
+    selectDefaultGroup(DEFAULT_GROUP_ID);
+    updateGroupDescription();
+}
+
+/**
+ * Prevents the submission group form from submitting and instead sends an AJAX request to create a
+ * new group. If the group is successfully created, the new group is added to the selection field,
+ * and the description updated.
+ */
+function initializeModalMode() {
+    $('#submission-group-form').off('submit').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: $(this).attr('method'),
+            data: $(this).serialize(),
+            success: async function (response) {
+                clearCreateGroupForm();
+                try {
+                    handleNewGroupAdded(response.group);
+                    $('#add-new-group-dialog').dialog("close");
+                }
+                catch (error) {
+                    alert("Failed to update group options.");
+                }
+            },
+            error: function (response) {
+                alert(response.responseJSON.message);
+            }
+        });
+    });
+}
+
+/**
+ * Handles the addition of a new group to the selection field.
+ *
+ * @param {Object} group - The group object containing details of the new group.
+ * The `group` object should have the following properties:
+ * - `name` (String): The name of the group.
+ * - `uuid` (String): The UUID of the group.
+ * - `description` (String): The description of the group.
+ */
+function handleNewGroupAdded(group) {
+    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+    selectField.append(new Option(group.name, group.uuid));
+    groupDescriptions[group.uuid] = group.description;
+    selectField.val(group.uuid).change();
+}
+
+function clearCreateGroupForm() {
+    const submissionGroupName = document.getElementById(ID_SUBMISSION_GROUP_NAME);
+    const submissionGroupDescription = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
+    submissionGroupName.value = '';
+    submissionGroupDescription.value = '';
+}
 
 $(() => {
 
@@ -366,41 +469,22 @@ $(() => {
         sourceTypesDialog.dialog("moveToTop")
     })
 
+    addNewGroupDialog = $('#add-new-group-dialog').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 700,
+        position: { my: "center", at: "center", of: window },
+    })
+
+    $('#show-add-new-group-dialog').on("click", (event) => {
+        event.preventDefault()
+        addNewGroupDialog.dialog("open")
+        addNewGroupDialog.dialog("moveToTop")
+    })
 
     /***************************************************************************
      * Expandable Forms Setup
-     **************************************************************************/
-
-    const transferGroupFlexItems = [
-        '#id_grouptransfer-new_group_name',
-        '#id_grouptransfer-group_description',
-    ]
-
-    var groupDescriptionFlexItems = [
-        ...$('[id^=id_groupname-').map(function() { return `[id='${this.id}']` })
-    ]
-
-    if (transferGroupFlexItems.some((selector) => elementExists(selector))) {
-        let groupName = $('#id_grouptransfer-group_name').val()
-        let currentGroupDescId = `[id='id_groupname-${groupName}']`
-        toggleFlexItems(groupDescriptionFlexItems.filter(id => id !== currentGroupDescId), 'off')
-        if (elementExists(currentGroupDescId)) {
-            toggleFlexItems([currentGroupDescId], 'on')
-        }
-        let state = groupName.toLowerCase().trim() === 'add new group' ? 'on' : 'off'
-        toggleFlexItems(transferGroupFlexItems, state)
-
-        $('#id_grouptransfer-group_name').change(function() {
-            let groupName = $(this).val()
-            let currentGroupDescId = `[id='id_groupname-${groupName}']`
-            toggleFlexItems(groupDescriptionFlexItems.filter(id => id !== currentGroupDescId), 'off')
-            if (elementExists(currentGroupDescId)) {
-                toggleFlexItems([currentGroupDescId], 'on')
-            }
-            let state = groupName.toLowerCase().trim() === 'add new group' ? 'on' : 'off'
-            toggleFlexItems(transferGroupFlexItems, state)
-        })
-    }
+    **************************************************************************/
 
     setupSelectOtherToggle(['#id_contactinfo-other_province_or_state'], removeOther);
 
@@ -413,12 +497,29 @@ $(() => {
     $('.add-form-row', '#transfer-form').on('click.transfer-form', (event) => {
         setupSelectOtherToggle(['.rights-select-other'], removeOther);
     })
+
+    /***************************************************************************
+     * Group Description Display
+    **************************************************************************/
+    // Add a change event listener to the group selection field
+    if (typeof ID_SUBMISSION_GROUP_SELECTION !== 'undefined') {
+        const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+        selectField.on('change', updateGroupDescription);
+        initializeGroupTransferForm();
+    }
+
+    /***************************************************************************
+     * New Group Creation Submission
+    **************************************************************************/
+    if (typeof MODAL_MODE !== 'undefined' && MODAL_MODE) {
+        initializeModalMode();
+    }
 })
 
 
 $(() => {
-    $(document).ready(function() {
-        $("button.close[data-dismiss=alert]").on("click", function(evt) {
+    $(document).ready(function () {
+        $("button.close[data-dismiss=alert]").on("click", function (evt) {
             $(evt.currentTarget).parents(".alert-dismissible").hide();
         });
     });

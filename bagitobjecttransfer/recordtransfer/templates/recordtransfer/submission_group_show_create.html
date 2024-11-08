@@ -1,0 +1,45 @@
+{% extends "recordtransfer/base.html" %}
+{% load i18n %}
+{% block javascript %}
+    {{ block.super }}
+    <script>
+        // Pass IDs of form fields elements to JavaScript
+        const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
+        const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
+    </script>
+{% endblock javascript %}
+{% block title %}
+    {% if IS_NEW %}
+        {% trans "Create New Submission Group" %}
+    {% else %}
+        {% trans "Submission Group: " %} {{ group.name }}
+    {% endif %}
+{% endblock title %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="title-text">
+            {% if IS_NEW %}
+                {% trans "Create New Submission Group" %}
+            {% else %}
+                {% trans "Submission Group: " %} {{ group.name }}
+            {% endif %}
+        </div>
+        {% include "includes/submission_group_form.html" %}
+        {% if not IS_NEW %}
+            <div class="flex-med-width-item margin-top-25px"
+                 id="past-transfers-in-group">
+                <label class="medium-text">{% trans "Past Transfers in this Group" %}</label>
+            </div>
+            {% if submissions %}
+                {% include "includes/submission_table.html" with submissions=submissions %}
+            {% else %}
+                <div class="flex-med-width-item">
+                    <p>{% trans "No submissions have been made under this group yet." %}</p>
+                </div>
+            {% endif %}
+            <div class="margin-top-25px">
+                <a href="{% url 'recordtransfer:transfer_with_group' group.uuid %}">{% trans "Click to add new transfer" %}</a>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock content %}

@@ -1,45 +1,51 @@
-{% extends 'recordtransfer/transferform_base.html' %}
+{% extends "recordtransfer/transferform_base.html" %}
 {% load static %}
 {% load i18n %}
-
+{% block javascript %}
+    {{ block.super }}
+    <script>
+    const ID_DISPLAY_GROUP_DESCRIPTION = "{{ ID_DISPLAY_GROUP_DESCRIPTION }}";
+    const ID_SUBMISSION_GROUP_SELECTION = "{{ ID_SUBMISSION_GROUP_SELECTION }}";
+    const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
+    const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
+    const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_user_submission_groups' user_id=request.user.id %}";
+    const DEFAULT_GROUP_ID = {% if DEFAULT_GROUP_ID is not None %}"{{ DEFAULT_GROUP_ID }}"{% else %}null{% endif %};
+    const MODAL_MODE = {% if MODAL_MODE %}true{% else %}false{% endif %};
+    </script>
+{% endblock javascript %}
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
-            <div class="flex-error">
-                <label for="nothing"></label>
-                <div class="field-error">{{ error }}</div>
-            </div>
-            {% endfor %}
-        {% endif %}
-        {% if field.label != 'hidden' %}
-            <div class="flex-item">
-                <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
-                {{ field }}
-                {# Help tooltip #}
-                {% if field.help_text %}
-                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
-                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
-                    </div>
-                {% endif %}
-            </div>
-        {% else %}
-            {# Render hidden field #}
-            {{ field }}
-        {% endif %}
-        {% if field.name == 'group_name' %}
-            {# Render hidden descriptions after the group_name field #}
-            {% for group in users_groups %}
-                <div class="flex-item" style="display: none;">
-                    <label for="id_groupname-{{ group.name }}">Group description</label>
-                    <textarea id="id_groupname-{{ group.name }}" name="{{ group.name }}" disabled >{{ group.description }}</textarea>
-                    <div tooltip-content="{% trans 'This is the description you previously provided for this group, you cannot edit it' %}"
-                         class="help-tooltip help-icon">
-                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
-                    </div>
+                <div class="flex-error">
+                    <label for="nothing"></label>
+                    <div class="field-error">{{ error }}</div>
                 </div>
             {% endfor %}
         {% endif %}
+        <div class="flex-item">
+            <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
+            {{ field }}
+            {# Help tooltip #}
+            {% if field.help_text %}
+                <div tooltip-content="{{ field.help_text }}"
+                     class="help-tooltip help-icon">
+                    <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                </div>
+            {% endif %}
+            {% if field.name == "group_id" %}
+                <button id="show-add-new-group-dialog" class="green-button" type="button">Add new group</button>
+            {% endif %}
+        </div>
     {% endfor %}
-{% endblock %}
+    <div class="flex-item">
+        <label for="group_description">Group Description</label>
+        <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}">Describe the group and its purpose.</p>
+    </div>
+{% endblock formfields %}
+{% block dialog %}
+    <div id="add-new-group-dialog" title="Create New Submission Group">
+        {% include "includes/submission_group_form.html" with form=new_group_form %}
+    </div>
+{% endblock dialog %}

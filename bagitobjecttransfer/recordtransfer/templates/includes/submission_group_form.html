@@ -1,0 +1,28 @@
+{% load i18n %}
+{% include "includes/messages.html" %}
+<form method="post"
+      action="{% if not IS_NEW %}{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submissiongroupnew' %}{% endif %}"
+      id="submission-group-form"
+      class="margin-top-25px">
+    {% csrf_token %}
+    {% for field in form %}
+        {% if field.errors %}
+            <div class="flex-error">
+                <label></label>
+                <div class="field-error">{{ field.errors.0 }}</div>
+            </div>
+        {% endif %}
+        <div class="flex-item margin-top-25px">{{ field.label_tag }} {{ field }}</div>
+    {% endfor %}
+    <div class="flex-item">
+        <label></label>
+        <button type="submit" class="blue-button" id="id_save_button">
+            {% if IS_NEW %}
+                {% trans "Create" %}
+            {% else %}
+                {% trans "Save" %}
+            {% endif %}
+        </button>
+    </div>
+</form>
+{% include "includes/submission_group_js.html" %}

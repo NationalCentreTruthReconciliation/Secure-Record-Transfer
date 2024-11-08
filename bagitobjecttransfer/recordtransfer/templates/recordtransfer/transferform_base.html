@@ -1,32 +1,33 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
-
 {% block title %}
     {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count %}
         Transfer Step {{ currentstep }} (of {{ totalsteps }})
     {% endblocktrans %}
-{% endblock %}
-
+{% endblock title %}
 {% block content %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
             {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
         {% endblocktrans %}
     </div>
-    {% if info_message %}<p><b>{{ info_message }}</b></p>{% endif %}
-
-    {% block form_explanation %}{% endblock %}
-
+    {% if info_message %}
+        <p>
+            <b>{{ info_message }}</b>
+        </p>
+    {% endif %}
+    {% block messages %}
+    {% endblock messages %}
+    {% block form_explanation %}
+    {% endblock form_explanation %}
+    {% block dialog %}
+    {% endblock dialog %}
     <form id="transfer-form" action="" method="post">
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ wizard.form.management_form }}
-
-        {% block formfields %}
-        {# !!! Add the form fields here !!! #}
-        {% endblock %}
-
-        <div class="{% block buttonarrayclass %}{% endblock %}">
+        {% block formfields %}{# !!! Add the form fields here !!! #}{% endblock %}
+        <div class="{% block buttonarrayclass %}{% endblock buttonarrayclass %}">
             <label></label>
             <div class="button-array">
                 {% if wizard.steps.prev %}
@@ -35,25 +36,28 @@
                     <button formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.prev }}"
-                            class="blue-button margin-right-20px">
-                        {% trans "Previous Step" %}
-                    </button>
+                            class="blue-button margin-right-20px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_state|stringformat:'s' != 'off' %}
-                <button class="blue-button margin-left-20px margin-right-20px" formnovalidate="formnovalidate"
-                        name="save_form_step"
-                        value="{{ wizard.steps.current }}" {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
-                    {% trans "Save form" %}
-                </button>
+                    <button class="blue-button margin-left-20px margin-right-20px"
+                            formnovalidate="formnovalidate"
+                            name="save_form_step"
+                            value="{{ wizard.steps.current }}"
+                            {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
+                        {% trans "Save form" %}
+                    </button>
                 {% endif %}
-                <button {% block submitbuttonattributes %}{% endblock %} type="{% block submitbuttontype %}submit{% endblock %}" class="blue-button">
+                <button {% block submitbuttonattributes %}
+                        {% endblock submitbuttonattributes %}
+                        type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
+                        class="blue-button">
                     {% if wizard.steps.step1 == wizard.steps.count %}
                         {% trans "Submit" %}
-                    {% else%}
+                    {% else %}
                         {% trans "Next Step" %}
                     {% endif %}
                 </button>
             </div>
         </div>
     </form>
-{% endblock %}
+{% endblock content %}

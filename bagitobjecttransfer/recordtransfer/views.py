@@ -10,15 +10,18 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.db.models.base import Model as Model
+from django.forms import BaseModelForm
 from django.http import (
     Http404,
+    HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -26,7 +29,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import DetailView, FormView, TemplateView, UpdateView, View
+from django.views.generic import CreateView, DetailView, FormView, TemplateView, UpdateView, View
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import settings
@@ -34,8 +37,12 @@ from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
+    ID_DISPLAY_GROUP_DESCRIPTION,
     ID_GETS_NOTIFICATION_EMAILS,
     ID_NEW_PASSWORD,
+    ID_SUBMISSION_GROUP_DESCRIPTION,
+    ID_SUBMISSION_GROUP_NAME,
+    ID_SUBMISSION_GROUP_SELECTION,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -46,6 +53,7 @@ from recordtransfer.emails import (
     send_your_transfer_did_not_go_through,
 )
 from recordtransfer.forms import SignUpForm, UserProfileForm
+from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
     SavedTransfer,
     Submission,
@@ -122,14 +130,18 @@ class UserProfile(UpdateView):
     def get_object(self, queryset=None):
         return self.request.user
 
-    def get_context_data(self, **kwargs):
-        context = super(UserProfile, self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add context data for the user profile view."""
+        context = super().get_context_data(**kwargs)
         context["in_process_submissions"] = SavedTransfer.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
             "-submission_date"
         )
+        context["submission_groups"] = SubmissionGroup.objects.filter(
+            created_by=self.request.user
+        ).order_by("name")
 
         context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
         context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
@@ -137,13 +149,14 @@ class UserProfile(UpdateView):
         context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
         return context
 
-    def get_form_kwargs(self):
-        """Pass User instance to form as a keyword argument."""
-        kwargs = super(UserProfile, self).get_form_kwargs()
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.get_object()
         return kwargs
 
-    def form_valid(self, form):
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
         response = super().form_valid(form)
         message = self.success_message
         if form.cleaned_data.get("new_password"):
@@ -160,7 +173,8 @@ class UserProfile(UpdateView):
         messages.success(self.request, message)
         return response
 
-    def form_invalid(self, form):
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
         messages.error(
             self.request,
             self.error_message,
@@ -387,8 +401,7 @@ class TransferFormWizard(SessionWizardView):
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
         if step == "grouptransfer":
-            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
-            kwargs["users_groups"] = users_groups
+            kwargs["user"] = self.request.user
         return kwargs
 
     def get_context_data(self, form, **kwargs):
@@ -409,8 +422,18 @@ class TransferFormWizard(SessionWizardView):
             context.update({"info_message": self._TEMPLATES[step_name]["infomessage"]})
 
         if step_name == "grouptransfer":
-            users_groups = SubmissionGroup.objects.filter(created_by=self.request.user)
-            context.update({"users_groups": users_groups})
+            context.update(
+                {
+                    "IS_NEW": True,
+                    "new_group_form": SubmissionGroupForm(),
+                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+                    "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
+                    "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
+                    "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
+                    "DEFAULT_GROUP_ID": self.kwargs.get("group_id", None),
+                    "MODAL_MODE": True,
+                }
+            )
 
         elif step_name == "rights":
             all_rights = RightsType.objects.all().exclude(name="Other")
@@ -536,32 +559,14 @@ class TransferFormWizard(SessionWizardView):
         """
         group = None
 
-        group_name = cleaned_form_data["group_name"]
-        if group_name != "No Group":
-            if group_name == "Add New Group":
-                new_group_name = cleaned_form_data["new_group_name"]
-                description = cleaned_form_data["group_description"]
-
-                group, created = SubmissionGroup.objects.get_or_create(
-                    name=new_group_name,
-                    description=description,
-                    created_by=self.request.user,
-                )
-                if created:
-                    LOGGER.info('Created "%s" SubmissionGroup', new_group_name)
-
+        group_id = cleaned_form_data["group_id"]
+        if group_id:
+            try:
+                group = SubmissionGroup.objects.get(uuid=group_id, created_by=self.request.user)
                 LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
-            else:
-                try:
-                    group = SubmissionGroup.objects.get(
-                        name=group_name, created_by=self.request.user
-                    )
-                    LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
-
-                except SubmissionGroup.DoesNotExist as exc:
-                    LOGGER.error('Could not find "%s" SubmissionGroup', group.name, exc_info=exc)
-                    group = None
+            except SubmissionGroup.DoesNotExist as exc:
+                LOGGER.error("Could not find SubmissionGroup with UUID %s", group_id, exc_info=exc)
         else:
             LOGGER.info("Not associating submission with a group")
 
@@ -908,11 +913,12 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
     template_name = "recordtransfer/submission_detail.html"
     context_object_name = "submission"
 
-    def get_object(self):
+    def get_object(self, queryset=None) -> Submission:
+        """Retrieve the Submission object based on the UUID in the URL."""
         return Submission.objects.get(uuid=self.kwargs.get("uuid"))
 
-    def test_func(self):
-        # Check if the user is the creator of the submission or is a staff member
+    def test_func(self) -> bool:
+        """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
     def handle_no_permission(self):
@@ -947,3 +953,138 @@ class SubmissionCsv(UserPassesTestMixin, View):
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + "_export-"
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+
+
+class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
+    """Displays the associated submissions for a given submission group, and allows modification
+    of submission group details.
+    """
+
+    model = SubmissionGroup
+    form_class = SubmissionGroupForm
+    template_name = "recordtransfer/submission_group_show_create.html"
+    context_object_name = "group"
+    success_message = gettext("Group updated")
+    error_message = gettext("There was an error updating the group")
+
+    def get_object(self):
+        return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
+
+    def test_func(self):
+        """Check if the user is the creator of the submission group or is a staff member."""
+        return self.request.user.is_staff or self.get_object().created_by == self.request.user
+
+    def handle_no_permission(self) -> HttpResponseForbidden:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Pass submissions associated with the group to the template."""
+        context = super().get_context_data(**kwargs)
+        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
+        context["IS_NEW"] = False
+        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
+        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
+        context["MODAL_MODE"] = False
+        return context
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
+        response = super().form_valid(form)
+        messages.success(self.request, self.success_message)
+        return response
+
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
+        messages.error(
+            self.request,
+            self.error_message,
+        )
+        return super().form_invalid(form)
+
+    def get_success_url(self) -> str:
+        """Redirect back to the same page after updating the group."""
+        return self.request.path
+
+
+class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
+    """Creates a new submission group."""
+
+    model = SubmissionGroup
+    form_class = SubmissionGroupForm
+    template_name = "recordtransfer/submission_group_show_create.html"
+    success_message = gettext("Group created")
+    error_message = gettext("There was an error creating the group")
+
+    def test_func(self):
+        """Check if the user is authenticated."""
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self) -> HttpResponseForbidden:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["IS_NEW"] = True
+        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
+        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
+        context["MODAL_MODE"] = False
+        return context
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
+        response = super().form_valid(form)
+        referer = self.request.headers.get("referer", "")
+        if "transfer" in referer:
+            return JsonResponse(
+                {
+                    "message": self.success_message,
+                    "status": "success",
+                    "group": {
+                        "uuid": str(self.object.uuid),
+                        "name": self.object.name,
+                        "description": self.object.description,
+                    },
+                },
+                status=200,
+            )
+        messages.success(self.request, self.success_message)
+        return response
+
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
+        referer = self.request.headers.get("referer", "")
+        error_message = next(iter(form.errors.values()))[0]
+        if "transfer" in referer:
+            return JsonResponse({"message": error_message, "status": "error"}, status=400)
+        messages.error(
+            self.request,
+            self.error_message,
+        )
+        return super().form_invalid(form)
+
+
+def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
+    """Retrieve the groups associated with the current user."""
+    if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
+        return JsonResponse(
+            {"error": gettext("You do not have permission to view these groups.")}, status=403
+        )
+
+    submission_groups = SubmissionGroup.objects.filter(created_by=user_id)
+    groups = [
+        {"uuid": str(group.uuid), "name": group.name, "description": group.description}
+        for group in submission_groups
+    ]
+    return JsonResponse(groups, safe=False)
