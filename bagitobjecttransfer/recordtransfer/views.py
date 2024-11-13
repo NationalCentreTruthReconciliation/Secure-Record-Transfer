@@ -20,6 +20,7 @@ from django.http import (
     HttpResponseNotFound,
     HttpResponseRedirect,
     JsonResponse,
+    QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -52,7 +53,7 @@ from recordtransfer.emails import (
     send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
-from recordtransfer.forms import SignUpForm, UserProfileForm
+from recordtransfer.forms import SignUpForm, UserProfileForm, RecordDescriptionForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
     InProgressSubmission,
@@ -350,32 +351,98 @@ class TransferFormWizard(SessionWizardView):
         """Handle POST request to save a transfer."""
         save_form_step = request.POST.get("save_form_step", None)
 
-        if save_form_step:
-            in_progress_uuid = kwargs.get("uuid")
-            past_data = self.storage.data
-            current_data = {
-                f.replace(save_form_step + "-", ""): self.request.POST[f]
-                for f in self.request.POST
-                if f.startswith(save_form_step + "-")
-            }
-            title = self.storage.get_step_data("recorddescription").get(
-                "recorddescription-accession_title", current_data.get("accession_title")
-            )
-            data = {
-                "save_form_step": save_form_step,
-                "form_data": {"past": past_data, "current": current_data},
-                "uuid": in_progress_uuid,
-                "title": title,
-            }
+        if not save_form_step:
+            return super().post(request, *args, **kwargs)
 
-            response = save_transfer_logic(request.user, data)
-            if response.status_code == 200:
-                messages.success(request, gettext("Transfer saved successfully."))
-            else:
-                messages.error(request, gettext("There was an error saving the transfer."))
-            return redirect("recordtransfer:userprofile")
+        in_progress_uuid = kwargs.get("uuid")
+        past_data = self.storage.data
+        current_data = self.format_step_data(save_form_step, request.POST)
 
-        return super().post(request, *args, **kwargs)
+        title = current_data.get(save_form_step)
+        if not title:
+            title = self.get_form_value(save_form_step, "accession_title")
+
+        data = {
+            "save_form_step": save_form_step,
+            "form_data": {"past": past_data, "current": current_data},
+            "uuid": in_progress_uuid,
+            "title": title,
+        }
+
+        try:
+            self.save_transfer(request.user, data)
+            messages.success(request, gettext("Transfer saved successfully."))
+        except Exception:
+            messages.error(request, gettext("There was an error saving the transfer."))
+        return redirect("recordtransfer:userprofile")
+
+    def format_step_data(self, step: str, data: QueryDict) -> dict:
+        """Format the step data by stripping the step prefix from the keys.
+
+        Args:
+            step (str): The current step of the form.
+            data (QueryDict): The data from the form.
+
+        Returns:
+            dict: The formatted step data.
+        """
+        return {
+            f.replace(step + "-", ""): data[f]
+            for f in self.request.POST
+            if f.startswith(step + "-")
+        }
+
+
+    def save_transfer(self, user: User, data: dict) -> None:
+        """Save the current state of a transfer.
+
+        Args:
+            user: The user who is saving the transfer.
+            data: The form data containing the submission data to save.
+            `data` is a dictionary containing the following:
+                - save_form_step: The current step of the form.
+                - step_data: The past and current data of the form.
+                - uuid (optional): The UUID of the in-progress submission to save.
+                - title: The accession title of the submission.
+
+        Returns:
+            A JSON response indicating the result of the save operation.
+        """
+        uuid = data.get("uuid")
+        form_data = data.get("form_data")
+        save_form_step = data.get("save_form_step")
+        title = data.get("title")
+
+        if not form_data or not save_form_step:
+            raise ValueError("Missing form data or save form step")
+
+        submission = InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
+        if uuid and not submission:
+            raise ValueError("In-progress submission not found for given UUID %s" % uuid)
+        if submission:
+            submission.last_updated = timezone.now()
+        else:
+            submission = InProgressSubmission()
+
+        submission.current_step = save_form_step
+        submission.user = user
+        submission.step_data = pickle.dumps(form_data)
+        submission.title = title
+        submission.save()
+
+
+    def get_form_value(self, step: str, field: str) -> Optional[str]:
+        """Get the value of a field in a form step.
+
+        Args:
+            step: The step of the form to get the field value from.
+            field: The field to get the value of.
+
+        Returns:
+            The value of the field in the form step, or None if the is not populated.
+        """
+        step_data = self.storage.get_step_data(step) or {}
+        return step_data.get(field)
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step"""
@@ -556,45 +623,6 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Not associating submission with a group")
 
         return group
-
-
-def save_transfer_logic(user: User, data: dict) -> JsonResponse:
-    """Save the current state of a transfer.
-
-    Args:
-        user: The user who is saving the transfer.
-        data: The form data containing the submission data to save.
-        `data` is a dictionary containing the following:
-            - save_form_step: The current step of the form.
-            - step_data: The past and current data of the form.
-            - uuid (optional): The UUID of the in-progress submission to save.
-
-    Returns:
-        A JSON response indicating the result of the save operation.
-    """
-    uuid = data.get("uuid")
-    form_data = data.get("form_data")
-    save_form_step = data.get("save_form_step")
-
-    if not form_data or not save_form_step:
-        return JsonResponse({"error": "Invalid request."}, status=400)
-
-    submission = InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
-    if uuid and not submission:
-        return JsonResponse(
-            {"error": "In-progress submission not found for given UUID %s" % uuid}, status=404
-        )
-    if submission:
-        submission.last_updated = timezone.now()
-    else:
-        submission = InProgressSubmission()
-
-    submission.current_step = save_form_step
-    submission.user = user
-    submission.step_data = pickle.dumps(form_data)
-    submission.save()
-    return JsonResponse({"message": "Transfer saved successfully."}, status=200)
-
 
 @require_http_methods(["POST"])
 def uploadfiles(request):
