@@ -248,21 +248,6 @@ def verify_caais_defaults():
     if not settings.CAAIS_DEFAULT_CREATION_TYPE:
         raise ImproperlyConfigured('CAAIS_DEFAULT_CREATION_TYPE is not set')
 
-
-def verify_saved_transfer_settings():
-    """ Verifies the setting
-
-    - MAX_SAVED_TRANSFER_COUNT
-
-    Ensure the setting is a non-negative integer, raises an ImproperlyConfigured exception if not.
-    """
-    max_transfer = settings.MAX_SAVED_TRANSFER_COUNT
-    if max_transfer < 0:
-        raise ImproperlyConfigured(
-            'The MAX_SAVED_TRANSFER_COUNT must be non-negative integer, but is currently {}'.format(max_transfer)
-        )
-
-
 class RecordTransferConfig(AppConfig):
     ''' Top-level application config for the recordtransfer app
     '''
@@ -278,7 +263,6 @@ class RecordTransferConfig(AppConfig):
             verify_max_upload_size()
             verify_accepted_file_formats()
             verify_caais_defaults()
-            verify_saved_transfer_settings()
 
         except AttributeError as exc:
             match_obj = re.search(

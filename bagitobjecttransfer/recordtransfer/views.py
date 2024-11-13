@@ -453,29 +453,7 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        context["save_form_state"] = self.get_save_form_state()
-
         return context
-
-    def get_save_form_state(self):
-        """Get the state required to update the "save form" button."""
-        resume_id = self.request.GET.get("resume_transfer", None)
-        num_saves = InProgressSubmission.objects.filter(user=self.request.user).count()
-
-        if settings.MAX_SAVED_TRANSFER_COUNT == 0:
-            # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
-            save_form_state = "off"
-
-        elif resume_id is None and num_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
-            # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
-            # transfer, disable the save form button.
-            save_form_state = "disabled"
-
-        else:
-            # else enable the button.
-            save_form_state = "on"
-
-        return save_form_state
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
