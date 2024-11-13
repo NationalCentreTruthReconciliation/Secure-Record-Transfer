@@ -55,6 +55,11 @@ urlpatterns = [
         login_required(views.DeleteTransfer.as_view()),
         name="confirmtransferdelete",
     ),
+    path(
+        "inprogress/<uuid:uuid>/resume/",
+        login_required(views.TransferFormWizard.as_view(_transfer_forms)),
+        name="resume_transfer"
+    ),
     path("about/", views.About.as_view(), name="about"),
     path("profile/", login_required(views.UserProfile.as_view()), name="userprofile"),
     path(

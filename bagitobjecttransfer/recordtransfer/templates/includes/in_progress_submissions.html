@@ -12,9 +12,9 @@
             </tr>
             {% for submission in in_progress_submissions %}
                 <tr>
-                    <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ in_process.last_updated|time:"H:i" }}</td>
+                    <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ submission.last_updated|time:"H:i" }}</td>
                     <td>
-                        <a href="{% url 'recordtransfer:transfer' %}?resume_transfer={{ submission.id }}">Resume</a>
+                        <a href="{% url 'recordtransfer:resume_transfer' submission.uuid%}">Resume</a>
                     </td>
                     <td>
                         <a href="{% url 'recordtransfer:transferdelete' submission.uuid %}">Delete</a>

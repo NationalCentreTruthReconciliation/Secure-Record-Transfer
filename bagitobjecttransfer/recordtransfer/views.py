@@ -323,18 +323,18 @@ class TransferFormWizard(SessionWizardView):
     }
 
     def get(self, request, *args, **kwargs):
-        resume_id = request.GET.get("resume_transfer", None)
+        in_progress_uuid = kwargs.get("uuid")
 
-        if resume_id:
+        if in_progress_uuid:
             transfer = InProgressSubmission.objects.filter(
-                user=self.request.user, id=resume_id
+                user=self.request.user, uuid=in_progress_uuid
             ).first()
 
             if transfer is None:
                 LOGGER.error(
                     ("Expected at least 1 saved transfer for user %s and ID %s, found 0"),
                     self.request.user,
-                    resume_id,
+                    in_progress_uuid,
                 )
 
             else:
@@ -348,11 +348,11 @@ class TransferFormWizard(SessionWizardView):
         save_form_step = self.request.POST.get("save_form_step", None)
 
         if save_form_step and save_form_step in self.steps.all:
-            resume_id = self.request.GET.get("resume_transfer", None)
+            in_progress_uuid = kwargs.get("uuid")
 
-            if resume_id:
+            if in_progress_uuid:
                 transfer = InProgressSubmission.objects.filter(
-                    user=self.request.user, id=resume_id
+                    user=self.request.user, uuid=in_progress_uuid
                 ).first()
                 transfer.last_updated = timezone.now()
             else:
