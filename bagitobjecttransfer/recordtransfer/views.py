@@ -53,7 +53,7 @@ from recordtransfer.emails import (
     send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
-from recordtransfer.forms import SignUpForm, UserProfileForm, RecordDescriptionForm
+from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
     InProgressSubmission,
@@ -329,9 +329,7 @@ class TransferFormWizard(SessionWizardView):
 
     def get(self, request, *args, **kwargs):
         if self.in_progress_uuid:
-            transfer = InProgressSubmission.objects.filter(
-                user=self.request.user, uuid=self.in_progress_uuid
-            ).first()
+            transfer = get_in_progress_submission(request.user, self.in_progress_uuid)
 
             if transfer is None:
                 LOGGER.error(
@@ -339,10 +337,8 @@ class TransferFormWizard(SessionWizardView):
                     self.request.user,
                     self.in_progress_uuid,
                 )
-
             else:
-                self.storage.data = pickle.loads(transfer.step_data)["past"]
-                self.storage.current_step = transfer.current_step
+                self.load_transfer_data(transfer)
                 return self.render(self.get_form())
 
         return super().get(self, request, *args, **kwargs)
@@ -356,7 +352,7 @@ class TransferFormWizard(SessionWizardView):
 
         in_progress_uuid = kwargs.get("uuid")
         past_data = self.storage.data
-        current_data = self.format_step_data(save_form_step, request.POST)
+        current_data = TransferFormWizard.format_step_data(save_form_step, request.POST)
 
         title = current_data.get(save_form_step)
         if not title:
@@ -376,7 +372,13 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
-    def format_step_data(self, step: str, data: QueryDict) -> dict:
+    def load_transfer_data(self, transfer: InProgressSubmission) -> None:
+        """Load the transfer data from an InProgressSubmission instance."""
+        self.storage.data = pickle.loads(transfer.step_data)["past"]
+        self.storage.current_step = transfer.current_step
+
+    @classmethod
+    def format_step_data(cls, step: str, data: QueryDict) -> dict:
         """Format the step data by stripping the step prefix from the keys.
 
         Args:
@@ -386,14 +388,9 @@ class TransferFormWizard(SessionWizardView):
         Returns:
             dict: The formatted step data.
         """
-        return {
-            f.replace(step + "-", ""): data[f]
-            for f in self.request.POST
-            if f.startswith(step + "-")
-        }
+        return {f.replace(step + "-", ""): data[f] for f in data if f.startswith(step + "-")}
 
-
-    def save_transfer(self, user: User, data: dict) -> None:
+    def save_transfer(self, data: dict) -> None:
         """Save the current state of a transfer.
 
         Args:
@@ -416,7 +413,7 @@ class TransferFormWizard(SessionWizardView):
         if not form_data or not save_form_step:
             raise ValueError("Missing form data or save form step")
 
-        submission = InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
+        submission = InProgressSubmission.objects.filter(user=self.request.user, uuid=uuid).first()
         if uuid and not submission:
             raise ValueError("In-progress submission not found for given UUID %s" % uuid)
         if submission:
@@ -425,11 +422,10 @@ class TransferFormWizard(SessionWizardView):
             submission = InProgressSubmission()
 
         submission.current_step = save_form_step
-        submission.user = user
+        submission.user = self.request.user
         submission.step_data = pickle.dumps(form_data)
         submission.title = title
         submission.save()
-
 
     def get_form_value(self, step: str, field: str) -> Optional[str]:
         """Get the value of a field in a form step.
@@ -456,9 +452,7 @@ class TransferFormWizard(SessionWizardView):
         initial = self.initial_dict.get(step, {})
 
         if self.in_progress_uuid:
-            transfer = InProgressSubmission.objects.filter(
-                user=self.request.user, uuid=self.in_progress_uuid
-            ).first()
+            transfer = get_in_progress_submission(self.request.user, self.in_progress_uuid)
             if step == transfer.current_step:
                 data = pickle.loads(transfer.step_data)["current"]
                 for k, v in data.items():
@@ -623,6 +617,12 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Not associating submission with a group")
 
         return group
+
+
+def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubmission]:
+    """Retrieve an in-progress submission for a given user and UUID."""
+    return InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
+
 
 @require_http_methods(["POST"])
 def uploadfiles(request):
