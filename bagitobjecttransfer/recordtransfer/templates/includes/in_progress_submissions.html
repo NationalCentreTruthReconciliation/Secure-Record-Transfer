@@ -7,14 +7,16 @@
         <table class="full-width-table standard-table" cellspacing="0">
             <tr>
                 <th>{% trans "Last Updated" %}</th>
-                <th></th>
-                <th></th>
+                <th>{% trans "Transfer Title" %}</th>
+                <th>{% trans "Resume Transfer" %}</th>
+                <th>{% trans "Delete" %}</th>
             </tr>
             {% for submission in in_progress_submissions %}
                 <tr>
                     <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ submission.last_updated|time:"H:i" }}</td>
+                    <td>{{ submission.title }}</td>
                     <td>
-                        <a href="{% url 'recordtransfer:resume_transfer' submission.uuid%}">Resume</a>
+                        <a href="{% url 'recordtransfer:resume_transfer' submission.uuid %}">Resume</a>
                     </td>
                     <td>
                         <a href="{% url 'recordtransfer:transferdelete' submission.uuid %}">Delete</a>
