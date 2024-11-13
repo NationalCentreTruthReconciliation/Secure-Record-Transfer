@@ -324,7 +324,10 @@ class TransferFormWizard(SessionWizardView):
     }
 
     def dispatch(self, request, *args, **kwargs):
-        self.in_progress_uuid = kwargs.get("uuid")
+        self.in_progress_uuid = request.GET.get("transfer_uuid")
+        self.submission_group_uuid = None
+        if not self.in_progress_uuid:
+            self.submission_group_uuid = request.GET.get("group_uuid")
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -498,7 +501,7 @@ class TransferFormWizard(SessionWizardView):
                     "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
-                    "DEFAULT_GROUP_ID": self.kwargs.get("group_id", None),
+                    "DEFAULT_GROUP_ID": self.submission_group_uuid,
                     "MODAL_MODE": True,
                 }
             )

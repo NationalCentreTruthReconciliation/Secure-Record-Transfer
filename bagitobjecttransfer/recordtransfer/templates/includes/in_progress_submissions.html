@@ -16,7 +16,7 @@
                     <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ submission.last_updated|time:"H:i" }}</td>
                     <td>{{ submission.title }}</td>
                     <td>
-                        <a href="{% url 'recordtransfer:resume_transfer' submission.uuid %}">Resume</a>
+                        <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ submission.uuid }}">Resume</a>
                     </td>
                     <td>
                         <a href="{% url 'recordtransfer:transferdelete' submission.uuid %}">Delete</a>
