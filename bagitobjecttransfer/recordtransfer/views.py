@@ -322,19 +322,21 @@ class TransferFormWizard(SessionWizardView):
         },
     }
 
-    def get(self, request, *args, **kwargs):
-        in_progress_uuid = kwargs.get("uuid")
+    def dispatch(self, request, *args, **kwargs):
+        self.in_progress_uuid = kwargs.get("uuid")
+        return super().dispatch(request, *args, **kwargs)
 
-        if in_progress_uuid:
+    def get(self, request, *args, **kwargs):
+        if self.in_progress_uuid:
             transfer = InProgressSubmission.objects.filter(
-                user=self.request.user, uuid=in_progress_uuid
+                user=self.request.user, uuid=self.in_progress_uuid
             ).first()
 
             if transfer is None:
                 LOGGER.error(
                     ("Expected at least 1 saved transfer for user %s and ID %s, found 0"),
                     self.request.user,
-                    in_progress_uuid,
+                    self.in_progress_uuid,
                 )
 
             else:
@@ -356,10 +358,14 @@ class TransferFormWizard(SessionWizardView):
                 for f in self.request.POST
                 if f.startswith(save_form_step + "-")
             }
+            title = self.storage.get_step_data("recorddescription").get(
+                "recorddescription-accession_title", current_data.get("accession_title")
+            )
             data = {
                 "save_form_step": save_form_step,
-                "step_data": {"past": past_data, "current": current_data},
+                "form_data": {"past": past_data, "current": current_data},
                 "uuid": in_progress_uuid,
+                "title": title,
             }
 
             response = save_transfer_logic(request.user, data)
@@ -382,10 +388,9 @@ class TransferFormWizard(SessionWizardView):
         """
         initial = self.initial_dict.get(step, {})
 
-        resume_id = self.request.GET.get("resume_transfer", None)
-        if resume_id is not None:
+        if self.in_progress_uuid:
             transfer = InProgressSubmission.objects.filter(
-                user=self.request.user, id=resume_id
+                user=self.request.user, uuid=self.in_progress_uuid
             ).first()
             if step == transfer.current_step:
                 data = pickle.loads(transfer.step_data)["current"]
@@ -552,12 +557,13 @@ class TransferFormWizard(SessionWizardView):
 
         return group
 
+
 def save_transfer_logic(user: User, data: dict) -> JsonResponse:
     """Save the current state of a transfer.
 
     Args:
         user: The user who is saving the transfer.
-        data: The in progress submission data to save.
+        data: The form data containing the submission data to save.
         `data` is a dictionary containing the following:
             - save_form_step: The current step of the form.
             - step_data: The past and current data of the form.
@@ -567,10 +573,10 @@ def save_transfer_logic(user: User, data: dict) -> JsonResponse:
         A JSON response indicating the result of the save operation.
     """
     uuid = data.get("uuid")
-    step_data = data.get("step_data")
+    form_data = data.get("form_data")
     save_form_step = data.get("save_form_step")
 
-    if not step_data or not save_form_step:
+    if not form_data or not save_form_step:
         return JsonResponse({"error": "Invalid request."}, status=400)
 
     submission = InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
@@ -585,7 +591,7 @@ def save_transfer_logic(user: User, data: dict) -> JsonResponse:
 
     submission.current_step = save_form_step
     submission.user = user
-    submission.step_data = pickle.dumps(step_data)
+    submission.step_data = pickle.dumps(form_data)
     submission.save()
     return JsonResponse({"message": "Transfer saved successfully."}, status=200)
 
