@@ -344,34 +344,32 @@ class TransferFormWizard(SessionWizardView):
 
         return super().get(self, request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        save_form_step = self.request.POST.get("save_form_step", None)
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Handle POST request to save a transfer."""
+        save_form_step = request.POST.get("save_form_step", None)
 
-        if save_form_step and save_form_step in self.steps.all:
+        if save_form_step:
             in_progress_uuid = kwargs.get("uuid")
-
-            if in_progress_uuid:
-                transfer = InProgressSubmission.objects.filter(
-                    user=self.request.user, uuid=in_progress_uuid
-                ).first()
-                transfer.last_updated = timezone.now()
-            else:
-                transfer = InProgressSubmission()
-
-            transfer.current_step = save_form_step
-            # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
+            past_data = self.storage.data
             current_data = {
                 f.replace(save_form_step + "-", ""): self.request.POST[f]
-                for f in self.request.POST.keys()
+                for f in self.request.POST
                 if f.startswith(save_form_step + "-")
             }
-            transfer.user = self.request.user
-            transfer.step_data = pickle.dumps({"past": self.storage.data, "current": current_data})
-            transfer.save()
+            data = {
+                "save_form_step": save_form_step,
+                "step_data": {"past": past_data, "current": current_data},
+                "uuid": in_progress_uuid,
+            }
+
+            response = save_transfer_logic(request.user, data)
+            if response.status_code == 200:
+                messages.success(request, gettext("Transfer saved successfully."))
+            else:
+                messages.error(request, gettext("There was an error saving the transfer."))
             return redirect("recordtransfer:userprofile")
 
-        else:
-            return super().post(*args, **kwargs)
+        return super().post(request, *args, **kwargs)
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step"""
@@ -553,6 +551,43 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Not associating submission with a group")
 
         return group
+
+def save_transfer_logic(user: User, data: dict) -> JsonResponse:
+    """Save the current state of a transfer.
+
+    Args:
+        user: The user who is saving the transfer.
+        data: The in progress submission data to save.
+        `data` is a dictionary containing the following:
+            - save_form_step: The current step of the form.
+            - step_data: The past and current data of the form.
+            - uuid (optional): The UUID of the in-progress submission to save.
+
+    Returns:
+        A JSON response indicating the result of the save operation.
+    """
+    uuid = data.get("uuid")
+    step_data = data.get("step_data")
+    save_form_step = data.get("save_form_step")
+
+    if not step_data or not save_form_step:
+        return JsonResponse({"error": "Invalid request."}, status=400)
+
+    submission = InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
+    if uuid and not submission:
+        return JsonResponse(
+            {"error": "In-progress submission not found for given UUID %s" % uuid}, status=404
+        )
+    if submission:
+        submission.last_updated = timezone.now()
+    else:
+        submission = InProgressSubmission()
+
+    submission.current_step = save_form_step
+    submission.user = user
+    submission.step_data = pickle.dumps(step_data)
+    submission.save()
+    return JsonResponse({"message": "Transfer saved successfully."}, status=200)
 
 
 @require_http_methods(["POST"])
