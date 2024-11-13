@@ -888,6 +888,8 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
 
 class DeleteTransfer(TemplateView):
     template_name = "recordtransfer/transfer_delete.html"
+    success_message = gettext("In-progress submission deleted")
+    error_message = gettext("There was an error deleting the in-progress submission")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -900,12 +902,17 @@ class DeleteTransfer(TemplateView):
     def post(self, request, *args, **kwargs):
         try:
             uuid = self.kwargs["uuid"]
-            transfer = InProgressSubmission.objects.filter(
+            submission = InProgressSubmission.objects.filter(
                 user=self.request.user, uuid=uuid
             ).first()
-            transfer.delete()
+            if submission:
+                submission.delete()
+                messages.success(request, self.success_message)
+            else:
+                LOGGER.error("Could not find in-progress submission with UUID %s", uuid)
+                messages.error(request, self.error_message)
         except KeyError:
-            LOGGER.error("Tried to render DeleteTransfer view without a transfer_id")
+            LOGGER.error("No UUID provided for deletion")
         return redirect("recordtransfer:userprofile")
 
 
