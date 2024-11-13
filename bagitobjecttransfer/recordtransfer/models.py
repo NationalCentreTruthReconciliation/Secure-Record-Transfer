@@ -528,13 +528,29 @@ class Job(models.Model):
 
 
 class InProgressSubmission(models.Model):
-    """A submission that is in progress, created when a user saves a submission form."""
+    """A submission that is in progress, created when a user saves a submission form.
+
+    Attributes:
+        uuid:
+            A unique ID for the submission
+        user:
+            The user who is submitting the form
+        last_updated:
+            The last time the form was updated
+        current_step:
+            The current step the user is on
+        step_data:
+            The data contained in the form
+        title:
+            The accession title of the submission
+    """
 
     uuid = models.UUIDField(default=uuid.uuid4)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now_add=True)
     current_step = models.CharField(max_length=20, null=False)
     step_data = models.BinaryField(default=b"")
+    title = models.CharField(max_length=256, null=True)
 
     def __str__(self):
         return f"Transfer of {self.last_updated} by {self.user}"
