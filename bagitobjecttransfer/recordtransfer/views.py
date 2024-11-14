@@ -36,6 +36,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import settings
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
+    FORMTITLE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
@@ -44,6 +45,8 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
+    INFOMESSAGE,
+    TEMPLATEREF,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -258,69 +261,69 @@ class TransferFormWizard(SessionWizardView):
 
     _TEMPLATES: ClassVar[dict[TransferStep, dict[str, str]]] = {
         TransferStep.ACCEPT_LEGAL: {
-            "templateref": "recordtransfer/transferform_legal.html",
-            "formtitle": gettext("Legal Agreement"),
+            TEMPLATEREF: "recordtransfer/transferform_legal.html",
+            FORMTITLE: gettext("Legal Agreement"),
         },
         TransferStep.CONTACT_INFO: {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("Contact Information"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            FORMTITLE: gettext("Contact Information"),
+            INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your transfer"
             ),
         },
         TransferStep.SOURCE_INFO: {
-            "templateref": "recordtransfer/transferform_sourceinfo.html",
-            "formtitle": gettext("Source Information"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
+            FORMTITLE: gettext("Source Information"),
+            INFOMESSAGE: gettext(
                 "Enter the info for the source of the records. The source is the person or entity "
                 "that created the records or is holding the records at the moment. If this is you, "
                 "put your own information in"
             ),
         },
         TransferStep.RECORD_DESCRIPTION: {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("Record Description"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            FORMTITLE: gettext("Record Description"),
+            INFOMESSAGE: gettext(
                 "Provide a brief description of the records you're transferring"
             ),
         },
         TransferStep.RIGHTS: {
-            "templateref": "recordtransfer/transferform_rights.html",
-            "formtitle": gettext("Record Rights"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_rights.html",
+            FORMTITLE: gettext("Record Rights"),
+            INFOMESSAGE: gettext(
                 "Enter any associated rights that apply to the records. Add as many rights "
                 "sections as you like using the + More button. You may enter another type of "
                 "rights if the dropdown does not contain the type of rights you're looking for."
             ),
         },
         TransferStep.OTHER_IDENTIFIERS: {
-            "templateref": "recordtransfer/transferform_formset.html",
-            "formtitle": gettext("Other Identifiers (Optional)"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_formset.html",
+            FORMTITLE: gettext("Other Identifiers (Optional)"),
+            INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             ),
         },
         TransferStep.GROUP_TRANSFER: {
-            "templateref": "recordtransfer/transferform_group.html",
-            "formtitle": gettext("Assign Transfer to Group (Optional)"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_group.html",
+            FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
+            INFOMESSAGE: gettext(
                 "If this transfer belongs in a group with other transfers you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
         },
         TransferStep.UPLOAD_FILES: {
-            "templateref": "recordtransfer/transferform_dropzone.html",
-            "formtitle": gettext("Upload Files"),
-            "infomessage": gettext(
+            TEMPLATEREF: "recordtransfer/transferform_dropzone.html",
+            FORMTITLE: gettext("Upload Files"),
+            INFOMESSAGE: gettext(
                 "Add any final notes you would like to add, and upload your files"
             ),
         },
         TransferStep.FINAL_NOTES: {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("Final Notes"),
-            "infomessage": gettext("Add any final notes that may not have fit in previous steps"),
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            FORMTITLE: gettext("Final Notes"),
+            INFOMESSAGE: gettext("Add any final notes that may not have fit in previous steps"),
         },
     }
 
@@ -477,7 +480,7 @@ class TransferFormWizard(SessionWizardView):
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step."""
-        return [self._TEMPLATES[self.current_step]["templateref"]]
+        return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
 
     def get_form_initial(self, step):
         """Populate form with saved transfer data (if a "resume" request was received), and add the
@@ -515,10 +518,10 @@ class TransferFormWizard(SessionWizardView):
         """
         context = super().get_context_data(form, **kwargs)
 
-        context.update({"form_title": self._TEMPLATES[self.current_step]["formtitle"]})
+        context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
-        if "infomessage" in self._TEMPLATES[self.current_step]:
-            context.update({"info_message": self._TEMPLATES[self.current_step]["infomessage"]})
+        if INFOMESSAGE in self._TEMPLATES[self.current_step]:
+            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
 
         if self.current_step == TransferStep.GROUP_TRANSFER:
             context.update(
