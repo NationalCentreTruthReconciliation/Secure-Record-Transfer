@@ -939,13 +939,16 @@ class DeleteTransfer(TemplateView):
     template_name = "recordtransfer/transfer_delete.html"
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")
+    model = InProgressSubmission
+    context_object_name = "transfer"
+
+    def get_object(self, queryset=None) -> InProgressSubmission:
+        """Retrieve the InProgressSubmission object based on the UUID in the URL."""
+        return get_object_or_404(InProgressSubmission, uuid=self.kwargs.get("uuid"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        transfer = InProgressSubmission.objects.filter(
-            user=self.request.user, uuid=context["uuid"]
-        ).first()
-        context["last_updated"] = transfer.last_updated
+        context[self.context_object_name] = self.get_object()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -974,7 +977,7 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
 
     def get_object(self, queryset=None) -> Submission:
         """Retrieve the Submission object based on the UUID in the URL."""
-        return Submission.objects.get(uuid=self.kwargs.get("uuid"))
+        return get_object_or_404(Submission, uuid=self.kwargs.get("uuid"))
 
     def test_func(self) -> bool:
         """Check if the user is the creator of the submission group or is a staff member."""
