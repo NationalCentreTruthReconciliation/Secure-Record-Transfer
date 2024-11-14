@@ -324,25 +324,38 @@ class TransferFormWizard(SessionWizardView):
     }
 
     def dispatch(self, request, *args, **kwargs):
-        self.in_progress_uuid = request.GET.get("transfer_uuid")
         self.submission_group_uuid = None
+        self.in_progress_submission = None
+        self.in_progress_uuid = request.GET.get("transfer_uuid")
+
+        # Handle no transfer UUID case
         if not self.in_progress_uuid:
             self.submission_group_uuid = request.GET.get("group_uuid")
+            return super().dispatch(request, *args, **kwargs)
+
+        # Handle transfer UUID case
+        try:
+            self.in_progress_submission = InProgressSubmission.objects.filter(
+                user=request.user, uuid=self.in_progress_uuid
+            ).first()
+        except ValidationError:
+            LOGGER.error("Invalid UUID %s", self.in_progress_uuid)
+            return redirect("recordtransfer:transfer")
+
+        if not self.in_progress_submission:
+            LOGGER.error(
+                "Expected at least 1 saved transfer for user %s and ID %s, found 0",
+                request.user,
+                self.in_progress_uuid,
+            )
+            return redirect("recordtransfer:transfer")
+
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        if self.in_progress_uuid:
-            transfer = get_in_progress_submission(request.user, self.in_progress_uuid)
-
-            if transfer is None:
-                LOGGER.error(
-                    ("Expected at least 1 saved transfer for user %s and ID %s, found 0"),
-                    self.request.user,
-                    self.in_progress_uuid,
-                )
-            else:
-                self.load_transfer_data(transfer)
-                return self.render(self.get_form())
+        if self.in_progress_submission:
+            self.load_transfer_data(self.in_progress_submission)
+            return self.render(self.get_form())
 
         return super().get(self, request, *args, **kwargs)
 
@@ -363,7 +376,7 @@ class TransferFormWizard(SessionWizardView):
         data = {
             "save_form_step": save_form_step,
             "form_data": {"past": past_data, "current": current_data},
-            "uuid": self.in_progress_uuid,
+            "submission": self.in_progress_submission,
             "title": title,
         }
 
@@ -401,13 +414,13 @@ class TransferFormWizard(SessionWizardView):
             `data` is a dictionary containing the following:
                 - save_form_step: The current step of the form.
                 - step_data: The past and current data of the form.
-                - uuid (optional): The UUID of the in-progress submission to save.
+                - submission (optional): The in-progress submission model object to update.
                 - title: The accession title of the submission.
 
         Returns:
             A JSON response indicating the result of the save operation.
         """
-        uuid = data.get("uuid")
+        submission = data.get("submission")
         form_data = data.get("form_data")
         save_form_step = data.get("save_form_step")
         title = data.get("title")
@@ -415,9 +428,6 @@ class TransferFormWizard(SessionWizardView):
         if not form_data or not save_form_step:
             raise ValueError("Missing form data or save form step")
 
-        submission = InProgressSubmission.objects.filter(user=self.request.user, uuid=uuid).first()
-        if uuid and not submission:
-            raise ValueError("In-progress submission not found for given UUID %s" % uuid)
         if submission:
             submission.last_updated = timezone.now()
         else:
@@ -453,10 +463,8 @@ class TransferFormWizard(SessionWizardView):
         """
         initial = self.initial_dict.get(step, {})
 
-        if self.in_progress_uuid:
-            transfer = get_in_progress_submission(self.request.user, self.in_progress_uuid)
-            if step == transfer.current_step:
-                data = pickle.loads(transfer.step_data)["current"]
+        if self.in_progress_submission and step == self.in_progress_submission.current_step:
+                data = pickle.loads(self.in_progress_submission.step_data)["current"]
                 for k, v in data.items():
                     initial[k] = v
 
