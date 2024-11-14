@@ -51,7 +51,7 @@
             </div>
             <div class="flex-item">
                 <label></label>
-                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count %}
+                {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
                     <button class="text-link margin-top-25px"
                             formnovalidate="formnovalidate"
                             name="save_form_step"
