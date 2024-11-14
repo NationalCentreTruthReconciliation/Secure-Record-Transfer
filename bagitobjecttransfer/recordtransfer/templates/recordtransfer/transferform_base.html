@@ -49,17 +49,15 @@
                     {% endif %}
                 </button>
             </div>
-            <div class="flex-item">
-                <label></label>
-                {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
-                    <button class="text-link margin-top-25px"
-                            formnovalidate="formnovalidate"
-                            name="save_form_step"
-                            value="{{ wizard.steps.current }}">
-                        {% trans "Click to save form and resume later" %}
-                    </button>
-                {% endif %}
-            </div>
+        </div>
+        <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
+            <label></label>
+            {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
+                <button class="text-link margin-top-25px"
+                        formnovalidate="formnovalidate"
+                        name="save_form_step"
+                        value="{{ wizard.steps.current }}">{% trans "Click to save form and resume later" %}</button>
+            {% endif %}
         </div>
     </form>
 {% endblock content %}
