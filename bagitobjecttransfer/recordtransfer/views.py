@@ -369,7 +369,7 @@ class TransferFormWizard(SessionWizardView):
         }
 
         try:
-            self.save_transfer(request.user, data)
+            self.save_transfer(data)
             messages.success(request, gettext("Transfer saved successfully."))
         except Exception:
             messages.error(request, gettext("There was an error saving the transfer."))
