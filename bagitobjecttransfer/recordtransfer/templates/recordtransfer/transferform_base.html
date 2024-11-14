@@ -51,12 +51,11 @@
             </div>
             <div class="flex-item">
                 <label></label>
-                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_state|stringformat:'s' != 'off' %}
+                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count %}
                     <button class="text-link margin-top-25px"
                             formnovalidate="formnovalidate"
                             name="save_form_step"
-                            value="{{ wizard.steps.current }}"
-                            {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
+                            value="{{ wizard.steps.current }}">
                         {% trans "Click to save form and resume later" %}
                     </button>
                 {% endif %}
