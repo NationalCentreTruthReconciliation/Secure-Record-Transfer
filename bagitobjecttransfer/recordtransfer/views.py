@@ -324,7 +324,15 @@ class TransferFormWizard(SessionWizardView):
         },
     }
 
-    def dispatch(self, request, *args, **kwargs) -> HttpResponse:
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Dispatch the request to the appropriate handler method."""
+        result = self.validate_transfer_request(request)
+        if isinstance(result, HttpResponse):
+            return result
+        return super().dispatch(request, *args, **kwargs)
+
+    def validate_transfer_request(self, request) -> Optional[HttpResponse]:
+        """Validate the transfer request and return an appropriate response if invalid."""
         self.submission_group_uuid = None
         self.in_progress_submission = None
         self.in_progress_uuid = request.GET.get("transfer_uuid")
@@ -332,7 +340,7 @@ class TransferFormWizard(SessionWizardView):
         # Handle no transfer UUID case
         if not self.in_progress_uuid:
             self.submission_group_uuid = request.GET.get("group_uuid")
-            return super().dispatch(request, *args, **kwargs)
+            return None
 
         # Handle transfer UUID case
         try:
@@ -351,7 +359,7 @@ class TransferFormWizard(SessionWizardView):
             )
             return redirect("recordtransfer:transfer")
 
-        return super().dispatch(request, *args, **kwargs)
+        return None
 
     def get(self, request, *args, **kwargs):
         if self.in_progress_submission:
