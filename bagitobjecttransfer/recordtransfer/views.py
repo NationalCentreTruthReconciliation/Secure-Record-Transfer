@@ -20,6 +20,7 @@ from django.http import (
     HttpResponseNotFound,
     HttpResponseRedirect,
     JsonResponse,
+    QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -55,7 +56,7 @@ from recordtransfer.emails import (
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
-    SavedTransfer,
+    InProgressSubmission,
     Submission,
     SubmissionGroup,
     UploadedFile,
@@ -133,7 +134,7 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-        context["in_process_submissions"] = SavedTransfer.objects.filter(
+        context["in_progress_submissions"] = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
         context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
@@ -322,54 +323,134 @@ class TransferFormWizard(SessionWizardView):
         },
     }
 
+    def dispatch(self, request, *args, **kwargs):
+        self.submission_group_uuid = None
+        self.in_progress_submission = None
+        self.in_progress_uuid = request.GET.get("transfer_uuid")
+
+        # Handle no transfer UUID case
+        if not self.in_progress_uuid:
+            self.submission_group_uuid = request.GET.get("group_uuid")
+            return super().dispatch(request, *args, **kwargs)
+
+        # Handle transfer UUID case
+        try:
+            self.in_progress_submission = InProgressSubmission.objects.filter(
+                user=request.user, uuid=self.in_progress_uuid
+            ).first()
+        except ValidationError:
+            LOGGER.error("Invalid UUID %s", self.in_progress_uuid)
+            return redirect("recordtransfer:transfer")
+
+        if not self.in_progress_submission:
+            LOGGER.error(
+                "Expected at least 1 saved transfer for user %s and ID %s, found 0",
+                request.user,
+                self.in_progress_uuid,
+            )
+            return redirect("recordtransfer:transfer")
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
-        resume_id = request.GET.get("resume_transfer", None)
-
-        if resume_id:
-            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
-
-            if transfer is None:
-                LOGGER.error(
-                    ("Expected at least 1 saved transfer for user %s and ID %s, found 0"),
-                    self.request.user,
-                    resume_id,
-                )
-
-            else:
-                self.storage.data = pickle.loads(transfer.step_data)["past"]
-                self.storage.current_step = transfer.current_step
-                return self.render(self.get_form())
+        if self.in_progress_submission:
+            self.load_transfer_data(self.in_progress_submission)
+            return self.render(self.get_form())
 
         return super().get(self, request, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
-        save_form_step = self.request.POST.get("save_form_step", None)
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Handle POST request to save a transfer."""
+        save_form_step = request.POST.get("save_form_step", None)
 
-        if save_form_step and save_form_step in self.steps.all:
-            resume_id = self.request.GET.get("resume_transfer", None)
+        if not save_form_step:
+            return super().post(request, *args, **kwargs)
 
-            if resume_id:
-                transfer = SavedTransfer.objects.filter(
-                    user=self.request.user, id=resume_id
-                ).first()
-                transfer.last_updated = timezone.now()
-            else:
-                transfer = SavedTransfer()
+        past_data = self.storage.data
+        current_data = TransferFormWizard.format_step_data(save_form_step, request.POST)
 
-            transfer.current_step = save_form_step
-            # Make a dict of form element names to values to store. Elements are prefixed with "<step_name>-"
-            current_data = {
-                f.replace(save_form_step + "-", ""): self.request.POST[f]
-                for f in self.request.POST.keys()
-                if f.startswith(save_form_step + "-")
-            }
-            transfer.user = self.request.user
-            transfer.step_data = pickle.dumps({"past": self.storage.data, "current": current_data})
-            transfer.save()
-            return redirect("recordtransfer:userprofile")
+        title = current_data.get("accession_title")
+        if not title:
+            title = self.get_form_value("recorddescription", "accession_title")
 
+        data = {
+            "save_form_step": save_form_step,
+            "form_data": {"past": past_data, "current": current_data},
+            "submission": self.in_progress_submission,
+            "title": title,
+        }
+
+        try:
+            self.save_transfer(data)
+            messages.success(request, gettext("Transfer saved successfully."))
+        except Exception:
+            messages.error(request, gettext("There was an error saving the transfer."))
+        return redirect("recordtransfer:userprofile")
+
+    def load_transfer_data(self, transfer: InProgressSubmission) -> None:
+        """Load the transfer data from an InProgressSubmission instance."""
+        self.storage.data = pickle.loads(transfer.step_data)["past"]
+        self.storage.current_step = transfer.current_step
+
+    @classmethod
+    def format_step_data(cls, step: str, data: QueryDict) -> dict:
+        """Format the step data by stripping the step prefix from the keys.
+
+        Args:
+            step (str): The current step of the form.
+            data (QueryDict): The data from the form.
+
+        Returns:
+            dict: The formatted step data.
+        """
+        return {f.replace(step + "-", ""): data[f] for f in data if f.startswith(step + "-")}
+
+    def save_transfer(self, data: dict) -> None:
+        """Save the current state of a transfer.
+
+        Args:
+            user: The user who is saving the transfer.
+            data: The form data containing the submission data to save.
+            `data` is a dictionary containing the following:
+                - save_form_step: The current step of the form.
+                - step_data: The past and current data of the form.
+                - submission (optional): The in-progress submission model object to update.
+                - title: The accession title of the submission.
+
+        Returns:
+            A JSON response indicating the result of the save operation.
+        """
+        submission = data.get("submission")
+        form_data = data.get("form_data")
+        save_form_step = data.get("save_form_step")
+        title = data.get("title")
+
+        if not form_data or not save_form_step:
+            raise ValueError("Missing form data or save form step")
+
+        if submission:
+            submission.last_updated = timezone.now()
         else:
-            return super().post(*args, **kwargs)
+            submission = InProgressSubmission()
+
+        submission.current_step = save_form_step
+        submission.user = self.request.user
+        submission.step_data = pickle.dumps(form_data)
+        submission.title = title
+        submission.save()
+
+    def get_form_value(self, step: str, field: str) -> Optional[str]:
+        """Get the value of a field in a form step.
+
+        Args:
+            step: The step of the form to get the field value from.
+            field: The field to get the value of.
+
+        Returns:
+            The value of the field in the form step, or None if the is not populated.
+        """
+        step_data = self.storage.get_step_data(step) or {}
+        return step_data.get(f"{step}-{field}")
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step"""
@@ -382,11 +463,8 @@ class TransferFormWizard(SessionWizardView):
         """
         initial = self.initial_dict.get(step, {})
 
-        resume_id = self.request.GET.get("resume_transfer", None)
-        if resume_id is not None:
-            transfer = SavedTransfer.objects.filter(user=self.request.user, id=resume_id).first()
-            if step == transfer.current_step:
-                data = pickle.loads(transfer.step_data)["current"]
+        if self.in_progress_submission and step == self.in_progress_submission.current_step:
+                data = pickle.loads(self.in_progress_submission.step_data)["current"]
                 for k, v in data.items():
                     initial[k] = v
 
@@ -430,7 +508,7 @@ class TransferFormWizard(SessionWizardView):
                     "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
-                    "DEFAULT_GROUP_ID": self.kwargs.get("group_id", None),
+                    "DEFAULT_GROUP_ID": self.submission_group_uuid,
                     "MODAL_MODE": True,
                 }
             )
@@ -449,29 +527,7 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        context["save_form_state"] = self.get_save_form_state()
-
         return context
-
-    def get_save_form_state(self):
-        """Get the state required to update the "save form" button."""
-        resume_id = self.request.GET.get("resume_transfer", None)
-        num_saves = SavedTransfer.objects.filter(user=self.request.user).count()
-
-        if settings.MAX_SAVED_TRANSFER_COUNT == 0:
-            # If MAX_SAVED_TRANSFER_COUNT is 0, then don't show the save form button.
-            save_form_state = "off"
-
-        elif resume_id is None and num_saves >= settings.MAX_SAVED_TRANSFER_COUNT:
-            # if the count of saved transfers is equal to or more than the maximum and we are NOT editing an existing
-            # transfer, disable the save form button.
-            save_form_state = "disabled"
-
-        else:
-            # else enable the button.
-            save_form_state = "on"
-
-        return save_form_state
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
@@ -571,6 +627,11 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Not associating submission with a group")
 
         return group
+
+
+def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubmission]:
+    """Retrieve an in-progress submission for a given user and UUID."""
+    return InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
 
 
 @require_http_methods(["POST"])
@@ -884,25 +945,34 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
 
 class DeleteTransfer(TemplateView):
     template_name = "recordtransfer/transfer_delete.html"
+    success_message = gettext("In-progress submission deleted")
+    error_message = gettext("There was an error deleting the in-progress submission")
+    model = InProgressSubmission
+    context_object_name = "transfer"
+
+    def get_object(self, queryset=None) -> InProgressSubmission:
+        """Retrieve the InProgressSubmission object based on the UUID in the URL."""
+        return get_object_or_404(InProgressSubmission, uuid=self.kwargs.get("uuid"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        transfer = SavedTransfer.objects.filter(
-            user=self.request.user, id=context["transfer_id"]
-        ).first()
-        context["last_updated"] = transfer.last_updated
+        context[self.context_object_name] = self.get_object()
         return context
 
     def post(self, request, *args, **kwargs):
         try:
-            if "yes_delete" in request.POST:
-                transfer_id = request.POST["transfer_id"]
-                transfer = SavedTransfer.objects.filter(
-                    user=self.request.user, id=transfer_id
-                ).first()
-                transfer.delete()
+            uuid = self.kwargs["uuid"]
+            submission = InProgressSubmission.objects.filter(
+                user=self.request.user, uuid=uuid
+            ).first()
+            if submission:
+                submission.delete()
+                messages.success(request, self.success_message)
+            else:
+                LOGGER.error("Could not find in-progress submission with UUID %s", uuid)
+                messages.error(request, self.error_message)
         except KeyError:
-            LOGGER.error("Tried to render DeleteTransfer view without a transfer_id")
+            LOGGER.error("No UUID provided for deletion")
         return redirect("recordtransfer:userprofile")
 
 
@@ -915,7 +985,7 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
 
     def get_object(self, queryset=None) -> Submission:
         """Retrieve the Submission object based on the UUID in the URL."""
-        return Submission.objects.get(uuid=self.kwargs.get("uuid"))
+        return get_object_or_404(Submission, uuid=self.kwargs.get("uuid"))
 
     def test_func(self) -> bool:
         """Check if the user is the creator of the submission group or is a staff member."""

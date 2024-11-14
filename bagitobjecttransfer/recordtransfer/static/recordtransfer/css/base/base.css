@@ -209,3 +209,19 @@ body {
     font-style: italic;
     padding: 10px;
 }
+
+.text-link {
+    background: none;
+    border: none;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+}
+
+.text-link:disabled {
+    color: gray;
+    text-decoration: none;
+    cursor: not-allowed;
+}

@@ -15,30 +15,6 @@ Application Features
 --------------------
 
 
-MAX_SAVED_TRANSFER_COUNT
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-    *Choose maximum saved transfers per user*
-
-    .. table::
-
-        ========  ======================  =========
-        Required  Default                 Type
-        ========  ======================  =========
-        NO        2                       int
-        ========  ======================  =========
-
-    The maximum number of transfers a user can save to resume later. Must be a non-negative integer.
-    Set to 0 to disable saving transfers.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        MAX_SAVED_TRANSFER_COUNT=5
-
-
 SIGN_UP_ENABLED
 ^^^^^^^^^^^^^^^
 

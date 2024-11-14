@@ -1,16 +1,24 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Delete Transfer?" %}{% endblock %}
-
+{% block title %}
+    {% trans "Delete Transfer?" %}
+{% endblock title %}
 {% block content %}
-<div class="title-text">{% block trans %}Do you wish to delete the transfer from {{ last_updated|date:"F j, Y g:ia" }}?{% endblock %}</div>
-<form id="delete-transfer-form" action="" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="transfer_id" value="{{ transfer_id }}" />
-    <p>
-    <input type="submit" name="yes_delete" value="Yes - Delete" />
-    <input type="submit" name="no_cancel" value="No - Cancel" />
-    </p>
-</form>
-{% endblock %}
+    <div class="title-text">{% trans "Confirm In Progress Transfer Deletion" %}</div>
+    <div class="flex-med-width-item margin-top-25px">
+        {% trans "Do you wish to delete the in-progress transfer from" %} {{ transfer.last_updated|date:"F j, Y g:ia" }}
+        {% if transfer.title %}titled "{{ transfer.title }}"{% endif %}
+        ?
+    </div>
+    <form id="delete-transfer-form"
+          action="{% url 'recordtransfer:transferdelete' uuid=transfer.uuid %}"
+          method="post">
+        {% csrf_token %}
+        <p>
+            <button type="button"
+                    onclick="window.location.href='{% url 'recordtransfer:userprofile' %}'"
+                    class="red-button margin-right-20px">{% trans "Cancel" %}</button>
+            <button type="submit" class="blue-button">{% trans "OK" %}</button>
+        </p>
+    </form>
+{% endblock content %}

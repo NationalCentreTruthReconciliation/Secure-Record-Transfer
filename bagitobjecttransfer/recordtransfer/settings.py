@@ -43,10 +43,6 @@ MAX_TOTAL_UPLOAD_COUNT = config('MAX_TOTAL_UPLOAD_COUNT', default=40, cast=int)
 
 USE_DATE_WIDGETS = config('USE_DATE_WIDGETS', default=True, cast=bool)
 
-# Maximum number of saved transfers per user.
-
-MAX_SAVED_TRANSFER_COUNT = config('MAX_SAVED_TRANSFER_COUNT', default=2, cast=int)
-
 # Defaults to use in place of form data, or to supplement form data with when converted to CAAIS
 # metadata
 

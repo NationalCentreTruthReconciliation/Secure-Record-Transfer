@@ -292,7 +292,7 @@ class SourceInfoForm(TransferForm):
         )
         .order_by("sort_order_other_first"),
         empty_label=gettext("Please select one"),
-        label=gettext("Source type *"),
+        label=gettext("* Source type"),
         help_text=gettext(
             "How would you describe <b>what</b> the source entity is? "
             "i.e., The source is a(n) ______"
@@ -327,7 +327,7 @@ class SourceInfoForm(TransferForm):
         )
         .order_by("sort_order_other_first"),
         empty_label=gettext("Please select one"),
-        label=gettext("Source role **"),
+        label=gettext("** Source role"),
         help_text=gettext("How does the source relate to the records? "),
         widget=forms.Select(
             attrs={
