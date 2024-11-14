@@ -353,18 +353,17 @@ class TransferFormWizard(SessionWizardView):
         if not save_form_step:
             return super().post(request, *args, **kwargs)
 
-        in_progress_uuid = kwargs.get("uuid")
         past_data = self.storage.data
         current_data = TransferFormWizard.format_step_data(save_form_step, request.POST)
 
-        title = current_data.get(save_form_step)
+        title = current_data.get("accession_title")
         if not title:
-            title = self.get_form_value(save_form_step, "accession_title")
+            title = self.get_form_value("recorddescription", "accession_title")
 
         data = {
             "save_form_step": save_form_step,
             "form_data": {"past": past_data, "current": current_data},
-            "uuid": in_progress_uuid,
+            "uuid": self.in_progress_uuid,
             "title": title,
         }
 
@@ -441,7 +440,7 @@ class TransferFormWizard(SessionWizardView):
             The value of the field in the form step, or None if the is not populated.
         """
         step_data = self.storage.get_step_data(step) or {}
-        return step_data.get(field)
+        return step_data.get(f"{step}-{field}")
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step"""
