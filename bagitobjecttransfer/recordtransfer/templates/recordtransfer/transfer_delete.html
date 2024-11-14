@@ -6,7 +6,9 @@
 {% block content %}
     <div class="title-text">{% trans "Confirm In Progress Transfer Deletion" %}</div>
     <div class="flex-med-width-item margin-top-25px">
-        {% trans "Do you wish to delete the in-progress transfer from" %} {{ transfer.last_updated|date:"F j, Y g:ia" }}{% if transfer.title %} titled "{{ transfer.title }}"{% endif %}?
+        {% trans "Do you wish to delete the in-progress transfer from" %} {{ transfer.last_updated|date:"F j, Y g:ia" }}
+        {% if transfer.title %}titled "{{ transfer.title }}"{% endif %}
+        ?
     </div>
     <form id="delete-transfer-form"
           action="{% url 'recordtransfer:transferdelete' uuid=transfer.uuid %}"
@@ -15,7 +17,7 @@
         <p>
             <button type="button"
                     onclick="window.location.href='{% url 'recordtransfer:userprofile' %}'"
-                    class="red-button">{% trans "Cancel" %}</button>
+                    class="red-button margin-right-20px">{% trans "Cancel" %}</button>
             <button type="submit" class="blue-button">{% trans "OK" %}</button>
         </p>
     </form>
