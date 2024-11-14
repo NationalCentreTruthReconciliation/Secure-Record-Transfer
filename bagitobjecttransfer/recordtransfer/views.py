@@ -1,6 +1,6 @@
 import logging
 import pickle
-from typing import Any, Optional, Union
+from typing import Any, ClassVar, Optional, Union
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
@@ -53,6 +53,7 @@ from recordtransfer.emails import (
     send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
+from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
@@ -252,15 +253,15 @@ def activate_account(request, uidb64, token):
 
 class TransferFormWizard(SessionWizardView):
     """A multi-page form for collecting user metadata and uploading files. Uses a form wizard. For
-    more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html
+    more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
     """
 
-    _TEMPLATES = {
-        "acceptlegal": {
+    _TEMPLATES: ClassVar[dict[TransferStep, dict[str, str]]] = {
+        TransferStep.ACCEPT_LEGAL: {
             "templateref": "recordtransfer/transferform_legal.html",
             "formtitle": gettext("Legal Agreement"),
         },
-        "contactinfo": {
+        TransferStep.CONTACT_INFO: {
             "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Contact Information"),
             "infomessage": gettext(
@@ -268,7 +269,7 @@ class TransferFormWizard(SessionWizardView):
                 "archivists regarding your transfer"
             ),
         },
-        "sourceinfo": {
+        TransferStep.SOURCE_INFO: {
             "templateref": "recordtransfer/transferform_sourceinfo.html",
             "formtitle": gettext("Source Information"),
             "infomessage": gettext(
@@ -277,14 +278,14 @@ class TransferFormWizard(SessionWizardView):
                 "put your own information in"
             ),
         },
-        "recorddescription": {
+        TransferStep.RECORD_DESCRIPTION: {
             "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Record Description"),
             "infomessage": gettext(
                 "Provide a brief description of the records you're transferring"
             ),
         },
-        "rights": {
+        TransferStep.RIGHTS: {
             "templateref": "recordtransfer/transferform_rights.html",
             "formtitle": gettext("Record Rights"),
             "infomessage": gettext(
@@ -293,7 +294,7 @@ class TransferFormWizard(SessionWizardView):
                 "rights if the dropdown does not contain the type of rights you're looking for."
             ),
         },
-        "otheridentifiers": {
+        TransferStep.OTHER_IDENTIFIERS: {
             "templateref": "recordtransfer/transferform_formset.html",
             "formtitle": gettext("Other Identifiers (Optional)"),
             "infomessage": gettext(
@@ -301,7 +302,7 @@ class TransferFormWizard(SessionWizardView):
                 "records, go to the next step"
             ),
         },
-        "grouptransfer": {
+        TransferStep.GROUP_TRANSFER: {
             "templateref": "recordtransfer/transferform_group.html",
             "formtitle": gettext("Assign Transfer to Group (Optional)"),
             "infomessage": gettext(
@@ -309,21 +310,21 @@ class TransferFormWizard(SessionWizardView):
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
         },
-        "uploadfiles": {
+        TransferStep.UPLOAD_FILES: {
             "templateref": "recordtransfer/transferform_dropzone.html",
             "formtitle": gettext("Upload Files"),
             "infomessage": gettext(
                 "Add any final notes you would like to add, and upload your files"
             ),
         },
-        "finalnotes": {
+        TransferStep.FINAL_NOTES: {
             "templateref": "recordtransfer/transferform_standard.html",
             "formtitle": gettext("Final Notes"),
             "infomessage": gettext("Add any final notes that may not have fit in previous steps"),
         },
     }
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs) -> HttpResponse:
         self.submission_group_uuid = None
         self.in_progress_submission = None
         self.in_progress_uuid = request.GET.get("transfer_uuid")
