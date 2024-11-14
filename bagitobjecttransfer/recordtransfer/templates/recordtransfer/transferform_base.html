@@ -38,15 +38,6 @@
                             value="{{ wizard.steps.prev }}"
                             class="blue-button margin-right-20px">{% trans "Previous Step" %}</button>
                 {% endif %}
-                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_state|stringformat:'s' != 'off' %}
-                    <button class="blue-button margin-left-20px margin-right-20px"
-                            formnovalidate="formnovalidate"
-                            name="save_form_step"
-                            value="{{ wizard.steps.current }}"
-                            {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
-                        {% trans "Save form" %}
-                    </button>
-                {% endif %}
                 <button {% block submitbuttonattributes %}
                         {% endblock submitbuttonattributes %}
                         type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
@@ -57,6 +48,18 @@
                         {% trans "Next Step" %}
                     {% endif %}
                 </button>
+            </div>
+            <div class="flex-item">
+                <label></label>
+                {% if wizard.steps.step1 > 1 and wizard.steps.step1 < wizard.steps.count and save_form_state|stringformat:'s' != 'off' %}
+                    <button class="text-link margin-top-25px"
+                            formnovalidate="formnovalidate"
+                            name="save_form_step"
+                            value="{{ wizard.steps.current }}"
+                            {% if save_form_state|stringformat:'s' == 'disabled' %}disabled="disabled"{% endif %}>
+                        {% trans "Click to save form and resume later" %}
+                    </button>
+                {% endif %}
             </div>
         </div>
     </form>
