@@ -10,3 +10,8 @@ ID_SUBMISSION_GROUP_DESCRIPTION = "id_submission_group_description"
 # Submission Group Selection and Description Display Element IDs
 ID_SUBMISSION_GROUP_SELECTION = "id_submission_group_selection"
 ID_DISPLAY_GROUP_DESCRIPTION = "id_display_group_description"
+
+# Define constants for dictionary keys in TransferFormWizard
+TEMPLATEREF = "templateref"
+FORMTITLE = "formtitle"
+INFOMESSAGE = "infomessage"
