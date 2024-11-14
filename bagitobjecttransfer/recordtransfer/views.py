@@ -71,12 +71,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
-    """The homepage"""
+    """The homepage."""
 
     template_name = "recordtransfer/home.html"
 
 
-def media_request(request, path: str) -> HttpResponse:
+def media_request(request: HttpRequest, path: str) -> HttpResponse:
     """Respond to whether a media request is allowed or not."""
     if not request.user.is_authenticated:
         return HttpResponseForbidden("You do not have permission to access this resource.")
@@ -104,7 +104,7 @@ def media_request(request, path: str) -> HttpResponse:
 
 
 class TransferSent(TemplateView):
-    """The page a user sees when they finish a transfer"""
+    """The page a user sees when they finish a transfer."""
 
     template_name = "recordtransfer/transfersent.html"
 
@@ -185,7 +185,7 @@ class UserProfile(UpdateView):
 
 
 class About(TemplateView):
-    """About the application"""
+    """About the application."""
 
     template_name = "recordtransfer/about.html"
 
@@ -199,19 +199,19 @@ class About(TemplateView):
 
 
 class ActivationSent(TemplateView):
-    """The page a user sees after creating an account"""
+    """The page a user sees after creating an account."""
 
     template_name = "recordtransfer/activationsent.html"
 
 
 class ActivationComplete(TemplateView):
-    """The page a user sees when their account has been activated"""
+    """The page a user sees when their account has been activated."""
 
     template_name = "recordtransfer/activationcomplete.html"
 
 
 class ActivationInvalid(TemplateView):
-    """The page a user sees if their account could not be activated"""
+    """The page a user sees if their account could not be activated."""
 
     template_name = "recordtransfer/activationinvalid.html"
 
@@ -454,7 +454,7 @@ class TransferFormWizard(SessionWizardView):
         return step_data.get(f"{step}-{field}")
 
     def get_template_names(self):
-        """Retrieve the name of the template for the current step"""
+        """Retrieve the name of the template for the current step."""
         step_name = self.steps.current
         return [self._TEMPLATES[step_name]["templateref"]]
 
@@ -565,7 +565,7 @@ class TransferFormWizard(SessionWizardView):
         )
 
     def done(self, form_list, **kwargs):
-        """Retrieves all of the form data, and creates a Submission from it.
+        """Retrieve all of the form data, and creates a Submission from it.
 
         Returns:
             HttpResponseRedirect: Redirects the user to their User Profile page.
@@ -808,8 +808,10 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
             the session is valid, or False if not. The dictionary also contains
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
-    mib_to_bytes = lambda m: m * (1024**2)
-    bytes_to_mib = lambda b: b / (1024**2)
+    def mib_to_bytes(m):
+        return m * 1024 ** 2
+    def bytes_to_mib(b):
+        return b / 1024 ** 2
 
     # Check extension exists
     name_split = filename.split(".")
@@ -904,7 +906,8 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
     if not session:
         return {"accepted": True}
 
-    mib_to_bytes = lambda m: m * (1024**2)
+    def mib_to_bytes(m):
+        return m * 1024 ** 2
 
     # Check number of files is within allowed total
     if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
@@ -945,6 +948,8 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
 
 
 class DeleteTransfer(TemplateView):
+    """View to handle the deletion of an in-progress submission."""
+
     template_name = "recordtransfer/transfer_delete.html"
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")
