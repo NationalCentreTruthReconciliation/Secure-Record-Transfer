@@ -324,6 +324,22 @@ class TransferFormWizard(SessionWizardView):
         },
     }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.submission_group_uuid = None
+        self.in_progress_submission = None
+        self.in_progress_uuid = None
+
+    @property
+    def current_step(self) -> TransferStep:
+        """Returns the current step as a TransferStep enum value."""
+        current = self.steps.current
+        try:
+            return TransferStep(current)  # Converts string to enum
+        except ValueError as exc:
+            LOGGER.error("Invalid step name: %s", current)
+            raise Http404("Invalid step name") from exc
+
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Dispatch the request to the appropriate handler method."""
         result = self.validate_transfer_request(request)
@@ -331,10 +347,8 @@ class TransferFormWizard(SessionWizardView):
             return result
         return super().dispatch(request, *args, **kwargs)
 
-    def validate_transfer_request(self, request) -> Optional[HttpResponse]:
+    def validate_transfer_request(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Validate the transfer request and return an appropriate response if invalid."""
-        self.submission_group_uuid = None
-        self.in_progress_submission = None
         self.in_progress_uuid = request.GET.get("transfer_uuid")
 
         # Handle no transfer UUID case
@@ -463,8 +477,7 @@ class TransferFormWizard(SessionWizardView):
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step."""
-        step_name = self.steps.current
-        return [self._TEMPLATES[step_name]["templateref"]]
+        return [self._TEMPLATES[self.current_step]["templateref"]]
 
     def get_form_initial(self, step):
         """Populate form with saved transfer data (if a "resume" request was received), and add the
@@ -473,9 +486,9 @@ class TransferFormWizard(SessionWizardView):
         initial = self.initial_dict.get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
-                data = pickle.loads(self.in_progress_submission.step_data)["current"]
-                for k, v in data.items():
-                    initial[k] = v
+            data = pickle.loads(self.in_progress_submission.step_data)["current"]
+            for k, v in data.items():
+                initial[k] = v
 
         if step == "contactinfo":
             curr_user = self.request.user
@@ -501,14 +514,13 @@ class TransferFormWizard(SessionWizardView):
             dict: A dictionary of context data to be used to render the form template.
         """
         context = super().get_context_data(form, **kwargs)
-        step_name = self.steps.current
 
-        context.update({"form_title": self._TEMPLATES[step_name]["formtitle"]})
+        context.update({"form_title": self._TEMPLATES[self.current_step]["formtitle"]})
 
-        if "infomessage" in self._TEMPLATES[step_name]:
-            context.update({"info_message": self._TEMPLATES[step_name]["infomessage"]})
+        if "infomessage" in self._TEMPLATES[self.current_step]:
+            context.update({"info_message": self._TEMPLATES[self.current_step]["infomessage"]})
 
-        if step_name == "grouptransfer":
+        if self.current_step == TransferStep.GROUP_TRANSFER:
             context.update(
                 {
                     "IS_NEW": True,
@@ -522,11 +534,11 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif step_name == "rights":
+        elif self.current_step == TransferStep.RIGHTS:
             all_rights = RightsType.objects.all().exclude(name="Other")
             context.update({"rights": all_rights})
 
-        elif step_name == "sourceinfo":
+        elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
             all_types = SourceType.objects.all().exclude(name="Other")
             context.update(
@@ -816,10 +828,12 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
             the session is valid, or False if not. The dictionary also contains
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
+
     def mib_to_bytes(m):
-        return m * 1024 ** 2
+        return m * 1024**2
+
     def bytes_to_mib(b):
-        return b / 1024 ** 2
+        return b / 1024**2
 
     # Check extension exists
     name_split = filename.split(".")
@@ -915,7 +929,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         return {"accepted": True}
 
     def mib_to_bytes(m):
-        return m * 1024 ** 2
+        return m * 1024**2
 
     # Check number of files is within allowed total
     if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
