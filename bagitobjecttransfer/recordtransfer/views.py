@@ -1,5 +1,6 @@
 import logging
 import pickle
+import re
 from typing import Any, ClassVar, Optional, Union
 
 from caais.export import ExportVersion
@@ -284,9 +285,7 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.RECORD_DESCRIPTION: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Record Description"),
-            INFOMESSAGE: gettext(
-                "Provide a brief description of the records you're transferring"
-            ),
+            INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
         TransferStep.RIGHTS: {
             TEMPLATEREF: "recordtransfer/transferform_rights.html",
@@ -337,6 +336,7 @@ class TransferFormWizard(SessionWizardView):
     def current_step(self) -> TransferStep:
         """Returns the current step as a TransferStep enum value."""
         current = self.steps.current
+        print("Current step:", current)
         try:
             return TransferStep(current)  # Converts string to enum
         except ValueError as exc:
@@ -387,20 +387,25 @@ class TransferFormWizard(SessionWizardView):
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a transfer."""
-        save_form_step = request.POST.get("save_form_step", None)
-
-        if not save_form_step:
+        # User is not saving the form, so continue with the normal form submission
+        if not request.POST.get("save_form_step", None):
             return super().post(request, *args, **kwargs)
 
         past_data = self.storage.data
-        current_data = TransferFormWizard.format_step_data(save_form_step, request.POST)
+        current_data = None
+        if self.current_step in TransferStep.get_formset_steps():
+            current_data = TransferFormWizard.format_formset_step_data(self.current_step, request.POST)
+        else:
+            current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
 
-        title = current_data.get("accession_title")
+        title = None
+        if isinstance(current_data, dict):
+            title = current_data.get("accession_title")
         if not title:
-            title = self.get_form_value("recorddescription", "accession_title")
+            title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
         data = {
-            "save_form_step": save_form_step,
+            "save_form_step": self.current_step,
             "form_data": {"past": past_data, "current": current_data},
             "submission": self.in_progress_submission,
             "title": title,
@@ -419,17 +424,42 @@ class TransferFormWizard(SessionWizardView):
         self.storage.current_step = transfer.current_step
 
     @classmethod
-    def format_step_data(cls, step: str, data: QueryDict) -> dict:
-        """Format the step data by stripping the step prefix from the keys.
+    def format_step_data(cls, step: TransferStep, data: QueryDict) -> dict:
+        """Format regular form data.
 
         Args:
-            step (str): The current step of the form.
-            data (QueryDict): The data from the form.
+            step: The current step of the form.
+            data: The data from the form.
 
         Returns:
             dict: The formatted step data.
         """
-        return {f.replace(step + "-", ""): data[f] for f in data if f.startswith(step + "-")}
+        return {
+            f.replace(step.value + "-", ""): data[f]
+            for f in data
+            if f.startswith(step.value + "-")
+        }
+
+    @classmethod
+    def format_formset_step_data(cls, step: TransferStep, data: QueryDict) -> list[dict]:
+        """Format formset data."""
+        formatted_data = []
+        pattern = f"^{step.value}-\\d+-"
+
+        indexed_data = {}
+        for key, value in data.items():
+            if re.match(pattern, key):
+                parts = key.split("-", 2)
+                index = int(parts[1])
+                field_name = parts[2]
+                if index not in indexed_data:
+                    indexed_data[index] = {}
+                indexed_data[index][field_name] = value
+
+        for index in sorted(indexed_data):
+            formatted_data.append(indexed_data[index])
+
+        return formatted_data
 
     def save_transfer(self, data: dict) -> None:
         """Save the current state of a transfer.
@@ -459,13 +489,13 @@ class TransferFormWizard(SessionWizardView):
         else:
             submission = InProgressSubmission()
 
-        submission.current_step = save_form_step
+        submission.current_step = save_form_step.value
         submission.user = self.request.user
         submission.step_data = pickle.dumps(form_data)
         submission.title = title
         submission.save()
 
-    def get_form_value(self, step: str, field: str) -> Optional[str]:
+    def get_form_value(self, step: TransferStep, field: str) -> Optional[str]:
         """Get the value of a field in a form step.
 
         Args:
@@ -475,8 +505,8 @@ class TransferFormWizard(SessionWizardView):
         Returns:
             The value of the field in the form step, or None if the is not populated.
         """
-        step_data = self.storage.get_step_data(step) or {}
-        return step_data.get(f"{step}-{field}")
+        step_data = self.storage.get_step_data(step.value) or {}
+        return step_data.get(f"{step.value}-{field}")
 
     def get_template_names(self):
         """Retrieve the name of the template for the current step."""
@@ -490,8 +520,11 @@ class TransferFormWizard(SessionWizardView):
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
             data = pickle.loads(self.in_progress_submission.step_data)["current"]
-            for k, v in data.items():
-                initial[k] = v
+            if step in [s.value for s in TransferStep.get_formset_steps()]:
+                initial = data
+            else:
+                for k, v in data.items():
+                    initial[k] = v
 
         if step == "contactinfo":
             curr_user = self.request.user
