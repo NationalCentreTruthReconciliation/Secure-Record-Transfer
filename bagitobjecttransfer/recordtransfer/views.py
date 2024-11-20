@@ -594,10 +594,10 @@ class TransferFormWizard(SessionWizardView):
     @property
     def num_extra_forms(self) -> int:
         """Compute the number of extra forms to generate if current step uses a formset."""
-        num_extra_forms = 0
+        num_extra_forms = 1
         if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
-            num_forms = len(self.get_form_initial(self.current_step))
-            num_extra_forms = 1 if num_forms > 0 else 0
+            num_forms = len(self.get_form_initial(self.current_step.value))
+            num_extra_forms = 0 if num_forms > 0 else 1
         return num_extra_forms
 
     def get_all_cleaned_data(self):

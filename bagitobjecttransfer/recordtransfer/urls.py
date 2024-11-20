@@ -13,8 +13,8 @@ if recordtransfersettings.FILE_UPLOAD_ENABLED:
         ("contactinfo", forms.ContactInfoForm),
         ("sourceinfo", forms.SourceInfoForm),
         ("recorddescription", forms.RecordDescriptionForm),
-        ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
-        ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
+        ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=0)),
+        ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=0)),
         ("grouptransfer", forms.GroupTransferForm),
         ("uploadfiles", forms.UploadFilesForm),
     ]
@@ -24,8 +24,8 @@ else:
         ("contactinfo", forms.ContactInfoForm),
         ("sourceinfo", forms.SourceInfoForm),
         ("recorddescription", forms.ExtendedRecordDescriptionForm),  # Different
-        ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
-        ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
+        ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=0)),
+        ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=0)),
         ("grouptransfer", forms.GroupTransferForm),
         ("finalnotes", forms.FinalStepFormNoUpload),  # Different
     ]
