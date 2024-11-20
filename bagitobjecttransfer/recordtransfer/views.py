@@ -12,7 +12,7 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models.base import Model as Model
-from django.forms import BaseModelForm
+from django.forms import BaseModelForm, formset_factory
 from django.http import (
     Http404,
     HttpRequest,
@@ -60,6 +60,7 @@ from recordtransfer.emails import (
 from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
+from recordtransfer.forms.transfer_forms import RightsForm
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -336,7 +337,6 @@ class TransferFormWizard(SessionWizardView):
     def current_step(self) -> TransferStep:
         """Returns the current step as a TransferStep enum value."""
         current = self.steps.current
-        print("Current step:", current)
         try:
             return TransferStep(current)  # Converts string to enum
         except ValueError as exc:
@@ -394,7 +394,9 @@ class TransferFormWizard(SessionWizardView):
         past_data = self.storage.data
         current_data = None
         if self.current_step in TransferStep.get_formset_steps():
-            current_data = TransferFormWizard.format_formset_step_data(self.current_step, request.POST)
+            current_data = TransferFormWizard.format_formset_step_data(
+                self.current_step, request.POST
+            )
         else:
             current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
 
@@ -572,7 +574,7 @@ class TransferFormWizard(SessionWizardView):
 
         elif self.current_step == TransferStep.RIGHTS:
             all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update({"rights": all_rights})
+            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
 
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
@@ -584,7 +586,19 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
+        elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
+            context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
+
         return context
+
+    @property
+    def num_extra_forms(self) -> int:
+        """Compute the number of extra forms to generate if current step uses a formset."""
+        num_extra_forms = 0
+        if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
+            num_forms = len(self.get_form_initial(self.current_step))
+            num_extra_forms = 1 if num_forms > 0 else 0
+        return num_extra_forms
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
