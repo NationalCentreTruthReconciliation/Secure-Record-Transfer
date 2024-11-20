@@ -80,6 +80,16 @@ function appendNewForm(cloneFormSelector) {
     $(cloneFormSelector).after(newForm);
 }
 
+function deleteForm(formSelector) {
+    var prefix = getFormPrefix();
+    var totalForms = getTotalForms(prefix);
+
+    var form = $(formSelector).last();
+    form.remove();
+    $(`#id_${prefix}-TOTAL_FORMS`).val(totalForms - 1);
+}
+
+
 /**
  * Increment all of the indices for the input elements of a formset form
  * @param form The form row element selected by jQuery
@@ -370,6 +380,11 @@ $(() => {
      **************************************************************************/
 
     var totalForms = getTotalForms()
+
+    if (typeof NUM_EXTRA_FORMS !== 'undefined' && getTotalForms() > 1) {
+        deleteForm('.form-row:last')
+    }
+
     $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
 
     $('.add-form-row').on('click', (event) => {
