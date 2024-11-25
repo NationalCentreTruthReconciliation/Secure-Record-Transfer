@@ -12,7 +12,7 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.db.models.base import Model as Model
-from django.forms import BaseModelForm, formset_factory
+from django.forms import BaseModelForm
 from django.http import (
     Http404,
     HttpRequest,
@@ -60,7 +60,6 @@ from recordtransfer.emails import (
 from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.transfer_forms import RightsForm
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -528,7 +527,7 @@ class TransferFormWizard(SessionWizardView):
                 for k, v in data.items():
                     initial[k] = v
 
-        if step == "contactinfo":
+        if step == TransferStep.CONTACT_INFO.value:
             curr_user = self.request.user
             if curr_user.first_name and curr_user.last_name:
                 initial["contact_name"] = f"{curr_user.first_name} {curr_user.last_name}"
@@ -538,7 +537,7 @@ class TransferFormWizard(SessionWizardView):
 
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
-        if step == "grouptransfer":
+        if step == TransferStep.GROUP_TRANSFER.value:
             kwargs["user"] = self.request.user
         return kwargs
 
