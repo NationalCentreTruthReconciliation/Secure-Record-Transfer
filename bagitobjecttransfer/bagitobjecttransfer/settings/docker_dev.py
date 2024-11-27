@@ -12,11 +12,6 @@ ALLOWED_HOSTS = [
     'localhost',
 ]
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-    '192.168.65.1',
-]
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

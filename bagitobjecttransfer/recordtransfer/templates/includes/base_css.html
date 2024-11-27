@@ -1,4 +1,7 @@
-{% if debug %}
+{% if USE_PIPELINE %}
+    {% load pipeline %}
+    {% stylesheet 'recordtransfer_base_styles' %}
+{% else %}
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/banner.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/base.css' %}">
@@ -8,7 +11,4 @@
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/transferform.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/widget.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/dropzone.css' %}">
-{% else %}
-    {% load pipeline %}
-    {% stylesheet 'recordtransfer_base_styles' %}
 {% endif %}

@@ -1,7 +1,7 @@
-{% if debug %}
-    {% load static %}
-    <script src="{% static 'recordtransfer/js/profile/profile.js' %}"></script>
-{% else %}
+{% if USE_PIPELINE %}
     {% load pipeline %}
     {% javascript 'recordtransfer_profile_js' %}
+{% else %}
+    {% load static %}
+    <script src="{% static 'recordtransfer/js/profile/profile.js' %}"></script>
 {% endif %}

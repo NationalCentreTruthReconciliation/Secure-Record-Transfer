@@ -1,9 +1,9 @@
-{% if debug %}
+{% if USE_PIPELINE %}
+    {% load pipeline %}
+    {% stylesheet 'recordtransfer_submission_detail_styles' %}
+{% else %}
     {% load static %}
     <link rel="stylesheet"
           type="text/css"
           href="{% static 'recordtransfer/css/submission_detail/submission_detail.css' %}">
-{% else %}
-    {% load pipeline %}
-    {% stylesheet 'recordtransfer_submission_detail_styles' %}
 {% endif %}
