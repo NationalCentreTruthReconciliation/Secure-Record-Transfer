@@ -16,8 +16,3 @@ class TransferStep(Enum):
     GROUP_TRANSFER = "grouptransfer"
     UPLOAD_FILES = "uploadfiles"
     FINAL_NOTES = "finalnotes"
-
-    @classmethod
-    def get_formset_steps(cls) -> list["TransferStep"]:
-        """Return the steps of the multi-stage form which use formsets."""
-        return [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]
