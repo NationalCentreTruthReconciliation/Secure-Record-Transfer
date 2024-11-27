@@ -373,17 +373,18 @@ $(() => {
     var rightsDialog = undefined
     var sourceRolesDialog = undefined
     var sourceTypesDialog = undefined
+    var totalForms = undefined
 
 
     /***************************************************************************
      * Formset Setup
      **************************************************************************/
 
-    var totalForms = getTotalForms()
-
     if (typeof NUM_EXTRA_FORMS !== 'undefined' && getTotalForms() > 1) {
         deleteForm('.form-row:last')
     }
+
+    totalForms = getTotalForms()
 
     $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
 
