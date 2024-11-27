@@ -380,7 +380,7 @@ $(() => {
      * Formset Setup
      **************************************************************************/
 
-    if (typeof NUM_EXTRA_FORMS !== 'undefined' && getTotalForms() > 1) {
+    if (typeof NUM_EXTRA_FORMS !== 'undefined' && !NUM_EXTRA_FORMS) {
         deleteForm('.form-row:last')
     }
 
