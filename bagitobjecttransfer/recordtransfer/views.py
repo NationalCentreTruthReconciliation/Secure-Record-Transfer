@@ -391,13 +391,7 @@ class TransferFormWizard(SessionWizardView):
             return super().post(request, *args, **kwargs)
 
         past_data = self.storage.data
-        current_data = None
-        if self.current_step in TransferStep.get_formset_steps():
-            current_data = TransferFormWizard.format_formset_step_data(
-                self.current_step, request.POST
-            )
-        else:
-            current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
+        current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
 
         title = None
         if isinstance(current_data, dict):
@@ -425,42 +419,50 @@ class TransferFormWizard(SessionWizardView):
         self.storage.current_step = transfer.current_step
 
     @classmethod
-    def format_step_data(cls, step: TransferStep, data: QueryDict) -> dict:
-        """Format regular form data.
+    def format_step_data(cls, step: TransferStep, data: QueryDict) -> Union[dict, list[dict]]:
+        """Format form data for the current step to be saved for later.
 
         Args:
             step: The current step of the form.
             data: The data from the form.
 
         Returns:
-            dict: The formatted step data.
+            The formatted step data. If this step represents a formset, the return object will be a
+            list of dicts, otherwise, it will be a dict.
         """
-        return {
-            f.replace(step.value + "-", ""): data[f]
-            for f in data
-            if f.startswith(step.value + "-")
-        }
+        pattern = re.compile("^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$")
 
-    @classmethod
-    def format_formset_step_data(cls, step: TransferStep, data: QueryDict) -> list[dict]:
-        """Format formset data."""
         formatted_data = []
-        pattern = f"^{step.value}-\\d+-"
+        is_formset = False
 
-        indexed_data = {}
         for key, value in data.items():
-            if re.match(pattern, key):
-                parts = key.split("-", 2)
-                index = int(parts[1])
-                field_name = parts[2]
-                if index not in indexed_data:
-                    indexed_data[index] = {}
-                indexed_data[index][field_name] = value
+            match_obj = pattern.match(key)
 
-        for index in sorted(indexed_data):
-            formatted_data.append(indexed_data[index])
+            if not match_obj:
+                continue
 
-        return formatted_data
+            field: str = match_obj.group("field")
+            index: str = match_obj.group("index")
+
+            if field in {"MIN_NUM_FORMS", "MAX_NUM_FORMS", "TOTAL_FORMS", "INITIAL_FORMS"}:
+                continue
+
+            if index:
+                index_num = int(index)
+                is_formset = True
+            else:
+                index_num = 0
+
+            while len(formatted_data) <= index_num:
+                formatted_data.append({})
+
+            formatted_data[index_num][field] = value
+
+        if is_formset:
+            # Remove any empty dictionaries if there were any created without data
+            return [data for data in formatted_data if data]
+
+        return formatted_data[0]
 
     def save_transfer(self, data: dict) -> None:
         """Save the current state of a transfer.
@@ -520,12 +522,7 @@ class TransferFormWizard(SessionWizardView):
         initial = self.initial_dict.get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
-            data = pickle.loads(self.in_progress_submission.step_data)["current"]
-            if step in [s.value for s in TransferStep.get_formset_steps()]:
-                initial = data
-            else:
-                for k, v in data.items():
-                    initial[k] = v
+            initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
         if step == TransferStep.CONTACT_INFO.value:
             curr_user = self.request.user
