@@ -1,0 +1,36 @@
+{
+  "version": "4",
+  "specifiers": {
+    "npm:yuglify@2": "2.0.0"
+  },
+  "npm": {
+    "abbrev@1.1.1": {
+      "integrity": "sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q=="
+    },
+    "nopt@2.1.2": {
+      "integrity": "sha512-x8vXm7BZ2jE1Txrxh/hO74HTuYZQEbo8edoRcANgdZ4+PCV+pbjd/xdummkmjjC7LU5EjPzlu8zEq/oxWylnKA==",
+      "dependencies": [
+        "abbrev"
+      ]
+    },
+    "uglify-js@3.19.3": {
+      "integrity": "sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ=="
+    },
+    "ycssmin@1.0.1": {
+      "integrity": "sha512-nSBxAfGA/RlALXyqijYUnIjMXNXWxYHrQJSYwNqypeULl44J8Z/eN5larw7ZEdYLeUHBgPyilve6hqQtWVVs9g=="
+    },
+    "yuglify@2.0.0": {
+      "integrity": "sha512-H5bf7+JO9htUtORqDGYiFAeZjrAQXVU7l2ZX1EYDQFJENjex2pSixhmE6SMSnntzHMeraQhcIXPFdA3YF9ssMA==",
+      "dependencies": [
+        "nopt",
+        "uglify-js",
+        "ycssmin"
+      ]
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:yuglify@2"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "yuglify": "npm:yuglify@^2.0.0"
+  }
+}

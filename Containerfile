@@ -1,14 +1,14 @@
 #
 # Builder image
 #
-FROM docker.io/node:20 AS builder
+FROM docker.io/denoland/deno:alpine-2.1.1 AS builder
 
 WORKDIR /build/
 
-COPY package*.json /build/
+COPY deno.json deno.lock /build/
 
 # Create binary for minifying assets
-RUN npm install && npm run compile
+RUN deno install && deno compile --no-check -A npm:yuglify
 
 
 #
@@ -21,7 +21,8 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app/
 
 # Copy built binary from builder
-COPY --from=builder /build/node_modules/yuglify/dist/* /app/node_modules/yuglify/dist/
+COPY --from=builder /build/yuglify* /app/
+RUN chmod +x /app/yuglify*
 
 # Copy files to container
 COPY pyproject.toml README.md ./docker/entrypoint.sh /app/
