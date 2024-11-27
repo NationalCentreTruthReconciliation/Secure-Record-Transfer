@@ -1,7 +1,7 @@
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
-from pathlib import Path
 from decouple import config
+
 from .base import *
 
 DEBUG = True
@@ -12,7 +12,10 @@ ALLOWED_HOSTS = [
     'localhost',
 ]
 
-# MySQL Database
+INTERNAL_IPS = [
+    '127.0.0.1',
+    '192.168.65.1',
+]
 
 DATABASES = {
     'default': {

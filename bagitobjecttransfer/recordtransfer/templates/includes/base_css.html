@@ -1,13 +1,13 @@
-{% if DEBUG %}
+{% if debug %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/banner.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/navbar.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/accounts.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/footer.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/transferform.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/widget.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/dropzone.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/banner.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/navbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/accounts.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/footer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/transferform.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/widget.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/dropzone.css' %}">
 {% else %}
     {% load pipeline %}
     {% stylesheet 'recordtransfer_base_styles' %}
