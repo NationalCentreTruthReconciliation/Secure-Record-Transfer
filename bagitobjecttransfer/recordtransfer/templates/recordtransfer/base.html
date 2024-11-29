@@ -12,6 +12,7 @@
             {% if FILE_UPLOAD_ENABLED %}
                 {% include "captcha/js_v2_invisible.html" %}
             {% endif %}
+            <script src="{% static 'base.bundle.js' %}"></script>
         {% endblock javascript %}
         <!-- CSS -->
         <link rel="stylesheet"
@@ -21,6 +22,7 @@
         <link rel="shortcut icon"
               type="image/png"
               href="{% static "recordtransfer/img/favicon.ico" %}" />
+        <link rel="stylesheet" href="{% static 'base.css' %}"> 
         <title>
             {% block title %}{% endblock title %}
         </title>
