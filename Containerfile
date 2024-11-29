@@ -12,7 +12,7 @@ COPY pyproject.toml README.md ./docker/entrypoint.sh /app/
 COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
 # # Install Python dependencies
-# RUN pip install .
+RUN pip install .
 
 # Install Node.js
 RUN apt-get update && apt-get install -y curl && \
@@ -24,4 +24,6 @@ COPY package*.json webpack.config.js /app/
 
 RUN npm install && npm run build
 
-# ENTRYPOINT ["/app/entrypoint.sh"]
+WORKDIR /app/bagitobjecttransfer/
+
+ENTRYPOINT ["/app/entrypoint.sh"]
