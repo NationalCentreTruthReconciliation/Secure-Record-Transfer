@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y curl && \
 
 COPY package*.json webpack.config.js /app/
 
-RUN npm install && npm run build
+RUN npm install
 
 WORKDIR /app/bagitobjecttransfer/
 

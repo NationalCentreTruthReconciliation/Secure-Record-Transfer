@@ -1,12 +1,20 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const glob = require('glob');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+console.log("CURRENT MODE IN WBEPACK: ", process.env.MODE)
 
 module.exports = {
-    mode: 'production',
+    mode: process.env.MODE === 'production' ? 'production' : 'development',
+    devtool: false,
     entry: {
         base: [
-            './bagitobjecttransfer/recordtransfer/static/recordtransfer/js/base/index.js',
+            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/base/*.js')
+                .map(file => './' + path.relative(__dirname, file)),
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/base/*.css')
                 .map(file => './' + path.relative(__dirname, file))
         ],
@@ -27,5 +35,11 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: '[name].css' // Output CSS file
         })
-    ]
+    ],
+    optimization: {
+        minimizer: [
+            '...', // This keeps the default JavaScript minifier
+            new CssMinimizerPlugin(), // Add this line to minify CSS
+        ],
+    }
 }

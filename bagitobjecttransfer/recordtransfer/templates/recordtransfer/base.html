@@ -22,7 +22,11 @@
         <link rel="shortcut icon"
               type="image/png"
               href="{% static "recordtransfer/img/favicon.ico" %}" />
-        <link rel="stylesheet" href="{% static 'base.css' %}"> 
+        {% if production %}
+            <link rel="stylesheet" href="{% static 'base.css' %}"> 
+        {% else %}
+            <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/main.css' %}">
+        {% endif %}
         <title>
             {% block title %}{% endblock title %}
         </title>
