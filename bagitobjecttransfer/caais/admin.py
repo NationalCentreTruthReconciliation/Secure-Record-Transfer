@@ -92,7 +92,6 @@ class SourceOfMaterialInlineAdmin(admin.StackedInline):
     class Media(PipelineFormMedia):
         """JavaScript to load for inline form."""
 
-        js_packages = ("caais_admin_js",)
         js = ("https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",)
 
     model = SourceOfMaterial
@@ -209,8 +208,6 @@ class MetadataAdmin(admin.ModelAdmin):
     """Main CAAIS metadata model admin. All repeatable fields have an
     associated Inline admin for editing all metadata at once.
     """
-
-    css = {"all": ("caais_styles",)}
 
     change_form_template = "admin/metadata_change_form.html"
 

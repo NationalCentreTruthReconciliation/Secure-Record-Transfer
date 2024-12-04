@@ -196,24 +196,7 @@ YUGLIFY_BINARY = config("YUGLIFY_BINARY", os.path.join(_YUGLIFY_BINARY_DIR, _YUG
 # create separate minified stylesheets and javascript files for each app
 PIPELINE = {
     'YUGLIFY_BINARY': YUGLIFY_BINARY,
-    'STYLESHEETS': {
-        'caais_styles': {
-            'source_filenames': (
-                'caais/css/base/*.css',
-            ),
-            'output_filename': 'caais/css/base/min.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
-    },
     'JAVASCRIPT': {
-        'caais_admin_js': {
-            'source_filenames': (
-                'caais/js/admin/*.js',
-            ),
-            'output_filename': 'caais/js/admin/min.js',
-        },
         'recordtransfer_admin_js': {
             'source_filenames': (
                 'recordtransfer/js/admin/*.js',

@@ -1,5 +1,17 @@
 {% extends "admin/change_form.html" %}
+
 {% load i18n %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static 'admin_metadata.bundle.js' %}"></script>
+{% endblock extrahead %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin_metadata.css' %}"> 
+{% endblock extrastyle %}
 
 {% block after_related_objects %}
     {% if original.dates_of_creation_or_revision.count %}

@@ -33,6 +33,13 @@ module.exports = {
         submissiongroup: [
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/submission_group/*.js')
                 .map(file => './' + path.relative(__dirname, file)),
+        ],
+        // Admin Site static assets
+        admin_metadata: [
+            ...glob.sync('./bagitobjecttransfer/caais/static/caais/css/base/*.css')
+                .map(file => './' + path.relative(__dirname, file)),
+            ...glob.sync('./bagitobjecttransfer/caais/static/caais/js/admin/*.js')
+            .map(file => './' + path.relative(__dirname, file)),
         ]
     },
     output: {
