@@ -191,3 +191,8 @@ STATICFILES_FINDERS = (
 _YUGLIFY_BINARY_NAME = "yuglify" if os.name != "nt" else "yuglify.exe"
 _YUGLIFY_BINARY_DIR = os.path.join(os.path.dirname(BASE_DIR), "node_modules/yuglify/dist/")
 YUGLIFY_BINARY = config("YUGLIFY_BINARY", os.path.join(_YUGLIFY_BINARY_DIR, _YUGLIFY_BINARY_NAME))
+
+# create separate minified stylesheets and javascript files for each app
+PIPELINE = {
+    'YUGLIFY_BINARY': YUGLIFY_BINARY,
+}

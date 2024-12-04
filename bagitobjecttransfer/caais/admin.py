@@ -1,8 +1,6 @@
 """CAAIS metadata administrator"""
 
 from django.contrib import admin
-from pipeline.forms import PipelineFormMedia
-from typing import ClassVar
 
 from caais.forms import (
     InlineAppraisalForm,
@@ -88,11 +86,6 @@ class DispositionAuthorityInlineAdmin(admin.TabularInline):
 
 class SourceOfMaterialInlineAdmin(admin.StackedInline):
     """Admin for editing source(s) of material inline."""
-
-    class Media(PipelineFormMedia):
-        """JavaScript to load for inline form."""
-
-        js = ("https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",)
 
     model = SourceOfMaterial
     form = InlineSourceOfMaterialForm
@@ -208,6 +201,13 @@ class MetadataAdmin(admin.ModelAdmin):
     """Main CAAIS metadata model admin. All repeatable fields have an
     associated Inline admin for editing all metadata at once.
     """
+
+    class Media:
+        css = {"all": ("admin_metadata.css",)}
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",
+            "admin_metadata.bundle.js",
+        )
 
     change_form_template = "admin/metadata_change_form.html"
 
