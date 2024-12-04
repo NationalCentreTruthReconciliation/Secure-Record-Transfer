@@ -16,7 +16,6 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
-from pipeline.forms import PipelineFormMedia
 
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (

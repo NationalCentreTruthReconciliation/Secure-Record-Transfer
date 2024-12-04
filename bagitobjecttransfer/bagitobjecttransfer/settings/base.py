@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'django_rq',
     'django_recaptcha',
     'dbtemplates',
-    'pipeline',
 ]
 
 MIDDLEWARE = [
@@ -40,7 +39,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-    'pipeline.middleware.MinifyHTMLMiddleware',
 ]
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'
@@ -156,6 +154,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static/')
 FILE_UPLOAD_PERMISSIONS = 0o644
 
+
 # CAAIS dates
 
 CAAIS_UNKNOWN_DATE_TEXT = config('CAAIS_UNKNOWN_DATE_TEXT', cast=str, default='Unknown date')
@@ -168,31 +167,3 @@ CAAIS_UNKNOWN_END_DATE = config('CAAIS_UNKNOWN_END_DATE', cast=str, default='202
 CLAMAV_ENABLED = config('CLAMAV_ENABLED', cast=bool, default=True)
 CLAMAV_HOST = config('CLAMAV_HOST', default='clamav')
 CLAMAV_PORT = config('CLAMAV_PORT', cast=int, default=3310)
-
-# Pipeline configuration
-
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": 'pipeline.storage.PipelineManifestStorage',
-    },
-}
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
-)
-
-# Set up yuglify binary location
-
-_YUGLIFY_BINARY_NAME = "yuglify" if os.name != "nt" else "yuglify.exe"
-_YUGLIFY_BINARY_DIR = os.path.join(os.path.dirname(BASE_DIR), "node_modules/yuglify/dist/")
-YUGLIFY_BINARY = config("YUGLIFY_BINARY", os.path.join(_YUGLIFY_BINARY_DIR, _YUGLIFY_BINARY_NAME))
-
-# create separate minified stylesheets and javascript files for each app
-PIPELINE = {
-    'YUGLIFY_BINARY': YUGLIFY_BINARY,
-}
