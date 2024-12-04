@@ -1,5 +1,8 @@
 {% extends "recordtransfer/base.html" %}
+
 {% load i18n %}
+{% load static %}
+
 {% block javascript %}
     {{ block.super }}
     <script>
@@ -7,6 +10,7 @@
         const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
         const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
     </script>
+    <script src="{% static 'submissiongroup.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block title %}
     {% if IS_NEW %}

@@ -1,6 +1,8 @@
 {% extends "recordtransfer/transferform_base.html" %}
+
 {% load static %}
 {% load i18n %}
+
 {% block javascript %}
     {{ block.super }}
     <script>
@@ -12,6 +14,7 @@
     const DEFAULT_GROUP_ID = {% if DEFAULT_GROUP_ID is not None %}"{{ DEFAULT_GROUP_ID }}"{% else %}null{% endif %};
     const MODAL_MODE = {% if MODAL_MODE %}true{% else %}false{% endif %};
     </script>
+    <script src="{% static 'submissiongroup.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}

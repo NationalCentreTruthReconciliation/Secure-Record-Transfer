@@ -1,7 +1,0 @@
-{% if DEBUG %}
-    {% load static %}
-    <script src="{% static 'recordtransfer/js/submission_group/submission_group_form.js' %}"></script>
-{% else %}
-    {% load pipeline %}
-    {% javascript 'recordtransfer_submission_group_js' %}
-{% endif %}
