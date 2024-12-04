@@ -229,12 +229,6 @@ PIPELINE = {
             ),
             'output_filename': 'recordtransfer/js/dropzone/min.js',
         },
-        'recordtransfer_profile_js': {
-            'source_filenames': (
-                'recordtransfer/js/profile/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/profile/min.js',
-        },
         'recordtransfer_submission_group_js': {
             'source_filenames': (
                 'recordtransfer/js/submission_group/*.js',
