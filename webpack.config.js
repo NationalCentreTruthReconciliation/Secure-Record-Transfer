@@ -19,7 +19,11 @@ module.exports = {
                 .map(file => './' + path.relative(__dirname, file))
         ],
         transferform: [
-            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/forms/*.js')
+            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/transferform/*.js')
+                .map(file => './' + path.relative(__dirname, file)),
+        ],
+        profile: [
+            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/profile/*.js')
                 .map(file => './' + path.relative(__dirname, file)),
         ]
     },
