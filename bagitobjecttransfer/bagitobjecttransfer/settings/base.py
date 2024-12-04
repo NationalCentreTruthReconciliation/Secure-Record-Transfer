@@ -206,15 +206,6 @@ PIPELINE = {
                 'media': 'screen,projection',
             },
         },
-        'recordtransfer_submission_detail_styles': {
-            'source_filenames': (
-                'recordtransfer/css/submission_detail/*.css',
-            ),
-            'output_filename': 'recordtransfer/css/submission_detail/min.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
     },
     'JAVASCRIPT': {
         'caais_admin_js': {
