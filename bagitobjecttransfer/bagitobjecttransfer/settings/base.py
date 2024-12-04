@@ -206,15 +206,6 @@ PIPELINE = {
                 'media': 'screen,projection',
             },
         },
-        'recordtransfer_base_styles': {
-            'source_filenames': (
-                'recordtransfer/css/base/*.css',
-            ),
-            'output_filename': 'recordtransfer/css/base/min.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
         'recordtransfer_submission_detail_styles': {
             'source_filenames': (
                 'recordtransfer/css/submission_detail/*.css',
@@ -231,12 +222,6 @@ PIPELINE = {
                 'caais/js/admin/*.js',
             ),
             'output_filename': 'caais/js/admin/min.js',
-        },
-        'recordtransfer_base_js': {
-            'source_filenames': (
-                'recordtransfer/js/base/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/base/min.js',
         },
         'recordtransfer_dropzone_js': {
             'source_filenames': (

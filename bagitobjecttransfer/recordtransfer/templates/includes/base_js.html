@@ -1,9 +1,0 @@
-{% if DEBUG %}
-    {% load static %}
-    <script src="{% static 'recordtransfer/js/base/forms.js' %}"></script>
-    <script src="{% static 'recordtransfer/js/base/navbar.js' %}"></script>
-    <script src="{% static 'recordtransfer/js/base/widgetconfig.js' %}"></script>
-{% else %}
-{% load pipeline %}
-    {% javascript 'recordtransfer_base_js' %}
-{% endif %}
