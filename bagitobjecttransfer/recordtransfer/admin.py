@@ -110,8 +110,10 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    class Media(PipelineFormMedia):
-        js_packages = ("recordtransfer_admin_js",)
+    class Media:
+        js = (
+            "admin_uploadedfile.bundle.js",
+        )
 
     change_form_template = "admin/readonly_change_form.html"
 
@@ -136,7 +138,6 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         """
         for uploaded_file in queryset:
             uploaded_file.remove()
-
 
 
 class UploadedFileInline(admin.TabularInline):
@@ -264,30 +265,25 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
 
-
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
     def export_atom_2_6_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
-
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
     def export_atom_2_3_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
 
-
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
     def export_atom_2_2_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
 
-
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
     def export_atom_2_1_csv(self, request, queryset):
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
-
 
 
 class SubmissionGroupInline(admin.TabularInline):
@@ -451,21 +447,17 @@ class SubmissionAdmin(admin.ModelAdmin):
     def export_caais_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
 
-
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Selected"))
     def export_atom_2_6_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_6)
-
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Selected"))
     def export_atom_2_3_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_3)
 
-
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Selected"))
     def export_atom_2_2_csv(self, request, queryset):
         return queryset.export_csv(version=ExportVersion.ATOM_2_2)
-
 
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Selected"))
     def export_atom_2_1_csv(self, request, queryset):

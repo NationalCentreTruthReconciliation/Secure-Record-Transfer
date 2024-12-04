@@ -40,6 +40,10 @@ module.exports = {
                 .map(file => './' + path.relative(__dirname, file)),
             ...glob.sync('./bagitobjecttransfer/caais/static/caais/js/admin/*.js')
             .map(file => './' + path.relative(__dirname, file)),
+        ],
+        admin_uploadedfile: [
+            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/admin/*.js')
+            .map(file => './' + path.relative(__dirname, file)),
         ]
     },
     output: {
