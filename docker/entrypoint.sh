@@ -17,5 +17,8 @@ if [ "$ENV" != 'dev' ]; then
   fi
 fi
 
+# Bundle and minify static assets
+npm run build
+
 echo ">> Starting app."
 exec "$@"
