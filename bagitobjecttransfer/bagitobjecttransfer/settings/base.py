@@ -223,12 +223,6 @@ PIPELINE = {
             ),
             'output_filename': 'caais/js/admin/min.js',
         },
-        'recordtransfer_dropzone_js': {
-            'source_filenames': (
-                'recordtransfer/js/dropzone/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/dropzone/min.js',
-        },
         'recordtransfer_submission_group_js': {
             'source_filenames': (
                 'recordtransfer/js/submission_group/*.js',
