@@ -75,7 +75,6 @@ TEMPLATES = [
                 'recordtransfer.context_processors.signup_status',
                 'recordtransfer.context_processors.file_upload_status',
                 'recordtransfer.context_processors.file_uploads',
-                'recordtransfer.context_processors.mode'
             ],
             'loaders': loaders,
         },

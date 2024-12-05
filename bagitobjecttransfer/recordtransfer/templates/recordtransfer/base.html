@@ -18,15 +18,11 @@
         <link rel="stylesheet"
               type="text/css"
               href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+        <link rel="stylesheet" href="{% static 'base.css' %}">
         <!-- Favicon -->
         <link rel="shortcut icon"
               type="image/png"
               href="{% static "recordtransfer/img/favicon.ico" %}" />
-        {% if production %}
-            <link rel="stylesheet" href="{% static 'base.css' %}"> 
-        {% else %}
-            <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/base/main.css' %}">
-        {% endif %}
         <title>
             {% block title %}{% endblock title %}
         </title>

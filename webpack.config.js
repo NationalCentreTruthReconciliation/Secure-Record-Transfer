@@ -2,14 +2,11 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const glob = require('glob');
-const dotenv = require('dotenv');
 
-dotenv.config();
-
-console.log("CURRENT MODE IN WBEPACK: ", process.env.MODE)
+console.log("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE)
 
 module.exports = {
-    mode: process.env.MODE === 'production' ? 'production' : 'development',
+    mode: process.env.WEBPACK_MODE === 'production' ? 'production' : 'development',
     devtool: false,
     entry: {
         base: [
@@ -39,11 +36,11 @@ module.exports = {
             ...glob.sync('./bagitobjecttransfer/caais/static/caais/css/base/*.css')
                 .map(file => './' + path.relative(__dirname, file)),
             ...glob.sync('./bagitobjecttransfer/caais/static/caais/js/admin/*.js')
-            .map(file => './' + path.relative(__dirname, file)),
+                .map(file => './' + path.relative(__dirname, file)),
         ],
         admin_uploadedfile: [
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/admin/*.js')
-            .map(file => './' + path.relative(__dirname, file)),
+                .map(file => './' + path.relative(__dirname, file)),
         ]
     },
     output: {

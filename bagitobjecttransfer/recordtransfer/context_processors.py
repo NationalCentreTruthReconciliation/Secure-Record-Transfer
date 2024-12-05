@@ -13,8 +13,3 @@ def file_uploads(request):
         'MAX_SINGLE_UPLOAD_SIZE': MAX_SINGLE_UPLOAD_SIZE,
         'MAX_TOTAL_UPLOAD_COUNT': MAX_TOTAL_UPLOAD_COUNT,
     }
-
-def mode(request):
-    return {
-        'production': MODE == "production"
-    }

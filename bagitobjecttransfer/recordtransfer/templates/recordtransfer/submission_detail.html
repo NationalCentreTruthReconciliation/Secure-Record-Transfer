@@ -6,11 +6,7 @@
     <title>Transfer Report for "{{ metadata.accession_title }}"</title>
     <meta name="description" content="Automatically generated report for the transfer submission.">
     <meta name="keywords" content="transfer, report, submission, metadata">
-    {% if production %}
-        <link rel="stylesheet" href="{% static 'submissiondetail.css' %}"> 
-    {% else %}
-        <link rel="stylesheet" type="text/css" href="{% static 'recordtransfer/css/submission_detail/submission_detail.css' %}">
-    {% endif %}
+    <link rel="stylesheet" href="{% static 'submissiondetail.css' %}">
 </head>
 <body>
     <div class="main-title">Transfer Report for "{{ metadata.accession_title }}"</div>
