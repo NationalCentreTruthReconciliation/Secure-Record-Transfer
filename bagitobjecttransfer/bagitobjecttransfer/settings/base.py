@@ -148,11 +148,22 @@ COUNTRIES_FLAG_URL = 'flags/{code}.gif'
 
 # Media and Static files (CSS, JavaScript, Images)
 
-MEDIA_URL = '/media/'
-STATIC_URL = '/static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static/')
+MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 FILE_UPLOAD_PERMISSIONS = 0o644
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
+
+# Tell Django where to find Webpack-built assets
+
+STATICFILES_DIRS = [
+    os.path.join(os.path.dirname(BASE_DIR), "dist"),
+]
 
 
 # CAAIS dates
