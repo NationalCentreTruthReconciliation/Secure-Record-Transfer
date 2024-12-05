@@ -1,22 +1,25 @@
-#
-# Main image
-#
 FROM nikolaik/python-nodejs:python3.10-nodejs22-slim
 
 ENV PYTHONUNBUFFERED=1
 
+# Install poetry
+RUN python -m pip install --user pipx && \
+    python -m pipx ensurepath && \
+    python -m pipx install poetry
+
 WORKDIR /app/
 
-# Copy files to container
-COPY pyproject.toml README.md ./docker/entrypoint.sh /app/
-COPY ./bagitobjecttransfer /app/bagitobjecttransfer
-
-# Install Python dependencies
-RUN pip install .
-
+# Copy Node-related files, and install NodeJS dependencies
 COPY package*.json webpack.config.js /app/
+RUN npm install --no-color
 
-RUN npm install
+# Copy poetry-related files, and install Python dependencies
+COPY pyproject.toml poetry.lock README.md /app/
+RUN poetry config virtualenvs.create false && poetry install
+
+# Copy application code to image
+COPY ./docker/entrypoint.sh /app/
+COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
 WORKDIR /app/bagitobjecttransfer/
 
