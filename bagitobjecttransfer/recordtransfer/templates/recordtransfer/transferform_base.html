@@ -1,10 +1,17 @@
 {% extends "recordtransfer/base.html" %}
+
 {% load i18n %}
+{% load static %}
 {% block title %}
+
     {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count %}
         Transfer Step {{ currentstep }} (of {{ totalsteps }})
     {% endblocktrans %}
 {% endblock title %}
+{% block javascript %}
+    {{ block.super }}
+    <script src="{% static 'transferform.bundle.js' %}"></script>
+{% endblock javascript %}
 {% block content %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}

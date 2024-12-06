@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'django_rq',
     'django_recaptcha',
     'dbtemplates',
-    'pipeline',
 ]
 
 MIDDLEWARE = [
@@ -40,7 +39,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-    'pipeline.middleware.MinifyHTMLMiddleware',
 ]
 
 ROOT_URLCONF = 'bagitobjecttransfer.urls'
@@ -149,11 +147,23 @@ COUNTRIES_FLAG_URL = 'flags/{code}.gif'
 
 # Media and Static files (CSS, JavaScript, Images)
 
-MEDIA_URL = '/media/'
-STATIC_URL = '/static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 FILE_UPLOAD_PERMISSIONS = 0o644
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
+
+# Tell Django where to find Webpack-built assets
+
+STATICFILES_DIRS = [
+    os.path.join(os.path.dirname(BASE_DIR), "dist"),
+]
+
 
 # CAAIS dates
 
@@ -167,101 +177,3 @@ CAAIS_UNKNOWN_END_DATE = config('CAAIS_UNKNOWN_END_DATE', cast=str, default='202
 CLAMAV_ENABLED = config('CLAMAV_ENABLED', cast=bool, default=True)
 CLAMAV_HOST = config('CLAMAV_HOST', default='clamav')
 CLAMAV_PORT = config('CLAMAV_PORT', cast=int, default=3310)
-
-# Pipeline configuration
-
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": 'pipeline.storage.PipelineManifestStorage',
-    },
-}
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
-)
-
-# Set up yuglify binary location
-
-_YUGLIFY_BINARY_NAME = "yuglify" if os.name != "nt" else "yuglify.exe"
-_YUGLIFY_BINARY_DIR = os.path.join(os.path.dirname(BASE_DIR), "node_modules/yuglify/dist/")
-YUGLIFY_BINARY = config("YUGLIFY_BINARY", os.path.join(_YUGLIFY_BINARY_DIR, _YUGLIFY_BINARY_NAME))
-
-
-# create separate minified stylesheets and javascript files for each app
-PIPELINE = {
-    'YUGLIFY_BINARY': YUGLIFY_BINARY,
-    'STYLESHEETS': {
-        'caais_styles': {
-            'source_filenames': (
-                'caais/css/base/*.css',
-            ),
-            'output_filename': 'caais/css/base/min.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
-        'recordtransfer_base_styles': {
-            'source_filenames': (
-                'recordtransfer/css/base/*.css',
-            ),
-            'output_filename': 'recordtransfer/css/base/min.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
-        'recordtransfer_submission_detail_styles': {
-            'source_filenames': (
-                'recordtransfer/css/submission_detail/*.css',
-            ),
-            'output_filename': 'recordtransfer/css/submission_detail/min.css',
-            'extra_context': {
-                'media': 'screen,projection',
-            },
-        },
-    },
-    'JAVASCRIPT': {
-        'caais_admin_js': {
-            'source_filenames': (
-                'caais/js/admin/*.js',
-            ),
-            'output_filename': 'caais/js/admin/min.js',
-        },
-        'recordtransfer_base_js': {
-            'source_filenames': (
-                'recordtransfer/js/base/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/base/min.js',
-        },
-        'recordtransfer_dropzone_js': {
-            'source_filenames': (
-                'recordtransfer/js/dropzone/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/dropzone/min.js',
-        },
-        'recordtransfer_profile_js': {
-            'source_filenames': (
-                'recordtransfer/js/profile/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/profile/min.js',
-        },
-        'recordtransfer_submission_group_js': {
-            'source_filenames': (
-                'recordtransfer/js/submission_group/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/submission_group/min.js',
-        },
-        'recordtransfer_admin_js': {
-            'source_filenames': (
-                'recordtransfer/js/admin/*.js',
-            ),
-            'output_filename': 'recordtransfer/js/admin/min.js',
-        },
-    }
-}
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')

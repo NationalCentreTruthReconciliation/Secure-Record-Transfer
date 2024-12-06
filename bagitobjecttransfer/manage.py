@@ -44,21 +44,6 @@ def initialize_debugger() -> None:
             debugpy.listen(("0.0.0.0", port))
 
 
-def check_yuglify_binary() -> None:
-    """Check that the yuglify binary exists when !DEBUG.
-
-    Raise ImproperlyConfigured if the binary is missing.
-    """
-    from django.conf import settings
-    from django.core.exceptions import ImproperlyConfigured
-
-    if not settings.DEBUG and not os.path.exists(settings.YUGLIFY_BINARY):
-        raise ImproperlyConfigured(
-            f"Could not find yuglify binary at '{settings.YUGLIFY_BINARY}'. Did you forget "
-            "to execute 'npm run compile'?"
-        )
-
-
 def main() -> None:
     """Run application with command line arguments."""
     if "DJANGO_SETTINGS_MODULE" not in os.environ:
@@ -79,8 +64,6 @@ def main() -> None:
         ) from exc
 
     initialize_debugger()
-    check_yuglify_binary()
-
     execute_from_command_line(sys.argv)
 
 

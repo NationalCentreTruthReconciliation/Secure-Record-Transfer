@@ -1,5 +1,8 @@
 {% extends "recordtransfer/base.html" %}
+
 {% load i18n %}
+{% load static %}
+
 {% block title %}
     {% trans "Your Profile" %}
 {% endblock title %}
@@ -12,6 +15,7 @@
         const ID_NEW_PASSWORD = "{{ ID_NEW_PASSWORD }}";
         const ID_CONFIRM_NEW_PASSWORD = "{{ ID_CONFIRM_NEW_PASSWORD }}";
     </script>
+    <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block content %}
     {% if user.is_authenticated %}

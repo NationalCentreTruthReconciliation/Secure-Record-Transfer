@@ -6,7 +6,7 @@ repository = "https://github.com/NationalCentreTruthReconciliation/Secure-Record
 documentation = "https://secure-record-transfer.readthedocs.io/en/latest/"
 authors = ["Daniel Lovegrove <Daniel.Lovegrove@umanitoba.ca>"]
 readme = "README.md"
-packages = [{ include = "bagitobjecttransfer" }]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -19,7 +19,6 @@ django-countries = "^7.6.1"
 django-dbtemplates = "^4.0"
 django-formtools = "^2.5.1"
 django-override-storage = "^0.3.2"
-django-pipeline = "^3.1.0"
 django-recaptcha = "^4.0.0"
 django-rq = "^3.0.0"
 gunicorn = "^23.0.0"

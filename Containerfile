@@ -1,34 +1,25 @@
-#
-# Builder image
-#
-FROM docker.io/node:20 AS builder
-
-WORKDIR /build/
-
-COPY package*.json /build/
-
-# Create binary for minifying assets
-RUN npm install && npm run compile
-
-
-#
-# Main image
-#
-FROM docker.io/python:3.10-slim
+FROM nikolaik/python-nodejs:python3.10-nodejs22-slim
 
 ENV PYTHONUNBUFFERED=1
 
+# Install poetry
+RUN python -m pip install --user pipx && \
+    python -m pipx ensurepath && \
+    python -m pipx install poetry
+
 WORKDIR /app/
 
-# Copy built binary from builder
-COPY --from=builder /build/node_modules/yuglify/dist/* /app/node_modules/yuglify/dist/
+# Copy Node-related files, and install NodeJS dependencies
+COPY package*.json webpack.config.js /app/
+RUN npm install --no-color
 
-# Copy files to container
-COPY pyproject.toml README.md ./docker/entrypoint.sh /app/
+# Copy poetry-related files, and install Python dependencies
+COPY pyproject.toml poetry.lock README.md /app/
+RUN poetry config virtualenvs.create false && poetry install
+
+# Copy application code to image
+COPY ./docker/entrypoint.sh /app/
 COPY ./bagitobjecttransfer /app/bagitobjecttransfer
-
-# Install Python dependencies
-RUN pip install .
 
 WORKDIR /app/bagitobjecttransfer/
 

@@ -51,6 +51,7 @@ services:
     environment:
       - ENV=prod
       - IS_RQ=yes
+      - WEBPACK_MODE=production
     depends_on:
       - db
       - redis
@@ -71,6 +72,7 @@ services:
     environment:
       - ENV=prod
       - IS_RQ=no
+      - WEBPACK_MODE=production
     depends_on:
       - db
       - rq

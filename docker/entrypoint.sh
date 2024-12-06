@@ -6,16 +6,22 @@ if [ "$ENV" != 'dev' ]; then
   do
     echo "** Trying again **"
   done
-
-  # Each of these tasks should only be run once
-  if [ "$IS_RQ" = 'yes' ]; then
-    echo ">> Running database migrations."
-    python manage.py migrate --no-input
-  else
-    echo ">> Collecting static files."
-    python manage.py collectstatic --no-input --clear
-  fi
 fi
 
-echo ">> Starting app."
+# Run database migrations in RQ container
+if [ "$IS_RQ" = 'yes' ]; then
+  echo ">> Running database migrations."
+  python manage.py migrate --no-input
+  echo ">> Starting RQ worker(s)"
+
+# Bundle, minify, and collect static assets in the Django container
+else
+  echo ">> Running webpack to bundle + minify assets."
+  npm run build
+  echo ">> Collecting static files."
+  python manage.py collectstatic --no-input --clear --ignore recordtransfer/**/*.js --ignore recordtransfer/**/*.css
+  echo ">> Starting app"
+
+fi
+
 exec "$@"
