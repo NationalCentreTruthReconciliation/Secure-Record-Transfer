@@ -2,8 +2,6 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const glob = require('glob');
-const CopyPlugin = require("copy-webpack-plugin");
-const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 
 console.log("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE)
 
@@ -60,38 +58,12 @@ module.exports = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: '[name].css' // Output CSS file
-        }),
-        new CopyPlugin({
-            patterns: [{
-                from: "bagitobjecttransfer/recordtransfer/static/recordtransfer/img",
-                to: "img"
-            }]
         })
     ],
     optimization: {
         minimizer: [
             '...', // This keeps the default JavaScript minifier
             new CssMinimizerPlugin(), // Add this line to minify CSS
-            new ImageMinimizerPlugin({
-                minimizer: {
-                    implementation: ImageMinimizerPlugin.sharpMinify,
-                },
-                generator: [
-                    {   
-                        // You can apply generator using `?as=webp`, you can use any name and provide more options
-                        type: "asset",
-                        preset: "webp",
-                        implementation: ImageMinimizerPlugin.sharpGenerate,
-                        options: {
-                            encodeOptions: {
-                                webp: {
-                                    quality: 90,
-                                },
-                            },
-                        },
-                    },
-                ],
-            }),
         ],
     }
 }
