@@ -1,3 +1,5 @@
+import Dropzone from "dropzone";
+
 /**
  * Functions and configuration for Dropzone.
  */
@@ -56,18 +58,18 @@ $(() => {
     const csrfToken = getCookie('csrftoken')
 
     var maxTotalUploadSize = 256.00
-    if (typeof(MAX_TOTAL_UPLOAD_SIZE) !== 'undefined') {
+    if (typeof (MAX_TOTAL_UPLOAD_SIZE) !== 'undefined') {
         maxTotalUploadSize = MAX_TOTAL_UPLOAD_SIZE
     }
     var maxTotalUploadSizeBytes = maxTotalUploadSize * 1024 * 1024
 
     var maxSingleUploadSize = 64.00
-    if (typeof(MAX_SINGLE_UPLOAD_SIZE) !== 'undefined') {
+    if (typeof (MAX_SINGLE_UPLOAD_SIZE) !== 'undefined') {
         maxSingleUploadSize = MAX_SINGLE_UPLOAD_SIZE
     }
 
     var maxTotalUploadCount = 40
-    if (typeof(MAX_TOTAL_UPLOAD_COUNT) !== 'undefined') {
+    if (typeof (MAX_TOTAL_UPLOAD_COUNT) !== 'undefined') {
         maxTotalUploadCount = MAX_TOTAL_UPLOAD_COUNT
     }
 
@@ -128,7 +130,7 @@ $(() => {
             "X-CSRFToken": csrfToken,
         },
         // Hit endpoint to determine if a file can be uploaded
-        accept: function(file, done) {
+        accept: function (file, done) {
             if (totalSizeBytes > maxTotalUploadSizeBytes) {
                 done({
                     'error': 'Maximum total upload size (' + maxTotalUploadSize + ' MiB) exceeded'
@@ -152,8 +154,8 @@ $(() => {
                         'filesize': file.size,
                     },
                     dataType: 'json',
-                    headers: {'X-CSRFToken': csrfToken},
-                    success: function(response) {
+                    headers: { 'X-CSRFToken': csrfToken },
+                    success: function (response) {
                         if (response.accepted) {
                             done()
                         }
@@ -161,7 +163,7 @@ $(() => {
                             done(response)
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         if (xhr.responseJSON) {
                             done(xhr.responseJSON)
                         }
@@ -175,7 +177,7 @@ $(() => {
                 })
             }
         },
-        init: function() {
+        init: function () {
             issueFiles = []
             uploadedFiles = []
             sessionToken = ''
@@ -253,7 +255,7 @@ $(() => {
                     var fileName = issue.file
                     invalidFileNames.push(fileName)
                     var fileObj = files.filter(file => { return file.name === fileName })[0]
-                    var errMessage = {'error': issue.error, 'verboseError': issue.verboseError}
+                    var errMessage = { 'error': issue.error, 'verboseError': issue.verboseError }
                     dropzoneClosure.emit('error', fileObj, errMessage, null)
                 }
                 for (const file of files) {
