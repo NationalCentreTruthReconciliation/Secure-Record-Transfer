@@ -87,13 +87,18 @@ module.exports = {
                 },
                 generator: [
                     {
-                      type: "asset",
-                      implementation: ImageMinimizerPlugin.imageminGenerate,
-                      options: {
-                        plugins: ["imagemin-webp"],
-                      },
+                        type: "asset",
+                        implementation: ImageMinimizerPlugin.imageminGenerate,
+                        options: {
+                            plugins: [
+                                "imagemin-gifsicle",
+                                "imagemin-mozjpeg",
+                                "imagemin-pngquant",
+                                "imagemin-svgo",
+                            ],
+                        },
                     },
-                  ],
+                ],
             }),
         ],
     }
