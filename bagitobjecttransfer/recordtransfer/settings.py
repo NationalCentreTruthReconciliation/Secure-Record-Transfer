@@ -96,5 +96,3 @@ ACCEPTED_FILE_FORMATS = config(
     cast=AcceptedFileTypes(),
     default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
 )
-
-MODE = config("MODE", default="DEFAULT_MODE")
