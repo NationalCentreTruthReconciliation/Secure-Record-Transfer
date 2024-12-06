@@ -73,29 +73,21 @@ module.exports = {
             '...', // This keeps the default JavaScript minifier
             new CssMinimizerPlugin(), // Add this line to minify CSS
             new ImageMinimizerPlugin({
-                loader: true,
                 minimizer: {
-                    implementation: ImageMinimizerPlugin.imageminMinify,
-                    options: {
-                        plugins: [
-                            "imagemin-gifsicle",
-                            "imagemin-mozjpeg",
-                            "imagemin-pngquant",
-                            "imagemin-svgo",
-                        ],
-                    },
+                    implementation: ImageMinimizerPlugin.sharpMinify,
                 },
                 generator: [
-                    {
+                    {   
+                        // You can apply generator using `?as=webp`, you can use any name and provide more options
                         type: "asset",
-                        implementation: ImageMinimizerPlugin.imageminGenerate,
+                        preset: "webp",
+                        implementation: ImageMinimizerPlugin.sharpGenerate,
                         options: {
-                            plugins: [
-                                "imagemin-gifsicle",
-                                "imagemin-mozjpeg",
-                                "imagemin-pngquant",
-                                "imagemin-svgo",
-                            ],
+                            encodeOptions: {
+                                webp: {
+                                    quality: 90,
+                                },
+                            },
                         },
                     },
                 ],
