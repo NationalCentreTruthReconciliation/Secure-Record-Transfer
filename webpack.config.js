@@ -64,7 +64,7 @@ module.exports = {
         new CopyPlugin({
             patterns: [{
                 from: "bagitobjecttransfer/recordtransfer/static/recordtransfer/img",
-                to: "img"
+                to: "recordtransfer/img"
             }]
         })
     ],
