@@ -2,16 +2,6 @@ FROM nikolaik/python-nodejs:python3.10-nodejs22-slim
 
 ENV PYTHONUNBUFFERED=1
 
-# Install necessary build tools
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    autoconf \
-    automake \
-    libtool \
-    pkg-config \
-    nasm \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install poetry
 RUN python -m pip install --user pipx && \
     python -m pipx ensurepath && \
