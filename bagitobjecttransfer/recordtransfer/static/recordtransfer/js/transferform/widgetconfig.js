@@ -1,3 +1,5 @@
+import IMask from 'imask';
+
 $(() => {
     /***************************************************************************
      * jQuery Date Picker Setup
@@ -37,15 +39,20 @@ $(() => {
     })
 
     /***************************************************************************
-     * jQuery Input Mask Setup
+     * Input Mask Setup
      **************************************************************************/
-    $('input[id$="phone_number"').each(function() {
-        $(this).mask('+0 (000) 000-0000')
-    })
 
-    $('input[id$="date_of_material"').each(function() {
-        $(this).mask('0000-00-00')
-    })
+    document.querySelectorAll('input[id$=phone_number]').forEach((el) => {
+        IMask(el, {
+            mask: '+0 (000) 000-0000',
+        });
+    });
+
+    document.querySelectorAll('input[id$=date_of_material]').forEach((el) => {
+        IMask(el, {
+            mask: '0000-00-00',
+        });
+    });
 
     /***************************************************************************
      * jQuery UI Tooltip Setup
