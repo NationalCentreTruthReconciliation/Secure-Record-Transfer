@@ -49,13 +49,13 @@ function clearDropzoneErrors() {
     }
 }
 
-
 $(() => {
     var issueFiles = []    // An array of file names
     var uploadedFiles = [] // An array of File objects
     var totalSizeBytes = 0
     var sessionToken = ''
     const csrfToken = getCookie('csrftoken')
+    var dropMessage = document.querySelector('.dz-message'); // Custom drop message
 
     var maxTotalUploadSize = 256.00
     if (typeof (MAX_TOTAL_UPLOAD_SIZE) !== 'undefined') {
@@ -112,6 +112,16 @@ $(() => {
             }
         }
     }
+
+    // Function to update the visibility of the drop message
+    function updateDropMessageVisibility() {
+        if (this.files.length === 0) {
+            dropMessage.style.display = 'block'; // Show message when no files are present
+        } else {
+            dropMessage.style.display = 'none'; // Hide message when there are files
+        }
+    }
+
 
     $("#file-dropzone").dropzone({
         url: "/transfer/uploadfile/",
@@ -184,6 +194,18 @@ $(() => {
 
             var dropzoneClosure = this
             var submitButton = document.getElementById("submit-form-btn")
+            
+            // Call on initialization to set the correct state
+            updateDropMessageVisibility();
+
+            // Update drop message visibility when files are added or removed
+            this.on("addedfile", function() {
+                updateDropMessageVisibility();
+            });
+
+            this.on("removedfile", function() {
+                updateDropMessageVisibility();
+            });
 
             submitButton.addEventListener("click", (event) => {
                 event.preventDefault()
