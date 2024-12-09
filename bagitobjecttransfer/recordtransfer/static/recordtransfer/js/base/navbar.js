@@ -5,28 +5,24 @@
  * Modifications made by: Daniel Lovegrove
  */
 
-$(() => {
-    const openToggle = document.querySelector(".nav-toggle-open")
-    const closeToggle = document.querySelector(".nav-toggle-close")
-    const toggleContainer = document.querySelector(".toggle-container")
-    const menu = document.querySelector(".main-navbar")
+document.addEventListener('DOMContentLoaded', () => {
+    const openToggle = document.querySelector(".nav-toggle-open");
+    const closeToggle = document.querySelector(".nav-toggle-close");
+    const toggleContainer = document.querySelector(".toggle-container");
+    const menu = document.querySelector(".main-navbar");
 
-    function toggleMobileMenu() {
-        let menuIsActive = menu.classList.contains("active")
-
-        if (menuIsActive) {
-            // Close it
+    toggleContainer.addEventListener("click", (e) => {
+        // Close it if its open
+        if (menu.classList.contains("active")) {
             menu.classList.remove("active")
             openToggle.style.display = "block"
             closeToggle.style.display = "none"
         }
+        // Open it if it's closed
         else {
-            // Open it
             menu.classList.add("active")
             openToggle.style.display = "none"
             closeToggle.style.display = "block"
         }
-    }
-
-    toggleContainer.addEventListener("click", toggleMobileMenu, false)
-})
+    }, false);
+});
