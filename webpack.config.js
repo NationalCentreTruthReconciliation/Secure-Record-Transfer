@@ -17,6 +17,10 @@ module.exports = {
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/base/*.css')
                 .map(file => './' + path.relative(__dirname, file))
         ],
+        home: [
+            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/home/*.js')
+                .map(file => './' + path.relative(__dirname, file)),
+        ],
         transferform: [
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/transferform/*.js')
                 .map(file => './' + path.relative(__dirname, file)),

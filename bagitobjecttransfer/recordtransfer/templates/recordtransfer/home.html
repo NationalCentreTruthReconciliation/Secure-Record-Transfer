@@ -4,6 +4,11 @@
 
 {% block title %}{% trans "NCTR Record Transfer Portal" %}{% endblock %}
 
+{% block javascript %}
+    {{ block.super }}
+    <script src="{% static 'home.bundle.js' %}"></script>
+{% endblock javascript %}
+
 {% block focused_content %}
 <div id="main-graphic-container">
     <img id="main-graphic">
