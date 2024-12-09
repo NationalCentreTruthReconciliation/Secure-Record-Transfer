@@ -3,9 +3,10 @@ import os
 import shutil
 import uuid
 from pathlib import Path
-from typing import Union
+from typing import ClassVar, Union
 
 import bagit
+from django.forms import ValidationError
 from caais.export import ExportVersion
 from caais.models import Metadata
 from django.contrib.auth.models import AbstractUser
@@ -17,6 +18,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer import settings
+from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
 
@@ -545,12 +547,26 @@ class InProgressSubmission(models.Model):
             The accession title of the submission
     """
 
+    STEP_CHOICES: ClassVar = [(step.value, step.name) for step in TransferStep]
+
     uuid = models.UUIDField(default=uuid.uuid4)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now_add=True)
-    current_step = models.CharField(max_length=20, null=False)
+    current_step = models.CharField(
+        max_length=20,
+        choices=STEP_CHOICES,
+        null=False,
+        help_text="Current step in the transfer wizard process",
+    )
     step_data = models.BinaryField(default=b"")
     title = models.CharField(max_length=256, null=True)
+
+    def clean(self) -> None:
+        """Validate the current step value."""
+        try:
+            TransferStep(self.current_step)
+        except ValueError:
+            raise ValidationError({"current_step": ["Invalid step value"]}) from None
 
     def __str__(self):
         return f"Transfer of {self.last_updated} by {self.user}"
