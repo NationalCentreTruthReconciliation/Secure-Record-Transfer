@@ -247,7 +247,6 @@ function setupSelectOtherToggle2(selectFieldInputId, otherFieldInputId, otherVal
 
     // Update other element when the select field changes
     selectField.addEventListener("change", function (event) {
-        console.log("event triggered!")
         const otherInput = document.getElementById(otherFieldInputId);
 
         if (!otherInput) {
