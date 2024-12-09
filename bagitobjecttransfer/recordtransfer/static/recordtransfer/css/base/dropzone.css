@@ -543,3 +543,10 @@
     border-right: 6px solid transparent;
     border-bottom: 6px solid #be2626;
 }
+
+/**
+ * Fix dropzone error tooltip from obscuring the "Remove file" link
+ */
+ .dropzone .dz-preview .dz-error-message {
+    top: 150px !important;
+}
