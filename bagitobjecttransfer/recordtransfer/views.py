@@ -43,6 +43,7 @@ from recordtransfer.constants import (
     ID_DISPLAY_GROUP_DESCRIPTION,
     ID_GETS_NOTIFICATION_EMAILS,
     ID_NEW_PASSWORD,
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
@@ -275,11 +276,9 @@ class TransferFormWizard(SessionWizardView):
         },
         TransferStep.SOURCE_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
-            FORMTITLE: gettext("Source Information"),
+            FORMTITLE: gettext("Source Information (Optional)"),
             INFOMESSAGE: gettext(
-                "Enter the info for the source of the records. The source is the person or entity "
-                "that created the records or is holding the records at the moment. If this is you, "
-                "put your own information in"
+                "Select Yes if you would like to manually enter source information"
             ),
         },
         TransferStep.RECORD_DESCRIPTION: {
@@ -575,8 +574,17 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
             all_types = SourceType.objects.all().exclude(name="Other")
+
+            other_role = SourceRole.objects.filter(name="Other").first()
+            other_type = SourceType.objects.filter(name="Other").first()
+
             context.update(
                 {
+                    "js_context": {
+                        "enter_manual_source_info_element_id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                        "other_role_id": other_role.pk if other_role else 0,
+                        "other_type_id": other_type.pk if other_type else 0,
+                    },
                     "source_roles": all_roles,
                     "source_types": all_types,
                 }

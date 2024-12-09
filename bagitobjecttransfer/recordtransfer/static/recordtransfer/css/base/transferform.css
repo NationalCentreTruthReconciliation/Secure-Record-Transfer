@@ -104,6 +104,10 @@
     transition: 120ms ease-in;
 }
 
+.hidden-item {
+    display: none !important;
+}
+
 #file-dropzone {
     min-height: 250px;
     background-color: #f9f9f9;

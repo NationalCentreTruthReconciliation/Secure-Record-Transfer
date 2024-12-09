@@ -13,7 +13,10 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer import settings
-from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
+from recordtransfer.constants import (
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SUBMISSION_GROUP_SELECTION,
+)
 from recordtransfer.models import SubmissionGroup
 
 
@@ -270,6 +273,18 @@ class SourceInfoForm(TransferForm):
             )
 
         return cleaned_data
+
+    enter_manual_source_info = forms.ChoiceField(
+        choices=[
+            ("yes", gettext("Yes")),
+            ("no", gettext("No")),
+        ],
+        widget=forms.RadioSelect(
+            attrs={"id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
+        ),
+        label=gettext("Submitting on behalf of an organization/another person"),
+        initial="no",
+    )
 
     source_name = forms.CharField(
         max_length=64,

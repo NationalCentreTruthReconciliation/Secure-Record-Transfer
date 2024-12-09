@@ -225,6 +225,47 @@ function setupSelectOtherToggle(otherField, choiceFieldFn) {
 }
 
 /**
+ * Conditionally hides/shows an "other" field based on a select field's value. Adds or removes the
+ * .hidden-item class to the other field's parent to show/hide the element.
+ *
+ * @param selectFieldInputId The ID of the select element
+ * @param otherFieldInputId The ID of the input to conditionally show
+ * @param otherValue The value of the select element needed to show the other element
+ */
+function setupSelectOtherToggle2(selectFieldInputId, otherFieldInputId, otherValue) {
+    const selectField = document.getElementById(selectFieldInputId);
+
+    // Hide element at first (if needed)
+    if (selectField.value != otherValue) {
+        const otherInput = document.getElementById(otherFieldInputId);
+
+        if (otherInput) {
+            const container = otherInput.parentElement;
+            container.classList.add("hidden-item");
+        }
+    }
+
+    // Update other element when the select field changes
+    selectField.addEventListener("change", function (event) {
+        console.log("event triggered!")
+        const otherInput = document.getElementById(otherFieldInputId);
+
+        if (!otherInput) {
+            return;
+        }
+
+        const container = otherInput.parentElement;
+
+        if (this.value == otherValue) {
+            container.classList.remove("hidden-item");
+        }
+        else {
+            container.classList.add("hidden-item");
+        }
+    });
+}
+
+/**
  * Function to toggle the visibility of the "other" text field based on the select box value.
  *
  * @param currentId : id of the "other" text field
@@ -506,9 +547,6 @@ $(() => {
 
     setupSelectOtherToggle(['.rights-select-other'], removeOther);
 
-    setupSelectOtherToggle(['.source-type-select-other'], removeOther);
-    setupSelectOtherToggle(['.source-role-select-other'], removeOther);
-
     // Add a new click handler (with namespace) to fix the event handlers that were cloned.
     $('.add-form-row', '#transfer-form').on('click.transfer-form', (event) => {
         setupSelectOtherToggle(['.rights-select-other'], removeOther);
@@ -529,6 +567,61 @@ $(() => {
     **************************************************************************/
     if (typeof MODAL_MODE !== 'undefined' && MODAL_MODE) {
         initializeModalMode();
+    }
+
+
+    /**********************************************************************************************
+     * Source information form setup
+     *********************************************************************************************/
+
+    // Context passed from template to JS
+    const sourceInfoContextElement = document.getElementById("py_context_source_info");
+
+    if (sourceInfoContextElement) {
+        const sourceInfoContext = JSON.parse(sourceInfoContextElement.textContent);
+
+        // Toggles Other source type field depending on value of Source type field
+        setupSelectOtherToggle2(
+            "id_sourceinfo-source_type",
+            "id_sourceinfo-other_source_type",
+            sourceInfoContext["other_type_id"]
+        );
+
+        // Toggles Other source role field depending on value of Source role field
+        setupSelectOtherToggle2(
+            "id_sourceinfo-source_role",
+            "id_sourceinfo-other_source_role",
+            sourceInfoContext["other_role_id"]
+        );
+
+        const enterManualInfoInputId = sourceInfoContext["enter_manual_source_info_element_id"];
+        const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
+
+        if (enterManualInfoInputElement) {
+            enterManualInfoInputElement.addEventListener("change", function (event) {
+                const selected = this.querySelector("input[type=radio]:checked").value;
+
+                if (selected === "yes") {
+                    document.querySelectorAll(".initially-hidden").forEach((el) => {
+                        el.classList.remove("hidden-item");
+                    });
+
+                    // Dispatch events to update "other" fields if they were just shown by accident
+                    const sourceTypeSelect = document.getElementById("id_sourceinfo-source_type");
+                    const sourceRoleSelect = document.getElementById("id_sourceinfo-source_role");
+                    sourceTypeSelect.dispatchEvent(new Event("change"));
+                    sourceRoleSelect.dispatchEvent(new Event("change"));
+                }
+                else {
+                    document.querySelectorAll(".initially-hidden").forEach((el) => {
+                        el.classList.add("hidden-item");
+                    });
+                }
+            });
+        }
+        else {
+            console.warn(`No element exists with the id: ${enterManualInfoInputId}`);
+        }
     }
 })
 
