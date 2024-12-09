@@ -666,7 +666,7 @@ class TransferFormWizard(SessionWizardView):
             send_submission_creation_success.delay(form_data, submission)
             send_thank_you_for_your_transfer.delay(form_data, submission)
 
-            return HttpResponseRedirect(reverse("recordtransfer:userprofile"))
+            return HttpResponseRedirect(reverse("recordtransfer:transfersent"))
 
         except Exception as exc:
             LOGGER.error("Encountered error creating Submission object", exc_info=exc)
