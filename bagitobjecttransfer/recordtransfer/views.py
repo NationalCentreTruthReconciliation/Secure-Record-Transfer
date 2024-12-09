@@ -464,9 +464,9 @@ class TransferFormWizard(SessionWizardView):
         initial = self.initial_dict.get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
-                data = pickle.loads(self.in_progress_submission.step_data)["current"]
-                for k, v in data.items():
-                    initial[k] = v
+            data = pickle.loads(self.in_progress_submission.step_data)["current"]
+            for k, v in data.items():
+                initial[k] = v
 
         if step == "contactinfo":
             curr_user = self.request.user
@@ -720,7 +720,7 @@ def uploadfiles(request):
         )
 
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET"])
 def accept_file(request):
     """Check whether the file is allowed to be uploaded by inspecting the file's extension. The
     allowed file extensions are set using the ACCEPTED_FILE_FORMATS setting.
@@ -734,27 +734,26 @@ def accept_file(request):
             'accepted' is False and both 'error' and 'verboseError' are set.
     """
     # Ensure required parameters are set
-    request_params = request.POST if request.method == "POST" else request.GET
     for required in ("filename", "filesize"):
-        if required not in request_params:
+        if required not in request.GET:
             return JsonResponse(
                 {
                     "accepted": False,
                     "error": gettext("Could not find {0} parameter in request").format(required),
                 },
-                status=400,
+                status=422,
             )
-        if not request_params[required]:
+        if not request.GET.get(required, None):
             return JsonResponse(
                 {
                     "accepted": False,
                     "error": gettext("{0} parameter cannot be empty").format(required),
                 },
-                status=400,
+                status=422,
             )
 
-    filename = request_params["filename"]
-    filesize = request_params["filesize"]
+    filename = request.GET["filename"]
+    filesize = request.GET["filesize"]
     token = request.headers.get("Upload-Session-Token", None)
 
     try:
@@ -775,7 +774,7 @@ def accept_file(request):
         return JsonResponse({"accepted": True}, status=200)
 
     except Exception as exc:
-        LOGGER.error(msg=("Uncaught exception in checkfile view: {0}".format(str(exc))))
+        LOGGER.error("Uncaught exception in checkfile view: %s", exc)
         return JsonResponse(
             {
                 "accepted": False,

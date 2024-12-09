@@ -48,7 +48,7 @@ function clearDropzoneErrors() {
 }
 
 
-$(() => {
+document.addEventListener("DOMContentLoaded", () => {
     var issueFiles = []    // An array of file names
     var uploadedFiles = [] // An array of File objects
     var totalSizeBytes = 0
@@ -145,37 +145,39 @@ $(() => {
                 })
             }
             else {
-                $.post({
-                    url: '/transfer/checkfile/',
-                    data: {
-                        'filename': file.name,
-                        'filesize': file.size,
-                    },
-                    dataType: 'json',
-                    headers: {'X-CSRFToken': csrfToken},
-                    success: function(response) {
-                        if (response.accepted) {
-                            done()
-                        }
-                        else {
-                            done(response)
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        if (xhr.responseJSON) {
-                            done(xhr.responseJSON)
-                        }
-                        else {
-                            done({
-                                'error': xhr.status + ': ' + xhr.statusText,
-                                'verboseError': undefined,
-                            })
-                        }
+                const params = new URLSearchParams({
+                    filename: file.name,
+                    filesize: file.size
+                });
+
+                fetch(`/transfer/checkfile/?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
                     }
                 })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.accepted) {
+                            done();
+                        } else {
+                            done(data);
+                        }
+                    })
+                    .catch(error => {
+                        if (error.response?.json) {
+                            done(error.response.json);
+                        } else {
+                            done({
+                                'error': `${error.status || 'Error'}: ${error.statusText || 'Unknown error'}`,
+                                'verboseError': undefined,
+                            });
+                        }
+                    });
             }
         },
-        init: function() {
+        init: function () {
             issueFiles = []
             uploadedFiles = []
             sessionToken = ''
