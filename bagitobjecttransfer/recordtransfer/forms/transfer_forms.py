@@ -15,6 +15,10 @@ from django_recaptcha.widgets import ReCaptchaV2Invisible
 from recordtransfer import settings
 from recordtransfer.constants import (
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SUBMISSION_GROUP_SELECTION,
 )
 from recordtransfer.models import SubmissionGroup
@@ -315,6 +319,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width",
+                "id": ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
     )
@@ -324,7 +329,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source type not covered by the other choices"),
-                "class": "source-type-select-other",
+                "id": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
         label=gettext("Other source type"),
@@ -347,6 +352,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width",
+                "id": ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
     )
@@ -356,7 +362,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source role not covered by the other choices"),
-                "class": "source-role-select-other",
+                "id": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),
         label=gettext("Other source role"),

@@ -44,6 +44,10 @@ from recordtransfer.constants import (
     ID_GETS_NOTIFICATION_EMAILS,
     ID_NEW_PASSWORD,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
@@ -581,7 +585,11 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "js_context": {
-                        "enter_manual_source_info_element_id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                        "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                        "id_source_type": ID_SOURCE_INFO_SOURCE_TYPE,
+                        "id_other_source_type": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                        "id_source_role": ID_SOURCE_INFO_SOURCE_ROLE,
+                        "id_other_source_role": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
                         "other_role_id": other_role.pk if other_role else 0,
                         "other_type_id": other_type.pk if other_type else 0,
                     },

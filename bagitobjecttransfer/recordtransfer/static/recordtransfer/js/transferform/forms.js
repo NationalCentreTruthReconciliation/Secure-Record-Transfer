@@ -581,19 +581,19 @@ $(() => {
 
         // Toggles Other source type field depending on value of Source type field
         setupSelectOtherToggle2(
-            "id_sourceinfo-source_type",
-            "id_sourceinfo-other_source_type",
+            sourceInfoContext["id_source_type"],
+            sourceInfoContext["id_other_source_type"],
             sourceInfoContext["other_type_id"]
         );
 
         // Toggles Other source role field depending on value of Source role field
         setupSelectOtherToggle2(
-            "id_sourceinfo-source_role",
-            "id_sourceinfo-other_source_role",
+            sourceInfoContext["id_source_role"],
+            sourceInfoContext["id_other_source_role"],
             sourceInfoContext["other_role_id"]
         );
 
-        const enterManualInfoInputId = sourceInfoContext["enter_manual_source_info_element_id"];
+        const enterManualInfoInputId = sourceInfoContext["id_enter_manual_source_info"];
         const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
 
         if (enterManualInfoInputElement) {
