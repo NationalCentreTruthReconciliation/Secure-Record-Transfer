@@ -1,7 +1,6 @@
 {% extends 'recordtransfer/transferform_standard.html' %}
 {% load static %}
 {% load i18n %}
-{% load recordtransfer_template_extras %}
 
 {% block javascript %}
     {{ block.super }}
@@ -19,8 +18,7 @@
             {% endfor %}
         {% endif %}
         {% if field.label != 'hidden' %}
-            {% if field.field.widget|class_name == "RadioSelect" %}
-            {# Only show radio select when form is first created #}
+            {% if field.name == "enter_manual_source_info" %}
             <div class="flex-item">
             {% else %}
             <div class="flex-item initially-hidden hidden-item">
