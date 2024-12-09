@@ -4,10 +4,29 @@
 }
 
 .form-tooltip {
+    /* Float on top of the UI */
+    position: absolute;
+    display: none;
+
+    /* Avoid layout interference */
+    width: max-content;
+    top: 0;
+    left: 0;
+
+    padding: 6px;
     font-size: 11pt;
     background-color: #333333;
     color: white;
     border: 5px;
+    border-radius: 5px;
+}
+
+.tooltip-arrow {
+    position: absolute;
+    background-color: #333333;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
 }
 
 @media(max-width: 700px) {

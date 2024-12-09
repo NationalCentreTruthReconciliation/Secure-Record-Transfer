@@ -1,6 +1,15 @@
 import IMask from 'imask';
+import {
+    autoUpdate,
+    arrow,
+    computePosition,
+    flip,
+    shift,
+    offset,
+} from '@floating-ui/dom';
 
-$(() => {
+
+document.addEventListener("DOMContentLoaded", () => {
     /***************************************************************************
      * jQuery Date Picker Setup
      **************************************************************************/
@@ -53,19 +62,76 @@ $(() => {
             mask: '0000-00-00',
         });
     });
-
-    /***************************************************************************
-     * jQuery UI Tooltip Setup
-     **************************************************************************/
-    $('.help-tooltip').tooltip({
-        items: 'div[tooltip-content]',
-        content: function() {
-            return $(this).attr('tooltip-content')
-        },
-        position: {
-            my: 'right-5',
-            at: 'left',
-        },
-        tooltipClass: 'form-tooltip',
-    })
 })
+
+// Create tooltips after content positioning is calculated; DOMContentLoaded is too early
+window.addEventListener('load', () => {
+    document.querySelectorAll('.help-tooltip').forEach((icon) => {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'form-tooltip';
+        tooltip.innerHTML = icon.getAttribute('tooltip-content')
+
+        const arrowElement = document.createElement('div');
+        arrowElement.className = 'tooltip-arrow';
+
+        tooltip.appendChild(arrowElement);
+
+        document.body.appendChild(tooltip);
+
+        const cleanup = autoUpdate(icon, tooltip, () => {
+            computePosition(icon, tooltip, {
+                placement: 'bottom-end',
+                middleware: [
+                    offset(5),
+                    flip(),
+                    shift(),
+                    arrow({ element: arrowElement }),
+                ],
+            }).then(({ x, y, placement, middlewareData }) => {
+                Object.assign(tooltip.style, {
+                    left: `${x}px`,
+                    top: `${y}px`,
+                });
+
+                // Position the arrow
+                const { x: arrowX, y: arrowY } = middlewareData.arrow;
+
+                const staticSide = {
+                    top: 'bottom',
+                    right: 'left',
+                    bottom: 'top',
+                    left: 'right',
+                }[placement.split('-')[0]];
+
+                Object.assign(arrowElement.style, {
+                    left: arrowX != null ? `${arrowX}px` : '',
+                    top: arrowY != null ? `${arrowY}px` : '',
+                    right: '',
+                    bottom: '',
+                    [staticSide]: '-4px',
+                });
+            });
+        });
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (Array.from(mutation.removedNodes).includes(icon)) {
+                    cleanup();
+                    observer.disconnect();
+                }
+            });
+        });
+
+        observer.observe(icon.parentNode, {
+            childList: true
+        });
+
+        icon.addEventListener('mouseenter', () => {
+            tooltip.style.display = 'block';
+        });
+
+        icon.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    });
+});
