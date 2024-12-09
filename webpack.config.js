@@ -1,7 +1,9 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
 const glob = require('glob');
+const path = require('path');
 
 console.log("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE)
 
@@ -52,7 +54,12 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [MiniCssExtractPlugin.loader, 'css-loader'] // Extract CSS
-            }
+            },
+            // You need this, if you are using `import file from "file.ext"`, for `new URL(...)` syntax you don't need it
+            {
+                test: /\.(jpe?g|png|svg|webp)$/i,
+                type: "asset",
+            },
         ]
     },
     plugins: [
@@ -64,6 +71,28 @@ module.exports = {
         minimizer: [
             '...', // This keeps the default JavaScript minifier
             new CssMinimizerPlugin(), // Add this line to minify CSS
+            new ImageMinimizerPlugin({
+                minimizer: {
+                    implementation: ImageMinimizerPlugin.sharpMinify,
+                    options: {
+                        encodeOptions: {
+                            jpeg: {
+                                // https://sharp.pixelplumbing.com/api-output#jpeg
+                                quality: 100,
+                            },
+                            webp: {
+                                // https://sharp.pixelplumbing.com/api-output#webp
+                                lossless: true,
+                            },
+                            // png by default sets the quality to 100%, which is same as lossless
+                            // https://sharp.pixelplumbing.com/api-output#png
+                            png: {
+                                compressionLevel: 9,
+                            },
+                        },
+                    },
+                },
+            }),
         ],
     }
 }
