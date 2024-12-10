@@ -17,7 +17,7 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from recordtransfer import settings
+import bagitobjecttransfer.settings as settings
 from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
