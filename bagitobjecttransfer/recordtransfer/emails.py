@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+import bagitobjecttransfer.settings.base
 from recordtransfer import settings
 from recordtransfer.models import Submission, User
 from recordtransfer.tokens import account_activation_token
@@ -225,7 +226,7 @@ def _get_do_not_reply_email_address() -> str:
     else:
         clean_domain = domain
 
-    return f"{settings.DO_NOT_REPLY_USERNAME}@{clean_domain}"
+    return f"{bagitobjecttransfer.settings.base.DO_NOT_REPLY_USERNAME}@{clean_domain}"
 
 
 def _send_mail_with_logs(

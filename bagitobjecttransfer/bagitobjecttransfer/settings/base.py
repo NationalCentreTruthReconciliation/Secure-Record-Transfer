@@ -179,3 +179,6 @@ SIGN_UP_ENABLED = config("SIGN_UP_ENABLED", default=True, cast=bool)
 
 # Enable or disable the file upload ability
 FILE_UPLOAD_ENABLED = config("FILE_UPLOAD_ENABLED", default=True, cast=bool)
+
+# Email Usernames
+DO_NOT_REPLY_USERNAME = config("DO_NOT_REPLY_USERNAME", default="do-not-reply")

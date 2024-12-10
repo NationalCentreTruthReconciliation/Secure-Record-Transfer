@@ -12,9 +12,6 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")
 
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER")
 
-# Email Usernames
-
-DO_NOT_REPLY_USERNAME = config("DO_NOT_REPLY_USERNAME", default="do-not-reply")
 ARCHIVIST_EMAIL = config("ARCHIVIST_EMAIL")
 
 # Checksum types
