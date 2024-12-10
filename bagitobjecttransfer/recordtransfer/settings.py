@@ -12,8 +12,6 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")
 
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER")
 
-APPROXIMATE_DATE_FORMAT = config("APPROXIMATE_DATE_FORMAT", default="[ca. {date}]")
-
 # File types allowed to be uploaded. See documentation for how to customize this list.
 
 ACCEPTED_FILE_FORMATS = config(

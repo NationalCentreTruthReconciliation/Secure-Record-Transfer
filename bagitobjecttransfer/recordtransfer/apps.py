@@ -37,10 +37,10 @@ def verify_date_format():
     Throws an ImproperlyConfigured exception if the setting does not contain
     "{date}"
     """
-    if r"{date}" not in settings.APPROXIMATE_DATE_FORMAT:
+    if r"{date}" not in bagitobjecttransfer.settings.base.APPROXIMATE_DATE_FORMAT:
         raise ImproperlyConfigured(
             ("The APPROXIMATE_DATE_FORMAT (currently: {0}) does not contain " "{{date}}").format(
-                settings.APPROXIMATE_DATE_FORMAT
+                bagitobjecttransfer.settings.base.APPROXIMATE_DATE_FORMAT
             )
         )
 
