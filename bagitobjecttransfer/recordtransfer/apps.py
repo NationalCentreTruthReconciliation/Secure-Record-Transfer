@@ -25,7 +25,7 @@ def verify_email_settings():
     """
     if not bagitobjecttransfer.settings.base.DO_NOT_REPLY_USERNAME:
         raise ImproperlyConfigured("The DO_NOT_REPLY_USERNAME setting is empty")
-    if not settings.ARCHIVIST_EMAIL:
+    if not bagitobjecttransfer.settings.base.ARCHIVIST_EMAIL:
         raise ImproperlyConfigured("The ARCHIVIST_EMAIL setting is empty")
 
 

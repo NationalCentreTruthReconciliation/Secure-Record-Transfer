@@ -12,8 +12,6 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")
 
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER")
 
-ARCHIVIST_EMAIL = config("ARCHIVIST_EMAIL")
-
 # Checksum types
 
 BAG_CHECKSUMS = config("BAG_CHECKSUMS", default="sha512", cast=Csv())

@@ -182,3 +182,5 @@ FILE_UPLOAD_ENABLED = config("FILE_UPLOAD_ENABLED", default=True, cast=bool)
 
 # Email Usernames
 DO_NOT_REPLY_USERNAME = config("DO_NOT_REPLY_USERNAME", default="do-not-reply")
+
+ARCHIVIST_EMAIL = config("ARCHIVIST_EMAIL")
