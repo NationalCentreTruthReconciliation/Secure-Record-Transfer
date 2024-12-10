@@ -1,9 +1,8 @@
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
-from pathlib import Path
 from decouple import config
+
 from .base import *
-import re
 
 # Overwrite base.py settings for media and static roots
 MEDIA_ROOT = "/app/media"

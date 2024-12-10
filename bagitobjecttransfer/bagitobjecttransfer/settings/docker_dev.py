@@ -1,7 +1,7 @@
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
-from pathlib import Path
 from decouple import config
+
 from .base import *
 
 DEBUG = True
