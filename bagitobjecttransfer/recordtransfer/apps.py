@@ -253,9 +253,9 @@ def verify_caais_defaults():
     Ensures that all required defaults exist, raises an ImproperlyConfigured
     exception if a default does not exist.
     """
-    if not settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
+    if not bagitobjecttransfer.settings.base.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set")
-    if not settings.CAAIS_DEFAULT_CREATION_TYPE:
+    if not bagitobjecttransfer.settings.base.CAAIS_DEFAULT_CREATION_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
 
 
