@@ -44,10 +44,10 @@ from recordtransfer.constants import (
     ID_GETS_NOTIFICATION_EMAILS,
     ID_NEW_PASSWORD,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
     ID_SOURCE_INFO_SOURCE_ROLE,
-    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
@@ -518,20 +518,47 @@ class TransferFormWizard(SessionWizardView):
         """Retrieve the name of the template for the current step."""
         return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
 
-    def get_form_initial(self, step):
-        """Populate form with saved transfer data (if a "resume" request was received), and add the
-        user's name and email from their user profile.
+    def get_name_of_user(self, user: User) -> str:
+        """Get the name of a user.
+
+        Tries to get the name from the User object first, and falls back to using the form data
+        submitted in the contact info.
         """
-        initial = self.initial_dict.get(step, {})
+        if user:
+            if user.first_name and user.last_name:
+                return f"{user.first_name} {user.last_name}"
+            elif user.first_name:
+                return user.first_name
+            elif user.last_name:
+                return user.last_name
+        return self.get_form_value(TransferStep.CONTACT_INFO, "contact_name") or ""
+
+    def get_form_initial(self, step: str) -> dict:
+        """Populate the initial state of the form.
+
+        Populate form with saved transfer data if a "resume" request was received. Fills in the
+        user's name and email automatically where possible.
+        """
+        initial = (self.initial_dict or {}).get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
-        if step == TransferStep.CONTACT_INFO.value:
-            curr_user = self.request.user
-            if curr_user.first_name and curr_user.last_name:
-                initial["contact_name"] = f"{curr_user.first_name} {curr_user.last_name}"
-            initial["email"] = str(curr_user.email)
+        if step == TransferStep.CONTACT_INFO.value and isinstance(self.request.user, User):
+            initial["contact_name"] = self.get_name_of_user(self.request.user)
+            initial["email"] = str(self.request.user.email)
+
+        elif step == TransferStep.SOURCE_INFO.value:
+            if isinstance(self.request.user, User):
+                initial["source_name"] = self.get_name_of_user(self.request.user)
+
+            donor_role = SourceRole.objects.filter(name="Donor").first()
+            if donor_role:
+                initial["source_role"] = donor_role.pk
+
+            individual_type = SourceType.objects.filter(name="Individual").first()
+            if individual_type:
+                initial["source_type"] = individual_type.pk
 
         return initial
 
