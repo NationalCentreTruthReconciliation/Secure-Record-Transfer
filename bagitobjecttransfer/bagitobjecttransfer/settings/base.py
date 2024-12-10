@@ -1,6 +1,6 @@
 import os
 
-from decouple import config
+from decouple import Csv, config
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -184,3 +184,6 @@ FILE_UPLOAD_ENABLED = config("FILE_UPLOAD_ENABLED", default=True, cast=bool)
 DO_NOT_REPLY_USERNAME = config("DO_NOT_REPLY_USERNAME", default="do-not-reply")
 
 ARCHIVIST_EMAIL = config("ARCHIVIST_EMAIL")
+# Checksum types
+
+BAG_CHECKSUMS = config("BAG_CHECKSUMS", default="sha512", cast=Csv())

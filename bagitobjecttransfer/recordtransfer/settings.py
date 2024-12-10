@@ -1,6 +1,6 @@
 """Application-specific settings for the recordtransfer app."""
 
-from decouple import Csv, config
+from decouple import config
 
 from recordtransfer.configuration import AcceptedFileTypes
 
@@ -11,10 +11,6 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")
 # The location where uploaded files are stored temporarily
 
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER")
-
-# Checksum types
-
-BAG_CHECKSUMS = config("BAG_CHECKSUMS", default="sha512", cast=Csv())
 
 # Maximum upload thresholds
 

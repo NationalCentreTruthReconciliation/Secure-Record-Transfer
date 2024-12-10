@@ -52,13 +52,15 @@ def verify_checksum_settings():
 
     Throws an ImproperlyConfigured exception if the setting is not valid.
     """
-    if not settings.BAG_CHECKSUMS:
+    if not bagitobjecttransfer.settings.base.BAG_CHECKSUMS:
         raise ImproperlyConfigured(
             "No checksums found in the BAG_CHECKSUMS setting. Choose one "
             "or more checksum algorithms to generate checksums for when "
             'creating a BagIt bag, separated by commas (i.e., "sha1,sha256")'
         )
-    not_found = [a for a in settings.BAG_CHECKSUMS if a not in CHECKSUM_ALGOS]
+    not_found = [
+        a for a in bagitobjecttransfer.settings.base.BAG_CHECKSUMS if a not in CHECKSUM_ALGOS
+    ]
     if not_found:
         not_supported = ", ".join(not_found)
         supported = ", ".join(CHECKSUM_ALGOS)
