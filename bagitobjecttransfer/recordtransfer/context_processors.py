@@ -1,9 +1,8 @@
-from bagitobjecttransfer.settings.base import SIGN_UP_ENABLED
+from bagitobjecttransfer.settings.base import FILE_UPLOAD_ENABLED, SIGN_UP_ENABLED
 from recordtransfer.settings import (
     MAX_SINGLE_UPLOAD_SIZE,
     MAX_TOTAL_UPLOAD_COUNT,
     MAX_TOTAL_UPLOAD_SIZE,
-    FILE_UPLOAD_ENABLED,
 )
 
 

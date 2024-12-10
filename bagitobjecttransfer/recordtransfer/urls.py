@@ -6,10 +6,9 @@ from django.urls import path, re_path
 import bagitobjecttransfer.settings.base
 
 from . import forms, views
-from . import settings as recordtransfersettings
 
 # Set up transfer forms depending on whether file uploads are enabled or disabled
-if recordtransfersettings.FILE_UPLOAD_ENABLED:
+if bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED:
     _transfer_forms = [
         ("acceptlegal", forms.AcceptLegal),
         ("contactinfo", forms.ContactInfoForm),
@@ -86,7 +85,7 @@ if settings.TESTING or not settings.DEBUG:
         re_path(r"media/(?P<path>.*)", login_required(views.media_request), name="media")
     )
 
-if settings.TESTING or recordtransfersettings.FILE_UPLOAD_ENABLED:
+if settings.TESTING or bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path("transfer/checkfile/", login_required(views.accept_file), name="checkfile"),

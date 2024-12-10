@@ -3,6 +3,7 @@ import pickle
 import re
 from typing import Any, ClassVar, Optional, Union
 
+import bagitobjecttransfer.settings.base
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
@@ -613,7 +614,7 @@ class TransferFormWizard(SessionWizardView):
         Returns:
             (None): The cleaned form data is modified in-place
         """
-        if not settings.FILE_UPLOAD_ENABLED:
+        if not bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED:
             return
 
         session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
@@ -646,7 +647,7 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Mapping form data to CAAIS metadata")
             submission.metadata = map_form_to_metadata(form_data)
 
-            if settings.FILE_UPLOAD_ENABLED:
+            if bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED:
                 token = form_data["session_token"]
                 LOGGER.info("Fetching session with the token %s", token)
                 submission.upload_session = UploadSession.objects.filter(token=token).first()

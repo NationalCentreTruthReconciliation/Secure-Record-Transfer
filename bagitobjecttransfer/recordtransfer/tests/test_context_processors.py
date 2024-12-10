@@ -16,7 +16,10 @@ class TestSignupStatus(TestCase):
 class TestFileUploadStatus(TestCase):
     def test_response_has_file_upload_status(self):
         response = self.client.get(reverse("recordtransfer:index"))
-        self.assertEqual(response.context["FILE_UPLOAD_ENABLED"], settings.FILE_UPLOAD_ENABLED)
+        self.assertEqual(
+            response.context["FILE_UPLOAD_ENABLED"],
+            bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED,
+        )
 
 
 class TestFileUploadLimit(TestCase):

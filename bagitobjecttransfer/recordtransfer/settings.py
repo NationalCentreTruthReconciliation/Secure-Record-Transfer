@@ -4,10 +4,6 @@ from decouple import Csv, config
 
 from recordtransfer.configuration import AcceptedFileTypes
 
-# Enable or disable the file upload ability
-
-FILE_UPLOAD_ENABLED = config("FILE_UPLOAD_ENABLED", default=True, cast=bool)
-
 # The location where bags will be stored
 
 BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")

@@ -176,3 +176,6 @@ CLAMAV_PORT = config("CLAMAV_PORT", cast=int, default=3310)
 
 # Enable or disable the sign-up ability
 SIGN_UP_ENABLED = config("SIGN_UP_ENABLED", default=True, cast=bool)
+
+# Enable or disable the file upload ability
+FILE_UPLOAD_ENABLED = config("FILE_UPLOAD_ENABLED", default=True, cast=bool)
