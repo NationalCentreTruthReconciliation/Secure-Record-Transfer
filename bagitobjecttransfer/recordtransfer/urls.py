@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
 from django.urls import path, re_path
 
+import bagitobjecttransfer.settings.base
+
 from . import forms, views
 from . import settings as recordtransfersettings
 
@@ -92,7 +94,7 @@ if settings.TESTING or recordtransfersettings.FILE_UPLOAD_ENABLED:
         ]
     )
 
-if settings.TESTING or recordtransfersettings.SIGN_UP_ENABLED:
+if settings.TESTING or bagitobjecttransfer.settings.base.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path("createaccount/", views.CreateAccount.as_view(), name="createaccount"),
