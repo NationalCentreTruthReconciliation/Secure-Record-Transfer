@@ -197,9 +197,13 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
-        context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
-        context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
-        context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
+        context["max_total_upload_size"] = bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE
+        context["max_single_upload_size"] = (
+            bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE
+        )
+        context["max_total_upload_count"] = (
+            bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_COUNT
+        )
         return context
 
 
@@ -935,7 +939,10 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
         }
 
     # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_single_size = min(
+        bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE,
+        bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE,
+    )
     max_single_size_bytes = mib_to_bytes(max_single_size)
     size_mib = bytes_to_mib(size)
     if size > max_single_size_bytes:
@@ -979,18 +986,24 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         return m * 1024**2
 
     # Check number of files is within allowed total
-    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
+    if (
+        session.number_of_files_uploaded()
+        >= bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_COUNT
+    ):
         return {
             "accepted": False,
             "error": gettext("You can not upload anymore files."),
             "verboseError": gettext(
                 'The file "{0}" would push the total file count past the '
                 "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE),
+            ).format(filename, bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE),
         }
 
     # Check total size of all files plus current one is within allowed size
-    max_size = max(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_size = max(
+        bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE,
+        bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE,
+    )
     max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
         return {

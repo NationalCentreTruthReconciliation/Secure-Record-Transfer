@@ -146,8 +146,8 @@ def verify_max_upload_size():
                 ).format(setting_name, value)
             )
 
-    max_total_size = settings.MAX_TOTAL_UPLOAD_SIZE
-    max_single_size = settings.MAX_SINGLE_UPLOAD_SIZE
+    max_total_size = bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE
+    max_single_size = bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE
     if max_total_size < max_single_size:
         raise ImproperlyConfigured(
             (

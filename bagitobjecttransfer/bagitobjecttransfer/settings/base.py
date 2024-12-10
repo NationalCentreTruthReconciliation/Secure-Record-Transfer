@@ -184,6 +184,11 @@ FILE_UPLOAD_ENABLED = config("FILE_UPLOAD_ENABLED", default=True, cast=bool)
 DO_NOT_REPLY_USERNAME = config("DO_NOT_REPLY_USERNAME", default="do-not-reply")
 
 ARCHIVIST_EMAIL = config("ARCHIVIST_EMAIL")
-# Checksum types
 
+# Checksum types
 BAG_CHECKSUMS = config("BAG_CHECKSUMS", default="sha512", cast=Csv())
+
+# Maximum upload thresholds
+MAX_TOTAL_UPLOAD_SIZE = config("MAX_TOTAL_UPLOAD_SIZE", default=256, cast=int)
+MAX_SINGLE_UPLOAD_SIZE = config("MAX_SINGLE_UPLOAD_SIZE", default=64, cast=int)
+MAX_TOTAL_UPLOAD_COUNT = config("MAX_TOTAL_UPLOAD_COUNT", default=40, cast=int)

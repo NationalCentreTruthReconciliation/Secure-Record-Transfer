@@ -12,12 +12,6 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")
 
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER")
 
-# Maximum upload thresholds
-
-MAX_TOTAL_UPLOAD_SIZE = config("MAX_TOTAL_UPLOAD_SIZE", default=256, cast=int)
-MAX_SINGLE_UPLOAD_SIZE = config("MAX_SINGLE_UPLOAD_SIZE", default=64, cast=int)
-MAX_TOTAL_UPLOAD_COUNT = config("MAX_TOTAL_UPLOAD_COUNT", default=40, cast=int)
-
 # Use Date widgets for record dates or use free text fields.
 
 USE_DATE_WIDGETS = config("USE_DATE_WIDGETS", default=True, cast=bool)
