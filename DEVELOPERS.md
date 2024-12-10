@@ -62,6 +62,36 @@ Use this `launch.json` configuration in VSCode to debug the application:
 }
 ```
 
+## Javascript Development
+
+If you're editing any of the `.js` files in this repo, add these settings to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project to set your environment up.
+
+```json
+{
+    "[javascript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "editor.rulers": [
+            99
+        ]
+    }
+}
+```
+
+### Re-build JS as Changes are Made
+
+After you run the dev container (`compose.dev.yml`), you can automatically re-build the JS files any time they change with this command:
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml exec app npm run watch
+
+# Using Podman:
+podman-compose -f compose.dev.yml exec app npm run watch
+```
+
+This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
+
 ## Testing Setup
 
 Ensure that you've installed the `dev` dependencies locally (preferably in a virtual environment):

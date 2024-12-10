@@ -58,3 +58,7 @@ If you'd like to be able to log in to the record transfer app as an administrato
 ```shell
 podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
 ```
+
+## Developers
+
+See the [DEVELOPERS.md](DEVELOPERS.md) file for more info on setting your development environment up to work on this application.
