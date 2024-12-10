@@ -12,10 +12,6 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER")
 
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER")
 
-# Use Date widgets for record dates or use free text fields.
-
-USE_DATE_WIDGETS = config("USE_DATE_WIDGETS", default=True, cast=bool)
-
 # Defaults to use in place of form data, or to supplement form data with when converted to CAAIS
 # metadata
 
