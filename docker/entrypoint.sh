@@ -18,8 +18,6 @@ if [ "$IS_RQ" = 'yes' ]; then
 else
   echo ">> Running webpack to bundle + minify assets."
   npm run build
-  echo ">> Collecting static files."
-  python manage.py collectstatic --no-input --clear --ignore recordtransfer/**/*.js --ignore recordtransfer/**/*.css
   echo ">> Starting app"
 
 fi

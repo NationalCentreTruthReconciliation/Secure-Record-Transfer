@@ -11,6 +11,9 @@ WORKDIR /app/
 
 # Copy Node-related files, and install NodeJS dependencies
 COPY package*.json webpack.config.js /app/
+# Copy script files
+COPY ./scripts /app/scripts
+
 RUN npm install --no-color
 
 # Copy poetry-related files, and install Python dependencies
