@@ -2,6 +2,8 @@ import os
 
 from decouple import Csv, config
 
+from recordtransfer.configuration import AcceptedFileTypes
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 TESTING = False
@@ -261,3 +263,10 @@ CAAIS_DEFAULT_CREATION_AGENT = config("CAAIS_DEFAULT_CREATION_AGENT", default=""
 CAAIS_DEFAULT_CREATION_NOTE = config("CAAIS_DEFAULT_CREATION_NOTE", default="")
 
 APPROXIMATE_DATE_FORMAT = config("APPROXIMATE_DATE_FORMAT", default="[ca. {date}]")
+
+# File types allowed to be uploaded. See documentation for how to customize this list.
+ACCEPTED_FILE_FORMATS = config(
+    "ACCEPTED_FILE_TYPES",
+    cast=AcceptedFileTypes(),
+    default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
+)

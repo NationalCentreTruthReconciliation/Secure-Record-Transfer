@@ -163,7 +163,7 @@ def verify_accepted_file_formats() -> None:
     Throws an ImproperlyConfigured exception if there are any issues with the
     formatting of the setting or the file extensions in the setting.
     """
-    formats = settings.ACCEPTED_FILE_FORMATS
+    formats = bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS
 
     if not isinstance(formats, dict):
         raise ImproperlyConfigured(

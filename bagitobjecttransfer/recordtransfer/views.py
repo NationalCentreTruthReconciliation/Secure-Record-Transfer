@@ -35,7 +35,6 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, FormView, TemplateView, UpdateView, View
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer import settings
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
@@ -196,7 +195,7 @@ class About(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
+        context["accepted_files"] = bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS
         context["max_total_upload_size"] = bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE
         context["max_single_upload_size"] = (
             bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE
@@ -627,7 +626,7 @@ class TransferFormWizard(SessionWizardView):
 
         count = get_human_readable_file_count(
             [f.name for f in session.get_existing_file_set()],
-            settings.ACCEPTED_FILE_FORMATS,
+            bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS,
             LOGGER,
         )
 
@@ -900,7 +899,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     # Check extension is allowed
     extension = name_split[-1].lower()
     extension_accepted = False
-    for _, accepted_extensions in settings.ACCEPTED_FILE_FORMATS.items():
+    for _, accepted_extensions in bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS.items():
         for accepted_extension in accepted_extensions:
             if extension == accepted_extension.lower():
                 extension_accepted = True
