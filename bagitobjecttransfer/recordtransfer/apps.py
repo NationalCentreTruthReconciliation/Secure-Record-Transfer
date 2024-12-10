@@ -3,14 +3,11 @@ import logging
 import os
 import re
 
+from bagit import CHECKSUM_ALGOS
 from django.apps import AppConfig
 from django.core.exceptions import ImproperlyConfigured
 
-from bagit import CHECKSUM_ALGOS
-
-import bagitobjecttransfer.settings.base
-from recordtransfer import settings
-
+from bagitobjecttransfer import settings
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -23,9 +20,9 @@ def verify_email_settings():
 
     Throws an ImproperlyConfigured exception if either of these are empty.
     """
-    if not bagitobjecttransfer.settings.base.DO_NOT_REPLY_USERNAME:
+    if not settings.DO_NOT_REPLY_USERNAME:
         raise ImproperlyConfigured("The DO_NOT_REPLY_USERNAME setting is empty")
-    if not bagitobjecttransfer.settings.base.ARCHIVIST_EMAIL:
+    if not settings.ARCHIVIST_EMAIL:
         raise ImproperlyConfigured("The ARCHIVIST_EMAIL setting is empty")
 
 
@@ -37,10 +34,10 @@ def verify_date_format():
     Throws an ImproperlyConfigured exception if the setting does not contain
     "{date}"
     """
-    if r"{date}" not in bagitobjecttransfer.settings.base.APPROXIMATE_DATE_FORMAT:
+    if r"{date}" not in settings.APPROXIMATE_DATE_FORMAT:
         raise ImproperlyConfigured(
             ("The APPROXIMATE_DATE_FORMAT (currently: {0}) does not contain " "{{date}}").format(
-                bagitobjecttransfer.settings.base.APPROXIMATE_DATE_FORMAT
+                settings.APPROXIMATE_DATE_FORMAT
             )
         )
 
@@ -52,15 +49,13 @@ def verify_checksum_settings():
 
     Throws an ImproperlyConfigured exception if the setting is not valid.
     """
-    if not bagitobjecttransfer.settings.base.BAG_CHECKSUMS:
+    if not settings.BAG_CHECKSUMS:
         raise ImproperlyConfigured(
             "No checksums found in the BAG_CHECKSUMS setting. Choose one "
             "or more checksum algorithms to generate checksums for when "
             'creating a BagIt bag, separated by commas (i.e., "sha1,sha256")'
         )
-    not_found = [
-        a for a in bagitobjecttransfer.settings.base.BAG_CHECKSUMS if a not in CHECKSUM_ALGOS
-    ]
+    not_found = [a for a in settings.BAG_CHECKSUMS if a not in CHECKSUM_ALGOS]
     if not_found:
         not_supported = ", ".join(not_found)
         supported = ", ".join(CHECKSUM_ALGOS)
@@ -146,8 +141,8 @@ def verify_max_upload_size():
                 ).format(setting_name, value)
             )
 
-    max_total_size = bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE
-    max_single_size = bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE
+    max_total_size = settings.MAX_TOTAL_UPLOAD_SIZE
+    max_single_size = settings.MAX_SINGLE_UPLOAD_SIZE
     if max_total_size < max_single_size:
         raise ImproperlyConfigured(
             (
@@ -163,7 +158,7 @@ def verify_accepted_file_formats() -> None:
     Throws an ImproperlyConfigured exception if there are any issues with the
     formatting of the setting or the file extensions in the setting.
     """
-    formats = bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS
+    formats = settings.ACCEPTED_FILE_FORMATS
 
     if not isinstance(formats, dict):
         raise ImproperlyConfigured(
@@ -253,9 +248,9 @@ def verify_caais_defaults():
     Ensures that all required defaults exist, raises an ImproperlyConfigured
     exception if a default does not exist.
     """
-    if not bagitobjecttransfer.settings.base.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
+    if not settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set")
-    if not bagitobjecttransfer.settings.base.CAAIS_DEFAULT_CREATION_TYPE:
+    if not settings.CAAIS_DEFAULT_CREATION_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
 
 

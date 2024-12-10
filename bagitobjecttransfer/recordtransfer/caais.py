@@ -3,17 +3,14 @@
 To set default values, refer to :ref:`Data Formatting and Defaults`.
 """
 
-from typing import Type, Optional
 import logging
+from typing import Optional, Type
 
+from caais.models import *
 from django.db.models import Model
 from django.utils.translation import gettext
 
-import bagitobjecttransfer.settings.base
-from caais.models import *
-
-from recordtransfer import settings
-
+from bagitobjecttransfer import settings
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -291,7 +288,7 @@ def add_submission_event(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is guaranteed to have a value
-    submission_type_name = bagitobjecttransfer.settings.base.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
+    submission_type_name = settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
 
     event_type, created = EventType.objects.get_or_create(name=submission_type_name)
 
@@ -326,7 +323,7 @@ def add_date_of_creation(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_CREATION_TYPE is guaranteed to have a value
-    creation_type_name = bagitobjecttransfer.settings.base.CAAIS_DEFAULT_CREATION_TYPE
+    creation_type_name = settings.CAAIS_DEFAULT_CREATION_TYPE
 
     creation_type, created = CreationOrRevisionType.objects.get_or_create(name=creation_type_name)
 

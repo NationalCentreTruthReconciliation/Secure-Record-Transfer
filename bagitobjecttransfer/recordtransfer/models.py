@@ -6,18 +6,18 @@ from pathlib import Path
 from typing import ClassVar, Union
 
 import bagit
-from django.forms import ValidationError
 from caais.export import ExportVersion
 from caais.models import Metadata
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.forms import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-import bagitobjecttransfer.settings as settings
+from bagitobjecttransfer import settings
 from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
