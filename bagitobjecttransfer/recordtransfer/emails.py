@@ -6,6 +6,7 @@ import smtplib
 from typing import List
 
 import django_rq
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -13,7 +14,6 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-import bagitobjecttransfer.settings.base
 from recordtransfer.models import Submission, User
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text
@@ -109,7 +109,7 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
             subject="Thank You For Your Transfer",
             template_name="recordtransfer/email/transfer_success.html",
             context={
-                "archivist_email": bagitobjecttransfer.settings.base.ARCHIVIST_EMAIL,
+                "archivist_email": settings.ARCHIVIST_EMAIL,
             },
         )
 
@@ -133,7 +133,7 @@ def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User)
                 "username": user_submitted.username,
                 "first_name": user_submitted.first_name,
                 "last_name": user_submitted.last_name,
-                "archivist_email": bagitobjecttransfer.settings.base.ARCHIVIST_EMAIL,
+                "archivist_email": settings.ARCHIVIST_EMAIL,
             },
         )
 
@@ -225,7 +225,7 @@ def _get_do_not_reply_email_address() -> str:
     else:
         clean_domain = domain
 
-    return f"{bagitobjecttransfer.settings.base.DO_NOT_REPLY_USERNAME}@{clean_domain}"
+    return f"{settings.DO_NOT_REPLY_USERNAME}@{clean_domain}"
 
 
 def _send_mail_with_logs(
