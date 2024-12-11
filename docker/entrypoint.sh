@@ -18,6 +18,18 @@ if [ "$IS_RQ" = 'yes' ]; then
 else
   echo ">> Running webpack to bundle + minify assets."
   npm run build
+
+  if [ "$ENV" != 'dev' ]; then
+    echo ">> Collecting static files."
+    python manage.py collectstatic --no-input --clear \
+      --ignore "recordtransfer/**/*.js" \
+      --ignore "recordtransfer/**/*.css" \
+      --ignore "recordtransfer/**/*.jpg" \
+      --ignore "recordtransfer/**/*.jpeg" \
+      --ignore "recordtransfer/**/*.png" \
+      --ignore "recordtransfer/**/*.webp"
+  fi
+
   echo ">> Starting app"
 
 fi
