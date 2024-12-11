@@ -260,6 +260,7 @@ class RecordTransferConfig(AppConfig):
 
     def ready(self):
         try:
+            LOGGER.info("Verifying settings in %s", settings.SETTINGS_MODULE)
             verify_email_settings()
             verify_date_format()
             verify_checksum_settings()
@@ -273,8 +274,8 @@ class RecordTransferConfig(AppConfig):
             if match_obj:
                 setting_name = match_obj.group(1)
                 raise ImproperlyConfigured(
-                    ("The {0} setting is not defined in recordtransfer.settings!").format(
-                        setting_name
+                    ("The {0} setting is not defined in {1}!").format(
+                        setting_name, settings.SETTINGS_MODULE
                     )
                 ) from exc
             raise exc
