@@ -15,8 +15,8 @@ LOGGER = logging.getLogger("recordtransfer")
 
 
 get_setting_name = lambda field_name: f"CAAIS_DEFAULT_{field_name.upper().strip()}"
-get_setting_name.__doc__ = """ Generates a setting name in :py:mod:`recordtransfer.settings`
-that may contain a default value for some field.
+get_setting_name.__doc__ = """Generates a setting name in the :py:data:`django.conf.settings`
+object that may contain a default value for some field.
 
 Args:
     field_name (str): The name of the field on the model or the form
@@ -361,7 +361,7 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model):
     an :py:class:`~caais.models.AbstractTerm`, then a :code:`ValueError` is thrown.
 
     Default values can be set by creating settings in
-    :py:mod:`recordtransfer.settings` named CAAIS_DEFAULT_FIELD_NAME, where
+    the module set by DJANGO_SETTINGS_MODULE named CAAIS_DEFAULT_FIELD_NAME, where
     FIELD_NAME is the uppercase-d field name of the model and the form field.
 
     Args:
@@ -401,7 +401,7 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model):
 
 
 def str_or_default(form_data: dict, field_name: str, default: str = ""):
-    """Return form data if it exists, or the setting in :py:mod:`recordtransfer.settings`
+    """Return form data if it exists, or the setting in the :py:data:`django.conf.settings` object
     if it exists, or the default value, in that order of priority.
 
     Args:
@@ -431,11 +431,11 @@ def term_or_default(
     TermClass: Type[AbstractTerm],
     default: Optional[AbstractTerm] = None,
 ) -> Optional[AbstractTerm]:
-    """If the name of a term can be found in the form data or in
-    :py:mod:`recordtransfer.settings`, return and instance of the term for the given
+    """If the name of a term can be found in the form data or in the
+    :py:data:`django.conf.settings` object, return an instance of the term for the given
     TermClass with that name. If the term did not exist, it is created.
 
-    If no name can be found in the form data or in :py:mod:`recordtransfer.settings`,
+    If no name can be found in the form data or in :py:data:`django.conf.settings`,
     the default value is returned.
 
     Args:
@@ -448,7 +448,7 @@ def term_or_default(
             settings
         default (Optional[AbstractTerm]):
             A term (or None) to return if there is no form data or there is no
-            default set in :code:`recordtransfer.settings`
+            default set in :code:`django.conf.settings`
 
     Returns:
         (Optional[AbstractTerm]):
