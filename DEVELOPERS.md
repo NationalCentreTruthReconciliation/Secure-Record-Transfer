@@ -111,7 +111,7 @@ pip install poetry
 
 ## Testing Setup
 
-Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before running tests.
+Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
 
 Install the `dev` dependencies with Poetry:
 
