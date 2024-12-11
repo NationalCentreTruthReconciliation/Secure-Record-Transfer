@@ -94,11 +94,18 @@ This will re-build the bundled JS files any time you save a change to a `.js` fi
 
 ## Testing Setup
 
-Ensure that you've installed the `dev` dependencies locally (preferably in a virtual environment):
+[Poetry](https://python-poetry.org/) is used to manage dependencies for this project. Install Poetry on your system:
 
 ```shell
-pip install .[dev]
+pip install poetry
 ```
+
+Install the `dev` dependencies with Poetry:
+
+```shell
+poetry install --extras "dev"
+```
+Note that `poetry` creates a virtual environment by default and installs the dependencies there.
 
 Use these settings in your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project so that tests are discovered correctly in the Testing menu:
 
