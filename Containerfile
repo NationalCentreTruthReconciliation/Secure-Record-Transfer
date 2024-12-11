@@ -20,8 +20,11 @@ RUN npm install --no-color
 COPY pyproject.toml poetry.lock README.md /app/
 RUN poetry config virtualenvs.create false && poetry install
 
-# Copy application code to image
+# Copy entrypoint script to image
 COPY ./docker/entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
+
+# Copy application code to image
 COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
 WORKDIR /app/bagitobjecttransfer/

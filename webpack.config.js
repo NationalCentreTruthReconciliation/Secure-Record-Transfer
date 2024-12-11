@@ -8,6 +8,11 @@ console.log("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE)
 module.exports = {
     mode: process.env.WEBPACK_MODE === 'production' ? 'production' : 'development',
     devtool: false,
+    watchOptions: {
+        aggregateTimeout: 500,
+        poll: 1000,
+        ignored: /node_modules/,
+    },
     entry: {
         base: [
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/base/*.js')
