@@ -13,7 +13,14 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer import settings
-from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
+from recordtransfer.constants import (
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SUBMISSION_GROUP_SELECTION,
+)
 from recordtransfer.models import SubmissionGroup
 
 
@@ -271,6 +278,18 @@ class SourceInfoForm(TransferForm):
 
         return cleaned_data
 
+    enter_manual_source_info = forms.ChoiceField(
+        choices=[
+            ("yes", gettext("Yes")),
+            ("no", gettext("No")),
+        ],
+        widget=forms.RadioSelect(
+            attrs={"id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
+        ),
+        label=gettext("Submitting on behalf of an organization/another person"),
+        initial="no",
+    )
+
     source_name = forms.CharField(
         max_length=64,
         min_length=2,
@@ -300,6 +319,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width",
+                "id": ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
     )
@@ -309,7 +329,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source type not covered by the other choices"),
-                "class": "source-type-select-other",
+                "id": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
         label=gettext("Other source type"),
@@ -332,6 +352,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width",
+                "id": ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
     )
@@ -341,7 +362,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source role not covered by the other choices"),
-                "class": "source-role-select-other",
+                "id": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),
         label=gettext("Other source role"),
