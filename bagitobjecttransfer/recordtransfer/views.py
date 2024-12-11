@@ -3,10 +3,10 @@ import pickle
 import re
 from typing import Any, ClassVar, Optional, Union
 
-import bagitobjecttransfer.settings.base
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
+from django.conf import settings
 from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
@@ -195,13 +195,13 @@ class About(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["accepted_files"] = bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS
-        context["max_total_upload_size"] = bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE
+        context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
+        context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
         context["max_single_upload_size"] = (
-            bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE
+            settings.MAX_SINGLE_UPLOAD_SIZE
         )
         context["max_total_upload_count"] = (
-            bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_COUNT
+            settings.MAX_TOTAL_UPLOAD_COUNT
         )
         return context
 
@@ -617,7 +617,7 @@ class TransferFormWizard(SessionWizardView):
         Returns:
             (None): The cleaned form data is modified in-place
         """
-        if not bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED:
+        if not settings.FILE_UPLOAD_ENABLED:
             return
 
         session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
@@ -626,7 +626,7 @@ class TransferFormWizard(SessionWizardView):
 
         count = get_human_readable_file_count(
             [f.name for f in session.get_existing_file_set()],
-            bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS,
+            settings.ACCEPTED_FILE_FORMATS,
             LOGGER,
         )
 
@@ -650,7 +650,7 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Mapping form data to CAAIS metadata")
             submission.metadata = map_form_to_metadata(form_data)
 
-            if bagitobjecttransfer.settings.base.FILE_UPLOAD_ENABLED:
+            if settings.FILE_UPLOAD_ENABLED:
                 token = form_data["session_token"]
                 LOGGER.info("Fetching session with the token %s", token)
                 submission.upload_session = UploadSession.objects.filter(token=token).first()
@@ -899,7 +899,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     # Check extension is allowed
     extension = name_split[-1].lower()
     extension_accepted = False
-    for _, accepted_extensions in bagitobjecttransfer.settings.base.ACCEPTED_FILE_FORMATS.items():
+    for _, accepted_extensions in settings.ACCEPTED_FILE_FORMATS.items():
         for accepted_extension in accepted_extensions:
             if extension == accepted_extension.lower():
                 extension_accepted = True
@@ -939,8 +939,8 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
 
     # Check file size is less than the maximum allowed size for a single file
     max_single_size = min(
-        bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE,
-        bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE,
+        settings.MAX_SINGLE_UPLOAD_SIZE,
+        settings.MAX_TOTAL_UPLOAD_SIZE,
     )
     max_single_size_bytes = mib_to_bytes(max_single_size)
     size_mib = bytes_to_mib(size)
@@ -987,7 +987,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
     # Check number of files is within allowed total
     if (
         session.number_of_files_uploaded()
-        >= bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_COUNT
+        >= settings.MAX_TOTAL_UPLOAD_COUNT
     ):
         return {
             "accepted": False,
@@ -995,13 +995,13 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
             "verboseError": gettext(
                 'The file "{0}" would push the total file count past the '
                 "maximum number of files ({1})"
-            ).format(filename, bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE),
+            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE),
         }
 
     # Check total size of all files plus current one is within allowed size
     max_size = max(
-        bagitobjecttransfer.settings.base.MAX_SINGLE_UPLOAD_SIZE,
-        bagitobjecttransfer.settings.base.MAX_TOTAL_UPLOAD_SIZE,
+        settings.MAX_SINGLE_UPLOAD_SIZE,
+        settings.MAX_TOTAL_UPLOAD_SIZE,
     )
     max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:

@@ -1,18 +1,16 @@
-from io import BytesIO
 import logging
-import pickle
+import os.path
 import shutil
 import zipfile
-import os.path
+from io import BytesIO
 
 import django_rq
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
-from recordtransfer.models import User, Job, Submission
-from bagitobjecttransfer.settings import base
+from recordtransfer.models import Job, Submission, User
 from recordtransfer.utils import zip_directory
-
 
 LOGGER = logging.getLogger("rq.worker")
 
@@ -43,7 +41,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
 
     if not os.path.exists(submission.location):
         LOGGER.info("No bag exists at %s, creating it now.", str(submission.location))
-        result = submission.make_bag(algorithms=base.BAG_CHECKSUMS, logger=LOGGER)
+        result = submission.make_bag(algorithms=settings.BAG_CHECKSUMS, logger=LOGGER)
         if (
             len(result["missing_files"]) != 0
             or not result["bag_created"]

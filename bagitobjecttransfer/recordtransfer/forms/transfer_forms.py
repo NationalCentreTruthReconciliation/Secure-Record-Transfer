@@ -2,9 +2,9 @@
 
 from uuid import UUID
 
-import bagitobjecttransfer.settings.base
 from caais.models import RightsType, SourceRole, SourceType
 from django import forms
+from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseFormSet
 from django.utils.translation import gettext
@@ -392,7 +392,7 @@ class RecordDescriptionForm(TransferForm):
 
         err = False
 
-        if not bagitobjecttransfer.settings.base.USE_DATE_WIDGETS:
+        if not settings.USE_DATE_WIDGETS:
             start_date_text = cleaned_data["start_date_of_material_text"]
             end_date_text = cleaned_data["end_date_of_material_text"]
 
@@ -420,11 +420,11 @@ class RecordDescriptionForm(TransferForm):
 
         if not err:
             if cleaned_data.get("start_date_is_approximate", False):
-                start_date_text = bagitobjecttransfer.settings.base.APPROXIMATE_DATE_FORMAT.format(
+                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(
                     date=start_date_text
                 )
             if cleaned_data.get("end_date_is_approximate", False):
-                end_date_text = bagitobjecttransfer.settings.base.APPROXIMATE_DATE_FORMAT.format(
+                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(
                     date=end_date_text
                 )
 
@@ -443,7 +443,7 @@ class RecordDescriptionForm(TransferForm):
         label=gettext("Title"),
     )
 
-    if not bagitobjecttransfer.settings.base.USE_DATE_WIDGETS:
+    if not settings.USE_DATE_WIDGETS:
         # Use _text to avoid jQuery input masks
         start_date_of_material_text = forms.CharField(
             min_length=2,
