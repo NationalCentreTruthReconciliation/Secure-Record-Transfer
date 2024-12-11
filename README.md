@@ -23,12 +23,13 @@ To start, clone the repository:
 ```shell
 git clone https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git
 ```
-
-From the root of the repository, make a copy of the dev environment variable file.
+(Optional) From the root of the repository, make a copy of the development environment variable file.
 
 ```shell
 cp example.dev.env .dev.env
 ```
+
+You can view the various settings which can be configured and defined in `.dev.env` [here](https://secure-record-transfer.readthedocs.io/en/latest/settings/index.html).
 
 **For the following commands, substitute `docker compose` for `podman-compose` if you're using Docker instead of Podman.**
 
