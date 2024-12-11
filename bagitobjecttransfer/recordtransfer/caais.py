@@ -7,10 +7,9 @@ import logging
 from typing import Optional, Type
 
 from caais.models import *
+from django.conf import settings
 from django.db.models import Model
 from django.utils.translation import gettext
-
-from bagitobjecttransfer import settings
 
 LOGGER = logging.getLogger("recordtransfer")
 

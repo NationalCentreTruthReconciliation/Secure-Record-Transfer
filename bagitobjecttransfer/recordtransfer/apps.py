@@ -5,9 +5,8 @@ import re
 
 from bagit import CHECKSUM_ALGOS
 from django.apps import AppConfig
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
-from bagitobjecttransfer import settings
 
 LOGGER = logging.getLogger("recordtransfer")
 
