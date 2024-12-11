@@ -92,20 +92,32 @@ podman-compose -f compose.dev.yml exec app npm run watch
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
-## Testing Setup
+# Virtual Environment and Poetry Setup
+Dependencies for testing and building documentation are managed with [Poetry](https://python-poetry.org/) within a virtual environment. To create a virtual environment and install Poetry for testing and building documentation, run the following commands:
 
-[Poetry](https://python-poetry.org/) is used to manage dependencies for this project. Install Poetry on your system:
-
+On Windows:
 ```shell
+python -m venv env
+.\env\Scripts\Activate.ps1
 pip install poetry
 ```
+
+On MacOS/Linux:
+```shell
+python3 -m venv env
+source env/bin/activate
+pip install poetry
+```
+
+## Testing Setup
+
+Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before running tests.
 
 Install the `dev` dependencies with Poetry:
 
 ```shell
 poetry install --extras "dev"
 ```
-Note that `poetry` creates a virtual environment by default and installs the dependencies there.
 
 Use these settings in your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project so that tests are discovered correctly in the Testing menu:
 
@@ -139,7 +151,9 @@ DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.test python manage.py test
 
 The documentation for this repository is built with [Sphinx](https://sphinx-doc.org).
 
-Before building the documentation, ensure you have the `docs` dependencies installed:
+Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
+
+Install the `docs` dependencies with Poetry:
 ```shell
 poetry install --extras "docs"
 ```
