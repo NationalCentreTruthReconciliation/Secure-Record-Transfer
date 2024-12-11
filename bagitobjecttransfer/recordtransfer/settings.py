@@ -14,11 +14,11 @@ FILE_UPLOAD_ENABLED = config('FILE_UPLOAD_ENABLED', default=True, cast=bool)
 
 # The location where bags will be stored
 
-BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER')
+BAG_STORAGE_FOLDER = config('BAG_STORAGE_FOLDER', default='media/bags/')
 
 # The location where uploaded files are stored temporarily
 
-UPLOAD_STORAGE_FOLDER = config('UPLOAD_STORAGE_FOLDER')
+UPLOAD_STORAGE_FOLDER = config('UPLOAD_STORAGE_FOLDER', default='media/uploaded_files/')
 
 # Whether to allow updating BagIt bags
 
