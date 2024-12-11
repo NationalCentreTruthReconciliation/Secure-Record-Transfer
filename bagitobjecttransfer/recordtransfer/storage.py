@@ -1,6 +1,5 @@
+from django.conf import settings
 from django.core.files.storage import get_storage_class
-
-from recordtransfer import settings
 
 Storage = get_storage_class()
 

@@ -4,10 +4,9 @@ from django.forms import formset_factory
 from django.urls import path, re_path
 
 from . import forms, views
-from . import settings as recordtransfersettings
 
 # Set up transfer forms depending on whether file uploads are enabled or disabled
-if recordtransfersettings.FILE_UPLOAD_ENABLED:
+if settings.FILE_UPLOAD_ENABLED:
     _transfer_forms = [
         ("acceptlegal", forms.AcceptLegal),
         ("contactinfo", forms.ContactInfoForm),
@@ -84,7 +83,7 @@ if settings.TESTING or not settings.DEBUG:
         re_path(r"media/(?P<path>.*)", login_required(views.media_request), name="media")
     )
 
-if settings.TESTING or recordtransfersettings.FILE_UPLOAD_ENABLED:
+if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path("transfer/checkfile/", login_required(views.accept_file), name="checkfile"),
@@ -92,7 +91,7 @@ if settings.TESTING or recordtransfersettings.FILE_UPLOAD_ENABLED:
         ]
     )
 
-if settings.TESTING or recordtransfersettings.SIGN_UP_ENABLED:
+if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path("createaccount/", views.CreateAccount.as_view(), name="createaccount"),

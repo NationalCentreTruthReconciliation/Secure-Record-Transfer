@@ -6,6 +6,7 @@ from typing import Any, ClassVar, Optional, Union
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
+from django.conf import settings
 from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
@@ -34,7 +35,6 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, FormView, TemplateView, UpdateView, View
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer import settings
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
@@ -197,8 +197,12 @@ class About(TemplateView):
         context = super().get_context_data(**kwargs)
         context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
         context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
-        context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
-        context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
+        context["max_single_upload_size"] = (
+            settings.MAX_SINGLE_UPLOAD_SIZE
+        )
+        context["max_total_upload_count"] = (
+            settings.MAX_TOTAL_UPLOAD_COUNT
+        )
         return context
 
 
@@ -934,7 +938,10 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
         }
 
     # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_single_size = min(
+        settings.MAX_SINGLE_UPLOAD_SIZE,
+        settings.MAX_TOTAL_UPLOAD_SIZE,
+    )
     max_single_size_bytes = mib_to_bytes(max_single_size)
     size_mib = bytes_to_mib(size)
     if size > max_single_size_bytes:
@@ -978,7 +985,10 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         return m * 1024**2
 
     # Check number of files is within allowed total
-    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
+    if (
+        session.number_of_files_uploaded()
+        >= settings.MAX_TOTAL_UPLOAD_COUNT
+    ):
         return {
             "accepted": False,
             "error": gettext("You can not upload anymore files."),
@@ -989,7 +999,10 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         }
 
     # Check total size of all files plus current one is within allowed size
-    max_size = max(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_size = max(
+        settings.MAX_SINGLE_UPLOAD_SIZE,
+        settings.MAX_TOTAL_UPLOAD_SIZE,
+    )
     max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
         return {
