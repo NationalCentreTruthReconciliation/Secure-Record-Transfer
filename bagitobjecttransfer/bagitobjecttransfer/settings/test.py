@@ -1,4 +1,8 @@
 # Minimal settings for either testing, or building docs with Sphinx
+import os
+
+from decouple import config
+
 from .base import *
 
 DEBUG = True
@@ -100,3 +104,6 @@ LOGGING = {
         },
     },
 }
+
+BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/bags/"))
+UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/uploaded_files/"))
