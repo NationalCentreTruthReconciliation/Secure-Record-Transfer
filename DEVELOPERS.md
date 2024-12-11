@@ -139,7 +139,10 @@ DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.test python manage.py test
 
 The documentation for this repository is built with [Sphinx](https://sphinx-doc.org).
 
-Before building the documentation, ensure you have the `dev` dependencies installed.
+Before building the documentation, ensure you have the `docs` dependencies installed:
+```shell
+poetry install --extras "docs"
+```
 
 To build the docs, run:
 
