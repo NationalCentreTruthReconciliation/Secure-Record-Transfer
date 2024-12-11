@@ -7,6 +7,7 @@ part of this application.
 .. toctree::
     :maxdepth: 1
 
+    configuration
     caaismodels
     forms
     views
@@ -14,5 +15,4 @@ part of this application.
     emails
     caais
     models
-    configuration
     utils
