@@ -6,24 +6,31 @@ const parentDir = path.dirname(__dirname);
 const inputDir = path.join(parentDir, 'bagitobjecttransfer/recordtransfer/static/recordtransfer/img');
 const outputDir = path.join(parentDir, 'dist');
 
+console.log("Running image compression...");
+
 if (!fs.existsSync(outputDir)) {
+    console.log(`Output directory "${outputDir}" does not exist. Creating...`);
     fs.mkdirSync(outputDir, { recursive: true });
 }
+
+console.log(`Reading from input directory: ${inputDir}`);
+
+console.log(`Compressing and outputting to directory: ${outputDir}`);
 
 // Compress and convert images to WebP
 fs.readdir(inputDir, (err, files) => {
     if (err) {
-        console.error('Error reading the directory:', err);
+        console.error(`Error reading the input directory "${inputDir}":`, err);
         return;
     }
 
-    files.forEach((file) => {
+    const promises = files.map((file) => {
         const inputFilePath = path.join(inputDir, file);
         const outputFilePath = path.join(outputDir, `${path.parse(file).name}.webp`); // Output as WebP
 
-        // Process only image files (supported formats)
+        // Process only supported image file formats
         if (/\.(jpg|jpeg|png|webp)$/i.test(file)) {
-            sharp(inputFilePath)
+            return sharp(inputFilePath)
                 .webp({ quality: 80 }) // Convert to WebP with 80% quality
                 .toFile(outputFilePath)
                 .then(() => {
@@ -34,6 +41,12 @@ fs.readdir(inputDir, (err, files) => {
                 });
         } else {
             console.log(`Skipped (not a supported image format): ${file}`);
+            return Promise.resolve();
         }
+    });
+
+    // Wait for all promises to complete
+    Promise.all(promises).then(() => {
+        console.log("Image compression completed.");
     });
 });
