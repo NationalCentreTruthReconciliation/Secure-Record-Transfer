@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from recordtransfer.configuration import AcceptedFileTypes
+from configuration import AcceptedFileTypes
 
 
 class TestAcceptedFileTypeParser(TestCase):
