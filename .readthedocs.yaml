@@ -1,5 +1,8 @@
 # Read the Docs configuration file for Sphinx projects
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for detail
+#
+# This configuration uses poetry to install dependencies because pip has trouble handling
+# package-mode = false in the pyproject.toml file.
 
 version: 2
 
