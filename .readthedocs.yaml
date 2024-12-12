@@ -5,12 +5,16 @@ version: 2
 
 build:
   os: "ubuntu-22.04"
-  commands:
-    - apt install pipx
-    - pipx ensurepath
-    - pipx install --user poetry
-    - poetry config virtualenvs.create false
-    - poetry install --extras docs
+  jobs:
+    pre_create_environment:
+      - asdf plugin add poetry
+      - asdf install poetry latest
+      - asdf global poetry latest
+      - poetry config virtualenvs.create false
+
+    post_install:
+      - source "$READTHEDOCS_VIRTUALENV_PATH/bin/activate" && poetry install --extras docs
+
   tools:
     python: "3.10"
 
