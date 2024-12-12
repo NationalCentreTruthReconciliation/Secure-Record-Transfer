@@ -52,6 +52,7 @@ services:
       - ENV=prod
       - IS_RQ=yes
       - WEBPACK_MODE=production
+      - DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.docker_prod
     depends_on:
       - db
       - redis
@@ -73,6 +74,7 @@ services:
       - ENV=prod
       - IS_RQ=no
       - WEBPACK_MODE=production
+      - DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.docker_prod
     depends_on:
       - db
       - rq

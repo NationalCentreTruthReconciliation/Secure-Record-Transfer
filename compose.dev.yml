@@ -49,7 +49,8 @@ services:
     ports:
       - 8010:8010
     env_file:
-      - .dev.env
+      - path: .dev.env
+        required: false
     # See manage.py for debugger setup
     environment:
       - ENV=dev
@@ -58,6 +59,7 @@ services:
       - ENABLE_DEBUGPY_ON_COMMAND=rqworker
       - DEBUGPY_PORT=8010
       - WEBPACK_MODE=development
+      - DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.docker_dev
     depends_on:
       - redis
 
@@ -74,7 +76,8 @@ services:
       - 8000:8000
       - 8009:8009
     env_file:
-      - .dev.env
+      - path: .dev.env
+        required: false
     # See manage.py for debugger setup
     environment:
       - ENV=dev
@@ -83,6 +86,7 @@ services:
       - ENABLE_DEBUGPY_ON_COMMAND=runserver
       - DEBUGPY_PORT=8009
       - WEBPACK_MODE=development
+      - DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.docker_dev
     depends_on:
       - rq
       - email
