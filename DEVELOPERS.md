@@ -110,7 +110,7 @@ Use these settings in your [local VSCode settings.json](https://code.visualstudi
     ],
 }
 ```
-The tests are built using [django-pytest](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml) and [pytest](https://docs.pytest.org/en/stable/how-to/usage.html). To run the tests, run the following command:
+The tests can be run with [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (using [pytest-django](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml)):
 
 ```shell
 pytest
