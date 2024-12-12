@@ -4,6 +4,7 @@ from uuid import UUID
 
 from caais.models import RightsType, SourceRole, SourceType
 from django import forms
+from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseFormSet
 from django.utils.translation import gettext
@@ -12,7 +13,6 @@ from django_countries.widgets import CountrySelectWidget
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
-from recordtransfer import settings
 from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
 from recordtransfer.models import SubmissionGroup
 
@@ -420,9 +420,13 @@ class RecordDescriptionForm(TransferForm):
 
         if not err:
             if cleaned_data.get("start_date_is_approximate", False):
-                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date_text)
+                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(
+                    date=start_date_text
+                )
             if cleaned_data.get("end_date_is_approximate", False):
-                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date_text)
+                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(
+                    date=end_date_text
+                )
 
             if start_date == end_date:
                 cleaned_data["date_of_materials"] = start_date

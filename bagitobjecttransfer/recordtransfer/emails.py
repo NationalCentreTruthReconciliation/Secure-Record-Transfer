@@ -6,6 +6,7 @@ import smtplib
 from typing import List
 
 import django_rq
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -13,7 +14,6 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from recordtransfer import settings
 from recordtransfer.models import Submission, User
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text

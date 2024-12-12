@@ -119,6 +119,10 @@ body {
     color: inherit;
 }
 
+.margin-right-10px {
+    margin-right: 10px;
+}
+
 .margin-right-20px {
     margin-right: 20px;
 }
@@ -143,14 +147,6 @@ body {
 
 .standard-table tr:nth-child(odd) {
     background-color: #eee;
-}
-
-
-/**
- * Fix dropzone error tooltip from obscuring the "Remove file" link
- */
-.dropzone .dz-preview .dz-error-message {
-    top: 150px !important;
 }
 
 /**

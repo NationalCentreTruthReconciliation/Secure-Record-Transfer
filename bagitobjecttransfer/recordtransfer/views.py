@@ -1,10 +1,12 @@
 import logging
 import pickle
-from typing import Any, Optional, Union
+import re
+from typing import Any, ClassVar, Optional, Union
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
+from django.conf import settings
 from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
@@ -33,9 +35,9 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, DetailView, FormView, TemplateView, UpdateView, View
 from formtools.wizard.views import SessionWizardView
 
-from recordtransfer import settings
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
+    FORMTITLE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
@@ -44,6 +46,8 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
+    INFOMESSAGE,
+    TEMPLATEREF,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -53,6 +57,7 @@ from recordtransfer.emails import (
     send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
+from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
@@ -70,12 +75,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Index(TemplateView):
-    """The homepage"""
+    """The homepage."""
 
     template_name = "recordtransfer/home.html"
 
 
-def media_request(request, path: str) -> HttpResponse:
+def media_request(request: HttpRequest, path: str) -> HttpResponse:
     """Respond to whether a media request is allowed or not."""
     if not request.user.is_authenticated:
         return HttpResponseForbidden("You do not have permission to access this resource.")
@@ -103,7 +108,7 @@ def media_request(request, path: str) -> HttpResponse:
 
 
 class TransferSent(TemplateView):
-    """The page a user sees when they finish a transfer"""
+    """The page a user sees when they finish a transfer."""
 
     template_name = "recordtransfer/transfersent.html"
 
@@ -184,7 +189,7 @@ class UserProfile(UpdateView):
 
 
 class About(TemplateView):
-    """About the application"""
+    """About the application."""
 
     template_name = "recordtransfer/about.html"
 
@@ -198,19 +203,19 @@ class About(TemplateView):
 
 
 class ActivationSent(TemplateView):
-    """The page a user sees after creating an account"""
+    """The page a user sees after creating an account."""
 
     template_name = "recordtransfer/activationsent.html"
 
 
 class ActivationComplete(TemplateView):
-    """The page a user sees when their account has been activated"""
+    """The page a user sees when their account has been activated."""
 
     template_name = "recordtransfer/activationcomplete.html"
 
 
 class ActivationInvalid(TemplateView):
-    """The page a user sees if their account could not be activated"""
+    """The page a user sees if their account could not be activated."""
 
     template_name = "recordtransfer/activationinvalid.html"
 
@@ -252,86 +257,106 @@ def activate_account(request, uidb64, token):
 
 class TransferFormWizard(SessionWizardView):
     """A multi-page form for collecting user metadata and uploading files. Uses a form wizard. For
-    more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html
+    more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
     """
 
-    _TEMPLATES = {
-        "acceptlegal": {
-            "templateref": "recordtransfer/transferform_legal.html",
-            "formtitle": gettext("Legal Agreement"),
+    _TEMPLATES: ClassVar[dict[TransferStep, dict[str, str]]] = {
+        TransferStep.ACCEPT_LEGAL: {
+            TEMPLATEREF: "recordtransfer/transferform_legal.html",
+            FORMTITLE: gettext("Legal Agreement"),
         },
-        "contactinfo": {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("Contact Information"),
-            "infomessage": gettext(
+        TransferStep.CONTACT_INFO: {
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            FORMTITLE: gettext("Contact Information"),
+            INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your transfer"
             ),
         },
-        "sourceinfo": {
-            "templateref": "recordtransfer/transferform_sourceinfo.html",
-            "formtitle": gettext("Source Information"),
-            "infomessage": gettext(
+        TransferStep.SOURCE_INFO: {
+            TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
+            FORMTITLE: gettext("Source Information"),
+            INFOMESSAGE: gettext(
                 "Enter the info for the source of the records. The source is the person or entity "
                 "that created the records or is holding the records at the moment. If this is you, "
                 "put your own information in"
             ),
         },
-        "recorddescription": {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("Record Description"),
-            "infomessage": gettext(
-                "Provide a brief description of the records you're transferring"
-            ),
+        TransferStep.RECORD_DESCRIPTION: {
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            FORMTITLE: gettext("Record Description"),
+            INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
-        "rights": {
-            "templateref": "recordtransfer/transferform_rights.html",
-            "formtitle": gettext("Record Rights"),
-            "infomessage": gettext(
+        TransferStep.RIGHTS: {
+            TEMPLATEREF: "recordtransfer/transferform_rights.html",
+            FORMTITLE: gettext("Record Rights"),
+            INFOMESSAGE: gettext(
                 "Enter any associated rights that apply to the records. Add as many rights "
                 "sections as you like using the + More button. You may enter another type of "
                 "rights if the dropdown does not contain the type of rights you're looking for."
             ),
         },
-        "otheridentifiers": {
-            "templateref": "recordtransfer/transferform_formset.html",
-            "formtitle": gettext("Other Identifiers (Optional)"),
-            "infomessage": gettext(
+        TransferStep.OTHER_IDENTIFIERS: {
+            TEMPLATEREF: "recordtransfer/transferform_formset.html",
+            FORMTITLE: gettext("Other Identifiers (Optional)"),
+            INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             ),
         },
-        "grouptransfer": {
-            "templateref": "recordtransfer/transferform_group.html",
-            "formtitle": gettext("Assign Transfer to Group (Optional)"),
-            "infomessage": gettext(
+        TransferStep.GROUP_TRANSFER: {
+            TEMPLATEREF: "recordtransfer/transferform_group.html",
+            FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
+            INFOMESSAGE: gettext(
                 "If this transfer belongs in a group with other transfers you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
         },
-        "uploadfiles": {
-            "templateref": "recordtransfer/transferform_dropzone.html",
-            "formtitle": gettext("Upload Files"),
-            "infomessage": gettext(
+        TransferStep.UPLOAD_FILES: {
+            TEMPLATEREF: "recordtransfer/transferform_dropzone.html",
+            FORMTITLE: gettext("Upload Files"),
+            INFOMESSAGE: gettext(
                 "Add any final notes you would like to add, and upload your files"
             ),
         },
-        "finalnotes": {
-            "templateref": "recordtransfer/transferform_standard.html",
-            "formtitle": gettext("Final Notes"),
-            "infomessage": gettext("Add any final notes that may not have fit in previous steps"),
+        TransferStep.FINAL_NOTES: {
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            FORMTITLE: gettext("Final Notes"),
+            INFOMESSAGE: gettext("Add any final notes that may not have fit in previous steps"),
         },
     }
 
-    def dispatch(self, request, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.submission_group_uuid = None
         self.in_progress_submission = None
+        self.in_progress_uuid = None
+
+    @property
+    def current_step(self) -> TransferStep:
+        """Returns the current step as a TransferStep enum value."""
+        current = self.steps.current
+        try:
+            return TransferStep(current)  # Converts string to enum
+        except ValueError as exc:
+            LOGGER.error("Invalid step name: %s", current)
+            raise Http404("Invalid step name") from exc
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Dispatch the request to the appropriate handler method."""
+        result = self.validate_transfer_request(request)
+        if isinstance(result, HttpResponse):
+            return result
+        return super().dispatch(request, *args, **kwargs)
+
+    def validate_transfer_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+        """Validate the transfer request and return an appropriate response if invalid."""
         self.in_progress_uuid = request.GET.get("transfer_uuid")
 
         # Handle no transfer UUID case
         if not self.in_progress_uuid:
             self.submission_group_uuid = request.GET.get("group_uuid")
-            return super().dispatch(request, *args, **kwargs)
+            return None
 
         # Handle transfer UUID case
         try:
@@ -350,7 +375,7 @@ class TransferFormWizard(SessionWizardView):
             )
             return redirect("recordtransfer:transfer")
 
-        return super().dispatch(request, *args, **kwargs)
+        return None
 
     def get(self, request, *args, **kwargs):
         if self.in_progress_submission:
@@ -361,20 +386,21 @@ class TransferFormWizard(SessionWizardView):
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a transfer."""
-        save_form_step = request.POST.get("save_form_step", None)
-
-        if not save_form_step:
+        # User is not saving the form, so continue with the normal form submission
+        if not request.POST.get("save_form_step", None):
             return super().post(request, *args, **kwargs)
 
         past_data = self.storage.data
-        current_data = TransferFormWizard.format_step_data(save_form_step, request.POST)
+        current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
 
-        title = current_data.get("accession_title")
+        title = None
+        if isinstance(current_data, dict):
+            title = current_data.get("accession_title")
         if not title:
-            title = self.get_form_value("recorddescription", "accession_title")
+            title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
         data = {
-            "save_form_step": save_form_step,
+            "save_form_step": self.current_step,
             "form_data": {"past": past_data, "current": current_data},
             "submission": self.in_progress_submission,
             "title": title,
@@ -393,17 +419,50 @@ class TransferFormWizard(SessionWizardView):
         self.storage.current_step = transfer.current_step
 
     @classmethod
-    def format_step_data(cls, step: str, data: QueryDict) -> dict:
-        """Format the step data by stripping the step prefix from the keys.
+    def format_step_data(cls, step: TransferStep, data: QueryDict) -> Union[dict, list[dict]]:
+        """Format form data for the current step to be saved for later.
 
         Args:
-            step (str): The current step of the form.
-            data (QueryDict): The data from the form.
+            step: The current step of the form.
+            data: The data from the form.
 
         Returns:
-            dict: The formatted step data.
+            The formatted step data. If this step represents a formset, the return object will be a
+            list of dicts, otherwise, it will be a dict.
         """
-        return {f.replace(step + "-", ""): data[f] for f in data if f.startswith(step + "-")}
+        pattern = re.compile("^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$")
+
+        formatted_data = []
+        is_formset = False
+
+        for key, value in data.items():
+            match_obj = pattern.match(key)
+
+            if not match_obj:
+                continue
+
+            field: str = match_obj.group("field")
+            index: str = match_obj.group("index")
+
+            if field in {"MIN_NUM_FORMS", "MAX_NUM_FORMS", "TOTAL_FORMS", "INITIAL_FORMS"}:
+                continue
+
+            if index:
+                index_num = int(index)
+                is_formset = True
+            else:
+                index_num = 0
+
+            while len(formatted_data) <= index_num:
+                formatted_data.append({})
+
+            formatted_data[index_num][field] = value
+
+        if is_formset:
+            # Remove any empty dictionaries if there were any created without data
+            return [data for data in formatted_data if data]
+
+        return formatted_data[0]
 
     def save_transfer(self, data: dict) -> None:
         """Save the current state of a transfer.
@@ -433,13 +492,13 @@ class TransferFormWizard(SessionWizardView):
         else:
             submission = InProgressSubmission()
 
-        submission.current_step = save_form_step
+        submission.current_step = save_form_step.value
         submission.user = self.request.user
         submission.step_data = pickle.dumps(form_data)
         submission.title = title
         submission.save()
 
-    def get_form_value(self, step: str, field: str) -> Optional[str]:
+    def get_form_value(self, step: TransferStep, field: str) -> Optional[str]:
         """Get the value of a field in a form step.
 
         Args:
@@ -449,13 +508,12 @@ class TransferFormWizard(SessionWizardView):
         Returns:
             The value of the field in the form step, or None if the is not populated.
         """
-        step_data = self.storage.get_step_data(step) or {}
-        return step_data.get(f"{step}-{field}")
+        step_data = self.storage.get_step_data(step.value) or {}
+        return step_data.get(f"{step.value}-{field}")
 
     def get_template_names(self):
-        """Retrieve the name of the template for the current step"""
-        step_name = self.steps.current
-        return [self._TEMPLATES[step_name]["templateref"]]
+        """Retrieve the name of the template for the current step."""
+        return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
 
     def get_form_initial(self, step):
         """Populate form with saved transfer data (if a "resume" request was received), and add the
@@ -464,11 +522,9 @@ class TransferFormWizard(SessionWizardView):
         initial = self.initial_dict.get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
-            data = pickle.loads(self.in_progress_submission.step_data)["current"]
-            for k, v in data.items():
-                initial[k] = v
+            initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
-        if step == "contactinfo":
+        if step == TransferStep.CONTACT_INFO.value:
             curr_user = self.request.user
             if curr_user.first_name and curr_user.last_name:
                 initial["contact_name"] = f"{curr_user.first_name} {curr_user.last_name}"
@@ -478,7 +534,7 @@ class TransferFormWizard(SessionWizardView):
 
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
-        if step == "grouptransfer":
+        if step == TransferStep.GROUP_TRANSFER.value:
             kwargs["user"] = self.request.user
         return kwargs
 
@@ -492,14 +548,13 @@ class TransferFormWizard(SessionWizardView):
             dict: A dictionary of context data to be used to render the form template.
         """
         context = super().get_context_data(form, **kwargs)
-        step_name = self.steps.current
 
-        context.update({"form_title": self._TEMPLATES[step_name]["formtitle"]})
+        context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
-        if "infomessage" in self._TEMPLATES[step_name]:
-            context.update({"info_message": self._TEMPLATES[step_name]["infomessage"]})
+        if INFOMESSAGE in self._TEMPLATES[self.current_step]:
+            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
 
-        if step_name == "grouptransfer":
+        if self.current_step == TransferStep.GROUP_TRANSFER:
             context.update(
                 {
                     "IS_NEW": True,
@@ -513,11 +568,11 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif step_name == "rights":
+        elif self.current_step == TransferStep.RIGHTS:
             all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update({"rights": all_rights})
+            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
 
-        elif step_name == "sourceinfo":
+        elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
             all_types = SourceType.objects.all().exclude(name="Other")
             context.update(
@@ -527,7 +582,19 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
+        elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
+            context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
+
         return context
+
+    @property
+    def num_extra_forms(self) -> int:
+        """Compute the number of extra forms to generate if current step uses a formset."""
+        num_extra_forms = 1
+        if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
+            num_forms = len(self.get_form_initial(self.current_step.value))
+            num_extra_forms = 0 if num_forms > 0 else 1
+        return num_extra_forms
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
@@ -564,7 +631,7 @@ class TransferFormWizard(SessionWizardView):
         )
 
     def done(self, form_list, **kwargs):
-        """Retrieves all of the form data, and creates a Submission from it.
+        """Retrieve all of the form data, and creates a Submission from it.
 
         Returns:
             HttpResponseRedirect: Redirects the user to their User Profile page.
@@ -599,7 +666,7 @@ class TransferFormWizard(SessionWizardView):
             send_submission_creation_success.delay(form_data, submission)
             send_thank_you_for_your_transfer.delay(form_data, submission)
 
-            return HttpResponseRedirect(reverse("recordtransfer:userprofile"))
+            return HttpResponseRedirect(reverse("recordtransfer:transfersent"))
 
         except Exception as exc:
             LOGGER.error("Encountered error creating Submission object", exc_info=exc)
@@ -806,8 +873,12 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
             the session is valid, or False if not. The dictionary also contains
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
-    mib_to_bytes = lambda m: m * (1024**2)
-    bytes_to_mib = lambda b: b / (1024**2)
+
+    def mib_to_bytes(m):
+        return m * 1024**2
+
+    def bytes_to_mib(b):
+        return b / 1024**2
 
     # Check extension exists
     name_split = filename.split(".")
@@ -862,7 +933,10 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
         }
 
     # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_single_size = min(
+        settings.MAX_SINGLE_UPLOAD_SIZE,
+        settings.MAX_TOTAL_UPLOAD_SIZE,
+    )
     max_single_size_bytes = mib_to_bytes(max_single_size)
     size_mib = bytes_to_mib(size)
     if size > max_single_size_bytes:
@@ -902,7 +976,8 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
     if not session:
         return {"accepted": True}
 
-    mib_to_bytes = lambda m: m * (1024**2)
+    def mib_to_bytes(m):
+        return m * 1024**2
 
     # Check number of files is within allowed total
     if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
@@ -916,7 +991,10 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         }
 
     # Check total size of all files plus current one is within allowed size
-    max_size = max(settings.MAX_SINGLE_UPLOAD_SIZE, settings.MAX_TOTAL_UPLOAD_SIZE)
+    max_size = max(
+        settings.MAX_SINGLE_UPLOAD_SIZE,
+        settings.MAX_TOTAL_UPLOAD_SIZE,
+    )
     max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
         return {
@@ -943,6 +1021,8 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
 
 
 class DeleteTransfer(TemplateView):
+    """View to handle the deletion of an in-progress submission."""
+
     template_name = "recordtransfer/transfer_delete.html"
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")

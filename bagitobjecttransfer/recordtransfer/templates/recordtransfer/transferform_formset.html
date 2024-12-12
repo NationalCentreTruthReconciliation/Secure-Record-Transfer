@@ -2,6 +2,13 @@
 {% load static %}
 {% load i18n %}
 
+{% block javascript %}
+    {{ block.super }}
+    <script>
+        const NUM_EXTRA_FORMS = {{ NUM_EXTRA_FORMS }};
+    </script>
+{% endblock javascript %}
+
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
     {% for form in wizard.form.forms %}
@@ -22,7 +29,7 @@
                 {# Help tooltip #}
                 {% if field.help_text %}
                     <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
-                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                        <img height="20" src="{% static 'help_40x40px.webp' %}">
                     </div>
                 {% endif %}
             </div>
@@ -32,7 +39,7 @@
     <div class="flex-item">
         <label></label>
         <div class="button-array">
-            <button class="green-button less-padding add-form-row">{% trans "+ More" %}</button>
+            <button class="green-button less-padding add-form-row margin-right-10px">{% trans "+ More" %}</button>
             <button disabled class="red-button less-padding remove-form-row">{% trans "- Remove" %}</button>
         </div>
     </div>

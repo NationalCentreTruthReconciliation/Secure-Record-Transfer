@@ -1,12 +1,10 @@
 Application Settings
 ====================
 
-.. automodule:: recordtransfer.settings
-   :members:
-
-These settings control the behaviour of the application. 99% of options can be controlled by setting
-a value in a :code:`.dev.env` or :code:`.prod.env` file, depending on whether you're running the dev
-or prod configuration. This file is referred to as :code:`.env` below.
+These settings control the behaviour of the application in addition to the default Django settings.
+Depending on whether you're running the dev or prod configuration, settings can be changed in the
+:code:`.dev.env` or :code:`.prod.env` file, respectively. This file is referred to as :code:`.env`
+below.
 
 .. contents:: List of Settings
 
@@ -22,11 +20,11 @@ SIGN_UP_ENABLED
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        NO        True          bool
-        ========  ============  =========
+        ============  =========
+        Default       Type
+        ============  =========
+        True          bool
+        ============  =========
 
     You may want to create users manually to tightly control who has access to the application. In
     this case, you will want to disable signing up so that no new users can be created without an
@@ -47,11 +45,11 @@ FILE_UPLOAD_ENABLED
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        NO        True          bool
-        ========  ============  =========
+        ============  =========
+        Default       Type
+        ============  =========
+        True          bool
+        ============  =========
 
     Sets whether file uploads are allowed. If they are *not* allowed (disabled), then only metadata
     is submitted to the application.
@@ -71,11 +69,11 @@ USE_DATE_WIDGETS
 
   .. table::
 
-      ========  ============  =========
-      Required  Default       Type
-      ========  ============  =========
-      NO        True          bool
-      ========  ============  =========
+      ============  =========
+      Default       Type
+      ============  =========
+      True          bool
+      ============  =========
 
   By default you must enter full dates in the format YYYY-MM-DD for records start and end dates.
   Setting this to False allows users to enter free text for the start and end date fields.
@@ -95,11 +93,11 @@ DBTEMPLATES_ENABLED
 
   .. table::
 
-      ========  ============  =========
-      Required  Default       Type
-      ========  ============  =========
-      NO        False         bool
-      ========  ============  =========
+      ============  =========
+      Default       Type
+      ============  =========
+      False         bool
+      ============  =========
 
   It is possible to enable this setting so that site templates can be changed without having to
   re-deploy the application. Be careful with enabling this - it is very easy to break templates,
@@ -129,11 +127,11 @@ CLAMAV_ENABLED
 
     .. table::
 
-        ========  ===============  =========
-        Required  Default          Type
-        ========  ===============  =========
-        NO        True             bool
-        ========  ===============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        True             bool
+        ===============  =========
 
     Enables/disables whether ClamAV malware checking is enabled.
 
@@ -154,11 +152,11 @@ CLAMAV_HOST
 
     .. table::
 
-        ===========  ===============  =========
-        Required     Default          Type
-        ===========  ===============  =========
-        NO           clamav           string
-        ===========  ===============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        clamav           string
+        ===============  =========
 
     Chooses the host where ClamAV is running. If :ref:`CLAMAV_ENABLED` is FALSE, this setting does
     not have any effect.
@@ -178,11 +176,11 @@ CLAMAV_PORT
 
     .. table::
 
-        ===========  ===============  =========
-        Required     Default          Type
-        ===========  ===============  =========
-        NO           3310             int
-        ===========  ===============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        3310             int
+        ===============  =========
 
     Chooses the port where ClamAV is accessible on the :ref:`CLAMAV_HOST`. If :ref:`CLAMAV_ENABLED`
     is FALSE, this setting does not have any effect.
@@ -202,11 +200,11 @@ REDIS_HOST
 
     .. table::
 
-        ===========  ===============  =========
-        Required     Default          Type
-        ===========  ===============  =========
-        NO           redis            string
-        ===========  ===============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        redis            string
+        ===============  =========
 
     Chooses the host where Redis is running. Redis is used in tandem with RQ to store ephemeral info
     about asynchronous jobs.
@@ -226,11 +224,11 @@ REDIS_PORT
 
     .. table::
 
-        ===========  ===============  =========
-        Required     Default          Type
-        ===========  ===============  =========
-        NO           6379             int
-        ===========  ===============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        6379             int
+        ===============  =========
 
     Chooses the port where Redis is accessible on the :ref:`REDIS_HOST`.
 
@@ -249,11 +247,11 @@ REDIS_PASSWORD
 
     .. table::
 
-        ===========  ===============  =========
-        Required     Default          Type
-        ===========  ===============  =========
-        NO           ""               string
-        ===========  ===============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        ""               string
+        ===============  =========
 
     By default, Redis **does not require a password**. If you would prefer to set one up, you can,
     and then use this setting to control the password. The default empty value is fine if you are
@@ -280,11 +278,11 @@ ACCEPTED_FILE_FORMATS
 
     .. table::
 
-        ========  ===============  =========
-        Required  Default          Type
-        ========  ===============  =========
-        NO        See below        str
-        ========  ===============  =========
+        ===============  =======================
+        Default          Type
+        ===============  =======================
+        See below        string (special syntax)
+        ===============  =======================
 
     Accepted files are grouped by type of file. The default accepted file extensions are:
 
@@ -356,11 +354,11 @@ MAX_SINGLE_UPLOAD_SIZE
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        NO        64            int
-        ========  ============  =========
+        ============  =========
+        Default       Type
+        ============  =========
+        64            int
+        ============  =========
 
     Sets the maximum allowed size a single file can be when uploaded with the transfer form. The
     size is expressed in **MiB**, *not* MB.
@@ -382,11 +380,11 @@ MAX_TOTAL_UPLOAD_SIZE
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        NO        256           int
-        ========  ============  =========
+        ============  =========
+        Default       Type
+        ============  =========
+        256           int
+        ============  =========
 
     Sets the maximum allowed total size of all files being transferred at one time. The size is
     expressed in **MiB**, *not* MB.
@@ -408,11 +406,11 @@ MAX_TOTAL_UPLOAD_COUNT
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        NO        40            int
-        ========  ============  =========
+        ============  =========
+        Default       Type
+        ============  =========
+        40            int
+        ============  =========
 
     Sets the maximum number of files that can be transferred at one time with the transfer form.
 
@@ -437,11 +435,11 @@ BAG_STORAGE_FOLDER
 
     .. table::
 
-        ========  =======  =========
-        Required  Default  Type
-        ========  =======  =========
-        YES                string
-        ========  =======  =========
+        ====================================  ================  ======
+        Default in Dev                        Default in Prod   Type
+        ====================================  ================  ======
+        /app/bagitobjecttransfer/media/bags/  /app/media/bags/  string
+        ====================================  ================  ======
 
     The folder on the server where bags are to be stored.
 
@@ -460,11 +458,11 @@ UPLOAD_STORAGE_FOLDER
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        YES                     string
-        ========  ============  =========
+        ==============================================  ==========================  ======
+        Default in Dev                                  Default in Prod             Type
+        ==============================================  ==========================  ======
+        /app/bagitobjecttransfer/media/uploaded_files/  /app/media/uploaded_files/  string
+        ==============================================  ==========================  ======
 
     The files users upload will be copied here after being uploaded with either of the Django
     file upload handlers. Uploaded files will first be uploaded in memory or to a temporary file
@@ -489,11 +487,11 @@ BAG_CHECKSUMS
 
     .. table::
 
-        ========  =======  =========
-        Required  Default  Type
-        ========  =======  =========
-        NO        sha512   str
-        ========  =======  =========
+        =======  ========================
+        Default  Type
+        =======  ========================
+        sha512   string (comma-separated)
+        =======  ========================
 
     When BagIt is run, the selected algorithm(s) are used to generate manifests for the files as
     well as the tag files in the Bag. Multiple algorithms can be used, separated by commas. Avoid
@@ -520,11 +518,11 @@ ARCHIVIST_EMAIL
 
     .. table::
 
-        ========  =======  =========
-        Required  Default  Type
-        ========  =======  =========
-        YES                string
-        ========  =======  =========
+        =====================  =========
+        Default                Type
+        =====================  =========
+        archivist@example.com  string
+        =====================  =========
 
     The email displayed for people to contact an archivist.
 
@@ -543,11 +541,11 @@ DO_NOT_REPLY_USERNAME
 
     .. table::
 
-        ========  ============  =========
-        Required  Default       Type
-        ========  ============  =========
-        NO        do-not-reply  string
-        ========  ============  =========
+        ============  =========
+        Default       Type
+        ============  =========
+        do-not-reply  string
+        ============  =========
 
     A username for the application to send "do not reply" emails from. This username is combined
     with the site's base URL to create an email address. The URL can be set from the admin site.
@@ -575,11 +573,11 @@ APPROXIMATE_DATE_FORMAT
 
     .. table::
 
-        ========  ======================  =========
-        Required  Default                 Type
-        ========  ======================  =========
-        NO        :code:`'[ca. {date}]'`  string
-        ========  ======================  =========
+        ======================  =========
+        Default                 Type
+        ======================  =========
+        :code:`'[ca. {date}]'`  string
+        ======================  =========
 
     A format string for the date to indicate an approximate date. The string variable :code:`{date}`
     must be present for the date format to be used.
@@ -599,11 +597,11 @@ CAAIS_UNKNOWN_DATE_TEXT
 
     .. table::
 
-        ========  ======================  =========
-        Required  Default                 Type
-        ========  ======================  =========
-        NO        Unknown date            string
-        ========  ======================  =========
+        ======================  =========
+        Default                 Type
+        ======================  =========
+        Unknown date            string
+        ======================  =========
 
     A string to use in the CAAIS metadata when a user indicates that a date is not known.
 
@@ -622,11 +620,11 @@ CAAIS_UNKNOWN_START_DATE
 
     .. table::
 
-        ========  ======================  =========
-        Required  Default                 Type
-        ========  ======================  =========
-        NO        1800-01-01              string
-        ========  ======================  =========
+        ======================  =========
+        Default                 Type
+        ======================  =========
+        1800-01-01              string
+        ======================  =========
 
     A yyyy-mm-dd formatted date that is used for the start of a date range when an unknown date is
     encountered when parsing a date for CAAIS.
@@ -646,11 +644,11 @@ CAAIS_UNKNOWN_END_DATE
 
     .. table::
 
-        ========  ======================  =========
-        Required  Default                 Type
-        ========  ======================  =========
-        NO        2010-01-01              string
-        ========  ======================  =========
+        ======================  =========
+        Default                 Type
+        ======================  =========
+        2010-01-01              string
+        ======================  =========
 
     A yyyy-mm-dd formatted date that is used for the end of a date range when an unknown date is
     encountered when parsing a date for CAAIS.
@@ -670,11 +668,11 @@ CAAIS_DEFAULT_REPOSITORY
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     **.env Example:**
 
@@ -691,11 +689,11 @@ CAAIS_DEFAULT_ACCESSION_TITLE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     **.env Example:**
 
@@ -712,11 +710,11 @@ CAAIS_DEFAULT_ARCHIVAL_UNIT
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     While the Archival Unit field *is* repeatable in CAAIS, it is not possible to specify
     multiple archival unit defaults.
@@ -734,11 +732,11 @@ CAAIS_DEFAULT_ACQUISITION_METHOD
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     ::
 
@@ -753,11 +751,11 @@ CAAIS_DEFAULT_DISPOSITION_AUTHORITY
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     While the Disposition Authority field *is* repeatable, it is not possible to specify multiple
     disposition authority defaults.
@@ -775,11 +773,11 @@ CAAIS_DEFAULT_STATUS
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     Leave empty, or populate with a term like "Waiting for review" to signify that the metadata has
     not been reviewed yet.
@@ -797,11 +795,11 @@ CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If a default is supplied, the source confidentiality will be applied to every source of material
     received.
@@ -819,11 +817,11 @@ CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     While the Preliminary Custodial History field *is* repeatable in CAAIS, it is not possible to
     specify multiple defaults here.
@@ -841,11 +839,11 @@ CAAIS_DEFAULT_DATE_OF_MATERIALS
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     See also: :ref:`CAAIS_UNKNOWN_DATE_TEXT`.
 
@@ -862,11 +860,11 @@ CAAIS_DEFAULT_EXTENT_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If a default is supplied, the extent type will be applied to every extent statement received.
 
@@ -883,11 +881,11 @@ CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If a default is supplied, the quantity and unit of measure will be applied to every extent
     statement received.
@@ -905,11 +903,11 @@ CAAIS_DEFAULT_CONTENT_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If a default is supplied, the content type will be applied to every extent statement received.
 
@@ -926,11 +924,11 @@ CAAIS_DEFAULT_CARRIER_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If a default is supplied, the carrier type will be applied to every extent statement received.
 
@@ -947,11 +945,11 @@ CAAIS_DEFAULT_EXTENT_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If a default is supplied, the extent note will be applied to every extent statement received.
 
@@ -968,11 +966,11 @@ CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     While the Preliminary Scope and Content field *is* repeatable in CAAIS, it is not possible to
     specify multiple defaults here.
@@ -990,11 +988,11 @@ CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     ::
 
@@ -1009,11 +1007,11 @@ CAAIS_DEFAULT_STORAGE_LOCATION
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     ::
 
@@ -1028,11 +1026,11 @@ CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default preservation requirements statement will be applied to each submission.
 
@@ -1049,11 +1047,11 @@ CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default preservation requirements statement will be applied to each submission.
 
@@ -1070,11 +1068,11 @@ CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default preservation requirements statement will be applied to each submission.
 
@@ -1091,11 +1089,11 @@ CAAIS_DEFAULT_APPRAISAL_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default appraisal statement will be applied to each submission.
 
@@ -1112,11 +1110,11 @@ CAAIS_DEFAULT_APPRAISAL_VALUE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default appraisal statement will be applied to each submission.
 
@@ -1133,11 +1131,11 @@ CAAIS_DEFAULT_APPRAISAL_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default appraisal statement will be applied to each submission.
 
@@ -1154,11 +1152,11 @@ CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default associated document will be applied to each submission.
 
@@ -1175,11 +1173,11 @@ CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default associated document will be applied to each submission.
 
@@ -1196,11 +1194,11 @@ CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     If not empty, a default associated document will be applied to each submission.
 
@@ -1217,11 +1215,11 @@ CAAIS_DEFAULT_GENERAL_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     ::
 
@@ -1236,11 +1234,11 @@ CAAIS_DEFAULT_RULES_OR_CONVENTIONS
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     ::
 
@@ -1255,11 +1253,11 @@ CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     ::
 
@@ -1274,11 +1272,11 @@ CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        YES       Transfer Submitted   string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        Transfer Submitted   string
+        ===================  =========
 
     At the time of receiving a submission, a "Submission" type event is created for the submission.
     You can control the Event Type name for that event here.
@@ -1296,11 +1294,11 @@ CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     At the time of receiving a submission, a "Submission" type event is created for the submission.
     You can control the Event Agent's name for that event here.
@@ -1318,11 +1316,11 @@ CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     At the time of receiving a submission, a "Submission" type event is created for the submission.
     You can control whether an Event Note is added for the event here.
@@ -1340,11 +1338,11 @@ CAAIS_DEFAULT_CREATION_TYPE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        YES       Creation             string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        Creation             string
+        ===================  =========
 
     At the time of receiving a submission, a Date of Creation or Revision is created to indicate
     the date the accession record was created. You can control the name of the event here if you do
@@ -1363,11 +1361,11 @@ CAAIS_DEFAULT_CREATION_AGENT
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     At the time of receiving a submission, a Date of Creation or Revision is created to indicate
     the date the accession record was created. You can control the name of the event agent here.
@@ -1385,11 +1383,11 @@ CAAIS_DEFAULT_CREATION_NOTE
 
     .. table::
 
-        ========  ===================  =========
-        Required  Default              Type
-        ========  ===================  =========
-        NO        "" *(empty string)*  string
-        ========  ===================  =========
+        ===================  =========
+        Default              Type
+        ===================  =========
+        "" *(empty string)*  string
+        ===================  =========
 
     At the time of receiving a submission, a Date of Creation or Revision is created to indicate
     the date the accession record was created. You can add a note to that event here by setting the
