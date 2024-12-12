@@ -93,20 +93,33 @@ podman-compose -f compose.dev.yml exec app npm run watch
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
 # Virtual Environment and Poetry Setup
-Dependencies for testing and building documentation are managed with [Poetry](https://python-poetry.org/) within a virtual environment. To create a virtual environment and install Poetry for testing and building documentation, run the following commands:
 
-On Windows:
+Python dependencies are managed with [Poetry](https://python-poetry.org/). To install Poetry and create a virtual environment with the minimally necessary packages, follow these instructions:
+
+First, install `pipx` via the [official pipx installation instructions](https://pipx.pypa.io/stable/installation/).
+
+After installing `pipx`, install [Poetry](https://python-poetry.org/):
+
 ```shell
-python -m venv env
-.\env\Scripts\Activate.ps1
-pip install poetry
+pipx install poetry
 ```
 
-On MacOS/Linux:
+Next, create and activate a virtual environment from the root of the repository:
+
 ```shell
+# If on Windows:
+python -m venv env
+.\env\Scripts\Activate.ps1
+
+# If on MacOS or Linux
 python3 -m venv env
 source env/bin/activate
-pip install poetry
+```
+
+Finally, install the dependencies with `poetry`:
+
+```shell
+poetry install
 ```
 
 ## Testing Setup
