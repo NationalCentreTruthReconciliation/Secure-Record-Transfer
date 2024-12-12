@@ -1,8 +1,7 @@
-import Dropzone from "dropzone";
-
 /**
  * Functions and configuration for Dropzone.
  */
+import Dropzone from "dropzone";
 
 Dropzone.autoDiscover = false
 
@@ -12,19 +11,20 @@ Dropzone.autoDiscover = false
  * @returns {String} The cookie value. null if it does not exist
  */
 function getCookie(name) {
-    var cookieValue = null
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';')
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim()
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-                break
-            }
-        }
+    if (!document.cookie || document.cookie === '') {
+        return null;
     }
-    return cookieValue
+
+    const cookies = document.cookie.split(';');
+    const targetCookie = cookies
+        .map(cookie => cookie.trim())
+        .find(cookie => cookie.startsWith(`${name}=`));
+
+    if (!targetCookie) {
+        return null;
+    }
+
+    return decodeURIComponent(targetCookie.substring(name.length + 1));
 }
 
 /**
@@ -32,46 +32,38 @@ function getCookie(name) {
  * @param {String} errorMessage The error message to show
  */
 function addDropzoneError(errorMessage) {
-    errorZone = document.getElementById('dropzone-errors')
-    newError = document.createElement('div')
-    newError.className = 'field-error'
-    newError.innerHTML = errorMessage
-    errorZone.appendChild(newError)
+    const errorZone = document.getElementById('dropzone-errors');
+    const newError = document.createElement('div');
+    newError.className = 'field-error';
+    newError.innerHTML = errorMessage;
+    errorZone.appendChild(newError);
 }
 
 /**
  * Removes all errors shown in the dropzone-errors element.
  */
 function clearDropzoneErrors() {
-    errorZone = document.getElementById('dropzone-errors')
+    const errorZone = document.getElementById('dropzone-errors');
     while (errorZone.lastElementChild) {
         errorZone.removeChild(errorZone.lastElementChild);
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    var issueFiles = []    // An array of file names
-    var uploadedFiles = [] // An array of File objects
-    var totalSizeBytes = 0
-    var sessionToken = ''
-    const csrfToken = getCookie('csrftoken')
-    var dropMessage = document.querySelector('.dz-message'); // Custom drop message
+    var issueFiles = [];    // An array of file names
+    var uploadedFiles = []; // An array of File objects
+    var totalSizeBytes = 0;
+    var sessionToken = '';
+    const csrfToken = getCookie('csrftoken');
+    const dropMessage = document.querySelector('.dz-message'); // Custom drop message
 
-    var maxTotalUploadSize = 256.00
-    if (typeof (MAX_TOTAL_UPLOAD_SIZE) !== 'undefined') {
-        maxTotalUploadSize = MAX_TOTAL_UPLOAD_SIZE
-    }
-    var maxTotalUploadSizeBytes = maxTotalUploadSize * 1024 * 1024
-
-    var maxSingleUploadSize = 64.00
-    if (typeof (MAX_SINGLE_UPLOAD_SIZE) !== 'undefined') {
-        maxSingleUploadSize = MAX_SINGLE_UPLOAD_SIZE
-    }
-
-    var maxTotalUploadCount = 40
-    if (typeof (MAX_TOTAL_UPLOAD_COUNT) !== 'undefined') {
-        maxTotalUploadCount = MAX_TOTAL_UPLOAD_COUNT
-    }
+    // Context injected from template
+    const dropzoneContextElement = document.getElementById("py_context_dropzone");
+    const dropzoneContext = JSON.parse(dropzoneContextElement?.textContent || "{}");
+    const maxSingleUploadSize = (dropzoneContext?.max_single_upload_size ?? 64.00).toFixed(2);
+    const maxTotalUploadCount = dropzoneContext?.max_total_upload_count ?? 40;
+    const maxTotalUploadSize = (dropzoneContext?.max_total_upload_size ?? 256.00).toFixed(2);
+    const maxTotalUploadSizeBytes = maxTotalUploadSize * 1024 * 1024;
 
     // Update total size of all uploads in dropzone area
     function updateTotalSize(file, operation) {
@@ -122,8 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
-    $("#file-dropzone").dropzone({
+    new Dropzone("#file-dropzone", {
         url: "/transfer/uploadfile/",
         paramName: "upload_files",
         addRemoveLinks: true,
@@ -143,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         accept: function (file, done) {
             if (totalSizeBytes > maxTotalUploadSizeBytes) {
                 done({
-                    'error': 'Maximum total upload size (' + maxTotalUploadSize + ' MiB) exceeded'
+                    'error': `Maximum total upload size (${maxTotalUploadSize} MiB) exceeded`
                 })
             }
             else if (this.files.length > this.options.maxFiles) {
@@ -194,20 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
             uploadedFiles = []
             sessionToken = ''
 
-            var dropzoneClosure = this
-            var submitButton = document.getElementById("submit-form-btn")
+            const dropzoneClosure = this
+            const submitButton = document.getElementById("submit-form-btn")
 
-            // Call on initialization to set the correct state
-            updateDropMessageVisibility();
-
-            // Update drop message visibility when files are added or removed
-            this.on("addedfile", function () {
-                updateDropMessageVisibility();
-            });
-
-            this.on("removedfile", function () {
-                updateDropMessageVisibility();
-            });
+            function updateDropMessageVisibility() {
+                if (dropzoneClosure.files.length === 0) {
+                    dropMessage.style.display = 'block'; // Show message when no files are present
+                } else {
+                    dropMessage.style.display = 'none'; // Hide message when there are files
+                }
+            }
 
             submitButton.addEventListener("click", (event) => {
                 event.preventDefault()
@@ -229,6 +216,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             })
 
+            // Call on initialization to set the correct state
+            updateDropMessageVisibility();
+
+            // Update drop message visibility when files are added or removed
+            this.on("addedfile", function (file) {
+                updateTotalSize(file, '+');
+                updateDropMessageVisibility();
+            });
+
+            this.on("removedfile", function (file) {
+                updateTotalSize(file, '-')
+
+                // If this file previously caused an issue, remove it from issueFiles
+                const issueIndex = issueFiles.indexOf(file.name)
+                if (issueIndex > -1) {
+                    issueFiles.splice(issueIndex, 1)
+                }
+                if (issueFiles.length === 0) {
+                    document.getElementById("submit-form-btn").disabled = false
+                    clearDropzoneErrors()
+                    this.element.classList.remove('dz-submit-disabled')
+                }
+
+                updateDropMessageVisibility();
+            });
+
             // Triggers on non-200 status
             this.on("error", (file, response, xhr) => {
                 if (response.verboseError) {
@@ -245,25 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("submit-form-btn").disabled = true
                 this.element.classList.add('dz-submit-disabled')
                 dropzoneClosure.options.autoProcessQueue = false
-            })
-
-            this.on("addedfile", (file) => {
-                updateTotalSize(file, '+')
-            })
-
-            this.on("removedfile", (file) => {
-                updateTotalSize(file, '-')
-
-                // If this file previously caused an issue, remove it from issueFiles
-                issueIndex = issueFiles.indexOf(file.name)
-                if (issueIndex > -1) {
-                    issueFiles.splice(issueIndex, 1)
-                }
-                if (issueFiles.length === 0) {
-                    document.getElementById("submit-form-btn").disabled = false
-                    clearDropzoneErrors()
-                    this.element.classList.remove('dz-submit-disabled')
-                }
             })
 
             this.on("sendingmultiple", (file, xhr, formData) => {
