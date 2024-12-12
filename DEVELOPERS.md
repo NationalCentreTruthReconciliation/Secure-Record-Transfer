@@ -92,12 +92,44 @@ podman-compose -f compose.dev.yml exec app npm run watch
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
-## Testing Setup
+# Virtual Environment and Poetry Setup
 
-Ensure that you've installed the `dev` dependencies locally (preferably in a virtual environment):
+Python dependencies are managed with [Poetry](https://python-poetry.org/). To install Poetry and create a virtual environment with the minimally necessary packages, follow these instructions:
+
+First, install `pipx` via the [official pipx installation instructions](https://pipx.pypa.io/stable/installation/).
+
+After installing `pipx`, install [Poetry](https://python-poetry.org/):
 
 ```shell
-pip install .[dev]
+pipx install poetry
+```
+
+Next, create and activate a virtual environment from the root of the repository:
+
+```shell
+# If on Windows:
+python -m venv env
+.\env\Scripts\Activate.ps1
+
+# If on MacOS or Linux
+python3 -m venv env
+source env/bin/activate
+```
+
+Finally, install the dependencies with `poetry`:
+
+```shell
+poetry install
+```
+
+## Testing Setup
+
+Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
+
+Install the `dev` dependencies with Poetry:
+
+```shell
+poetry install --extras "dev"
 ```
 
 Use these settings in your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project so that tests are discovered correctly in the Testing menu:
@@ -120,7 +152,12 @@ pytest
 
 The documentation for this repository is built with [Sphinx](https://sphinx-doc.org).
 
-Before building the documentation, ensure you have the `dev` dependencies installed.
+Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
+
+Install the `docs` dependencies with Poetry:
+```shell
+poetry install --extras "docs"
+```
 
 To build the docs, run:
 
