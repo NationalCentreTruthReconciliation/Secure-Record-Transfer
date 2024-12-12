@@ -13,7 +13,7 @@ build:
       - poetry config virtualenvs.create false
 
     post_install:
-      - source "$READTHEDOCS_VIRTUALENV_PATH/bin/activate" && poetry install --extras docs
+      - . "$READTHEDOCS_VIRTUALENV_PATH/bin/activate" && poetry install --extras docs
 
   tools:
     python: "3.10"
