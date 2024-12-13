@@ -27,19 +27,17 @@
     </div>
     <div class="pagination">
         {% if in_progress_page_obj.has_previous %}
-            <button onclick="location.href='?in_progress_page={{ in_progress_page_obj.previous_page_number }}'">
-                {% trans "Previous" %}
-            </button>
+            <a href="?in_progress_page={{ in_progress_page_obj.previous_page_number }}"
+               class="btn-arrow btn-arrow-left">{% trans "Previous" %}</a>
         {% else %}
-            <button disabled>{% trans "Previous" %}</button>
+            <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true">{% trans "Previous" %}</a>
         {% endif %}
         <span>{% trans "Page" %} {{ in_progress_page_obj.number }} {% trans "of" %} {{ in_progress_page_obj.paginator.num_pages }}</span>
         {% if in_progress_page_obj.has_next %}
-            <button onclick="location.href='?in_progress_page={{ in_progress_page_obj.next_page_number }}'">
-                {% trans "Next" %}
-            </button>
+            <a href="?in_progress_page={{ in_progress_page_obj.next_page_number }}"
+               class="btn-arrow btn-arrow-right">{% trans "Next" %}</a>
         {% else %}
-            <button disabled>{% trans "Next" %}</button>
+            <a class="btn-arrow btn-arrow-right disabled" aria-disabled="true">{% trans "Next" %}</a>
         {% endif %}
     </div>
 {% else %}
