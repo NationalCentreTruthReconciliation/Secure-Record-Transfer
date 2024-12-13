@@ -25,21 +25,7 @@
             {% endfor %}
         </table>
     </div>
-    <div class="pagination">
-        {% if in_progress_page_obj.has_previous %}
-            <a href="?in_progress_page={{ in_progress_page_obj.previous_page_number }}"
-               class="btn-arrow btn-arrow-left">{% trans "Previous" %}</a>
-        {% else %}
-            <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true">{% trans "Previous" %}</a>
-        {% endif %}
-        <span>{% trans "Page" %} {{ in_progress_page_obj.number }} {% trans "of" %} {{ in_progress_page_obj.paginator.num_pages }}</span>
-        {% if in_progress_page_obj.has_next %}
-            <a href="?in_progress_page={{ in_progress_page_obj.next_page_number }}"
-               class="btn-arrow btn-arrow-right">{% trans "Next" %}</a>
-        {% else %}
-            <a class="btn-arrow btn-arrow-right disabled" aria-disabled="true">{% trans "Next" %}</a>
-        {% endif %}
-    </div>
+    {% include "includes/pagination.html" with page_obj=in_progress_page_obj %}
 {% else %}
     <p>{% trans "No in-progress transfers available." %}</p>
 {% endif %}
