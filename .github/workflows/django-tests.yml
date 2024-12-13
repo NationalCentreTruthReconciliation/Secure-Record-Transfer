@@ -25,13 +25,8 @@ jobs:
     - name: Install Poetry
       run: pipx install poetry
 
-    - name: Create and activate virtual environment
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-
     - name: Install dependencies
       run: poetry install --extras "dev"
 
     - name: Run tests
-      run: pytest
+      run: poetry run pytest
