@@ -5,198 +5,7 @@
  * https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
  */
 
-
-const VALID_INPUTS = 'input:not([type=button]):not([type=submit]):not([type=reset]), textarea, select'
-const ID_NUM_REGEX = new RegExp('-(\\d+)-')
-
 let groupDescriptions = {};
-
-/**
- * Test if an element exists on the page.
- * @param {String} selector A jQuery type selector string
- * @returns {Boolean} true if element exists, false otherwise
- */
-function elementExists(selector) {
-    return $(selector).length !== 0
-}
-
-/**
- * Get the prefix name of the currently activated formset.
- * @returns {String} The name of the formset
- */
-function getFormPrefix() {
-    if (elementExists('#id_rights-TOTAL_FORMS')) {
-        return 'rights'
-    }
-    else if (elementExists('#id_otheridentifiers-TOTAL_FORMS')) {
-        return 'otheridentifiers'
-    }
-    else {
-        return 'none'
-    }
-}
-
-/**
- * Get the current number of forms displayed on the page.
- * @param {String} prefix The form prefix, if it is known
- * @returns {Number} The current number of forms
- */
-function getTotalForms(prefix = null) {
-    var formPrefix = prefix === null ? getFormPrefix() : prefix
-    return parseInt($(`#id_${formPrefix}-TOTAL_FORMS`).val())
-}
-
-/**
- * Get the maximum number of allowable forms set by the backend.
- * @param {String} prefix The form prefix, if it is known
- * @returns {Number} The maximum number of forms
- */
-function getMaxForms(prefix = null) {
-    var formPrefix = prefix === null ? getFormPrefix() : prefix
-    return parseInt($(`#id_${formPrefix}-MAX_NUM_FORMS`).val())
-}
-
-/**
- * Add a new form to the formset by cloning the selected form. The cloned form is inserted in the
- * document tree directly below the form that was cloned. This function respects whether the
- * max_num of formsets was set in the backend.
- * @param {String} cloneFormSelector The form to clone to create a new form from
- */
-function appendNewForm(cloneFormSelector) {
-    var prefix = getFormPrefix()
-    var totalForms = getTotalForms(prefix)
-    var maxNumForms = getMaxForms(prefix)
-
-    if (totalForms + 1 > maxNumForms) {
-        alert(`You may not exceed ${maxNumForms} form sections.`)
-        return
-    }
-
-    var newForm = $(cloneFormSelector).clone(true)
-    newForm.addClass('margin-top-25px')
-    incrementInputAttributes(newForm)
-    incrementLabelAttributes(newForm)
-    $(`#id_${prefix}-TOTAL_FORMS`).val(totalForms + 1);
-    $(cloneFormSelector).after(newForm);
-}
-
-function deleteForm(formSelector) {
-    var prefix = getFormPrefix();
-    var totalForms = getTotalForms(prefix);
-
-    var form = $(formSelector).last();
-    form.remove();
-    $(`#id_${prefix}-TOTAL_FORMS`).val(totalForms - 1);
-}
-
-
-/**
- * Increment all of the indices for the input elements of a formset form
- * @param form The form row element selected by jQuery
- */
-function incrementInputAttributes(form) {
-    var formIdNumber = -1
-    var oldNumber = null
-    var newNumber = null
-
-    $(form).find(VALID_INPUTS).each((_, element) => {
-        var name = $(element).attr('name')
-
-        if (formIdNumber === -1) {
-            var match = ID_NUM_REGEX.exec(name)
-            formIdNumber = parseInt(match[1])
-            oldNumber = `-${formIdNumber}-`
-            newNumber = `-${formIdNumber + 1}-`
-        }
-
-        var newName = name.replace(oldNumber, newNumber)
-        var newId = `id_${newName}`
-
-        $(element).attr({
-            'name': newName,
-            'id': newId
-        })
-            .val('')
-            .removeAttr('checked')
-    })
-}
-
-/**
- * Increment all of the indices for the label elements of a formset form
- * @param form The form row element selected by jQuery
- */
-function incrementLabelAttributes(form) {
-    var formIdNumber = -1
-    var oldNumber = null
-    var newNumber = null
-
-    $(form).find('label').each((_, element) => {
-        var forValue = $(element).attr('for')
-
-        if (forValue) {
-            if (formIdNumber === -1) {
-                var match = ID_NUM_REGEX.exec(forValue)
-                formIdNumber = parseInt(match[1])
-                oldNumber = `-${formIdNumber}-`
-                newNumber = `-${formIdNumber + 1}-`
-            }
-
-            var newForValue = forValue.replace(oldNumber, newNumber)
-            $(element).attr({
-                'for': newForValue
-            })
-        }
-    })
-}
-
-/**
- * Delete a specific form element from the formset
- * @param {String} deleteFormSelector The selector for the form row
- */
-function deleteForm(deleteFormSelector) {
-    var prefix = getFormPrefix()
-    var total = getTotalForms(prefix)
-
-    if (total > 1) {
-        $(deleteFormSelector).remove()
-
-        var forms = $('.form-row')
-        $(`#id_${prefix}-TOTAL_FORMS`).val(forms.length)
-
-        // Update each input's index for the remaining forms
-        for (var i = 0; i < forms.length; i++) {
-            $(forms.get(i)).find(':input').each((_, element) => {
-                updateElementIndex(element, i, prefix);
-            });
-        }
-    }
-}
-
-/**
- * Update a form element's index within the current form.
- * @param element An element selected from the page with jQuery
- * @param {Number} index The new index the element is to have
- */
-function updateElementIndex(element, index, prefix) {
-    var idRegex = new RegExp(`(${prefix}-\\d+)`);
-    var replacement = prefix + '-' + index;
-
-    forValue = $(element).attr("for")
-    if (forValue) {
-        const new_for = forValue.replace(idRegex, replacement)
-        $(element).attr({
-            "for": new_for
-        })
-    }
-
-    if (element.id) {
-        element.id = element.id.replace(idRegex, replacement)
-    }
-
-    if (element.name) {
-        element.name = element.name.replace(idRegex, replacement)
-    }
-}
 
 /**
  * Function to setup on click handlers for select boxes to toggle text fields when selecting "Other"
@@ -280,8 +89,8 @@ const updateGroupDescription = () => {
 
 /**
  * Asynchronously populates group descriptions by making an AJAX request to fetch user group descriptions.
- * 
- * @returns {Promise<void>} A promise that resolves when the group descriptions have been successfully populated, 
+ *
+ * @returns {Promise<void>} A promise that resolves when the group descriptions have been successfully populated,
  * or rejects if the AJAX request fails.
  */
 async function populateGroupDescriptions() {
@@ -368,65 +177,105 @@ function clearCreateGroupForm() {
     submissionGroupDescription.value = '';
 }
 
-$(() => {
-
-    var rightsDialog = undefined
-    var sourceRolesDialog = undefined
-    var sourceTypesDialog = undefined
-    var totalForms = undefined
-
-
+document.addEventListener("DOMContentLoaded", function () {
     /***************************************************************************
      * Formset Setup
      **************************************************************************/
+    const contextElement = document.getElementById("py_context_formset");
 
-    if (typeof NUM_EXTRA_FORMS !== 'undefined' && !NUM_EXTRA_FORMS) {
-        deleteForm('.form-row:last')
-    }
+    // Set up adding and removing formset forms
+    if (contextElement) {
+        const contextContent = JSON.parse(contextElement.textContent);
 
-    totalForms = getTotalForms()
+        const prefix = contextContent.formset_prefix;
+        const formRowRegex = new RegExp(`${prefix}-\\d+-`, 'g');
 
-    $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
+        const maxFormsInput = document.getElementById(`id_${prefix}-MAX_NUM_FORMS`);
+        const maxForms = parseInt(maxFormsInput.getAttribute("value"));
+        const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
 
-    $('.add-form-row').on('click', (event) => {
-        event.preventDefault()
-        appendNewForm('.form-row:last')
-        totalForms = getTotalForms()
-        $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
-    })
+        let formsetForms = document.querySelectorAll('.form-row');
+        let numForms = formsetForms.length;
 
-    $('.remove-form-row').on('click', (event) => {
-        event.preventDefault()
-        deleteForm('.form-row:last')
-        totalForms = getTotalForms()
-        $('.remove-form-row').prop('disabled', Boolean(totalForms <= 1))
-    })
-
-    $('.remove-form-row').hover(() => {
-        totalForms = getTotalForms()
-        if (totalForms > 1) {
-            $('.form-row:last').find('label').each((_, element) => {
-                $(element).addClass('red-text-strikethrough')
-            })
-            $('.form-row:last').find(VALID_INPUTS).each((_, element) => {
-                $(element).addClass('red-border')
-                $(element).addClass('red-text-strikethrough')
-            })
+        function refreshFormset() {
+            formsetForms = document.querySelectorAll('.form-row');
+            numForms = formsetForms.length;
+            totalFormsInput.setAttribute('value', numForms);
         }
-    }, () => {
-        $('.form-row:last').find('label').each((_, element) => {
-            $(element).removeClass('red-text-strikethrough')
-        })
-        $('.form-row:last').find(VALID_INPUTS).each((_, element) => {
-            $(element).removeClass('red-border')
-            $(element).removeClass('red-text-strikethrough')
-        })
-    })
 
+        const removeFormButton = document.querySelector(".remove-form-row");
+        const addFormButton = document.querySelector(".add-form-row");
+
+        function refreshButtonState() {
+            removeFormButton.disabled = numForms <= 1;
+            addFormButton.disabled = numForms >= maxForms;
+        }
+
+        refreshButtonState();
+
+        // Remove the last form on click
+        removeFormButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            refreshFormset();
+
+            if (numForms > 1) {
+                const lastForm = formsetForms[formsetForms.length - 1];
+                lastForm.remove();
+            }
+
+            refreshFormset();
+            refreshButtonState();
+        });
+
+        // Add imminent-removal class to the last form when about to click the button
+        removeFormButton.addEventListener('mouseenter', function (event) {
+            event.preventDefault();
+            this.style.cursor = 'pointer';
+            refreshFormset();
+            if (numForms > 1) {
+                const lastForm = formsetForms[formsetForms.length - 1];
+                lastForm.classList.add('imminent-removal');
+            }
+        });
+
+        // Remove imminent-removal class on mouse leave
+        removeFormButton.addEventListener('mouseleave', function (event) {
+            event.preventDefault();
+            this.style.cursor = 'default';
+            refreshFormset();
+            const lastForm = formsetForms[formsetForms.length - 1];
+            lastForm.classList.remove('imminent-removal');
+        });
+
+        // Insert one more form on click
+        addFormButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            refreshFormset();
+
+            if (numForms < maxForms) {
+                const lastForm = formsetForms[formsetForms.length - 1];
+                const newForm = lastForm.cloneNode(true);
+
+                // The formset number is zero-based, so we can use the current length as the form number
+                const formNumber = formsetForms.length;
+                newForm.innerHTML = newForm.innerHTML.replace(formRowRegex, `${prefix}-${formNumber}-`);
+
+                // Insert the new form after the last form
+                lastForm.parentNode.insertBefore(newForm, lastForm.nextSibling);
+            }
+
+            refreshFormset();
+            refreshButtonState();
+        });
+    }
 
     /***************************************************************************
      * Dialog Box Setup
      **************************************************************************/
+
+    var rightsDialog = undefined
+    var sourceRolesDialog = undefined
+    var sourceTypesDialog = undefined
 
     rightsDialog = $('#rights-dialog').dialog({
         autoOpen: false,

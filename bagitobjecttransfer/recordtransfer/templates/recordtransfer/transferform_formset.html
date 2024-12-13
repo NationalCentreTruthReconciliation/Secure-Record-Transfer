@@ -4,9 +4,7 @@
 
 {% block javascript %}
     {{ block.super }}
-    <script>
-        const NUM_EXTRA_FORMS = {{ NUM_EXTRA_FORMS }};
-    </script>
+    {{ js_context|json_script:"py_context_formset" }}
 {% endblock javascript %}
 
 {% block buttonarrayclass %}flex-item{% endblock %}

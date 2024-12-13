@@ -32,7 +32,14 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView, DetailView, FormView, TemplateView, UpdateView, View
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    FormView,
+    TemplateView,
+    UpdateView,
+    View,
+)
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.caais import map_form_to_metadata
@@ -568,10 +575,6 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif self.current_step == TransferStep.RIGHTS:
-            all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
-
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
             all_types = SourceType.objects.all().exclude(name="Other")
@@ -582,8 +585,24 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
+        elif self.current_step == TransferStep.RIGHTS:
+            context.update(
+                {
+                    "rights": RightsType.objects.all().exclude(name="Other"),
+                    "js_context": {
+                        "formset_prefix": "rights",
+                    },
+                }
+            )
+
         elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
-            context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
+            context.update(
+                {
+                    "js_context": {
+                        "formset_prefix": "other_identifiers",
+                    },
+                },
+            )
 
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
