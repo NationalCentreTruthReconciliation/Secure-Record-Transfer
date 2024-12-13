@@ -1,33 +1,24 @@
 {% load i18n %}
-{% if groups_page_obj %}
-    <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
-        <label class="medium-text">{% trans "Submission Groups" %}</label>
-    </div>
-    <div class="flex-med-width-item">
-        <table class="full-width-table standard-table" cellspacing="0">
+<div class="flex-med-width-item">
+    <table class="full-width-table standard-table" cellspacing="0">
+        <tr>
+            <th>{% trans "Group ID" %}</th>
+            <th>{% trans "Group Name" %}</th>
+            <th>{% trans "Group Description" %}</th>
+            <th>{% trans "Transfers in Group" %}</th>
+            <th>{% trans "View Group" %}</th>
+        </tr>
+        {% for group in groups_page_obj %}
             <tr>
-                <th>{% trans "Group ID" %}</th>
-                <th>{% trans "Group Name" %}</th>
-                <th>{% trans "Group Description" %}</th>
-                <th>{% trans "Transfers in Group" %}</th>
-                <th>{% trans "View Group" %}</th>
+                <td>{{ group.uuid }}</td>
+                <td>{{ group.name }}</td>
+                <td>{{ group.description }}</td>
+                <td>{{ group.number_of_submissions_in_group }}</td>
+                <td>
+                    <a href="{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
+                </td>
             </tr>
-            {% for group in groups_page_obj %}
-                <tr>
-                    <td>{{ group.uuid }}</td>
-                    <td>{{ group.name }}</td>
-                    <td>{{ group.description }}</td>
-                    <td>{{ group.number_of_submissions_in_group }}</td>
-                    <td>
-                        <a href="{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-    {% include "includes/pagination.html" with page_obj=groups_page_obj %}
-{% else %}
-    <div class="flex-med-width-item">
-        <p>{% trans "You have not made any submission groups." %}</p>
-    </div>
-{% endif %}
+        {% endfor %}
+    </table>
+</div>
+{% include "includes/pagination.html" with page_obj=groups_page_obj %}
