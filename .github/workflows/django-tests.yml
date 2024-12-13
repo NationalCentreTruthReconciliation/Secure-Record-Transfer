@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - master
-  push:
-    branches:
-      - 266-require-tests-to-pass-before-merge
 
 jobs:
   test:
