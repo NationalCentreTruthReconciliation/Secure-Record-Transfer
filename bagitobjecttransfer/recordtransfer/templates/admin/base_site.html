@@ -1,45 +1,97 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
+
 {% block extrahead %}
+    {{ block.super }}
     <link rel="icon" href="{% static 'recordtransfer/img/favicon.ico'  %}" />
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
     <style>
-        #header {
-            background: #eee;
-            box-shadow: 0 4px 3px -3px #bbb;
+        html[data-theme="light"], :root {
+            --primary: #b13d32;
+            --secondary: #f0f0f0;
+            --breadcrumbs-bg: #b13d32;
+            --header-color: #333333;
+            --header-link-color: #000a92;
+            --default-button-bg: #3c83a3;
+            --button-bg: #81b6ce;
+            --accent: #333333;
+            --selected-row: #d9f2ff;
+
+            /* Override the section having color: var(--header-link-color) */
+            .section {
+                color: var(--secondary);
+            }
+
+            /* Override the section:visited having color: var(--header-color) */
+            .section:visited {
+                color: var(--secondary) !important;
+            }
         }
-        #branding h1 {
-            float: left;
+
+        html[data-theme="dark"] {
+            --primary: #6b0900;
+            --secondary: #5c5c5c;
+            --accent:#ebebeb;
+            --header-color: #cecece;
+            --header-link-color: var(--accent);
+            --header-bg: #1a1a1a;
+            --default-button-bg: #3c83a3;
+            --button-bg: #325261;
+            --breadcrumbs-bg: #292929;
+
+            /* Override the section having color: var(--header-link-color) */
+            .section {
+                color: var(--primary-fg);
+            }
+
+            /* Override the section:visited having color: var(--header-color) */
+            .section:visited {
+                color: var(--primary-fg) !important;
+            }
         }
-        #branding h1, #branding h1 a:link, #branding h1 a:visited {
-            color: #333;
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #6b0900;
+                --secondary: #5c5c5c;
+                --accent: #ebebeb;
+                --header-color: #cecece;
+                --header-link-color: var(--accent);
+                --header-bg: #1a1a1a;
+                --default-button-bg: #3c83a3;
+                --button-bg: #325261;
+                --breadcrumbs-bg: #292929;
+
+                /* Override the section having color: var(--header-link-color) */
+                .section {
+                    color: var(--primary-fg);
+                }
+
+                /* Override the section:visited having color: var(--header-color) */
+                .section:visited {
+                    color: var(--primary-fg) !important;
+                }
+            }
         }
-        #user-tools {
-            color: #333;
-        }
-        #header a:link, #header a:visited {
-            color: #447e9b;
-        }
+
         #branding img {
             float: left;
             margin-right: 10px;
         }
-        .module h2, .module caption, .inline-group h2 {
-            background: #b13d32;
+
+        #header {
+            box-shadow: 0 4px 3px -3px #bbb;
         }
-        div.breadcrumbs {
-            background: #b13d32;
-        }
-        #nav-sidebar {
-            margin-top: 5px;
-        }
-        #nav-sidebar .current-model {
-            background: #cef;
-        }
-        #toggle-nav-sidebar {
-            background: #ddd;
+
+        #branding h1 {
+            float: left;
         }
     </style>
 {% endblock %}
+
 {% block branding %}
     <img height="40" src="{% static 'nctrlogo_flame_150x150px.webp'%}">
     <h1 style="line-height: 40px;" id="site-name">
