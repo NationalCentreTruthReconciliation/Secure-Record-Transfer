@@ -5,9 +5,11 @@
     <nav class="main-header-content">
         <ul class="main-navbar">
             <li class="nav-logo">
+                <img id="app-logo" src="{% static 'nctrlogo_flame_150x150px.webp'%}">
+            </li>
+            <li class="nav-title">
                 <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
-                    <img id="app-logo" src="{% static 'nctrlogo_flame_150x150px.webp'%}">
-                    <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}<span>
+                    <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}</span>
                 </a>
             </li>
             <li class="nav-item">
