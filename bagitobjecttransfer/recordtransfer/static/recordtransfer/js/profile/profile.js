@@ -30,4 +30,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     checkForChanges();
+
+    // Save scroll position before page unload
+    window.addEventListener('beforeunload', function () {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    });
+
+    // Restore scroll position after page load
+    window.addEventListener('load', function () {
+        const scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition !== null) {
+            window.scrollTo(0, parseInt(scrollPosition, 10));
+            localStorage.removeItem('scrollPosition');
+        }
+    });
 });
