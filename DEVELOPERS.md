@@ -62,6 +62,10 @@ Use this `launch.json` configuration in VSCode to debug the application:
 }
 ```
 
+## Continuous Integration
+
+A GitHub Actions workflow is set up to run Django tests on every pull request to the master branch. All tests must pass before a merge is allowed. The workflow configuration can be found in `.github/workflows/django-tests.yml`.
+
 ## Javascript Development
 
 If you're editing any of the `.js` files in this repo, add these settings to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project to set your environment up.
