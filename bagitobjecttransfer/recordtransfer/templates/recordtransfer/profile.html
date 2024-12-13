@@ -20,7 +20,17 @@
         <div class="title-text">{% trans "Your Profile" %}</div>
         {% include "includes/profile_form.html" %}
         <br>
-        {% include "includes/in_progress_submission_table.html" %}
+        <!-- In Progress Submissions -->
+        <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
+            <label class="medium-text">{% trans "In Progress Transfers" %}</label>
+        </div>
+        {% if in_progress_page_obj and in_progress_page_obj|length > 0 %}
+            {% include "includes/in_progress_submission_table.html" %}
+        {% else %}
+            <div class="flex-med-width-item">
+                <p>{% trans "You have no submissions that are in progress." %}</p>
+            </div>
+        {% endif %}
         <div class="flex-med-width-item margin-top-25px" id="past-transfers">
             <label class="medium-text">{% trans "Past Transfers" %}</label>
         </div>
