@@ -22,7 +22,7 @@ header {
 }
 
 .nav-title {
-    margin-left: 10px;
+    margin-left: 20px;
     flex-grow: 1;
     align-content: start;
     justify-content: flex-start;
