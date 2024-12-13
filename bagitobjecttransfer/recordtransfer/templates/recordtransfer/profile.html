@@ -34,16 +34,7 @@
         <div class="margin-top-25px">
             <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
         </div>
-        <div class="flex-med-width-item margin-top-25px" id="submission-groups">
-            <label class="medium-text">{% trans "Submission Groups" %}</label>
-        </div>
-        {% if submission_groups %}
-            {% include "includes/submission_group_table.html" with groups=submission_groups %}
-        {% else %}
-            <div class="flex-med-width-item">
-                <p>{% trans "You have not made any submission groups." %}</p>
-            </div>
-        {% endif %}
+        {% include "includes/submission_group_table.html" %}
         <div class="margin-top-25px">
             <a href="{% url 'recordtransfer:submissiongroupnew' %}">{% trans "Click to add new group" %}</a>
         </div>
