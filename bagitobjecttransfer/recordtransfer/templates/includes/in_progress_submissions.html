@@ -1,5 +1,5 @@
 {% load i18n %}
-{% if in_progress_submissions %}
+{% if in_progress_page_obj %}
     <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
         <label class="medium-text">{% trans "In Progress Transfers" %}</label>
     </div>
@@ -11,7 +11,7 @@
                 <th>{% trans "Resume Transfer" %}</th>
                 <th>{% trans "Delete" %}</th>
             </tr>
-            {% for submission in in_progress_submissions %}
+            {% for submission in in_progress_page_obj %}
                 <tr>
                     <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ submission.last_updated|time:"H:i" }}</td>
                     <td>{{ submission.title }}</td>
@@ -25,4 +25,15 @@
             {% endfor %}
         </table>
     </div>
+    <div class="pagination">
+        <span>{% trans "Page" %} {{ in_progress_page_obj.number }} {% trans "of" %} {{ in_progress_page_obj.paginator.num_pages }}</span>
+        {% if in_progress_page_obj.has_previous %}
+            <button onclick="location.href='?in_progress_page={{ in_progress_page_obj.previous_page_number }}'">{% trans "Previous" %}</button>
+        {% endif %}
+        {% if in_progress_page_obj.has_next %}
+            <button onclick="location.href='?in_progress_page={{ in_progress_page_obj.next_page_number }}'">{% trans "Next" %}</button>
+        {% endif %}
+    </div>
+{% else %}
+    <p>{% trans "No in-progress transfers available." %}</p>
 {% endif %}

@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
 from django.forms import BaseModelForm
 from django.http import (
@@ -126,7 +127,7 @@ class UserProfile(UpdateView):
     """
 
     template_name = "recordtransfer/profile.html"
-    paginate_by = 10
+    paginate_by = 2
     form_class = UserProfileForm
     success_url = reverse_lazy("recordtransfer:userprofile")
     success_message = gettext("Preferences updated")
@@ -139,20 +140,36 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-        context["in_progress_submissions"] = InProgressSubmission.objects.filter(
+
+        # Paginate InProgressSubmission
+        in_progress_submissions = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
-        context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
-            "-submission_date"
-        )
-        context["submission_groups"] = SubmissionGroup.objects.filter(
+        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
+        in_progress_page_number = self.request.GET.get("in_progress_page", 1)
+        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
+
+        # Paginate Submission
+        user_submissions = Submission.objects.filter(
+            user=self.request.user
+        ).order_by("-submission_date")
+        submissions_paginator = Paginator(user_submissions, self.paginate_by)
+        submissions_page_number = self.request.GET.get("submissions_page", 1)
+        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
+
+        # Paginate SubmissionGroup
+        submission_groups = SubmissionGroup.objects.filter(
             created_by=self.request.user
         ).order_by("name")
+        groups_paginator = Paginator(submission_groups, self.paginate_by)
+        groups_page_number = self.request.GET.get("groups_page", 1)
+        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
 
         context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
         context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
         context["ID_NEW_PASSWORD"] = ID_NEW_PASSWORD
         context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
+
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
