@@ -35,14 +35,14 @@
         <div class="flex-med-width-item margin-top-25px" id="past-transfers">
             <label class="medium-text">{% trans "Past Transfers" %}</label>
         </div>
-        {% if user_submissions %}
-            {% include "includes/submission_table.html" with submissions=user_submissions %}
+        {% if submissions_page_obj and submissions_page_obj|length > 0 %}
+            {% include "includes/submission_table.html" %}
         {% else %}
             <div class="flex-med-width-item">
                 <p>{% trans "You have not sent any records to the NCTR." %}</p>
             </div>
         {% endif %}
-        <div class="margin-top-25px">
+        <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
         </div>
         <!-- Submission Groups -->
@@ -55,10 +55,10 @@
             <div class="flex-med-width-item">
                 <p>{% trans "You have not made any submission groups." %}</p>
             </div>
-            <div class="margin-top-25px">
-                <a href="{% url 'recordtransfer:submissiongroupnew' %}">{% trans "Click to add new group" %}</a>
-            </div>
         {% endif %}
+        <div class="margin-top-15px">
+            <a href="{% url 'recordtransfer:submissiongroupnew' %}">{% trans "Click to add new group" %}</a>
+        </div>
     {% else %}
         {% url 'login' as login %}
         <p>
