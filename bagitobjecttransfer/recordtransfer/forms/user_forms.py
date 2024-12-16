@@ -8,15 +8,27 @@ from django.utils.translation import gettext_lazy as _
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
+    ID_FIRST_NAME,
     ID_GETS_NOTIFICATION_EMAILS,
+    ID_LAST_NAME,
     ID_NEW_PASSWORD,
 )
 from recordtransfer.models import User
 
+import re
 
 class UserProfileForm(forms.ModelForm):
     """Form for editing user profile."""
-
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={"id": ID_FIRST_NAME}),
+        label=_("First Name"),
+        required=True,
+    )
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={"id": ID_LAST_NAME}),
+        label=_("Last Name"),
+        required=True,
+    )
     gets_notification_emails = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"id": ID_GETS_NOTIFICATION_EMAILS}),
         label=_("Receive notification emails?"),
@@ -39,6 +51,8 @@ class UserProfileForm(forms.ModelForm):
         required=False,
     )
 
+    NAME_PATTERN = re.compile(r"^(?!.*[.\s']{2})[A-Za-z\s.'-]+$")
+
     class Meta:
         """Meta class for UserProfileForm."""
 
@@ -46,9 +60,11 @@ class UserProfileForm(forms.ModelForm):
         fields = ("gets_notification_emails",)
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
+        user:User = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         if user:
+            self.fields["first_name"].initial = user.first_name
+            self.fields["last_name"].initial = user.last_name
             self.fields["gets_notification_emails"].initial = user.gets_notification_emails
 
     def clean(self) -> "dict[str, Any]":
@@ -60,7 +76,27 @@ class UserProfileForm(forms.ModelForm):
         current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
-        gets_notification_emails = cleaned_data.get("gets_notification_emails")
+
+        first_name = cleaned_data.get("first_name")
+        last_name = cleaned_data.get("last_name")
+
+        if first_name and not self.NAME_PATTERN.match(first_name):
+            raise ValidationError(
+            {
+                "first_name": [
+                _("Invalid first name."),
+                ]
+            }
+            )
+
+        if last_name and not self.NAME_PATTERN.match(last_name):
+            raise ValidationError(
+            {
+                "last_name": [
+                _("Invalid last name."),
+                ]
+            }
+            )
 
         password_change = False
 
@@ -117,10 +153,9 @@ class UserProfileForm(forms.ModelForm):
                     }
                 )
 
-            password_change = True
+            password_change = True           
 
-        notification_setting_changed = self.has_changed()
-        if not notification_setting_changed and not password_change:
+        if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
 
         return cleaned_data
