@@ -272,7 +272,11 @@ class SourceInfoForm(TransferForm):
         if enter_manual == "no":
             cleaned_data["source_name"] = self.initial["source_name"]
             cleaned_data["source_type"] = SourceType.objects.get(id=self.initial["source_type"])
+            cleaned_data["other_source_type"] = ""
             cleaned_data["source_role"] = SourceRole.objects.get(id=self.initial["source_role"])
+            cleaned_data["other_source_role"] = ""
+            cleaned_data["source_note"] = ""
+            cleaned_data["preliminary_custodial_history"] = ""
 
         source_name = cleaned_data.get("source_name", "")
 
