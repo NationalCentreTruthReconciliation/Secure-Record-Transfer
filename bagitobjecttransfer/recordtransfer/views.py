@@ -130,7 +130,7 @@ class UserProfile(UpdateView):
     """
 
     template_name = "recordtransfer/profile.html"
-    paginate_by = 2
+    paginate_by = 10
     form_class = UserProfileForm
     success_url = reverse_lazy("recordtransfer:userprofile")
     success_message = gettext("Preferences updated")
