@@ -240,40 +240,67 @@ class ContactInfoForm(TransferForm):
 
 
 class SourceInfoForm(TransferForm):
-    """The Source Information portion of the form. Contains fields from Section 2 of CAAIS"""
+    """The Source Information portion of the form. Contains fields from Section 2 of CAAIS.
 
-    def clean(self):
+    This form is nominally "optional," but a user can fill in the fields if they want to. The
+    source name, source type, and source role are all required in CAAIS, so if a user chooses not
+    to fill in the form, we use defaults from the initial data for those fields.
+    """
+
+    def __init__(self, *args, **kwargs):
+        if "initial" not in kwargs:
+            raise ValueError("SourceInfoForm requires an initial dictionary")
+
+        initial = kwargs.get("initial", {})
+
+        for required in ("source_type", "source_role", "source_name"):
+            if required not in initial:
+                raise ValueError(f"SourceInfoForm requires an initial value for {required}")
+
+        super().__init__(*args, **kwargs)
+
+    def clean(self) -> dict:
+        """Clean form and set defaults if the user chose not to enter source info manually.
+
+        As none of the fields are required, we need to check whether they are set here.
+        """
         cleaned_data = super().clean()
+
+        enter_manual = cleaned_data["enter_manual_source_info"]
+
+        # Re-set defaults if manual entry is not selected
+        if enter_manual == "no":
+            cleaned_data["source_name"] = self.initial["source_name"]
+            cleaned_data["source_type"] = SourceType.objects.get(id=self.initial["source_type"])
+            cleaned_data["source_role"] = SourceRole.objects.get(id=self.initial["source_role"])
+
+        source_name = cleaned_data.get("source_name", "")
+
+        if not source_name:
+            self.add_error("source_name", gettext("This field is required."))
 
         source_type = cleaned_data.get("source_type", None)
         other_source_type = cleaned_data.get("other_source_type", "")
 
-        if (not source_type or source_type.name.lower() == "other") and not other_source_type:
-            self.add_error(
-                "source_type",
-                gettext(
-                    'If "Other source type" is empty, you must choose one of the '
-                    "Source types here"
-                ),
-            )
+        if not source_type:
+            self.add_error("source_type", gettext("This field is required."))
+
+        elif source_type.name.lower() == "other" and not other_source_type:
             self.add_error(
                 "other_source_type",
-                gettext('If "Source type" is Other, you must enter a different type ' "here"),
+                gettext('If "Source type" is Other, you must enter your own source type here'),
             )
 
         source_role = cleaned_data.get("source_role", None)
         other_source_role = cleaned_data.get("other_source_role", "")
-        if (not source_role or source_role.name.lower() == "other") and not other_source_role:
-            self.add_error(
-                "source_role",
-                gettext(
-                    'If "Other source role" is empty, you must choose one of the '
-                    "Source roles here"
-                ),
-            )
+
+        if not source_role:
+            self.add_error("source_role", gettext("This field is required."))
+
+        elif source_role.name.lower() == "other" and not other_source_role:
             self.add_error(
                 "other_source_role",
-                gettext('If "Source role" is Other, you must enter a different type ' "here"),
+                gettext('If "Source role" is Other, you must enter your own source role here'),
             )
 
         return cleaned_data
@@ -293,14 +320,14 @@ class SourceInfoForm(TransferForm):
     source_name = forms.CharField(
         max_length=64,
         min_length=2,
-        required=True,
+        required=False,  # Required if enter_manual_source_info == "yes"
         widget=forms.TextInput(),
         label=gettext("Name of source"),
         help_text=gettext("The organization or entity submitting the records"),
     )
 
     source_type = forms.ModelChoiceField(
-        required=True,
+        required=False,  # Required if enter_manual_source_info == "yes"
         queryset=SourceType.objects.all()
         .annotate(
             sort_order_other_first=Case(
@@ -336,7 +363,7 @@ class SourceInfoForm(TransferForm):
     )
 
     source_role = forms.ModelChoiceField(
-        required=True,
+        required=False,  # Required if enter_manual_source_info == "yes"
         queryset=SourceRole.objects.all()
         .annotate(
             sort_order_other_first=Case(
