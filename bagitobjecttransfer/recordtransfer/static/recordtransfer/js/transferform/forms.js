@@ -594,7 +594,7 @@ $(() => {
         );
 
         // Add faux-required-field to labels
-        Array.from(document.querySelectorAll(".faux-required-field")).forEach((element, index) => {
+        document.querySelectorAll(".faux-required-field").forEach((element, index) => {
             let label = element.previousElementSibling;
             if (label && label.tagName === "LABEL") {
                 label.classList.add("faux-required-field");
@@ -605,21 +605,6 @@ $(() => {
         const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
 
         if (enterManualInfoInputElement) {
-            const selected = enterManualInfoInputElement.querySelector("input[type=radio]:checked").value;
-
-            // Show elements at first if selected=yes already
-            if (selected === "yes") {
-                document.querySelectorAll(".initially-hidden").forEach((el) => {
-                    el.classList.remove("hidden-item");
-                });
-
-                // Dispatch events to update "other" fields if they were just shown by accident
-                const sourceTypeSelect = document.getElementById("id_sourceinfo-source_type");
-                const sourceRoleSelect = document.getElementById("id_sourceinfo-source_role");
-                sourceTypeSelect.dispatchEvent(new Event("change"));
-                sourceRoleSelect.dispatchEvent(new Event("change"));
-            }
-
             enterManualInfoInputElement.addEventListener("change", function (event) {
                 const selected = this.querySelector("input[type=radio]:checked").value;
 
@@ -640,6 +625,8 @@ $(() => {
                     });
                 }
             });
+
+            enterManualInfoInputElement.dispatchEvent(new Event("change"));
         }
         else {
             console.warn(`No element exists with the id: ${enterManualInfoInputId}`);
