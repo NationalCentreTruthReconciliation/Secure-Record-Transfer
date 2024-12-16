@@ -26,6 +26,7 @@
         </div>
         {% if in_progress_page_obj and in_progress_page_obj|length > 0 %}
             {% include "includes/in_progress_submission_table.html" %}
+            {% include "includes/pagination.html" with page_obj=in_progress_page_obj pagination_name=IN_PROGRESS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">
                 <p>{% trans "You have no transfers that are in progress." %}</p>
@@ -37,6 +38,7 @@
         </div>
         {% if submissions_page_obj and submissions_page_obj|length > 0 %}
             {% include "includes/submission_table.html" %}
+            {% include "includes/pagination.html" with page_obj=submissions_page_obj pagination_name=SUBMISSIONS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">
                 <p>{% trans "You have not sent any records to the NCTR." %}</p>
@@ -51,6 +53,7 @@
         </div>
         {% if groups_page_obj and groups_page_obj|length > 0 %}
             {% include "includes/submission_group_table.html" %}
+            {% include "includes/pagination.html" with page_obj=groups_page_obj pagination_name=GROUPS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">
                 <p>{% trans "You have not made any submission groups." %}</p>
