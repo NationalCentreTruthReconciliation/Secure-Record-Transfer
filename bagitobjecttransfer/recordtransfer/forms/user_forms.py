@@ -163,9 +163,19 @@ class UserProfileForm(forms.ModelForm):
     def save(self, commit: bool = True) -> User:
         """Save the form data."""
         user: User = super().save(commit=False)
+        
         new_password = self.cleaned_data.get("new_password")
         if new_password:
             user.set_password(new_password)
+
+        gets_notification_emails = self.cleaned_data.get("gets_notification_emails")
+        if gets_notification_emails:
+            user.gets_notification_emails = gets_notification_emails
+        
+        # First and last name always get updated since they are required fields
+        user.first_name = self.cleaned_data.get("first_name", user.first_name)
+        user.last_name = self.cleaned_data.get("last_name", user.last_name)
+
         if commit:
             user.save()
         return user
