@@ -46,15 +46,7 @@ Visit http://localhost:8000 to see the application running.
 If you are using `Podman Desktop <https://podman-desktop.io/>`_, you should now see the application
 and all of its services running there, too.
 
-The application will not work at first, since the database is not populated. To populate the
-database, you can run the following command.
-
-.. code-block:: bash
-
-    podman-compose -f compose.dev.yml exec app python manage.py migrate --no-input
-
-
-You will also find that you cannot log in to the application. You can create a new administrator
+You will find that you cannot log in to the application. You can create a new administrator
 user by running the following command.
 
 .. code-block:: bash
