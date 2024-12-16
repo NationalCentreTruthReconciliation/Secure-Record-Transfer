@@ -7,7 +7,11 @@
     {% else %}
         <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true">{% trans "Previous" %}</a>
     {% endif %}
-    <span>{% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}</span>
+    <span>
+        {% blocktrans with curr_page=page_obj.number total_pages=page_obj.paginator.num_pages %}
+            Page {{ curr_page }} of {{ total_pages }}
+        {% endblocktrans %}
+    </span>
     {% if page_obj.has_next %}
         <a href="?{% update_query_params pagination_name page_obj.next_page_number %}"
            class="btn-arrow btn-arrow-right">{% trans "Next" %}</a>
