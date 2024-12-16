@@ -1,27 +1,38 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const firstName = document.getElementById(ID_FIRST_NAME);
+    const lastName = document.getElementById(ID_LAST_NAME);
     const getsNotificationEmails = document.getElementById(ID_GETS_NOTIFICATION_EMAILS);
     const currentPassword = document.getElementById(ID_CURRENT_PASSWORD);
     const newPassword = document.getElementById(ID_NEW_PASSWORD);
     const confirmNewPassword = document.getElementById(ID_CONFIRM_NEW_PASSWORD);
 
-    const inputFields = [getsNotificationEmails, currentPassword, newPassword, confirmNewPassword];
+    const inputFields = [
+        firstName,
+        lastName,
+        getsNotificationEmails,
+        currentPassword,
+        newPassword,
+        confirmNewPassword
+    ];
 
     const saveButton = document.getElementById("id_save_button");
 
     const initialValues = {
+        firstName: firstName.value,
+        lastName: lastName.value,
         getsNotificationEmails: getsNotificationEmails.checked,
-        currentPassword: currentPassword.value,
-        newPassword: newPassword.value,
-        confirmNewPassword: confirmNewPassword.value
     };
 
     function checkForChanges() {
+        const firstNameChanged = firstName.value !== initialValues.firstName;
+        const lastNameChanged = lastName.value !== initialValues.lastName;
         const notificationChanged = getsNotificationEmails.checked !== initialValues.getsNotificationEmails;
-        const passwordFieldsChanged = currentPassword.value !== initialValues.currentPassword &&
-            newPassword.value !== initialValues.newPassword &&
-            confirmNewPassword.value !== initialValues.confirmNewPassword;
 
-        const hasChanged = notificationChanged || passwordFieldsChanged;
+        const passwordFieldsPopulated = currentPassword.value !== "" &&
+            newPassword.value !== "" &&
+            confirmNewPassword.value !== "";
+
+        const hasChanged = firstNameChanged || lastNameChanged || notificationChanged || passwordFieldsPopulated;
         saveButton.disabled = !hasChanged;
     }
 

@@ -43,7 +43,9 @@ from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
+    ID_FIRST_NAME,
     ID_GETS_NOTIFICATION_EMAILS,
+    ID_LAST_NAME,
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
@@ -169,11 +171,15 @@ class UserProfile(UpdateView):
         context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
 
         context.update(
-            {
+            {   
+                # Form field element IDs
+                "ID_FIRST_NAME":  ID_FIRST_NAME,
+                "ID_LAST_NAME": ID_LAST_NAME,
                 "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
                 "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
                 "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                 "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                # Pagination
                 "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
                 "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
                 "GROUPS_PAGE": GROUPS_PAGE,
