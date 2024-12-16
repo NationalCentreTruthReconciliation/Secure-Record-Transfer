@@ -8,14 +8,14 @@
             <th>{% trans "Transfers in Group" %}</th>
             <th>{% trans "View Group" %}</th>
         </tr>
-        {% for group in groups %}
+        {% for group in groups_page_obj %}
             <tr>
                 <td>{{ group.uuid }}</td>
                 <td>{{ group.name }}</td>
                 <td>{{ group.description }}</td>
                 <td>{{ group.number_of_submissions_in_group }}</td>
                 <td>
-                    <a href="{% url "recordtransfer:submissiongroupdetail" uuid=group.uuid %}">{% trans "Click to view group" %}</a>
+                    <a href="{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
                 </td>
             </tr>
         {% endfor %}

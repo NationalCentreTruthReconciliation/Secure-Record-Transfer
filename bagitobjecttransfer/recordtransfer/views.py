@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
 from django.forms import BaseModelForm
 from django.http import (
@@ -38,6 +39,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
+    GROUPS_PAGE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
@@ -46,7 +48,9 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
+    IN_PROGRESS_PAGE,
     INFOMESSAGE,
+    SUBMISSIONS_PAGE,
     TEMPLATEREF,
 )
 from recordtransfer.emails import (
@@ -139,20 +143,43 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-        context["in_progress_submissions"] = InProgressSubmission.objects.filter(
+
+        # Paginate InProgressSubmission
+        in_progress_submissions = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
-        context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
+        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
+        in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
+        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
+
+        # Paginate Submission
+        user_submissions = Submission.objects.filter(user=self.request.user).order_by(
             "-submission_date"
         )
-        context["submission_groups"] = SubmissionGroup.objects.filter(
-            created_by=self.request.user
-        ).order_by("name")
+        submissions_paginator = Paginator(user_submissions, self.paginate_by)
+        submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
+        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
 
-        context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
-        context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
-        context["ID_NEW_PASSWORD"] = ID_NEW_PASSWORD
-        context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
+        # Paginate SubmissionGroup
+        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
+            "name"
+        )
+        groups_paginator = Paginator(submission_groups, self.paginate_by)
+        groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
+        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
+
+        context.update(
+            {
+                "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
+                "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
+                "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
+                "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
+                "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
+                "GROUPS_PAGE": GROUPS_PAGE,
+            }
+        )
+
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -197,12 +224,8 @@ class About(TemplateView):
         context = super().get_context_data(**kwargs)
         context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
         context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
-        context["max_single_upload_size"] = (
-            settings.MAX_SINGLE_UPLOAD_SIZE
-        )
-        context["max_total_upload_count"] = (
-            settings.MAX_TOTAL_UPLOAD_COUNT
-        )
+        context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
+        context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
         return context
 
 
@@ -985,10 +1008,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
         return m * 1024**2
 
     # Check number of files is within allowed total
-    if (
-        session.number_of_files_uploaded()
-        >= settings.MAX_TOTAL_UPLOAD_COUNT
-    ):
+    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
             "accepted": False,
             "error": gettext("You can not upload anymore files."),

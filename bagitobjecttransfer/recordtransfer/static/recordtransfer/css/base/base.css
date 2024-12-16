@@ -114,6 +114,83 @@ body {
     cursor: default;
 }
 
+/* 
+ * Credits: Adapted from https://codepen.io/adevade/pen/AeZBVV
+ */
+.btn-arrow {
+    color: transparent;
+    display: block;
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+
+
+    transition: all 150ms ease-out;
+
+    &::before,
+    &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        background-color: #606060;
+
+        transition: all 150ms ease-out;
+    }
+
+    &::before {
+        width: 75%;
+        height: 25%;
+    }
+
+    &::after {
+        width: 25%;
+        height: 75%;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: rgba(black, .1);
+
+        &::before,
+        &::after {
+            background-color: #404040;
+        }
+    }
+
+    &.btn-arrow-left,
+    &.btn-arrow-right {
+
+        &::before,
+        &::after {
+            top: 12.5%;
+            left: 12.5%;
+        }
+    }
+
+    &.btn-arrow-left {
+        transform: rotate(-45deg);
+    }
+
+    &.btn-arrow-right {
+        transform: rotate(135deg);
+    }
+
+    &.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
 .no-decoration {
     text-decoration: inherit;
     color: inherit;
@@ -125,6 +202,10 @@ body {
 
 .margin-right-20px {
     margin-right: 20px;
+}
+
+.margin-top-15px {
+    margin-top: 15px;
 }
 
 .margin-top-25px {
@@ -153,6 +234,7 @@ body {
  * Responsive design section
  */
 @media (min-width: 1200px) {
+
     .main-header-content,
     .main-content {
         width: 80%;
@@ -162,6 +244,7 @@ body {
 }
 
 @media (max-width: 1199px) {
+
     .main-header-content,
     .main-content {
         width: 95%;

@@ -15,3 +15,8 @@ ID_DISPLAY_GROUP_DESCRIPTION = "id_display_group_description"
 TEMPLATEREF = "templateref"
 FORMTITLE = "formtitle"
 INFOMESSAGE = "infomessage"
+
+# Pagination query names
+IN_PROGRESS_PAGE = "in_progress_page"
+SUBMISSIONS_PAGE = "submissions_page"
+GROUPS_PAGE = "groups_page"
