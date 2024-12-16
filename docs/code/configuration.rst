@@ -1,6 +1,6 @@
-recordtransfer.configuration - Custom Config Parsers
-====================================================
+configuration - Custom Config Parsers
+=====================================
 
-.. automodule:: recordtransfer.configuration
+.. automodule:: configuration
    :members:
    :undoc-members:

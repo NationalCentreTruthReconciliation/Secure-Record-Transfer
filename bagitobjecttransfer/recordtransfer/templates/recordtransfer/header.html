@@ -5,9 +5,11 @@
     <nav class="main-header-content">
         <ul class="main-navbar">
             <li class="nav-logo">
+                <img id="app-logo" src="{% static 'nctrlogo_flame_150x150px.webp'%}">
+            </li>
+            <li class="nav-title">
                 <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
-                    <img id="app-logo" src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.png'%}">
-                    <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}<span>
+                    <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -62,12 +64,12 @@
             <span class="toggle-container">
                 <li class="nav-toggle-open">
                     <a class="nav-link" href="#">
-                        <img height="20" src="{% static 'recordtransfer/img/menu_64x64px.png'%}">
+                        <img height="20" src="{% static 'menu_64x64px.webp'%}">
                     </a>
                 </li>
                 <li class="nav-toggle-close">
                     <a class="nav-link" href="#">
-                        <img height="20" src="{% static 'recordtransfer/img/close_menu_64x64px.png'%}">
+                        <img height="20" src="{% static 'close_menu_64x64px.webp'%}">
                     </a>
                 </li>
             </span>

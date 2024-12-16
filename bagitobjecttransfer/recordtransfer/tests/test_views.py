@@ -26,12 +26,12 @@ class TestHomepage(TestCase):
 
 
 @patch(
-    "recordtransfer.settings.ACCEPTED_FILE_FORMATS",
+    "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
 )
-@patch("recordtransfer.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
-@patch("recordtransfer.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
-@patch("recordtransfer.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 @override_storage(storage=LocMemStorage())
 class TestUploadFileView(TestCase):
     """Tests for recordtransfer:uploadfile view."""
@@ -219,12 +219,12 @@ class TestMediaRequestView(TestCase):
 
 
 @patch(
-    "recordtransfer.settings.ACCEPTED_FILE_FORMATS",
+    "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
 )
-@patch("recordtransfer.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
-@patch("recordtransfer.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
-@patch("recordtransfer.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 @override_storage(storage=LocMemStorage())
 class TestAcceptFileView(TestCase):
     """Tests for recordtransfer:checkfile view"""

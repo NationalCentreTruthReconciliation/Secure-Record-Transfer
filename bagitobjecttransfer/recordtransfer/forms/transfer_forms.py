@@ -4,6 +4,7 @@ from uuid import UUID
 
 from caais.models import RightsType, SourceRole, SourceType
 from django import forms
+from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseFormSet
 from django.utils.translation import gettext
@@ -12,13 +13,12 @@ from django_countries.widgets import CountrySelectWidget
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
-from recordtransfer import settings
 from recordtransfer.constants import (
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
     ID_SOURCE_INFO_SOURCE_ROLE,
-    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_SELECTION,
 )
 from recordtransfer.models import SubmissionGroup
