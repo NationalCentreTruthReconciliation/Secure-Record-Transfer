@@ -594,13 +594,15 @@ $(() => {
         );
 
         // Add faux-required-field to labels
-        document.querySelectorAll(".faux-required-field").forEach((element, index) => {
-            let label = element.previousElementSibling;
+        document.querySelectorAll(".faux-required-field").forEach((el) => {
+            let label = el.previousElementSibling;
             if (label && label.tagName === "LABEL") {
                 label.classList.add("faux-required-field");
             }
         });
 
+        const sourceTypeSelect = document.getElementById(sourceInfoContext["id_source_type"]);
+        const sourceRoleSelect = document.getElementById(sourceInfoContext["id_source_role"]);
         const enterManualInfoInputId = sourceInfoContext["id_enter_manual_source_info"];
         const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
 
@@ -614,8 +616,6 @@ $(() => {
                     });
 
                     // Dispatch events to update "other" fields if they were just shown by accident
-                    const sourceTypeSelect = document.getElementById("id_sourceinfo-source_type");
-                    const sourceRoleSelect = document.getElementById("id_sourceinfo-source_role");
                     sourceTypeSelect.dispatchEvent(new Event("change"));
                     sourceRoleSelect.dispatchEvent(new Event("change"));
                 }
