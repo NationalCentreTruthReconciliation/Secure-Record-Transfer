@@ -133,7 +133,8 @@
     margin-top: 10px;
 }
 
-.required-field:after {
+.required-field:after,
+.faux-required-field:after {
     content: "  *";
     color: #d00;
     font-weight: bold;

@@ -325,7 +325,11 @@ class SourceInfoForm(TransferForm):
         max_length=64,
         min_length=2,
         required=False,  # Required if enter_manual_source_info == "yes"
-        widget=forms.TextInput(),
+        widget=forms.TextInput(
+            attrs={
+                "class": "faux-required-field",
+            }
+        ),
         label=gettext("Name of source"),
         help_text=gettext("The organization or entity submitting the records"),
     )
@@ -342,14 +346,14 @@ class SourceInfoForm(TransferForm):
         )
         .order_by("sort_order_other_first"),
         empty_label=gettext("Please select one"),
-        label=gettext("* Source type"),
+        label=gettext("Source type"),
         help_text=gettext(
             "How would you describe <b>what</b> the source entity is? "
             "i.e., The source is a(n) ______"
         ),
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width",
+                "class": "reduce-form-field-width faux-required-field",
                 "id": ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
@@ -360,6 +364,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source type not covered by the other choices"),
+                "class": "faux-required-field",
                 "id": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
@@ -378,11 +383,11 @@ class SourceInfoForm(TransferForm):
         )
         .order_by("sort_order_other_first"),
         empty_label=gettext("Please select one"),
-        label=gettext("** Source role"),
+        label=gettext("Source role"),
         help_text=gettext("How does the source relate to the records? "),
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width",
+                "class": "reduce-form-field-width faux-required-field",
                 "id": ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
@@ -393,6 +398,7 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source role not covered by the other choices"),
+                "class": "faux-required-field",
                 "id": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),

@@ -593,6 +593,14 @@ $(() => {
             sourceInfoContext["other_role_id"]
         );
 
+        // Add faux-required-field to labels
+        Array.from(document.querySelectorAll(".faux-required-field")).forEach((element, index) => {
+            let label = element.previousElementSibling;
+            if (label && label.tagName === "LABEL") {
+                label.classList.add("faux-required-field");
+            }
+        });
+
         const enterManualInfoInputId = sourceInfoContext["id_enter_manual_source_info"];
         const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
 
