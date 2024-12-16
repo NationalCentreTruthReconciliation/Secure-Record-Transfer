@@ -19,7 +19,7 @@
         <br>
         {% if not user.is_authenticated and SIGN_UP_ENABLED %}
         <div class="hero-button">
-            <a href="{% url 'recordtransfer:transfer' %}">
+            <a href="{% url 'recordtransfer:createaccount' %}">
                 {% trans "Sign up Now" %}
             </a>
         </div>
