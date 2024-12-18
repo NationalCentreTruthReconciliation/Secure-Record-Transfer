@@ -574,11 +574,20 @@ class TestAcceptFileView(TestCase):
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
 class TestUserProfileView(TestCase):
     def setUp(self):
+        self.test_username = "testuser"
+        self.test_first_name = "Test"
+        self.test_last_name = "User"
+        self.test_email = "testuser@example.com"
+        self.test_password = "old_password"
+        self.test_gets_notification_emails = True
+        self.test_new_password = "new_password123"
         self.user = User.objects.create_user(
-            username="testuser",
-            email="testuser@example.com",
-            password="old_password",
-            gets_notification_emails=True,
+            username=self.test_username,
+            first_name=self.test_first_name,
+            last_name=self.test_last_name,
+            email=self.test_email,
+            password=self.test_password,
+            gets_notification_emails=self.test_gets_notification_emails,
         )
         self.client.login(username="testuser", password="old_password")
         self.url = reverse("recordtransfer:userprofile")
@@ -598,6 +607,8 @@ class TestUserProfileView(TestCase):
 
     def test_valid_notification_setting_change(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": False,
             "current_password": "",
             "new_password": "",
@@ -626,6 +637,8 @@ class TestUserProfileView(TestCase):
 
     def test_valid_password_change(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "old_password",
             "new_password": "new_password123",
