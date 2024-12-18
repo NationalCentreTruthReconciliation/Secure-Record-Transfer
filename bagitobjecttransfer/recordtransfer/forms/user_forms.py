@@ -67,6 +67,7 @@ class UserProfileForm(forms.ModelForm):
             self.fields["last_name"].initial = user.last_name
             self.fields["gets_notification_emails"].initial = user.gets_notification_emails
 
+
     def clean(self) -> "dict[str, Any]":
         """Clean the form data."""
         if not self.data:
@@ -163,13 +164,13 @@ class UserProfileForm(forms.ModelForm):
     def save(self, commit: bool = True) -> User:
         """Save the form data."""
         user: User = super().save(commit=False)
-        
+
         new_password = self.cleaned_data.get("new_password")
         if new_password:
             user.set_password(new_password)
 
         gets_notification_emails = self.cleaned_data.get("gets_notification_emails")
-        if gets_notification_emails:
+        if gets_notification_emails is not None:
             user.gets_notification_emails = gets_notification_emails
         
         # First and last name always get updated since they are required fields
