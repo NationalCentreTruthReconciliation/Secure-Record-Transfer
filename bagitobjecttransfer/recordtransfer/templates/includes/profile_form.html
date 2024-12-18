@@ -1,6 +1,6 @@
 {% load i18n %}
 {% include "includes/messages.html" %}
-<form method="post" action="{% url 'recordtransfer:userprofile' %}">
+<form method="post" action="{% url 'recordtransfer:userprofile' %}" class="margin-top-25px">
     {% csrf_token %}
     {% if form.first_name.errors %}
         <div class="error-message">{% trans form.first_name.errors.0 %}</div>
