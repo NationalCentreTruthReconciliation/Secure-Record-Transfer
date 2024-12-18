@@ -1,4 +1,6 @@
 # User Profile Form Field IDs
+ID_FIRST_NAME = "id_first_name"
+ID_LAST_NAME = "id_last_name"
 ID_GETS_NOTIFICATION_EMAILS = "id_gets_notification_emails"
 ID_CURRENT_PASSWORD = "id_current_password"
 ID_NEW_PASSWORD = "id_new_password"
