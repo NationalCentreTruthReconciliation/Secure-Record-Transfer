@@ -1,7 +1,7 @@
 import logging
 import pickle
 import re
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, cast
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
@@ -218,7 +218,9 @@ class UserProfile(UpdateView):
             self.request,
             self.error_message,
         )
-        return super().form_invalid(form)
+        profile_form = cast(UserProfileForm, form)
+        profile_form.reset_form()
+        return super().form_invalid(profile_form)
 
 
 class About(TemplateView):
