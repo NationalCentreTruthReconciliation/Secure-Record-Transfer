@@ -32,8 +32,8 @@ function getCookie(name) {
  * @param {String} errorMessage The error message to show
  */
 function addDropzoneError(errorMessage) {
-    errorZone = document.getElementById('dropzone-errors')
-    newError = document.createElement('div')
+    const errorZone = document.getElementById('dropzone-errors')
+    const newError = document.createElement('div')
     newError.className = 'field-error'
     newError.innerHTML = errorMessage
     errorZone.appendChild(newError)
@@ -43,7 +43,7 @@ function addDropzoneError(errorMessage) {
  * Removes all errors shown in the dropzone-errors element.
  */
 function clearDropzoneErrors() {
-    errorZone = document.getElementById('dropzone-errors')
+    const errorZone = document.getElementById('dropzone-errors')
     while (errorZone.lastElementChild) {
         errorZone.removeChild(errorZone.lastElementChild);
     }
@@ -110,15 +110,6 @@ $(() => {
                     remainingSizeElement.classList.remove('field-error')
                 }
             }
-        }
-    }
-
-    // Function to update the visibility of the drop message
-    function updateDropMessageVisibility() {
-        if (this.files.length === 0) {
-            dropMessage.style.display = 'block'; // Show message when no files are present
-        } else {
-            dropMessage.style.display = 'none'; // Hide message when there are files
         }
     }
 
@@ -194,16 +185,25 @@ $(() => {
 
             var dropzoneClosure = this
             var submitButton = document.getElementById("submit-form-btn")
-            
+
+            // Function to update the visibility of the drop message
+            function updateDropMessageVisibility() {
+                if (dropzoneClosure.files.length === 0) {
+                    dropMessage.style.display = 'block'; // Show message when no files are present
+                } else {
+                    dropMessage.style.display = 'none'; // Hide message when there are files
+                }
+            }
+
             // Call on initialization to set the correct state
             updateDropMessageVisibility();
 
             // Update drop message visibility when files are added or removed
-            this.on("addedfile", function() {
+            this.on("addedfile", function () {
                 updateDropMessageVisibility();
             });
 
-            this.on("removedfile", function() {
+            this.on("removedfile", function () {
                 updateDropMessageVisibility();
             });
 
