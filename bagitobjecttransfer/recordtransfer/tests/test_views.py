@@ -605,6 +605,44 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
+    def test_valid_name_change(self):
+        form_data = {
+            "first_name": "New",
+            "last_name": "Name",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
+    def test_invalid_first_name(self):
+        form_data = {
+            "first_name": "123",
+            "last_name": self.test_last_name,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_invalid_last_name(self):
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": "123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
     def test_valid_notification_setting_change(self):
         form_data = {
             "first_name": self.test_first_name,
@@ -621,6 +659,8 @@ class TestUserProfileView(TestCase):
 
     def test_invalid_notification_setting_change(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "",
             "new_password": "",
@@ -653,6 +693,8 @@ class TestUserProfileView(TestCase):
 
     def test_wrong_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "wrong_password",
             "new_password": "new_password123",
@@ -669,6 +711,8 @@ class TestUserProfileView(TestCase):
 
     def test_passwords_do_not_match(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "old_password",
             "new_password": "new_password123",
@@ -685,6 +729,8 @@ class TestUserProfileView(TestCase):
 
     def test_same_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "old_password",
             "new_password": "old_password",
@@ -701,6 +747,8 @@ class TestUserProfileView(TestCase):
 
     def test_missing_current_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
@@ -716,6 +764,8 @@ class TestUserProfileView(TestCase):
 
     def test_missing_new_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "old_password",
             "confirm_new_password": "new_password123",
@@ -731,6 +781,8 @@ class TestUserProfileView(TestCase):
 
     def test_missing_confirm_new_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
             "current_password": "old_password",
             "new_password": "new_password123",
@@ -746,6 +798,8 @@ class TestUserProfileView(TestCase):
 
     def test_no_changes(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
         }
         response = self.client.post(self.url, data=form_data)
