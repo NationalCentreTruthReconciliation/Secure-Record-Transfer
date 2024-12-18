@@ -21,15 +21,33 @@ import re
 class UserProfileForm(forms.ModelForm):
     """Form for editing user profile."""
 
-    first_name = forms.CharField(
+    NAME_PATTERN = re.compile(
+        r"""^[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u01FF]+([ \-']{0,1}[a-zA-Z\u00C0-\u00D6
+    \u00D8-\u00F6\u00F8-\u01FF]+){0,2}[.]{0,1}$"""
+    )
+    NAME_VALIDATION_MESSAGE = _(
+        "Name must contain only letters and may include these symbols: ' - . \n"
+    )
+
+    first_name = forms.RegexField(
+        regex=NAME_PATTERN,
         widget=forms.TextInput(attrs={"id": ID_FIRST_NAME}),
         label=_("First Name"),
         required=True,
+        error_messages={
+            "required": _("First name is required."),
+            "invalid": _(NAME_VALIDATION_MESSAGE),
+        },
     )
-    last_name = forms.CharField(
+    last_name = forms.RegexField(
+        regex=NAME_PATTERN,
         widget=forms.TextInput(attrs={"id": ID_LAST_NAME}),
         label=_("Last Name"),
         required=True,
+        error_messages={
+            "required": _("Last name is required."),
+            "invalid": _(NAME_VALIDATION_MESSAGE),
+        },
     )
     gets_notification_emails = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={"id": ID_GETS_NOTIFICATION_EMAILS}),
@@ -53,11 +71,6 @@ class UserProfileForm(forms.ModelForm):
         required=False,
     )
 
-    NAME_PATTERN = re.compile(r"^(?!.*[.\s']{2})[A-Za-z\s.'-]+$")
-    NAME_VALIDATION_MESSAGE = _(
-        "Name must contain only letters and may include these symbols: ' - . \n"
-    )
-
     class Meta:
         """Meta class for UserProfileForm."""
 
@@ -76,15 +89,6 @@ class UserProfileForm(forms.ModelForm):
         current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
-
-        first_name = cleaned_data.get("first_name")
-        last_name = cleaned_data.get("last_name")
-
-        if first_name and not self.NAME_PATTERN.match(first_name):
-            raise ValidationError({"first_name": [self.NAME_VALIDATION_MESSAGE]})
-
-        if last_name and not self.NAME_PATTERN.match(last_name):
-            raise ValidationError({"last_name": [self.NAME_VALIDATION_MESSAGE]})
 
         password_change = False
 
