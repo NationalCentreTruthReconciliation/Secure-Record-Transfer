@@ -17,8 +17,10 @@ from recordtransfer.models import User
 
 import re
 
+
 class UserProfileForm(forms.ModelForm):
     """Form for editing user profile."""
+
     first_name = forms.CharField(
         widget=forms.TextInput(attrs={"id": ID_FIRST_NAME}),
         label=_("First Name"),
@@ -52,6 +54,9 @@ class UserProfileForm(forms.ModelForm):
     )
 
     NAME_PATTERN = re.compile(r"^(?!.*[.\s']{2})[A-Za-z\s.'-]+$")
+    NAME_VALIDATION_MESSAGE = _(
+        "Name must contain only letters and may include these symbols: ' - . \n"
+    )
 
     class Meta:
         """Meta class for UserProfileForm."""
@@ -76,22 +81,10 @@ class UserProfileForm(forms.ModelForm):
         last_name = cleaned_data.get("last_name")
 
         if first_name and not self.NAME_PATTERN.match(first_name):
-            raise ValidationError(
-            {
-                "first_name": [
-                _("Invalid first name."),
-                ]
-            }
-            )
+            raise ValidationError({"first_name": [self.NAME_VALIDATION_MESSAGE]})
 
         if last_name and not self.NAME_PATTERN.match(last_name):
-            raise ValidationError(
-            {
-                "last_name": [
-                _("Invalid last name."),
-                ]
-            }
-            )
+            raise ValidationError({"last_name": [self.NAME_VALIDATION_MESSAGE]})
 
         password_change = False
 
@@ -134,7 +127,9 @@ class UserProfileForm(forms.ModelForm):
                 raise ValidationError(
                     {
                         "new_password": [
-                            _("The new password must be different from the current password."),
+                            _(
+                                "The new password must be different from the current password."
+                            ),
                         ]
                     }
                 )
@@ -148,7 +143,7 @@ class UserProfileForm(forms.ModelForm):
                     }
                 )
 
-            password_change = True           
+            password_change = True
 
         if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
@@ -166,7 +161,7 @@ class UserProfileForm(forms.ModelForm):
         gets_notification_emails = self.cleaned_data.get("gets_notification_emails")
         if gets_notification_emails is not None:
             user.gets_notification_emails = gets_notification_emails
-        
+
         # First and last name always get updated since they are required fields
         user.first_name = self.cleaned_data.get("first_name", user.first_name)
         user.last_name = self.cleaned_data.get("last_name", user.last_name)
@@ -179,9 +174,11 @@ class UserProfileForm(forms.ModelForm):
         """Reset form fields to initial values from instance."""
         if self.instance:
             self.data = self.data.copy()
-            self.data['first_name'] = self.instance.first_name
-            self.data['last_name'] = self.instance.last_name
-            self.data['gets_notification_emails'] = self.instance.gets_notification_emails
-            self.data['current_password'] = ''
-            self.data['new_password'] = ''
-            self.data['confirm_new_password'] = ''
+            self.data["first_name"] = self.instance.first_name
+            self.data["last_name"] = self.instance.last_name
+            self.data["gets_notification_emails"] = (
+                self.instance.gets_notification_emails
+            )
+            self.data["current_password"] = ""
+            self.data["new_password"] = ""
+            self.data["confirm_new_password"] = ""
