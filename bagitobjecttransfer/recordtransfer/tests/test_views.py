@@ -578,7 +578,7 @@ class TestUserProfileView(TestCase):
         self.test_first_name = "Test"
         self.test_last_name = "User"
         self.test_email = "testuser@example.com"
-        self.test_password = "old_password"
+        self.test_current_password = "old_password"
         self.test_gets_notification_emails = True
         self.test_new_password = "new_password123"
         self.user = User.objects.create_user(
@@ -586,7 +586,7 @@ class TestUserProfileView(TestCase):
             first_name=self.test_first_name,
             last_name=self.test_last_name,
             email=self.test_email,
-            password=self.test_password,
+            password=self.test_current_password,
             gets_notification_emails=self.test_gets_notification_emails,
         )
         self.client.login(username="testuser", password="old_password")
@@ -648,9 +648,6 @@ class TestUserProfileView(TestCase):
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
             "gets_notification_emails": False,
-            "current_password": "",
-            "new_password": "",
-            "confirm_new_password": "",
         }
         response = self.client.post(self.url, data=form_data)
         self.assertRedirects(response, self.url)
@@ -661,10 +658,7 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": "",
-            "new_password": "",
-            "confirm_new_password": "",
+            "gets_notification_emails": self.test_gets_notification_emails,
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
@@ -679,8 +673,7 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": "old_password",
+            "current_password": self.test_current_password,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
@@ -695,7 +688,6 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
             "current_password": "wrong_password",
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
@@ -713,8 +705,7 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": "old_password",
+            "current_password": self.test_current_password,
             "new_password": "new_password123",
             "confirm_new_password": "different_password",
         }
@@ -731,10 +722,9 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": "old_password",
-            "new_password": "old_password",
-            "confirm_new_password": "old_password",
+            "current_password": self.test_current_password,
+            "new_password": self.test_current_password,
+            "confirm_new_password": self.test_current_password,
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
@@ -749,7 +739,6 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
@@ -766,8 +755,7 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": "old_password",
+            "current_password": self.test_current_password,
             "confirm_new_password": "new_password123",
         }
         response = self.client.post(self.url, data=form_data)
@@ -784,7 +772,7 @@ class TestUserProfileView(TestCase):
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
             "gets_notification_emails": True,
-            "current_password": "old_password",
+            "current_password": self.test_current_password,
             "new_password": "new_password123",
         }
         response = self.client.post(self.url, data=form_data)
@@ -800,7 +788,7 @@ class TestUserProfileView(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
+            "gets_notification_emails": self.test_gets_notification_emails,
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)

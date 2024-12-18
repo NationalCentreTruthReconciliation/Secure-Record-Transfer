@@ -26,10 +26,6 @@ class UserProfileFormTest(TestCase):
         form_data = {
             "first_name": "New",
             "last_name": "Name",
-            "gets_notification_emails": self.test_gets_notification_emails,
-            "current_password": "",
-            "new_password": "",
-            "confirm_new_password": "",
         }
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
@@ -59,7 +55,6 @@ class UserProfileFormTest(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": self.test_gets_notification_emails,
             "current_password": self.test_password,
             "new_password": self.test_new_password,
             "confirm_new_password": self.test_new_password,
@@ -73,7 +68,6 @@ class UserProfileFormTest(TestCase):
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
-            "gets_notification_emails": True,
             "current_password": "wrong_password",
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
@@ -107,6 +101,8 @@ class UserProfileFormTest(TestCase):
 
     def test_form_missing_new_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "current_password": self.test_password,
             "confirm_new_password": "new_password123",
         }
