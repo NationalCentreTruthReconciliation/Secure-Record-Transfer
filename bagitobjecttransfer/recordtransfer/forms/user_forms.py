@@ -57,7 +57,7 @@ class UserProfileForm(forms.ModelForm):
         """Meta class for UserProfileForm."""
 
         model = User
-        fields = ("gets_notification_emails",)
+        fields = ("gets_notification_emails", "first_name", "last_name")
 
     def __init__(self, *args, **kwargs):
         user:User = kwargs.pop("user", None)
