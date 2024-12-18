@@ -191,7 +191,7 @@ class UserProfile(UpdateView):
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
         kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.get_object()
+        kwargs["instance"] = self.get_object()
         return kwargs
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:

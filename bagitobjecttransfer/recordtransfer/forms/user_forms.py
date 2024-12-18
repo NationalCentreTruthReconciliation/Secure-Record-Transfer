@@ -60,13 +60,7 @@ class UserProfileForm(forms.ModelForm):
         fields = ("gets_notification_emails", "first_name", "last_name")
 
     def __init__(self, *args, **kwargs):
-        user:User = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-        if user:
-            self.fields["first_name"].initial = user.first_name
-            self.fields["last_name"].initial = user.last_name
-            self.fields["gets_notification_emails"].initial = user.gets_notification_emails
-
 
     def clean(self) -> "dict[str, Any]":
         """Clean the form data."""
@@ -180,3 +174,14 @@ class UserProfileForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+    def reset_form(self):
+        """Reset form fields to initial values from instance."""
+        if self.instance:
+            self.data = self.data.copy()
+            self.data['first_name'] = self.instance.first_name
+            self.data['last_name'] = self.instance.last_name
+            self.data['gets_notification_emails'] = self.instance.gets_notification_emails
+            self.data['current_password'] = ''
+            self.data['new_password'] = ''
+            self.data['confirm_new_password'] = ''
