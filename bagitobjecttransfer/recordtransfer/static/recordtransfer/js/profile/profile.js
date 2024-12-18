@@ -1,10 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const firstName = document.getElementById(ID_FIRST_NAME);
-    const lastName = document.getElementById(ID_LAST_NAME);
-    const getsNotificationEmails = document.getElementById(ID_GETS_NOTIFICATION_EMAILS);
-    const currentPassword = document.getElementById(ID_CURRENT_PASSWORD);
-    const newPassword = document.getElementById(ID_NEW_PASSWORD);
-    const confirmNewPassword = document.getElementById(ID_CONFIRM_NEW_PASSWORD);
+    // Context passed from template to JS
+    const userProfileContextElement = document.getElementById("py_context_user_profile");
+
+    if (!userProfileContextElement) {
+        return;
+    }
+
+    const userProfileContext = JSON.parse(userProfileContextElement.textContent);
+
+    const firstName = document.getElementById(userProfileContext["ID_FIRST_NAME"]);
+    const lastName = document.getElementById(userProfileContext["ID_LAST_NAME"]);
+    const getsNotificationEmails = document.getElementById(userProfileContext["ID_GETS_NOTIFICATION_EMAILS"]);
+    const currentPassword = document.getElementById(userProfileContext["ID_CURRENT_PASSWORD"]);
+    const newPassword = document.getElementById(userProfileContext["ID_NEW_PASSWORD"]);
+    const confirmNewPassword = document.getElementById(userProfileContext["ID_CONFIRM_NEW_PASSWORD"]);
 
     const inputFields = [
         firstName,
