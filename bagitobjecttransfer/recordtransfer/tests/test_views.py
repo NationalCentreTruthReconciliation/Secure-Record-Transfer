@@ -615,6 +615,16 @@ class TestUserProfileView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), self.success_message)
 
+    def test_accented_name_change(self):
+        form_data = {
+            "first_name": "Áccéntéd",
+            "last_name": "Námé",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
     def test_invalid_first_name(self):
         form_data = {
             "first_name": "123",

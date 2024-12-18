@@ -32,6 +32,17 @@ class UserProfileFormTest(TestCase):
         user = form.save()
         self.assertEqual(user.first_name, "New")
         self.assertEqual(user.last_name, "Name")
+
+    def test_form_accented_name_change(self):
+        form_data = {
+            "first_name": "Áccéntéd",
+            "last_name": "Námé",
+        }
+        form = UserProfileForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertEqual(user.first_name, "Áccéntéd")
+        self.assertEqual(user.last_name, "Námé")
     
     def test_form_invalid_first_name(self):
         form_data = {
