@@ -1,9 +1,7 @@
 {% extends "recordtransfer/base.html" %}
-
 {% load i18n %}
 {% load static %}
 {% block title %}
-
     {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count %}
         Transfer Step {{ currentstep }} (of {{ totalsteps }})
     {% endblocktrans %}
@@ -60,11 +58,14 @@
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
             <label></label>
             {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
-                <button class="text-link margin-top-25px"
+                <button id="form-save-button"
+                        class="text-link margin-top-25px"
                         formnovalidate="formnovalidate"
                         name="save_form_step"
                         value="{{ wizard.steps.current }}">{% trans "Click to save form and resume later" %}</button>
             {% endif %}
         </div>
     </form>
+
+    {% include "includes/unsaved_transferform_modal.html" with wizard=wizard %}
 {% endblock content %}

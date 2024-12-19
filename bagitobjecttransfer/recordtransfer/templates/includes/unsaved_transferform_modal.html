@@ -1,0 +1,22 @@
+{% load i18n %}
+<dialog id="unsaved-transferform-modal" class="modal" open>
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h2>Are you sure you want to leave?</h2>
+        </div>
+        <div class="modal-body">
+            <p>
+                <strong>You have unsaved data!</strong>
+                If you would like to save your submission for later, click this link:
+            </p>
+            <button id="modal-save-button" class="text-link margin-top-25px">
+                {% trans "Save form and resume later" %}
+            </button>
+        </div>
+        <div class="modal-footer">
+            <button id="unsaved-transferform-modal-cancel" class="red-button">Cancel</button>
+            <button id="unsaved-transferform-modal-leave" class="green-button">Leave</button>
+        </div>
+    </div>
+</dialog>
