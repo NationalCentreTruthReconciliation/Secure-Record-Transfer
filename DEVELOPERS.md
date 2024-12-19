@@ -8,24 +8,13 @@ Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthRec
 
 ## Linting + Formatting
 
-Before beginning development, please configure git to use the git hooks (`.git/hooks`) provided in the repository. This will ensure that the linting configuration is updated before each commit.
+Before beginning development, please configure git to use the git hooks (`.git/hooks`) provided in the repository. This will ensure that the linting configuration for Python is updated before each commit.
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-Additionaly, add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting/formatting:
-
-```json
-{
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit",
-    },
-    "eslint.validate": [
-        "javascript"
-    ]
-}
-```
+Additionally, install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for JavaScript linting.
 
 ## Debugging the Application
 
