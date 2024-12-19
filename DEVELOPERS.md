@@ -14,7 +14,21 @@ Before beginning development, please configure git to use the git hooks (`.git/h
 git config core.hooksPath .githooks
 ```
 
-Additionally, install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for JavaScript linting.
+Additionally, install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting:
+
+```json
+{
+    "[javascript]": {
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+        "editor.rulers": [
+            99
+        ]
+    }
+}
+```
 
 ## Debugging the Application
 
@@ -68,21 +82,6 @@ Use this `launch.json` configuration in VSCode to debug the application:
 
 A GitHub Actions workflow is set up to run Django tests on every pull request to the master branch. All tests must pass before a merge is allowed. The workflow configuration can be found in `.github/workflows/django-tests.yml`.
 
-## Javascript Development
-
-If you're editing any of the `.js` files in this repo, add these settings to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project to set your environment up.
-
-```json
-{
-    "[javascript]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "vscode.typescript-language-features",
-        "editor.rulers": [
-            99
-        ]
-    }
-}
-```
 
 ### Re-build JS as Changes are Made
 
