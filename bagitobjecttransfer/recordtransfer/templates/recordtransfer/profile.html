@@ -6,13 +6,7 @@
 {% endblock title %}
 {% block javascript %}
     {{ block.super }}
-    <script>
-        // Pass constants to JavaScript used by profile form
-        const ID_GETS_NOTIFICATION_EMAILS = "{{ ID_GETS_NOTIFICATION_EMAILS }}";
-        const ID_CURRENT_PASSWORD = "{{ ID_CURRENT_PASSWORD }}";
-        const ID_NEW_PASSWORD = "{{ ID_NEW_PASSWORD }}";
-        const ID_CONFIRM_NEW_PASSWORD = "{{ ID_CONFIRM_NEW_PASSWORD }}";
-    </script>
+    {{ js_context|json_script:"py_context_user_profile" }}
     <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block content %}
