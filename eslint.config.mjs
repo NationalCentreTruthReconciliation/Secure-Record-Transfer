@@ -1,6 +1,7 @@
 import pluginJs from "@eslint/js";
 import stylisticJs from "@stylistic/eslint-plugin-js";
 import importPlugin from "eslint-plugin-import";
+import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
 
 
@@ -11,6 +12,7 @@ export default [
         plugins: {
             "@stylistic/js": stylisticJs,
             "import": importPlugin,
+            "jsdoc": jsdoc,
         },
         rules: {
             "@stylistic/js/indent": ["error", 4],
@@ -22,6 +24,7 @@ export default [
             }],
         }
     },
+    jsdoc.configs["flat/recommended"],
     pluginJs.configs.recommended,
     {
         rules: {
