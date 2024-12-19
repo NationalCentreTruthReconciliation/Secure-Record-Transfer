@@ -14,6 +14,19 @@ Before beginning development, please configure git to use the git hooks (`.git/h
 git config core.hooksPath .githooks
 ```
 
+Additionaly, add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting/formatting:
+
+```json
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+    },
+    "eslint.validate": [
+        "javascript"
+    ]
+}
+```
+
 ## Debugging the Application
 
 The ports 8009 and 8010 are exposed to allow you to debug the web application, and the asynchronous job queue, respectively. This functionality is only available when `DEBUG = True`. These ports can be attached to with `debugpy`
