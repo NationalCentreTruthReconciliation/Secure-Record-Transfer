@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    if (currentFormStep <= 1) {
+        return;
+    }
+
     const modal = document.getElementById('unsaved-transferform-modal');
     const saveButton = document.getElementById('modal-save-button');
     const closeButton = document.querySelector('.close-modal-button');
