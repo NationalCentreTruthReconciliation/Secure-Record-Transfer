@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if (currentFormStep <= 1) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const transferUuid = urlParams.get('transfer_uuid');
+    
+    // Skip click-away protection if on the first step of a fresh form
+    if (currentFormStep <= 1 && !transferUuid) {
         return;
     }
 
