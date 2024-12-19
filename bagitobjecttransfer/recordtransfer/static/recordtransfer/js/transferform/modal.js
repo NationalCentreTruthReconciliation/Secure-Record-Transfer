@@ -12,11 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeButton.addEventListener('click', () => {
-        console.log('close button clicked');
-        modal.close();
+        modal.classList.add('hidden');
     });
 
     cancelButton.addEventListener('click', () => {
-        modal.close();
+        modal.classList.add('hidden');
     });
 });
