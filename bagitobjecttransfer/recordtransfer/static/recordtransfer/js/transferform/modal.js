@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
             targetUrl = event.currentTarget.href;
-            modal.classList.remove('hidden');
+            modal.classList.add('visible');
         });
     });
 
@@ -19,15 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         // Save and submit the form using the form's save button
         document.getElementById('form-save-button').click();
-        modal.close();
+        modal.classList.remove('visible');
     });
 
     closeButton.addEventListener('click', () => {
-        modal.classList.add('hidden');
+        modal.classList.remove('visible');
     });
 
     cancelButton.addEventListener('click', () => {
-        modal.classList.add('hidden');
+        modal.classList.remove('visible');
     });
 
     leaveButton.addEventListener('click', () => {
