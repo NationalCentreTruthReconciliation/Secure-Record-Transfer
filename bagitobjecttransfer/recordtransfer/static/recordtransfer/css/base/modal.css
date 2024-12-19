@@ -9,13 +9,13 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    visibility: visible;
-    opacity: 1;
-}
-
-.modal.hidden {
     visibility: hidden;
     opacity: 0;
+}
+
+.modal.visible {
+    visibility: visible;
+    opacity: 1;
 }
 
 .modal-content {
