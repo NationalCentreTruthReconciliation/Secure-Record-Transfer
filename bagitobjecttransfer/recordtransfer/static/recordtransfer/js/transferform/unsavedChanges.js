@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const transferUuid = urlParams.get('transfer_uuid');
+    const transferUuid = new URLSearchParams(window.location.search).get('transfer_uuid');
     
     // Skip click-away protection if on the first step of a fresh form
     if (currentFormStep <= 1 && !transferUuid) {
@@ -11,40 +10,43 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         event.returnValue = '';
     };
-    window.addEventListener('beforeunload', beforeUnloadListener);
 
-    const modal = document.getElementById('unsaved-transferform-modal');
-    const modalSaveButton = document.getElementById('modal-save-button');
-    const closeButton = document.getElementById('close-modal-button');
-    const cancelButton = document.getElementById('unsaved-transferform-modal-cancel');
-    const leaveButton = document.getElementById('unsaved-transferform-modal-leave');
+    const elements = {
+        modal: document.getElementById('unsaved-transferform-modal'),
+        saveButton: document.getElementById('modal-save-button'),
+        closeButton: document.getElementById('close-modal-button'),
+        cancelButton: document.getElementById('unsaved-transferform-modal-cancel'),
+        leaveButton: document.getElementById('unsaved-transferform-modal-leave'),
+        formSaveButton: document.getElementById('form-save-button')
+    };
+
+    // The URL to navigate to when the user chooses to leave the form
     let targetUrl = '';
+
+    const hideModal = () => elements.modal.classList.remove('visible');
+    const showModal = () => elements.modal.classList.add('visible');
 
     // Add event listeners to only navigational links
     document.querySelectorAll('a:not(.non-nav-link)').forEach(link => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
             targetUrl = event.currentTarget.href;
-            modal.classList.add('visible');
+            showModal();
         });
     });
 
-    modalSaveButton.addEventListener('click', (event) => {
+    elements.saveButton.addEventListener('click', (event) => {
         event.preventDefault();
         // Save and submit the form using the form's save button
-        document.getElementById('form-save-button').click();
-        modal.classList.remove('visible');
+        elements.formSaveButton.click();
+        hideModal();
     });
 
-    closeButton.addEventListener('click', () => {
-        modal.classList.remove('visible');
-    });
+    elements.closeButton.addEventListener('click', hideModal);
+    elements.cancelButton.addEventListener('click', hideModal);
 
-    cancelButton.addEventListener('click', () => {
-        modal.classList.remove('visible');
-    });
-
-    leaveButton.addEventListener('click', () => {
+    elements.leaveButton.addEventListener('click', () => {
+        window.removeEventListener('beforeunload', beforeUnloadListener);
         window.location.href = targetUrl;
     });
 
@@ -52,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const safeElements = [
         document.getElementById('form-next-or-submit-button'),
         document.getElementById('form-previous-button'),
-        document.getElementById('form-save-button'),
+        elements.formSaveButton,
     ];
 
     safeElements.forEach(element => {
@@ -62,4 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    window.addEventListener('beforeunload', beforeUnloadListener);
 });
