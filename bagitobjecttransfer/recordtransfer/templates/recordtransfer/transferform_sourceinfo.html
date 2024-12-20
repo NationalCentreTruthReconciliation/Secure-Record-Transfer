@@ -1,11 +1,11 @@
-{% extends 'recordtransfer/transferform_standard.html' %}
+{% extends "recordtransfer/transferform_standard.html" %}
 {% load static %}
 {% load i18n %}
 
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_source_info" }}
-{% endblock %}
+{% endblock javascript %}
 
 {% block formfields %}
     {% for field in wizard.form %}
@@ -42,7 +42,7 @@
                 <div>
                     <i>
                         {% blocktrans %}
-                        <a id="show-source-types-dialog" href="#">Click here</a> for an explanation
+                        <a id="show-source-types-dialog" class="non-nav-link" href="#">Click here</a> for an explanation
                         of the different types of source types.
                         {% endblocktrans %}
                     </i>
@@ -55,7 +55,7 @@
                 <div>
                     <i>
                         {% blocktrans %}
-                        <a id="show-source-roles-dialog" href="#">Click here</a> for an explanation
+                        <a id="show-source-roles-dialog" class="non-nav-link" href="#">Click here</a> for an explanation
                         of the different types of source roles.
                         {% endblocktrans %}
                     </i>
@@ -64,7 +64,7 @@
             </div>
         {% endif %}
     {% endfor %}
-{% endblock %}
+{% endblock formfields %}
 
 {% block form_explanation %}
     <div id="source-types-dialog" title="Explanation of Source Types">
@@ -95,6 +95,5 @@
             </p>
         {% endfor %}
     </div>
-{% endblock %}
-
-{% block buttonarrayclass %}flex-item{% endblock %}
+{% endblock form_explanation %}
+{% block buttonarrayclass %}flex-item{% endblock buttonarrayclass %}
