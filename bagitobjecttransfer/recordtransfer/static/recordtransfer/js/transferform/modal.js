@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const modal = document.getElementById('unsaved-transferform-modal');
     const saveButton = document.getElementById('modal-save-button');
-    const closeButton = document.querySelector('.close-modal-button');
+    const closeButton = document.getElementById('close-modal-button');
     const cancelButton = document.getElementById('unsaved-transferform-modal-cancel');
     const leaveButton = document.getElementById('unsaved-transferform-modal-leave');
     let targetUrl = '';
