@@ -8,11 +8,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const modal = document.getElementById('unsaved-transferform-modal');
-    const saveButton = document.getElementById('modal-save-button');
+    const modalSaveButton = document.getElementById('modal-save-button');
     const closeButton = document.getElementById('close-modal-button');
     const cancelButton = document.getElementById('unsaved-transferform-modal-cancel');
     const leaveButton = document.getElementById('unsaved-transferform-modal-leave');
     let targetUrl = '';
+
+    // Elements that should not trigger the modal and the browser warning dialog
+    const safeElements = [
+        document.getElementById('form-next-or-submit-button'),
+        document.getElementById('form-previous-button'),
+        document.getElementById('form-save-button'),
+        document.getElementById('show-source-types-dialog'),
+        document.getElementById('show-source-roles-dialog'),
+    ];
 
     // Add event listeners to all links on page to unhide modal if clicked
     document.querySelectorAll('a').forEach(link => {
@@ -23,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    saveButton.addEventListener('click', (event) => {
+    modalSaveButton.addEventListener('click', (event) => {
         event.preventDefault();
         // Save and submit the form using the form's save button
         document.getElementById('form-save-button').click();

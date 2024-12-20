@@ -39,13 +39,15 @@
                 {% if wizard.steps.prev %}
                     {# Without formnovalidate, you can't go to the previous step without valid data #}
                     {# Which kind of defeats the purpose of going back to the previous step! #}
-                    <button formnovalidate="formnovalidate"
+                    <button id="form-previous-button"
+                            formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.prev }}"
                             class="blue-button margin-right-20px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 <button {% block submitbuttonattributes %}
                         {% endblock submitbuttonattributes %}
+                        id="form-next-or-submit-button"
                         type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
                         class="blue-button">
                     {% if wizard.steps.step1 == wizard.steps.count %}
@@ -67,6 +69,5 @@
             {% endif %}
         </div>
     </form>
-
     {% include "includes/unsaved_transferform_modal.html" %}
 {% endblock content %}
