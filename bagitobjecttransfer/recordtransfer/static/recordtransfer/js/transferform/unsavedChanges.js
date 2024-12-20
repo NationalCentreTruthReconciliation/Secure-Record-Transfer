@@ -19,12 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('form-next-or-submit-button'),
         document.getElementById('form-previous-button'),
         document.getElementById('form-save-button'),
-        document.getElementById('show-source-types-dialog'),
-        document.getElementById('show-source-roles-dialog'),
     ];
 
-    // Add event listeners to all links on page to unhide modal if clicked
-    document.querySelectorAll('a').forEach(link => {
+    // Add event listeners to only navigational links
+    document.querySelectorAll('a:not(.non-nav-link)').forEach(link => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
             targetUrl = event.currentTarget.href;
