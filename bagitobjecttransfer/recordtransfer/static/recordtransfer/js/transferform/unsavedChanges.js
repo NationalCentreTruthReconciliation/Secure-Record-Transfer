@@ -52,8 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elements that should not trigger the browser warning dialog
     const safeElements = [
-        document.getElementById('form-next-or-submit-button'),
+        document.getElementById('form-next-button'),
         document.getElementById('form-previous-button'),
+        document.getElementById('submit-form-btn'),
         elements.formSaveButton,
     ];
 
