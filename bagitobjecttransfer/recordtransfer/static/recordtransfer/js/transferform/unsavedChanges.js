@@ -7,19 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    const beforeUnloadListener = (event) => {
+        event.preventDefault();
+        event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', beforeUnloadListener);
+
     const modal = document.getElementById('unsaved-transferform-modal');
     const modalSaveButton = document.getElementById('modal-save-button');
     const closeButton = document.getElementById('close-modal-button');
     const cancelButton = document.getElementById('unsaved-transferform-modal-cancel');
     const leaveButton = document.getElementById('unsaved-transferform-modal-leave');
     let targetUrl = '';
-
-    // Elements that should not trigger the modal and the browser warning dialog
-    const safeElements = [
-        document.getElementById('form-next-or-submit-button'),
-        document.getElementById('form-previous-button'),
-        document.getElementById('form-save-button'),
-    ];
 
     // Add event listeners to only navigational links
     document.querySelectorAll('a:not(.non-nav-link)').forEach(link => {
@@ -47,5 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     leaveButton.addEventListener('click', () => {
         window.location.href = targetUrl;
+    });
+
+    // Elements that should not trigger the browser warning dialog
+    const safeElements = [
+        document.getElementById('form-next-or-submit-button'),
+        document.getElementById('form-previous-button'),
+        document.getElementById('form-save-button'),
+    ];
+
+    safeElements.forEach(element => {
+        if (element) {
+            element.addEventListener('click', () => {
+                window.removeEventListener('beforeunload', beforeUnloadListener);
+            });
+        }
     });
 });
