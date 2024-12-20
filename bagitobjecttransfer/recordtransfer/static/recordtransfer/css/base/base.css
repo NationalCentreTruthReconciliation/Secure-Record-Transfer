@@ -66,6 +66,11 @@ body {
     -webkit-appearance: none;
 }
 
+.large-button {
+    font-size: 13pt;
+    padding: 8px 16px;
+}
+
 .less-padding {
     padding: 4px 6px 4px 6px !important;
 }

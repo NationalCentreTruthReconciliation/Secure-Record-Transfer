@@ -1,20 +1,19 @@
 {% extends 'recordtransfer/transferform_standard.html' %}
 {% load static %}
 {% load i18n %}
-
 {% block form_explanation %}
     <p>
         {% blocktrans %}
-        <a id="show-source-types-dialog" href="#">* Click here</a> for an explanation of the
-        different types of source types.
+        <a id="show-source-types-dialog" class="non-nav-link" href="#">* Click here</a> for an
+        explanation of the different types of source types.
         {% endblocktrans %}
-        <br/>
+        <br />
         {% blocktrans %}
-        <a id="show-source-roles-dialog" href="#">** Click here</a> for an explanation of the
-        different types of source relationships (roles).
+        <a id="show-source-roles-dialog" class="non-nav-link" href="#">** Click here</a> for an
+        explanation of the different types of source relationships (roles).
         {% endblocktrans %}
     </p>
-    <br/>
+    <br />
     <div id="source-types-dialog" title="Explanation of Source Types">
         <p>
             {% blocktrans %}
@@ -44,5 +43,4 @@
         {% endfor %}
     </div>
 {% endblock %}
-
 {% block buttonarrayclass %}flex-item{% endblock %}
