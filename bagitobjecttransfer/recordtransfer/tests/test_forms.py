@@ -8,19 +8,69 @@ from recordtransfer.models import User
 
 class UserProfileFormTest(TestCase):
     def setUp(self):
+        self.test_username = "testuser"
+        self.test_first_name = "Test"
+        self.test_last_name = "User"
+        self.test_email = "testuser@example.com"
+        self.test_password = "old_password"
+        self.test_gets_notification_emails = True
+        self.test_new_password = "new_password123"
         self.user = User.objects.create_user(
-            username="testuser",
-            email="testuser@example.com",
-            password="old_password",
-            gets_notification_emails=True,
+            username=self.test_username,
+            first_name=self.test_first_name,
+            last_name=self.test_last_name,
+            email=self.test_email,
+            password=self.test_password,
+            gets_notification_emails=self.test_gets_notification_emails,
         )
 
-    def test_form_valid_data(self):
+    def test_form_valid_name_change(self):
         form_data = {
-            "gets_notification_emails": True,
-            "current_password": "old_password",
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
+            "first_name": "New",
+            "last_name": "Name",
+        }
+        form = UserProfileForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertEqual(user.first_name, "New")
+        self.assertEqual(user.last_name, "Name")
+
+    def test_form_accented_name_change(self):
+        form_data = {
+            "first_name": "Áccéntéd",
+            "last_name": "Námé",
+        }
+        form = UserProfileForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertEqual(user.first_name, "Áccéntéd")
+        self.assertEqual(user.last_name, "Námé")
+    
+    def test_form_invalid_first_name(self):
+        form_data = {
+            "first_name": "123",
+            "last_name": self.test_last_name,
+        }
+        form = UserProfileForm(data=form_data, instance=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("first_name", form.errors)
+    
+    def test_form_invalid_last_name(self):
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": "123",
+        }
+        form = UserProfileForm(data=form_data, instance=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("last_name", form.errors)
+
+    def test_form_valid_password_change(self):
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_password,
+            "new_password": self.test_new_password,
+            "confirm_new_password": self.test_new_password,
         }
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
@@ -29,7 +79,8 @@ class UserProfileFormTest(TestCase):
 
     def test_form_invalid_current_password(self):
         form_data = {
-            "gets_notification_emails": True,
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "current_password": "wrong_password",
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
@@ -40,7 +91,9 @@ class UserProfileFormTest(TestCase):
 
     def test_form_new_passwords_do_not_match(self):
         form_data = {
-            "current_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_password,
             "new_password": "new_password123",
             "confirm_new_password": "different_password",
         }
@@ -50,6 +103,8 @@ class UserProfileFormTest(TestCase):
 
     def test_form_missing_current_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
@@ -59,7 +114,9 @@ class UserProfileFormTest(TestCase):
 
     def test_form_missing_new_password(self):
         form_data = {
-            "current_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_password,
             "confirm_new_password": "new_password123",
         }
         form = UserProfileForm(data=form_data, instance=self.user)
@@ -68,7 +125,9 @@ class UserProfileFormTest(TestCase):
 
     def test_form_missing_confirm_new_password(self):
         form_data = {
-            "current_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_password,
             "new_password": "new_password123",
         }
         form = UserProfileForm(data=form_data, instance=self.user)
@@ -77,9 +136,11 @@ class UserProfileFormTest(TestCase):
 
     def test_form_new_password_is_same_as_old_password(self):
         form_data = {
-            "current_password": "old_password",
-            "new_password": "old_password",
-            "confirm_new_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_password,
+            "new_password": self.test_password,
+            "confirm_new_password": self.test_password,
         }
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
@@ -96,6 +157,8 @@ class UserProfileFormTest(TestCase):
         self.user.save()
 
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
         }
         form = UserProfileForm(data=form_data, instance=self.user)
@@ -105,6 +168,8 @@ class UserProfileFormTest(TestCase):
 
     def test_form_email_notification_initial_true(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": False,
         }
         form = UserProfileForm(data=form_data, instance=self.user)
@@ -114,7 +179,9 @@ class UserProfileFormTest(TestCase):
 
     def test_form_no_changes(self):
         form_data = {
-            "gets_notification_emails": True,
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "gets_notification_emails": self.test_gets_notification_emails,
             "current_password": "",
             "new_password": "",
             "confirm_new_password": "",

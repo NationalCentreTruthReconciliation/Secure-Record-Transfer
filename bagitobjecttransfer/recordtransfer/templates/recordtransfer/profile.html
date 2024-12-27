@@ -1,20 +1,12 @@
 {% extends "recordtransfer/base.html" %}
-
 {% load i18n %}
 {% load static %}
-
 {% block title %}
     {% trans "Your Profile" %}
 {% endblock title %}
 {% block javascript %}
     {{ block.super }}
-    <script>
-        // Pass constants to JavaScript used by profile form
-        const ID_GETS_NOTIFICATION_EMAILS = "{{ ID_GETS_NOTIFICATION_EMAILS }}";
-        const ID_CURRENT_PASSWORD = "{{ ID_CURRENT_PASSWORD }}";
-        const ID_NEW_PASSWORD = "{{ ID_NEW_PASSWORD }}";
-        const ID_CONFIRM_NEW_PASSWORD = "{{ ID_CONFIRM_NEW_PASSWORD }}";
-    </script>
+    {{ js_context|json_script:"py_context_user_profile" }}
     <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block content %}
@@ -22,31 +14,46 @@
         <div class="title-text">{% trans "Your Profile" %}</div>
         {% include "includes/profile_form.html" %}
         <br>
-        {% include "includes/in_progress_submissions.html" %}
+        <!-- In Progress Submissions -->
+        <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
+            <label class="medium-text">{% trans "In Progress Transfers" %}</label>
+        </div>
+        {% if in_progress_page_obj and in_progress_page_obj|length > 0 %}
+            {% include "includes/in_progress_submission_table.html" %}
+            {% include "includes/pagination.html" with page_obj=in_progress_page_obj pagination_name=IN_PROGRESS_PAGE %}
+        {% else %}
+            <div class="flex-med-width-item">
+                <p>{% trans "You have no transfers that are in progress." %}</p>
+            </div>
+        {% endif %}
+        <!-- Past Transfers -->
         <div class="flex-med-width-item margin-top-25px" id="past-transfers">
             <label class="medium-text">{% trans "Past Transfers" %}</label>
         </div>
-        {% if user_submissions %}
-            {% include "includes/submission_table.html" with submissions=user_submissions %}
+        {% if submissions_page_obj and submissions_page_obj|length > 0 %}
+            {% include "includes/submission_table.html" %}
+            {% include "includes/pagination.html" with page_obj=submissions_page_obj pagination_name=SUBMISSIONS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">
                 <p>{% trans "You have not sent any records to the NCTR." %}</p>
             </div>
         {% endif %}
-        <div class="margin-top-25px">
+        <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
         </div>
-        <div class="flex-med-width-item margin-top-25px" id="submission-groups">
+        <!-- Submission Groups -->
+        <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
         </div>
-        {% if submission_groups %}
-            {% include "includes/submission_group_table.html" with groups=submission_groups %}
+        {% if groups_page_obj and groups_page_obj|length > 0 %}
+            {% include "includes/submission_group_table.html" %}
+            {% include "includes/pagination.html" with page_obj=groups_page_obj pagination_name=GROUPS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">
                 <p>{% trans "You have not made any submission groups." %}</p>
             </div>
         {% endif %}
-        <div class="margin-top-25px">
+        <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submissiongroupnew' %}">{% trans "Click to add new group" %}</a>
         </div>
     {% else %}

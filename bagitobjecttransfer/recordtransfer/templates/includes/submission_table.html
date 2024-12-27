@@ -9,7 +9,7 @@
             <th>{% trans "View Report" %}</th>
             <th>{% trans "Download CSV" %}</th>
         </tr>
-        {% for submission in submissions %}
+        {% for submission in submissions_page_obj %}
             <tr>
                 <td>{{ submission.uuid }}</td>
                 <td>{{ submission.submission_date }}</td>
@@ -24,44 +24,4 @@
             </tr>
         {% endfor %}
     </table>
-    {% if is_paginated %}
-        <div class="flex-med-width-item margin-top-25px">
-            <div class="button-array">
-                <span class="margin-right-20px">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                {# First #}
-                {% if page_obj.has_previous %}
-                    <a href="?page=1" class="no-decoration">
-                        <button class="blue-button">{% trans "« First" %}</button>
-                    </a>
-                {% else %}
-                    <button disabled class="blue-button">{% trans "« First" %}</button>
-                {% endif %}
-                {# Previous #}
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}"
-                       class="no-decoration">
-                        <button class="blue-button">{% trans "Previous" %}</button>
-                    </a>
-                {% else %}
-                    <button disabled class="blue-button">{% trans "Previous" %}</button>
-                {% endif %}
-                {# Next #}
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="no-decoration">
-                        <button class="blue-button">{% trans "Next" %}</button>
-                    </a>
-                {% else %}
-                    <button disabled class="blue-button">{% trans "Next" %}</button>
-                {% endif %}
-                {# Last #}
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.paginator.num_pages }}" class="no-decoration">
-                        <button class="blue-button">{% trans "Last »" %}</button>
-                    </a>
-                {% else %}
-                    <button disabled class="blue-button">{% trans "Last »" %}</button>
-                {% endif %}
-            </div>
-        </div>
-    {% endif %}
 </div>

@@ -32,12 +32,6 @@ To start up the application, run the following command:
 podman-compose -f compose.dev.yml up -d
 ```
 
-The database will not be populated at first. To migrate the database, run this command:
-
-```shell
-podman-compose -f compose.dev.yml exec app python manage.py migrate
-```
-
 After the containers are built and running, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. For example, if you sign up using the sign-up form, you can find those at http://localhost:8025.
 
 To restart the application, run these commands:

@@ -568,7 +568,6 @@ $(() => {
         initializeModalMode();
     }
 
-
     /**********************************************************************************************
      * Source information form setup
      *********************************************************************************************/
@@ -632,13 +631,4 @@ $(() => {
             console.warn(`No element exists with the id: ${enterManualInfoInputId}`);
         }
     }
-})
-
-
-$(() => {
-    $(document).ready(function () {
-        $("button.close[data-dismiss=alert]").on("click", function (evt) {
-            $(evt.currentTarget).parents(".alert-dismissible").hide();
-        });
-    });
 })

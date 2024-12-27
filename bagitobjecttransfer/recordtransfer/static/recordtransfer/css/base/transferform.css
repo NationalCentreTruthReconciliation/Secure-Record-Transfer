@@ -17,6 +17,7 @@
 
 .flex-full-width-item {
     max-width: 100%;
+    margin-bottom: 15px;
 }
 
 .flex-full-width-error,
