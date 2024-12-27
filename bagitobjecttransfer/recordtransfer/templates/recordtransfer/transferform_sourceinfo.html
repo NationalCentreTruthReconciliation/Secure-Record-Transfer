@@ -11,7 +11,7 @@
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
-            <div class="flex-error">
+            <div class="flex-error initially-hidden">
                 <label for="nothing"></label>
                 <div class="field-error">{{ error }}</div>
             </div>
