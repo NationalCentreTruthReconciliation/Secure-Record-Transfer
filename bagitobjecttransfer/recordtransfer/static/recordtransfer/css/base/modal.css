@@ -11,6 +11,7 @@
     z-index: 1000;
     visibility: hidden;
     opacity: 0;
+    padding: 0;
 }
 
 .modal.visible {
@@ -62,4 +63,27 @@
 
 .modal-footer button {
     margin-left: 15px;
+}
+
+/* Responsive styles for screens below 800px */
+@media (max-width: 800px) {
+    .modal-content {
+        max-width: 80%;
+        padding: 15px;
+        font-size: small;
+    }
+
+
+    .modal-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .modal-footer button {
+        margin: 10px;
+        width: 100%;
+        border-radius: 8px;
+    }
 }
