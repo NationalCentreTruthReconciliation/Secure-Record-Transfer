@@ -248,14 +248,21 @@ class SourceInfoForm(TransferForm):
     """
 
     def __init__(self, *args, **kwargs):
-        if "initial" not in kwargs:
-            raise ValueError("SourceInfoForm requires an initial dictionary")
+        if "defaults" not in kwargs:
+            raise ValueError(
+                "SourceInfoForm requires default data (i.e., defaults should be a keyword "
+                "argument)"
+            )
 
-        initial = kwargs.get("initial", {})
+        self.defaults = kwargs.pop("defaults")
 
-        for required in ("source_type", "source_role", "source_name"):
-            if required not in initial:
-                raise ValueError(f"SourceInfoForm requires an initial value for {required}")
+        for required in ("source_name", "source_type", "source_role"):
+            if required not in self.defaults:
+                raise ValueError(f"SourceInfoForm requires a default value for {required}")
+
+        self.default_source_name = self.defaults["source_name"]
+        self.default_source_type = self.defaults["source_type"]
+        self.default_source_role = self.defaults["source_role"]
 
         super().__init__(*args, **kwargs)
 
@@ -268,12 +275,12 @@ class SourceInfoForm(TransferForm):
 
         enter_manual = cleaned_data["enter_manual_source_info"]
 
-        # Re-set defaults if manual entry is not selected
+        # Set defaults if manual entry is not selected
         if enter_manual == "no":
-            cleaned_data["source_name"] = self.initial["source_name"]
-            cleaned_data["source_type"] = SourceType.objects.get(pk=self.initial["source_type"])
+            cleaned_data["source_name"] = self.default_source_name
+            cleaned_data["source_type"] = self.default_source_type
             cleaned_data["other_source_type"] = ""
-            cleaned_data["source_role"] = SourceRole.objects.get(pk=self.initial["source_role"])
+            cleaned_data["source_role"] = self.default_source_role
             cleaned_data["other_source_role"] = ""
             cleaned_data["source_note"] = ""
             cleaned_data["preliminary_custodial_history"] = ""

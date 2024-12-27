@@ -131,12 +131,10 @@ class SourceInfoFormTest(TestCase):
         """Create initial test data."""
         self.source_name = "Person Name"
         self.source_type = SourceType.objects.get_or_create(name="Test Source Type")[0]
-        self.source_type_id = self.source_type.pk
         self.source_role = SourceRole.objects.get_or_create(name="Test Source Role")[0]
-        self.source_role_id = self.source_role.pk
-        self.form_initial = {
-            "source_type": self.source_type_id,
-            "source_role": self.source_role_id,
+        self.form_defaults = {
+            "source_type": self.source_type,
+            "source_role": self.source_role,
             "source_name": self.source_name,
         }
 
@@ -146,7 +144,7 @@ class SourceInfoFormTest(TestCase):
             data={
                 "enter_manual_source_info": "no",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["source_name"], self.source_name)
@@ -162,7 +160,7 @@ class SourceInfoFormTest(TestCase):
                 "source_note": "This is a test note that will be overwritten.",
                 "preliminary_custodial_history": "Preliminary history note.",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["source_name"], self.source_name)
@@ -185,7 +183,7 @@ class SourceInfoFormTest(TestCase):
                 "source_note": "Test Note",
                 "preliminary_custodial_history": "History note.",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["source_name"], "My Name")
@@ -210,7 +208,7 @@ class SourceInfoFormTest(TestCase):
                 "source_note": "Test Note",
                 "preliminary_custodial_history": "History note.",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["source_name"], "My Name")
@@ -235,7 +233,7 @@ class SourceInfoFormTest(TestCase):
                 "source_note": "Test Note",
                 "preliminary_custodial_history": "History note.",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
@@ -254,7 +252,7 @@ class SourceInfoFormTest(TestCase):
                 "source_note": "Test Note",
                 "preliminary_custodial_history": "History note.",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
@@ -273,7 +271,7 @@ class SourceInfoFormTest(TestCase):
                 "source_note": "Test Note",
                 "preliminary_custodial_history": "History note.",
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
@@ -291,7 +289,7 @@ class SourceInfoFormTest(TestCase):
                 "source_type": other_type.pk,
                 "source_role": new_source_role.pk,
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
@@ -309,7 +307,7 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": other_role.pk,
             },
-            initial=self.form_initial,
+            defaults=self.form_defaults,
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))

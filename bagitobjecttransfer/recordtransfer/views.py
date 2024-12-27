@@ -552,24 +552,24 @@ class TransferFormWizard(SessionWizardView):
             initial["contact_name"] = self.get_name_of_user(self.request.user)
             initial["email"] = str(self.request.user.email)
 
-        elif step == TransferStep.SOURCE_INFO.value:
-            if isinstance(self.request.user, User):
-                initial["source_name"] = self.get_name_of_user(self.request.user)
-
-            donor_role = SourceRole.objects.filter(name="Donor").first()
-            if donor_role:
-                initial["source_role"] = donor_role.pk
-
-            individual_type = SourceType.objects.filter(name="Individual").first()
-            if individual_type:
-                initial["source_type"] = individual_type.pk
-
         return initial
 
-    def get_form_kwargs(self, step=None):
+    def get_form_kwargs(self, step: Optional[str] = None) -> dict:
+        """Add data to inject when initializing the form."""
         kwargs = super().get_form_kwargs(step)
+
         if step == TransferStep.GROUP_TRANSFER.value:
             kwargs["user"] = self.request.user
+
+        elif step == TransferStep.SOURCE_INFO.value:
+            source_type, _ = SourceType.objects.get_or_create(name="Individual")
+            source_role, _ = SourceRole.objects.get_or_create(name="Donor")
+            kwargs["defaults"] = {
+                "source_name": self.get_name_of_user(self.request.user),  # type: ignore
+                "source_type": source_type,
+                "source_role": source_role,
+            }
+
         return kwargs
 
     def get_context_data(self, form, **kwargs):
