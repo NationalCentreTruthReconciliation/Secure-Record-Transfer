@@ -4,7 +4,8 @@
   "description": "The secure record transfer application has been designed for the purpose of transferring files and standardized metadata over the internet to an institution.",
   "scripts": {
     "build": "webpack --config webpack.config.js && node scripts/compress_images.js",
-    "watch": "webpack --watch --config webpack.config.js"
+    "watch": "webpack --watch --config webpack.config.js",
+    "lint": "eslint '**/*.{js,cjs,mjs}'"
   },
   "dependencies": {
     "css-loader": "^7.1.2",
