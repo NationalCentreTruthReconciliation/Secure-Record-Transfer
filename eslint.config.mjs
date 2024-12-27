@@ -31,6 +31,12 @@ export default [
             "no-duplicate-imports": "error",
         }
     },
+    {
+        files: ["webpack.config.js"],
+        languageOptions: {
+            globals: globals.node,
+        },
+    },
     // Docstring rules
     jsdoc.configs["flat/recommended"],
     // Recommended ESLint rules
