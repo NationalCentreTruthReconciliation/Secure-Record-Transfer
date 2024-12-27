@@ -30,6 +30,12 @@ Additionally, install the [ESLint VSCode extension](https://marketplace.visualst
 }
 ```
 
+Finally, install Node dependencies for development:
+
+```shell
+npm install --include=dev
+```
+
 ## Debugging the Application
 
 The ports 8009 and 8010 are exposed to allow you to debug the web application, and the asynchronous job queue, respectively. This functionality is only available when `DEBUG = True`. These ports can be attached to with `debugpy`
