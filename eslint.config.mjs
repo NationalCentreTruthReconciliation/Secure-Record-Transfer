@@ -15,6 +15,7 @@ export default [
             "jsdoc": jsdoc,
         },
         rules: {
+            // Plugin rules
             "@stylistic/js/indent": ["error", 4],
             "@stylistic/js/max-len": ["error", { code: 99, tabWidth: 4, ignoreUrls: true }],
             "@stylistic/js/semi": ["error", "always"],
@@ -22,12 +23,7 @@ export default [
             "import/order": ["error", {
                 "alphabetize": { "order": "asc", "caseInsensitive": true }
             }],
-        }
-    },
-    jsdoc.configs["flat/recommended"],
-    pluginJs.configs.recommended,
-    {
-        rules: {
+            // ESLint extra rules
             "no-console": "warn",
             "eqeqeq": "error",
             "curly": "error",
@@ -35,4 +31,8 @@ export default [
             "no-duplicate-imports": "error",
         }
     },
+    // Docstring rules
+    jsdoc.configs["flat/recommended"],
+    // Recommended ESLint rules
+    pluginJs.configs.recommended,
 ];
