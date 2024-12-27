@@ -2,18 +2,25 @@
 <script src="https://{{ recaptcha_domain }}/recaptcha/api.js{% if api_params %}?{{ api_params }}{% endif %}"></script>
 <script type="text/javascript">
     // Submit function to be called, after reCAPTCHA was successful.
+    // OVERRIDEEEEEEN
     var onSubmit_{{ widget_uuid }} = function(token) {
         console.log("reCAPTCHA validated for 'data-widget-uuid=\"{{ widget_uuid }}\"'. Submitting form...")
         document.querySelector('.g-recaptcha[data-widget-uuid="{{ widget_uuid }}"]').closest('form').submit();
     };
 
     // Helper function to prevent form submission and execute verification.
-    var verifyCaptcha_{{ widget_uuid}} = function() {
+    var verifyCaptcha_{{ widget_uuid}} = function(e) {
+        // Check if the form submission was triggered by the "Previous Step" button
+        if (e.submitter && e.submitter.id === 'form-previous-button') {
+            return; // Skip CAPTCHA verification
+        }
+        e.preventDefault();
         grecaptcha.execute();
     };
 
-    // Call the captcha verify method explicitly which we do from the dropzone queuecomplete event.
-    var singleCaptchaFn = function () {
-        verifyCaptcha_{{ widget_uuid }}();
-    };
+    // Bind the helper function to the form submit action.
+    document.addEventListener( 'DOMContentLoaded', function () {
+        var element = document.querySelector('.g-recaptcha[data-widget-uuid="{{ widget_uuid }}"]');
+        element.closest('form').addEventListener('submit', verifyCaptcha_{{ widget_uuid}});
+    });
 </script>

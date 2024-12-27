@@ -844,7 +844,7 @@ class UploadFilesForm(TransferForm):
         label=gettext("Other notes"),
     )
 
-    session_token = forms.CharField(required=True, widget=forms.HiddenInput(), label="hidden")
+    session_token = forms.CharField(required=False, widget=forms.HiddenInput(), label="hidden")
 
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
 
