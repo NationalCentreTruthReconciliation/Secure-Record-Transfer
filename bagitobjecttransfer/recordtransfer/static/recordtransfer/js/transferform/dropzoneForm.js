@@ -13,10 +13,7 @@ import {
 Dropzone.autoDiscover = false;
 
 $(() => {
-    let issueFiles = [];
-    let uploadedFiles = [];
     let totalSizeBytes = 0;
-    let sessionToken = '';
     const csrfToken = getCookie('csrftoken');
     const submitButton = document.getElementById("submit-form-btn");
 
@@ -103,41 +100,43 @@ $(() => {
             }
         },
         init: function () {
-            const dropzoneClosure = this;
+            this.issueFiles = [];
+            this.uploadedFiles = [];
+            this.sessionToken = '';
 
-            updateDropMessageVisibility(dropzoneClosure);
+            updateDropMessageVisibility(this);
 
-            this.on("addedfile", (file) => handleFileAdded(dropzoneClosure, file, updateTotalSize));
-            this.on("removedfile", (file) => handleFileRemoved(dropzoneClosure, file, issueFiles, updateTotalSize, submitButton));
-            this.on("error", (file, response) => handleError(file, response, issueFiles, submitButton, dropzoneClosure));
-            this.on("successmultiple", (files, response) => handleSuccess(files, response, uploadedFiles, dropzoneClosure));
-            this.on("queuecomplete", () => handleQueueComplete(issueFiles, sessionToken));
+            this.on("addedfile", (file) => handleFileAdded(this, file, updateTotalSize));
+            this.on("removedfile", (file) => handleFileRemoved(this, file, updateTotalSize, submitButton));
+            this.on("error", (file, response) => handleError(file, response, submitButton, this));
+            this.on("successmultiple", (files, response) => handleSuccess(files, response, this));
+            this.on("queuecomplete", () => handleQueueComplete(this));
 
             submitButton.addEventListener("click", (event) => {
                 event.preventDefault();
                 event.stopPropagation();
 
-                if (issueFiles.length > 0) {
+                if (this.issueFiles.length > 0) {
                     alert('One or more files cannot be uploaded. Remove them before submitting');
                 } else {
                     clearDropzoneErrors();
-                    dropzoneClosure.element.classList.remove('dz-submit-disabled');
-                    if (dropzoneClosure.getQueuedFiles().length + uploadedFiles.length === 0) {
+                    this.element.classList.remove('dz-submit-disabled');
+                    if (this.getQueuedFiles().length + this.uploadedFiles.length === 0) {
                         alert('You cannot submit a form without files. Please choose at least one file');
                     } else {
-                        dropzoneClosure.options.autoProcessQueue = true;
-                        dropzoneClosure.processQueue();
+                        this.options.autoProcessQueue = true;
+                        this.processQueue();
                     }
                 }
             });
 
             this.on("sendingmultiple", (file, xhr) => {
-                xhr.setRequestHeader("Upload-Session-Token", sessionToken);
+                xhr.setRequestHeader("Upload-Session-Token", this.sessionToken);
             });
 
             this.on("errormultiple", (files, response) => {
                 if (response.uploadSessionToken) {
-                    sessionToken = response.uploadSessionToken;
+                    this.sessionToken = response.uploadSessionToken;
                 }
                 if (response.fatalError) {
                     window.location.href = response.redirect;

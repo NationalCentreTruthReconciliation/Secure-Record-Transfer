@@ -5,13 +5,13 @@ export function handleFileAdded(dropzoneInstance, file, updateTotalSize) {
     updateDropMessageVisibility(dropzoneInstance);
 }
 
-export function handleFileRemoved(dropzoneInstance, file, issueFiles, updateTotalSize, submitButton) {
+export function handleFileRemoved(dropzoneInstance, file, updateTotalSize, submitButton) {
     updateTotalSize(file, '-');
-    const issueIndex = issueFiles.indexOf(file.name);
+    const issueIndex = dropzoneInstance.issueFiles.indexOf(file.name);
     if (issueIndex > -1) {
-        issueFiles.splice(issueIndex, 1);
+        dropzoneInstance.issueFiles.splice(issueIndex, 1);
     }
-    if (issueFiles.length === 0) {
+    if (dropzoneInstance.issueFiles.length === 0) {
         submitButton.disabled = false;
         clearDropzoneErrors();
         dropzoneInstance.element.classList.remove('dz-submit-disabled');
@@ -19,18 +19,20 @@ export function handleFileRemoved(dropzoneInstance, file, issueFiles, updateTota
     updateDropMessageVisibility(dropzoneInstance);
 }
 
-export function handleError(file, response, issueFiles, submitButton, dropzoneInstance) {
+export function handleError(file, response, submitButton, dropzoneInstance) {
     addDropzoneError(response.verboseError || response.error || response);
-    issueFiles.push(file.name);
+    dropzoneInstance.issueFiles.push(file.name);
     submitButton.disabled = true;
     dropzoneInstance.element.classList.add('dz-submit-disabled');
     dropzoneInstance.options.autoProcessQueue = false;
 }
 
-export function handleSuccess(files, response, uploadedFiles, dropzoneInstance) {
+export function handleSuccess(files, response, dropzoneInstance) {
+    console.log("handleSuccess");
     if (response.uploadSessionToken) {
         dropzoneInstance.sessionToken = response.uploadSessionToken;
     }
+    console.log("In handleSuccess, sessionToken is " + dropzoneInstance.sessionToken);
     const invalidFileNames = response.issues.map(issue => issue.file);
     invalidFileNames.forEach(fileName => {
         const fileObj = files.find(file => file.name === fileName);
@@ -38,25 +40,27 @@ export function handleSuccess(files, response, uploadedFiles, dropzoneInstance) 
     });
     files.forEach(file => {
         if (!invalidFileNames.includes(file.name)) {
-            uploadedFiles.push(file);
+            dropzoneInstance.uploadedFiles.push(file);
         }
     });
 }
 
-export function handleQueueComplete(issueFiles, sessionToken) {
-    if (issueFiles.length === 0) {
+export function handleQueueComplete(dropzoneInstance) {
+    console.log("handleQueueComplete");
+    if (dropzoneInstance.issueFiles.length === 0) {
         const sessionTokenElement = document.querySelector('[id$="session_token"]');
         if (sessionTokenElement) {
-            sessionTokenElement.setAttribute("value", sessionToken);
-            sessionToken = '';
+            console.log("In handleQueueComplete, sessionToken is " + dropzoneInstance.sessionToken);
+            sessionTokenElement.setAttribute("value", dropzoneInstance.sessionToken);
+            dropzoneInstance.sessionToken = '';
             // window.setTimeout(() => {
             //     singleCaptchaFn();
             // }, 1000);
-            document.getElementById("transfer-form").submit();
+            // document.getElementById("transfer-form").submit();
         } else {
             console.error('Could not find any input id matching "session_token" on the page!');
         }
-    } else if (issueFiles.length === dropzoneInstance.files.length) {
+    } else if (dropzoneInstance.issueFiles.length === dropzoneInstance.files.length) {
         alert('There are one or more files that could not be uploaded. Remove these files and try again.');
     }
 }
