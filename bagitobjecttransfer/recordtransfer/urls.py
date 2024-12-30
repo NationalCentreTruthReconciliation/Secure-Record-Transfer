@@ -16,6 +16,7 @@ if settings.FILE_UPLOAD_ENABLED:
         ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
         ("grouptransfer", forms.GroupTransferForm),
         ("uploadfiles", forms.UploadFilesForm),
+        ("review", forms.ReviewForm),
     ]
 else:
     _transfer_forms = [
@@ -27,6 +28,7 @@ else:
         ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
         ("grouptransfer", forms.GroupTransferForm),
         ("finalnotes", forms.FinalStepFormNoUpload),  # Different
+        ("review", forms.ReviewForm),
     ]
 
 app_name = "recordtransfer"
