@@ -56,7 +56,7 @@ export function handleQueueComplete(dropzoneInstance) {
             // window.setTimeout(() => {
             //     singleCaptchaFn();
             // }, 1000);
-            // document.getElementById("transfer-form").submit();
+            document.getElementById("transfer-form").submit();
         } else {
             console.error('Could not find any input id matching "session_token" on the page!');
         }

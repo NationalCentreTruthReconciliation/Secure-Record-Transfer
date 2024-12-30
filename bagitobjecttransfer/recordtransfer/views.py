@@ -382,6 +382,13 @@ class TransferFormWizard(SessionWizardView):
                 "Add any final notes that may not have fit in previous steps"
             ),
         },
+        TransferStep.REVIEW: {
+            TEMPLATEREF: "recordtransfer/transferform_review.html",
+            FORMTITLE: gettext("Review"),
+            INFOMESSAGE: gettext(
+                "Review the information you've entered and the files you've uploaded"
+            ),
+        }
     }
 
     def __init__(self, *args, **kwargs):
