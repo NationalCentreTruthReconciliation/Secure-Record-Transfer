@@ -846,8 +846,6 @@ class UploadFilesForm(TransferForm):
 
     session_token = forms.CharField(required=True, widget=forms.HiddenInput(), label="hidden")
 
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
-
 
 class FinalStepFormNoUpload(TransferForm):
     """The form where users write any final notes. Intended to be used in place of UploadFilesForm
@@ -870,3 +868,10 @@ class FinalStepFormNoUpload(TransferForm):
         ),
         label=gettext("Other notes"),
     )
+
+class ReviewForm(TransferForm):
+    """The final step of the form where the user can review their submission before sending
+    it.
+    """
+
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
