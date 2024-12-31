@@ -30,8 +30,18 @@ export class TransferDropzone extends Dropzone {
         this.submitButton = document.getElementById("submit-form-btn");
         this.dropMessage = document.querySelector('.dz-message');
         
+        this.initializeSessionToken();
         this.setupEventListeners();
         this.updateDropMessageVisibility();
+    }
+
+    initializeSessionToken = () => {
+        const sessionTokenElement = document.querySelector('[id$="session_token"]');
+        if (sessionTokenElement) {
+            this.sessionToken = sessionTokenElement.getAttribute("value");
+        } else {
+            console.error('Could not find any input id matching "session_token" on the page!');
+        }
     }
 
     setupEventListeners = () => {
