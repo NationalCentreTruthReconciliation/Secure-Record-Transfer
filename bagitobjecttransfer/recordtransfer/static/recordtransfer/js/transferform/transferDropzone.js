@@ -125,6 +125,17 @@ export class TransferDropzone extends Dropzone {
     handleRemovedFile = (file) => {
         this.updateTotalSize(file, '-');
         this.updateDropMessageVisibility();
+
+        // If this file previously caused an issue, remove it from issueFiles
+        const issueIndex = this.issueFiles.indexOf(file.name);
+        if (issueIndex > -1) {
+            this.issueFiles.splice(issueIndex, 1);
+        }
+        if (this.issueFiles.length === 0) {
+            this.submitButton.disabled = false;
+            clearDropzoneErrors();
+            this.element.classList.remove('dz-submit-disabled');
+        }
     }
 
     handleSuccessMultiple = (files, response) => {
