@@ -1,5 +1,5 @@
 import Dropzone from "dropzone";
-import { clearDropzoneErrors, getCookie } from "./utils.js";
+import { addDropzoneError, clearDropzoneErrors, getCookie } from "./utils.js";
 import { maxTotalUploadSize, maxSingleUploadSize, maxTotalUploadCount, maxTotalUploadSizeBytes } from "./config.js";
 
 Dropzone.autoDiscover = false;
@@ -40,6 +40,7 @@ export class TransferDropzone extends Dropzone {
         this.on("successmultiple", (files, response) => this.handleSuccessMultiple(files, response));
         this.on("queuecomplete", () => this.handleQueueComplete());
         this.on("sendingmultiple", (files, xhr) => this.handleSendingMultiple(files, xhr));
+        this.on("error", (file, response) => this.handleError(file, response));
         this.on("errormultiple", (files, response) => this.handleErrorMultiple(files, response));
         this.submitButton.addEventListener("click", (event) => this.handleSubmit(event));
     }
@@ -149,6 +150,23 @@ export class TransferDropzone extends Dropzone {
         xhr.setRequestHeader("Upload-Session-Token", this.sessionToken);
     }
 
+    handleError = (file, response) => {
+        if (response.verboseError) {
+            addDropzoneError(response.verboseError)
+        }
+        else if (response.error) {
+            addDropzoneError(response.error)
+        }
+        else {
+            addDropzoneError(response)
+        }
+
+        this.issueFiles.push(file.name)
+        this.submitButton.disabled = true
+        this.element.classList.add('dz-submit-disabled')
+        this.options.autoProcessQueue = false
+    }
+
     handleErrorMultiple = (_files, response) => {
         if (response.uploadSessionToken) {
             this.sessionToken = response.uploadSessionToken;
@@ -197,6 +215,8 @@ export class TransferDropzone extends Dropzone {
         this.options.autoProcessQueue = true;
         this.processQueue();
     }
+
+    // Helper methods
 
     updateDropMessageVisibility = () => {
         if (this.files.length === 0) {
