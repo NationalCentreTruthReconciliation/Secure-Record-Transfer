@@ -188,9 +188,6 @@ export class TransferDropzone extends Dropzone {
     }
 
     handleQueueComplete = () => {
-        console.log("Handling queue complete");
-        console.log("Session token: " + this.sessionToken);
-
         if (this.issueFiles.length === 0) {
             const sessionTokenElement = document.querySelector('[id$="session_token"]');
             if (sessionTokenElement) {
@@ -206,7 +203,6 @@ export class TransferDropzone extends Dropzone {
     }
 
     handleSubmit = (event) => {
-        console.log("Submit button clicked");
         event.preventDefault();
         event.stopPropagation();
 
