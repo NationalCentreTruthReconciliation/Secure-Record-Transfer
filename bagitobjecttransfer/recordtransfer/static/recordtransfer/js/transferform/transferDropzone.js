@@ -96,10 +96,10 @@ export class TransferDropzone extends Dropzone {
         fetch('/transfer/checkfile/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': this.options.headers["X-CSRFToken"]
             },
-            body: JSON.stringify({
+            body: new URLSearchParams({
                 filename: file.name,
                 filesize: file.size
             })
