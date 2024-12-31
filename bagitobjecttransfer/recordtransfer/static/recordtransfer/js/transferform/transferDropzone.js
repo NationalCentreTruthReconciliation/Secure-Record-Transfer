@@ -23,16 +23,13 @@ export class TransferDropzone extends Dropzone {
                 "X-CSRFToken": getCookie('csrftoken'),
             }
         });
-        this.options.init = this.init;
-    }
-
-    init = () => {
         this.totalSizeBytes = 0;
         this.issueFiles = [];
         this.uploadedFiles = [];
         this.sessionToken = '';
         this.submitButton = document.getElementById("submit-form-btn");
         this.dropMessage = document.querySelector('.dz-message');
+        
         this.setupEventListeners();
         this.updateDropMessageVisibility();
     }
@@ -79,7 +76,7 @@ export class TransferDropzone extends Dropzone {
         }
     }
 
-    accept(file, done) {
+    accept = (file, done) => {
         if (this.totalSizeBytes > maxTotalUploadSizeBytes) {
             done({ error: `Maximum total upload size (${maxTotalUploadSize} MiB) exceeded` });
             return;
@@ -117,7 +114,7 @@ export class TransferDropzone extends Dropzone {
         });
     }
 
-    // // Event handlers
+    // Event handlers
 
     handleAddedFile = (file) => {
         this.updateTotalSize(file, '+');
@@ -162,6 +159,9 @@ export class TransferDropzone extends Dropzone {
     }
 
     handleQueueComplete = () => {
+        console.log("Handling queue complete");
+        console.log("Session token: " + this.sessionToken);
+
         if (this.issueFiles.length === 0) {
             const sessionTokenElement = document.querySelector('[id$="session_token"]');
             if (sessionTokenElement) {
@@ -177,6 +177,7 @@ export class TransferDropzone extends Dropzone {
     }
 
     handleSubmit = (event) => {
+        console.log("Submit button clicked");
         event.preventDefault();
         event.stopPropagation();
 
