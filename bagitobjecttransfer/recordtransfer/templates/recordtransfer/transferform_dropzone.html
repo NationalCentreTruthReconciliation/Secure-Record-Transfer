@@ -29,7 +29,7 @@
         {% endblocktrans %}
     </p>
     <div id="dropzone-errors" class="flex-full-width-error"></div>
-    <div class="flex-med-width-item">
+    {% comment %} <div class="flex-med-width-item">
         <div id="file-dropzone" class="dz-clickable custom-dropzone dropzone">
             <div class="dz-message">
                 <table class="dz-message-table">
@@ -44,7 +44,8 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div> {% endcomment %}
+    <div id="drag-drop"></div> 
     <div class="flex-med-width-item">
         <div>
             {% trans "Total size of transfer:" %}
