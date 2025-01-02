@@ -1,7 +1,6 @@
 {% extends 'recordtransfer/transferform_standard.html' %}
 {% load static %}
 {% load i18n %}
-
 {% block javascript %}
     {{ block.super }}
     <script type='text/javascript'>
@@ -10,9 +9,12 @@
         const MAX_TOTAL_UPLOAD_COUNT = parseFloat(({{ MAX_TOTAL_UPLOAD_COUNT }}).toFixed(2))
     </script>
 {% endblock %}
-
-{% block buttonarrayclass %}flex-med-width-item{% endblock buttonarrayclass %}
-{% block savelinkclass %}flex-med-width-item{% endblock savelinkclass %}
+{% block buttonarrayclass %}
+    flex-med-width-item
+{% endblock buttonarrayclass %}
+{% block savelinkclass %}
+    flex-med-width-item
+{% endblock savelinkclass %}
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block submitbuttontype %}button{% endblock %}
 {% block formfields %}
@@ -46,7 +48,7 @@
         </div>
     </div> {% endcomment %}
     <div class="flex-med-width-item">
-        <div id="drag-drop"></div>
+        <div id="uppy-dashboard"></div>
     </div>
     <div class="flex-med-width-item">
         <div>

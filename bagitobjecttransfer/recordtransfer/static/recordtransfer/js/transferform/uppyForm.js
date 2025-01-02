@@ -1,6 +1,6 @@
 import Uppy from '@uppy/core';
-import DragDrop from '@uppy/drag-drop';
+import Dashboard from '@uppy/dashboard';
 
 document.addEventListener('DOMContentLoaded', () => {
-    new Uppy().use(DragDrop, { target: "#drag-drop" });
+    new Uppy().use(Dashboard, { inline: true, target: '#uppy-dashboard' });
 });

@@ -21,11 +21,9 @@ module.exports = {
                 "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
         ],
         transferform: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/" +
-                "transferform/*.js")
-                .map(file => "./" + path.relative(__dirname, file)),
-            require.resolve("@uppy/core/dist/style.css"),
-            require.resolve("@uppy/drag-drop/dist/style.css"),
+            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/transferform/*.js')
+                .map(file => './' + path.relative(__dirname, file)),
+            require.resolve('@uppy/dashboard/dist/style.min.css'),
         ],
         profile: [
             ...glob.sync(
