@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 singleFileFullScreen: false,
                 proudlyDisplayPoweredByUppy: false,
                 width: '100%',
+                disableThumbnailGenerator: true,
+                showRemoveButtonAfterComplete: true,
+                doneButtonHandler: null,
             }
         )
         .use(XHR, {
@@ -65,6 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 filename: file.name,
                 filesize: file.size,
             });
+        });
+
+        const fileId = uppy.addFile({
+            name: "myfile.pdf",
+            type: "application/pdf",
+            data: new Blob(),
+          });
+
+        uppy.setFileState(fileId, {
+            progress: { uploadComplete: true, uploadStarted: true },
         });
     
         console.dir(uppy);
