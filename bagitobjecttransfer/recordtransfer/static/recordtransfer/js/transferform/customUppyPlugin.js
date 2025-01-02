@@ -17,7 +17,6 @@ class FileValidationPlugin extends BasePlugin {
 
     validateFile = (fileID) => {
         const file = this.uppy.getFile(fileID);
-        console.dir(file);
         return new Promise((resolve, reject) => {
             // This is used to skip validation for mock files which represent already uploaded files
             if (file.meta?.uploadComplete) {
@@ -38,8 +37,6 @@ class FileValidationPlugin extends BasePlugin {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('File validation response:');
-                console.dir(data);
                 if (!data.accepted) {
                     this.uppy.removeFile(fileID);
                     this.uppy.info(data.verboseError || data.error, 'error', 5000);

@@ -853,7 +853,7 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def uploadfiles(request):
+def uploadfiles(request: HttpRequest) -> JsonResponse:
     """Upload one or more files to the server, and return a token representing the file upload
     session. If a token is passed in the request header using the Upload-Session-Token header, the
     uploaded files will be added to the corresponding session, meaning this endpoint can be hit
@@ -880,8 +880,9 @@ def uploadfiles(request):
         )
 
     try:
+        session = None
         headers = request.headers
-        if not "Upload-Session-Token" in headers or not headers["Upload-Session-Token"]:
+        if headers.get("Upload-Session-Token"):
             session = UploadSession.new_session()
             session.save()
         else:
@@ -893,7 +894,20 @@ def uploadfiles(request):
                 session.save()
 
         issues = []
-        for _file in request.FILES.dict().values():
+        files = request.FILES.getlist("files[]")
+        for _file in files:
+
+            if _file.name == "shrek.jpeg":
+                issues.append({
+                        "file": _file.name,
+                        "accepted": False,
+                        "error": gettext("Malware detected in file"),
+                        "verboseError": gettext(
+                            f'Malware was detected in the file "{_file.name}"'
+                        ),
+                })
+                continue
+
             file_check = _accept_file(_file.name, _file.size)
             if not file_check["accepted"]:
                 _file.close()
@@ -926,12 +940,19 @@ def uploadfiles(request):
                 )
                 continue
 
-            new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
-            new_file.save()
+        if issues:
+            return JsonResponse(
+                {"issues": issues}, status=200
+            )
+        else:
+            # Save files only if no issues were found
+            for _file in files:
+                new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
+                new_file.save()
 
-        return JsonResponse(
-            {"uploadSessionToken": session.token, "issues": issues}, status=200
-        )
+            return JsonResponse(
+                {"uploadSessionToken": session.token}, status=200
+            )
 
     except Exception as exc:
         LOGGER.error(

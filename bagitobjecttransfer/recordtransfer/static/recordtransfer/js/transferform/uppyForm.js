@@ -2,7 +2,7 @@ import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 import XHR from '@uppy/xhr-upload';
 import FileValidationPlugin from './customUppyPlugin';
-import { getCookie } from './utils';
+import { getCookie, getSessionToken } from './utils';
 
 document.addEventListener('DOMContentLoaded', () => {
     const settings = JSON.parse(
@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 inline: true,
                 target: '#uppy-dashboard',
                 hideUploadButton: false,
+                hideRetryButton: true,
+                hideCancelButton: true,
                 singleFileFullScreen: false,
                 proudlyDisplayPoweredByUppy: false,
                 width: '100%',
@@ -47,21 +49,38 @@ document.addEventListener('DOMContentLoaded', () => {
             formData: true,
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
+                'Upload-Session-Token': getSessionToken(),
             },
             bundle: true,
             timeout: 180000,
             limit: 2,
             responseType: 'json',
-            getResponseData(xhr) {
+            getResponseData: (xhr) => {
                 try {
                     return xhr.response;
                 } catch (error) {
                     console.error('Error parsing JSON response:', error);
                     return null;
                 }
+            },
+            onAfterResponse: (xhr, retryCount) => {
+                const issues = xhr.response.issues;
+                if (issues) {
+                    xhr.response.issues.forEach((issue) => {
+                        uppy.info(issue.verboseError || issue.error, 'error', 5000);
+                    });
+                    uppy.emit('error', new Error('Invalid file'))
+                }
             }
+
         })
         .use(FileValidationPlugin);
+
+        uppy.on("complete", (result) => {
+            console.log('Upload complete');
+            console.log('successful files:', result.successful);
+	        console.log('failed files:', result.failed);
+        });
 
         const fileId = uppy.addFile({
             name: "myfile.pdf",
