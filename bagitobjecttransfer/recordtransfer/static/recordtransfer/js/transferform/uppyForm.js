@@ -1,6 +1,7 @@
 import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 import XHR from '@uppy/xhr-upload';
+import GoldenRetriever from '@uppy/golden-retriever';
 import { getCookie } from './utils';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return null;
                 }
             }
-        });
+        })
+        .use(GoldenRetriever);
 
         uppy.on('file-added', (file) => {
             uppy.setFileMeta(file.id, {
