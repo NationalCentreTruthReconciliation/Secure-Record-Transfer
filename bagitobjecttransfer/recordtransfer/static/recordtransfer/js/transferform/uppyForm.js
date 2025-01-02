@@ -2,33 +2,24 @@ import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Extract configuration settings from the context element
-    const fileUploadSettingsContextElement = document.getElementById("py_context_file_upload_settings");
+    const settings = JSON.parse(
+        document.getElementById("py_context_file_upload_settings")?.textContent
+    );
 
-    if (!fileUploadSettingsContextElement) {
-        return;
-    }
+    if (!settings) return;
 
-    const fileUploadSettings = JSON.parse(fileUploadSettingsContextElement.textContent);
-
-    const {
-        MAX_TOTAL_UPLOAD_SIZE: maxTotalUploadSize,
-        MAX_SINGLE_UPLOAD_SIZE: maxSingleUploadSize,
-        MAX_TOTAL_UPLOAD_COUNT: maxTotalUploadCount,
-        ACCEPTED_FILE_FORMATS: acceptedFileFormats
-    } = fileUploadSettings;
-
-    const maxTotalUploadSizeBytes = maxTotalUploadSize * 1024 * 1024;
+    const maxTotalUploadSizeBytes = settings.MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
+    const maxSingleUploadSizeBytes = settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024;
 
     new Uppy(
         {
             autoProceed: false,
             restrictions: {
-                maxFileSize: maxSingleUploadSize,
+                maxFileSize: maxSingleUploadSizeBytes,
                 minFileSize: 0,
                 maxTotalFileSize: maxTotalUploadSizeBytes,
-                maxNumberOfFiles: maxTotalUploadCount,
-                allowedFileTypes: acceptedFileFormats,
+                maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
+                allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,
             },
             locale: {
                 strings: {
