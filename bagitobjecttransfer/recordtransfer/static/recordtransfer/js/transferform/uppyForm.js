@@ -1,7 +1,7 @@
 import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 import XHR from '@uppy/xhr-upload';
-import GoldenRetriever from '@uppy/golden-retriever';
+import FileValidationPlugin from './customUppyPlugin';
 import { getCookie } from './utils';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Dashboard,
             {
                 inline: true,
-                target: '#uppy-dashboard' ,
+                target: '#uppy-dashboard',
                 hideUploadButton: false,
                 singleFileFullScreen: false,
                 proudlyDisplayPoweredByUppy: false,
@@ -61,19 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         })
-        .use(GoldenRetriever);
-
-        uppy.on('file-added', (file) => {
-            uppy.setFileMeta(file.id, {
-                filename: file.name,
-                filesize: file.size,
-            });
-        });
+        .use(FileValidationPlugin);
 
         const fileId = uppy.addFile({
             name: "myfile.pdf",
             type: "application/pdf",
             data: new Blob(),
+            meta: { uploadComplete: true, uploadStarted: true },
           });
 
         uppy.setFileState(fileId, {

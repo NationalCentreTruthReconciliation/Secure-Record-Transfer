@@ -18,3 +18,15 @@ export const getCookie = (name) => {
     }
     return cookieValue
 }
+
+/**
+ * Retrieves the upload session token from the DOM.
+ * Looks for an input element with an ID ending in "session_token", which should exist on the
+ * upload step of the transfer form.
+ * 
+ * @returns {?string} The value of the session token if found, null otherwise
+ */
+export const getSessionToken = () => {
+    const sessionToken = document.querySelector('[id$="session_token"]')?.getAttribute("value");
+    return sessionToken || null;
+};
