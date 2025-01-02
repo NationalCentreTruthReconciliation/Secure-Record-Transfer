@@ -706,6 +706,22 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
             context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
 
+        elif self.current_step == TransferStep.UPLOAD_FILES:
+            context.update(
+                {
+                    "js_context": {
+                        "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                        "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                        "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                         "ACCEPTED_FILE_FORMATS": [
+                            f".{format}"
+                            for formats in settings.ACCEPTED_FILE_FORMATS.values()
+                            for format in formats
+                        ],
+                    }
+                }
+            )
+
         return context
 
     @property
