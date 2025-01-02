@@ -23,7 +23,8 @@ module.exports = {
         transferform: [
             ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/transferform/*.js')
                 .map(file => './' + path.relative(__dirname, file)),
-            require.resolve('@uppy/dashboard/dist/style.min.css'),
+            require.resolve('@uppy/core/dist/style.css'),
+            require.resolve('@uppy/dashboard/dist/style.css'),
         ],
         profile: [
             ...glob.sync(
