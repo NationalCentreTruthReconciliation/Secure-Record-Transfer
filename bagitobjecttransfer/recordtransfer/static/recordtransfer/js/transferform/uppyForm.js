@@ -11,21 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxTotalUploadSizeBytes = settings.MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
     const maxSingleUploadSizeBytes = settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024;
 
-    new Uppy(
+    const uppyDashboard = new Uppy(
         {
             autoProceed: false,
             restrictions: {
                 maxFileSize: maxSingleUploadSizeBytes,
                 minFileSize: 0,
                 maxTotalFileSize: maxTotalUploadSizeBytes,
+                minNumberOfFiles: 1,
                 maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
                 allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,
-            },
-            locale: {
-                strings: {
-                    dropHereOr: 'Drop here or %{browse}',
-                    browse: 'browse',
-                },
             },
         }
     )
@@ -40,4 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 width: '100%',
             }
         );
+    
+        console.dir(uppyDashboard);
 });
