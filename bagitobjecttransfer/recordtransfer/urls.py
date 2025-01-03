@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
 from django.urls import path, re_path
@@ -120,3 +121,7 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             ),
         ]
     )
+
+# Serve media files directly without nginx during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
