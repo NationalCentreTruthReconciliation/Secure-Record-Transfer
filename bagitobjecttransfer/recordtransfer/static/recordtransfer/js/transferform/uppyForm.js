@@ -2,12 +2,10 @@ import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 import XHR from '@uppy/xhr-upload';
 import FileValidationPlugin from './customUppyPlugin';
-import { getCookie, getSessionToken } from './utils';
+import { getCookie, getSessionToken, setSessionToken, getSettings } from './utils';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const settings = JSON.parse(
-        document.getElementById("py_context_file_upload_settings")?.textContent
-    );
+    const settings = getSettings();
 
     if (!settings) return;
 
@@ -95,6 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         uppy.emit('upload-error', issueFile, {name: "Upload Error", message: issue.verboseError}, xhr);
                     });
                 }
+                else {
+                    const sessionToken = xhr.response.uploadSessionToken;
+                    if (!sessionToken) {
+                        console.error('No session token found in response:', xhr.response);
+                        return;
+                    }
+                    // If session token is not already set, set it
+                    if (!getSessionToken()) {
+                        setSessionToken(sessionToken);
+                    }
+                }
             }
 
         })
@@ -107,6 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         uppy.on("upload-success", (file, { body }) => {
+            // If all uploads were successful, the server should return a mapping of file IDs to
+            // URLs for the files
             const fileUrl = body.fileIdToUrl?.[file.id];
             if (!body.issues && fileUrl) {
             uppy.setFileState(file.id, { uploadURL: fileUrl });
@@ -115,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const fileId = uppy.addFile({
             name: "myfile.pdf",
-            type: "application/pdf",
             data: new Blob(),
             meta: { uploadComplete: true, uploadStarted: true },
           });

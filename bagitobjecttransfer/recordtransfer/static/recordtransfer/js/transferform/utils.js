@@ -30,3 +30,29 @@ export const getSessionToken = () => {
     const sessionToken = document.querySelector('[id$="session_token"]')?.getAttribute("value");
     return sessionToken || null;
 };
+
+/**
+ * Sets the upload session token in the DOM.
+ * Looks for an input element with an ID ending in "session_token", which should exist on the
+ * upload step of the transfer form.
+ * 
+ * @param {string} token - The session token to set
+ */
+export const setSessionToken = (token) => {
+    const sessionTokenElement = document.querySelector('[id$="session_token"]');
+    if (sessionTokenElement) {
+        sessionTokenElement.setAttribute("value", token);
+    }
+};
+
+/**
+ * Retrieves file upload settings from context passed from view.
+ * @returns {?Object} The parsed JSON settings object if element exists, null otherwise.
+ */
+export const getSettings = () => {
+    const settingsElement = document.getElementById("py_context_file_upload_settings");
+    if (!settingsElement) {
+        return null;
+    }
+    return JSON.parse(settingsElement.textContent);
+}

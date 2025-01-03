@@ -883,15 +883,15 @@ def uploadfiles(request: HttpRequest) -> JsonResponse:
         session = None
         headers = request.headers
         if headers.get("Upload-Session-Token"):
-            session = UploadSession.new_session()
-            session.save()
-        else:
             session = UploadSession.objects.filter(
                 token=headers["Upload-Session-Token"]
             ).first()
             if session is None:
                 session = UploadSession.new_session()
                 session.save()
+        else:
+            session = UploadSession.new_session()
+            session.save()
 
         issues = []
         files = request.FILES.getlist("files[]")
@@ -1218,8 +1218,8 @@ def _accept_session(
     return {"accepted": True}
 
 @require_http_methods(["GET"])
-def get_uploaded_files(request: HttpRequest) -> JsonResponse:
-    """Get a list of files that have been uploaded in a given upload session.
+def list_uploaded_files(request: HttpRequest) -> JsonResponse:
+    """Get a list of metadata for files that have been uploaded in a given upload session.
 
     Args:
         request: The HTTP request containing the upload session token in headers
@@ -1247,6 +1247,7 @@ def get_uploaded_files(request: HttpRequest) -> JsonResponse:
         files.append({
             "name": uploaded_file.name,
             "size": uploaded_file.file_upload.size,
+            "url": uploaded_file.get_file_url(),  # Include the file URL
             "uploaded": uploaded_file.upload_date.isoformat()
         })
 
