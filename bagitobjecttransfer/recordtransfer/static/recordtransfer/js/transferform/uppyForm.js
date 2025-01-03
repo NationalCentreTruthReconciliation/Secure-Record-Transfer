@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxTotalUploadSizeBytes = settings.MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
     const maxSingleUploadSizeBytes = settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024;
 
+    const uploadButton = document.getElementById('upload-button');
+
+    const issueFileIds = [];
+    
+
     const uppy = new Uppy(
             {
                 autoProceed: false,
@@ -25,6 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
                     allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,
                 },
+                onBeforeUpload: (files) => {
+                    const hasIssues = Object.values(files).some(file => issueFileIds.includes(file.id));
+                    if (hasIssues) {
+                        uppy.info('Please remove the files with issues before proceeding.', 'error', 5000);
+                        return false;
+                    }
+                }
             }
         )
         .use(
@@ -36,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideRetryButton: true,
                 hideCancelButton: true,
                 singleFileFullScreen: false,
+                disableStatusBar: true,
                 proudlyDisplayPoweredByUppy: false,
                 width: '100%',
                 disableThumbnailGenerator: true,
@@ -63,13 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     return null;
                 }
             },
-            onAfterResponse: (xhr, retryCount) => {
+            onAfterResponse: (xhr, _retryCount) => {
                 const issues = xhr.response.issues;
                 if (issues) {
+                    uppy.resetProgress();
+                    const uppyFiles = uppy.getFiles();
                     xhr.response.issues.forEach((issue) => {
-                        uppy.info(issue.verboseError || issue.error, 'error', 5000);
+                        const issueFile = uppyFiles.find((file) => file.name === issue.file);
+                        issueFileIds.push(issueFile.id);
+                        uppy.emit('upload-error', issueFile, {name: "Upload Error", message: issue.verboseError}, xhr);
                     });
-                    uppy.emit('error', new Error('Invalid file'))
                 }
             }
 
@@ -94,4 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     
         console.dir(uppy);
+
+        uploadButton.addEventListener('click', () => {
+            uppy.upload();
+        });
 });
