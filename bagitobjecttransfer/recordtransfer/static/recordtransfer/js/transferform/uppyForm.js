@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadButton = document.getElementById('upload-button');
 
     const issueFileIds = [];
-    
 
     const uppy = new Uppy(
             {
@@ -36,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         uppy.info('Please remove the files with issues before proceeding.', 'error', 5000);
                         return false;
                     }
+                    // Add mapping of file names to file IDs as global metadata so that the server
+                    // can associate files with their IDs
+                    const fileNameToIdPairs = Object.values(files).reduce((acc, file) => {
+                        acc[file.name] = file.id;
+                        return acc;
+                    }, {});
+                    uppy.setMeta(fileNameToIdPairs);
                 }
             }
         )
@@ -54,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 disableThumbnailGenerator: true,
                 showRemoveButtonAfterComplete: true,
                 doneButtonHandler: null,
+                showLinkToFileUploadResult: true,
             }
         )
         .use(XHR, {
@@ -97,6 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Upload complete');
             console.log('successful files:', result.successful);
 	        console.log('failed files:', result.failed);
+        });
+
+        uppy.on("upload-success", (file, { body }) => {
+            const fileUrl = body.fileIdToUrl?.[file.id];
+            if (!body.issues && fileUrl) {
+            uppy.setFileState(file.id, { uploadURL: fileUrl });
+            }
         });
 
         const fileId = uppy.addFile({

@@ -945,15 +945,21 @@ def uploadfiles(request: HttpRequest) -> JsonResponse:
                 {"issues": issues}, status=200
             )
         else:
-            uploadUrls = []
+            fileIdToUrl = {}
             # Save files only if no issues were found
             for _file in files:
                 new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
                 new_file.save()
-                uploadUrls.append(new_file.get_file_url())
+                clientFileId = request.POST.get(_file.name)
+                if clientFileId:
+                    fileIdToUrl[clientFileId] = new_file.get_file_url()
 
             return JsonResponse(
-                {"uploadSessionToken": session.token, "uploadUrls": uploadUrls}, status=200
+                {
+                    "uploadSessionToken": session.token,
+                    "fileIdToUrl": fileIdToUrl
+                },
+                status=200
             )
 
     except Exception as exc:
