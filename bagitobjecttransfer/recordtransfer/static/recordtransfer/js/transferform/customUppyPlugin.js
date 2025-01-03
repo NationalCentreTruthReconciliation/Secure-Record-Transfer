@@ -19,7 +19,7 @@ class FileValidationPlugin extends BasePlugin {
         const file = this.uppy.getFile(fileID);
         return new Promise((resolve, reject) => {
             // This is used to skip validation for mock files which represent already uploaded files
-            if (file.meta?.uploadComplete) {
+            if (file.meta?.mock) {
                 resolve();
                 return;
             }

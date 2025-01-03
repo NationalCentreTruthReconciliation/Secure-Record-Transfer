@@ -56,3 +56,25 @@ export const getSettings = () => {
     }
     return JSON.parse(settingsElement.textContent);
 }
+
+export const fetchUploadedFiles = async () => {
+    const sessionToken = getSessionToken();
+    if (!sessionToken) {
+        console.error('Cannot fetch uploaded files without a session token');
+        return
+    }
+    const response = await fetch(`/transfer/upload-session/${sessionToken}/files/`, {
+        method: 'GET',
+    });
+    if (!response.ok) {
+        console.error('Failed to fetch uploaded files:', response.statusText);
+        return null;
+    }
+    return response.json();
+}
+
+export const makeMockBlob = (size) => {
+    const blob = new Blob([''], { type: 'application/octet-stream' });
+    Object.defineProperty(blob, 'size', { value: size });
+    return blob;
+};

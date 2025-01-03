@@ -853,7 +853,7 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def uploadfiles(request: HttpRequest) -> JsonResponse:
+def upload_files(request: HttpRequest) -> JsonResponse:
     """Upload one or more files to the server, and return a token representing the file upload
     session. If a token is passed in the request header using the Upload-Session-Token header, the
     uploaded files will be added to the corresponding session, meaning this endpoint can be hit
@@ -1218,24 +1218,18 @@ def _accept_session(
     return {"accepted": True}
 
 @require_http_methods(["GET"])
-def list_uploaded_files(request: HttpRequest) -> JsonResponse:
+def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
     """Get a list of metadata for files that have been uploaded in a given upload session.
 
     Args:
-        request: The HTTP request containing the upload session token in headers
+        request: The HTTP request
+        session_token: The upload session token from the URL
 
     Returns:
         JsonResponse: A JSON response containing the list of uploaded files and their details,
         or an error message if the session is not found.
     """
-    token = request.headers.get("Upload-Session-Token")
-    if not token:
-        return JsonResponse(
-            {"error": gettext("No upload session token provided")},
-            status=400
-        )
-
-    session = UploadSession.objects.filter(token=token).first()
+    session = UploadSession.objects.filter(token=session_token).first()
     if not session:
         return JsonResponse(
             {"error": gettext("Upload session not found")},
@@ -1247,11 +1241,10 @@ def list_uploaded_files(request: HttpRequest) -> JsonResponse:
         files.append({
             "name": uploaded_file.name,
             "size": uploaded_file.file_upload.size,
-            "url": uploaded_file.get_file_url(),  # Include the file URL
-            "uploaded": uploaded_file.upload_date.isoformat()
+            "url": uploaded_file.get_file_url(),
         })
 
-    return JsonResponse({"files": files}, status=200)
+    return JsonResponse(files, safe=False, status=200)
 
 
 class DeleteTransfer(TemplateView):

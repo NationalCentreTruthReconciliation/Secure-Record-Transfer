@@ -2,9 +2,9 @@ import Uppy from '@uppy/core';
 import Dashboard from '@uppy/dashboard';
 import XHR from '@uppy/xhr-upload';
 import FileValidationPlugin from './customUppyPlugin';
-import { getCookie, getSessionToken, setSessionToken, getSettings } from './utils';
+import { getCookie, getSessionToken, setSessionToken, getSettings, fetchUploadedFiles, makeMockBlob } from './utils';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const settings = getSettings();
 
     if (!settings) return;
@@ -123,20 +123,29 @@ document.addEventListener('DOMContentLoaded', () => {
             uppy.setFileState(file.id, { uploadURL: fileUrl });
             }
         });
-
-        const fileId = uppy.addFile({
-            name: "myfile.pdf",
-            data: new Blob(),
-            meta: { uploadComplete: true, uploadStarted: true },
-          });
-
-        uppy.setFileState(fileId, {
-            progress: { uploadComplete: true, uploadStarted: true },
-        });
     
         console.dir(uppy);
 
         uploadButton.addEventListener('click', () => {
             uppy.upload();
         });
+
+        const uploadedFiles = await fetchUploadedFiles();
+        console.log(uploadedFiles);
+
+        if (uploadedFiles) {
+            uploadedFiles.forEach((file) => {
+                console.log(file);
+                const fileId = uppy.addFile({
+                    name: file.name,
+                    data: makeMockBlob(file.size),
+                    meta: { mock: true },
+                });
+                uppy.setFileState(fileId, {
+                    progress: { uploadComplete: true, uploadStarted: true },
+                    uploadURL: file.url,
+                });
+            
+            });
+        }
 });
