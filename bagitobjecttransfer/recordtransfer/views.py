@@ -945,13 +945,15 @@ def uploadfiles(request: HttpRequest) -> JsonResponse:
                 {"issues": issues}, status=200
             )
         else:
+            uploadUrls = []
             # Save files only if no issues were found
             for _file in files:
                 new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
                 new_file.save()
+                uploadUrls.append(new_file.get_file_url())
 
             return JsonResponse(
-                {"uploadSessionToken": session.token}, status=200
+                {"uploadSessionToken": session.token, "uploadUrls": uploadUrls}, status=200
             )
 
     except Exception as exc:
@@ -1208,6 +1210,41 @@ def _accept_session(
 
     # All checks succeded
     return {"accepted": True}
+
+@require_http_methods(["GET"])
+def get_uploaded_files(request: HttpRequest) -> JsonResponse:
+    """Get a list of files that have been uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request containing the upload session token in headers
+
+    Returns:
+        JsonResponse: A JSON response containing the list of uploaded files and their details,
+        or an error message if the session is not found.
+    """
+    token = request.headers.get("Upload-Session-Token")
+    if not token:
+        return JsonResponse(
+            {"error": gettext("No upload session token provided")},
+            status=400
+        )
+
+    session = UploadSession.objects.filter(token=token).first()
+    if not session:
+        return JsonResponse(
+            {"error": gettext("Upload session not found")},
+            status=404
+        )
+
+    files = []
+    for uploaded_file in session.uploadedfile_set.all():
+        files.append({
+            "name": uploaded_file.name,
+            "size": uploaded_file.file_upload.size,
+            "uploaded": uploaded_file.upload_date.isoformat()
+        })
+
+    return JsonResponse({"files": files}, status=200)
 
 
 class DeleteTransfer(TemplateView):

@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             responseType: 'json',
             getResponseData: (xhr) => {
                 try {
+                    console.log('XHR response:', xhr.response);
                     return xhr.response;
                 } catch (error) {
                     console.error('Error parsing JSON response:', error);
