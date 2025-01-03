@@ -3,7 +3,7 @@ import os
 import shutil
 import uuid
 from pathlib import Path
-from typing import ClassVar, Union
+from typing import ClassVar, Optional, Union
 
 import bagit
 from caais.export import ExportVersion
@@ -204,6 +204,12 @@ class UploadedFile(models.Model):
         """Delete the real file-system representation of this model."""
         if self.file_upload:
             self.file_upload.delete(save=True)
+
+    def get_file_url(self) -> Optional[str]:
+        """Generate the URL to access this file."""
+        if self.exists:
+            return self.file_upload.url
+        return None
 
     def __str__(self):
         if self.exists:

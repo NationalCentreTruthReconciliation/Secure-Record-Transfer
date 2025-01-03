@@ -18,8 +18,13 @@ class OverwriteStorage(Storage):
         return name
 
 class UploadedFileStorage(Storage):
-    ''' Stores files in UPLOAD_STORAGE_FOLDER
-    '''
+    """Stores files in UPLOAD_STORAGE_FOLDER."""
+
     def __init__(self, **kwargs):
         kwargs['location'] = settings.UPLOAD_STORAGE_FOLDER
         super().__init__(**kwargs)
+
+    def url(self, name):
+        """Generate the URL based on MEDIA_URL and the relative path."""
+        relative_path = name.replace(settings.UPLOAD_STORAGE_FOLDER, '').lstrip('/')
+        return f"{settings.MEDIA_URL}uploaded_files/{relative_path}"
