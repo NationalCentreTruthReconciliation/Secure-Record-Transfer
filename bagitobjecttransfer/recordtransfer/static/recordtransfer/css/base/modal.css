@@ -70,9 +70,7 @@
     .modal-content {
         max-width: 80%;
         padding: 15px;
-        font-size: small;
     }
-
 
     .modal-footer {
         flex-direction: row;
