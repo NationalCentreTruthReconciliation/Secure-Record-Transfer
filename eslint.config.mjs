@@ -8,6 +8,14 @@ import globals from "globals";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
     {
+        ignores: [
+            "env/",
+            "dist/",
+            "node_modules/",
+            "bagitobjecttransfer/static/",
+        ],
+    },
+    {
         languageOptions: { globals: globals.browser },
         plugins: {
             "@stylistic/js": stylisticJs,
