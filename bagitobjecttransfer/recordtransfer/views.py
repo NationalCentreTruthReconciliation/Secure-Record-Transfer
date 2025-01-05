@@ -54,6 +54,11 @@ from recordtransfer.constants import (
     ID_GETS_NOTIFICATION_EMAILS,
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
@@ -329,11 +334,9 @@ class TransferFormWizard(SessionWizardView):
         },
         TransferStep.SOURCE_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
-            FORMTITLE: gettext("Source Information"),
+            FORMTITLE: gettext("Source Information (Optional)"),
             INFOMESSAGE: gettext(
-                "Enter the info for the source of the records. The source is the person or entity "
-                "that created the records or is holding the records at the moment. If this is you, "
-                "put your own information in"
+                "Select Yes if you would like to manually enter source information"
             ),
         },
         TransferStep.RECORD_DESCRIPTION: {
@@ -586,11 +589,28 @@ class TransferFormWizard(SessionWizardView):
         """Retrieve the name of the template for the current step."""
         return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
 
-    def get_form_initial(self, step):
-        """Populate form with saved transfer data (if a "resume" request was received), and add the
-        user's name and email from their user profile.
+    def get_name_of_user(self, user: User) -> str:
+        """Get the name of a user.
+
+        Tries to get the name from the User object first, and falls back to using the form data
+        submitted in the contact info.
         """
-        initial = self.initial_dict.get(step, {})
+        if user:
+            if user.first_name and user.last_name:
+                return f"{user.first_name} {user.last_name}"
+            elif user.first_name:
+                return user.first_name
+            elif user.last_name:
+                return user.last_name
+        return self.get_form_value(TransferStep.CONTACT_INFO, "contact_name") or ""
+
+    def get_form_initial(self, step: str) -> dict:
+        """Populate the initial state of the form.
+
+        Populate form with saved transfer data if a "resume" request was received. Fills in the
+        user's name and email automatically where possible.
+        """
+        initial = (self.initial_dict or {}).get(step, {})
 
         if (
             self.in_progress_submission
@@ -598,20 +618,28 @@ class TransferFormWizard(SessionWizardView):
         ):
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
-        if step == TransferStep.CONTACT_INFO.value:
-            curr_user = self.request.user
-            if curr_user.first_name and curr_user.last_name:
-                initial["contact_name"] = (
-                    f"{curr_user.first_name} {curr_user.last_name}"
-                )
-            initial["email"] = str(curr_user.email)
+        if step == TransferStep.CONTACT_INFO.value and isinstance(self.request.user, User):
+            initial["contact_name"] = self.get_name_of_user(self.request.user)
+            initial["email"] = str(self.request.user.email)
 
         return initial
 
-    def get_form_kwargs(self, step=None):
+    def get_form_kwargs(self, step: Optional[str] = None) -> dict:
+        """Add data to inject when initializing the form."""
         kwargs = super().get_form_kwargs(step)
+
         if step == TransferStep.GROUP_TRANSFER.value:
             kwargs["user"] = self.request.user
+
+        elif step == TransferStep.SOURCE_INFO.value:
+            source_type, _ = SourceType.objects.get_or_create(name="Individual")
+            source_role, _ = SourceRole.objects.get_or_create(name="Donor")
+            kwargs["defaults"] = {
+                "source_name": self.get_name_of_user(self.request.user),  # type: ignore
+                "source_type": source_type,
+                "source_role": source_role,
+            }
+
         return kwargs
 
     def get_context_data(self, form, **kwargs):
@@ -655,8 +683,21 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
             all_types = SourceType.objects.all().exclude(name="Other")
+
+            other_role = SourceRole.objects.filter(name="Other").first()
+            other_type = SourceType.objects.filter(name="Other").first()
+
             context.update(
                 {
+                    "js_context": {
+                        "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                        "id_source_type": ID_SOURCE_INFO_SOURCE_TYPE,
+                        "id_other_source_type": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                        "id_source_role": ID_SOURCE_INFO_SOURCE_ROLE,
+                        "id_other_source_role": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+                        "other_role_id": other_role.pk if other_role else 0,
+                        "other_type_id": other_type.pk if other_type else 0,
+                    },
                     "source_roles": all_roles,
                     "source_types": all_types,
                 }
