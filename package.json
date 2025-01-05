@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --config webpack.config.js && node scripts/compress_images.js",
     "watch": "webpack --watch --config webpack.config.js",
-    "lint": "eslint '**/*.{js,cjs,mjs}'"
+    "lint": "eslint"
   },
   "dependencies": {
     "css-loader": "^7.1.2",
