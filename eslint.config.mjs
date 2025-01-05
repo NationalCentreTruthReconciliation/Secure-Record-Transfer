@@ -9,7 +9,7 @@ import globals from "globals";
 export default [
     {
         ignores: [
-            "env/",
+            "{env,venv,.env,.venv}/**",
             "dist/",
             "node_modules/",
             "bagitobjecttransfer/static/",
