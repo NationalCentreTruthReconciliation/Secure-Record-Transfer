@@ -11,6 +11,8 @@ from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
 from django.utils import timezone
@@ -216,6 +218,17 @@ class UploadedFile(models.Model):
             return f"{self.name} | Session {self.session}"
         return f"{self.name} Removed! | Session {self.session}"
 
+@receiver(post_delete, sender=UploadedFile)
+def delete_file_on_model_delete(sender: UploadedFile, instance: UploadedFile, **kwargs) -> None:
+    """Delete the actual file when an UploadedFile model instance is deleted.
+
+    Args:
+        sender: The model class that sent the signal
+        instance: The UploadedFile instance being deleted
+        **kwargs: Additional keyword arguments passed to the signal handler
+    """
+    if instance.file_upload:
+        instance.file_upload.delete(save=False)
 
 class SubmissionGroup(models.Model):
     """Represents a group of submissions.
