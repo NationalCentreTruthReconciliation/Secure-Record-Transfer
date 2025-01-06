@@ -21,12 +21,11 @@ const updateCapacity = (uppy) => {
 
 document.addEventListener("DOMContentLoaded", async () => {
     const settings = getSettings();
-
     // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
 
-    const uploadButton = document.getElementById("upload-button");
-
+    const nextButton = document.getElementById("form-next-button");
+    const transferForm = document.getElementById("transfer-form");
     const issueFileIds = [];
 
     const uppy = new Uppy(
@@ -170,12 +169,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             sendDeleteRequestForFile(file.name);
         }
     });
-    
-    // Remove after debugging
-    console.dir(uppy);
 
-    uploadButton.addEventListener("click", () => {
-        uppy.upload();
+    // Connect the next button to the Uppy upload
+    nextButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const result = await uppy.upload();
+        // Allow form to submit if there were no errors in the upload
+        if (result.failed.length === 0) {
+            transferForm.submit();
+        }
     });
 
     const uploadedFiles = await fetchUploadedFiles();
