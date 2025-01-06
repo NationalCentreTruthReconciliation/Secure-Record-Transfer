@@ -47,8 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     return false;
                 }
-                // Add mapping of file names to file IDs as global metadata so that the server
-                // can associate files with their IDs
                 const fileNameToIdPairs = Object.values(files).reduce((acc, file) => {
                     acc[file.name] = file.id;
                     return acc;
@@ -146,9 +144,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     uppy.on("file-removed", (file) => {
-        if (file.meta.mock) {
-            return;
-        }
         // If file had issues, remove it from the list of files with issues
         if (issueFileIds.includes(file.id)) {
             const index = issueFileIds.indexOf(file.id);
