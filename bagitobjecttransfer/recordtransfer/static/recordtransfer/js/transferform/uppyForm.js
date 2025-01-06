@@ -154,7 +154,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const index = issueFileIds.indexOf(file.id);
             issueFileIds.splice(index, 1);
         }
-        sendDeleteRequestForFile(file.name);
+        else {
+            sendDeleteRequestForFile(file.name);
+        }
     });
     
     console.dir(uppy);
