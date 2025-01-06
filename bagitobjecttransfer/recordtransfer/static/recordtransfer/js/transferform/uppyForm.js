@@ -105,7 +105,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             onAfterResponse: (xhr) => {
                 const issues = xhr.response.issues;
                 if (issues) {
-                    uppy.resetProgress();
                     const uppyFiles = uppy.getFiles();
                     xhr.response.issues.forEach((issue) => {
                         const issueFile = uppyFiles.find((file) => file.name === issue.file);
@@ -174,6 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     nextButton.addEventListener("click", async (event) => {
         event.preventDefault();
         const result = await uppy.upload();
+        console.dir(result);
         // Allow form to submit if there were no errors in the upload
         if (result.failed.length === 0) {
             transferForm.submit();
@@ -196,6 +196,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             
         });
     }
+
+    console.dir(uppy);
 
 
 });
