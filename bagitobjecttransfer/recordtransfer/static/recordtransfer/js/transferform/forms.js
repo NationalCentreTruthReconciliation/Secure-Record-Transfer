@@ -632,3 +632,12 @@ $(() => {
         }
     }
 })
+
+document.addEventListener("DOMContentLoaded", () => {
+    const submitButton = document.getElementById("submit-form-btn");
+    if (submitButton) {
+        submitButton.addEventListener("click", () => {
+            singleCaptchaFn();
+        });
+    }   
+});
