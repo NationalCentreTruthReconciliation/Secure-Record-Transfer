@@ -164,11 +164,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Connect the next button to the Uppy upload
     nextButton.addEventListener("click", async (event) => {
         event.preventDefault();
+        uppy.setOptions({"disabled": true});
         const result = await uppy.upload();
         // Allow form to submit if there were no errors in the upload
         if (result.failed.length === 0) {
             transferForm.submit();
         }
+        uppy.setOptions({"disabled": false});
     });
 
     const uploadedFiles = await fetchUploadedFiles();
