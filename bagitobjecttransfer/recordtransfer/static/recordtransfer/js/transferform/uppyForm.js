@@ -122,7 +122,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
                     // If session token is not already set, set it
                     if (!getSessionToken()) {
-                        console.log("Setting initial session token after first upload:", sessionToken);
                         setSessionToken(sessionToken);
                     }
                 }
@@ -147,6 +146,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     uppy.on("file-removed", (file) => {
+        if (file.meta.mock) {
+            return;
+        }
+        // If file had issues, remove it from the list of files with issues
+        if (issueFileIds.includes(file.id)) {
+            const index = issueFileIds.indexOf(file.id);
+            issueFileIds.splice(index, 1);
+        }
         sendDeleteRequestForFile(file.name);
     });
     
