@@ -8,7 +8,8 @@ import {
     setSessionToken,
     getSettings,
     fetchUploadedFiles,
-    makeMockBlob
+    makeMockBlob,
+    sendDeleteRequestForFile,
 } from "./utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -140,6 +141,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!body.issues && fileUrl) {
             uppy.setFileState(file.id, { uploadURL: fileUrl });
         }
+    });
+
+    uppy.on("file-removed", (file) => {
+        sendDeleteRequestForFile(file.name);
     });
     
     console.dir(uppy);

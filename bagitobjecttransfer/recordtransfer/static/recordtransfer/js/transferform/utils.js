@@ -76,3 +76,21 @@ export const makeMockBlob = (size) => {
     Object.defineProperty(blob, "size", { value: size });
     return blob;
 };
+
+export const sendDeleteRequestForFile = async (filename) => {
+    const sessionToken = getSessionToken();
+    if (!sessionToken) {
+        console.error("Cannot delete file without a session token");
+        return;
+    }
+    const response = await fetch(`/transfer/upload-session/${sessionToken}/files/${filename}`, {
+        method: "DELETE",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+    });
+    if (!response.ok) {
+        console.error("Failed to delete file:", response.statusText);
+    }
+
+};

@@ -1246,6 +1246,37 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
 
     return JsonResponse(files, safe=False, status=200)
 
+@require_http_methods(["DELETE"])
+def delete_uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> JsonResponse:
+    """Delete a file that has been uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+        filename: The name of the file to delete
+
+    Returns:
+        JsonResponse: A JSON response containing the result of the deletion operation
+    """
+    session = UploadSession.objects.filter(token=session_token).first()
+    if not session:
+        return JsonResponse(
+            {"error": gettext("Upload session not found")},
+            status=404
+        )
+
+    uploaded_file = session.uploadedfile_set.filter(name=file_name).first()
+    if not uploaded_file:
+        return JsonResponse(
+            {"error": gettext("File not found in upload session")},
+            status=404
+        )
+
+    uploaded_file.delete()
+    return JsonResponse(
+        {"message": gettext("File deleted successfully")},
+        status=200
+    )
 
 class DeleteTransfer(TemplateView):
     """View to handle the deletion of an in-progress submission."""
