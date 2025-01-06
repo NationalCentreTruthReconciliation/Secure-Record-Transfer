@@ -57,6 +57,12 @@ export const getSettings = () => {
     return JSON.parse(settingsElement.textContent);
 };
 
+/**
+ * Fetches the list of uploaded files for the current upload session.
+ * This function sends a GET request to the server to retrieve the list of uploaded files.
+ * @returns {Promise<object|null>} - A promise that resolves to the JSON response containing the
+ * list of uploaded files, or null if the request fails or the session token is not available.
+ */
 export const fetchUploadedFiles = async () => {
     const sessionToken = getSessionToken();
     if (!sessionToken) {
@@ -73,17 +79,29 @@ export const fetchUploadedFiles = async () => {
     return response.json();
 };
 
+/**
+ * Creates a mock Blob object with a specified size without actually allocating memory for
+ * the data content.
+ * @param {number} size - The size of the Blob in bytes.
+ * @returns {Blob} - A mock Blob object with the specified size.
+ */
 export const makeMockBlob = (size) => {
     const blob = new Blob([""], { type: "application/octet-stream" });
     Object.defineProperty(blob, "size", { value: size });
     return blob;
 };
 
+/**
+ * Sends a DELETE request to remove an uploaded file from the server.
+ * @param {string} filename - The name of the file to delete.
+ * @returns {Promise<Response|null>} - A promise that resolves to the response of the request or
+ * null if the session token was not found.
+ */
 export const sendDeleteRequestForFile = async (filename) => {
     const sessionToken = getSessionToken();
     if (!sessionToken) {
         console.error("Cannot delete file without a session token");
-        return;
+        return null;
     }
     const response = await fetch(`/transfer/upload-session/${sessionToken}/files/${filename}`, {
         method: "DELETE",
@@ -94,6 +112,7 @@ export const sendDeleteRequestForFile = async (filename) => {
     if (!response.ok) {
         console.error("Failed to delete file:", response.statusText);
     }
+    return response;
 };
 
 /**
