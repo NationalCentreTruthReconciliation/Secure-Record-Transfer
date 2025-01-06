@@ -92,7 +92,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             responseType: "json",
             getResponseData: (xhr) => {
                 try {
-                    console.log("XHR response:", xhr.response);
                     return xhr.response;
                 } catch (error) {
                     console.error("Error parsing JSON response:", error);
@@ -132,13 +131,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         })
         .use(FileValidationPlugin);
-    
-    // Remove after debugging
-    uppy.on("complete", (result) => {
-        console.log("Upload complete");
-        console.log("successful files:", result.successful);
-        console.log("failed files:", result.failed);
-    });
 
     uppy.on("upload-success", (file, { body }) => {
         // If all uploads were successful, the server should return a mapping of file IDs to
@@ -173,7 +165,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     nextButton.addEventListener("click", async (event) => {
         event.preventDefault();
         const result = await uppy.upload();
-        console.dir(result);
         // Allow form to submit if there were no errors in the upload
         if (result.failed.length === 0) {
             transferForm.submit();
@@ -196,8 +187,4 @@ document.addEventListener("DOMContentLoaded", async () => {
             
         });
     }
-
-    console.dir(uppy);
-
-
 });

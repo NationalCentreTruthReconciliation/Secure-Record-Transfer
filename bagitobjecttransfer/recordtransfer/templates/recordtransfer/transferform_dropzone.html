@@ -1,10 +1,10 @@
-{% extends 'recordtransfer/transferform_standard.html' %}
+{% extends "recordtransfer/transferform_standard.html" %}
 {% load static %}
 {% load i18n %}
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_file_upload_settings" }}
-{% endblock %}
+{% endblock javascript %}
 {% block buttonarrayclass %}
     flex-med-width-item
 {% endblock buttonarrayclass %}
@@ -24,23 +24,6 @@
         minutes, so please do not reload the web page when your files are being uploaded.
         {% endblocktrans %}
     </p>
-    <div id="dropzone-errors" class="flex-full-width-error"></div>
-    {% comment %} <div class="flex-med-width-item">
-        <div id="file-dropzone" class="dz-clickable custom-dropzone dropzone">
-            <div class="dz-message">
-                <table class="dz-message-table">
-                    <tr>
-                        <td>
-                            <img src="{% static 'file_upload_32x32px.webp' %}">
-                        </td>
-                        <td>
-                            {% trans "Drop files here or click to upload" %}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div> {% endcomment %}
     <div class="flex-med-width-item">
         <div id="uppy-dashboard"></div>
     </div>
@@ -54,5 +37,4 @@
             <span id="remaining-size">{{ MAX_TOTAL_UPLOAD_SIZE }}</span> {% trans "MiB" %}
         </div>
     </div>
-    <button id="upload-button" type="button">Upload</button>
-{% endblock %}
+{% endblock formfields %}
