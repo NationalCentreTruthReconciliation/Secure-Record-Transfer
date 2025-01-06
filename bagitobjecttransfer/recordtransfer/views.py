@@ -716,6 +716,11 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
                 {
+                    # For use in template
+                    "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                    "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                    "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    # For use in JS
                     "js_context": {
                         "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
                         "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
