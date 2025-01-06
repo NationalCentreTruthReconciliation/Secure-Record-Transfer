@@ -10,15 +10,20 @@ import {
     fetchUploadedFiles,
     makeMockBlob,
     sendDeleteRequestForFile,
+    updateCapacityDisplay,
 } from "./utils";
+
+const updateCapacity = (uppy) => {
+    const uppyFiles = uppy.getFiles();
+    const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
+    updateCapacityDisplay(uppyFiles.length, totalSize);
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
     const settings = getSettings();
 
+    // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
-
-    const maxTotalUploadSizeBytes = settings.MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
-    const maxSingleUploadSizeBytes = settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024;
 
     const uploadButton = document.getElementById("upload-button");
 
@@ -28,9 +33,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         {
             autoProceed: false,
             restrictions: {
-                maxFileSize: maxSingleUploadSizeBytes,
+                maxFileSize: settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024,
                 minFileSize: 0,
-                maxTotalFileSize: maxTotalUploadSizeBytes,
+                maxTotalFileSize: settings.MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024,
                 minNumberOfFiles: 1,
                 maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
                 allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,
@@ -129,7 +134,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         })
         .use(FileValidationPlugin);
-
+    
+    // Remove after debugging
     uppy.on("complete", (result) => {
         console.log("Upload complete");
         console.log("successful files:", result.successful);
@@ -145,8 +151,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    uppy.on("files-added" , () => {
+        updateCapacity(uppy);
+    });
+
     uppy.on("file-removed", (file) => {
-        // If file is only selected but not uploaded yet, don't need to do anything
+        updateCapacity(uppy);
+        // If file is only selected but not uploaded yet, don't need to do anything else
         if (!file.progress.uploadComplete) {
             return;
         }
@@ -160,6 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
     
+    // Remove after debugging
     console.dir(uppy);
 
     uploadButton.addEventListener("click", () => {
@@ -167,11 +179,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const uploadedFiles = await fetchUploadedFiles();
-    console.log(uploadedFiles);
 
     if (uploadedFiles) {
         uploadedFiles.forEach((file) => {
-            console.log(file);
             const fileId = uppy.addFile({
                 name: file.name,
                 data: makeMockBlob(file.size),
@@ -184,4 +194,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             
         });
     }
+
+
 });

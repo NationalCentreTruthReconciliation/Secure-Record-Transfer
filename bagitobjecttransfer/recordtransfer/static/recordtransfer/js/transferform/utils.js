@@ -44,7 +44,9 @@ export const setSessionToken = (token) => {
 };
 
 /**
- * Retrieves file upload settings from context passed from view.
+ * Retrieves file upload settings from context passed from view. Note that this function
+ * should only be called after the DOM has loaded, otherwise the settings element may not exist
+ * yet.
  * @returns {?object} The parsed JSON settings object if element exists, null otherwise.
  */
 export const getSettings = () => {
@@ -92,5 +94,30 @@ export const sendDeleteRequestForFile = async (filename) => {
     if (!response.ok) {
         console.error("Failed to delete file:", response.statusText);
     }
+};
 
+/**
+ * Updates the capacity display elements with the total number of files and total size in bytes.
+ * Highlights the elements if the total size exceeds the maximum allowed upload size.
+ * @param {number} totalNumFiles - The total number of files.
+ * @param {number} totalSizeBytes - The total size of the files in bytes.
+ */
+export const updateCapacityDisplay = (totalNumFiles, totalSizeBytes) => {
+    const totalSizeElement = document.getElementById("total-size");
+    const remainingSizeElement = document.getElementById("remaining-size");
+    const { MAX_TOTAL_UPLOAD_SIZE } = getSettings();
+    const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
+
+    const updateElement = (element, value, isError) => {
+        if (element) {
+            element.innerHTML = value.toFixed(2);
+            element.classList.toggle("field-error", isError);
+        }
+    };
+
+    const totalMiB = totalSizeBytes / (1024 * 1024);
+    const remainingMiB = (maxTotalUploadSizeBytes - totalSizeBytes) / (1024 * 1024);
+
+    updateElement(totalSizeElement, totalMiB, totalSizeBytes > maxTotalUploadSizeBytes);
+    updateElement(remainingSizeElement, Math.max(remainingMiB, 0), remainingMiB < 0);
 };
