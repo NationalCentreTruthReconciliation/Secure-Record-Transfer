@@ -47,6 +47,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     return false;
                 }
+                // Include mapping of file names to file IDs within global metadata so that the
+                // server can associate files with their IDs
                 const fileNameToIdPairs = Object.values(files).reduce((acc, file) => {
                     acc[file.name] = file.id;
                     return acc;
@@ -172,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 meta: { mock: true },
             });
             uppy.setFileState(fileId, {
-                progress: { uploadComplete: true, uploadStarted: true },
+                progress: { uploadComplete: true, uploadStarted: true, percentage: 100 },
                 uploadURL: file.url,
             });
             
