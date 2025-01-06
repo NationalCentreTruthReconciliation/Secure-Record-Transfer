@@ -908,18 +908,6 @@ def upload_files(request: HttpRequest) -> JsonResponse:
         issues = []
         files = request.FILES.getlist("files[]")
         for _file in files:
-
-            if _file.name == "shrek.jpeg":
-                issues.append({
-                        "file": _file.name,
-                        "accepted": False,
-                        "error": gettext("Malware detected in file"),
-                        "verboseError": gettext(
-                            f'Malware was detected in the file "{_file.name}"'
-                        ),
-                })
-                continue
-
             file_check = _accept_file(_file.name, _file.size)
             if not file_check["accepted"]:
                 _file.close()
