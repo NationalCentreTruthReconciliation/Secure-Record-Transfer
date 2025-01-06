@@ -81,7 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             formData: true,
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
-                "Upload-Session-Token": getSessionToken(),
             },
             bundle: true,
             timeout: 180000,
@@ -95,6 +94,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     console.error("Error parsing JSON response:", error);
                     return null;
                 }
+            },
+            onBeforeRequest(xhr) {
+                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
             },
             onAfterResponse: (xhr) => {
                 const issues = xhr.response.issues;
@@ -120,6 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
                     // If session token is not already set, set it
                     if (!getSessionToken()) {
+                        console.log("Setting initial session token after first upload:", sessionToken);
                         setSessionToken(sessionToken);
                     }
                 }
