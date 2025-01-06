@@ -146,6 +146,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     uppy.on("file-removed", (file) => {
+        // If file is only selected but not uploaded yet, don't need to do anything
+        if (!file.progress.uploadComplete) {
+            return;
+        }
         // If file had issues, remove it from the list of files with issues
         if (issueFileIds.includes(file.id)) {
             const index = issueFileIds.indexOf(file.id);
