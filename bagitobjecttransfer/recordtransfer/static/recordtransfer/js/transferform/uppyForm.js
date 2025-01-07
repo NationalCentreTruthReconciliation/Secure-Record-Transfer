@@ -61,37 +61,56 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
     )
-        .use(
-            Dashboard,
-            {
-                inline: true,
-                target: "#uppy-dashboard",
-                hideUploadButton: false,
-                hideRetryButton: true,
-                hideCancelButton: true,
-                singleFileFullScreen: false,
-                disableStatusBar: true,
-                proudlyDisplayPoweredByUppy: false,
-                width: "100%",
-                disableThumbnailGenerator: true,
-                showRemoveButtonAfterComplete: true,
-                doneButtonHandler: null,
-                showLinkToFileUploadResult: true,
-            }
-        )
+        .use(Dashboard, {
+            inline: true,
+            target: "#uppy-dashboard",
+            hideUploadButton: false,
+            hideRetryButton: true,
+            hideCancelButton: true,
+            singleFileFullScreen: false,
+            disableStatusBar: true,
+            proudlyDisplayPoweredByUppy: false,
+            width: "100%",
+            disableThumbnailGenerator: true,
+            showRemoveButtonAfterComplete: true,
+            doneButtonHandler: null,
+            showLinkToFileUploadResult: true,
+        })
         .use(XHR, {
             endpoint: "/transfer/uploadfile/",
             method: "POST",
             formData: true,
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
+            headers: { "X-CSRFToken": getCookie("csrftoken") },
             bundle: true,
             timeout: 180000,
             limit: 2,
             responseType: "json",
             getResponseData: (xhr) => {
                 try {
+                    const uppyFiles = uppy.getFiles();
+                    const { issues } = xhr.response;
+                    
+                    // Reset progress of all files that were not mocked (already uploaded)
+                    // so that another attempt can be made to upload them
+                    uppyFiles.forEach(file => {
+                        if(!file.meta.mock) {
+                            uppy.setFileState(file.id, {
+                                progress: { uploadComplete: false }
+                            });
+                        }
+                    }); 
+
+                    // Display errors and keep track of files that had issues during upload
+                    if (issues) {
+                        issues.forEach(issue => {
+                            const issueFile = uppyFiles.find(file => file.name === issue.file);
+                            uppy.setFileState(issueFile.id, {
+                                error: issue.error || issue.verboseError 
+                            });
+                            uppy.info(issue.verboseError || issue.error, "error", 5000);
+                            issueFileIds.push(issueFile.id);
+                        });
+                    }
                     return xhr.response;
                 } catch (error) {
                     console.error("Error parsing JSON response:", error);
@@ -101,32 +120,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             onBeforeRequest(xhr) {
                 xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
             },
-            onAfterResponse: (xhr) => {
-                const issues = xhr.response.issues;
+            onAfterResponse: (xhr, retryCount) => {
+                const uppyFiles = uppy.getFiles();
+                const {issues, uploadSessionToken} = xhr.response;
+
+                // Remove unuploaded files if server error occurs after 3 retries
+                if (retryCount >=3 && xhr.status >= 500) {
+                    uppy.info("Server error. Please try again later.", "error", 5000);
+                    uppyFiles.forEach(file => !file.meta.mock && uppy.removeFile(file.id));
+                    return;
+                }
                 if (issues) {
-                    const uppyFiles = uppy.getFiles();
-                    xhr.response.issues.forEach((issue) => {
-                        const issueFile = uppyFiles.find((file) => file.name === issue.file);
-                        issueFileIds.push(issueFile.id);
-                        uppy.emit(
-                            "upload-error",
-                            issueFile,
-                            {name: "Upload Error", message: issue.verboseError},
-                            xhr
-                        );
-                    });
+                    return;
                 }
-                else {
-                    const sessionToken = xhr.response.uploadSessionToken;
-                    if (!sessionToken) {
-                        console.error("No session token found in response:", xhr.response);
-                        return;
-                    }
-                    // If session token is not already set, set it
-                    if (!getSessionToken()) {
-                        setSessionToken(sessionToken);
-                    }
+                if (!uploadSessionToken) {
+                    console.error("No session token found in response:", xhr.response);
+                    return;
                 }
+                setSessionToken(uploadSessionToken);
             }
 
         })

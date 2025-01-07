@@ -944,7 +944,7 @@ def upload_files(request: HttpRequest) -> JsonResponse:
 
         if issues:
             return JsonResponse(
-                {"issues": issues}, status=200
+                {"issues": issues}, status=400
             )
         else:
             fileIdToUrl = {}
