@@ -803,8 +803,7 @@ class TransferFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                for file in upload_session.get_existing_file_set():
-                    file.move_to_permanent_storage()
+                submission.upload_session.move_uploads_to_permanent_storage()
             else:
                 LOGGER.info(
                     (

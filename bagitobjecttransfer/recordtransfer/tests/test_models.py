@@ -114,32 +114,6 @@ class TestUploadSession(TestCase):
         session.delete()
 
     @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
-    def test_move_files_in_session(self, uploadedfile_set_mock):
-        mock_path_exists = patch.object(Path, 'exists').start()
-        mock_path_exists.return_value = True
-
-        session = UploadSession.new_session()
-        session.save()
-
-        file_1 = get_mock_uploaded_file('1.pdf')
-        file_2 = get_mock_uploaded_file('2.pdf')
-        file_3 = get_mock_uploaded_file('3.pdf', exists=False)
-
-        uploadedfile_set_mock.all.return_value = [file_1, file_2, file_3]
-
-        copied, missing = session.move_session_uploads('/home/')
-
-        file_1.move.assert_called_once_with(Path('/home/1.pdf'))
-        file_2.move.assert_called_once_with(Path('/home/2.pdf'))
-        file_3.move.assert_not_called()
-        self.assertIn(str(Path('/home/1.pdf')), copied)
-        self.assertIn(str(Path('/home/2.pdf')), copied)
-        self.assertEqual(len(missing), 1)
-
-        session.delete()
-        mock_path_exists.stop()
-
-    @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
     def test_copy_files_in_session(self, uploadedfile_set_mock):
         mock_path_exists = patch.object(Path, 'exists').start()
         mock_path_exists.return_value = True

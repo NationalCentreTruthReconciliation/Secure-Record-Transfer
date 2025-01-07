@@ -80,28 +80,29 @@ class UploadSession(models.Model):
             logger.info(
                 msg=("There are no existing uploaded files in the session {0}".format(self.token))
             )
-        else:
-            logger.info(
-                msg=(
-                    "Removing {0} uploaded files from the session {1}".format(
-                        len(existing_files), self.token
-                    )
-                )
-            )
             for uploaded_file in existing_files:
                 uploaded_file.remove()
 
-    def move_session_uploads(self, destination, logger=None):
-        """Move uploaded files associated with this session to a destination directory.
+    def move_uploads_to_permanent_storage(self, logger: Optional[logging.Logger] = None) -> None:
+        """Move uploaded files from temporary to permanent storage.
 
         Args:
-            destination (str): The destination directory
-            logger: A logger object
-
-        Returns:
-            (tuple): A two tuple containing a list of the copied, and missing files
+            logger: Optional logger instance to use for logging operations
         """
-        return self._copy_session_uploads(destination, delete=True, logger=logger)
+        logger = logger or LOGGER
+        existing_files = self.get_existing_file_set()
+        if not existing_files:
+            logger.info("There are no existing uploaded files in the session %s", self.token)
+        else:
+            logger.info(
+                msg=(
+                    "Moving %d uploaded files from the session %s to permanent storage",
+                    len(existing_files),
+                    self.token,
+                )
+            )
+            for uploaded_file in existing_files:
+                uploaded_file.move_to_permanent_storage()
 
     def copy_session_uploads(self, destination, logger=None):
         """Copy uploaded files associated with this session to a destination directory. Files are
