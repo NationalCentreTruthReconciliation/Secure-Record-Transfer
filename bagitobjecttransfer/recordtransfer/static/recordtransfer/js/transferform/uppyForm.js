@@ -13,12 +13,6 @@ import {
     updateCapacityDisplay,
 } from "./utils";
 
-const updateCapacity = (uppy) => {
-    const uppyFiles = uppy.getFiles();
-    const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
-    updateCapacityDisplay(uppyFiles.length, totalSize);
-};
-
 document.addEventListener("DOMContentLoaded", async () => {
     const settings = getSettings();
     // Don't render Uppy at all if settings are not available
@@ -27,6 +21,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     const nextButton = document.getElementById("form-next-button");
     const transferForm = document.getElementById("transfer-form");
     const issueFileIds = [];
+
+    /**
+     * Updates the display of the file capacity information on the page
+     * @param {import('@uppy/core').Uppy} uppy - The Uppy instance
+     * @returns {void}
+     */
+    const updateCapacity = (uppy) => {
+        const uppyFiles = uppy.getFiles();
+        const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
+        updateCapacityDisplay(uppyFiles.length, totalSize);
+    };
+    
+    /**
+     * Processes and displays error issues for files in Uppy instance
+     * @param {import('@uppy/core').Uppy} uppy - The Uppy instance to handle issues for
+     * @param {Array<{
+     *   file: string,
+     *   error?: string,
+     *   verboseError?: string
+     * }>} issues - Array of issue objects containing file names and error messages
+     * @param {Array<string>} issueFileIds - Array to store IDs of files with issues
+     * @returns {void}
+     */
+    const handleIssues = (uppy, issues, issueFileIds) => {
+        const allFiles = uppy.getFiles();
+        issues.forEach(issue => {
+            const issueFile = allFiles.find(file => file.name === issue.file);
+            uppy.setFileState(issueFile.id, { error: issue.error || issue.verboseError });
+            uppy.info(issue.verboseError || issue.error, "error", 5000);
+            issueFileIds.push(issueFile.id);
+        });
+    };    
 
     const uppy = new Uppy(
         {
@@ -99,18 +125,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                             });
                         }
                     }); 
-
-                    // Display errors and keep track of files that had issues during upload
+                    
                     if (issues) {
-                        issues.forEach(issue => {
-                            const issueFile = uppyFiles.find(file => file.name === issue.file);
-                            uppy.setFileState(issueFile.id, {
-                                error: issue.error || issue.verboseError 
-                            });
-                            uppy.info(issue.verboseError || issue.error, "error", 5000);
-                            issueFileIds.push(issueFile.id);
-                        });
+                        handleIssues(uppy, issues, issueFileIds);
                     }
+
                     return xhr.response;
                 } catch (error) {
                     console.error("Error parsing JSON response:", error);
