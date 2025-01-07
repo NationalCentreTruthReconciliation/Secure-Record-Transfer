@@ -2,7 +2,7 @@
 <div class="flex-full-width-item">
     <table class="full-width-table standard-table" cellspacing="0">
         <tr>
-            <th>{% trans "Submission ID" %}</th>
+            <th class="uuid-column">{% trans "Submission ID" %}</th>
             <th>{% trans "Date Transferred" %}</th>
             <th>{% trans "Transfer Title" %}</th>
             <th>{% trans "Files Transferred" %}</th>
@@ -11,7 +11,7 @@
         </tr>
         {% for submission in submissions_page_obj %}
             <tr>
-                <td>{{ submission.uuid }}</td>
+                <td class="uuid-column">{{ submission.uuid }}</td>
                 <td>{{ submission.submission_date }}</td>
                 <td>{{ submission.metadata.accession_title }}</td>
                 <td>{{ submission.extent_statements }}</td>
