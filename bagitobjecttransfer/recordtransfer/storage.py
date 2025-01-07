@@ -1,10 +1,8 @@
 from django.conf import settings
-from django.core.files.storage import get_storage_class
-
-Storage = get_storage_class()
+from django.core.files.storage import FileSystemStorage
 
 
-class OverwriteStorage(Storage):
+class OverwriteStorage(FileSystemStorage):
     """Overwrites files in storage if they have the same name.
 
     Django's default method of storing files named the same thing is to append a unique suffix to
@@ -19,25 +17,28 @@ class OverwriteStorage(Storage):
     def get_available_name(self, name, max_length=None):
         return name
 
-class UploadedFileStorage(Storage):
+
+class UploadedFileStorage(FileSystemStorage):
     """Stores files in UPLOAD_STORAGE_FOLDER."""
 
     def __init__(self, **kwargs):
-        kwargs['location'] = settings.UPLOAD_STORAGE_FOLDER
+        kwargs["location"] = settings.UPLOAD_STORAGE_FOLDER
         super().__init__(**kwargs)
 
     def url(self, name):
         """Generate the URL based on MEDIA_URL and the relative path."""
-        relative_path = name.replace(settings.UPLOAD_STORAGE_FOLDER, '').lstrip('/')
+        relative_path = name.replace(settings.UPLOAD_STORAGE_FOLDER, "").lstrip("/")
         return f"{settings.MEDIA_URL}uploaded_files/{relative_path}"
-class TempFileStorage(Storage):
+
+
+class TempFileStorage(FileSystemStorage):
     """Stores files in TEMP_STORAGE_FOLDER."""
 
     def __init__(self, **kwargs):
-        kwargs['location'] = settings.TEMP_STORAGE_FOLDER
+        kwargs["location"] = settings.TEMP_STORAGE_FOLDER
         super().__init__(**kwargs)
 
     def url(self, name):
         """Generate the URL based on MEDIA_URL and the relative path."""
-        relative_path = name.replace(settings.TEMP_STORAGE_FOLDER, '').lstrip('/')
+        relative_path = name.replace(settings.TEMP_STORAGE_FOLDER, "").lstrip("/")
         return f"{settings.MEDIA_URL}temp/{relative_path}"

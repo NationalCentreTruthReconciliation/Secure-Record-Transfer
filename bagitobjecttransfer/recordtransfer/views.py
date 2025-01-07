@@ -797,12 +797,14 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Mapping form data to CAAIS metadata")
             submission.metadata = map_form_to_metadata(form_data)
 
-            if settings.FILE_UPLOAD_ENABLED:
-                token = form_data["session_token"]
-                LOGGER.info("Fetching session with the token %s", token)
-                submission.upload_session = UploadSession.objects.filter(
-                    token=token
+            if settings.FILE_UPLOAD_ENABLED and (
+                upload_session := UploadSession.objects.filter(
+                    token=form_data["session_token"]
                 ).first()
+            ):
+                submission.upload_session = upload_session
+                for file in upload_session.get_existing_file_set():
+                    file.move_to_permanent_storage()
             else:
                 LOGGER.info(
                     (
@@ -1231,8 +1233,11 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
     """
     session = UploadSession.objects.filter(token=session_token).first()
     if not session:
+        # Create a new session if one is not found
+        session = UploadSession.new_session()
+        session.save()
         return JsonResponse(
-            {"error": gettext("Upload session not found")},
+            {"error": gettext("Upload session not found"), "uploadSessionToken": session.token},
             status=404
         )
 

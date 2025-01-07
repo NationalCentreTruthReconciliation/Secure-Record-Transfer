@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
-from recordtransfer.storage import OverwriteStorage, TempFileStorage
+from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -173,6 +173,7 @@ class UploadedFile(models.Model):
     file_upload = models.FileField(
         null=True, storage=TempFileStorage, upload_to=session_upload_location
     )
+    temp = models.BooleanField(default=True)
 
     @property
     def exists(self):
@@ -198,9 +199,14 @@ class UploadedFile(models.Model):
         Args:
             new_path: The new path to move this file to
         """
-        if self.file_upload:
-            shutil.move(self.file_upload.path, new_path)
-            self.remove()
+        if not self.file_upload:
+            return
+
+        directory = os.path.dirname(new_path)
+        os.makedirs(directory, exist_ok=True)
+
+        shutil.move(self.file_upload.path, new_path)
+        self.remove()
 
     def remove(self):
         """Delete the real file-system representation of this model."""
@@ -212,6 +218,15 @@ class UploadedFile(models.Model):
         if self.exists:
             return self.file_upload.url
         return None
+
+    def move_to_permanent_storage(self) -> None:
+        """Move the file from TempFileStorage to UploadedFileStorage."""
+        if self.temp and self.file_upload:
+            new_storage = UploadedFileStorage()
+            new_path = new_storage.path(self.file_upload.name)
+            self.move(new_path)
+            self.file_upload.storage = new_storage
+            self.save()
 
     def __str__(self):
         if self.exists:

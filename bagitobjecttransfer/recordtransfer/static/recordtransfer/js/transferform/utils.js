@@ -66,7 +66,6 @@ export const getSettings = () => {
 export const fetchUploadedFiles = async () => {
     const sessionToken = getSessionToken();
     if (!sessionToken) {
-        console.error("Cannot fetch uploaded files without a session token");
         return;
     }
     const response = await fetch(`/transfer/upload-session/${sessionToken}/files/`, {
