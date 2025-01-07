@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
-from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
+from recordtransfer.storage import OverwriteStorage, TempFileStorage
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -171,7 +171,7 @@ class UploadedFile(models.Model):
     name = models.CharField(max_length=256, null=True, default="-")
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=True)
     file_upload = models.FileField(
-        null=True, storage=UploadedFileStorage, upload_to=session_upload_location
+        null=True, storage=TempFileStorage, upload_to=session_upload_location
     )
 
     @property
@@ -218,6 +218,7 @@ class UploadedFile(models.Model):
             return f"{self.name} | Session {self.session}"
         return f"{self.name} Removed! | Session {self.session}"
 
+
 @receiver(post_delete, sender=UploadedFile)
 def delete_file_on_model_delete(sender: UploadedFile, instance: UploadedFile, **kwargs) -> None:
     """Delete the actual file when an UploadedFile model instance is deleted.
@@ -229,6 +230,7 @@ def delete_file_on_model_delete(sender: UploadedFile, instance: UploadedFile, **
     """
     if instance.file_upload:
         instance.file_upload.delete(save=False)
+
 
 class SubmissionGroup(models.Model):
     """Represents a group of submissions.

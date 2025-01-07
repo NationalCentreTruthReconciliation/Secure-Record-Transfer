@@ -107,3 +107,4 @@ LOGGING = {
 
 BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/bags/"))
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/uploaded_files/"))
+TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/temp/"))
