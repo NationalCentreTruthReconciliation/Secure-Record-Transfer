@@ -7,7 +7,6 @@ from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from django.conf import settings
-from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -910,7 +909,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
 
         uploaded_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
         uploaded_file.save()
-        file_url = uploaded_file.get_file_url()
+        file_url = uploaded_file.get_file_access_url()
 
         return JsonResponse(
             {
@@ -1194,16 +1193,16 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
             {
                 "name": uploaded_file.name,
                 "size": uploaded_file.file_upload.size,
-                "url": uploaded_file.get_file_url(),
+                "url": uploaded_file.get_file_access_url(),
             }
         )
 
     return JsonResponse(files, safe=False, status=200)
 
 
-@require_http_methods(["DELETE"])
-def delete_uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> JsonResponse:
-    """Delete a file that has been uploaded in a given upload session.
+@require_http_methods(["DELETE", "GET"])
+def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
+    """Get or delete a file that has been uploaded in a given upload session.
 
     Args:
         request: The HTTP request
@@ -1211,18 +1210,47 @@ def delete_uploaded_file(request: HttpRequest, session_token: str, file_name: st
         filename: The name of the file to delete
 
     Returns:
-        JsonResponse: A JSON response containing the result of the deletion operation
+        HttpResponse:
+            In the case of deletion, returns a 204 response when successfully deleted. In the case
+            of getting a file, redirects to the file's media path in development, or returns an
+            X-Accel-Redirect to the file's media path if in production.
     """
     session = UploadSession.objects.filter(token=session_token).first()
     if not session:
         return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-    uploaded_file = session.uploadedfile_set.filter(name=file_name).first()
+    uploaded_file: UploadedFile = session.uploadedfile_set.filter(name=file_name).first()
     if not uploaded_file:
         return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 
-    uploaded_file.delete()
-    return JsonResponse({"message": gettext("File deleted successfully")}, status=200)
+    if request.method == "DELETE":
+        uploaded_file.delete()
+        # 204: No content (i.e., deletion succeeded, no message needed)
+        return HttpResponse(status=204)
+
+    elif settings.DEBUG:
+        try:
+            return HttpResponseRedirect(uploaded_file.get_file_media_url())
+        except FileNotFoundError:
+            return HttpResponseNotFound()
+
+    else:
+        try:
+            response = HttpResponse(
+                headers={"X-Accel-Redirect": uploaded_file.get_file_media_url()}
+            )
+        except FileNotFoundError:
+            return HttpResponseNotFound()
+
+        # Nginx will assign its own headers for the following:
+        del response["Content-Type"]
+        del response["Content-Disposition"]
+        del response["Accept-Ranges"]
+        del response["Set-Cookie"]
+        del response["Cache-Control"]
+        del response["Expires"]
+
+        return response
 
 
 class DeleteTransfer(TemplateView):

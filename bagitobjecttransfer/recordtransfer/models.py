@@ -214,11 +214,27 @@ class UploadedFile(models.Model):
         if self.file_upload:
             self.file_upload.delete(save=True)
 
-    def get_file_url(self) -> Optional[str]:
-        """Generate the URL to access this file."""
+    def get_file_media_url(self) -> str:
+        """Generate the media URL to this file.
+
+        Raises:
+            FileNotFoundError if the file does not exist.
+        """
         if self.exists:
             return self.file_upload.url
-        return None
+        token = self.session.token if self.session else "NOSESSION"
+        raise FileNotFoundError(f"{self.name} does not exist in session {token}")
+
+    def get_file_access_url(self) -> str:
+        """Generate URL to request access for this file."""
+        token = self.session.token if self.session else "NOSESSION"
+        return reverse(
+            "recordtransfer:uploaded_file",
+            kwargs={
+                "session_token": token,
+                "file_name": self.name,
+            },
+        )
 
     def move_to_permanent_storage(self) -> None:
         """Move the file from TempFileStorage to UploadedFileStorage."""
