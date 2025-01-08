@@ -1,7 +1,6 @@
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHR from "@uppy/xhr-upload";
-import FileValidationPlugin from "./customUppyPlugin";
 import {
     getCookie,
     getSessionToken,
@@ -44,19 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
                 allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,
             },
-            onBeforeUpload: (files) => {
-                const hasIssues = Object.values(files).some(
-                    file => issueFileIds.includes(file.id)
-                );
-                if (hasIssues) {
-                    uppy.info(
-                        "Please remove the files with issues before proceeding.", 
-                        "error",
-                        5000
-                    );
-                    return false;
-                }
-            }
         }
     )
         .use(Dashboard, {
@@ -144,13 +130,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Connect the next button to the Uppy upload
     nextButton.addEventListener("click", async (event) => {
         event.preventDefault();
-        uppy.setOptions({"disabled": true});
-        const result = await uppy.upload();
-        // Allow form to submit if there were no errors in the upload
-        if (result.failed.length === 0) {
-            transferForm.submit();
+
+        // Make sure user cannot proceed to next form step if there are files with issues
+        const uppyFiles = uppy.getFiles();
+        const hasIssues = Object.values(uppyFiles).some(
+            file => issueFileIds.includes(file.id)
+        );
+        if (hasIssues) {
+            uppy.info(
+                "Please remove the files with issues before proceeding.", 
+                "error",
+                5000
+            );
+            return;
         }
-        uppy.setOptions({"disabled": false});
+        transferForm.submit();
     });
 
     const uploadedFiles = await fetchUploadedFiles();
