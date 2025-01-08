@@ -90,7 +90,7 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path("transfer/checkfile/", login_required(views.accept_file), name="checkfile"),
-            path("transfer/uploadfile/", login_required(views.upload_files), name="uploadfile"),
+            path("transfer/uploadfile/", login_required(views.upload_file), name="uploadfile"),
             path("transfer/upload-session/<session_token>/files/", login_required(views.list_uploaded_files), name="list_uploaded_files"),
             path(
                 "transfer/upload-session/<session_token>/files/<file_name>/",

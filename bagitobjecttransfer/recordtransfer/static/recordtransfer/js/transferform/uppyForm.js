@@ -31,32 +31,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
         updateCapacityDisplay(uppyFiles.length, totalSize);
-    };
-    
-    /**
-     * Processes and displays error issues for files in Uppy instance
-     * @param {import('@uppy/core').Uppy} uppy - The Uppy instance to handle issues for
-     * @param {Array<{
-     *   file: string,
-     *   error?: string,
-     *   verboseError?: string
-     * }>} issues - Array of issue objects containing file names and error messages
-     * @param {Array<string>} issueFileIds - Array to store IDs of files with issues
-     * @returns {void}
-     */
-    const handleIssues = (uppy, issues, issueFileIds) => {
-        const allFiles = uppy.getFiles();
-        issues.forEach(issue => {
-            const issueFile = allFiles.find(file => file.name === issue.file);
-            uppy.setFileState(issueFile.id, { error: issue.error || issue.verboseError });
-            uppy.info(issue.verboseError || issue.error, "error", 5000);
-            issueFileIds.push(issueFile.id);
-        });
-    };    
+    };   
 
     const uppy = new Uppy(
         {
-            autoProceed: false,
+            autoProceed: true,
             restrictions: {
                 maxFileSize: settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024,
                 minFileSize: 0,
@@ -77,13 +56,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                     return false;
                 }
-                // Include mapping of file names to file IDs within global metadata so that the
-                // server can associate files with their IDs
-                const fileNameToIdPairs = Object.values(files).reduce((acc, file) => {
-                    acc[file.name] = file.id;
-                    return acc;
-                }, {});
-                uppy.setMeta(fileNameToIdPairs);
             }
         }
     )
@@ -107,29 +79,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             method: "POST",
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
-            bundle: true,
+            bundle: false,
             timeout: 180000,
             limit: 2,
             responseType: "json",
             getResponseData: (xhr) => {
                 try {
-                    const uppyFiles = uppy.getFiles();
-                    const { issues } = xhr.response;
-                    
-                    // Reset progress of all files that were not mocked (already uploaded)
-                    // so that another attempt can be made to upload them
-                    uppyFiles.forEach(file => {
-                        if(!file.meta.mock) {
-                            uppy.setFileState(file.id, {
-                                progress: { uploadComplete: false }
-                            });
-                        }
-                    }); 
-                    
-                    if (issues) {
-                        handleIssues(uppy, issues, issueFileIds);
-                    }
-
                     return xhr.response;
                 } catch (error) {
                     console.error("Error parsing JSON response:", error);
@@ -139,40 +94,37 @@ document.addEventListener("DOMContentLoaded", async () => {
             onBeforeRequest(xhr) {
                 xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
             },
-            onAfterResponse: (xhr, retryCount) => {
-                const uppyFiles = uppy.getFiles();
-                const {issues, uploadSessionToken} = xhr.response;
+            onAfterResponse: (xhr) => {
+                const {error, uploadSessionToken} = xhr.response;
 
-                // Remove unuploaded files if server error occurs after 3 retries
-                if (retryCount >=3 && xhr.status >= 500) {
-                    uppy.info("Server error. Please try again later.", "error", 5000);
-                    uppyFiles.forEach(file => !file.meta.mock && uppy.removeFile(file.id));
-                    return;
-                }
-                if (issues) {
-                    return;
+                if (error) {
+                    throw new Error(error);
                 }
                 if (!uploadSessionToken) {
                     console.error("No session token found in response:", xhr.response);
                     return;
                 }
                 setSessionToken(uploadSessionToken);
+            },
+            // Attempt to retry uploads for server errors, timeouts, and rate limiting
+            // Default number of retries is 3, which cannot be changed
+            shouldRetry: (response) => {
+                const status = response.status;
+                return (
+                    status >= 500 && status < 600 || 
+                    status === 408 || 
+                    status === 429
+                );
             }
 
-        })
-        .use(FileValidationPlugin);
-
-    uppy.on("upload-success", (file, { body }) => {
-        // If all uploads were successful, the server should return a mapping of file IDs to
-        // URLs for the files
-        const fileUrl = body.fileIdToUrl?.[file.id];
-        if (!body.issues && fileUrl) {
-            uppy.setFileState(file.id, { uploadURL: fileUrl });
-        }
-    });
+        });
 
     uppy.on("files-added" , () => {
         updateCapacity(uppy);
+    });
+
+    uppy.on("upload-error", (file) => {
+        issueFileIds.push(file.id);
     });
 
     uppy.on("file-removed", (file) => {
@@ -181,14 +133,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!file.progress.uploadComplete) {
             return;
         }
-        // If file had issues, remove it from the list of files with issues
+        // Remove file from the list of files with issues if it is included
         if (issueFileIds.includes(file.id)) {
             const index = issueFileIds.indexOf(file.id);
             issueFileIds.splice(index, 1);
         }
-        else {
-            sendDeleteRequestForFile(file.name);
-        }
+        sendDeleteRequestForFile(file.name);
     });
 
     // Connect the next button to the Uppy upload
