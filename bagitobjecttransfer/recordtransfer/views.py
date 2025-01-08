@@ -46,6 +46,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
+    GO_TO_STEP_ACTION,
     GROUPS_PAGE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
@@ -64,6 +65,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_SELECTION,
     IN_PROGRESS_PAGE,
     INFOMESSAGE,
+    SAVE_FORM_ACTION,
     SUBMISSIONS_PAGE,
     TEMPLATEREF,
 )
@@ -448,7 +450,7 @@ class TransferFormWizard(SessionWizardView):
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a transfer."""
         # User is not saving the form, so continue with the normal form submission
-        if not request.POST.get("save_form_step", None):
+        if not request.POST.get(SAVE_FORM_ACTION, None):
             return super().post(request, *args, **kwargs)
 
         past_data = self.storage.data
@@ -471,11 +473,16 @@ class TransferFormWizard(SessionWizardView):
             "title": title,
         }
 
+        wizard_goto_step = request.POST.get("wizard_goto_step")
         try:
             self.save_transfer(data)
+            if wizard_goto_step and wizard_goto_step in self.get_form_list():
+                return self.render_goto_step(wizard_goto_step)
             messages.success(request, gettext("Transfer saved successfully."))
         except Exception:
             messages.error(request, gettext("There was an error saving the transfer."))
+            return self.render(self.get_form())
+
         return redirect("recordtransfer:userprofile")
 
     def load_transfer_data(self, transfer: InProgressSubmission) -> None:
@@ -545,8 +552,8 @@ class TransferFormWizard(SessionWizardView):
             user: The user who is saving the transfer.
             data: The form data containing the submission data to save.
             `data` is a dictionary containing the following:
-                - save_form_step: The current step of the form.
-                - step_data: The past and current data of the form.
+                - save_form_step: The current TransferStep of the form.
+                - form_data: The past and current data of the form.
                 - submission (optional): The in-progress submission model object to update.
                 - title: The accession title of the submission.
 
@@ -653,7 +660,12 @@ class TransferFormWizard(SessionWizardView):
         """
         context = super().get_context_data(form, **kwargs)
 
-        context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
+        context.update({
+            "form_title": self._TEMPLATES[self.current_step][FORMTITLE],
+            # Action names to include in form submissions of POST requests
+            "SAVE_FORM_ACTION": SAVE_FORM_ACTION,
+            "GO_TO_STEP_ACTION": GO_TO_STEP_ACTION,
+        })
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
             context.update(

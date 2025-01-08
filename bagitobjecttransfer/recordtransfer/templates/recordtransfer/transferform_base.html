@@ -9,9 +9,15 @@
 {% block javascript %}
     {{ block.super }}
     <script src="{% static 'transferform.bundle.js' %}"></script>
-    <script>currentFormStep = {{ wizard.steps.step1 }}</script>
+    <script>
+        const currentFormStep = {{ wizard.steps.step1 }}
+        const previousFormStep = "{{ wizard.steps.prev|escapejs }}"
+        const SAVE_FORM_ACTION = "{{ SAVE_FORM_ACTION }}"
+        const GO_TO_STEP_ACTION = "{{ GO_TO_STEP_ACTION }}"
+    </script>
 {% endblock javascript %}
 {% block content %}
+    {% include "includes/messages.html" %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
             {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
