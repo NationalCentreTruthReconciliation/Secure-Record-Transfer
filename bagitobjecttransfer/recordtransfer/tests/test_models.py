@@ -161,6 +161,23 @@ class TestUploadSession(TestCase):
         session.delete()
         mock_path_exists.stop()
 
+    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
+    def test_move_file_to_permanent_storage(self, uploadedfile_set_mock: BaseManager) -> None:
+        session = UploadSession.new_session()
+        session.save()
+
+        file_1 = get_mock_uploaded_file("1.pdf")
+        file_2 = get_mock_uploaded_file("2.pdf")
+        file_3 = get_mock_uploaded_file("3.pdf", exists=False)
+
+        uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
+
+        session.move_uploads_to_permanent_storage()
+
+        file_1.move_to_permanent_storage.assert_called_once()
+        file_2.move_to_permanent_storage.assert_called_once()
+        file_3.move_to_permanent_storage.assert_not_called()
+
     @classmethod
     def tearDownClass(cls) -> None:
         """Restore logging settings."""

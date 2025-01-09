@@ -242,6 +242,7 @@ class UploadedFile(models.Model):
             new_path = new_storage.path(self.file_upload.name)
             self.move(new_path)
             self.file_upload.storage = new_storage
+            self.temp = False
             self.save()
 
     def __str__(self):
