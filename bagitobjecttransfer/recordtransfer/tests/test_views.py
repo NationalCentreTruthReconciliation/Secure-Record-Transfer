@@ -115,9 +115,9 @@ class TestUploadFileView(TestCase):
         response_json = response.json()
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response_json["issues"]), 1)
-        self.assertEqual(response_json["issues"][0]["error"], "ISSUE")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json.get("error"), "ISSUE")
+        self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
         session.uploadedfile_set.all().delete()
@@ -134,9 +134,9 @@ class TestUploadFileView(TestCase):
         response_json = response.json()
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response_json["issues"]), 1)
-        self.assertEqual(response_json["issues"][0]["error"], "ISSUE")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json.get("error"), "ISSUE")
+        self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
         session.uploadedfile_set.all().delete()

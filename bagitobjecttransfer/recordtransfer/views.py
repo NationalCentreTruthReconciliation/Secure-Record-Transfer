@@ -110,7 +110,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
         return HttpResponseForbidden("You do not have permission to access this resource.")
 
     response = HttpResponse(
-        headers={"X-Accel-Redirect": djangosettings.MEDIA_URL + path.lstrip("/")}
+        headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")}
     )
 
     # Nginx will assign its own headers for the following:
@@ -841,23 +841,13 @@ def upload_file(request: HttpRequest) -> JsonResponse:
         JsonResponse: If the upload was successful, the session token is returned in
         'upload_session_token'. If not successful, the error description is returned in 'error'.
     """
-    if not request.FILES:
-        return JsonResponse(
-            {
-                "error": gettext("No file was uploaded"),
-            },
-            status=400,
-        )
-
     try:
-        session = None
         headers = request.headers
-        if headers.get("Upload-Session-Token"):
-            session = UploadSession.objects.filter(token=headers["Upload-Session-Token"]).first()
-            if session is None:
-                session = UploadSession.new_session()
-                session.save()
-        else:
+        session_token = headers.get("Upload-Session-Token")
+        session = (
+            UploadSession.objects.filter(token=session_token).first() if session_token else None
+        )
+        if not session:
             session = UploadSession.new_session()
             session.save()
 
@@ -865,6 +855,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
         if not _file:
             return JsonResponse(
                 {
+                    "uploadSessionToken": session.token,
                     "error": gettext("No file was uploaded"),
                 },
                 status=400,
@@ -873,14 +864,14 @@ def upload_file(request: HttpRequest) -> JsonResponse:
         file_check = _accept_file(_file.name, _file.size)
         if not file_check["accepted"]:
             return JsonResponse(
-                {"file": _file.name, **file_check},
+                {"file": _file.name, "uploadSessionToken": session.token, **file_check},
                 status=400,
             )
 
         session_check = _accept_session(_file.name, _file.size, session)
         if not session_check["accepted"]:
             return JsonResponse(
-                {"file": _file.name, **session_check},
+                {"file": _file.name, "uploadSessionToken": session.token, **session_check},
                 status=400,
             )
 

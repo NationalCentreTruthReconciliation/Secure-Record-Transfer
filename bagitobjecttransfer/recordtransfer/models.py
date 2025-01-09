@@ -76,12 +76,11 @@ class UploadSession(models.Model):
         """
         logger = logger or LOGGER
         existing_files = self.get_existing_file_set()
-        if not existing_files:
-            logger.info(
-                msg=("There are no existing uploaded files in the session {0}".format(self.token))
-            )
+        if existing_files:
             for uploaded_file in existing_files:
                 uploaded_file.remove()
+        else:
+            logger.info(msg=("There are no existing uploaded files in the session %s", self.token))
 
     def move_uploads_to_permanent_storage(self, logger: Optional[logging.Logger] = None) -> None:
         """Move uploaded files from temporary to permanent storage.
