@@ -84,14 +84,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             onAfterResponse: (xhr) => {
                 const {error, uploadSessionToken} = xhr.response;
 
+                // We expect the upload session token to be included unless the server had an error
+                if (xhr.status < 500 && uploadSessionToken) {
+                    setSessionToken(uploadSessionToken);
+                } else {
+                    console.error("No session token found in response:", xhr.response);
+                }
+
                 if (error) {
                     throw new Error(error);
                 }
-                if (!uploadSessionToken) {
-                    console.error("No session token found in response:", xhr.response);
-                    return;
-                }
-                setSessionToken(uploadSessionToken);
             },
             // Attempt to retry uploads for server errors, timeouts, and rate limiting
             // Default number of retries is 3, which cannot be changed

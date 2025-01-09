@@ -892,6 +892,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
                 {
                     "file": _file.name,
                     "accepted": False,
+                    "uploadSessionToken": session.token,
                     "error": gettext(f'Malware was detected in the file "{_file.name}"'),
                 },
                 status=400,
