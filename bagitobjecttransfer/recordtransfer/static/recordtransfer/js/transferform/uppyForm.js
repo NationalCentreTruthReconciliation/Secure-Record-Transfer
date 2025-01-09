@@ -151,6 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         transferForm.submit();
     });
 
+    // Add mock files to represent files that have already been uploaded to the upload session
     const uploadedFiles = await fetchUploadedFiles();
 
     if (uploadedFiles) {

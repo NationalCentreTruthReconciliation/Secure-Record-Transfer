@@ -60,22 +60,44 @@ export const getSettings = () => {
 /**
  * Fetches the list of uploaded files for the current upload session.
  * This function sends a GET request to the server to retrieve the list of uploaded files.
+ * Uses exponential backoff to retry a total of 3 times if getting a 500 or more status.
  * @returns {Promise<object|null>} - A promise that resolves to the JSON response containing the
  * list of uploaded files, or null if the request fails or the session token is not available.
  */
 export const fetchUploadedFiles = async () => {
     const sessionToken = getSessionToken();
     if (!sessionToken) {
-        return;
-    }
-    const response = await fetch(`/transfer/upload-session/${sessionToken}/files/`, {
-        method: "GET",
-    });
-    if (!response.ok) {
-        console.error("Failed to fetch uploaded files:", response.statusText);
         return null;
     }
-    return response.json();
+
+    const maxRetries = 3;
+    let attempt = 0;
+    let response;
+
+    while (attempt < maxRetries) {
+        response = await fetch(`/transfer/upload-session/${sessionToken}/files/`, {
+            method: "GET",
+        });
+
+        if (response.ok) {
+            const responseJson = await response.json();
+            if (!responseJson?.files) {
+                console.error("Response is missing files");
+                return null;
+            }
+            return responseJson.files;
+        } else if (response.status >= 500) {
+            attempt++;
+            const delay = Math.pow(2, attempt) * 100; // Exponential backoff
+            await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+            console.error("Failed to fetch uploaded files:", response.statusText);
+            return null;
+        }
+    }
+
+    console.error("Failed to fetch uploaded files after multiple attempts");
+    return null;
 };
 
 /**
