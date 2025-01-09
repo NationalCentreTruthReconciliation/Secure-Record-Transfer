@@ -870,16 +870,6 @@ def upload_file(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        if _file.name == "shrek.jpeg":
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": False,
-                    "error": gettext('Shrek is not allowed.').format(_file.name),
-                },
-                status=400,
-            )
-
         file_check = _accept_file(_file.name, _file.size)
         if not file_check["accepted"]:
             return JsonResponse(

@@ -1,57 +1,39 @@
-import { BasePlugin } from '@uppy/core';
-import { getCookie, getSessionToken } from './utils';
+import { BasePlugin } from "@uppy/core";
 
 class FileValidationPlugin extends BasePlugin {
     constructor(uppy, opts) {
         super(uppy, opts);
-        this.type = 'uploader';
-        this.id = this.opts.id || 'FileValidationPlugin';
-        this.title = 'File Validation Plugin';
+        this.type = "uploader";
+        this.id = this.opts.id || "FileValidationPlugin";
+        this.title = "File Validation Plugin";
     }
 
     install() {
-        this.uppy.on('file-added', (file) => {
-            this.validateFile([file.id]);
-        })
-    }
-
-    validateFile = (fileID) => {
-        const file = this.uppy.getFile(fileID);
-        return new Promise((resolve, reject) => {
-            // This is used to skip validation for mock files which represent already uploaded files
-            if (file.meta?.mock) {
-                resolve();
-                return;
-            }
-            fetch('/transfer/checkfile/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Upload-Session-Token': getSessionToken()
-                },
-                body: new URLSearchParams({
-                    filename: file.name,
-                    filesize: file.size
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.accepted) {
-                    this.uppy.removeFile(fileID);
-                    this.uppy.info(data.verboseError || data.error, 'error', 5000);
-                    reject(new Error(data.error));
-                } else {
-                    resolve();
-                }
-            })
-            .catch(error => {
-                this.uppy.removeFile(fileID);
-                this.uppy.info('File was not accepted', 'error', 5000);
-                reject(new Error('File was not accepted'));
-            });
+        this.uppy.on("file-added", (file) => {
+            this.validateFile(file);
         });
     }
+
+    // This deals with the case where the user tries to upload a file with the same name as an
+    // existing mock file, which wouldn't be caught due to the difference in file ids
+    validateFile = (file) => {
+        // Skip validation for mock files which represent already uploaded files
+        if (file.meta?.mock) {
+            return;
+        }
+        // Check if file name is duplicate
+        const uppyFiles = this.uppy.getFiles();
+        const hasDuplicate = uppyFiles.some(
+            existingFile => existingFile.name === file.name && existingFile.id !== file.id
+        );
+        if (hasDuplicate) {
+            this.uppy.info(`Cannot add the duplicate file '${file.name}', it already exists`,
+                5000
+            );
+            this.uppy.removeFile(file.id);
+            return;
+        }
+    };
 }
 
 export default FileValidationPlugin;
