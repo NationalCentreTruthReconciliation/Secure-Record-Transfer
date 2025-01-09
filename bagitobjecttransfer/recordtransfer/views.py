@@ -109,9 +109,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
     if not user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this resource.")
 
-    response = HttpResponse(
-        headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")}
-    )
+    response = HttpResponse(headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")})
 
     # Nginx will assign its own headers for the following:
     del response["Content-Type"]
@@ -1179,7 +1177,9 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
             }
         )
 
-    return JsonResponse(files, safe=False, status=200)
+    response_data = {"uploadSessionToken": session.token, "files": files}
+
+    return JsonResponse(response_data, safe=False, status=200)
 
 
 @require_http_methods(["DELETE", "GET"])

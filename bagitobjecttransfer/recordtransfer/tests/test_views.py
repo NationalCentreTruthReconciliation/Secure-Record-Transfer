@@ -94,7 +94,7 @@ class TestUploadFileView(TestCase):
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
-            headers={"upload-session-token": session.token}
+            headers={"upload-session-token": session.token},
         )
 
         self.assertEqual(response.status_code, 200)
@@ -173,7 +173,6 @@ class TestUploadFileView(TestCase):
 
         session.uploadedfile_set.all().delete()
         session.delete()
-
 
     @skipIf(True, "File content scanning is not implemented yet")
     def test_content_issue_flagged(self):
@@ -483,7 +482,7 @@ class TestAcceptFileView(TestCase):
                             "filename": "My File.pdf",
                             "filesize": size,
                         },
-                        headers={"upload-session-token": "test_session_1"}
+                        headers={"upload-session-token": "test_session_1"},
                     )
                     self.assertEqual(response.status_code, 200)
                     response_json = response.json()
@@ -513,7 +512,7 @@ class TestAcceptFileView(TestCase):
                     "filename": "My File.pdf",
                     "filesize": "1024",
                 },
-                headers={"upload-session-token": "test_session_1"}
+                headers={"upload-session-token": "test_session_1"},
             )
 
             self.assertEqual(response.status_code, 200)
@@ -548,7 +547,7 @@ class TestAcceptFileView(TestCase):
                     "filename": "My File.pdf",
                     "filesize": len(self.one_mib),
                 },
-                headers={"upload-session-token": "test_session_1"}
+                headers={"upload-session-token": "test_session_1"},
             )
 
             self.assertEqual(response.status_code, 200)
@@ -581,7 +580,7 @@ class TestAcceptFileView(TestCase):
                             "filename": name,
                             "filesize": "1024",
                         },
-                        headers={"upload-session-token": "test_session_1"}
+                        headers={"upload-session-token": "test_session_1"},
                     )
 
                     self.assertEqual(response.status_code, 200)
@@ -600,6 +599,63 @@ class TestAcceptFileView(TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
         logging.disable(logging.NOTSET)
+        UploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
+
+
+class TestListUploadedFilesView(TestCase):
+    """Tests for recordtransfer:list_uploaded_files view."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.one_kib = bytearray([1] * 1024)
+        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
+
+    def setUp(self):
+        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session()
+        self.session.save()
+        self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
+
+    def test_list_uploaded_files_session_not_found(self):
+        response = self.client.get(
+            reverse("recordtransfer:list_uploaded_files", args=["invalid_token"])
+        )
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertIn("uploadSessionToken", response_json)
+
+    def test_list_uploaded_files_empty_session(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertEqual(response_json.get("files"), [])
+        self.assertIn("uploadSessionToken", response_json)
+
+    def test_list_uploaded_files_with_files(self):
+        uploaded_file = UploadedFile(
+            session=self.session,
+            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
+            name="testfile.txt",
+        )
+        uploaded_file.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertIn("uploadSessionToken", response_json)
+        responseFiles = response_json.get("files")
+        self.assertEqual(len(responseFiles), 1)
+        self.assertEqual(responseFiles[0]["name"], "testfile.txt")
+        self.assertEqual(responseFiles[0]["size"], uploaded_file.file_upload.size)
+        self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
+
+    def tearDown(self):
         UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
