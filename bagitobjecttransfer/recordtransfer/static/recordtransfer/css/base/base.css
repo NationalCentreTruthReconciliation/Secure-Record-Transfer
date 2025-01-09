@@ -74,19 +74,40 @@ body {
     margin-right: 30px;
 }
 
-.hero-button {
+.hero-button,
+.homepage-button {
+    font-family: "Merriweather", serif;
     display: inline-block;
-    font-size: 1.2em;
-    font-weight: bold;
-    border: 2px solid #ffffff;
     border-radius: 3px;
-    padding: 12px 12px 12px 12px;
     margin-bottom: 20px;
 }
 
-.hero-button a {
-    text-decoration: none;
+.hero-button a,
+.homepage-button a {
     color: white;
+    text-decoration: none;
+}
+
+.hero-button {
+    padding: 12px;
+    border: 2px solid #ffffff;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.homepage-button {
+    margin-bottom: 0;
+    padding: 10px;
+    border: 2px solid #89140a;
+    background-color: #89140a;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.homepage-header {
+    font-family: "Merriweather", serif;
+    margin-top: 40px;
+    color: #89140a;
 }
 
 .red-button,
@@ -289,12 +310,26 @@ body {
         margin-right: auto;
     }
 
+    .main-graphic-text-container {
+        width: 80%;
+    }
+
     #main-graphic-container {
         height: 70vh;
     }
 
     .main-graphic-text {
         width: 100%;
+    }
+}
+
+@media (max-width: 799px) {
+    .main-graphic-text {
+        font-size: 2em;
+    }
+
+    .hero-button {
+        font-size: 1em;
     }
 }
 

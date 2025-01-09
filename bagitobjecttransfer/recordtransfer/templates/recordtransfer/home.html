@@ -29,30 +29,36 @@
 {% endblock %}
 
 {% block content %}
-{% url 'recordtransfer:about' as about_page %}
+<h1 class="homepage-header">Now Accepting Donations</h1>
 <p>
     {% blocktrans %}
-        Welcome to the National Centre for Truth and Reconciliation's digital record transfer app.
-        View our <a href="{{ about_page }}">About page</a> for information about this website.
+    This transfer portal is the preferred method of submitting small-scale digital donations to the
+    NCTR. Contact us if you intend to make a large donation of records or if you would like to send
+    physical records.
     {% endblocktrans %}
 </p>
-{% if user.is_authenticated %}
-    {% url 'recordtransfer:transfer' as pre_transfer_page %}
-    <p>
-        {% blocktrans %}
-            Welcome back! To start a new transfer, <a href="{{ pre_transfer_page }}">click here</a>.
-        {% endblocktrans %}
-    </p>
-{% else %}
-    {% url 'login' as login %}
-    {% url 'recordtransfer:createaccount' as create_account_page %}
-    <p>
-        {% blocktrans %}
-            Please <a href="{{ login }}">log in</a> to start transferring records to the NCTR.
-            If you or someone you know would like to send digital files to the NCTR,
-            <a href="{{ create_account_page }}">Sign up</a> for an account to start transferring
-            records.
-        {% endblocktrans %}
-    </p>
-{% endif %}
+<div class="homepage-button">
+    <a href="https://nctr.ca/contact/">
+        {% trans "Contact Us" %}
+    </a>
+</div>
+
+
+<h1 class="homepage-header">Standards-Based</h1>
+<p>
+    {% blocktrans %}
+    Data is captured in a standardized format. We follow CAAIS (Canadian Archival Accession
+    Information Standard) for gathering data.
+    {% endblocktrans %}
+</p>
+
+<h1 class="homepage-header">Open Source</h1>
+<p>
+    {% blocktrans %}
+    This project has been made open source by the NCTR. If your organization would like to learn
+    how to leverage this project, connect with us on <a href="https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer">
+    GitHub</a>.
+    {% endblocktrans %}
+</p>
+
 {% endblock %}
