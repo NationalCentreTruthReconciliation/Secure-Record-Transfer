@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -50,6 +51,7 @@ class TestUploadFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.patch__accept_file = patch("recordtransfer.views._accept_file").start()
         self.patch__accept_session = patch("recordtransfer.views._accept_session").start()
+        self.patch_check_for_malware = patch("recordtransfer.views.check_for_malware").start()
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
 
@@ -113,6 +115,10 @@ class TestUploadFileView(TestCase):
         )
 
         response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
 
         self.assertEqual(response.status_code, 400)
@@ -132,6 +138,10 @@ class TestUploadFileView(TestCase):
         )
 
         response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
 
         self.assertEqual(response.status_code, 400)
@@ -141,6 +151,29 @@ class TestUploadFileView(TestCase):
 
         session.uploadedfile_set.all().delete()
         session.delete()
+
+    def test_malware_flagged(self):
+        self.patch_check_for_malware.side_effect = ValidationError("Malware found")
+        response = self.client.post(
+            reverse("recordtransfer:uploadfile"),
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+        )
+
+        response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
+        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
+        self.assertEqual(response_json.get("accepted"), False)
+        self.assertEqual(len(session.uploadedfile_set.all()), 0)
+
+        session.uploadedfile_set.all().delete()
+        session.delete()
+
 
     @skipIf(True, "File content scanning is not implemented yet")
     def test_content_issue_flagged(self):
