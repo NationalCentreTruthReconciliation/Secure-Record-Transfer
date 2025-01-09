@@ -1,23 +1,29 @@
-#pylint: disable=too-many-public-methods
-from unittest.mock import MagicMock, PropertyMock, patch
-from pathlib import Path
+# pylint: disable=too-many-public-methods
 import logging
+from pathlib import Path
+from typing import Optional
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from django.db.models.manager import BaseManager
 from django.test import TestCase
 
-from recordtransfer.models import UploadSession, UploadedFile
+from recordtransfer.models import UploadedFile, UploadSession
 
 
-def get_mock_uploaded_file(name, exists=True, session=None, upload_to='/media/',
-                           size=1024):
-    ''' Create a new MagicMock that implements all the correct properties
-    required for an UploadedFile
-    '''
+def get_mock_uploaded_file(
+    name: str,
+    exists: bool = True,
+    session: Optional[UploadSession] = None,
+    upload_to: str = "/media/",
+    size: int = 1024,
+) -> MagicMock:
+    """Create a new MagicMock that implements all the correct properties
+    required for an UploadedFile.
+    """
     if not exists:
         size = 0
     file_mock = MagicMock(spec=UploadedFile)
-    path = upload_to.rstrip('/') + '/' + name
+    path = upload_to.rstrip("/") + "/" + name
     type(file_mock).exists = PropertyMock(return_value=exists)
     type(file_mock).name = PropertyMock(return_value=name)
     type(file_mock).session = PropertyMock(return_value=session)
@@ -28,15 +34,16 @@ def get_mock_uploaded_file(name, exists=True, session=None, upload_to='/media/',
 
 
 class TestUploadSession(TestCase):
-    ''' Tests for the UploadSession model
-    '''
+    """Tests for the UploadSession model."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
+        """Set up test class."""
         super().setUpClass()
         logging.disable(logging.CRITICAL)
 
-    def test_empty_session(self):
+    def test_empty_session(self) -> None:
+        """Test that a new session has no files."""
         session = UploadSession.new_session()
         session.save()
 
@@ -45,65 +52,79 @@ class TestUploadSession(TestCase):
 
         session.delete()
 
-    @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
-    def test_one_file_in_session(self, uploadedfile_set_mock):
+    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
+    def test_one_file_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
+        """Test that a session with one file returns correct file count and size."""
         session = UploadSession.new_session()
         session.save()
 
-        uploadedfile_set_mock.all.return_value = [
-            get_mock_uploaded_file('1.pdf', size=1000),
-        ]
+        uploadedfile_set_mock.all = MagicMock(
+            return_value=[
+                get_mock_uploaded_file("1.pdf", size=1000),
+            ]
+        )
 
         self.assertEqual(len(session.get_existing_file_set()), 1)
         self.assertEqual(session.upload_size, 1000)
 
         session.delete()
 
-    @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
-    def test_multiple_files_in_session(self, uploadedfile_set_mock):
+    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
+    def test_multiple_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
+        """Test that a session with multiple files returns correct file count and size."""
         session = UploadSession.new_session()
         session.save()
 
-        uploadedfile_set_mock.all.return_value = [
-            get_mock_uploaded_file('1.pdf', size=1000),
-            get_mock_uploaded_file('2.pdf', size=1000),
-            get_mock_uploaded_file('3.pdf', size=1000),
-            get_mock_uploaded_file('4.pdf', size=1000),
-            get_mock_uploaded_file('5.pdf', size=1000),
-        ]
+        uploadedfile_set_mock.all = MagicMock(
+            return_value=[
+                get_mock_uploaded_file("1.pdf", size=1000),
+                get_mock_uploaded_file("2.pdf", size=1000),
+                get_mock_uploaded_file("3.pdf", size=1000),
+                get_mock_uploaded_file("4.pdf", size=1000),
+                get_mock_uploaded_file("5.pdf", size=1000),
+            ]
+        )
 
         self.assertEqual(len(session.get_existing_file_set()), 5)
         self.assertEqual(session.upload_size, 5000)
 
         session.delete()
 
-    @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
-    def test_some_files_do_not_exist_in_session(self, uploadedfile_set_mock):
+    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
+    def test_some_files_do_not_exist_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
+        """Test that a session with some files that do not exist returns correct file count and
+        size.
+        """
         session = UploadSession.new_session()
         session.save()
 
-        uploadedfile_set_mock.all.return_value = [
-            get_mock_uploaded_file('1.pdf', size=1000),
-            get_mock_uploaded_file('2.pdf', size=1000),
-            get_mock_uploaded_file('3.pdf', exists=False),
-            get_mock_uploaded_file('4.pdf', exists=False),
-        ]
+        uploadedfile_set_mock.all = MagicMock(
+            return_value=[
+                get_mock_uploaded_file("1.pdf", size=1000),
+                get_mock_uploaded_file("2.pdf", size=1000),
+                get_mock_uploaded_file("3.pdf", exists=False),
+                get_mock_uploaded_file("4.pdf", exists=False),
+            ]
+        )
 
         self.assertEqual(len(session.get_existing_file_set()), 2)
         self.assertEqual(session.upload_size, 2000)
 
         session.delete()
 
-    @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
-    def test_delete_files_in_session(self, uploadedfile_set_mock):
+    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
+    def test_delete_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
+        """Test that a session with files that exist are removed when delete is called
+        on the session.
+        """
         session = UploadSession.new_session()
         session.save()
 
-        file_1 = get_mock_uploaded_file('1.pdf')
-        file_2 = get_mock_uploaded_file('2.pdf')
-        file_3 = get_mock_uploaded_file('3.pdf', exists=False)
+        file_1 = get_mock_uploaded_file("1.pdf")
+        file_2 = get_mock_uploaded_file("2.pdf")
+        file_3 = get_mock_uploaded_file("3.pdf", exists=False)
 
-        uploadedfile_set_mock.all.return_value = [file_1, file_2, file_3]
+        uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
         session.remove_session_uploads()
 
@@ -113,33 +134,35 @@ class TestUploadSession(TestCase):
 
         session.delete()
 
-    @patch('recordtransfer.models.UploadSession.uploadedfile_set', spec=BaseManager)
-    def test_copy_files_in_session(self, uploadedfile_set_mock):
-        mock_path_exists = patch.object(Path, 'exists').start()
+    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
+    def test_copy_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
+        """Test that a session with files that exist are copied when copy is called."""
+        mock_path_exists = patch.object(Path, "exists").start()
         mock_path_exists.return_value = True
 
         session = UploadSession.new_session()
         session.save()
 
-        file_1 = get_mock_uploaded_file('1.pdf')
-        file_2 = get_mock_uploaded_file('2.pdf')
-        file_3 = get_mock_uploaded_file('3.pdf', exists=False)
+        file_1 = get_mock_uploaded_file("1.pdf")
+        file_2 = get_mock_uploaded_file("2.pdf")
+        file_3 = get_mock_uploaded_file("3.pdf", exists=False)
 
-        uploadedfile_set_mock.all.return_value = [file_1, file_2, file_3]
+        uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
-        copied, missing = session.copy_session_uploads('/home/')
+        copied, missing = session.copy_session_uploads("/home/")
 
-        file_1.copy.assert_called_once_with(Path('/home/1.pdf'))
-        file_2.copy.assert_called_once_with(Path('/home/2.pdf'))
+        file_1.copy.assert_called_once_with(Path("/home/1.pdf"))
+        file_2.copy.assert_called_once_with(Path("/home/2.pdf"))
         file_3.copy.assert_not_called()
-        self.assertIn(str(Path('/home/1.pdf')), copied)
-        self.assertIn(str(Path('/home/2.pdf')), copied)
+        self.assertIn(str(Path("/home/1.pdf")), copied)
+        self.assertIn(str(Path("/home/2.pdf")), copied)
         self.assertEqual(len(missing), 1)
 
         session.delete()
         mock_path_exists.stop()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
+        """Restore logging settings."""
         super().tearDownClass()
         logging.disable(logging.NOTSET)
