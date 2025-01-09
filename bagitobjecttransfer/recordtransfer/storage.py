@@ -1,3 +1,6 @@
+import os
+from urllib.parse import urljoin
+
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
@@ -25,10 +28,9 @@ class UploadedFileStorage(FileSystemStorage):
         kwargs["location"] = settings.UPLOAD_STORAGE_FOLDER
         super().__init__(**kwargs)
 
-    def url(self, name):
+    def url(self, name: str) -> str:
         """Generate the URL based on MEDIA_URL and the relative path."""
-        relative_path = name.replace(settings.UPLOAD_STORAGE_FOLDER, "").lstrip("/")
-        return f"{settings.MEDIA_URL}uploaded_files/{relative_path}"
+        return urljoin(settings.MEDIA_URL, urljoin(settings.UPLOAD_URL, name))
 
 
 class TempFileStorage(FileSystemStorage):
@@ -38,7 +40,6 @@ class TempFileStorage(FileSystemStorage):
         kwargs["location"] = settings.TEMP_STORAGE_FOLDER
         super().__init__(**kwargs)
 
-    def url(self, name):
+    def url(self, name: str) -> str:
         """Generate the URL based on MEDIA_URL and the relative path."""
-        relative_path = name.replace(settings.TEMP_STORAGE_FOLDER, "").lstrip("/")
-        return f"{settings.MEDIA_URL}temp/{relative_path}"
+        return urljoin(settings.MEDIA_URL, urljoin(settings.TEMP_URL, name))
