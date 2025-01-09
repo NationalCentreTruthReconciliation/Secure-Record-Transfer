@@ -8,6 +8,7 @@ from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext
 from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
@@ -623,6 +624,7 @@ class TestListUploadedFilesView(TestCase):
         self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
 
     def test_list_uploaded_files_session_not_found(self):
+        """Invalid session token."""
         response = self.client.get(
             reverse("recordtransfer:list_uploaded_files", args=["invalid_token"])
         )
@@ -632,6 +634,7 @@ class TestListUploadedFilesView(TestCase):
         self.assertIn("uploadSessionToken", response_json)
 
     def test_list_uploaded_files_empty_session(self):
+        """Session has no files."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
@@ -639,6 +642,7 @@ class TestListUploadedFilesView(TestCase):
         self.assertIn("uploadSessionToken", response_json)
 
     def test_list_uploaded_files_with_files(self):
+        """Session has one file."""
         uploaded_file = UploadedFile(
             session=self.session,
             file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
@@ -654,6 +658,77 @@ class TestListUploadedFilesView(TestCase):
         self.assertEqual(responseFiles[0]["name"], "testfile.txt")
         self.assertEqual(responseFiles[0]["size"], uploaded_file.file_upload.size)
         self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
+
+    def tearDown(self):
+        UploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
+
+
+class TestUploadedFileView(TestCase):
+    """Tests for recordtransfer:uploaded_file view."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.one_kib = bytearray([1] * 1024)
+        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
+
+    def setUp(self):
+        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session()
+        self.session.save()
+        self.uploaded_file = UploadedFile(
+            session=self.session,
+            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
+            name="testfile.txt",
+        )
+        self.uploaded_file.save()
+        self.url = reverse(
+            "recordtransfer:uploaded_file", args=[self.session.token, self.uploaded_file.name]
+        )
+
+    def test_uploaded_file_session_not_found(self):
+        """Invalid session token."""
+        response = self.client.get(
+            reverse("recordtransfer:uploaded_file", args=["invalid_token", "testfile.txt"])
+        )
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertEqual(response_json["error"], gettext("Upload session not found"))
+
+    def test_uploaded_file_not_found(self):
+        """Invalid file name in a valid session."""
+        response = self.client.get(
+            reverse("recordtransfer:uploaded_file", args=[self.session.token, "invalid_file.txt"])
+        )
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertEqual(response_json["error"], gettext("File not found in upload session"))
+
+    def test_delete_uploaded_file(self):
+        """Delete an uploaded file."""
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(UploadedFile.objects.filter(name="testfile.txt").exists())
+
+    @patch("recordtransfer.views.settings.DEBUG", True)
+    def test_get_uploaded_file_in_debug(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.url, self.uploaded_file.get_file_media_url())
+
+    @patch("recordtransfer.views.settings.DEBUG", False)
+    def test_get_uploaded_file_in_production(self):
+        response = self.client.get(self.url)
+        self.assertIn("X-Accel-Redirect", response.headers)
+        self.assertEqual(
+            response.headers["X-Accel-Redirect"], self.uploaded_file.get_file_media_url()
+        )
 
     def tearDown(self):
         UploadedFile.objects.all().delete()

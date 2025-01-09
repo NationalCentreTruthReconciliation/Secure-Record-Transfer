@@ -1177,7 +1177,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
             }
         )
 
-    response_data = {"uploadSessionToken": session.token, "files": files}
+    response_data = {"files": files, "uploadSessionToken": session.token}
 
     return JsonResponse(response_data, safe=False, status=200)
 
