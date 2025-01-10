@@ -1,5 +1,6 @@
 # pylint: disable=too-many-public-methods
 import logging
+import shutil
 import tempfile
 from pathlib import Path
 from typing import Optional
@@ -188,17 +189,6 @@ class TestUploadSession(TestCase):
         logging.disable(logging.NOTSET)
 
 
-TEST_MEDIA_ROOT = tempfile.mkdtemp()
-TEST_TEMP_STORAGE_FOLDER = Path(TEST_MEDIA_ROOT) / "temp"
-TEST_TEMP_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
-TEST_UPLOAD_STORAGE_FOLDER = Path(TEST_MEDIA_ROOT) / "uploads"
-TEST_UPLOAD_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
-
-@override_settings(
-    MEDIA_ROOT=TEST_MEDIA_ROOT,
-    TEMP_STORAGE_FOLDER=TEST_TEMP_STORAGE_FOLDER,
-    UPLOAD_STORAGE_FOLDER=TEST_UPLOAD_STORAGE_FOLDER,
-)
 class TestUploadedFile(TestCase):
     """Tests for the UploadedFile model."""
 
@@ -225,19 +215,16 @@ class TestUploadedFile(TestCase):
         )
         self.uploaded_file.save()
 
-    def test_settings_overridden(self) -> None:
-        """Test that settings are overridden."""
-        self.assertEqual(settings.MEDIA_ROOT, TEST_MEDIA_ROOT)
-        self.assertEqual(settings.TEMP_STORAGE_FOLDER, TEST_TEMP_STORAGE_FOLDER)
-        self.assertEqual(settings.UPLOAD_STORAGE_FOLDER, TEST_UPLOAD_STORAGE_FOLDER)
-
     def test_file_exists(self) -> None:
         """Test that the file exists."""
         self.assertTrue(self.uploaded_file.exists)
 
     def test_file_does_not_exist(self) -> None:
         """Test that the file does not exist."""
-        self.uploaded_file.file_upload.delete()
+        # Find the file and delete it from TEST_TEMP_STORAGE_FOLDER
+        for file_path in settings.TEMP_STORAGE_FOLDER.rglob("test.pdf"):
+            if file_path.exists():
+                file_path.unlink()
         self.assertFalse(self.uploaded_file.exists)
 
     def test_copy(self) -> None:
@@ -270,6 +257,14 @@ class TestUploadedFile(TestCase):
         """Tear down test."""
         UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
+
+        # Clear everything in the temp and upload storage folders
+        shutil.rmtree(settings.TEMP_STORAGE_FOLDER)
+        shutil.rmtree(settings.UPLOAD_STORAGE_FOLDER)
+
+        # Recreate the directories
+        settings.TEMP_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+        settings.UPLOAD_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls) -> None:

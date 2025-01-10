@@ -1,6 +1,3 @@
-import os
-from urllib.parse import urljoin
-
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
@@ -25,7 +22,7 @@ class UploadedFileStorage(FileSystemStorage):
     """Stores files in UPLOAD_STORAGE_FOLDER."""
 
     def __init__(self, **kwargs):
-        kwargs["location"] = settings.UPLOAD_STORAGE_FOLDER
+        kwargs["location"] = str(settings.UPLOAD_STORAGE_FOLDER)
         super().__init__(**kwargs)
 
     def url(self, name: str) -> str:
@@ -37,7 +34,7 @@ class TempFileStorage(FileSystemStorage):
     """Stores files in TEMP_STORAGE_FOLDER."""
 
     def __init__(self, **kwargs):
-        kwargs["location"] = settings.TEMP_STORAGE_FOLDER
+        kwargs["location"] = str(settings.TEMP_STORAGE_FOLDER)
         super().__init__(**kwargs)
 
     def url(self, name: str) -> str:

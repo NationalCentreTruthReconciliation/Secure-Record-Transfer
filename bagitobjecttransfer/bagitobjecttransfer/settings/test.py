@@ -1,5 +1,7 @@
 # Minimal settings for either testing, or building docs with Sphinx
 import os
+from pathlib import Path
+import tempfile
 
 from decouple import config
 
@@ -105,9 +107,17 @@ LOGGING = {
     },
 }
 
-BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/bags/"))
-UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/uploaded_files/"))
-TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/temp/"))
+# BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/bags/"))
+# UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/uploaded_files/"))
+# TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/temp/"))
 
-TEMP_URL = TEMP_STORAGE_FOLDER.replace(MEDIA_ROOT, "").lstrip("/")
-UPLOAD_URL = UPLOAD_STORAGE_FOLDER.replace(MEDIA_ROOT, "").lstrip("/")
+BASE_DIR = tempfile.mkdtemp()
+MEDIA_ROOT = Path(BASE_DIR) / "media"
+TEMP_STORAGE_FOLDER = Path(MEDIA_ROOT) / "temp"
+TEMP_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+UPLOAD_STORAGE_FOLDER = Path(MEDIA_ROOT) / "uploads"
+UPLOAD_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+BAG_STORAGE_FOLDER = Path(MEDIA_ROOT) / "bags"
+
+TEMP_URL = str(TEMP_STORAGE_FOLDER).replace(str(MEDIA_ROOT), "").lstrip("/")
+UPLOAD_URL = str(UPLOAD_STORAGE_FOLDER).replace(str(MEDIA_ROOT), "").lstrip("/")
