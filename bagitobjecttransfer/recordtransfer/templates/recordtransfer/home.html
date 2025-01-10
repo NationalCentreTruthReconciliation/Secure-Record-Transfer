@@ -13,14 +13,14 @@
         </div>
         <div class="hero-button">
             <a href="{% url 'recordtransfer:transfer' %}">
-                {% trans "Start a New Transfer" %}
+                {% trans "Submit Your Records" %}
             </a>
         </div>
         <br>
         {% if not user.is_authenticated and SIGN_UP_ENABLED %}
         <div class="hero-button">
             <a href="{% url 'recordtransfer:createaccount' %}">
-                {% trans "Sign up Now" %}
+                {% trans "Sign Up Now" %}
             </a>
         </div>
         {% endif %}
@@ -29,36 +29,123 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="homepage-header">Now Accepting Donations</h1>
-<p>
+
+<h1 class="homepage-header">{% trans "Preserve History, Share Truth" %}</h1>
+<p class="lead-text">
     {% blocktrans %}
-    This transfer portal is the preferred method of submitting small-scale digital donations to the
-    NCTR. Contact us if you intend to make a large donation of records or if you would like to send
-    physical records.
+    Join us in building a comprehensive digital archive that honors and preserves vital historical records.
+    Our secure transfer portal makes it simple to contribute to this important collection.
     {% endblocktrans %}
 </p>
-<div class="homepage-button">
-    <a href="https://nctr.ca/contact/">
-        {% trans "Contact Us" %}
-    </a>
+
+<div class="features-grid">
+    <div class="feature-box">
+        <h2>{% trans "Simple &amp; Secure" %}</h2>
+        <p>
+            {% blocktrans %}
+            Upload your digital records with confidence through our encrypted, user-friendly
+            platform.
+            {% endblocktrans %}
+        </p>
+    </div>
+
+    <div class="feature-box">
+        <h2>{% trans "Standards-Based" %}</h2>
+        <p>
+            {% blocktrans %}
+            Your contributions are preserved following CAAIS (Canadian Archival Accession
+            Information Standard), ensuring long-term accessibility and value.
+            {% endblocktrans %}
+        </p>
+    </div>
+
+    <div class="feature-box">
+        <h2>{% trans "Make an Impact" %}</h2>
+        <p>
+            {% blocktrans %}
+            Every record shared helps build a more complete historical narrative for future
+            generations.
+            {% endblocktrans %}
+        </p>
+    </div>
 </div>
 
+<section class="cta-section">
+    <h2>{% trans "Ready to Contribute?" %}</h2>
+    <p>
+        {% blocktrans %}
+        We welcome both individual and organizational contributions. For large-scale donations or
+        physical records, please get in contact with us.
+        {% endblocktrans %}
+    </p>
+    <div class="cta-buttons">
+        {% if user.is_authenticated %}
+            <a href="{% url 'recordtransfer:transfer' %}" class="primary-button">
+                {% trans "Submit Your Records" %}
+            </a>
+        {% elif SIGN_UP_ENABLED %}
+            <a href="{% url 'recordtransfer:createaccount' %}" class="primary-button">
+                {% trans "Sign Up Now" %}
+            </a>
+        {% endif %}
+        <a href="https://nctr.ca/contact/" class="secondary-button">
+            {% trans "Contact Us" %}
+        </a>
+    </div>
+</section>
 
-<h1 class="homepage-header">Standards-Based</h1>
-<p>
-    {% blocktrans %}
-    Data is captured in a standardized format. We follow CAAIS (Canadian Archival Accession
-    Information Standard) for gathering data.
-    {% endblocktrans %}
-</p>
+<section class="related-section">
+    <div class="related-content">
+        <div class="related-links">
+            <h2>{% trans "More NCTR Resources" %}</h2>
+            <div class="links-list">
+                <a href="https://nctr.ca/records/view-your-records/" class="link-item">
+                    <span class="link-title">
+                        {% trans "View Your Records" %}
+                    </span>
+                    <span class="link-description">
+                        {% trans "Access your personal or family records held in the NCTR archives" %}
+                    </span>
+                </a>
+                <a href="https://nctr.ca/about" class="link-item">
+                    <span class="link-title">{% trans "About NCTR" %}</span>
+                    <span class="link-description">
+                        {% trans "Learn about our mission, mandate and the work we do" %}
+                    </span>
+                </a>
+                <a href="https://archives.nctr.ca" class="link-item">
+                    <span class="link-title">{% trans "Public Records" %}</span>
+                    <span class="link-description">
+                        {% trans "Browse our public collection of records" %}
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div class="related-image">
+            <img src="{% static 'PHABNE_00281.webp' %}" alt="Individuals making a donation to the Bentwood Box">
+        </div>
+    </div>
+</section>
 
-<h1 class="homepage-header">Open Source</h1>
-<p>
-    {% blocktrans %}
-    This project has been made open source by the NCTR. If your organization would like to learn
-    how to leverage this project, connect with us on <a href="https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer">
-    GitHub</a>.
-    {% endblocktrans %}
-</p>
-
+<section class="github-section">
+    <h2>{% trans "Fully Open Source" %}</h2>
+    <div class="github-container">
+        <div class="github-content">
+            <p>
+                {% blocktrans %}
+                This project is open source, demonstrating our commitment to transparency and
+                collaboration. Join our community on GitHub to explore the code, contribute
+                improvements, or adapt it for your organization's needs.
+                {% endblocktrans %}
+            </p>
+            <a href="https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer" class="github-button">
+                <i class="fab fa-github"></i>
+                {% trans "View on GitHub" %}
+            </a>
+        </div>
+        <div class="github-graphic">
+            <i class="fab fa-github"></i>
+        </div>
+    </div>
+</section>
 {% endblock %}
