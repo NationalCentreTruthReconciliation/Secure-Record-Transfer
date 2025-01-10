@@ -169,7 +169,7 @@ class UploadedFile(models.Model):
     """Represents a file that a user uploaded during an upload session"""
 
     name = models.CharField(max_length=256, null=True, default="-")
-    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=True)
+    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
     file_upload = models.FileField(
         null=True, storage=TempFileStorage, upload_to=session_upload_location
     )
@@ -221,16 +221,14 @@ class UploadedFile(models.Model):
         """
         if self.exists:
             return self.file_upload.url
-        token = self.session.token if self.session else "NOSESSION"
-        raise FileNotFoundError(f"{self.name} does not exist in session {token}")
+        raise FileNotFoundError(f"{self.name} does not exist in session {self.session.token}")
 
     def get_file_access_url(self) -> str:
         """Generate URL to request access for this file."""
-        token = self.session.token if self.session else "NOSESSION"
         return reverse(
             "recordtransfer:uploaded_file",
             kwargs={
-                "session_token": token,
+                "session_token": self.session.token,
                 "file_name": self.name,
             },
         )
