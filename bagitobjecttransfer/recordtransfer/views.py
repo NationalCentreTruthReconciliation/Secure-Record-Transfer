@@ -473,6 +473,9 @@ class TransferFormWizard(SessionWizardView):
 
         try:
             self.save_transfer(data)
+            wizard_goto_step = request.POST.get("wizard_goto_step", None)
+            if wizard_goto_step:
+                return self.render_goto_step(wizard_goto_step)
             messages.success(request, gettext("Transfer saved successfully."))
         except Exception:
             messages.error(request, gettext("There was an error saving the transfer."))
