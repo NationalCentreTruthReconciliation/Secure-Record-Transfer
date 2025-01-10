@@ -9,9 +9,12 @@
 {% block javascript %}
     {{ block.super }}
     <script src="{% static 'transferform.bundle.js' %}"></script>
-    <script>const currentFormStep = {{ wizard.steps.step1 }}</script>
-    <script>const previousStep = "{{ wizard.steps.prev }}"</script>
-    <script>const saveFormStep = "{{ wizard.steps.current }}"</script>
+    <script>
+        const currentStepNum = {{ wizard.steps.step1 }}
+        const previousStepName = "{{ wizard.steps.prev }}"
+        const currentStepName = "{{ wizard.steps.current }}"
+    </script>
+    {{ js_context_transfer_form|json_script:"py_context_transfer_form" }} 
 {% endblock javascript %}
 {% block content %}
     {% include "includes/messages.html" %}

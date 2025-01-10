@@ -28,3 +28,7 @@ INFOMESSAGE = "infomessage"
 IN_PROGRESS_PAGE = "in_progress_page"
 SUBMISSIONS_PAGE = "submissions_page"
 GROUPS_PAGE = "groups_page"
+
+# Transfer form action names
+SAVE_FORM_ACTION = "save_form"
+GO_TO_STEP_ACTION = "wizard_goto_step"

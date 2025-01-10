@@ -4,7 +4,7 @@
 
 {% block javascript %}
     {{ block.super }}
-    {{ js_context|json_script:"py_context_source_info" }}
+    {{ js_context_source_info|json_script:"py_context_source_info" }}
 {% endblock javascript %}
 
 {% block formfields %}
