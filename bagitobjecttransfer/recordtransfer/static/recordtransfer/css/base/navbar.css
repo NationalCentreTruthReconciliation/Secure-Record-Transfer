@@ -6,9 +6,10 @@
  */
 
 header {
-    background-color: #eeeeee;
+    position: absolute;
+    /* background-color: #eeeeee; */
     width: 100%;
-    box-shadow: 0 4px 3px -3px #bbbbbb;
+    /* box-shadow: 0 4px 3px -3px #bbbbbb; */
 }
 
 .main-navbar {
@@ -31,7 +32,7 @@ header {
 
 .nav-link {
     text-decoration: none;
-    color: #333333;
+    color: white;
     line-height: 40px;
 }
 
@@ -67,12 +68,22 @@ header {
     display: none;
 }
 
-.nav-link.main {
-    font-weight: bold;
-}
-
 .active .nav-item {
     display: block;
+}
+
+.nav-button {
+    border: 3px solid rgba(255, 255, 255, 0.7);
+    border-radius: 3rem;
+    padding: 0.5rem 1.5rem;   
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.nav-button:hover {
+    background-color: #ffffff;
+    color: #ee7421;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #app-logo {
@@ -82,7 +93,7 @@ header {
 /* Desktop menu (design is mobile-first) */
 @media all and (min-width: 800px) {
     .main-navbar {
-        align-items: flex-start;
+        align-items: center;
         flex-wrap: nowrap;
         background: none;
     }
@@ -91,9 +102,6 @@ header {
         position: relative;
         display: block;
         width: auto;
-    }
-    .nav-link {
-        line-height: 70px;
     }
     .nav-toggle-open,
     .nav-toggle-close {

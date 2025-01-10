@@ -5,7 +5,7 @@
     <nav class="main-header-content">
         <ul class="main-navbar">
             <li class="nav-logo">
-                <img id="app-logo" src="{% static 'nctrlogo_flame_150x150px.webp'%}">
+                <img id="app-logo" src="{% static 'logo-white-cropped.webp'%}">
             </li>
             <li class="nav-title">
                 <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
@@ -55,7 +55,7 @@
                 {% endif %}
                 {% if 'login' not in request.path %}
                     <li class="nav-item">
-                        <a class="nav-link main" href="{% url 'login' %}">
+                        <a class="nav-button" href="{% url 'login' %}">
                             {% trans "Log In" %}
                         </a>
                     </li>

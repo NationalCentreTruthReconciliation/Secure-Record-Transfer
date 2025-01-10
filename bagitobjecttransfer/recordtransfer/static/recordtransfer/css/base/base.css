@@ -35,7 +35,7 @@ body {
 }
 
 .title-text {
-    color: #333333;
+    color: white;
     font-size: 20pt;
 }
 
@@ -88,11 +88,20 @@ body {
     text-decoration: none;
 }
 
+.hero-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+}
+
 .hero-button {
     padding: 12px;
     border: 2px solid #ffffff;
     font-size: 1.2em;
     font-weight: bold;
+    flex: 1; /* Make the button take up equal space */
+    text-align: center; /* Center the text */
+    width: 30%; /* Ensure the button takes the full width of the container */
 }
 
 .homepage-button {
