@@ -194,7 +194,7 @@ class UploadedFile(models.Model):
             shutil.copy2(self.file_upload.path, new_path)
 
     def move(self, new_path):
-        """Move this file to a new path. Marks this file as removed post-move.
+        """Move this file to a new path.
 
         Args:
             new_path: The new path to move this file to

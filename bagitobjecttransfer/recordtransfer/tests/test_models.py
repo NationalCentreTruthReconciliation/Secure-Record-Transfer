@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from recordtransfer.models import UploadedFile, UploadSession
 
@@ -167,6 +167,7 @@ class TestUploadSession(TestCase):
 
     @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
     def test_move_file_to_permanent_storage(self, uploadedfile_set_mock: BaseManager) -> None:
+        """Test that files are moved to permanent storage."""
         session = UploadSession.new_session()
         session.save()
 
@@ -275,7 +276,14 @@ class TestUploadedFile(TestCase):
             settings.MEDIA_URL + settings.UPLOAD_URL + self.uploaded_file.file_upload.name
         )
 
-    def tearDown(cls) -> None:
+    def test_get_file_media_url_no_file(self) -> None:
+        """Test that an exception is raised when trying to get the media URL of a non-existent
+        file.
+        """
+        self.uploaded_file.remove()
+        self.assertRaises(FileNotFoundError, self.uploaded_file.get_file_media_url)
+
+    def tearDown(self) -> None:
         """Tear down test."""
         UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
