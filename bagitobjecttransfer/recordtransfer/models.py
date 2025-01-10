@@ -239,9 +239,13 @@ class UploadedFile(models.Model):
         """Move the file from TempFileStorage to UploadedFileStorage."""
         if self.temp and self.file_upload:
             new_storage = UploadedFileStorage()
+            # Relative path of file to the storage root
+            relative_path = self.file_upload.name
             new_path = new_storage.path(self.file_upload.name)
             self.move(new_path)
+            # After actual file is moved, all FileField attributes are lost
             self.file_upload.storage = new_storage
+            self.file_upload.name = relative_path
             self.temp = False
             self.save()
 

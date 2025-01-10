@@ -231,21 +231,34 @@ class TestUploadedFile(TestCase):
     def test_copy(self) -> None:
         """Test that the file is copied."""
         temp_dir = tempfile.mkdtemp()
+        original_file_path = self.uploaded_file.file_upload.path
         self.uploaded_file.copy(temp_dir)
         self.assertTrue(Path(temp_dir, "test.pdf").exists())
-        self.assertTrue(self.uploaded_file.exists)
+        self.assertTrue(Path(original_file_path).exists())
 
     def test_move(self) -> None:
         """Test that the file is moved."""
         temp_dir = tempfile.mkdtemp()
+        old_path = self.uploaded_file.file_upload.path
         self.uploaded_file.move(temp_dir)
-        self.assertFalse(self.uploaded_file.exists)
+        # Check that file does not exist in old path
+        self.assertFalse(Path(old_path).exists())
         self.assertTrue(Path(temp_dir, "test.pdf").exists())
 
     def test_remove(self) -> None:
         """Test that the file is removed."""
+        file_path = self.uploaded_file.file_upload.path
         self.uploaded_file.remove()
-        self.assertFalse(self.uploaded_file.exists)
+        self.assertFalse(Path(file_path).exists())
+
+    def test_move_to_permanent_storage(self) -> None:
+        """Test that the file is moved to permanent storage."""
+        original_file_path = self.uploaded_file.file_upload.path
+        relative_path = self.uploaded_file.file_upload.name
+        self.uploaded_file.move_to_permanent_storage()
+        self.assertTrue(Path(settings.UPLOAD_STORAGE_FOLDER, relative_path).exists())
+        self.assertFalse(Path(original_file_path).exists())
+        self.assertFalse(self.uploaded_file.temp)
 
     def test_get_temp_file_media_url(self) -> None:
         """Test that the file media URL is returned."""
@@ -254,7 +267,13 @@ class TestUploadedFile(TestCase):
             settings.MEDIA_URL + settings.TEMP_URL + self.uploaded_file.file_upload.name
         )
 
-
+    def test_get_permanent_file_media_url(self) -> None:
+        """Test that the file media URL is returned."""
+        self.uploaded_file.move_to_permanent_storage()
+        self.assertEqual(
+            self.uploaded_file.get_file_media_url(),
+            settings.MEDIA_URL + settings.UPLOAD_URL + self.uploaded_file.file_upload.name
+        )
 
     def tearDown(cls) -> None:
         """Tear down test."""
