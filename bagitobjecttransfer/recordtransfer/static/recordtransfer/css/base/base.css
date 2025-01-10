@@ -99,9 +99,18 @@ body {
     border: 2px solid #ffffff;
     font-size: 1.2em;
     font-weight: bold;
-    flex: 1; /* Make the button take up equal space */
-    text-align: center; /* Center the text */
-    width: 30%; /* Ensure the button takes the full width of the container */
+    flex: 1;
+    text-align: center;
+    width: 30%;
+}
+
+.hero-button:hover {
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.hero-button:hover a {
+    color: #ee7421;
 }
 
 .homepage-button {
