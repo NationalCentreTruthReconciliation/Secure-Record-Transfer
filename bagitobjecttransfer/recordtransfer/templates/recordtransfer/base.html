@@ -35,6 +35,11 @@
             {% block banner %}
                 {% include "recordtransfer/banner.html" %}
             {% endblock banner %}
+            {% block header %}
+                {% if request.path != "/" %}
+                    {% include "recordtransfer/header.html" %}
+                {% endif %}
+            {% endblock header %}
             <div class="main-container">
                 <div class="focused-content">
                     {% block focused_content %}{% endblock focused_content %}

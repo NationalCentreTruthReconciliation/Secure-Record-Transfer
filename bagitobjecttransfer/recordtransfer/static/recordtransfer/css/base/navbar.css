@@ -6,10 +6,15 @@
  */
 
 header {
-    position: absolute;
-    /* background-color: #eeeeee; */
+    background-color: rgb(137, 34, 26);
     width: 100%;
-    /* box-shadow: 0 4px 3px -3px #bbbbbb; */
+    box-shadow: 0 4px 3px -3px #bbbbbb;
+}
+
+header.homepage {
+    position: absolute;
+    background-color: transparent;
+    box-shadow: none;
 }
 
 .main-navbar {

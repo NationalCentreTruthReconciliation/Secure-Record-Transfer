@@ -1,7 +1,7 @@
 {% load static %}
 {% load i18n %}
 
-<header class="header">
+<header class="header {% if request.path == "/" %}homepage{% endif %}">
     <nav class="main-header-content">
         <ul class="main-navbar">
             <li class="nav-logo">

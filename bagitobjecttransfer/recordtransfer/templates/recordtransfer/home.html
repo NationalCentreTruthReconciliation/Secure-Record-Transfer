@@ -6,13 +6,9 @@
 
 {% block focused_content %}
 <div id="main-graphic-container">
-    {% block header %}
-        {{ block.super }}
-        {% include "recordtransfer/header.html" %}
-    {% endblock header %}
+    {% include "recordtransfer/header.html" %}
     <img id="main-graphic" src="{% static 'hero4-scaled.webp' %}">
     <div class="main-graphic-text-container">
-        
         <div class="main-graphic-text">
             {% trans "Securely Send Your Records to the NCTR" %}
         </div>
