@@ -221,9 +221,10 @@ class TestUploadedFile(TestCase):
 
     def test_file_does_not_exist(self) -> None:
         """Test that the file does not exist."""
-        # Find the file and delete it from TEST_TEMP_STORAGE_FOLDER
+        # Delete the uploaded file from the file system
         for file_path in settings.TEMP_STORAGE_FOLDER.rglob("test.pdf"):
             if file_path.exists():
+                print("Deleting found file from: ", file_path)
                 file_path.unlink()
         self.assertFalse(self.uploaded_file.exists)
 
@@ -252,6 +253,8 @@ class TestUploadedFile(TestCase):
             self.uploaded_file.get_file_media_url(),
             settings.MEDIA_URL + settings.TEMP_URL + self.uploaded_file.file_upload.name
         )
+
+
 
     def tearDown(cls) -> None:
         """Tear down test."""
