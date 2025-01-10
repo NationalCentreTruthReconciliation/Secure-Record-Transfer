@@ -30,7 +30,7 @@ class UploadedFileStorage(FileSystemStorage):
 
     def url(self, name: str) -> str:
         """Generate the URL based on MEDIA_URL and the relative path."""
-        return urljoin(settings.MEDIA_URL, urljoin(settings.UPLOAD_URL, name))
+        return self.base_location.split(settings.BASE_DIR)[-1] + name
 
 
 class TempFileStorage(FileSystemStorage):
@@ -42,4 +42,4 @@ class TempFileStorage(FileSystemStorage):
 
     def url(self, name: str) -> str:
         """Generate the URL based on MEDIA_URL and the relative path."""
-        return urljoin(settings.MEDIA_URL, urljoin(settings.TEMP_URL, name))
+        return self.base_location.split(settings.BASE_DIR)[-1] + name

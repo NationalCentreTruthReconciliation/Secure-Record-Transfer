@@ -1,11 +1,14 @@
 # pylint: disable=too-many-public-methods
 import logging
+import tempfile
 from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, PropertyMock, patch
 
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from recordtransfer.models import UploadedFile, UploadSession
 
@@ -177,6 +180,96 @@ class TestUploadSession(TestCase):
         file_1.move_to_permanent_storage.assert_called_once()
         file_2.move_to_permanent_storage.assert_called_once()
         file_3.move_to_permanent_storage.assert_not_called()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Restore logging settings."""
+        super().tearDownClass()
+        logging.disable(logging.NOTSET)
+
+
+TEST_MEDIA_ROOT = tempfile.mkdtemp()
+TEST_TEMP_STORAGE_FOLDER = Path(TEST_MEDIA_ROOT) / "temp"
+TEST_TEMP_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+TEST_UPLOAD_STORAGE_FOLDER = Path(TEST_MEDIA_ROOT) / "uploads"
+TEST_UPLOAD_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+
+@override_settings(
+    MEDIA_ROOT=TEST_MEDIA_ROOT,
+    TEMP_STORAGE_FOLDER=TEST_TEMP_STORAGE_FOLDER,
+    UPLOAD_STORAGE_FOLDER=TEST_UPLOAD_STORAGE_FOLDER,
+)
+class TestUploadedFile(TestCase):
+    """Tests for the UploadedFile model."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Set up test class."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    def setUp(self) -> None:
+        """Set up test."""
+        self.session = UploadSession.new_session()
+        self.session.save()
+
+        test_file_content = b"Test file content"
+        test_file = SimpleUploadedFile(
+            "test.pdf", test_file_content, content_type="application/pdf"
+        )
+
+        self.uploaded_file = UploadedFile(
+            name="test.pdf",
+            session=self.session,
+            file_upload=test_file,
+        )
+        self.uploaded_file.save()
+
+    def test_settings_overridden(self) -> None:
+        """Test that settings are overridden."""
+        self.assertEqual(settings.MEDIA_ROOT, TEST_MEDIA_ROOT)
+        self.assertEqual(settings.TEMP_STORAGE_FOLDER, TEST_TEMP_STORAGE_FOLDER)
+        self.assertEqual(settings.UPLOAD_STORAGE_FOLDER, TEST_UPLOAD_STORAGE_FOLDER)
+
+    def test_file_exists(self) -> None:
+        """Test that the file exists."""
+        self.assertTrue(self.uploaded_file.exists)
+
+    def test_file_does_not_exist(self) -> None:
+        """Test that the file does not exist."""
+        self.uploaded_file.file_upload.delete()
+        self.assertFalse(self.uploaded_file.exists)
+
+    def test_copy(self) -> None:
+        """Test that the file is copied."""
+        temp_dir = tempfile.mkdtemp()
+        self.uploaded_file.copy(temp_dir)
+        self.assertTrue(Path(temp_dir, "test.pdf").exists())
+        self.assertTrue(self.uploaded_file.exists)
+
+    def test_move(self) -> None:
+        """Test that the file is moved."""
+        temp_dir = tempfile.mkdtemp()
+        self.uploaded_file.move(temp_dir)
+        self.assertFalse(self.uploaded_file.exists)
+        self.assertTrue(Path(temp_dir, "test.pdf").exists())
+
+    def test_remove(self) -> None:
+        """Test that the file is removed."""
+        self.uploaded_file.remove()
+        self.assertFalse(self.uploaded_file.exists)
+
+    def test_get_temp_file_media_url(self) -> None:
+        """Test that the file media URL is returned."""
+        self.assertEqual(
+            self.uploaded_file.get_file_media_url(),
+            settings.MEDIA_URL + settings.TEMP_URL + self.uploaded_file.file_upload.name
+        )
+
+    def tearDown(cls) -> None:
+        """Tear down test."""
+        UploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
 
     @classmethod
     def tearDownClass(cls) -> None:
