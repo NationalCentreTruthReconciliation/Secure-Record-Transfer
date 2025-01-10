@@ -47,6 +47,12 @@ header.homepage {
     color: #ee7421;
 }
 
+.nav-link:not(.title):hover {
+    text-decoration: underline;
+    text-decoration-thickness: 4px;
+    text-underline-offset: 12px;
+}
+
 .nav-logo {
     order: 0;
     flex-grow: 0;
