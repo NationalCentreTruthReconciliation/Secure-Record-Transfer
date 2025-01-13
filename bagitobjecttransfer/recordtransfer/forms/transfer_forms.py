@@ -198,6 +198,7 @@ class ContactInfoForm(TransferForm):
             ("WI", "Wisconsin"),
             ("WY", "Wyoming"),
         ],
+        initial="",
     )
 
     other_province_or_state = forms.CharField(
