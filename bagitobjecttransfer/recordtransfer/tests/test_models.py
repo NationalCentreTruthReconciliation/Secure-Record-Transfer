@@ -263,7 +263,7 @@ class TestUploadedFile(TestCase):
         """Test that the file media URL is returned."""
         self.assertEqual(
             self.uploaded_file.get_file_media_url(),
-            settings.MEDIA_URL + settings.TEMP_URL + self.uploaded_file.file_upload.name,
+            str(Path(settings.TEMP_STORAGE_FOLDER).relative_to(settings.BASE_DIR) / self.uploaded_file.file_upload.name),
         )
 
     def test_get_permanent_file_media_url(self) -> None:
@@ -271,7 +271,7 @@ class TestUploadedFile(TestCase):
         self.uploaded_file.move_to_permanent_storage()
         self.assertEqual(
             self.uploaded_file.get_file_media_url(),
-            settings.MEDIA_URL + settings.UPLOAD_URL + self.uploaded_file.file_upload.name,
+            str(Path(settings.UPLOAD_STORAGE_FOLDER).relative_to(settings.BASE_DIR) / self.uploaded_file.file_upload.name),
         )
 
     def test_get_file_media_url_no_file(self) -> None:
