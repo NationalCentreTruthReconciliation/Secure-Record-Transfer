@@ -12,6 +12,7 @@ from django.db.models.manager import BaseManager
 from django.test import TestCase
 
 from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.storage import UploadedFileStorage
 
 
 def get_mock_uploaded_file(
@@ -238,32 +239,35 @@ class TestUploadedFile(TestCase):
     def test_move(self) -> None:
         """Test that the file is moved."""
         temp_dir = tempfile.mkdtemp()
-        old_path = self.uploaded_file.file_upload.path
         self.uploaded_file.move(temp_dir)
         # Check that file does not exist in old path
-        self.assertFalse(Path(old_path).exists())
-        self.assertTrue(Path(temp_dir, "test.pdf").exists())
+        self.assertFalse(self.uploaded_file.exists)
+        self.assertTrue(
+            self.uploaded_file.file_upload.storage.exists(self.uploaded_file.file_upload.name)
+        )
 
     def test_remove(self) -> None:
         """Test that the file is removed."""
-        file_path = self.uploaded_file.file_upload.path
         self.uploaded_file.remove()
-        self.assertFalse(Path(file_path).exists())
+        self.assertFalse(self.uploaded_file.exists)
 
     def test_move_to_permanent_storage(self) -> None:
         """Test that the file is moved to permanent storage."""
-        original_file_path = self.uploaded_file.file_upload.path
         relative_path = self.uploaded_file.file_upload.name
         self.uploaded_file.move_to_permanent_storage()
         self.assertTrue(Path(settings.UPLOAD_STORAGE_FOLDER, relative_path).exists())
-        self.assertFalse(Path(original_file_path).exists())
+        self.assertTrue(self.uploaded_file.exists)
+        self.assertIsInstance(self.uploaded_file.file_upload.storage, UploadedFileStorage)
         self.assertFalse(self.uploaded_file.temp)
 
     def test_get_temp_file_media_url(self) -> None:
         """Test that the file media URL is returned."""
         self.assertEqual(
             self.uploaded_file.get_file_media_url(),
-            str(Path(settings.TEMP_STORAGE_FOLDER).relative_to(settings.BASE_DIR) / self.uploaded_file.file_upload.name),
+            str(
+                Path(settings.TEMP_STORAGE_FOLDER).relative_to(settings.BASE_DIR)
+                / self.uploaded_file.file_upload.name
+            ),
         )
 
     def test_get_permanent_file_media_url(self) -> None:
@@ -271,7 +275,10 @@ class TestUploadedFile(TestCase):
         self.uploaded_file.move_to_permanent_storage()
         self.assertEqual(
             self.uploaded_file.get_file_media_url(),
-            str(Path(settings.UPLOAD_STORAGE_FOLDER).relative_to(settings.BASE_DIR) / self.uploaded_file.file_upload.name),
+            str(
+                Path(settings.UPLOAD_STORAGE_FOLDER).relative_to(settings.BASE_DIR)
+                / self.uploaded_file.file_upload.name
+            ),
         )
 
     def test_get_file_media_url_no_file(self) -> None:
