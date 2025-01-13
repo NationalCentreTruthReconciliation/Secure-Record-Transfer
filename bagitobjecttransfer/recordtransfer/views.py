@@ -478,6 +478,13 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
+    def render_goto_step(self, *args, **kwargs) -> HttpResponse:
+        """Save current step data before going back to a previous step."""
+        form = self.get_form(data=self.request.POST, files=self.request.FILES)
+        self.storage.set_step_data(self.steps.current, self.process_step(form))
+        self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+        return super().render_goto_step(*args, **kwargs)
+
     def load_transfer_data(self, transfer: InProgressSubmission) -> None:
         """Load the transfer data from an InProgressSubmission instance."""
         self.storage.data = pickle.loads(transfer.step_data)["past"]
