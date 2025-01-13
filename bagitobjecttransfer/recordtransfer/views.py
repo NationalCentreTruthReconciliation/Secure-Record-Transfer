@@ -101,18 +101,14 @@ class Index(TemplateView):
 def media_request(request: HttpRequest, path: str) -> HttpResponse:
     """Respond to whether a media request is allowed or not."""
     if not request.user.is_authenticated:
-        return HttpResponseForbidden(
-            "You do not have permission to access this resource."
-        )
+        return HttpResponseForbidden("You do not have permission to access this resource.")
 
     if not path:
         return HttpResponseNotFound("The requested resource could not be found")
 
     user = request.user
     if not user.is_staff:
-        return HttpResponseForbidden(
-            "You do not have permission to access this resource."
-        )
+        return HttpResponseForbidden("You do not have permission to access this resource.")
 
     response = HttpResponse(
         headers={"X-Accel-Redirect": djangosettings.MEDIA_URL + path.lstrip("/")}
@@ -153,9 +149,7 @@ class UserProfile(UpdateView):
     success_url = reverse_lazy("recordtransfer:userprofile")
     success_message = gettext("Preferences updated")
     password_change_success_message = gettext("Password updated")
-    error_message = gettext(
-        "There was an error updating your preferences. Please try again."
-    )
+    error_message = gettext("There was an error updating your preferences. Please try again.")
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -170,9 +164,7 @@ class UserProfile(UpdateView):
         ).order_by("-last_updated")
         in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
         in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
-        context["in_progress_page_obj"] = in_progress_paginator.get_page(
-            in_progress_page_number
-        )
+        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
 
         # Paginate Submission
         user_submissions = Submission.objects.filter(user=self.request.user).order_by(
@@ -180,14 +172,12 @@ class UserProfile(UpdateView):
         )
         submissions_paginator = Paginator(user_submissions, self.paginate_by)
         submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
-        context["submissions_page_obj"] = submissions_paginator.get_page(
-            submissions_page_number
-        )
+        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
 
         # Paginate SubmissionGroup
-        submission_groups = SubmissionGroup.objects.filter(
-            created_by=self.request.user
-        ).order_by("name")
+        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
+            "name"
+        )
         groups_paginator = Paginator(submission_groups, self.paginate_by)
         groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
         context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
@@ -342,9 +332,7 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.RECORD_DESCRIPTION: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Record Description"),
-            INFOMESSAGE: gettext(
-                "Provide a brief description of the records you're transferring"
-            ),
+            INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
         TransferStep.RIGHTS: {
             TEMPLATEREF: "recordtransfer/transferform_rights.html",
@@ -381,9 +369,7 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.FINAL_NOTES: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Final Notes"),
-            INFOMESSAGE: gettext(
-                "Add any final notes that may not have fit in previous steps"
-            ),
+            INFOMESSAGE: gettext("Add any final notes that may not have fit in previous steps"),
         },
     }
 
@@ -452,17 +438,13 @@ class TransferFormWizard(SessionWizardView):
             return super().post(request, *args, **kwargs)
 
         past_data = self.storage.data
-        current_data = TransferFormWizard.format_step_data(
-            self.current_step, request.POST
-        )
+        current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
 
         title = None
         if isinstance(current_data, dict):
             title = current_data.get("accession_title")
         if not title:
-            title = self.get_form_value(
-                TransferStep.RECORD_DESCRIPTION, "accession_title"
-            )
+            title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
         data = {
             "save_form_step": self.current_step,
@@ -485,15 +467,32 @@ class TransferFormWizard(SessionWizardView):
         self.storage.set_step_files(self.steps.current, self.process_step_files(form))
         return super().render_goto_step(*args, **kwargs)
 
+    def render_next_step(self, form, **kwargs):
+        """Render next step of form. Overrides parent method to clear errors from the form."""
+        # get the form instance based on the data from the storage backend
+        # (if available).
+        next_step = self.steps.next
+        new_form = self.get_form(
+            next_step,
+            data=self.storage.get_step_data(next_step),
+            files=self.storage.get_step_files(next_step),
+        )
+        ##########################
+        # This part is different from the parent class. We need to clear the errors from the form
+        new_form.errors.clear()
+        ##########################
+
+        # change the stored current step
+        self.storage.current_step = next_step
+        return self.render(new_form, **kwargs)
+
     def load_transfer_data(self, transfer: InProgressSubmission) -> None:
         """Load the transfer data from an InProgressSubmission instance."""
         self.storage.data = pickle.loads(transfer.step_data)["past"]
         self.storage.current_step = transfer.current_step
 
     @classmethod
-    def format_step_data(
-        cls, step: TransferStep, data: QueryDict
-    ) -> Union[dict, list[dict]]:
+    def format_step_data(cls, step: TransferStep, data: QueryDict) -> Union[dict, list[dict]]:
         """Format form data for the current step to be saved for later.
 
         Args:
@@ -504,9 +503,7 @@ class TransferFormWizard(SessionWizardView):
             The formatted step data. If this step represents a formset, the return object will be a
             list of dicts, otherwise, it will be a dict.
         """
-        pattern = re.compile(
-            "^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$"
-        )
+        pattern = re.compile("^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$")
 
         formatted_data = []
         is_formset = False
@@ -619,10 +616,7 @@ class TransferFormWizard(SessionWizardView):
         """
         initial = (self.initial_dict or {}).get(step, {})
 
-        if (
-            self.in_progress_submission
-            and step == self.in_progress_submission.current_step
-        ):
+        if self.in_progress_submission and step == self.in_progress_submission.current_step:
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
         if step == TransferStep.CONTACT_INFO.value and isinstance(self.request.user, User):
@@ -663,9 +657,7 @@ class TransferFormWizard(SessionWizardView):
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
-            context.update(
-                {"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]}
-            )
+            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
 
         if self.current_step == TransferStep.GROUP_TRANSFER:
             context.update(
@@ -683,9 +675,7 @@ class TransferFormWizard(SessionWizardView):
 
         elif self.current_step == TransferStep.RIGHTS:
             all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update(
-                {"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms}
-            )
+            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
 
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
@@ -744,9 +734,7 @@ class TransferFormWizard(SessionWizardView):
         if not settings.FILE_UPLOAD_ENABLED:
             return
 
-        session = UploadSession.objects.filter(
-            token=cleaned_data["session_token"]
-        ).first()
+        session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
 
         size = get_human_readable_size(session.upload_size, base=1024, precision=2)
 
@@ -756,9 +744,9 @@ class TransferFormWizard(SessionWizardView):
             LOGGER,
         )
 
-        cleaned_data["quantity_and_unit_of_measure"] = gettext(
-            "{0}, totalling {1}"
-        ).format(count, size)
+        cleaned_data["quantity_and_unit_of_measure"] = gettext("{0}, totalling {1}").format(
+            count, size
+        )
 
     def done(self, form_list, **kwargs):
         """Retrieve all of the form data, and creates a Submission from it.
@@ -779,9 +767,7 @@ class TransferFormWizard(SessionWizardView):
             if settings.FILE_UPLOAD_ENABLED:
                 token = form_data["session_token"]
                 LOGGER.info("Fetching session with the token %s", token)
-                submission.upload_session = UploadSession.objects.filter(
-                    token=token
-                ).first()
+                submission.upload_session = UploadSession.objects.filter(token=token).first()
             else:
                 LOGGER.info(
                     (
@@ -808,9 +794,7 @@ class TransferFormWizard(SessionWizardView):
 
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
 
-    def get_submission_group(
-        self, cleaned_form_data: dict
-    ) -> Optional[SubmissionGroup]:
+    def get_submission_group(self, cleaned_form_data: dict) -> Optional[SubmissionGroup]:
         """Get a submission group to associate the submission with, depending on how the user
         filled out the submission group section of the form.
         """
@@ -819,12 +803,8 @@ class TransferFormWizard(SessionWizardView):
         group_id = cleaned_form_data["group_id"]
         if group_id:
             try:
-                group = SubmissionGroup.objects.get(
-                    uuid=group_id, created_by=self.request.user
-                )
-                LOGGER.info(
-                    'Associating Submission with "%s" SubmissionGroup', group.name
-                )
+                group = SubmissionGroup.objects.get(uuid=group_id, created_by=self.request.user)
+                LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
             except SubmissionGroup.DoesNotExist as exc:
                 LOGGER.error(
@@ -876,9 +856,7 @@ def uploadfiles(request):
             session = UploadSession.new_session()
             session.save()
         else:
-            session = UploadSession.objects.filter(
-                token=headers["Upload-Session-Token"]
-            ).first()
+            session = UploadSession.objects.filter(token=headers["Upload-Session-Token"]).first()
             if session is None:
                 session = UploadSession.new_session()
                 session.save()
@@ -901,9 +879,7 @@ def uploadfiles(request):
                 check_for_malware(_file)
 
             except ValidationError as exc:
-                LOGGER.error(
-                    "Malware was found in the file %s", _file.name, exc_info=exc
-                )
+                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
                 _file.close()
                 issues.append(
                     {
@@ -920,14 +896,10 @@ def uploadfiles(request):
             new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
             new_file.save()
 
-        return JsonResponse(
-            {"uploadSessionToken": session.token, "issues": issues}, status=200
-        )
+        return JsonResponse({"uploadSessionToken": session.token, "issues": issues}, status=200)
 
     except Exception as exc:
-        LOGGER.error(
-            msg=("Uncaught exception in uploadfiles view: {0}".format(str(exc)))
-        )
+        LOGGER.error(msg=("Uncaught exception in uploadfiles view: {0}".format(str(exc))))
         return JsonResponse(
             {
                 "error": gettext("500 Internal Server Error"),
@@ -957,9 +929,7 @@ def accept_file(request):
             return JsonResponse(
                 {
                     "accepted": False,
-                    "error": gettext("Could not find {0} parameter in request").format(
-                        required
-                    ),
+                    "error": gettext("Could not find {0} parameter in request").format(required),
                 },
                 status=400,
             )
@@ -1039,9 +1009,9 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
         return {
             "accepted": False,
             "error": gettext("File is missing an extension."),
-            "verboseError": gettext(
-                'The file "{0}" does not have a file extension'
-            ).format(filename),
+            "verboseError": gettext('The file "{0}" does not have a file extension').format(
+                filename
+            ),
         }
 
     # Check extension is allowed
@@ -1056,12 +1026,10 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     if not extension_accepted:
         return {
             "accepted": False,
-            "error": gettext('Files with "{0}" extension are not allowed.').format(
-                extension
+            "error": gettext('Files with "{0}" extension are not allowed.').format(extension),
+            "verboseError": gettext('The file "{0}" has an invalid extension (.{1})').format(
+                filename, extension
             ),
-            "verboseError": gettext(
-                'The file "{0}" has an invalid extension (.{1})'
-            ).format(filename, extension),
         }
 
     # Check filesize is an integer
@@ -1097,9 +1065,9 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     if size > max_single_size_bytes:
         return {
             "accepted": False,
-            "error": gettext(
-                "File is too big ({0:.2f}MiB). Max filesize: {1}MiB"
-            ).format(size_mib, max_single_size),
+            "error": gettext("File is too big ({0:.2f}MiB). Max filesize: {1}MiB").format(
+                size_mib, max_single_size
+            ),
             "verboseError": gettext(
                 'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
             ).format(filename, size_mib, max_single_size),
@@ -1109,9 +1077,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     return {"accepted": True}
 
 
-def _accept_session(
-    filename: str, filesize: Union[str, int], session: UploadSession
-) -> dict:
+def _accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
     """Determine if a new file should be accepted as part of the session.
 
     These checks are applied:
@@ -1156,12 +1122,9 @@ def _accept_session(
     if int(filesize) > max_remaining_size_bytes:
         return {
             "accepted": False,
-            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(
-                max_size
-            ),
+            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
             "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the '
-                "{1}MiB max"
+                'The file "{0}" would push the total transfer size past the {1}MiB max'
             ).format(filename, max_size),
         }
 
@@ -1171,9 +1134,9 @@ def _accept_session(
         return {
             "accepted": False,
             "error": gettext("A file with the same name has already been uploaded."),
-            "verboseError": gettext(
-                'A file with the name "{0}" has already been uploaded'
-            ).format(filename),
+            "verboseError": gettext('A file with the name "{0}" has already been uploaded').format(
+                filename
+            ),
         }
 
     # All checks succeded
@@ -1261,9 +1224,7 @@ class SubmissionCsv(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + "_export-"
-        return queryset.export_csv(
-            version=ExportVersion.CAAIS_1_0, filename_prefix=prefix
-        )
+        return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
 class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
@@ -1283,10 +1244,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         """Check if the user is the creator of the submission group or is a staff member."""
-        return (
-            self.request.user.is_staff
-            or self.get_object().created_by == self.request.user
-        )
+        return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
     def handle_no_permission(self) -> HttpResponseForbidden:
         return HttpResponseForbidden("You do not have permission to access this page.")
@@ -1294,9 +1252,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
-        context["submissions"] = Submission.objects.filter(
-            part_of_group=self.get_object()
-        )
+        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         context["IS_NEW"] = False
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
         context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
@@ -1383,9 +1339,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
         if "transfer" in referer:
-            return JsonResponse(
-                {"message": error_message, "status": "error"}, status=400
-            )
+            return JsonResponse({"message": error_message, "status": "error"}, status=400)
         messages.error(
             self.request,
             self.error_message,
@@ -1395,11 +1349,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
-    if (
-        request.user.pk != user_id
-        and not request.user.is_staff
-        and not request.user.is_superuser
-    ):
+    if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
         return JsonResponse(
             {"error": gettext("You do not have permission to view these groups.")},
             status=403,
