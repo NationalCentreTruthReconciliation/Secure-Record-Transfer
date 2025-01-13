@@ -1,12 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const transferFormContextElement = document.getElementById("py_context_transfer_form");
-
-    if (!transferFormContextElement) {
-        return;
-    }
-
-    const context = JSON.parse(transferFormContextElement.textContent);
-
     const previousButton = document.getElementById("form-previous-button");
     const form = document.getElementById("transfer-form");
 
@@ -15,14 +7,14 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const hiddenInput1 = document.createElement("input");
         hiddenInput1.type = "hidden";
-        hiddenInput1.name = context.GO_TO_STEP_ACTION;
-        hiddenInput1.value = previousStepName;
+        hiddenInput1.name = "wizard_goto_step";
+        hiddenInput1.value = previousStep;
         form.appendChild(hiddenInput1);
 
         const hiddenInput2 = document.createElement("input");
         hiddenInput2.type = "hidden";
-        hiddenInput2.name = context.SAVE_FORM_ACTION;
-        hiddenInput2.value = currentStepName;
+        hiddenInput2.name = "save_form_step";
+        hiddenInput2.value = saveFormStep;
         form.appendChild(hiddenInput2);
 
         form.submit();
