@@ -16,9 +16,6 @@ if [ "$IS_RQ" = 'yes' ]; then
 
 # Bundle, minify, and collect static assets in the Django container
 else
-  echo ">> Running webpack to bundle + minify assets."
-  npm run build
-
   if [ "$ENV" != 'dev' ]; then
     echo ">> Collecting static files."
     python manage.py collectstatic --no-input --clear \
