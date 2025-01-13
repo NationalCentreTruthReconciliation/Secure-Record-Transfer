@@ -10,6 +10,7 @@
     {{ block.super }}
     <script src="{% static 'transferform.bundle.js' %}"></script>
     <script>currentFormStep = {{ wizard.steps.step1 }}</script>
+    <link rel="stylesheet" href="{% static 'transferform.css' %}">
 {% endblock javascript %}
 {% block content %}
     <div class="form-title title-text">

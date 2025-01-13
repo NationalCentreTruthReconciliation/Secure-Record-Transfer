@@ -16,3 +16,4 @@ class TransferStep(Enum):
     GROUP_TRANSFER = "grouptransfer"
     UPLOAD_FILES = "uploadfiles"
     FINAL_NOTES = "finalnotes"
+    REVIEW = "review"

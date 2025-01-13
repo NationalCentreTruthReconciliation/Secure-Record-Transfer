@@ -7,7 +7,6 @@ from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from django.conf import settings
-from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -101,22 +100,16 @@ class Index(TemplateView):
 def media_request(request: HttpRequest, path: str) -> HttpResponse:
     """Respond to whether a media request is allowed or not."""
     if not request.user.is_authenticated:
-        return HttpResponseForbidden(
-            "You do not have permission to access this resource."
-        )
+        return HttpResponseForbidden("You do not have permission to access this resource.")
 
     if not path:
         return HttpResponseNotFound("The requested resource could not be found")
 
     user = request.user
     if not user.is_staff:
-        return HttpResponseForbidden(
-            "You do not have permission to access this resource."
-        )
+        return HttpResponseForbidden("You do not have permission to access this resource.")
 
-    response = HttpResponse(
-        headers={"X-Accel-Redirect": djangosettings.MEDIA_URL + path.lstrip("/")}
-    )
+    response = HttpResponse(headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")})
 
     # Nginx will assign its own headers for the following:
     del response["Content-Type"]
@@ -153,9 +146,7 @@ class UserProfile(UpdateView):
     success_url = reverse_lazy("recordtransfer:userprofile")
     success_message = gettext("Preferences updated")
     password_change_success_message = gettext("Password updated")
-    error_message = gettext(
-        "There was an error updating your preferences. Please try again."
-    )
+    error_message = gettext("There was an error updating your preferences. Please try again.")
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -170,9 +161,7 @@ class UserProfile(UpdateView):
         ).order_by("-last_updated")
         in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
         in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
-        context["in_progress_page_obj"] = in_progress_paginator.get_page(
-            in_progress_page_number
-        )
+        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
 
         # Paginate Submission
         user_submissions = Submission.objects.filter(user=self.request.user).order_by(
@@ -180,14 +169,12 @@ class UserProfile(UpdateView):
         )
         submissions_paginator = Paginator(user_submissions, self.paginate_by)
         submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
-        context["submissions_page_obj"] = submissions_paginator.get_page(
-            submissions_page_number
-        )
+        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
 
         # Paginate SubmissionGroup
-        submission_groups = SubmissionGroup.objects.filter(
-            created_by=self.request.user
-        ).order_by("name")
+        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
+            "name"
+        )
         groups_paginator = Paginator(submission_groups, self.paginate_by)
         groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
         context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
@@ -342,9 +329,7 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.RECORD_DESCRIPTION: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Record Description"),
-            INFOMESSAGE: gettext(
-                "Provide a brief description of the records you're transferring"
-            ),
+            INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
         TransferStep.RIGHTS: {
             TEMPLATEREF: "recordtransfer/transferform_rights.html",
@@ -381,9 +366,12 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.FINAL_NOTES: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Final Notes"),
-            INFOMESSAGE: gettext(
-                "Add any final notes that may not have fit in previous steps"
-            ),
+            INFOMESSAGE: gettext("Add any final notes that may not have fit in previous steps"),
+        },
+        TransferStep.REVIEW: {
+            TEMPLATEREF: "recordtransfer/transferform_review.html",
+            FORMTITLE: gettext("Review"),
+            INFOMESSAGE: gettext("Review the information you've entered before submitting"),
         },
     }
 
@@ -452,17 +440,13 @@ class TransferFormWizard(SessionWizardView):
             return super().post(request, *args, **kwargs)
 
         past_data = self.storage.data
-        current_data = TransferFormWizard.format_step_data(
-            self.current_step, request.POST
-        )
+        current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
 
         title = None
         if isinstance(current_data, dict):
             title = current_data.get("accession_title")
         if not title:
-            title = self.get_form_value(
-                TransferStep.RECORD_DESCRIPTION, "accession_title"
-            )
+            title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
         data = {
             "save_form_step": self.current_step,
@@ -484,9 +468,7 @@ class TransferFormWizard(SessionWizardView):
         self.storage.current_step = transfer.current_step
 
     @classmethod
-    def format_step_data(
-        cls, step: TransferStep, data: QueryDict
-    ) -> Union[dict, list[dict]]:
+    def format_step_data(cls, step: TransferStep, data: QueryDict) -> Union[dict, list[dict]]:
         """Format form data for the current step to be saved for later.
 
         Args:
@@ -497,9 +479,7 @@ class TransferFormWizard(SessionWizardView):
             The formatted step data. If this step represents a formset, the return object will be a
             list of dicts, otherwise, it will be a dict.
         """
-        pattern = re.compile(
-            "^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$"
-        )
+        pattern = re.compile("^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$")
 
         formatted_data = []
         is_formset = False
@@ -612,10 +592,7 @@ class TransferFormWizard(SessionWizardView):
         """
         initial = (self.initial_dict or {}).get(step, {})
 
-        if (
-            self.in_progress_submission
-            and step == self.in_progress_submission.current_step
-        ):
+        if self.in_progress_submission and step == self.in_progress_submission.current_step:
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
         if step == TransferStep.CONTACT_INFO.value and isinstance(self.request.user, User):
@@ -656,9 +633,7 @@ class TransferFormWizard(SessionWizardView):
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
-            context.update(
-                {"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]}
-            )
+            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
 
         if self.current_step == TransferStep.GROUP_TRANSFER:
             context.update(
@@ -676,9 +651,7 @@ class TransferFormWizard(SessionWizardView):
 
         elif self.current_step == TransferStep.RIGHTS:
             all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update(
-                {"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms}
-            )
+            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
 
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
@@ -705,6 +678,27 @@ class TransferFormWizard(SessionWizardView):
 
         elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
             context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
+
+        elif self.current_step == TransferStep.UPLOAD_FILES:
+            context.update(
+                {
+                    # For use in template
+                    "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                    "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                    "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    # For use in JS
+                    "js_context": {
+                        "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                        "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                        "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                        "ACCEPTED_FILE_FORMATS": [
+                            f".{format}"
+                            for formats in settings.ACCEPTED_FILE_FORMATS.values()
+                            for format in formats
+                        ],
+                    },
+                }
+            )
 
         return context
 
@@ -737,9 +731,7 @@ class TransferFormWizard(SessionWizardView):
         if not settings.FILE_UPLOAD_ENABLED:
             return
 
-        session = UploadSession.objects.filter(
-            token=cleaned_data["session_token"]
-        ).first()
+        session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
 
         size = get_human_readable_size(session.upload_size, base=1024, precision=2)
 
@@ -749,9 +741,9 @@ class TransferFormWizard(SessionWizardView):
             LOGGER,
         )
 
-        cleaned_data["quantity_and_unit_of_measure"] = gettext(
-            "{0}, totalling {1}"
-        ).format(count, size)
+        cleaned_data["quantity_and_unit_of_measure"] = gettext("{0}, totalling {1}").format(
+            count, size
+        )
 
     def done(self, form_list, **kwargs):
         """Retrieve all of the form data, and creates a Submission from it.
@@ -769,12 +761,13 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Mapping form data to CAAIS metadata")
             submission.metadata = map_form_to_metadata(form_data)
 
-            if settings.FILE_UPLOAD_ENABLED:
-                token = form_data["session_token"]
-                LOGGER.info("Fetching session with the token %s", token)
-                submission.upload_session = UploadSession.objects.filter(
-                    token=token
+            if settings.FILE_UPLOAD_ENABLED and (
+                upload_session := UploadSession.objects.filter(
+                    token=form_data["session_token"]
                 ).first()
+            ):
+                submission.upload_session = upload_session
+                submission.upload_session.move_uploads_to_permanent_storage()
             else:
                 LOGGER.info(
                     (
@@ -801,9 +794,7 @@ class TransferFormWizard(SessionWizardView):
 
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
 
-    def get_submission_group(
-        self, cleaned_form_data: dict
-    ) -> Optional[SubmissionGroup]:
+    def get_submission_group(self, cleaned_form_data: dict) -> Optional[SubmissionGroup]:
         """Get a submission group to associate the submission with, depending on how the user
         filled out the submission group section of the form.
         """
@@ -812,12 +803,8 @@ class TransferFormWizard(SessionWizardView):
         group_id = cleaned_form_data["group_id"]
         if group_id:
             try:
-                group = SubmissionGroup.objects.get(
-                    uuid=group_id, created_by=self.request.user
-                )
-                LOGGER.info(
-                    'Associating Submission with "%s" SubmissionGroup', group.name
-                )
+                group = SubmissionGroup.objects.get(uuid=group_id, created_by=self.request.user)
+                LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
             except SubmissionGroup.DoesNotExist as exc:
                 LOGGER.error(
@@ -837,13 +824,12 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def uploadfiles(request):
-    """Upload one or more files to the server, and return a token representing the file upload
+def upload_file(request: HttpRequest) -> JsonResponse:
+    """Upload a single file to the server, and return a token representing the file upload
     session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded files will be added to the corresponding session, meaning this endpoint can be hit
-    multiple times for a large batch upload of files.
+    uploaded file will be added to the corresponding session.
 
-    Each file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if any
+    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
     file is not an accepted type, an error message is returned.
 
     Args:
@@ -851,80 +837,75 @@ def uploadfiles(request):
 
     Returns:
         JsonResponse: If the upload was successful, the session token is returned in
-            'upload_session_token'. If not successful, the error description is returned in 'error',
-            and a more verbose error is returned in 'verboseError'.
+        'upload_session_token'. If not successful, the error description is returned in 'error'.
     """
-    if not request.FILES:
-        return JsonResponse(
-            {
-                "error": gettext("No files were uploaded"),
-                "verboseError": gettext("No files were uploaded"),
-            },
-            status=400,
-        )
-
     try:
         headers = request.headers
-        if not "Upload-Session-Token" in headers or not headers["Upload-Session-Token"]:
+        session_token = headers.get("Upload-Session-Token")
+        session = (
+            UploadSession.objects.filter(token=session_token).first() if session_token else None
+        )
+        if not session:
             session = UploadSession.new_session()
             session.save()
-        else:
-            session = UploadSession.objects.filter(
-                token=headers["Upload-Session-Token"]
-            ).first()
-            if session is None:
-                session = UploadSession.new_session()
-                session.save()
 
-        issues = []
-        for _file in request.FILES.dict().values():
-            file_check = _accept_file(_file.name, _file.size)
-            if not file_check["accepted"]:
-                _file.close()
-                issues.append({"file": _file.name, **file_check})
-                continue
+        _file = request.FILES.get("file")
+        if not _file:
+            return JsonResponse(
+                {
+                    "uploadSessionToken": session.token,
+                    "error": gettext("No file was uploaded"),
+                },
+                status=400,
+            )
 
-            session_check = _accept_session(_file.name, _file.size, session)
-            if not session_check["accepted"]:
-                _file.close()
-                issues.append({"file": _file.name, **session_check})
-                continue
+        file_check = _accept_file(_file.name, _file.size)
+        if not file_check["accepted"]:
+            return JsonResponse(
+                {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+                status=400,
+            )
 
-            try:
-                check_for_malware(_file)
+        session_check = _accept_session(_file.name, _file.size, session)
+        if not session_check["accepted"]:
+            return JsonResponse(
+                {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+                status=400,
+            )
 
-            except ValidationError as exc:
-                LOGGER.error(
-                    "Malware was found in the file %s", _file.name, exc_info=exc
-                )
-                _file.close()
-                issues.append(
-                    {
-                        "file": _file.name,
-                        "accepted": False,
-                        "error": gettext("Malware detected in file"),
-                        "verboseError": gettext(
-                            f'Malware was detected in the file "{_file.name}"'
-                        ),
-                    }
-                )
-                continue
+        try:
+            check_for_malware(_file)
+        except ValidationError as exc:
+            LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+            return JsonResponse(
+                {
+                    "file": _file.name,
+                    "accepted": False,
+                    "uploadSessionToken": session.token,
+                    "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                },
+                status=400,
+            )
 
-            new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
-            new_file.save()
+        uploaded_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
+        uploaded_file.save()
+        file_url = uploaded_file.get_file_access_url()
 
         return JsonResponse(
-            {"uploadSessionToken": session.token, "issues": issues}, status=200
+            {
+                "file": _file.name,
+                "accepted": True,
+                "uploadSessionToken": session.token,
+                "url": file_url,
+            },
+            status=200,
         )
 
     except Exception as exc:
-        LOGGER.error(
-            msg=("Uncaught exception in uploadfiles view: {0}".format(str(exc)))
-        )
+        LOGGER.error(msg=("Uncaught exception in upload_file view: %s", exc))
         return JsonResponse(
             {
-                "error": gettext("500 Internal Server Error"),
-                "verboseError": gettext("500 Internal Server Error"),
+                "error": gettext("There was an internal server error. Please try again."),
             },
             status=500,
         )
@@ -950,9 +931,7 @@ def accept_file(request):
             return JsonResponse(
                 {
                     "accepted": False,
-                    "error": gettext("Could not find {0} parameter in request").format(
-                        required
-                    ),
+                    "error": gettext("Could not find {0} parameter in request").format(required),
                 },
                 status=400,
             )
@@ -1032,9 +1011,9 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
         return {
             "accepted": False,
             "error": gettext("File is missing an extension."),
-            "verboseError": gettext(
-                'The file "{0}" does not have a file extension'
-            ).format(filename),
+            "verboseError": gettext('The file "{0}" does not have a file extension').format(
+                filename
+            ),
         }
 
     # Check extension is allowed
@@ -1049,12 +1028,10 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     if not extension_accepted:
         return {
             "accepted": False,
-            "error": gettext('Files with "{0}" extension are not allowed.').format(
-                extension
+            "error": gettext('Files with "{0}" extension are not allowed.').format(extension),
+            "verboseError": gettext('The file "{0}" has an invalid extension (.{1})').format(
+                filename, extension
             ),
-            "verboseError": gettext(
-                'The file "{0}" has an invalid extension (.{1})'
-            ).format(filename, extension),
         }
 
     # Check filesize is an integer
@@ -1090,9 +1067,9 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     if size > max_single_size_bytes:
         return {
             "accepted": False,
-            "error": gettext(
-                "File is too big ({0:.2f}MiB). Max filesize: {1}MiB"
-            ).format(size_mib, max_single_size),
+            "error": gettext("File is too big ({0:.2f}MiB). Max filesize: {1}MiB").format(
+                size_mib, max_single_size
+            ),
             "verboseError": gettext(
                 'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
             ).format(filename, size_mib, max_single_size),
@@ -1102,9 +1079,7 @@ def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
     return {"accepted": True}
 
 
-def _accept_session(
-    filename: str, filesize: Union[str, int], session: UploadSession
-) -> dict:
+def _accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
     """Determine if a new file should be accepted as part of the session.
 
     These checks are applied:
@@ -1149,12 +1124,9 @@ def _accept_session(
     if int(filesize) > max_remaining_size_bytes:
         return {
             "accepted": False,
-            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(
-                max_size
-            ),
+            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
             "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the '
-                "{1}MiB max"
+                'The file "{0}" would push the total transfer size past the ' "{1}MiB max"
             ).format(filename, max_size),
         }
 
@@ -1164,13 +1136,103 @@ def _accept_session(
         return {
             "accepted": False,
             "error": gettext("A file with the same name has already been uploaded."),
-            "verboseError": gettext(
-                'A file with the name "{0}" has already been uploaded'
-            ).format(filename),
+            "verboseError": gettext('A file with the name "{0}" has already been uploaded').format(
+                filename
+            ),
         }
 
     # All checks succeded
     return {"accepted": True}
+
+
+@require_http_methods(["GET"])
+def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
+    """Get a list of metadata for files that have been uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+
+    Returns:
+        JsonResponse: A JSON response containing the list of uploaded files and their details,
+        or an error message if the session is not found.
+    """
+    session = UploadSession.objects.filter(token=session_token).first()
+    if not session:
+        # Create a new session if one is not found
+        session = UploadSession.new_session()
+        session.save()
+        return JsonResponse(
+            {"error": gettext("Upload session not found"), "uploadSessionToken": session.token},
+            status=404,
+        )
+
+    files = []
+    for uploaded_file in session.uploadedfile_set.all():
+        files.append(
+            {
+                "name": uploaded_file.name,
+                "size": uploaded_file.file_upload.size,
+                "url": uploaded_file.get_file_access_url(),
+            }
+        )
+
+    response_data = {"files": files, "uploadSessionToken": session.token}
+
+    return JsonResponse(response_data, safe=False, status=200)
+
+
+@require_http_methods(["DELETE", "GET"])
+def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
+    """Get or delete a file that has been uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+        filename: The name of the file to delete
+
+    Returns:
+        HttpResponse:
+            In the case of deletion, returns a 204 response when successfully deleted. In the case
+            of getting a file, redirects to the file's media path in development, or returns an
+            X-Accel-Redirect to the file's media path if in production.
+    """
+    session = UploadSession.objects.filter(token=session_token).first()
+    if not session:
+        return JsonResponse({"error": gettext("Upload session not found")}, status=404)
+
+    uploaded_file: UploadedFile = session.uploadedfile_set.filter(name=file_name).first()
+    if not uploaded_file:
+        return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
+
+    if request.method == "DELETE":
+        uploaded_file.delete()
+        # 204: No content (i.e., deletion succeeded, no message needed)
+        return HttpResponse(status=204)
+
+    elif settings.DEBUG:
+        try:
+            return HttpResponseRedirect(uploaded_file.get_file_media_url())
+        except FileNotFoundError:
+            return HttpResponseNotFound()
+
+    else:
+        try:
+            response = HttpResponse(
+                headers={"X-Accel-Redirect": uploaded_file.get_file_media_url()}
+            )
+        except FileNotFoundError:
+            return HttpResponseNotFound()
+
+        # Nginx will assign its own headers for the following:
+        del response["Content-Type"]
+        del response["Content-Disposition"]
+        del response["Accept-Ranges"]
+        del response["Set-Cookie"]
+        del response["Cache-Control"]
+        del response["Expires"]
+
+        return response
 
 
 class DeleteTransfer(TemplateView):
@@ -1254,9 +1316,7 @@ class SubmissionCsv(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + "_export-"
-        return queryset.export_csv(
-            version=ExportVersion.CAAIS_1_0, filename_prefix=prefix
-        )
+        return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
 class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
@@ -1276,10 +1336,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         """Check if the user is the creator of the submission group or is a staff member."""
-        return (
-            self.request.user.is_staff
-            or self.get_object().created_by == self.request.user
-        )
+        return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
     def handle_no_permission(self) -> HttpResponseForbidden:
         return HttpResponseForbidden("You do not have permission to access this page.")
@@ -1287,9 +1344,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
-        context["submissions"] = Submission.objects.filter(
-            part_of_group=self.get_object()
-        )
+        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         context["IS_NEW"] = False
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
         context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
@@ -1376,9 +1431,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
         if "transfer" in referer:
-            return JsonResponse(
-                {"message": error_message, "status": "error"}, status=400
-            )
+            return JsonResponse({"message": error_message, "status": "error"}, status=400)
         messages.error(
             self.request,
             self.error_message,
@@ -1388,11 +1441,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
-    if (
-        request.user.pk != user_id
-        and not request.user.is_staff
-        and not request.user.is_superuser
-    ):
+    if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
         return JsonResponse(
             {"error": gettext("You do not have permission to view these groups.")},
             status=403,
