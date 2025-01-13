@@ -112,6 +112,7 @@ body {
 
 .hero-button:hover a {
     color: #ee7421;
+    transition: color 0.3s ease;
 }
 
 .homepage-button {
