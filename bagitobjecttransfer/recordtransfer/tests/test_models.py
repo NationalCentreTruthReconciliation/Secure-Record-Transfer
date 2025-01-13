@@ -223,19 +223,17 @@ class TestUploadedFile(TestCase):
     def test_file_does_not_exist(self) -> None:
         """Test that the file does not exist."""
         # Delete the uploaded file from the file system
-        for file_path in settings.TEMP_STORAGE_FOLDER.rglob("test.pdf"):
-            if file_path.exists():
-                print("Deleting found file from: ", file_path)
-                file_path.unlink()
+        self.uploaded_file.file_upload.delete()
         self.assertFalse(self.uploaded_file.exists)
 
     def test_copy(self) -> None:
         """Test that the file is copied."""
         temp_dir = tempfile.mkdtemp()
-        original_file_path = self.uploaded_file.file_upload.path
         self.uploaded_file.copy(temp_dir)
         self.assertTrue(Path(temp_dir, "test.pdf").exists())
-        self.assertTrue(Path(original_file_path).exists())
+        self.assertTrue(
+            self.uploaded_file.file_upload.storage.exists(self.uploaded_file.file_upload.name)
+        )
 
     def test_move(self) -> None:
         """Test that the file is moved."""
@@ -265,7 +263,7 @@ class TestUploadedFile(TestCase):
         """Test that the file media URL is returned."""
         self.assertEqual(
             self.uploaded_file.get_file_media_url(),
-            settings.MEDIA_URL + settings.TEMP_URL + self.uploaded_file.file_upload.name
+            settings.MEDIA_URL + settings.TEMP_URL + self.uploaded_file.file_upload.name,
         )
 
     def test_get_permanent_file_media_url(self) -> None:
@@ -273,7 +271,7 @@ class TestUploadedFile(TestCase):
         self.uploaded_file.move_to_permanent_storage()
         self.assertEqual(
             self.uploaded_file.get_file_media_url(),
-            settings.MEDIA_URL + settings.UPLOAD_URL + self.uploaded_file.file_upload.name
+            settings.MEDIA_URL + settings.UPLOAD_URL + self.uploaded_file.file_upload.name,
         )
 
     def test_get_file_media_url_no_file(self) -> None:
