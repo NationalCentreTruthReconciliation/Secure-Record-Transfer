@@ -14,7 +14,6 @@
     <script>const saveFormStep = "{{ wizard.steps.current }}"</script>
 {% endblock javascript %}
 {% block content %}
-    {% include "includes/messages.html" %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
             {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
