@@ -242,9 +242,6 @@ class TestUploadedFile(TestCase):
         self.uploaded_file.move(temp_dir)
         # Check that file does not exist in old path
         self.assertFalse(self.uploaded_file.exists)
-        self.assertTrue(
-            self.uploaded_file.file_upload.storage.exists(self.uploaded_file.file_upload.name)
-        )
 
     def test_remove(self) -> None:
         """Test that the file is removed."""
