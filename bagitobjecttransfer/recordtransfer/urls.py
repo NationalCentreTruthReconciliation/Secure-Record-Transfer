@@ -81,7 +81,11 @@ urlpatterns = [
     ),
 ]
 
-if settings.TESTING or not settings.DEBUG:
+if settings.DEBUG:
+    # Serve media files directly without nginx in development
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # Check permissions and serve through nginx in production
     urlpatterns.append(
         re_path(r"media/(?P<path>.*)", login_required(views.media_request), name="media")
     )
@@ -91,7 +95,11 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
         [
             path("transfer/checkfile/", login_required(views.accept_file), name="checkfile"),
             path("transfer/uploadfile/", login_required(views.upload_file), name="uploadfile"),
-            path("transfer/upload-session/<session_token>/files/", login_required(views.list_uploaded_files), name="list_uploaded_files"),
+            path(
+                "transfer/upload-session/<session_token>/files/",
+                login_required(views.list_uploaded_files),
+                name="list_uploaded_files",
+            ),
             path(
                 "transfer/upload-session/<session_token>/files/<file_name>/",
                 login_required(views.uploaded_file),
@@ -128,6 +136,3 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
         ]
     )
 
-# Serve media files directly without nginx during development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

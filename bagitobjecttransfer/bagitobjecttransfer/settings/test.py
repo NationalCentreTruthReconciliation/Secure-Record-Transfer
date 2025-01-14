@@ -1,9 +1,7 @@
 # Minimal settings for either testing, or building docs with Sphinx
 import os
-from pathlib import Path
 import tempfile
-
-from decouple import config
+from pathlib import Path
 
 from .base import *
 
