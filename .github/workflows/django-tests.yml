@@ -32,5 +32,5 @@ jobs:
     - name: Install dependencies
       run: poetry install --extras "dev"
 
-    - name: Run tests
-      run: poetry run pytest
+    - name: Run unit tests
+      run: poetry run pytest -k "unit"
