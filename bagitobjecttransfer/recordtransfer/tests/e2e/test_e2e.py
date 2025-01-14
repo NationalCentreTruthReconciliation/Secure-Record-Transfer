@@ -1,4 +1,3 @@
-import pytest
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -9,7 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from recordtransfer.models import User
 
 
-@pytest.mark.e2e
 class TransferFormWizardTest(LiveServerTestCase):
     """End-to-end tests for the transfer form wizard."""
 
@@ -21,10 +19,8 @@ class TransferFormWizardTest(LiveServerTestCase):
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        prefs = {
-            'autofill.profile_enabled': False
-        }
-        chrome_options.add_experimental_option('prefs', prefs)
+        prefs = {"autofill.profile_enabled": False}
+        chrome_options.add_experimental_option("prefs", prefs)
 
         # Set up the web driver (e.g., Chrome)
         self.driver = webdriver.Chrome(options=chrome_options)
