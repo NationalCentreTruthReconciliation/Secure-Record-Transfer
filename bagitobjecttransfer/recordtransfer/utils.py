@@ -85,7 +85,7 @@ def get_human_readable_size(
     }
 
     if size_bytes < base:
-        return f"{size_bytes} {suffixes[base][0]}"
+        return f"{size_bytes:.0f} {suffixes[base][0]}"
 
     size_float = float(size_bytes)
     base_float = float(base)

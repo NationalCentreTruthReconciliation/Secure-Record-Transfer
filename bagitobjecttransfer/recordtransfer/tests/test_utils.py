@@ -63,6 +63,7 @@ class HumanReadableSizeUtilityTests(TestCase):
         param_list = [
             (0, 1024, "0 B"),
             (0, 1000, "0 B"),
+            (1.0, 1024, "1 B"),
             (5, 1024, "5 B"),
             (5, 1000, "5 B"),
             (1023, 1024, "1023 B"),
