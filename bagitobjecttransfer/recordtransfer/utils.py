@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -58,7 +59,11 @@ def html_to_text(html: str) -> str:
     return "\n".join(plain_text_split)
 
 
-def get_human_readable_size(size_bytes: int | float, base: int = 1024, precision: int = 2) -> str:
+def get_human_readable_size(
+    size_bytes: Union[int, float],
+    base: int = 1024,
+    precision: int = 2,
+) -> str:
     """Convert bytes into a human-readable size.
 
     Args:
@@ -130,7 +135,7 @@ def get_human_readable_file_count(file_names: list[str]) -> str:
     return string_statement
 
 
-def count_file_types(file_names: list[str]) -> dict[str | None, int]:
+def count_file_types(file_names: list[str]) -> dict[Union[str, None], int]:
     """Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
