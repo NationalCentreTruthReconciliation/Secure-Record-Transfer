@@ -166,7 +166,7 @@ def session_upload_location(instance, filename):
 
 
 class UploadedFile(models.Model):
-    """Represents a file that a user uploaded during an upload session"""
+    """Represent a file that a user uploaded during an upload session."""
 
     name = models.CharField(max_length=256, null=True, default="-")
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
@@ -176,15 +176,15 @@ class UploadedFile(models.Model):
     temp = models.BooleanField(default=True)
 
     @property
-    def exists(self):
+    def exists(self) -> bool:
         """Determine if the file this object represents exists on the file system.
 
         Returns:
             (bool): True if file exists, False otherwise
         """
-        return self.file_upload and self.file_upload.storage.exists(self.file_upload.name)
+        return bool(self.file_upload) and self.file_upload.storage.exists(self.file_upload.name)
 
-    def copy(self, new_path):
+    def copy(self, new_path: str) -> None:
         """Copy this file to a new path.
 
         Args:
@@ -193,7 +193,7 @@ class UploadedFile(models.Model):
         if self.file_upload:
             shutil.copy2(self.file_upload.path, new_path)
 
-    def move(self, new_path):
+    def move(self, new_path: str) -> None:
         """Move this file to a new path.
 
         Args:
@@ -208,7 +208,7 @@ class UploadedFile(models.Model):
         shutil.move(self.file_upload.path, new_path)
         self.remove()
 
-    def remove(self):
+    def remove(self) -> None:
         """Delete the real file-system representation of this model."""
         if self.file_upload:
             self.file_upload.delete(save=True)
@@ -248,6 +248,7 @@ class UploadedFile(models.Model):
             self.save()
 
     def __str__(self):
+        """Return a string representation of this object."""
         if self.exists:
             return f"{self.name} | Session {self.session}"
         return f"{self.name} Removed! | Session {self.session}"
