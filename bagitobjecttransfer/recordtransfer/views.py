@@ -245,6 +245,9 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
+        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
+        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
+        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
         context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
         context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
         context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
@@ -674,9 +677,6 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.SOURCE_INFO:
-            all_roles = SourceRole.objects.all().exclude(name="Other")
-            all_types = SourceType.objects.all().exclude(name="Other")
-
             other_role = SourceRole.objects.filter(name="Other").first()
             other_type = SourceType.objects.filter(name="Other").first()
 
@@ -691,15 +691,12 @@ class TransferFormWizard(SessionWizardView):
                         "other_role_id": other_role.pk if other_role else 0,
                         "other_type_id": other_type.pk if other_type else 0,
                     },
-                    "source_roles": all_roles,
-                    "source_types": all_types,
                 }
             )
 
         elif self.current_step == TransferStep.RIGHTS:
             context.update(
                 {
-                    "rights": RightsType.objects.all().exclude(name="Other"),
                     "js_context": {
                         "formset_prefix": "rights",
                     },

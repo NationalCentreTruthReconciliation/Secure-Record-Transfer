@@ -34,14 +34,22 @@ body {
     padding: 10px 0px;
 }
 
+h1,
 .title-text {
+    font-weight: normal;
     color: #333333;
     font-size: 20pt;
 }
 
+h2,
 .medium-text {
+    font-weight: normal;
     color: #333333;
     font-size: 16pt;
+}
+
+li {
+    margin-top: 5px;
 }
 
 #main-graphic-container {

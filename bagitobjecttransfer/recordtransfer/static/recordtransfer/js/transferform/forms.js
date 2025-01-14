@@ -313,68 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
      * Dialog Box Setup
      **************************************************************************/
 
-    var rightsDialog = undefined
-    var sourceRolesDialog = undefined
-    var sourceTypesDialog = undefined
-
-    rightsDialog = $('#rights-dialog').dialog({
-        autoOpen: false,
-        modal: false,
-        width: 500,
-        position: { my: "center", at: "top", of: window },
-        buttons: [
-            {
-                text: "OK",
-                click: () => { rightsDialog.dialog("close") }
-            }
-        ],
-    })
-
-    $('#show-rights-dialog').on("click", (event) => {
-        event.preventDefault()
-        rightsDialog.dialog("open")
-        rightsDialog.dialog("moveToTop")
-    })
-
-    sourceRolesDialog = $('#source-roles-dialog').dialog({
-        autoOpen: false,
-        modal: false,
-        width: 500,
-        position: { my: "center", at: "top", of: window },
-        buttons: [
-            {
-                text: "OK",
-                click: () => { sourceRolesDialog.dialog("close") }
-            }
-        ],
-    })
-
-    $('#show-source-roles-dialog').on("click", (event) => {
-        event.preventDefault()
-        sourceRolesDialog.dialog("open")
-        sourceRolesDialog.dialog("moveToTop")
-    })
-
-    sourceTypesDialog = $('#source-types-dialog').dialog({
-        autoOpen: false,
-        modal: false,
-        width: 500,
-        position: { my: "center", at: "top", of: window },
-        buttons: [
-            {
-                text: "OK",
-                click: () => { sourceTypesDialog.dialog("close") }
-            }
-        ],
-    })
-
-    $('#show-source-types-dialog').on("click", (event) => {
-        event.preventDefault()
-        sourceTypesDialog.dialog("open")
-        sourceTypesDialog.dialog("moveToTop")
-    })
-
-    addNewGroupDialog = $('#add-new-group-dialog').dialog({
+    const addNewGroupDialog = $('#add-new-group-dialog').dialog({
         autoOpen: false,
         modal: true,
         width: 700,
