@@ -16,19 +16,26 @@ header {
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
     list-style-type: none;
     list-style: none;
 }
 
+.nav-title {
+    margin-left: 20px;
+    flex-grow: 1;
+    align-content: start;
+    justify-content: flex-start;
+    text-align: left;
+}
+
 .nav-link {
     text-decoration: none;
     color: #333333;
-    display: block;
-    line-height: 50px;
+    line-height: 40px;
 }
 
+#app-title:hover,
 .nav-link:hover,
 .nav-link:hover::after {
     color: #ee7421;
@@ -36,7 +43,7 @@ header {
 
 .nav-logo {
     order: 0;
-    flex: 1;
+    flex-grow: 0;
 }
 
 .nav-toggle-open {
@@ -72,21 +79,12 @@ header {
     height: 70px;
 }
 
-#app-title {
-    line-height: 70px;
-    position: absolute;
-    margin-left: 10px;
-}
-
 /* Desktop menu (design is mobile-first) */
 @media all and (min-width: 800px) {
     .main-navbar {
         align-items: flex-start;
         flex-wrap: nowrap;
         background: none;
-    }
-    .nav-logo {
-        order: 0;
     }
     .nav-item {
         order: 1;

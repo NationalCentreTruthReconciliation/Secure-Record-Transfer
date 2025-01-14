@@ -13,7 +13,14 @@ from django_countries.widgets import CountrySelectWidget
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
-from recordtransfer.constants import ID_SUBMISSION_GROUP_SELECTION
+from recordtransfer.constants import (
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SUBMISSION_GROUP_SELECTION,
+)
 from recordtransfer.models import SubmissionGroup
 
 
@@ -40,17 +47,18 @@ class ContactInfoForm(TransferForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        region = cleaned_data["province_or_state"]
-        if region.lower() == "other" and not cleaned_data["other_province_or_state"]:
-            self.add_error(
-                "other_province_or_state",
-                'This field must be filled out if "Other" province or state is selected',
-            )
-        elif region.lower() == "":
+        region = cleaned_data.get("province_or_state")
+        if not region or region.lower() == "":
             self.add_error(
                 "province_or_state",
                 'You must select a province or state, use "Other" to enter a custom location',
             )
+        elif region.lower() == "other" and not cleaned_data["other_province_or_state"]:
+            self.add_error(
+                "other_province_or_state",
+                'This field must be filled out if "Other" province or state is selected',
+            )
+
         return cleaned_data
 
     contact_name = forms.CharField(
@@ -191,6 +199,7 @@ class ContactInfoForm(TransferForm):
             ("WI", "Wisconsin"),
             ("WY", "Wyoming"),
         ],
+        initial="",
     )
 
     other_province_or_state = forms.CharField(
@@ -233,55 +242,109 @@ class ContactInfoForm(TransferForm):
 
 
 class SourceInfoForm(TransferForm):
-    """The Source Information portion of the form. Contains fields from Section 2 of CAAIS"""
+    """The Source Information portion of the form. Contains fields from Section 2 of CAAIS.
 
-    def clean(self):
+    This form is nominally "optional," but a user can fill in the fields if they want to. The
+    source name, source type, and source role are all required in CAAIS, so if a user chooses not
+    to fill in the form, we use defaults from the initial data for those fields.
+    """
+
+    def __init__(self, *args, **kwargs):
+        if "defaults" not in kwargs:
+            raise ValueError(
+                "SourceInfoForm requires default data (i.e., defaults should be a keyword "
+                "argument)"
+            )
+
+        self.defaults = kwargs.pop("defaults")
+
+        for required in ("source_name", "source_type", "source_role"):
+            if required not in self.defaults:
+                raise ValueError(f"SourceInfoForm requires a default value for {required}")
+
+        self.default_source_name = self.defaults["source_name"]
+        self.default_source_type = self.defaults["source_type"]
+        self.default_source_role = self.defaults["source_role"]
+
+        super().__init__(*args, **kwargs)
+
+    def clean(self) -> dict:
+        """Clean form and set defaults if the user chose not to enter source info manually.
+
+        As none of the fields are required, we need to check whether they are set here.
+        """
         cleaned_data = super().clean()
+
+        enter_manual = cleaned_data["enter_manual_source_info"]
+
+        # Set defaults if manual entry is not selected
+        if enter_manual == "no":
+            cleaned_data["source_name"] = self.default_source_name
+            cleaned_data["source_type"] = self.default_source_type
+            cleaned_data["other_source_type"] = ""
+            cleaned_data["source_role"] = self.default_source_role
+            cleaned_data["other_source_role"] = ""
+            cleaned_data["source_note"] = ""
+            cleaned_data["preliminary_custodial_history"] = ""
+
+        source_name = cleaned_data.get("source_name", "")
+
+        if not source_name:
+            self.add_error("source_name", gettext("This field is required."))
 
         source_type = cleaned_data.get("source_type", None)
         other_source_type = cleaned_data.get("other_source_type", "")
 
-        if (not source_type or source_type.name.lower() == "other") and not other_source_type:
-            self.add_error(
-                "source_type",
-                gettext(
-                    'If "Other source type" is empty, you must choose one of the '
-                    "Source types here"
-                ),
-            )
+        if not source_type:
+            self.add_error("source_type", gettext("This field is required."))
+
+        elif source_type.name.lower() == "other" and not other_source_type:
             self.add_error(
                 "other_source_type",
-                gettext('If "Source type" is Other, you must enter a different type ' "here"),
+                gettext('If "Source type" is Other, you must enter your own source type here'),
             )
 
         source_role = cleaned_data.get("source_role", None)
         other_source_role = cleaned_data.get("other_source_role", "")
-        if (not source_role or source_role.name.lower() == "other") and not other_source_role:
-            self.add_error(
-                "source_role",
-                gettext(
-                    'If "Other source role" is empty, you must choose one of the '
-                    "Source roles here"
-                ),
-            )
+
+        if not source_role:
+            self.add_error("source_role", gettext("This field is required."))
+
+        elif source_role.name.lower() == "other" and not other_source_role:
             self.add_error(
                 "other_source_role",
-                gettext('If "Source role" is Other, you must enter a different type ' "here"),
+                gettext('If "Source role" is Other, you must enter your own source role here'),
             )
 
         return cleaned_data
 
+    enter_manual_source_info = forms.ChoiceField(
+        choices=[
+            ("yes", gettext("Yes")),
+            ("no", gettext("No")),
+        ],
+        widget=forms.RadioSelect(
+            attrs={"id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
+        ),
+        label=gettext("Submitting on behalf of an organization/another person"),
+        initial="no",
+    )
+
     source_name = forms.CharField(
         max_length=64,
         min_length=2,
-        required=True,
-        widget=forms.TextInput(),
+        required=False,  # Required if enter_manual_source_info == "yes"
+        widget=forms.TextInput(
+            attrs={
+                "class": "faux-required-field",
+            }
+        ),
         label=gettext("Name of source"),
         help_text=gettext("The organization or entity submitting the records"),
     )
 
     source_type = forms.ModelChoiceField(
-        required=True,
+        required=False,  # Required if enter_manual_source_info == "yes"
         queryset=SourceType.objects.all()
         .annotate(
             sort_order_other_first=Case(
@@ -292,14 +355,15 @@ class SourceInfoForm(TransferForm):
         )
         .order_by("sort_order_other_first"),
         empty_label=gettext("Please select one"),
-        label=gettext("* Source type"),
+        label=gettext("Source type"),
         help_text=gettext(
             "How would you describe <b>what</b> the source entity is? "
             "i.e., The source is a(n) ______"
         ),
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width",
+                "class": "reduce-form-field-width faux-required-field",
+                "id": ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
     )
@@ -309,14 +373,15 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source type not covered by the other choices"),
-                "class": "source-type-select-other",
+                "class": "faux-required-field",
+                "id": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
         label=gettext("Other source type"),
     )
 
     source_role = forms.ModelChoiceField(
-        required=True,
+        required=False,  # Required if enter_manual_source_info == "yes"
         queryset=SourceRole.objects.all()
         .annotate(
             sort_order_other_first=Case(
@@ -327,11 +392,12 @@ class SourceInfoForm(TransferForm):
         )
         .order_by("sort_order_other_first"),
         empty_label=gettext("Please select one"),
-        label=gettext("** Source role"),
+        label=gettext("Source role"),
         help_text=gettext("How does the source relate to the records? "),
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width",
+                "class": "reduce-form-field-width faux-required-field",
+                "id": ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
     )
@@ -341,7 +407,8 @@ class SourceInfoForm(TransferForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("A source role not covered by the other choices"),
-                "class": "source-role-select-other",
+                "class": "faux-required-field",
+                "id": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),
         label=gettext("Other source role"),
@@ -420,13 +487,9 @@ class RecordDescriptionForm(TransferForm):
 
         if not err:
             if cleaned_data.get("start_date_is_approximate", False):
-                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(
-                    date=start_date_text
-                )
+                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date_text)
             if cleaned_data.get("end_date_is_approximate", False):
-                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(
-                    date=end_date_text
-                )
+                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date_text)
 
             if start_date == end_date:
                 cleaned_data["date_of_materials"] = start_date

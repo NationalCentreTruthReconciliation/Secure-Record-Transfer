@@ -1,0 +1,21 @@
+{% load i18n %}
+{% load query_params %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?{% update_query_params pagination_name page_obj.previous_page_number %}"
+           class="btn-arrow btn-arrow-left">{% trans "Previous" %}</a>
+    {% else %}
+        <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true">{% trans "Previous" %}</a>
+    {% endif %}
+    <span>
+        {% blocktrans with curr_page=page_obj.number total_pages=page_obj.paginator.num_pages %}
+            Page {{ curr_page }} of {{ total_pages }}
+        {% endblocktrans %}
+    </span>
+    {% if page_obj.has_next %}
+        <a href="?{% update_query_params pagination_name page_obj.next_page_number %}"
+           class="btn-arrow btn-arrow-right">{% trans "Next" %}</a>
+    {% else %}
+        <a class="btn-arrow btn-arrow-right disabled" aria-disabled="true">{% trans "Next" %}</a>
+    {% endif %}
+</div>

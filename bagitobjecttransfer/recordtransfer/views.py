@@ -1,7 +1,7 @@
 import logging
 import pickle
 import re
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, cast
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
 from django.forms import BaseModelForm
 from django.http import (
@@ -45,15 +46,25 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
+    GROUPS_PAGE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
+    ID_FIRST_NAME,
     ID_GETS_NOTIFICATION_EMAILS,
+    ID_LAST_NAME,
     ID_NEW_PASSWORD,
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
+    IN_PROGRESS_PAGE,
     INFOMESSAGE,
+    SUBMISSIONS_PAGE,
     TEMPLATEREF,
 )
 from recordtransfer.emails import (
@@ -146,26 +157,55 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-        context["in_progress_submissions"] = InProgressSubmission.objects.filter(
+
+        # Paginate InProgressSubmission
+        in_progress_submissions = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
-        context["user_submissions"] = Submission.objects.filter(user=self.request.user).order_by(
+        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
+        in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
+        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
+
+        # Paginate Submission
+        user_submissions = Submission.objects.filter(user=self.request.user).order_by(
             "-submission_date"
         )
-        context["submission_groups"] = SubmissionGroup.objects.filter(
-            created_by=self.request.user
-        ).order_by("name")
+        submissions_paginator = Paginator(user_submissions, self.paginate_by)
+        submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
+        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
 
-        context["ID_GETS_NOTIFICATION_EMAILS"] = ID_GETS_NOTIFICATION_EMAILS
-        context["ID_CURRENT_PASSWORD"] = ID_CURRENT_PASSWORD
-        context["ID_NEW_PASSWORD"] = ID_NEW_PASSWORD
-        context["ID_CONFIRM_NEW_PASSWORD"] = ID_CONFIRM_NEW_PASSWORD
+        # Paginate SubmissionGroup
+        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
+            "name"
+        )
+        groups_paginator = Paginator(submission_groups, self.paginate_by)
+        groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
+        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
+
+        context.update(
+            {
+                # Form field element IDs
+                "js_context": {
+                    "ID_FIRST_NAME": ID_FIRST_NAME,
+                    "ID_LAST_NAME": ID_LAST_NAME,
+                    "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
+                    "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
+                    "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
+                    "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                },
+                # Pagination
+                "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
+                "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
+                "GROUPS_PAGE": GROUPS_PAGE,
+            }
+        )
+
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
         kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.get_object()
+        kwargs["instance"] = self.get_object()
         return kwargs
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
@@ -192,7 +232,9 @@ class UserProfile(UpdateView):
             self.request,
             self.error_message,
         )
-        return super().form_invalid(form)
+        profile_form = cast(UserProfileForm, form)
+        profile_form.reset_form()
+        return super().form_invalid(profile_form)
 
 
 class About(TemplateView):
@@ -282,11 +324,9 @@ class TransferFormWizard(SessionWizardView):
         },
         TransferStep.SOURCE_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
-            FORMTITLE: gettext("Source Information"),
+            FORMTITLE: gettext("Source Information (Optional)"),
             INFOMESSAGE: gettext(
-                "Enter the info for the source of the records. The source is the person or entity "
-                "that created the records or is holding the records at the moment. If this is you, "
-                "put your own information in"
+                "Select Yes if you would like to manually enter source information"
             ),
         },
         TransferStep.RECORD_DESCRIPTION: {
@@ -420,6 +460,32 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
+    def render_goto_step(self, *args, **kwargs) -> HttpResponse:
+        """Save current step data before going back to a previous step."""
+        form = self.get_form(data=self.request.POST, files=self.request.FILES)
+        self.storage.set_step_data(self.steps.current, self.process_step(form))
+        self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+        return super().render_goto_step(*args, **kwargs)
+
+    def render_next_step(self, form, **kwargs):
+        """Render next step of form. Overrides parent method to clear errors from the form."""
+        # get the form instance based on the data from the storage backend
+        # (if available).
+        next_step = self.steps.next
+        new_form = self.get_form(
+            next_step,
+            data=self.storage.get_step_data(next_step),
+            files=self.storage.get_step_files(next_step),
+        )
+        ##########################
+        # This part is different from the parent class. We need to clear the errors from the form
+        new_form.errors.clear()
+        ##########################
+
+        # change the stored current step
+        self.storage.current_step = next_step
+        return self.render(new_form, **kwargs)
+
     def load_transfer_data(self, transfer: InProgressSubmission) -> None:
         """Load the transfer data from an InProgressSubmission instance."""
         self.storage.data = pickle.loads(transfer.step_data)["past"]
@@ -451,7 +517,12 @@ class TransferFormWizard(SessionWizardView):
             field: str = match_obj.group("field")
             index: str = match_obj.group("index")
 
-            if field in {"MIN_NUM_FORMS", "MAX_NUM_FORMS", "TOTAL_FORMS", "INITIAL_FORMS"}:
+            if field in {
+                "MIN_NUM_FORMS",
+                "MAX_NUM_FORMS",
+                "TOTAL_FORMS",
+                "INITIAL_FORMS",
+            }:
                 continue
 
             if index:
@@ -522,27 +593,54 @@ class TransferFormWizard(SessionWizardView):
         """Retrieve the name of the template for the current step."""
         return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
 
-    def get_form_initial(self, step):
-        """Populate form with saved transfer data (if a "resume" request was received), and add the
-        user's name and email from their user profile.
+    def get_name_of_user(self, user: User) -> str:
+        """Get the name of a user.
+
+        Tries to get the name from the User object first, and falls back to using the form data
+        submitted in the contact info.
         """
-        initial = self.initial_dict.get(step, {})
+        if user:
+            if user.first_name and user.last_name:
+                return f"{user.first_name} {user.last_name}"
+            elif user.first_name:
+                return user.first_name
+            elif user.last_name:
+                return user.last_name
+        return self.get_form_value(TransferStep.CONTACT_INFO, "contact_name") or ""
+
+    def get_form_initial(self, step: str) -> dict:
+        """Populate the initial state of the form.
+
+        Populate form with saved transfer data if a "resume" request was received. Fills in the
+        user's name and email automatically where possible.
+        """
+        initial = (self.initial_dict or {}).get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
-        if step == TransferStep.CONTACT_INFO.value:
-            curr_user = self.request.user
-            if curr_user.first_name and curr_user.last_name:
-                initial["contact_name"] = f"{curr_user.first_name} {curr_user.last_name}"
-            initial["email"] = str(curr_user.email)
+        if step == TransferStep.CONTACT_INFO.value and isinstance(self.request.user, User):
+            initial["contact_name"] = self.get_name_of_user(self.request.user)
+            initial["email"] = str(self.request.user.email)
 
         return initial
 
-    def get_form_kwargs(self, step=None):
+    def get_form_kwargs(self, step: Optional[str] = None) -> dict:
+        """Add data to inject when initializing the form."""
         kwargs = super().get_form_kwargs(step)
+
         if step == TransferStep.GROUP_TRANSFER.value:
             kwargs["user"] = self.request.user
+
+        elif step == TransferStep.SOURCE_INFO.value:
+            source_type, _ = SourceType.objects.get_or_create(name="Individual")
+            source_role, _ = SourceRole.objects.get_or_create(name="Donor")
+            kwargs["defaults"] = {
+                "source_name": self.get_name_of_user(self.request.user),  # type: ignore
+                "source_type": source_type,
+                "source_role": source_role,
+            }
+
         return kwargs
 
     def get_context_data(self, form, **kwargs):
@@ -578,8 +676,21 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.SOURCE_INFO:
             all_roles = SourceRole.objects.all().exclude(name="Other")
             all_types = SourceType.objects.all().exclude(name="Other")
+
+            other_role = SourceRole.objects.filter(name="Other").first()
+            other_type = SourceType.objects.filter(name="Other").first()
+
             context.update(
                 {
+                    "js_context": {
+                        "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                        "id_source_type": ID_SOURCE_INFO_SOURCE_TYPE,
+                        "id_other_source_type": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                        "id_source_role": ID_SOURCE_INFO_SOURCE_ROLE,
+                        "id_other_source_role": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+                        "other_role_id": other_role.pk if other_role else 0,
+                        "other_type_id": other_type.pk if other_type else 0,
+                    },
                     "source_roles": all_roles,
                     "source_types": all_types,
                 }
@@ -599,7 +710,7 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "js_context": {
-                        "formset_prefix": "other_identifiers",
+                        "formset_prefix": "otheridentifiers",
                     },
                 },
             )
@@ -719,7 +830,11 @@ class TransferFormWizard(SessionWizardView):
                 LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
 
             except SubmissionGroup.DoesNotExist as exc:
-                LOGGER.error("Could not find SubmissionGroup with UUID %s", group_id, exc_info=exc)
+                LOGGER.error(
+                    "Could not find SubmissionGroup with UUID %s",
+                    group_id,
+                    exc_info=exc,
+                )
         else:
             LOGGER.info("Not associating submission with a group")
 
@@ -1031,7 +1146,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
             "accepted": False,
             "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
             "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the ' "{1}MiB max"
+                'The file "{0}" would push the total transfer size past the {1}MiB max'
             ).format(filename, max_size),
         }
 
@@ -1258,7 +1373,8 @@ def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonRespon
     """Retrieve the groups associated with the current user."""
     if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
         return JsonResponse(
-            {"error": gettext("You do not have permission to view these groups.")}, status=403
+            {"error": gettext("You do not have permission to view these groups.")},
+            status=403,
         )
 
     submission_groups = SubmissionGroup.objects.filter(created_by=user_id)

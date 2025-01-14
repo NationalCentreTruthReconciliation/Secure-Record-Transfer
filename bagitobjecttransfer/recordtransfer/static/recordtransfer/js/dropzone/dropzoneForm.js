@@ -3,19 +3,19 @@
  */
 import Dropzone from "dropzone";
 
-Dropzone.autoDiscover = false
+Dropzone.autoDiscover = false;
 
 /**
  * Get a cookie's value by its name.
- * @param {String} name The name of the cookie to retrieve from the user
- * @returns {String} The cookie value. null if it does not exist
+ * @param {string} name The name of the cookie to retrieve from the user
+ * @returns {string} The cookie value. null if it does not exist
  */
 function getCookie(name) {
-    if (!document.cookie || document.cookie === '') {
+    if (!document.cookie || document.cookie === "") {
         return null;
     }
 
-    const cookies = document.cookie.split(';');
+    const cookies = document.cookie.split(";");
     const targetCookie = cookies
         .map(cookie => cookie.trim())
         .find(cookie => cookie.startsWith(`${name}=`));
@@ -29,12 +29,12 @@ function getCookie(name) {
 
 /**
  * Appends an error message to the page in the dropzone-errors element.
- * @param {String} errorMessage The error message to show
+ * @param {string} errorMessage The error message to show
  */
 function addDropzoneError(errorMessage) {
-    const errorZone = document.getElementById('dropzone-errors');
-    const newError = document.createElement('div');
-    newError.className = 'field-error';
+    const errorZone = document.getElementById("dropzone-errors");
+    const newError = document.createElement("div");
+    newError.className = "field-error";
     newError.innerHTML = errorMessage;
     errorZone.appendChild(newError);
 }
@@ -43,7 +43,7 @@ function addDropzoneError(errorMessage) {
  * Removes all errors shown in the dropzone-errors element.
  */
 function clearDropzoneErrors() {
-    const errorZone = document.getElementById('dropzone-errors');
+    const errorZone = document.getElementById("dropzone-errors");
     while (errorZone.lastElementChild) {
         errorZone.removeChild(errorZone.lastElementChild);
     }
@@ -53,9 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
     var issueFiles = [];    // An array of file names
     var uploadedFiles = []; // An array of File objects
     var totalSizeBytes = 0;
-    var sessionToken = '';
-    const csrfToken = getCookie('csrftoken');
-    const dropMessage = document.querySelector('.dz-message'); // Custom drop message
+    var sessionToken = "";
+    const csrfToken = getCookie("csrftoken");
+    const dropMessage = document.querySelector(".dz-message"); // Custom drop message
 
     // Context injected from template
     const dropzoneContextElement = document.getElementById("py_context_dropzone");
@@ -66,51 +66,47 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxTotalUploadSizeBytes = maxTotalUploadSize * 1024 * 1024;
 
     // Update total size of all uploads in dropzone area
+    /**
+     *
+     * @param file
+     * @param operation
+     */
     function updateTotalSize(file, operation) {
-        let changed = false
-        if (operation === '+') {
-            totalSizeBytes += file.size
-            changed = true
+        let changed = false;
+        if (operation === "+") {
+            totalSizeBytes += file.size;
+            changed = true;
         }
-        else if (operation === '-') {
-            totalSizeBytes -= file.size
-            changed = true
+        else if (operation === "-") {
+            totalSizeBytes -= file.size;
+            changed = true;
         }
         if (changed) {
-            var totalSizeElement = document.getElementById('total-size')
+            var totalSizeElement = document.getElementById("total-size");
             if (totalSizeElement) {
-                let totalMiB = parseFloat((totalSizeBytes / (1024 * 1024)).toFixed(2))
-                totalSizeElement.innerHTML = totalMiB
+                const totalMiB = parseFloat((totalSizeBytes / (1024 * 1024)).toFixed(2));
+                totalSizeElement.innerHTML = totalMiB;
                 if (totalSizeBytes > maxTotalUploadSizeBytes) {
-                    totalSizeElement.classList.add('field-error')
+                    totalSizeElement.classList.add("field-error");
                 }
                 else {
-                    totalSizeElement.classList.remove('field-error')
+                    totalSizeElement.classList.remove("field-error");
                 }
             }
 
-            var remainingSizeElement = document.getElementById('remaining-size')
+            var remainingSizeElement = document.getElementById("remaining-size");
             if (remainingSizeElement) {
-                let remaining = maxTotalUploadSizeBytes - totalSizeBytes
+                const remaining = maxTotalUploadSizeBytes - totalSizeBytes;
                 if (remaining < 0) {
-                    remainingSizeElement.innerHTML = '0'
-                    remainingSizeElement.classList.add('field-error')
+                    remainingSizeElement.innerHTML = "0";
+                    remainingSizeElement.classList.add("field-error");
                 }
                 else {
-                    let remainingMiB = parseFloat((remaining / (1024 * 1024)).toFixed(2))
-                    remainingSizeElement.innerHTML = remainingMiB
-                    remainingSizeElement.classList.remove('field-error')
+                    const remainingMiB = parseFloat((remaining / (1024 * 1024)).toFixed(2));
+                    remainingSizeElement.innerHTML = remainingMiB;
+                    remainingSizeElement.classList.remove("field-error");
                 }
             }
-        }
-    }
-
-    // Function to update the visibility of the drop message
-    function updateDropMessageVisibility() {
-        if (this.files.length === 0) {
-            dropMessage.style.display = 'block'; // Show message when no files are present
-        } else {
-            dropMessage.style.display = 'none'; // Hide message when there are files
         }
     }
 
@@ -134,18 +130,18 @@ document.addEventListener("DOMContentLoaded", () => {
         accept: function (file, done) {
             if (totalSizeBytes > maxTotalUploadSizeBytes) {
                 done({
-                    'error': `Maximum total upload size (${maxTotalUploadSize} MiB) exceeded`
-                })
+                    "error": `Maximum total upload size (${maxTotalUploadSize} MiB) exceeded`
+                });
             }
             else if (this.files.length > this.options.maxFiles) {
                 done({
-                    'error': 'You can not upload anymore files.'
-                })
+                    "error": "You can not upload anymore files."
+                });
             }
             else if (this.files.slice(0, -1).map(f => f.name).includes(file.name)) {
                 done({
-                    'error': 'You can not upload two files with the same name.'
-                })
+                    "error": "You can not upload two files with the same name."
+                });
             }
             else {
                 const params = new URLSearchParams({
@@ -154,10 +150,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 fetch(`/transfer/checkfile/?${params.toString()}`, {
-                    method: 'GET',
+                    method: "GET",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken,
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken,
                     }
                 })
                     .then(response => response.json())
@@ -173,70 +169,83 @@ document.addEventListener("DOMContentLoaded", () => {
                             done(error.response.json);
                         } else {
                             done({
-                                'error': `${error.status || 'Error'}: ${error.statusText || 'Unknown error'}`,
-                                'verboseError': undefined,
+                                "error": `${error.status || "Error"}: ${error.statusText || "Unknown error"}`,
+                                "verboseError": undefined,
                             });
                         }
                     });
             }
         },
         init: function () {
-            issueFiles = []
-            uploadedFiles = []
-            sessionToken = ''
+            issueFiles = [];
+            uploadedFiles = [];
+            sessionToken = "";
 
-            const dropzoneClosure = this
-            const submitButton = document.getElementById("submit-form-btn")
+            var dropzoneClosure = this;
+            var submitButton = document.getElementById("submit-form-btn");
 
+            // Function to update the visibility of the drop message
             function updateDropMessageVisibility() {
                 if (dropzoneClosure.files.length === 0) {
-                    dropMessage.style.display = 'block'; // Show message when no files are present
+                    dropMessage.style.display = "block"; // Show message when no files are present
                 } else {
-                    dropMessage.style.display = 'none'; // Hide message when there are files
+                    dropMessage.style.display = "none"; // Hide message when there are files
                 }
             }
 
+            // Call on initialization to set the correct state
+            updateDropMessageVisibility();
+
+            // Update drop message visibility when files are added or removed
+            this.on("addedfile", function() {
+                updateDropMessageVisibility();
+            });
+
+            this.on("removedfile", function() {
+                updateDropMessageVisibility();
+            });
+
             submitButton.addEventListener("click", (event) => {
-                event.preventDefault()
-                event.stopPropagation()
+                event.preventDefault();
+                event.stopPropagation();
 
                 if (issueFiles.length > 0) {
-                    alert('One or more files cannot be uploaded. Remove them before submitting')
+                    alert("One or more files cannot be uploaded. Remove them before submitting");
                 }
                 else {
-                    clearDropzoneErrors()
-                    this.element.classList.remove('dz-submit-disabled')
+                    clearDropzoneErrors();
+                    this.element.classList.remove("dz-submit-disabled");
                     if (dropzoneClosure.getQueuedFiles().length + uploadedFiles.length === 0) {
-                        alert('You cannot submit a form without files. Please choose at least one file')
+                        alert("You cannot submit a form without files. Please choose at least one file");
                     }
                     else {
-                        dropzoneClosure.options.autoProcessQueue = true
-                        dropzoneClosure.processQueue()
+                        dropzoneClosure.options.autoProcessQueue = true;
+                        dropzoneClosure.processQueue();
                     }
                 }
-            })
+            });
 
             // Call on initialization to set the correct state
             updateDropMessageVisibility();
 
             // Update drop message visibility when files are added or removed
             this.on("addedfile", function (file) {
-                updateTotalSize(file, '+');
+                updateTotalSize(file, "+");
                 updateDropMessageVisibility();
             });
 
             this.on("removedfile", function (file) {
-                updateTotalSize(file, '-')
+                updateTotalSize(file, "-");
 
                 // If this file previously caused an issue, remove it from issueFiles
-                const issueIndex = issueFiles.indexOf(file.name)
+                const issueIndex = issueFiles.indexOf(file.name);
                 if (issueIndex > -1) {
-                    issueFiles.splice(issueIndex, 1)
+                    issueFiles.splice(issueIndex, 1);
                 }
                 if (issueFiles.length === 0) {
-                    document.getElementById("submit-form-btn").disabled = false
-                    clearDropzoneErrors()
-                    this.element.classList.remove('dz-submit-disabled')
+                    document.getElementById("submit-form-btn").disabled = false;
+                    clearDropzoneErrors();
+                    this.element.classList.remove("dz-submit-disabled");
                 }
 
                 updateDropMessageVisibility();
@@ -245,73 +254,73 @@ document.addEventListener("DOMContentLoaded", () => {
             // Triggers on non-200 status
             this.on("error", (file, response, xhr) => {
                 if (response.verboseError) {
-                    addDropzoneError(response.verboseError)
+                    addDropzoneError(response.verboseError);
                 }
                 else if (response.error) {
-                    addDropzoneError(response.error)
+                    addDropzoneError(response.error);
                 }
                 else {
-                    addDropzoneError(response)
+                    addDropzoneError(response);
                 }
 
-                issueFiles.push(file.name)
-                document.getElementById("submit-form-btn").disabled = true
-                this.element.classList.add('dz-submit-disabled')
-                dropzoneClosure.options.autoProcessQueue = false
-            })
+                issueFiles.push(file.name);
+                document.getElementById("submit-form-btn").disabled = true;
+                this.element.classList.add("dz-submit-disabled");
+                dropzoneClosure.options.autoProcessQueue = false;
+            });
 
             this.on("sendingmultiple", (file, xhr, formData) => {
-                xhr.setRequestHeader("Upload-Session-Token", sessionToken)
-            })
+                xhr.setRequestHeader("Upload-Session-Token", sessionToken);
+            });
 
             this.on("successmultiple", (files, response) => {
                 if (response.uploadSessionToken) {
-                    sessionToken = response.uploadSessionToken
+                    sessionToken = response.uploadSessionToken;
                 }
-                var invalidFileNames = []
+                var invalidFileNames = [];
                 for (const issue of response.issues) {
-                    var fileName = issue.file
-                    invalidFileNames.push(fileName)
-                    var fileObj = files.filter(file => { return file.name === fileName })[0]
-                    var errMessage = { 'error': issue.error, 'verboseError': issue.verboseError }
-                    dropzoneClosure.emit('error', fileObj, errMessage, null)
+                    var fileName = issue.file;
+                    invalidFileNames.push(fileName);
+                    var fileObj = files.filter(file => { return file.name === fileName; })[0];
+                    var errMessage = { "error": issue.error, "verboseError": issue.verboseError };
+                    dropzoneClosure.emit("error", fileObj, errMessage, null);
                 }
                 for (const file of files) {
                     if (invalidFileNames && invalidFileNames.indexOf(file.name) === -1) {
-                        uploadedFiles.push(file)
+                        uploadedFiles.push(file);
                     }
                 }
-            })
+            });
 
             this.on("errormultiple", (files, response) => {
                 if (response.uploadSessionToken) {
-                    sessionToken = response.uploadSessionToken
+                    sessionToken = response.uploadSessionToken;
                 }
                 if (response.fatalError) {
-                    window.location.href = response.redirect
+                    window.location.href = response.redirect;
                 }
-            })
+            });
 
             this.on("queuecomplete", () => {
                 if (issueFiles.length === 0) {
-                    var sessionTokenElement = document.querySelector('[id$="session_token"]')
+                    var sessionTokenElement = document.querySelector("[id$=\"session_token\"]");
                     if (sessionTokenElement) {
-                        sessionTokenElement.setAttribute("value", sessionToken)
-                        sessionToken = ''
+                        sessionTokenElement.setAttribute("value", sessionToken);
+                        sessionToken = "";
                         // Show the end of the dropzone animation by delaying submission
                         window.setTimeout(() => {
                             // Use this function to execute the invisible Captcha methods.
                             singleCaptchaFn();
-                        }, 1000)
+                        }, 1000);
                     }
                     else {
-                        console.error('Could not find any input id matching "session_token" on the page!')
+                        console.error("Could not find any input id matching \"session_token\" on the page!");
                     }
                 }
                 else if (!issueFiles.length === dropzoneClosure.files.length) {
-                    alert('There are one or more files that could not be uploaded. Remove these files and try again.')
+                    alert("There are one or more files that could not be uploaded. Remove these files and try again.");
                 }
-            })
+            });
         }
-    })
-})
+    });
+});

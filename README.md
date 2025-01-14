@@ -24,24 +24,12 @@ To start, clone the repository:
 git clone https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git
 ```
 
-From the root of the repository, make a copy of the dev environment variable file.
-
-```shell
-cp example.dev.env .dev.env
-```
-
 **For the following commands, substitute `docker compose` for `podman-compose` if you're using Docker instead of Podman.**
 
 To start up the application, run the following command:
 
 ```shell
 podman-compose -f compose.dev.yml up -d
-```
-
-The database will not be populated at first. To migrate the database, run this command:
-
-```shell
-podman-compose -f compose.dev.yml exec app python manage.py migrate
 ```
 
 After the containers are built and running, the application should now be accessible at http://localhost:8000. Any emails that are sent by the application are intercepted by the mail application running at http://localhost:8025. For example, if you sign up using the sign-up form, you can find those at http://localhost:8025.
@@ -57,6 +45,17 @@ If you'd like to be able to log in to the record transfer app as an administrato
 
 ```shell
 podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
+```
+
+## Configuration
+To configure the application, set environment variables in a `.dev.env` file for development or a `.prod.env` file for production. While a `.dev.env` file is optional (default settings will be used if it's absent), a `.prod.env` file is mandatory for production.
+
+You can find a detailed list of configurable settings for `.dev.env` and `.prod.env` [here](https://secure-record-transfer.readthedocs.io/en/latest/settings/index.html).
+
+An example production environment file is included in the repository. To use it, copy it to `.prod.env`:
+
+```shell
+cp example.prod.env .prod.env
 ```
 
 ## Developers

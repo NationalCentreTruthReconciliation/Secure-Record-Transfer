@@ -17,6 +17,7 @@
 
 .flex-full-width-item {
     max-width: 100%;
+    margin-bottom: 15px;
 }
 
 .flex-full-width-error,
@@ -108,6 +109,10 @@
     }
 }
 
+.hidden-item {
+    display: none !important;
+}
+
 #file-dropzone {
     min-height: 250px;
     background-color: #f9f9f9;
@@ -133,7 +138,8 @@
     margin-top: 10px;
 }
 
-.required-field:after {
+.required-field:after,
+.faux-required-field:after {
     content: "  *";
     color: #d00;
     font-weight: bold;

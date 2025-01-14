@@ -1,20 +1,72 @@
-{% extends 'recordtransfer/transferform_standard.html' %}
+{% extends "recordtransfer/transferform_standard.html" %}
 {% load static %}
 {% load i18n %}
 
+{% block javascript %}
+    {{ block.super }}
+    {{ js_context|json_script:"py_context_source_info" }}
+{% endblock javascript %}
+
+{% block formfields %}
+    {% for field in wizard.form %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+            <div class="flex-error initially-hidden">
+                <label for="nothing"></label>
+                <div class="field-error">{{ error }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% if field.label != 'hidden' %}
+            {% if field.name == "enter_manual_source_info" %}
+            <div class="flex-item">
+            {% else %}
+            <div class="flex-item initially-hidden hidden-item">
+            {% endif %}
+                <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
+                {{ field }}
+                {# Help tooltip #}
+                {% if field.help_text %}
+                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
+                        <img height="20" src="{% static 'recordtransfer/img/help_40x40px.png' %}">
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            {# Render hidden field #}
+            {{ field }}
+        {% endif %}
+        {% if field.name == "other_source_type" %}
+            <div class="flex-item initially-hidden hidden-item">
+                <label></label>
+                <div>
+                    <i>
+                        {% blocktrans %}
+                        <a id="show-source-types-dialog" class="non-nav-link" href="#">Click here</a> for an explanation
+                        of the different types of source types.
+                        {% endblocktrans %}
+                    </i>
+                </div>
+                <br>
+            </div>
+        {% elif field.name == "other_source_role" %}
+            <div class="flex-item initially-hidden hidden-item">
+                <label></label>
+                <div>
+                    <i>
+                        {% blocktrans %}
+                        <a id="show-source-roles-dialog" class="non-nav-link" href="#">Click here</a> for an explanation
+                        of the different types of source roles.
+                        {% endblocktrans %}
+                    </i>
+                </div>
+                <br>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endblock formfields %}
+
 {% block form_explanation %}
-    <p>
-        {% blocktrans %}
-        <a id="show-source-types-dialog" href="#">* Click here</a> for an explanation of the
-        different types of source types.
-        {% endblocktrans %}
-        <br/>
-        {% blocktrans %}
-        <a id="show-source-roles-dialog" href="#">** Click here</a> for an explanation of the
-        different types of source relationships (roles).
-        {% endblocktrans %}
-    </p>
-    <br/>
     <div id="source-types-dialog" title="Explanation of Source Types">
         <p>
             {% blocktrans %}
@@ -43,6 +95,5 @@
             </p>
         {% endfor %}
     </div>
-{% endblock %}
-
-{% block buttonarrayclass %}flex-item{% endblock %}
+{% endblock form_explanation %}
+{% block buttonarrayclass %}flex-item{% endblock buttonarrayclass %}
