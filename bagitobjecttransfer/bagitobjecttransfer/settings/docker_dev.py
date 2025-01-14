@@ -91,6 +91,3 @@ UPLOAD_STORAGE_FOLDER = config(
     "UPLOAD_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/uploaded_files/"
 )
 TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/temp/")
-
-TEMP_URL = TEMP_STORAGE_FOLDER.replace(MEDIA_ROOT, "").lstrip("/")
-UPLOAD_URL = UPLOAD_STORAGE_FOLDER.replace(MEDIA_ROOT, "").lstrip("/")
