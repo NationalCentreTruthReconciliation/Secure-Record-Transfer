@@ -86,7 +86,12 @@ from recordtransfer.models import (
     User,
 )
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
+from recordtransfer.utils import (
+    accept_file,
+    accept_session,
+    get_human_readable_file_count,
+    get_human_readable_size,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -885,14 +890,14 @@ def upload_file(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        file_check = _accept_file(_file.name, _file.size)
+        file_check = accept_file(_file.name, _file.size)
         if not file_check["accepted"]:
             return JsonResponse(
                 {"file": _file.name, "uploadSessionToken": session.token, **file_check},
                 status=400,
             )
 
-        session_check = _accept_session(_file.name, _file.size, session)
+        session_check = accept_session(_file.name, _file.size, session)
         if not session_check["accepted"]:
             return JsonResponse(
                 {"file": _file.name, "uploadSessionToken": session.token, **session_check},
@@ -935,240 +940,6 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             },
             status=500,
         )
-
-
-@require_http_methods(["GET", "POST"])
-def accept_file(request):
-    """Check whether the file is allowed to be uploaded by inspecting the file's extension. The
-    allowed file extensions are set using the ACCEPTED_FILE_FORMATS setting.
-
-    Args:
-        request: The request sent by the user. This request should either be a GET or a POST
-            request, with the name of the file in the **filename** parameter.
-
-    Returns:
-        JsonResponse: If the file is allowed to be uploaded, 'accepted' will be True. Otherwise,
-            'accepted' is False and both 'error' and 'verboseError' are set.
-    """
-    # Ensure required parameters are set
-    request_params = request.POST if request.method == "POST" else request.GET
-    for required in ("filename", "filesize"):
-        if required not in request_params:
-            return JsonResponse(
-                {
-                    "accepted": False,
-                    "error": gettext("Could not find {0} parameter in request").format(required),
-                },
-                status=400,
-            )
-        if not request_params[required]:
-            return JsonResponse(
-                {
-                    "accepted": False,
-                    "error": gettext("{0} parameter cannot be empty").format(required),
-                },
-                status=400,
-            )
-
-    filename = request_params["filename"]
-    filesize = request_params["filesize"]
-    token = request.headers.get("Upload-Session-Token", None)
-
-    try:
-        file_check = _accept_file(filename, filesize)
-        if not file_check["accepted"]:
-            return JsonResponse(file_check, status=200)
-
-        if token:
-            session = UploadSession.objects.filter(token=token).first()
-            if session:
-                session_check = _accept_session(filename, filesize, session)
-                if not session_check["accepted"]:
-                    return JsonResponse(session_check, status=200)
-
-        # The contents of the file are not known here, so it is not necessary to
-        # call _accept_content()
-
-        return JsonResponse({"accepted": True}, status=200)
-
-    except Exception as exc:
-        LOGGER.error(msg=("Uncaught exception in checkfile view: {0}".format(str(exc))))
-        return JsonResponse(
-            {
-                "accepted": False,
-                "error": gettext("500 Internal Server Error"),
-                "verboseError": gettext("500 Internal Server Error"),
-            },
-            status=500,
-        )
-
-
-def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
-    """Determine if a new file should be accepted. Does not check the file's
-    contents, only its name and its size.
-
-    These checks are applied:
-    - The file name is not empty
-    - The file has an extension
-    - The file's extension exists in ACCEPTED_FILE_FORMATS
-    - The file's size is an integer greater than zero
-    - The file's size is less than or equal to the maximum allowed size for one file
-
-    Args:
-        filename (str): The name of the file
-        filesize (Union[str, int]): A string or integer representing the size of
-            the file (in bytes)
-
-    Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key if 'accepted' is False.
-    """
-
-    def mib_to_bytes(m):
-        return m * 1024**2
-
-    def bytes_to_mib(b):
-        return b / 1024**2
-
-    # Check extension exists
-    name_split = filename.split(".")
-    if len(name_split) == 1:
-        return {
-            "accepted": False,
-            "error": gettext("File is missing an extension."),
-            "verboseError": gettext('The file "{0}" does not have a file extension').format(
-                filename
-            ),
-        }
-
-    # Check extension is allowed
-    extension = name_split[-1].lower()
-    extension_accepted = False
-    for _, accepted_extensions in settings.ACCEPTED_FILE_FORMATS.items():
-        for accepted_extension in accepted_extensions:
-            if extension == accepted_extension.lower():
-                extension_accepted = True
-                break
-
-    if not extension_accepted:
-        return {
-            "accepted": False,
-            "error": gettext('Files with "{0}" extension are not allowed.').format(extension),
-            "verboseError": gettext('The file "{0}" has an invalid extension (.{1})').format(
-                filename, extension
-            ),
-        }
-
-    # Check filesize is an integer
-    size = filesize
-    try:
-        size = int(filesize)
-        if size < 0:
-            raise ValueError("File size cannot be negative")
-    except ValueError:
-        return {
-            "accepted": False,
-            "error": gettext("File size is invalid."),
-            "verboseError": gettext('The file "{0}" has an invalid size ({1})').format(
-                filename, size
-            ),
-        }
-
-    # Check file has some contents (i.e., non-zero size)
-    if size == 0:
-        return {
-            "accepted": False,
-            "error": gettext("File is empty."),
-            "verboseError": gettext('The file "{0}" is empty').format(filename),
-        }
-
-    # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
-    )
-    max_single_size_bytes = mib_to_bytes(max_single_size)
-    size_mib = bytes_to_mib(size)
-    if size > max_single_size_bytes:
-        return {
-            "accepted": False,
-            "error": gettext("File is too big ({0:.2f}MiB). Max filesize: {1}MiB").format(
-                size_mib, max_single_size
-            ),
-            "verboseError": gettext(
-                'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
-            ).format(filename, size_mib, max_single_size),
-        }
-
-    # All checks succeded
-    return {"accepted": True}
-
-
-def _accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
-    """Determine if a new file should be accepted as part of the session.
-
-    These checks are applied:
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_COUNT
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE
-    - A file with the same name has not already been uploaded
-
-    Args:
-        filename (str): The name of the file
-        filesize (Union[str, int]): A string or integer representing the size of
-            the file (in bytes)
-        session (UploadSession): The session files are being uploaded to
-
-    Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key if 'accepted' is False.
-    """
-    if not session:
-        return {"accepted": True}
-
-    def mib_to_bytes(m):
-        return m * 1024**2
-
-    # Check number of files is within allowed total
-    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
-        return {
-            "accepted": False,
-            "error": gettext("You can not upload anymore files."),
-            "verboseError": gettext(
-                'The file "{0}" would push the total file count past the '
-                "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE),
-        }
-
-    # Check total size of all files plus current one is within allowed size
-    max_size = max(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
-    )
-    max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
-    if int(filesize) > max_remaining_size_bytes:
-        return {
-            "accepted": False,
-            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
-            "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the {1}MiB max'
-            ).format(filename, max_size),
-        }
-
-    # Check that a file with this name has not already been uploaded
-    filename_list = session.uploadedfile_set.all().values_list("name", flat=True)
-    if filename in filename_list:
-        return {
-            "accepted": False,
-            "error": gettext("A file with the same name has already been uploaded."),
-            "verboseError": gettext('A file with the name "{0}" has already been uploaded').format(
-                filename
-            ),
-        }
-
-    # All checks succeded
-    return {"accepted": True}
 
 
 @require_http_methods(["GET"])
