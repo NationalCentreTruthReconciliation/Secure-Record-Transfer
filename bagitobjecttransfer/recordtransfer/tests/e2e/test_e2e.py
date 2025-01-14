@@ -1,3 +1,4 @@
+import pytest
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -8,9 +9,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from recordtransfer.models import User
 
 
+@pytest.mark.e2e
 class TransferFormWizardTest(LiveServerTestCase):
-    def setUp(self):
-        # Set up Chrome options to disable autofill
+    """End-to-end tests for the transfer form wizard."""
+
+    def setUp(self) -> None:
+        """Set up the web driver and create a test user."""
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
@@ -25,11 +29,12 @@ class TransferFormWizardTest(LiveServerTestCase):
         # Create a test user
         self.user = User.objects.create_user(username="testuser", password="testpassword")
 
-    def tearDown(self):
-        # Close the web driver
+    def tearDown(self) -> None:
+        """Close the web driver."""
         self.driver.quit()
 
-    def login(self):
+    def login(self) -> None:
+        """Log in the test user."""
         driver = self.driver
 
         # Open the login page
@@ -45,12 +50,14 @@ class TransferFormWizardTest(LiveServerTestCase):
         # Wait for the login to complete and redirect to the home page
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
-    def test_login(self):
+    def test_login(self) -> None:
+        """Test that the user can log in."""
         self.login()
         # Verify that the user is logged in by checking the presence of a specific element
         self.assertTrue(self.driver.find_element(By.ID, "logout-btn"))
 
-    def test_previous_saves_form(self):
+    def test_previous_saves_form(self) -> None:
+        """Test that the form data is saved when going to the previous step."""
         self.login()
         driver = self.driver
 
