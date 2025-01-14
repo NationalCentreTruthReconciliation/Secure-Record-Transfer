@@ -50,8 +50,8 @@ class TestUploadFileView(TestCase):
 
     def setUp(self):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.patch__accept_file = patch("recordtransfer.util.accept_file").start()
-        self.patch__accept_session = patch("recordtransfer.util.accept_session").start()
+        self.patch__accept_file = patch("recordtransfer.utils.accept_file").start()
+        self.patch__accept_session = patch("recordtransfer.utils.accept_session").start()
         self.patch_check_for_malware = patch("recordtransfer.views.check_for_malware").start()
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
