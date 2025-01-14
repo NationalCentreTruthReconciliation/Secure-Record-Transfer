@@ -12,10 +12,12 @@
             <script src="{% static 'base.bundle.js' %}"></script>
         {% endblock javascript %}
         <!-- CSS -->
-        <link rel="stylesheet"
-              type="text/css"
-              href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-        <link rel="stylesheet" href="{% static 'base.css' %}">
+        {% block stylesheet %}
+            <link rel="stylesheet"
+                type="text/css"
+                href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+            <link rel="stylesheet" href="{% static 'base.css' %}">
+        {% endblock stylesheet %}
         <!-- Favicon -->
         <link rel="shortcut icon"
               type="image/png"

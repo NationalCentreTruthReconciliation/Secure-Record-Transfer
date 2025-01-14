@@ -154,9 +154,19 @@ Use these settings in your [local VSCode settings.json](https://code.visualstudi
 }
 ```
 The tests can be run with [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (using [pytest-django](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml)):
-
+To run tests, use:
 ```shell
 pytest
+```
+
+For unit tests only:
+```shell
+pytest -k "unit"
+```
+
+For E2E tests only:
+```shell
+pytest -k "e2e"
 ```
 
 ## Building the Documentation

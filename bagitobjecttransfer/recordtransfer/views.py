@@ -462,6 +462,32 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
+    def render_goto_step(self, *args, **kwargs) -> HttpResponse:
+        """Save current step data before going back to a previous step."""
+        form = self.get_form(data=self.request.POST, files=self.request.FILES)
+        self.storage.set_step_data(self.steps.current, self.process_step(form))
+        self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+        return super().render_goto_step(*args, **kwargs)
+
+    def render_next_step(self, form, **kwargs):
+        """Render next step of form. Overrides parent method to clear errors from the form."""
+        # get the form instance based on the data from the storage backend
+        # (if available).
+        next_step = self.steps.next
+        new_form = self.get_form(
+            next_step,
+            data=self.storage.get_step_data(next_step),
+            files=self.storage.get_step_files(next_step),
+        )
+        ##########################
+        # This part is different from the parent class. We need to clear the errors from the form
+        new_form.errors.clear()
+        ##########################
+
+        # change the stored current step
+        self.storage.current_step = next_step
+        return self.render(new_form, **kwargs)
+
     def load_transfer_data(self, transfer: InProgressSubmission) -> None:
         """Load the transfer data from an InProgressSubmission instance."""
         self.storage.data = pickle.loads(transfer.step_data)["past"]
@@ -1126,7 +1152,7 @@ def _accept_session(filename: str, filesize: Union[str, int], session: UploadSes
             "accepted": False,
             "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
             "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the ' "{1}MiB max"
+                'The file "{0}" would push the total transfer size past the {1}MiB max'
             ).format(filename, max_size),
         }
 

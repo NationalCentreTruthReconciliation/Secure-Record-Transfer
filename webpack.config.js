@@ -34,6 +34,9 @@ module.exports = {
             ...glob.sync(
                 "./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/profile/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
+            ...glob.sync(
+                "./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/profile/*.css")
+                .map(file => "./" + path.relative(__dirname, file)),
         ],
         submissiondetail: [
             ...glob.sync(
