@@ -32,5 +32,7 @@ jobs:
     - name: Install dependencies
       run: poetry install --extras "dev"
 
-    - name: Run tests
-      run: poetry run pytest
+    - uses: browser-actions/setup-chrome@v1
+    - run: chrome --version
+    - name: Run E2E tests
+      run: poetry run pytest -m e2e
