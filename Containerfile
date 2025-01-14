@@ -27,9 +27,9 @@ RUN chmod +x /app/entrypoint.sh
 # Copy application code to image
 COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
-WORKDIR /app/bagitobjecttransfer/
-
 # Run webpack to bundle and minify assets
-RUN echo ">> Running webpack to bundle + minify assets." && npm run build
+RUN npm run build
+
+WORKDIR /app/bagitobjecttransfer/
 
 ENTRYPOINT ["/app/entrypoint.sh"]

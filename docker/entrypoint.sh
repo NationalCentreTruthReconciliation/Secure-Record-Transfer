@@ -14,7 +14,6 @@ if [ "$IS_RQ" = 'yes' ]; then
   python manage.py migrate --no-input
   echo ">> Starting RQ worker(s)"
 
-# Bundle, minify, and collect static assets in the Django container
 else
   if [ "$ENV" != 'dev' ]; then
     echo ">> Collecting static files."
