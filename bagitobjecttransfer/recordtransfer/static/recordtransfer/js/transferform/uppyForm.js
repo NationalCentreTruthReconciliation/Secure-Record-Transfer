@@ -70,6 +70,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             timeout: 180000,
             limit: 2,
             responseType: "json",
+            onBeforeRequest(xhr) {
+                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
+            },
+            // Turns the response into a JSON object
             getResponseData: (xhr) => {
                 try {
                     return xhr.response;
@@ -77,9 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     console.error("Error parsing JSON response:", error);
                     return null;
                 }
-            },
-            onBeforeRequest(xhr) {
-                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
             },
             onAfterResponse: (xhr) => {
                 const {error, uploadSessionToken} = xhr.response;
@@ -95,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     throw new Error(error);
                 }
             },
-            // Attempt to retry uploads for server errors, timeouts, and rate limiting
+            // Retry uploads for server errors, timeouts, and rate limiting
             // Default number of retries is 3, which cannot be changed
             shouldRetry: (response) => {
                 const status = response.status;
@@ -131,7 +132,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         sendDeleteRequestForFile(file.name);
     });
 
-    // Connect the next button to the Uppy upload
     nextButton.addEventListener("click", async (event) => {
         event.preventDefault();
 

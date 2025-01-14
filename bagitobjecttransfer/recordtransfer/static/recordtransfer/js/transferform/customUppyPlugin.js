@@ -15,7 +15,7 @@ class FileValidationPlugin extends BasePlugin {
     }
 
     // This deals with the case where the user tries to upload a file with the same name as an
-    // existing mock file, which wouldn't be caught due to the difference in file ids
+    // existing mock file, which wouldn't normally be caught due to the difference in file ids
     validateFile = (file) => {
         // Skip validation for mock files which represent already uploaded files
         if (file.meta?.mock) {
