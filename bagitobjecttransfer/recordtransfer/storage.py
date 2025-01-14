@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from pathlib import Path
 
 
 class OverwriteStorage(FileSystemStorage):
@@ -19,25 +20,34 @@ class OverwriteStorage(FileSystemStorage):
         return name
 
 
-class UploadedFileStorage(FileSystemStorage):
+class MediaFileStorage(FileSystemStorage):
+    """Base class for custom file storage."""
+
+    def __init__(self, location: str, **kwargs):
+        """Set the location of the storage. The location has to be a subdirectory of MEDIA_ROOT."""
+        # Check if the location is a subdirectory of MEDIA_ROOT
+        media_root = Path(settings.MEDIA_ROOT).resolve()
+        location_path = Path(location).resolve()
+
+        if not location_path.is_relative_to(media_root):
+            raise ValueError("The location must be a subdirectory of MEDIA_ROOT")
+        kwargs["location"] = str(location)
+        super().__init__(**kwargs)
+
+    def url(self, name: str) -> str:
+        """Generate the URL based on MEDIA_URL and the relative path."""
+        return f"/{Path(self.base_location).relative_to(settings.BASE_DIR) / name}"
+
+
+class UploadedFileStorage(MediaFileStorage):
     """Stores files in UPLOAD_STORAGE_FOLDER."""
 
     def __init__(self, **kwargs):
-        kwargs["location"] = str(settings.UPLOAD_STORAGE_FOLDER)
-        super().__init__(**kwargs)
-
-    def url(self, name: str) -> str:
-        """Generate the URL based on MEDIA_URL and the relative path."""
-        return f"/{Path(self.base_location).relative_to(settings.BASE_DIR) / name}"
+        super().__init__(settings.UPLOAD_STORAGE_FOLDER, **kwargs)
 
 
-class TempFileStorage(FileSystemStorage):
+class TempFileStorage(MediaFileStorage):
     """Stores files in TEMP_STORAGE_FOLDER."""
 
     def __init__(self, **kwargs):
-        kwargs["location"] = str(settings.TEMP_STORAGE_FOLDER)
-        super().__init__(**kwargs)
-
-    def url(self, name: str) -> str:
-        """Generate the URL based on MEDIA_URL and the relative path."""
-        return f"/{Path(self.base_location).relative_to(settings.BASE_DIR) / name}"
+        super().__init__(settings.TEMP_STORAGE_FOLDER, **kwargs)
