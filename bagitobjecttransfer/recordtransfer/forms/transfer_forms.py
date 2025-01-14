@@ -47,17 +47,18 @@ class ContactInfoForm(TransferForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        region = cleaned_data["province_or_state"]
-        if region.lower() == "other" and not cleaned_data["other_province_or_state"]:
-            self.add_error(
-                "other_province_or_state",
-                'This field must be filled out if "Other" province or state is selected',
-            )
-        elif region.lower() == "":
+        region = cleaned_data.get("province_or_state")
+        if not region or region.lower() == "":
             self.add_error(
                 "province_or_state",
                 'You must select a province or state, use "Other" to enter a custom location',
             )
+        elif region.lower() == "other" and not cleaned_data["other_province_or_state"]:
+            self.add_error(
+                "other_province_or_state",
+                'This field must be filled out if "Other" province or state is selected',
+            )
+
         return cleaned_data
 
     contact_name = forms.CharField(
