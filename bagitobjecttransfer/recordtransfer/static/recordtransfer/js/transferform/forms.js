@@ -165,38 +165,7 @@ async function initializeGroupTransferForm() {
 }
 
 /**
- * Prevents the submission group form from submitting and instead sends an AJAX request to create a
- * new group. If the group is successfully created, the new group is added to the selection field,
- * and the description updated.
- */
-function initializeModalMode() {
-    $('#submission-group-form').off('submit').on('submit', function (event) {
-        event.preventDefault();
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: $(this).attr('method'),
-            data: $(this).serialize(),
-            success: async function (response) {
-                clearCreateGroupForm();
-                try {
-                    handleNewGroupAdded(response.group);
-                    $('#add-new-group-dialog').dialog("close");
-                }
-                catch (error) {
-                    alert("Failed to update group options.");
-                }
-            },
-            error: function (response) {
-                alert(response.responseJSON.message);
-            }
-        });
-    });
-}
-
-/**
  * Handles the addition of a new group to the selection field.
- *
  * @param {Object} group - The group object containing details of the new group.
  * The `group` object should have the following properties:
  * - `name` (String): The name of the group.
@@ -204,18 +173,21 @@ function initializeModalMode() {
  * - `description` (String): The description of the group.
  */
 function handleNewGroupAdded(group) {
-    const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
+    const selectField = document.getElementById(ID_SUBMISSION_GROUP_SELECTION);
     selectField.append(new Option(group.name, group.uuid));
     groupDescriptions[group.uuid] = group.description;
-    selectField.val(group.uuid).change();
+    selectField.value = group.uuid;
+    selectField.dispatchEvent(new Event('change'));
 }
 
 function clearCreateGroupForm() {
-    const submissionGroupName = document.getElementById(ID_SUBMISSION_GROUP_NAME);
-    const submissionGroupDescription = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
-    submissionGroupName.value = '';
-    submissionGroupDescription.value = '';
+    const groupName = document.getElementById(ID_SUBMISSION_GROUP_NAME);
+    const groupDesc = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
+    groupName.value = "";
+    groupDesc.value = "";
 }
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     /***************************************************************************
@@ -313,18 +285,52 @@ document.addEventListener("DOMContentLoaded", function () {
      * Dialog Box Setup
      **************************************************************************/
 
-    const addNewGroupDialog = $('#add-new-group-dialog').dialog({
-        autoOpen: false,
-        modal: true,
-        width: 700,
-        position: { my: "center", at: "center", of: window },
-    })
+    const addNewGroupButton = document.getElementById("show-add-new-group-dialog");
 
-    $('#show-add-new-group-dialog').on("click", (event) => {
-        event.preventDefault()
-        addNewGroupDialog.dialog("open")
-        addNewGroupDialog.dialog("moveToTop")
-    })
+    if (addNewGroupButton) {
+        const createNewGroupForm = document.getElementById("submission-group-form");
+        const createNewGroupModal = document.getElementById("create-new-submissiongroup-modal");
+        const closeModalButton = document.getElementById("close-new-submissiongroup-modal");
+        //const createButton = document.getElementById("id_save_button");
+
+        const hideCreateNewGroupModal = () => createNewGroupModal.classList.remove("visible");
+        const showCreateNewGroupModal = () => createNewGroupModal.classList.add("visible");
+
+        addNewGroupButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            showCreateNewGroupModal();
+        });
+
+        closeModalButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            hideCreateNewGroupModal();
+        });
+
+        createNewGroupForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.group) {
+                        clearCreateGroupForm();
+                        handleNewGroupAdded(data.group);
+                        hideCreateNewGroupModal();
+                    }
+                })
+                .catch(error => {
+                    alert(error);
+                });
+        });
+    }
 
     /***************************************************************************
      * Expandable Forms Setup

@@ -26,8 +26,6 @@
     {% endblock messages %}
     {% block form_explanation %}
     {% endblock form_explanation %}
-    {% block dialog %}
-    {% endblock dialog %}
     <form id="transfer-form" action="" method="post">
         {% csrf_token %}
         {{ wizard.management_form }}
