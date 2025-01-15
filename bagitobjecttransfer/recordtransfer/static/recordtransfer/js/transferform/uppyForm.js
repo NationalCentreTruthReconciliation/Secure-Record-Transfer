@@ -137,6 +137,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Make sure user cannot proceed to next form step if there are files with issues
         const uppyFiles = uppy.getFiles();
+
+        if (uppyFiles.length === 0) {
+            uppy.info("Please upload at least one file before proceeding.", "error", 5000);
+            return;
+        }
+
         const hasIssues = Object.values(uppyFiles).some(
             file => issueFileIds.includes(file.id)
         );
