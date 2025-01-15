@@ -21,7 +21,7 @@ from recordtransfer.constants import (
     ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_SELECTION,
 )
-from recordtransfer.models import SubmissionGroup
+from recordtransfer.models import SubmissionGroup, UploadSession
 
 
 class TransferForm(forms.Form):
@@ -673,7 +673,7 @@ class RightsForm(TransferForm):
             )
             self.add_error(
                 "other_rights_type",
-                gettext('If "Type of rights" is empty, you must enter a different type ' "here"),
+                gettext('If "Type of rights" is empty, you must enter a different type here'),
             )
 
         return cleaned_data
@@ -710,7 +710,7 @@ class RightsForm(TransferForm):
             attrs={
                 "rows": "2",
                 "placeholder": gettext(
-                    "Any notes on these rights or which files they may apply to " "(optional)"
+                    "Any notes on these rights or which files they may apply to (optional)"
                 ),
             }
         ),
@@ -779,7 +779,7 @@ class OtherIdentifiersForm(TransferForm):
             attrs={
                 "rows": "2",
                 "placeholder": gettext(
-                    "Any notes on this identifier or which files it may apply to " "(optional)."
+                    "Any notes on this identifier or which files it may apply to (optional)."
                 ),
             }
         ),
@@ -836,12 +836,12 @@ class UploadFilesForm(TransferForm):
             attrs={
                 "rows": "6",
                 "placeholder": gettext(
-                    "Record any general notes you have about the records here " "(optional)"
+                    "Record any general notes you have about the records here (optional)"
                 ),
             }
         ),
         help_text=gettext(
-            "These should be notes that did not fit in any of the previous steps of " "this form"
+            "These should be notes that did not fit in any of the previous steps of this form"
         ),
         label=gettext("Other notes"),
     )
@@ -852,6 +852,16 @@ class UploadFilesForm(TransferForm):
         label="hidden",
         error_messages={"required": "Upload session token is required"},
     )
+
+    def clean(self) -> dict:
+        cleaned_data = super().clean()
+        session_token = cleaned_data.get("session_token")
+        upload_session = UploadSession.objects.get(token=session_token)
+        if not upload_session:
+            self.add_error("session_token", "Invalid upload. Please try again.")
+        if upload_session.number_of_files_uploaded() == 0:
+            self.add_error("session_token", "You must upload at least one file")
+        return cleaned_data
 
 
 class FinalStepFormNoUpload(TransferForm):
@@ -866,15 +876,16 @@ class FinalStepFormNoUpload(TransferForm):
             attrs={
                 "rows": "6",
                 "placeholder": gettext(
-                    "Record any general notes you have about the records here " "(optional)"
+                    "Record any general notes you have about the records here (optional)"
                 ),
             }
         ),
         help_text=gettext(
-            "These should be notes that did not fit in any of the previous steps of " "this form"
+            "These should be notes that did not fit in any of the previous steps of this form"
         ),
         label=gettext("Other notes"),
     )
+
 
 class ReviewForm(TransferForm):
     """The final step of the form where the user can review their submission before sending
