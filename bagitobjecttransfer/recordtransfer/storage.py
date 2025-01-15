@@ -31,12 +31,17 @@ class MediaFileStorage(FileSystemStorage):
 
         if not location_path.is_relative_to(media_root):
             raise ValueError("The location must be a subdirectory of MEDIA_ROOT")
+
+        relative_path = location_path.relative_to(media_root)
+
+        base_url = Path(settings.MEDIA_URL / relative_path).as_posix()
+        kwargs["base_url"] = base_url
         kwargs["location"] = str(location)
         super().__init__(**kwargs)
 
     def url(self, name: str) -> str:
         """Generate the URL based on MEDIA_URL and the relative path."""
-        return f"/{Path(self.base_location).relative_to(settings.BASE_DIR) / name}"
+        return (Path(self.base_url) / name).as_posix()
 
 
 class UploadedFileStorage(MediaFileStorage):
