@@ -1,6 +1,8 @@
 FROM nikolaik/python-nodejs:python3.10-nodejs22-slim
 
 ENV PYTHONUNBUFFERED=1
+ARG WEBPACK_MODE
+ENV WEBPACK_MODE $WEBPACK_MODE
 
 # Install poetry
 RUN python -m pip install --user pipx && \
