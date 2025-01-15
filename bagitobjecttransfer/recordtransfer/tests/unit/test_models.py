@@ -293,12 +293,12 @@ class TestUploadedFile(TestCase):
         UploadSession.objects.all().delete()
 
         # Clear everything in the temp and upload storage folders
-        shutil.rmtree(settings.TEMP_STORAGE_FOLDER)
-        shutil.rmtree(settings.UPLOAD_STORAGE_FOLDER)
+        shutil.rmtree(Path(settings.TEMP_STORAGE_FOLDER))
+        shutil.rmtree(Path(settings.UPLOAD_STORAGE_FOLDER))
 
         # Recreate the directories
-        settings.TEMP_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
-        settings.UPLOAD_STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+        Path(settings.TEMP_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
+        Path(settings.UPLOAD_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls) -> None:
