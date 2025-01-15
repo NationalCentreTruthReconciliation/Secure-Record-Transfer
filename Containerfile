@@ -15,9 +15,6 @@ RUN poetry config virtualenvs.create false && poetry install
 
 # Copy Node-related files, and install NodeJS dependencies
 COPY package*.json webpack.config.js /app/
-# Copy script files
-COPY ./scripts /app/scripts
-
 RUN npm install --no-color
 
 # Copy entrypoint script to image
