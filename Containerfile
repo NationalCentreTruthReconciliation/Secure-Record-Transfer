@@ -1,6 +1,7 @@
 FROM nikolaik/python-nodejs:python3.10-nodejs22-slim
 
 ENV PYTHONUNBUFFERED=1
+# Make arg passed from compose files into environment variable
 ARG WEBPACK_MODE
 ENV WEBPACK_MODE $WEBPACK_MODE
 
