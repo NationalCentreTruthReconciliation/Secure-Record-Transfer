@@ -846,7 +846,12 @@ class UploadFilesForm(TransferForm):
         label=gettext("Other notes"),
     )
 
-    session_token = forms.CharField(required=True, widget=forms.HiddenInput(), label="hidden")
+    session_token = forms.CharField(
+        required=True,
+        widget=forms.HiddenInput(),
+        label="hidden",
+        error_messages={"required": "Upload session token is required"},
+    )
 
 
 class FinalStepFormNoUpload(TransferForm):

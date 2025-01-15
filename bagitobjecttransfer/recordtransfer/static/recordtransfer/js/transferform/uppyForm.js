@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const uppyFiles = uppy.getFiles();
 
         if (uppyFiles.length === 0) {
-            uppy.info("Please upload at least one file before proceeding.", "error", 5000);
+            uppy.info("You must upload at least one file.", "error", 5000);
             return;
         }
 
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         if (hasIssues) {
             uppy.info(
-                "Please remove the files with issues before proceeding.", 
+                "Remove the files with issues to proceed.", 
                 "error",
                 5000
             );
