@@ -7,7 +7,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import gettext
 from override_storage import override_storage
 from override_storage.storage import LocMemStorage
