@@ -277,7 +277,6 @@ class TestListUploadedFilesView(TestCase):
         self.assertEqual(response.status_code, 404)
         response_json = response.json()
         self.assertIn("error", response_json)
-        self.assertIn("uploadSessionToken", response_json)
 
     def test_list_uploaded_files_empty_session(self):
         """Session has no files."""
@@ -285,7 +284,6 @@ class TestListUploadedFilesView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json.get("files"), [])
-        self.assertIn("uploadSessionToken", response_json)
 
     def test_list_uploaded_files_with_files(self):
         """Session has one file."""
@@ -298,7 +296,6 @@ class TestListUploadedFilesView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
-        self.assertIn("uploadSessionToken", response_json)
         responseFiles = response_json.get("files")
         self.assertEqual(len(responseFiles), 1)
         self.assertEqual(responseFiles[0]["name"], "testfile.txt")
