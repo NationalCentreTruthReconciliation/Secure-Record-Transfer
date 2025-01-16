@@ -956,11 +956,8 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
     """
     session = UploadSession.objects.filter(token=session_token).first()
     if not session:
-        # Create a new session if one is not found
-        session = UploadSession.new_session()
-        session.save()
         return JsonResponse(
-            {"error": gettext("Upload session not found"), "uploadSessionToken": session.token},
+            {"error": gettext("Upload session not found")},
             status=404,
         )
 
