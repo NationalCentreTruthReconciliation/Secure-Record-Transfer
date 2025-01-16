@@ -10,6 +10,7 @@ from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.files import File
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -165,15 +166,15 @@ def session_upload_location(instance, filename):
     return "NOSESSION/{0}".format(filename)
 
 
-class UploadedFile(models.Model):
-    """Represent a file that a user uploaded during an upload session."""
+class BaseUploadedFile(models.Model):
+    """Base class for uploaded files with shared methods."""
 
     name = models.CharField(max_length=256, null=True, default="-")
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
-    file_upload = models.FileField(
-        null=True, storage=TempFileStorage, upload_to=session_upload_location
-    )
-    temp = models.BooleanField(default=True)
+    file_upload = models.FileField(null=True)
+
+    class Meta:
+        abstract = True
 
     @property
     def exists(self) -> bool:
@@ -193,25 +194,10 @@ class UploadedFile(models.Model):
         if self.file_upload:
             shutil.copy2(self.file_upload.path, new_path)
 
-    def move(self, new_path: str) -> None:
-        """Move this file to a new path.
-
-        Args:
-            new_path: The new path to move this file to
-        """
-        if not self.file_upload:
-            return
-
-        directory = os.path.dirname(new_path)
-        os.makedirs(directory, exist_ok=True)
-
-        shutil.move(self.file_upload.path, new_path)
-        self.remove()
-
     def remove(self) -> None:
-        """Delete the real file-system representation of this model."""
-        if self.file_upload:
-            self.file_upload.delete(save=True)
+        """Remove this file from the file system."""
+        if self.exists:
+            self.file_upload.delete(save=False)
 
     def get_file_media_url(self) -> str:
         """Generate the media URL to this file.
@@ -233,20 +219,6 @@ class UploadedFile(models.Model):
             },
         )
 
-    def move_to_permanent_storage(self) -> None:
-        """Move the file from TempFileStorage to UploadedFileStorage."""
-        if self.temp and self.file_upload:
-            new_storage = UploadedFileStorage()
-            # Relative path of file to the storage root
-            relative_path = self.file_upload.name
-            new_path = new_storage.path(self.file_upload.name)
-            self.move(new_path)
-            # After actual file is moved, all FileField attributes are lost
-            self.file_upload.storage = new_storage
-            self.file_upload.name = relative_path
-            self.temp = False
-            self.save()
-
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
@@ -254,8 +226,32 @@ class UploadedFile(models.Model):
         return f"{self.name} Removed! | Session {self.session}"
 
 
-@receiver(post_delete, sender=UploadedFile)
-def delete_file_on_model_delete(sender: UploadedFile, instance: UploadedFile, **kwargs) -> None:
+class TempUploadedFile(BaseUploadedFile):
+    """Represent a file that a user uploaded during an upload session."""
+
+    file_upload = models.FileField(
+        null=True, storage=TempFileStorage, upload_to=session_upload_location
+    )
+
+    def move_to_permanent_storage(self) -> None:
+        """Move the file from TempFileStorage to UploadedFileStorage."""
+        if self.exists:
+            stored_file = StoredUploadedFile(name=self.name, session=self.session)
+            stored_file.file_upload.save(self.file_upload.name, File(self.file_upload.file))
+            stored_file.save()
+            self.delete()
+
+
+class StoredUploadedFile(BaseUploadedFile):
+    """Represent a file that a user uploaded and has been stored."""
+
+    file_upload = models.FileField(null=True, storage=UploadedFileStorage)
+
+
+@receiver(post_delete, sender=TempUploadedFile)
+def delete_file_on_model_delete(
+    sender: TempUploadedFile, instance: TempUploadedFile, **kwargs
+) -> None:
     """Delete the actual file when an UploadedFile model instance is deleted.
 
     Args:
