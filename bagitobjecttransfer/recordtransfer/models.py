@@ -249,14 +249,17 @@ class StoredUploadedFile(BaseUploadedFile):
 
 
 @receiver(post_delete, sender=TempUploadedFile)
+@receiver(post_delete, sender=StoredUploadedFile)
 def delete_file_on_model_delete(
-    sender: TempUploadedFile, instance: TempUploadedFile, **kwargs
+    sender: Union[TempUploadedFile, StoredUploadedFile],
+    instance: Union[TempUploadedFile, StoredUploadedFile],
+    **kwargs,
 ) -> None:
-    """Delete the actual file when an UploadedFile model instance is deleted.
+    """Delete the actual file when an uploaded file model instance is deleted.
 
     Args:
         sender: The model class that sent the signal
-        instance: The UploadedFile instance being deleted
+        instance: The model uploaded file instance being deleted
         **kwargs: Additional keyword arguments passed to the signal handler
     """
     if instance.file_upload:
