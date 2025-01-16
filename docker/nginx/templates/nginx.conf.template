@@ -13,6 +13,10 @@ server {
         proxy_redirect off;
     }
 
+    location /transfer/uploadfile/ {
+        client_max_body_size ${MAX_SINGLE_UPLOAD_SIZE}m;
+    }
+
     location /static/ {
         alias ${STATIC_ROOT};
     }
@@ -33,6 +37,4 @@ server {
         internal;
         alias /var/www/html/500.html;
     }
-
-    client_max_body_size ${MAX_SINGLE_UPLOAD_SIZE}m;
 }
