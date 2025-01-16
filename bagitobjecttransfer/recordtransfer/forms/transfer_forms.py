@@ -827,7 +827,7 @@ class GroupTransferForm(TransferForm):
 
 
 class UploadFilesForm(TransferForm):
-    """The form where users upload their files and write any final notes"""
+    """The form where users upload their files and write any final notes."""
 
     general_note = forms.CharField(
         required=False,
@@ -854,13 +854,23 @@ class UploadFilesForm(TransferForm):
     )
 
     def clean(self) -> dict:
+        """Check that the session token is valid and that at least one file has been uploaded."""
         cleaned_data = super().clean()
         session_token = cleaned_data.get("session_token")
-        upload_session = UploadSession.objects.get(token=session_token)
-        if not upload_session:
+
+        if not session_token:
             self.add_error("session_token", "Invalid upload. Please try again.")
+            return cleaned_data
+
+        try:
+            upload_session = UploadSession.objects.get(token=session_token)
+        except UploadSession.DoesNotExist:
+            self.add_error("session_token", "Invalid upload. Please try again.")
+            return cleaned_data
+
         if upload_session.number_of_files_uploaded() == 0:
             self.add_error("session_token", "You must upload at least one file")
+
         return cleaned_data
 
 
