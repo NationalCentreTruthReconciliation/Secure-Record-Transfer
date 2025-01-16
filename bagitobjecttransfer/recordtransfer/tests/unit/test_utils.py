@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -241,7 +242,13 @@ class FileCountingUtilityTests(TestCase):
         self.assertIn("1 Audio file", statement)
         self.assertIn("3 Image files", statement)
 
-
+@patch(
+    "django.conf.settings.ACCEPTED_FILE_FORMATS",
+    {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
+)
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 class TestAcceptFile(TestCase):
     """Tests for accept_file method."""
 
@@ -249,10 +256,6 @@ class TestAcceptFile(TestCase):
     def setUpClass(cls) -> None:
         """Set up class-level test data."""
         super().setUpClass()
-        settings.ACCEPTED_FILE_FORMATS = {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]}
-        settings.MAX_TOTAL_UPLOAD_SIZE = 3  # MiB
-        settings.MAX_SINGLE_UPLOAD_SIZE = 1  # MiB
-        settings.MAX_TOTAL_UPLOAD_COUNT = 4  # Number of files
 
     def test_accept_file_valid(self) -> None:
         """Test that valid files are accepted."""
@@ -329,7 +332,13 @@ class TestAcceptFile(TestCase):
         result = accept_file("My File.pdf", ((1024**2) * 1))  # 1 MiB
         self.assertTrue(result["accepted"])
 
-
+@patch(
+    "django.conf.settings.ACCEPTED_FILE_FORMATS",
+    {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
+)
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 class TestAcceptSession(TestCase):
     """Tests for accept_session method."""
 
@@ -337,10 +346,6 @@ class TestAcceptSession(TestCase):
     def setUpClass(cls) -> None:
         """Set up class-level test data."""
         super().setUpClass()
-        settings.ACCEPTED_FILE_FORMATS = {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]}
-        settings.MAX_TOTAL_UPLOAD_SIZE = 3  # MiB
-        settings.MAX_SINGLE_UPLOAD_SIZE = 1  # MiB
-        settings.MAX_TOTAL_UPLOAD_COUNT = 4  # Number of files
 
     @classmethod
     def setUpTestData(cls) -> None:
