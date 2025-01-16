@@ -797,6 +797,8 @@ class TransferFormWizard(SessionWizardView):
                     token=form_data["session_token"]
                 ).first()
             ):
+                upload_session.expired = True
+                upload_session.save()
                 submission.upload_session = upload_session
                 submission.upload_session.move_uploads_to_permanent_storage()
             else:

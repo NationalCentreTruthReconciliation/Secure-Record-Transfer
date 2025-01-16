@@ -5,11 +5,10 @@ from django.utils.html import format_html
 from django.utils.translation import gettext
 
 from recordtransfer.models import (
-    SubmissionGroup,
     Submission,
-    UploadSession,
+    SubmissionGroup,
     TempUploadedFile,
-    User,
+    UploadSession,
 )
 
 
@@ -51,7 +50,7 @@ class UploadSessionForm(RecordTransferModelForm):
 
     class Meta:
         model = UploadSession
-        fields = ("token", "started_at")
+        fields = ("token", "started_at", "expired")
 
     number_of_files_uploaded = forms.IntegerField(required=False)
 

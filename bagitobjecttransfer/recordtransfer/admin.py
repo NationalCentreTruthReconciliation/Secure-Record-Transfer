@@ -100,7 +100,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 
 @admin.register(TempUploadedFile)
-class UploadedFileAdmin(ReadOnlyAdmin):
+class TempUploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model
 
     Permissions:
@@ -137,7 +137,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
             uploaded_file.remove()
 
 
-class UploadedFileInline(admin.TabularInline):
+class TempUploadedFileInline(admin.TabularInline):
     """Inline admin for the UploadedFile model. Used to view the files
     associated with an upload session
 
@@ -177,10 +177,10 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     form = UploadSessionForm
 
     inlines = [
-        UploadedFileInline,
+        TempUploadedFileInline,
     ]
 
-    list_display = ["token", "started_at", "number_of_files_uploaded"]
+    list_display = ["token", "started_at", "number_of_files_uploaded", "expired"]
 
     ordering = [
         "-started_at",

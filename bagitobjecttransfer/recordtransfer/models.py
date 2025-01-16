@@ -46,6 +46,7 @@ class UploadSession(models.Model):
 
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
+    expired = models.BooleanField(default=False)
 
     @classmethod
     def new_session(cls):
@@ -57,9 +58,11 @@ class UploadSession(models.Model):
         """Get total size (in bytes) of all uploaded files in this session"""
         return sum(f.file_upload.size for f in self.get_existing_file_set())
 
-    def get_existing_file_set(self):
-        """Get all files from the uploadedfile_set where the file exists"""
-        return [f for f in self.tempuploadedfile_set.all() if f.exists]
+    def get_existing_file_set(self) -> Union[list["TempUploadedFile"], list["StoredUploadedFile"]]:
+        if self.expired:
+            return [f for f in self.storeduploadedfile_set.all() if f.exists]
+        else:
+            return [f for f in self.tempuploadedfile_set.all() if f.exists]
 
     def number_of_files_uploaded(self):
         """Get the number of files associated with this session.
@@ -67,7 +70,10 @@ class UploadSession(models.Model):
         Returns:
             (int): The number of files
         """
-        return len(self.tempuploadedfile_set.all())
+        if self.expired:
+            return len(self.storeduploadedfile_set.all())
+        else:
+            return len(self.tempuploadedfile_set.all())
 
     def remove_session_uploads(self, logger=None):
         """Remove uploaded files associated with this session.
@@ -90,6 +96,15 @@ class UploadSession(models.Model):
             logger: Optional logger instance to use for logging operations
         """
         logger = logger or LOGGER
+        if self.expired:
+            logger.warning(
+                msg=(
+                    "Session %s has already expired, cannot move files to permanent storage",
+                    self.token,
+                )
+            )
+            return
+
         existing_files = self.get_existing_file_set()
         if not existing_files:
             logger.info("There are no existing uploaded files in the session %s", self.token)
@@ -193,6 +208,11 @@ class BaseUploadedFile(models.Model):
         """
         if self.file_upload:
             shutil.copy2(self.file_upload.path, new_path)
+
+    def remove(self) -> None:
+        """Remove this file from the file system."""
+        if self.exists:
+            self.file_upload.delete(save=False)
 
     def get_file_media_url(self) -> str:
         """Generate the media URL to this file.
