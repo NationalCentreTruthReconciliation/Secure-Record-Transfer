@@ -1,5 +1,7 @@
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
+import os
+
 from decouple import config
 
 from .base import *
@@ -88,4 +90,4 @@ BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default="/app/bagitobjecttrans
 UPLOAD_STORAGE_FOLDER = config(
     "UPLOAD_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/uploaded_files/"
 )
-
+TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/temp/")

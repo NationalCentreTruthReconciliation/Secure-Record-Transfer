@@ -95,3 +95,4 @@ LOGGING = {
 
 BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default="/app/media/bags/")
 UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default="/app/media/uploaded_files/")
+TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default="/app/media/temp/")

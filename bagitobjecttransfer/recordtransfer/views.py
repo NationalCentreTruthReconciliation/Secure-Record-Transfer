@@ -7,7 +7,6 @@ from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from django.conf import settings
-from django.conf import settings as djangosettings
 from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -87,7 +86,12 @@ from recordtransfer.models import (
     User,
 )
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
+from recordtransfer.utils import (
+    accept_file,
+    accept_session,
+    get_human_readable_file_count,
+    get_human_readable_size,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -110,9 +114,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
     if not user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this resource.")
 
-    response = HttpResponse(
-        headers={"X-Accel-Redirect": djangosettings.MEDIA_URL + path.lstrip("/")}
-    )
+    response = HttpResponse(headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")})
 
     # Nginx will assign its own headers for the following:
     del response["Content-Type"]
@@ -370,6 +372,11 @@ class TransferFormWizard(SessionWizardView):
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Final Notes"),
             INFOMESSAGE: gettext("Add any final notes that may not have fit in previous steps"),
+        },
+        TransferStep.REVIEW: {
+            TEMPLATEREF: "recordtransfer/transferform_review.html",
+            FORMTITLE: gettext("Review"),
+            INFOMESSAGE: gettext("Review the information you've entered before submitting"),
         },
     }
 
@@ -703,6 +710,27 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
             context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
 
+        elif self.current_step == TransferStep.UPLOAD_FILES:
+            context.update(
+                {
+                    # For use in template
+                    "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                    "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                    "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    # For use in JS
+                    "js_context": {
+                        "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                        "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                        "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                        "ACCEPTED_FILE_FORMATS": [
+                            f".{format}"
+                            for formats in settings.ACCEPTED_FILE_FORMATS.values()
+                            for format in formats
+                        ],
+                    },
+                }
+            )
+
         return context
 
     @property
@@ -764,10 +792,13 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Mapping form data to CAAIS metadata")
             submission.metadata = map_form_to_metadata(form_data)
 
-            if settings.FILE_UPLOAD_ENABLED:
-                token = form_data["session_token"]
-                LOGGER.info("Fetching session with the token %s", token)
-                submission.upload_session = UploadSession.objects.filter(token=token).first()
+            if settings.FILE_UPLOAD_ENABLED and (
+                upload_session := UploadSession.objects.filter(
+                    token=form_data["session_token"]
+                ).first()
+            ):
+                submission.upload_session = upload_session
+                submission.upload_session.move_uploads_to_permanent_storage()
             else:
                 LOGGER.info(
                     (
@@ -824,13 +855,12 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def uploadfiles(request):
-    """Upload one or more files to the server, and return a token representing the file upload
+def upload_file(request: HttpRequest) -> JsonResponse:
+    """Upload a single file to the server, and return a token representing the file upload
     session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded files will be added to the corresponding session, meaning this endpoint can be hit
-    multiple times for a large batch upload of files.
+    uploaded file will be added to the corresponding session.
 
-    Each file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if any
+    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
     file is not an accepted type, an error message is returned.
 
     Args:
@@ -838,309 +868,165 @@ def uploadfiles(request):
 
     Returns:
         JsonResponse: If the upload was successful, the session token is returned in
-            'upload_session_token'. If not successful, the error description is returned in 'error',
-            and a more verbose error is returned in 'verboseError'.
+        'upload_session_token'. If not successful, the error description is returned in 'error'.
     """
-    if not request.FILES:
-        return JsonResponse(
-            {
-                "error": gettext("No files were uploaded"),
-                "verboseError": gettext("No files were uploaded"),
-            },
-            status=400,
-        )
-
     try:
         headers = request.headers
-        if not "Upload-Session-Token" in headers or not headers["Upload-Session-Token"]:
+        session_token = headers.get("Upload-Session-Token")
+        session = (
+            UploadSession.objects.filter(token=session_token).first() if session_token else None
+        )
+        if not session:
             session = UploadSession.new_session()
             session.save()
-        else:
-            session = UploadSession.objects.filter(token=headers["Upload-Session-Token"]).first()
-            if session is None:
-                session = UploadSession.new_session()
-                session.save()
 
-        issues = []
-        for _file in request.FILES.dict().values():
-            file_check = _accept_file(_file.name, _file.size)
-            if not file_check["accepted"]:
-                _file.close()
-                issues.append({"file": _file.name, **file_check})
-                continue
-
-            session_check = _accept_session(_file.name, _file.size, session)
-            if not session_check["accepted"]:
-                _file.close()
-                issues.append({"file": _file.name, **session_check})
-                continue
-
-            try:
-                check_for_malware(_file)
-
-            except ValidationError as exc:
-                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
-                _file.close()
-                issues.append(
-                    {
-                        "file": _file.name,
-                        "accepted": False,
-                        "error": gettext("Malware detected in file"),
-                        "verboseError": gettext(
-                            f'Malware was detected in the file "{_file.name}"'
-                        ),
-                    }
-                )
-                continue
-
-            new_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
-            new_file.save()
-
-        return JsonResponse({"uploadSessionToken": session.token, "issues": issues}, status=200)
-
-    except Exception as exc:
-        LOGGER.error(msg=("Uncaught exception in uploadfiles view: {0}".format(str(exc))))
-        return JsonResponse(
-            {
-                "error": gettext("500 Internal Server Error"),
-                "verboseError": gettext("500 Internal Server Error"),
-            },
-            status=500,
-        )
-
-
-@require_http_methods(["GET", "POST"])
-def accept_file(request):
-    """Check whether the file is allowed to be uploaded by inspecting the file's extension. The
-    allowed file extensions are set using the ACCEPTED_FILE_FORMATS setting.
-
-    Args:
-        request: The request sent by the user. This request should either be a GET or a POST
-            request, with the name of the file in the **filename** parameter.
-
-    Returns:
-        JsonResponse: If the file is allowed to be uploaded, 'accepted' will be True. Otherwise,
-            'accepted' is False and both 'error' and 'verboseError' are set.
-    """
-    # Ensure required parameters are set
-    request_params = request.POST if request.method == "POST" else request.GET
-    for required in ("filename", "filesize"):
-        if required not in request_params:
+        _file = request.FILES.get("file")
+        if not _file:
             return JsonResponse(
                 {
-                    "accepted": False,
-                    "error": gettext("Could not find {0} parameter in request").format(required),
-                },
-                status=400,
-            )
-        if not request_params[required]:
-            return JsonResponse(
-                {
-                    "accepted": False,
-                    "error": gettext("{0} parameter cannot be empty").format(required),
+                    "uploadSessionToken": session.token,
+                    "error": gettext("No file was uploaded"),
                 },
                 status=400,
             )
 
-    filename = request_params["filename"]
-    filesize = request_params["filesize"]
-    token = request.headers.get("Upload-Session-Token", None)
-
-    try:
-        file_check = _accept_file(filename, filesize)
+        file_check = accept_file(_file.name, _file.size)
         if not file_check["accepted"]:
-            return JsonResponse(file_check, status=200)
+            return JsonResponse(
+                {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+                status=400,
+            )
 
-        if token:
-            session = UploadSession.objects.filter(token=token).first()
-            if session:
-                session_check = _accept_session(filename, filesize, session)
-                if not session_check["accepted"]:
-                    return JsonResponse(session_check, status=200)
+        session_check = accept_session(_file.name, _file.size, session)
+        if not session_check["accepted"]:
+            return JsonResponse(
+                {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+                status=400,
+            )
 
-        # The contents of the file are not known here, so it is not necessary to
-        # call _accept_content()
+        try:
+            check_for_malware(_file)
+        except ValidationError as exc:
+            LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+            return JsonResponse(
+                {
+                    "file": _file.name,
+                    "accepted": False,
+                    "uploadSessionToken": session.token,
+                    "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                },
+                status=400,
+            )
 
-        return JsonResponse({"accepted": True}, status=200)
+        uploaded_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
+        uploaded_file.save()
+        file_url = uploaded_file.get_file_access_url()
 
-    except Exception as exc:
-        LOGGER.error(msg=("Uncaught exception in checkfile view: {0}".format(str(exc))))
         return JsonResponse(
             {
-                "accepted": False,
-                "error": gettext("500 Internal Server Error"),
-                "verboseError": gettext("500 Internal Server Error"),
+                "file": _file.name,
+                "accepted": True,
+                "uploadSessionToken": session.token,
+                "url": file_url,
+            },
+            status=200,
+        )
+
+    except Exception as exc:
+        LOGGER.error(msg=("Uncaught exception in upload_file view: %s", exc))
+        return JsonResponse(
+            {
+                "error": gettext("There was an internal server error. Please try again."),
             },
             status=500,
         )
 
 
-def _accept_file(filename: str, filesize: Union[str, int]) -> dict:
-    """Determine if a new file should be accepted. Does not check the file's
-    contents, only its name and its size.
-
-    These checks are applied:
-    - The file name is not empty
-    - The file has an extension
-    - The file's extension exists in ACCEPTED_FILE_FORMATS
-    - The file's size is an integer greater than zero
-    - The file's size is less than or equal to the maximum allowed size for one file
+@require_http_methods(["GET"])
+def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
+    """Get a list of metadata for files that have been uploaded in a given upload session.
 
     Args:
-        filename (str): The name of the file
-        filesize (Union[str, int]): A string or integer representing the size of
-            the file (in bytes)
+        request: The HTTP request
+        session_token: The upload session token from the URL
 
     Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key if 'accepted' is False.
+        JsonResponse: A JSON response containing the list of uploaded files and their details,
+        or an error message if the session is not found.
     """
-
-    def mib_to_bytes(m):
-        return m * 1024**2
-
-    def bytes_to_mib(b):
-        return b / 1024**2
-
-    # Check extension exists
-    name_split = filename.split(".")
-    if len(name_split) == 1:
-        return {
-            "accepted": False,
-            "error": gettext("File is missing an extension."),
-            "verboseError": gettext('The file "{0}" does not have a file extension').format(
-                filename
-            ),
-        }
-
-    # Check extension is allowed
-    extension = name_split[-1].lower()
-    extension_accepted = False
-    for _, accepted_extensions in settings.ACCEPTED_FILE_FORMATS.items():
-        for accepted_extension in accepted_extensions:
-            if extension == accepted_extension.lower():
-                extension_accepted = True
-                break
-
-    if not extension_accepted:
-        return {
-            "accepted": False,
-            "error": gettext('Files with "{0}" extension are not allowed.').format(extension),
-            "verboseError": gettext('The file "{0}" has an invalid extension (.{1})').format(
-                filename, extension
-            ),
-        }
-
-    # Check filesize is an integer
-    size = filesize
-    try:
-        size = int(filesize)
-        if size < 0:
-            raise ValueError("File size cannot be negative")
-    except ValueError:
-        return {
-            "accepted": False,
-            "error": gettext("File size is invalid."),
-            "verboseError": gettext('The file "{0}" has an invalid size ({1})').format(
-                filename, size
-            ),
-        }
-
-    # Check file has some contents (i.e., non-zero size)
-    if size == 0:
-        return {
-            "accepted": False,
-            "error": gettext("File is empty."),
-            "verboseError": gettext('The file "{0}" is empty').format(filename),
-        }
-
-    # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
-    )
-    max_single_size_bytes = mib_to_bytes(max_single_size)
-    size_mib = bytes_to_mib(size)
-    if size > max_single_size_bytes:
-        return {
-            "accepted": False,
-            "error": gettext("File is too big ({0:.2f}MiB). Max filesize: {1}MiB").format(
-                size_mib, max_single_size
-            ),
-            "verboseError": gettext(
-                'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
-            ).format(filename, size_mib, max_single_size),
-        }
-
-    # All checks succeded
-    return {"accepted": True}
-
-
-def _accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
-    """Determine if a new file should be accepted as part of the session.
-
-    These checks are applied:
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_COUNT
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE
-    - A file with the same name has not already been uploaded
-
-    Args:
-        filename (str): The name of the file
-        filesize (Union[str, int]): A string or integer representing the size of
-            the file (in bytes)
-        session (UploadSession): The session files are being uploaded to
-
-    Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key if 'accepted' is False.
-    """
+    session = UploadSession.objects.filter(token=session_token).first()
     if not session:
-        return {"accepted": True}
+        return JsonResponse(
+            {"error": gettext("Upload session not found")},
+            status=404,
+        )
 
-    def mib_to_bytes(m):
-        return m * 1024**2
+    files = []
+    for uploaded_file in session.uploadedfile_set.all():
+        files.append(
+            {
+                "name": uploaded_file.name,
+                "size": uploaded_file.file_upload.size,
+                "url": uploaded_file.get_file_access_url(),
+            }
+        )
 
-    # Check number of files is within allowed total
-    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
-        return {
-            "accepted": False,
-            "error": gettext("You can not upload anymore files."),
-            "verboseError": gettext(
-                'The file "{0}" would push the total file count past the '
-                "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE),
-        }
+    response_data = {"files": files}
 
-    # Check total size of all files plus current one is within allowed size
-    max_size = max(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
-    )
-    max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
-    if int(filesize) > max_remaining_size_bytes:
-        return {
-            "accepted": False,
-            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
-            "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the {1}MiB max'
-            ).format(filename, max_size),
-        }
+    return JsonResponse(response_data, safe=False, status=200)
 
-    # Check that a file with this name has not already been uploaded
-    filename_list = session.uploadedfile_set.all().values_list("name", flat=True)
-    if filename in filename_list:
-        return {
-            "accepted": False,
-            "error": gettext("A file with the same name has already been uploaded."),
-            "verboseError": gettext('A file with the name "{0}" has already been uploaded').format(
-                filename
-            ),
-        }
 
-    # All checks succeded
-    return {"accepted": True}
+@require_http_methods(["DELETE", "GET"])
+def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
+    """Get or delete a file that has been uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+        filename: The name of the file to delete
+
+    Returns:
+        HttpResponse:
+            In the case of deletion, returns a 204 response when successfully deleted. In the case
+            of getting a file, redirects to the file's media path in development, or returns an
+            X-Accel-Redirect to the file's media path if in production.
+    """
+    session = UploadSession.objects.filter(token=session_token).first()
+    if not session:
+        return JsonResponse({"error": gettext("Upload session not found")}, status=404)
+
+    uploaded_file: UploadedFile = session.uploadedfile_set.filter(name=file_name).first()
+    if not uploaded_file:
+        return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
+
+    if request.method == "DELETE":
+        uploaded_file.delete()
+        # 204: No content (i.e., deletion succeeded, no message needed)
+        return HttpResponse(status=204)
+
+    elif settings.DEBUG:
+        try:
+            return HttpResponseRedirect(uploaded_file.get_file_media_url())
+        except FileNotFoundError:
+            return HttpResponseNotFound()
+
+    else:
+        try:
+            response = HttpResponse(
+                headers={"X-Accel-Redirect": uploaded_file.get_file_media_url()}
+            )
+        except FileNotFoundError:
+            return HttpResponseNotFound()
+
+        # Nginx will assign its own headers for the following:
+        del response["Content-Type"]
+        del response["Content-Disposition"]
+        del response["Accept-Ranges"]
+        del response["Set-Cookie"]
+        del response["Cache-Control"]
+        del response["Expires"]
+
+        return response
 
 
 class DeleteTransfer(TemplateView):
