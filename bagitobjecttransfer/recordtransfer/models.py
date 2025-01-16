@@ -3,7 +3,7 @@ import os
 import shutil
 import uuid
 from pathlib import Path
-from typing import ClassVar, Union
+from typing import ClassVar, Optional, Union
 
 import bagit
 from caais.export import ExportVersion
@@ -11,6 +11,8 @@ from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
 from django.utils import timezone
@@ -20,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
-from recordtransfer.storage import OverwriteStorage, UploadedFileStorage
+from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -74,32 +76,32 @@ class UploadSession(models.Model):
         """
         logger = logger or LOGGER
         existing_files = self.get_existing_file_set()
+        if existing_files:
+            for uploaded_file in existing_files:
+                uploaded_file.remove()
+        else:
+            logger.info(msg=("There are no existing uploaded files in the session %s", self.token))
+
+    def move_uploads_to_permanent_storage(self, logger: Optional[logging.Logger] = None) -> None:
+        """Move uploaded files from temporary to permanent storage.
+
+        Args:
+            logger: Optional logger instance to use for logging operations
+        """
+        logger = logger or LOGGER
+        existing_files = self.get_existing_file_set()
         if not existing_files:
-            logger.info(
-                msg=("There are no existing uploaded files in the session {0}".format(self.token))
-            )
+            logger.info("There are no existing uploaded files in the session %s", self.token)
         else:
             logger.info(
                 msg=(
-                    "Removing {0} uploaded files from the session {1}".format(
-                        len(existing_files), self.token
-                    )
+                    "Moving %d uploaded files from the session %s to permanent storage",
+                    len(existing_files),
+                    self.token,
                 )
             )
             for uploaded_file in existing_files:
-                uploaded_file.remove()
-
-    def move_session_uploads(self, destination, logger=None):
-        """Move uploaded files associated with this session to a destination directory.
-
-        Args:
-            destination (str): The destination directory
-            logger: A logger object
-
-        Returns:
-            (tuple): A two tuple containing a list of the copied, and missing files
-        """
-        return self._copy_session_uploads(destination, delete=True, logger=logger)
+                uploaded_file.move_to_permanent_storage()
 
     def copy_session_uploads(self, destination, logger=None):
         """Copy uploaded files associated with this session to a destination directory. Files are
@@ -164,24 +166,25 @@ def session_upload_location(instance, filename):
 
 
 class UploadedFile(models.Model):
-    """Represents a file that a user uploaded during an upload session"""
+    """Represent a file that a user uploaded during an upload session."""
 
     name = models.CharField(max_length=256, null=True, default="-")
-    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=True)
+    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
     file_upload = models.FileField(
-        null=True, storage=UploadedFileStorage, upload_to=session_upload_location
+        null=True, storage=TempFileStorage, upload_to=session_upload_location
     )
+    temp = models.BooleanField(default=True)
 
     @property
-    def exists(self):
+    def exists(self) -> bool:
         """Determine if the file this object represents exists on the file system.
 
         Returns:
             (bool): True if file exists, False otherwise
         """
-        return self.file_upload and self.file_upload.storage.exists(self.file_upload.name)
+        return bool(self.file_upload) and self.file_upload.storage.exists(self.file_upload.name)
 
-    def copy(self, new_path):
+    def copy(self, new_path: str) -> None:
         """Copy this file to a new path.
 
         Args:
@@ -190,25 +193,78 @@ class UploadedFile(models.Model):
         if self.file_upload:
             shutil.copy2(self.file_upload.path, new_path)
 
-    def move(self, new_path):
-        """Move this file to a new path. Marks this file as removed post-move.
+    def move(self, new_path: str) -> None:
+        """Move this file to a new path.
 
         Args:
             new_path: The new path to move this file to
         """
-        if self.file_upload:
-            shutil.move(self.file_upload.path, new_path)
-            self.remove()
+        if not self.file_upload:
+            return
 
-    def remove(self):
+        directory = os.path.dirname(new_path)
+        os.makedirs(directory, exist_ok=True)
+
+        shutil.move(self.file_upload.path, new_path)
+        self.remove()
+
+    def remove(self) -> None:
         """Delete the real file-system representation of this model."""
         if self.file_upload:
             self.file_upload.delete(save=True)
 
+    def get_file_media_url(self) -> str:
+        """Generate the media URL to this file.
+
+        Raises:
+            FileNotFoundError if the file does not exist.
+        """
+        if self.exists:
+            return self.file_upload.url
+        raise FileNotFoundError(f"{self.name} does not exist in session {self.session.token}")
+
+    def get_file_access_url(self) -> str:
+        """Generate URL to request access for this file."""
+        return reverse(
+            "recordtransfer:uploaded_file",
+            kwargs={
+                "session_token": self.session.token,
+                "file_name": self.name,
+            },
+        )
+
+    def move_to_permanent_storage(self) -> None:
+        """Move the file from TempFileStorage to UploadedFileStorage."""
+        if self.temp and self.file_upload:
+            new_storage = UploadedFileStorage()
+            # Relative path of file to the storage root
+            relative_path = self.file_upload.name
+            new_path = new_storage.path(self.file_upload.name)
+            self.move(new_path)
+            # After actual file is moved, all FileField attributes are lost
+            self.file_upload.storage = new_storage
+            self.file_upload.name = relative_path
+            self.temp = False
+            self.save()
+
     def __str__(self):
+        """Return a string representation of this object."""
         if self.exists:
             return f"{self.name} | Session {self.session}"
         return f"{self.name} Removed! | Session {self.session}"
+
+
+@receiver(post_delete, sender=UploadedFile)
+def delete_file_on_model_delete(sender: UploadedFile, instance: UploadedFile, **kwargs) -> None:
+    """Delete the actual file when an UploadedFile model instance is deleted.
+
+    Args:
+        sender: The model class that sent the signal
+        instance: The UploadedFile instance being deleted
+        **kwargs: Additional keyword arguments passed to the signal handler
+    """
+    if instance.file_upload:
+        instance.file_upload.delete(save=False)
 
 
 class SubmissionGroup(models.Model):
