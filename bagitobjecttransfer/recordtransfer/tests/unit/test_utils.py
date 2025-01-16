@@ -3,7 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
 
-from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.models import TempUploadedFile, UploadSession
 from recordtransfer.utils import (
     accept_file,
     accept_session,
@@ -358,7 +358,7 @@ class TestAcceptSession(TestCase):
         try:
             # 2 MiB of files (one MiB x 2)
             files = [
-                UploadedFile.objects.create(
+                TempUploadedFile.objects.create(
                     session=self.session_1,
                     file_upload=SimpleUploadedFile(name, self.one_mib),
                     name=name,
@@ -382,7 +382,7 @@ class TestAcceptSession(TestCase):
             # 2 MiB of files (half MiB x 4)
             # Max file count is 4
             files = [
-                UploadedFile.objects.create(
+                TempUploadedFile.objects.create(
                     session=self.session_1,
                     name=name,
                     file_upload=SimpleUploadedFile(name, self.half_mib),
@@ -404,7 +404,7 @@ class TestAcceptSession(TestCase):
         try:
             # 2.5 MiB of files (1 Mib x 2, 0.5 MiB x 1)
             files = [
-                UploadedFile.objects.create(
+                TempUploadedFile.objects.create(
                     session=self.session_1,
                     name=name,
                     file_upload=SimpleUploadedFile(name, content),
@@ -430,7 +430,7 @@ class TestAcceptSession(TestCase):
         names = ("File.1.docx", "File.2.pdf")
         try:
             files = [
-                UploadedFile.objects.create(
+                TempUploadedFile.objects.create(
                     session=self.session_1,
                     name=name,
                     file_upload=SimpleUploadedFile(name, self.half_mib),

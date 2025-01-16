@@ -81,7 +81,7 @@ from recordtransfer.models import (
     InProgressSubmission,
     Submission,
     SubmissionGroup,
-    UploadedFile,
+    TempUploadedFile,
     UploadSession,
     User,
 )
@@ -918,7 +918,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        uploaded_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
+        uploaded_file = TempUploadedFile(session=session, file_upload=_file, name=_file.name)
         uploaded_file.save()
         file_url = uploaded_file.get_file_access_url()
 
@@ -965,7 +965,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         )
 
     files = []
-    for uploaded_file in session.uploadedfile_set.all():
+    for uploaded_file in session.tempuploadedfile_set.all():
         files.append(
             {
                 "name": uploaded_file.name,
@@ -998,7 +998,7 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     if not session:
         return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-    uploaded_file: UploadedFile = session.uploadedfile_set.filter(name=file_name).first()
+    uploaded_file: TempUploadedFile = session.tempuploadedfile_set.filter(name=file_name).first()
     if not uploaded_file:
         return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 

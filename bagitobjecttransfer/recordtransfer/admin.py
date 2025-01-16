@@ -31,7 +31,7 @@ from recordtransfer.models import (
     Job,
     Submission,
     SubmissionGroup,
-    UploadedFile,
+    TempUploadedFile,
     UploadSession,
     User,
 )
@@ -99,7 +99,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(UploadedFile)
+@admin.register(TempUploadedFile)
 class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model
 
@@ -110,9 +110,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
     """
 
     class Media:
-        js = (
-            "admin_uploadedfile.bundle.js",
-        )
+        js = ("admin_uploadedfile.bundle.js",)
 
     change_form_template = "admin/readonly_change_form.html"
 
@@ -150,7 +148,7 @@ class UploadedFileInline(admin.TabularInline):
     """
 
     form = InlineUploadedFileForm
-    model = UploadedFile
+    model = TempUploadedFile
     max_num = 0
     show_change_link = True
 
