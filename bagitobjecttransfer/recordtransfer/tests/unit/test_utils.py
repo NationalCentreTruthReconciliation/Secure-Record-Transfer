@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from django.conf import settings
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
@@ -242,6 +242,7 @@ class FileCountingUtilityTests(TestCase):
         self.assertIn("1 Audio file", statement)
         self.assertIn("3 Image files", statement)
 
+
 @patch(
     "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
@@ -332,6 +333,7 @@ class TestAcceptFile(TestCase):
         result = accept_file("My File.pdf", ((1024**2) * 1))  # 1 MiB
         self.assertTrue(result["accepted"])
 
+
 @patch(
     "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
@@ -357,101 +359,69 @@ class TestAcceptSession(TestCase):
         cls.one_mib = bytearray([1] * (1024**2))
         cls.half_mib = bytearray([1] * int((1024**2) / 2))
 
+    def tearDown(self) -> None:
+        """Remove all uploaded files after each test."""
+        UploadedFile.objects.all().delete()
+
     def test_session_has_room(self) -> None:
         """Test that a session with room for more files is accepted."""
-        files = []
-        try:
-            # 2 MiB of files (one MiB x 2)
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    file_upload=SimpleUploadedFile(name, self.one_mib),
-                    name=name,
-                )
-                for name in ("File 1.docx", "File 2.docx")
-            ]
-
-            for size in ("1024", len(self.one_mib)):
-                with self.subTest():
-                    result = accept_session("My File.pdf", size, self.session_1)
-                    self.assertTrue(result["accepted"])
-
-        finally:
-            for file_ in files:
-                file_.delete()
+        # 2 MiB of files (one MiB x 2)
+        for name in ("File 1.docx", "File 2.docx"):
+            UploadedFile.objects.create(
+                session=self.session_1,
+                file_upload=SimpleUploadedFile(name, self.one_mib),
+                name=name,
+            )
+        for size in ("1024", len(self.one_mib)):
+            with self.subTest():
+                result = accept_session("My File.pdf", size, self.session_1)
+                self.assertTrue(result["accepted"])
 
     def test_session_file_count_full(self) -> None:
         """Test that a session with the maximum number of files is rejected."""
-        files = []
-        try:
-            # 2 MiB of files (half MiB x 4)
-            # Max file count is 4
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    name=name,
-                    file_upload=SimpleUploadedFile(name, self.half_mib),
-                )
-                for name in ("File 1.docx", "File 2.pdf", "File 3.pdf", "File 4.pdf")
-            ]
-
-            result = accept_session("My File.pdf", "1024", self.session_1)
-            self.assertFalse(result["accepted"])
-            self.assertIn("You can not upload anymore files", result["error"])
-
-        finally:
-            for file_ in files:
-                file_.delete()
+        # 2 MiB of files (half MiB x 4)
+        # Max file count is 4
+        for name in ("File 1.docx", "File 2.pdf", "File 3.pdf", "File 4.pdf"):
+            UploadedFile.objects.create(
+                session=self.session_1,
+                name=name,
+                file_upload=SimpleUploadedFile(name, self.half_mib),
+            )
+        result = accept_session("My File.pdf", "1024", self.session_1)
+        self.assertFalse(result["accepted"])
+        self.assertIn("You can not upload anymore files", result["error"])
 
     def test_file_too_large_for_session(self) -> None:
         """Test that a file that is too large for the session is rejected."""
-        files = []
-        try:
-            # 2.5 MiB of files (1 Mib x 2, 0.5 MiB x 1)
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    name=name,
-                    file_upload=SimpleUploadedFile(name, content),
-                )
-                for name, content in (
-                    ("File 1.docx", self.one_mib),
-                    ("File 2.pdf", self.one_mib),
-                    ("File 3.pdf", self.half_mib),
-                )
-            ]
-
-            result = accept_session("My File.pdf", len(self.one_mib), self.session_1)
-            self.assertFalse(result["accepted"])
-            self.assertIn("Maximum total upload size (3 MiB) exceeded", result["error"])
-
-        finally:
-            for file_ in files:
-                file_.delete()
+        # 2.5 MiB of files (1 Mib x 2, 0.5 MiB x 1)
+        for name, content in (
+            ("File 1.docx", self.one_mib),
+            ("File 2.pdf", self.one_mib),
+            ("File 3.pdf", self.half_mib),
+        ):
+            UploadedFile.objects.create(
+                session=self.session_1,
+                name=name,
+                file_upload=SimpleUploadedFile(name, content),
+            )
+        result = accept_session("My File.pdf", len(self.one_mib), self.session_1)
+        self.assertFalse(result["accepted"])
+        self.assertIn("Maximum total upload size (3 MiB) exceeded", result["error"])
 
     def test_duplicate_file_name(self) -> None:
         """Test that a file with the same name as an existing file is rejected."""
-        files = []
         names = ("File.1.docx", "File.2.pdf")
-        try:
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    name=name,
-                    file_upload=SimpleUploadedFile(name, self.half_mib),
+        for name in names:
+            UploadedFile.objects.create(
+                session=self.session_1,
+                name=name,
+                file_upload=SimpleUploadedFile(name, self.half_mib),
+            )
+        for name in names:
+            with self.subTest():
+                result = accept_session(name, "1024", self.session_1)
+                self.assertFalse(result["accepted"])
+                self.assertIn(
+                    "A file with the same name has already been uploaded",
+                    result["error"],
                 )
-                for name in names
-            ]
-
-            for name in names:
-                with self.subTest():
-                    result = accept_session(name, "1024", self.session_1)
-                    self.assertFalse(result["accepted"])
-                    self.assertIn(
-                        "A file with the same name has already been uploaded",
-                        result["error"],
-                    )
-
-        finally:
-            for file_ in files:
-                file_.delete()
