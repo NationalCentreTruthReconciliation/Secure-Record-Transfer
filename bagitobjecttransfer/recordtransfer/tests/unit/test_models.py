@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
 from django.test import TestCase
 
-from recordtransfer.models import TempUploadedFile, UploadSession
+from recordtransfer.models import UploadedFile, UploadSession
 from recordtransfer.storage import UploadedFileStorage
 
 
@@ -27,7 +27,7 @@ def get_mock_uploaded_file(
     """
     if not exists:
         size = 0
-    file_mock = MagicMock(spec=TempUploadedFile)
+    file_mock = MagicMock(spec=UploadedFile)
     path = upload_to.rstrip("/") + "/" + name
     type(file_mock).exists = PropertyMock(return_value=exists)
     type(file_mock).name = PropertyMock(return_value=name)
@@ -210,7 +210,7 @@ class TestUploadedFile(TestCase):
             "test.pdf", test_file_content, content_type="application/pdf"
         )
 
-        self.uploaded_file = TempUploadedFile(
+        self.uploaded_file = UploadedFile(
             name="test.pdf",
             session=self.session,
             file_upload=test_file,
@@ -289,7 +289,7 @@ class TestUploadedFile(TestCase):
 
     def tearDown(self) -> None:
         """Tear down test."""
-        TempUploadedFile.objects.all().delete()
+        UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
         # Clear everything in the temp and upload storage folders

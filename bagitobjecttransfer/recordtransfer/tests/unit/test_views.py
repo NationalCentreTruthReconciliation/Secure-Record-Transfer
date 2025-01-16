@@ -11,7 +11,7 @@ from django.utils.translation import gettext
 from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
-from recordtransfer.models import TempUploadedFile, UploadSession, User
+from recordtransfer.models import UploadedFile, UploadSession, User
 
 
 class TestHomepage(TestCase):
@@ -195,7 +195,7 @@ class TestUploadFileView(TestCase):
         super().tearDownClass()
         logging.disable(logging.NOTSET)
         patch.stopall()
-        TempUploadedFile.objects.all().delete()
+        UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
 
@@ -289,7 +289,7 @@ class TestListUploadedFilesView(TestCase):
 
     def test_list_uploaded_files_with_files(self):
         """Session has one file."""
-        uploaded_file = TempUploadedFile(
+        uploaded_file = UploadedFile(
             session=self.session,
             file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
             name="testfile.txt",
@@ -306,7 +306,7 @@ class TestListUploadedFilesView(TestCase):
         self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
 
     def tearDown(self):
-        TempUploadedFile.objects.all().delete()
+        UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
 
@@ -327,7 +327,7 @@ class TestUploadedFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session()
         self.session.save()
-        self.uploaded_file = TempUploadedFile(
+        self.uploaded_file = UploadedFile(
             session=self.session,
             file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
             name="testfile.txt",
@@ -361,7 +361,7 @@ class TestUploadedFileView(TestCase):
         """Delete an uploaded file."""
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 204)
-        self.assertFalse(TempUploadedFile.objects.filter(name="testfile.txt").exists())
+        self.assertFalse(UploadedFile.objects.filter(name="testfile.txt").exists())
 
     @patch("recordtransfer.views.settings.DEBUG", True)
     def test_get_uploaded_file_in_debug(self):
@@ -377,7 +377,7 @@ class TestUploadedFileView(TestCase):
         )
 
     def tearDown(self):
-        TempUploadedFile.objects.all().delete()
+        UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
 

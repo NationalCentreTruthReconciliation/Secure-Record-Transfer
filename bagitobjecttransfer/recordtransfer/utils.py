@@ -341,7 +341,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
         }
 
     # Check that a file with this name has not already been uploaded
-    filename_list = session.tempuploadedfile_set.all().values_list("name", flat=True)
+    filename_list = session.uploadedfile_set.all().values_list("name", flat=True)
     if filename in filename_list:
         return {
             "accepted": False,
