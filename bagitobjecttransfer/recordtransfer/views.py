@@ -962,7 +962,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         )
 
     files = []
-    for uploaded_file in session.uploadedfile_set.all():
+    for uploaded_file in session.tempuploadedfile_set.all():
         files.append(
             {
                 "name": uploaded_file.name,
@@ -995,7 +995,7 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     if not session:
         return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-    uploaded_file: TempUploadedFile = session.uploadedfile_set.filter(name=file_name).first()
+    uploaded_file: TempUploadedFile = session.tempuploadedfile_set.filter(name=file_name).first()
     if not uploaded_file:
         return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 

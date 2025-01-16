@@ -58,8 +58,8 @@ class UploadSession(models.Model):
         return sum(f.file_upload.size for f in self.get_existing_file_set())
 
     def get_existing_file_set(self):
-        """Get all files from the uploadedfile_set where the file exists"""
-        return [f for f in self.uploadedfile_set.all() if f.exists]
+        """Get all files from the tempuploadedfile_set where the file exists"""
+        return [f for f in self.tempuploadedfile_set.all() if f.exists]
 
     def number_of_files_uploaded(self):
         """Get the number of files associated with this session.
@@ -67,7 +67,7 @@ class UploadSession(models.Model):
         Returns:
             (int): The number of files
         """
-        return len(self.uploadedfile_set.all())
+        return len(self.tempuploadedfile_set.all())
 
     def remove_session_uploads(self, logger=None):
         """Remove uploaded files associated with this session.
@@ -126,7 +126,7 @@ class UploadSession(models.Model):
             logger.error(msg=message.format(destination))
             raise FileNotFoundError(message.format(destination))
 
-        files = self.uploadedfile_set.all()
+        files = self.tempuploadedfile_set.all()
 
         if not files:
             logger.warning(msg=("No existing files found in the session {0}".format(self.token)))
