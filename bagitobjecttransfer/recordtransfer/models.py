@@ -80,7 +80,7 @@ class UploadSession(models.Model):
             for uploaded_file in existing_files:
                 uploaded_file.remove()
         else:
-            logger.info(msg=("There are no existing uploaded files in the session %s", self.token))
+            logger.info("There are no existing uploaded files in the session %s", self.token)
 
     def move_uploads_to_permanent_storage(self, logger: Optional[logging.Logger] = None) -> None:
         """Move uploaded files from temporary to permanent storage.
@@ -94,11 +94,9 @@ class UploadSession(models.Model):
             logger.info("There are no existing uploaded files in the session %s", self.token)
         else:
             logger.info(
-                msg=(
-                    "Moving %d uploaded files from the session %s to permanent storage",
-                    len(existing_files),
-                    self.token,
-                )
+                "Moving %d uploaded files from the session %s to permanent storage",
+                len(existing_files),
+                self.token,
             )
             for uploaded_file in existing_files:
                 uploaded_file.move_to_permanent_storage()
@@ -121,30 +119,29 @@ class UploadSession(models.Model):
 
         destination_path = Path(destination)
         if not destination_path.exists():
-            message = "The destination path {0} does not exist!"
-            logger.error(msg=message.format(destination))
-            raise FileNotFoundError(message.format(destination))
+            logger.error("The destination path %s does not exist!", destination)
+            raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
         files = self.uploadedfile_set.all()
 
         if not files:
-            logger.warning(msg=("No existing files found in the session {0}".format(self.token)))
+            logger.warning("No existing files found in the session %s", self.token)
             return ([], [])
 
         verb = "Moving" if delete else "Copying"
-        logger.info(msg=("{0} {1} temp files to {2}".format(verb, len(files), destination)))
+        logger.info("%s %d temp files to %s", verb, len(files), destination)
         copied = []
         missing = []
         for uploaded_file in files:
             source_path = uploaded_file.file_upload.path
 
             if not uploaded_file.exists:
-                logger.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
+                logger.error('File "%s" was moved or deleted', source_path)
                 missing.append(str(source_path))
                 continue
 
             new_path = destination_path / uploaded_file.name
-            logger.info(msg=("{0} {1} to {2}".format(verb, source_path, new_path)))
+            logger.info("%s %s to %s", verb, source_path, new_path)
 
             if delete:
                 uploaded_file.move(new_path)
