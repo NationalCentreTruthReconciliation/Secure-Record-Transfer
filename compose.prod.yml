@@ -97,12 +97,13 @@ services:
     volumes:
       - static-volume:/app/static/
       - media-volume:/app/media/
-      - ./docker/nginx/templates/default.conf.template:/etc/nginx/templates/default.conf.template:z
+      - ./docker/nginx/templates/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:z
       - ./bagitobjecttransfer/templates/:/var/www/html/:z
+    env_file:
+      - .prod.env
     environment:
       - STATIC_ROOT=/app/static/
       - MEDIA_ROOT=/app/media/
-      - MAX_SINGLE_UPLOAD_SIZE
 
 volumes:
   mysql-database:
