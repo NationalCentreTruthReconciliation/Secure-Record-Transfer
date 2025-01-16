@@ -49,7 +49,7 @@ export const setSessionToken = (token) => {
  * yet.
  * @returns {?object} The parsed JSON settings object if element exists, null otherwise.
  */
-export const getSettings = () => {
+export const getFileUploadSettings = () => {
     const settingsElement = document.getElementById("py_context_file_upload_settings");
     if (!settingsElement) {
         return null;
@@ -145,7 +145,7 @@ export const sendDeleteRequestForFile = async (filename) => {
 export const updateCapacityDisplay = (totalNumFiles, totalSizeBytes) => {
     const totalSizeElement = document.getElementById("total-size");
     const remainingSizeElement = document.getElementById("remaining-size");
-    const { MAX_TOTAL_UPLOAD_SIZE } = getSettings();
+    const { MAX_TOTAL_UPLOAD_SIZE } = getFileUploadSettings();
     const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
 
     const updateElement = (element, value, isError) => {

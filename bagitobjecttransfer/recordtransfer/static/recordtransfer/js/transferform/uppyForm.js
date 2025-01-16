@@ -6,7 +6,7 @@ import {
     getCookie,
     getSessionToken,
     setSessionToken,
-    getSettings,
+    getFileUploadSettings,
     fetchUploadedFiles,
     makeMockBlob,
     sendDeleteRequestForFile,
@@ -14,7 +14,7 @@ import {
 } from "./utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const settings = getSettings();
+    const settings = getFileUploadSettings();
     // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
 
