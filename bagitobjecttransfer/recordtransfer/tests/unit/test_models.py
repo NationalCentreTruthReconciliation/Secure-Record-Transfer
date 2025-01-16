@@ -131,7 +131,7 @@ class TestUploadSession(TestCase):
 
         uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
-        session.remove_session_uploads()
+        session.remove_temp_uploads()
 
         file_1.remove.assert_called_once()
         file_2.remove.assert_called_once()
@@ -178,7 +178,7 @@ class TestUploadSession(TestCase):
 
         uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
-        session.move_uploads_to_permanent_storage()
+        session.move_temp_uploads_to_permanent_storage()
 
         file_1.move_to_permanent_storage.assert_called_once()
         file_2.move_to_permanent_storage.assert_called_once()

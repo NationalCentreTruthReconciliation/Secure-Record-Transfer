@@ -764,10 +764,16 @@ class TransferFormWizard(SessionWizardView):
 
         session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
 
+        if not session:
+            LOGGER.error(
+                "No UploadSession found with token %s", cleaned_data["session_token"],
+            )
+            return
+
         size = get_human_readable_size(session.upload_size, base=1024, precision=2)
 
         count = get_human_readable_file_count(
-            [f.name for f in session.get_existing_file_set()],
+            [f.name for f in session.get_temp_uploaded_files()],
             settings.ACCEPTED_FILE_FORMATS,
             LOGGER,
         )
@@ -798,7 +804,7 @@ class TransferFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.move_uploads_to_permanent_storage()
+                submission.upload_session.move_temp_uploads_to_permanent_storage()
             else:
                 LOGGER.info(
                     (
