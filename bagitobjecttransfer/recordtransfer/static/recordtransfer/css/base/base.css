@@ -42,6 +42,11 @@ body {
 }
 
 .title-text {
+    color: #333333;
+    font-size: 20pt;
+}
+
+.title-text-light {
     color: white;
     font-size: 20pt;
 }
