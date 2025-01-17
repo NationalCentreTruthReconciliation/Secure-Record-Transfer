@@ -1,14 +1,14 @@
 {% load static %}
 {% load i18n %}
 
-<header class="header">
+<header class="header {% if request.path == "/" %}homepage{% endif %}">
     <nav class="main-header-content">
         <ul class="main-navbar">
             <li class="nav-logo">
-                <img id="app-logo" src="{% static 'nctrlogo_flame_150x150px.webp'%}">
+                <img id="app-logo" src="{% static 'logo-white-cropped.webp'%}">
             </li>
             <li class="nav-title">
-                <a class="nav-link" href="{% url 'recordtransfer:index' %}" title="Go to home page">
+                <a class="nav-link title" href="{% url 'recordtransfer:index' %}" title="Go to home page">
                     <span id="app-title" class="title-text">{% trans "NCTR Record Transfer" %}</span>
                 </a>
             </li>
@@ -55,7 +55,7 @@
                 {% endif %}
                 {% if 'login' not in request.path %}
                     <li class="nav-item">
-                        <a class="nav-link main" href="{% url 'login' %}">
+                        <a class="nav-button" href="{% url 'login' %}">
                             {% trans "Log In" %}
                         </a>
                     </li>

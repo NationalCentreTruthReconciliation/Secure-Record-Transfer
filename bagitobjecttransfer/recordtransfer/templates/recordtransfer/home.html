@@ -6,24 +6,31 @@
 
 {% block focused_content %}
 <div id="main-graphic-container">
+    {% include "recordtransfer/header.html" %}
     <img id="main-graphic" src="{% static 'hero4-scaled.webp' %}">
     <div class="main-graphic-text-container">
         <div class="main-graphic-text">
             {% trans "Securely Send Your Records to the NCTR" %}
         </div>
-        <div class="hero-button">
-            <a href="{% url 'recordtransfer:transfer' %}">
-                {% trans "Submit Your Records" %}
-            </a>
+        <div class="hero-button-container">
+            <div class="hero-button">
+                <a href="{% url 'recordtransfer:transfer' %}">
+                    {% trans "Submit Your Records" %}
+                </a>
+            </div>
+            {% if not user.is_authenticated and SIGN_UP_ENABLED %}
+            <div class="hero-button">
+                <a href="{% url 'recordtransfer:createaccount' %}">
+                    {% trans "Sign up Now" %}
+                </a>
+            </div>
+            <div class="hero-button">
+                <a href="#">
+                    Sign in
+                </a>
+            </div>
+            {% endif %}
         </div>
-        <br>
-        {% if not user.is_authenticated and SIGN_UP_ENABLED %}
-        <div class="hero-button">
-            <a href="{% url 'recordtransfer:createaccount' %}">
-                {% trans "Sign Up Now" %}
-            </a>
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
