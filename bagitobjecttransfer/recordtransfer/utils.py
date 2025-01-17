@@ -186,6 +186,7 @@ def mib_to_bytes(m: int) -> int:
     """
     return m * 1024**2
 
+
 def bytes_to_mib(b: int) -> float:
     """Convert bytes to MiB.
 
@@ -196,6 +197,7 @@ def bytes_to_mib(b: int) -> float:
         float: Size in MiB.
     """
     return b / 1024**2
+
 
 def accept_file(filename: str, filesize: Union[str, int]) -> dict:
     """Determine if a new file should be accepted. Does not check the file's
@@ -314,6 +316,13 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     if not session:
         return {"accepted": True}
 
+    if session.expired:
+        return {
+            "accepted": False,
+            "error": gettext("Session has expired."),
+            "verboseError": gettext("The session has expired and no more files can be uploaded."),
+        }
+
     # Check number of files is within allowed total
     if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
@@ -341,7 +350,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
         }
 
     # Check that a file with this name has not already been uploaded
-    filename_list = session.tempuploadedfile_set.all().values_list("name", flat=True)
+    filename_list = [f.name for f in session.get_uploaded_files()]
     if filename in filename_list:
         return {
             "accepted": False,
