@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
 
-from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.models import TempUploadedFile, UploadSession
 from recordtransfer.utils import (
     accept_file,
     accept_session,
@@ -361,13 +361,13 @@ class TestAcceptSession(TestCase):
 
     def tearDown(self) -> None:
         """Remove all uploaded files after each test."""
-        UploadedFile.objects.all().delete()
+        TempUploadedFile.objects.all().delete()
 
     def test_session_has_room(self) -> None:
         """Test that a session with room for more files is accepted."""
         # 2 MiB of files (one MiB x 2)
         for name in ("File 1.docx", "File 2.docx"):
-            UploadedFile.objects.create(
+            TempUploadedFile.objects.create(
                 session=self.session_1,
                 file_upload=SimpleUploadedFile(name, self.one_mib),
                 name=name,
@@ -382,7 +382,7 @@ class TestAcceptSession(TestCase):
         # 2 MiB of files (half MiB x 4)
         # Max file count is 4
         for name in ("File 1.docx", "File 2.pdf", "File 3.pdf", "File 4.pdf"):
-            UploadedFile.objects.create(
+            TempUploadedFile.objects.create(
                 session=self.session_1,
                 name=name,
                 file_upload=SimpleUploadedFile(name, self.half_mib),
@@ -399,7 +399,7 @@ class TestAcceptSession(TestCase):
             ("File 2.pdf", self.one_mib),
             ("File 3.pdf", self.half_mib),
         ):
-            UploadedFile.objects.create(
+            TempUploadedFile.objects.create(
                 session=self.session_1,
                 name=name,
                 file_upload=SimpleUploadedFile(name, content),
@@ -412,7 +412,7 @@ class TestAcceptSession(TestCase):
         """Test that a file with the same name as an existing file is rejected."""
         names = ("File.1.docx", "File.2.pdf")
         for name in names:
-            UploadedFile.objects.create(
+            TempUploadedFile.objects.create(
                 session=self.session_1,
                 name=name,
                 file_upload=SimpleUploadedFile(name, self.half_mib),

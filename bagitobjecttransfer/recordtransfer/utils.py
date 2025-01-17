@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Union
+from typing import Optional, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.models import UploadSession
+from recordtransfer.models import BaseUploadedFile, UploadSession
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -316,6 +316,13 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     if not session:
         return {"accepted": True}
 
+    if session.expired:
+        return {
+            "accepted": False,
+            "error": gettext("Session has expired."),
+            "verboseError": gettext("The session has expired and no more files can be uploaded."),
+        }
+
     # Check number of files is within allowed total
     if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
@@ -343,7 +350,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
         }
 
     # Check that a file with this name has not already been uploaded
-    filename_list = session.uploadedfile_set.all().values_list("name", flat=True)
+    filename_list = [f.name for f in session.get_uploaded_files()]
     if filename in filename_list:
         return {
             "accepted": False,
@@ -355,3 +362,16 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
 
     # All checks succeded
     return {"accepted": True}
+
+
+def find_uploaded_file_by_name(session: UploadSession, filename: str) -> Optional[BaseUploadedFile]:
+    """Find an uploaded file by its name.
+
+    Args:
+        session: The session containing the uploaded files
+        filename: The name of the file to find
+
+    Returns:
+        The uploaded file if found, or None if not found
+    """
+    return next((f for f in session.get_uploaded_files() if f.name == filename), None)

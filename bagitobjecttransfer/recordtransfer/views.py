@@ -78,10 +78,11 @@ from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
+    BaseUploadedFile,
     InProgressSubmission,
     Submission,
     SubmissionGroup,
-    UploadedFile,
+    TempUploadedFile,
     UploadSession,
     User,
 )
@@ -89,6 +90,7 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
+    find_uploaded_file_by_name,
     get_human_readable_file_count,
     get_human_readable_size,
 )
@@ -764,10 +766,17 @@ class TransferFormWizard(SessionWizardView):
 
         session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
 
+        if not session:
+            LOGGER.error(
+                "No UploadSession found with token %s",
+                cleaned_data["session_token"],
+            )
+            return
+
         size = get_human_readable_size(session.upload_size, base=1024, precision=2)
 
         count = get_human_readable_file_count(
-            [f.name for f in session.get_existing_file_set()],
+            [f.name for f in session.get_uploaded_files()],
             settings.ACCEPTED_FILE_FORMATS,
             LOGGER,
         )
@@ -798,7 +807,7 @@ class TransferFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.move_uploads_to_permanent_storage()
+                submission.upload_session.make_uploads_permanent()
             else:
                 LOGGER.info(
                     (
@@ -918,7 +927,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        uploaded_file = UploadedFile(session=session, file_upload=_file, name=_file.name)
+        uploaded_file = TempUploadedFile(session=session, file_upload=_file, name=_file.name)
         uploaded_file.save()
         file_url = uploaded_file.get_file_access_url()
 
@@ -962,7 +971,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         )
 
     files = []
-    for uploaded_file in session.uploadedfile_set.all():
+    for uploaded_file in session.get_uploaded_files():
         files.append(
             {
                 "name": uploaded_file.name,
@@ -995,11 +1004,21 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     if not session:
         return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-    uploaded_file: UploadedFile = session.uploadedfile_set.filter(name=file_name).first()
+    uploaded_file = find_uploaded_file_by_name(session, file_name)
     if not uploaded_file:
         return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 
     if request.method == "DELETE":
+        if session.expired:
+            return JsonResponse(
+                {
+                    "error": gettext(
+                        "You are not allowed to delete a file from an expired session."
+                    )
+                },
+                status=400,
+            )
+
         uploaded_file.delete()
         # 204: No content (i.e., deletion succeeded, no message needed)
         return HttpResponse(status=204)

@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
 from django.test import TestCase
 
-from recordtransfer.models import UploadedFile, UploadSession
+from recordtransfer.models import TempUploadedFile, UploadSession
 from recordtransfer.storage import UploadedFileStorage
 
 
@@ -27,7 +27,7 @@ def get_mock_uploaded_file(
     """
     if not exists:
         size = 0
-    file_mock = MagicMock(spec=UploadedFile)
+    file_mock = MagicMock(spec=TempUploadedFile)
     path = upload_to.rstrip("/") + "/" + name
     type(file_mock).exists = PropertyMock(return_value=exists)
     type(file_mock).name = PropertyMock(return_value=name)
@@ -52,7 +52,7 @@ class TestUploadSession(TestCase):
         session = UploadSession.new_session()
         session.save()
 
-        self.assertEqual(len(session.get_existing_file_set()), 0)
+        self.assertEqual(len(session.get_uploaded_files()), 0)
         self.assertEqual(session.upload_size, 0)
 
         session.delete()
@@ -69,7 +69,7 @@ class TestUploadSession(TestCase):
             ]
         )
 
-        self.assertEqual(len(session.get_existing_file_set()), 1)
+        self.assertEqual(len(session.get_uploaded_files()), 1)
         self.assertEqual(session.upload_size, 1000)
 
         session.delete()
@@ -90,7 +90,7 @@ class TestUploadSession(TestCase):
             ]
         )
 
-        self.assertEqual(len(session.get_existing_file_set()), 5)
+        self.assertEqual(len(session.get_uploaded_files()), 5)
         self.assertEqual(session.upload_size, 5000)
 
         session.delete()
@@ -112,7 +112,7 @@ class TestUploadSession(TestCase):
             ]
         )
 
-        self.assertEqual(len(session.get_existing_file_set()), 2)
+        self.assertEqual(len(session.get_uploaded_files()), 2)
         self.assertEqual(session.upload_size, 2000)
 
         session.delete()
@@ -131,7 +131,7 @@ class TestUploadSession(TestCase):
 
         uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
-        session.remove_session_uploads()
+        session._remove_temp_uploads()
 
         file_1.remove.assert_called_once()
         file_2.remove.assert_called_once()
@@ -178,7 +178,7 @@ class TestUploadSession(TestCase):
 
         uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
-        session.move_uploads_to_permanent_storage()
+        session.move_temp_uploads_to_permanent_storage()
 
         file_1.move_to_permanent_storage.assert_called_once()
         file_2.move_to_permanent_storage.assert_called_once()
@@ -210,7 +210,7 @@ class TestUploadedFile(TestCase):
             "test.pdf", test_file_content, content_type="application/pdf"
         )
 
-        self.uploaded_file = UploadedFile(
+        self.uploaded_file = TempUploadedFile(
             name="test.pdf",
             session=self.session,
             file_upload=test_file,
@@ -289,7 +289,7 @@ class TestUploadedFile(TestCase):
 
     def tearDown(self) -> None:
         """Tear down test."""
-        UploadedFile.objects.all().delete()
+        TempUploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
         # Clear everything in the temp and upload storage folders

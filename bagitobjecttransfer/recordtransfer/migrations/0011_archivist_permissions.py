@@ -19,8 +19,6 @@ def populate_permissions(apps, schema_editor):
         'add_job',
         'change_job',
         'view_job',
-        # UploadedFile
-        'view_uploadedfile',
         # UploadSession
         'view_uploadsession',
         # User
