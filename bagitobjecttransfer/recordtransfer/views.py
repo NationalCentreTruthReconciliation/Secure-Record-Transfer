@@ -807,7 +807,7 @@ class TransferFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.move_temp_uploads_to_permanent_storage()
+                submission.upload_session.make_uploads_permanent()
             else:
                 LOGGER.info(
                     (
