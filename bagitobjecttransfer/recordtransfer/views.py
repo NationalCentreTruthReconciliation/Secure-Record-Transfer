@@ -987,7 +987,7 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     Args:
         request: The HTTP request
         session_token: The upload session token from the URL
-        filename: The name of the file to delete
+        file_name: The name of the file to delete
 
     Returns:
         HttpResponse:
