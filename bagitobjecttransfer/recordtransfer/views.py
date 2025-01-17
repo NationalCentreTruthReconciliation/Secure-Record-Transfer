@@ -883,11 +883,15 @@ def upload_file(request: HttpRequest) -> JsonResponse:
     try:
         headers = request.headers
         session_token = headers.get("Upload-Session-Token")
+        user: User = cast(User, request.user)
         session = (
-            UploadSession.objects.filter(token=session_token).first() if session_token else None
+            UploadSession.objects.filter(token=session_token, user=user).first()
+            if session_token
+            else None
         )
         if not session:
             session = UploadSession.new_session()
+            session.user = user
             session.save()
 
         _file = request.FILES.get("file")
@@ -976,7 +980,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         JsonResponse: List of uploaded files and their details, or error message
     """
     try:
-        session = UploadSession.objects.filter(token=session_token).first()
+        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
             return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
@@ -995,7 +999,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
 def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
     """Get or delete a file that has been uploaded in a given upload session."""
     try:
-        session = UploadSession.objects.filter(token=session_token).first()
+        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
             return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 

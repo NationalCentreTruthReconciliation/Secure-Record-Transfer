@@ -88,6 +88,7 @@ class UploadSession(models.Model):
     status = models.CharField(
         max_length=2, choices=SessionStatus.choices, default=SessionStatus.CREATED
     )
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     @classmethod
     def new_session(cls) -> UploadSession:
