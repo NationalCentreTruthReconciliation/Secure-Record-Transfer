@@ -1,8 +1,8 @@
-from abc import abstractmethod
 import logging
 import os
 import shutil
 import uuid
+from abc import abstractmethod
 from pathlib import Path
 from typing import ClassVar, Optional, Union
 
@@ -449,7 +449,10 @@ class Submission(models.Model):
         return f"Submission by {self.user} at {self.submission_date}"
 
     def make_bag(
-        self, algorithms: Union[str, list] = "sha512", file_perms: str = "644", logger=None
+        self,
+        algorithms: Union[str, list] = "sha512",
+        file_perms: str = "644",
+        logger: Optional[logging.Logger] = None,
     ):
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
         is determined by self.location. Checks the validity of the Bag post-creation to ensure that
@@ -465,6 +468,12 @@ class Submission(models.Model):
 
         if not algorithms:
             raise ValueError("algorithms cannot be empty")
+
+        if not self.upload_session:
+            raise ValueError("This submission has no associated upload session")
+
+        if not self.metadata:
+            raise ValueError("This submission has no associated metadata")
 
         if isinstance(algorithms, str):
             algorithms = [a.strip() for a in algorithms.split(",")]
