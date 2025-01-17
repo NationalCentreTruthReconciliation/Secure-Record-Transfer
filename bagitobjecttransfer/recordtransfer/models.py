@@ -136,8 +136,6 @@ class UploadSession(models.Model):
         if not destination_path.exists():
             logger.error("The destination path %s does not exist!", destination)
             raise FileNotFoundError(f"The destination path {destination} does not exist!")
-            logger.error("The destination path %s does not exist!", destination)
-            raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
         files = self.get_uploaded_files()
         if not files:
