@@ -933,7 +933,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
         )
 
     except Exception as exc:
-        LOGGER.error(msg=("Uncaught exception in upload_file view: %s", exc))
+        LOGGER.error("Uncaught exception in upload_file view: %s", str(exc), exc_info=exc)
         return JsonResponse(
             {
                 "error": gettext("There was an internal server error. Please try again."),
