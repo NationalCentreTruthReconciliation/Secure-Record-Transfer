@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Union
+from typing import Optional, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.models import UploadSession
+from recordtransfer.models import BaseUploadedFile, UploadSession
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -362,3 +362,16 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
 
     # All checks succeded
     return {"accepted": True}
+
+
+def find_uploaded_file_by_name(session: UploadSession, filename: str) -> Optional[BaseUploadedFile]:
+    """Find an uploaded file by its name.
+
+    Args:
+        session: The session containing the uploaded files
+        filename: The name of the file to find
+
+    Returns:
+        The uploaded file if found, or None if not found
+    """
+    return next((f for f in session.get_uploaded_files() if f.name == filename), None)

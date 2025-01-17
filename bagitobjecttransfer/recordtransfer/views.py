@@ -78,6 +78,7 @@ from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
+    BaseUploadedFile,
     InProgressSubmission,
     Submission,
     SubmissionGroup,
@@ -89,6 +90,7 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
+    find_uploaded_file_by_name,
     get_human_readable_file_count,
     get_human_readable_size,
 )
@@ -969,7 +971,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         )
 
     files = []
-    for uploaded_file in session.tempuploadedfile_set.all():
+    for uploaded_file in session.get_uploaded_files():
         files.append(
             {
                 "name": uploaded_file.name,
@@ -1002,11 +1004,21 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     if not session:
         return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-    uploaded_file: TempUploadedFile = session.tempuploadedfile_set.filter(name=file_name).first()
+    uploaded_file = find_uploaded_file_by_name(session, file_name)
     if not uploaded_file:
         return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 
     if request.method == "DELETE":
+        if session.expired:
+            return JsonResponse(
+                {
+                    "error": gettext(
+                        "You are not allowed to delete a file from an expired session."
+                    )
+                },
+                status=400,
+            )
+
         uploaded_file.delete()
         # 204: No content (i.e., deletion succeeded, no message needed)
         return HttpResponse(status=204)
