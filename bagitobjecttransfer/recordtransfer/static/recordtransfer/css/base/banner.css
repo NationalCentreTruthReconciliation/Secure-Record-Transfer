@@ -1,7 +1,7 @@
 .banner-container {
-    background: linear-gradient(90deg, #ba5b3c 0, #89140a 100%);
+    background: linear-gradient(90deg, #89140a 0, #ba5b3c 100%);
     color: white;
-    padding: 8px 40px;
+    padding: 12px 40px;
 }
 
 .banner-text {

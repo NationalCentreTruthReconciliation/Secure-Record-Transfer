@@ -23,7 +23,7 @@ class TestHomepage(TestCase):
     def test_index(self):
         response = self.client.get(reverse("recordtransfer:index"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Welcome")
+        self.assertContains(response, "NCTR Record Transfer")
 
 
 @patch(
