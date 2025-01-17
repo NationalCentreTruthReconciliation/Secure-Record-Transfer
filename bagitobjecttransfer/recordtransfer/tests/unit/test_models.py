@@ -52,7 +52,7 @@ class TestUploadSession(TestCase):
         session = UploadSession.new_session()
         session.save()
 
-        self.assertEqual(len(session.get_existing_file_set()), 0)
+        self.assertEqual(len(session.get_uploaded_files()), 0)
         self.assertEqual(session.upload_size, 0)
 
         session.delete()
@@ -69,7 +69,7 @@ class TestUploadSession(TestCase):
             ]
         )
 
-        self.assertEqual(len(session.get_existing_file_set()), 1)
+        self.assertEqual(len(session.get_uploaded_files()), 1)
         self.assertEqual(session.upload_size, 1000)
 
         session.delete()
@@ -90,7 +90,7 @@ class TestUploadSession(TestCase):
             ]
         )
 
-        self.assertEqual(len(session.get_existing_file_set()), 5)
+        self.assertEqual(len(session.get_uploaded_files()), 5)
         self.assertEqual(session.upload_size, 5000)
 
         session.delete()
@@ -112,7 +112,7 @@ class TestUploadSession(TestCase):
             ]
         )
 
-        self.assertEqual(len(session.get_existing_file_set()), 2)
+        self.assertEqual(len(session.get_uploaded_files()), 2)
         self.assertEqual(session.upload_size, 2000)
 
         session.delete()
@@ -131,7 +131,7 @@ class TestUploadSession(TestCase):
 
         uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
 
-        session.remove_temp_uploads()
+        session._remove_temp_uploads()
 
         file_1.remove.assert_called_once()
         file_2.remove.assert_called_once()

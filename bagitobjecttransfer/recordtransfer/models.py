@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import logging
 import os
 import shutil
@@ -40,8 +41,8 @@ class User(AbstractUser):
 
 
 class UploadSession(models.Model):
-    """Represents a file upload session, that may or may not be split into
-    multiple parallel uploads
+    """Represents a file upload session. This model is used to track the files that a
+    user uploads during a session.
     """
 
     token = models.CharField(max_length=32)
@@ -49,82 +50,48 @@ class UploadSession(models.Model):
     expired = models.BooleanField(default=False)
 
     @classmethod
-    def new_session(cls):
-        """Start a new upload session"""
+    def new_session(cls) -> "UploadSession":
+        """Start a new upload session."""
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
     @property
-    def upload_size(self):
-        """Get total size (in bytes) of all uploaded files in this session"""
-        return sum(f.file_upload.size for f in self.get_existing_file_set())
+    def upload_size(self) -> int:
+        """Get total size (in bytes) of all uploaded files in this session."""
+        return sum(f.file_upload.size for f in self.get_uploaded_files())
 
-    def get_temp_uploaded_files(self) -> list["TempUploadedFile"]:
-        """Get list of existing temporary uploaded files."""
-        return [f for f in self.tempuploadedfile_set.all() if f.exists]
-
-    def get_perm_uploaded_files(self) -> list["PermUploadedFile"]:
-        """Get list of existing stored uploaded files."""
-        return [f for f in self.permuploadedfile_set.all() if f.exists]
-
-    def get_existing_file_set(self) -> Union[list["TempUploadedFile"], list["PermUploadedFile"]]:
-        """Get list of existing files based on session state."""
+    def get_uploaded_files(self) -> list["BaseUploadedFile"]:
+        """Get a list of uploaded files that exist, based on session state. If session has expired,
+        permanent files are returned, otherwise temporary files are returned.
+        """
         if self.expired:
-            return self.get_perm_uploaded_files()
-        return self.get_temp_uploaded_files()
+            return [f for f in self.permuploadedfile_set.all() if f.exists]
+        else:
+            return [f for f in self.tempuploadedfile_set.all() if f.exists]
 
-    def number_of_files_uploaded(self):
+    def number_of_files_uploaded(self) -> int:
         """Get the number of files associated with this session.
 
         Returns:
-            (int): The number of files
+            If the session has expired, the number of permanent files is returned, otherwise the
+            number of temporary files is returned.
         """
         if self.expired:
             return len(self.storeduploadedfile_set.all())
         else:
             return len(self.tempuploadedfile_set.all())
 
-    def remove_temp_uploads(self, logger=None):
-        """Remove temporary uploaded files associated with this session.
+    def remove_uploads(self) -> None:
+        """Remove all uploaded files associated with this session."""
+        files = list(self.permuploadedfile_set.all()) + list(self.tempuploadedfile_set.all())
+        for f in files:
+            f.remove()
 
-        Args:
-            logger: A logger object
-        """
-        logger = logger or LOGGER
-        temp_files = self.get_temp_uploaded_files()
-        if temp_files:
-            for uploaded_file in temp_files:
-                uploaded_file.remove()
-        else:
-            logger.info(
-                msg=(
-                    "There are no existing temporary uploaded files in the session %s",
-                    self.token,
-                )
-            )
+        if not files:
+            LOGGER.info("There are no existing uploaded files in the session %s", self.token)
 
-    def remove_permanent_uploads(self, logger=None):
-        """Remove permanent uploaded files associated with this session.
-
-        Args:
-            logger: A logger object
-        """
-        logger = logger or LOGGER
-        perm_files = self.get_perm_uploaded_files()
-        if perm_files:
-            for uploaded_file in perm_files:
-                uploaded_file.remove()
-        else:
-            logger.info(
-                msg=(
-                    "There are no existing permanent uploaded files in the session %s",
-                    self.token,
-                )
-            )
-
-    def move_temp_uploads_to_permanent_storage(
-        self, logger: Optional[logging.Logger] = None
-    ) -> None:
-        """Move temporary uploaded files from temporary to permanent storage.
+    def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
+        """Make all uploaded files associated with this session permanent. Does nothing if the
+        session has expired.
 
         Args:
             logger: Optional logger instance to use for logging operations
@@ -132,80 +99,68 @@ class UploadSession(models.Model):
         logger = logger or LOGGER
         if self.expired:
             logger.warning(
-                msg=(
-                    "Session %s has already expired, cannot move files to permanent storage",
-                    self.token,
-                )
+                "Session %s has already expired, cannot move files to permanent storage",
+                self.token,
             )
             return
 
-        temp_files = self.get_temp_uploaded_files()
-        if not temp_files:
-            logger.info("There are no temporary uploaded files in the session %s", self.token)
-        else:
-            logger.info(
-                msg=(
-                    "Moving %d temporary uploaded files from the session %s to permanent storage",
-                    len(temp_files),
-                    self.token,
-                )
-            )
-            for uploaded_file in temp_files:
-                uploaded_file.move_to_permanent_storage()
+        files = self.get_uploaded_files()
+        if not files:
+            logger.info("There are no uploaded files in the session %s", self.token)
+            return
 
-    def copy_session_permanent_uploads(
+        logger.info(
+            "Moving %d temporary uploaded files from the session %s to permanent storage",
+            len(files),
+            self.token,
+        )
+        for uploaded_file in files:
+            uploaded_file.move_to_permanent_storage()
+
+    def copy_session_uploads(
         self, destination: str, logger: Optional[logging.Logger] = None
     ) -> tuple[list[str], list[str]]:
-        """Copy uploaded files associated with this session to a destination directory. Files are
-        not removed from their original location.
+        """Copy uploaded files associated with this session to a destination directory.
 
         Args:
             destination: The destination directory
             logger: A logger object
 
         Returns:
-            A two tuple containing a list of the copied, and missing files
+            A tuple containing lists of copied and missing files
         """
         logger = logger or LOGGER
-
         destination_path = Path(destination)
         if not destination_path.exists():
-            message = "The destination path {0} does not exist!"
-            logger.error(msg=message.format(destination))
-            raise FileNotFoundError(message.format(destination))
+            logger.error("The destination path %s does not exist!", destination)
+            raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
-        temp_files = self.get_temp_uploaded_files()
+        files = self.get_uploaded_files()
+        if not files:
+            logger.warning("No existing files found in the session %s", self.token)
+            return [], []
 
-        if not temp_files:
-            logger.warning(msg=("No existing files found in the session {0}".format(self.token)))
-            return ([], [])
-
-        logger.info(msg=("Copying {0} temp files to {1}".format(len(temp_files), destination)))
-        copied = []
-        missing = []
-        for temp_file in temp_files:
-            source_path = temp_file.file_upload.path
-
-            if not temp_file.exists:
-                logger.error(msg=('File "{0}" was moved or deleted'.format(source_path)))
-                missing.append(str(source_path))
+        logger.info("Copying %d files to %s", len(files), destination)
+        copied, missing = [], []
+        for f in files:
+            if not f.exists:
+                logger.error('File "%s" was moved or deleted', f.file_upload.path)
+                missing.append(f.file_upload.path)
                 continue
 
-            if temp_file.name is None:
-                logger.error(msg=('File name is None for file "{0}"'.format(source_path)))
-                missing.append(str(source_path))
-                continue
+            if f.name is not None:
+                new_path = destination_path / f.name
+                logger.info("Copying %s to %s", f.file_upload.path, new_path)
+                f.copy(str(new_path))
+                copied.append(str(new_path))
+            else:
+                logger.error('File name is None for file "%s"', f.file_upload.path)
+                missing.append(f.file_upload.path)
 
-            new_path = destination_path / temp_file.name
-            logger.info(msg=("{0} to {1}".format(source_path, new_path)))
-
-            temp_file.copy(str(new_path))
-
-            copied.append(str(new_path))
-
-        return (copied, missing)
+        return copied, missing
 
     def __str__(self):
+        """Return a string representation of this object."""
         return f"{self.token} ({self.started_at})"
 
 
@@ -268,6 +223,11 @@ class BaseUploadedFile(models.Model):
             },
         )
 
+    @abstractmethod
+    def move_to_permanent_storage(self) -> None:
+        """Abstract method that child classes must implement."""
+        pass
+
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
@@ -295,6 +255,10 @@ class PermUploadedFile(BaseUploadedFile):
     """Represent a file that a user uploaded and has been stored."""
 
     file_upload = models.FileField(null=True, storage=UploadedFileStorage)
+
+    def move_to_permanent_storage(self) -> None:
+        """Do nothing, the file is already in permanent storage."""
+        pass
 
 
 @receiver(post_delete, sender=TempUploadedFile)
