@@ -38,16 +38,19 @@ class TestUploadFileView(TestCase):
     """Tests for recordtransfer:uploadfile view."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
+        """Set logging level."""
         super().setUpClass()
         logging.disable(logging.CRITICAL)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.patch__accept_file = patch("recordtransfer.views.accept_file").start()
         self.patch__accept_session = patch("recordtransfer.views.accept_session").start()
@@ -56,11 +59,13 @@ class TestUploadFileView(TestCase):
         self.patch__accept_session.return_value = {"accepted": True}
 
     def test_logged_out_error(self):
+        """Test that a 302 is returned if the user is not logged in."""
         self.client.logout()
         response = self.client.post(reverse("recordtransfer:uploadfile"), {})
         self.assertEqual(response.status_code, 302)
 
-    def test_500_error_caught(self):
+    def test_500_error_caught(self) -> None:
+        """Test that a 500 is returned if an error is raised."""
         self.patch__accept_file.side_effect = ValueError("err")
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
@@ -68,11 +73,13 @@ class TestUploadFileView(TestCase):
         )
         self.assertEqual(response.status_code, 500)
 
-    def test_no_files_uploaded(self):
+    def test_no_files_uploaded(self) -> None:
+        """Test that a 400 is returned if no files are uploaded."""
         response = self.client.post(reverse("recordtransfer:uploadfile"), {})
         self.assertEqual(response.status_code, 400)
 
-    def test_new_session_created(self):
+    def test_new_session_created(self) -> None:
+        """Test that a new session associated with the user is created."""
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
@@ -81,14 +88,16 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertIn("uploadSessionToken", response_json)
-        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
-        self.assertTrue(session)
+        session = UploadSession.objects.filter(
+            token=response_json["uploadSessionToken"], user=self.test_user_1
+        ).first()
+        self.assertIsNotNone(session)
+        self.assertEqual(len(session.uploadedfile_set.all()), 1)
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
-
-    def test_same_session_used(self):
+    def test_same_session_used(self) -> None:
+        """Test that the same session is used if the token is provided."""
         session = UploadSession.new_session()
+        session.user = self.test_user_1
         session.save()
 
         response = self.client.post(
@@ -103,10 +112,42 @@ class TestUploadFileView(TestCase):
         self.assertEqual(len(session.uploadedfile_set.all()), 1)
         self.assertEqual(session.uploadedfile_set.first().name, "File.PDF")
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
+    def test_new_session_made_invalid_token(self) -> None:
+        """Test that a new session is made if the token is invalid."""
+        session = UploadSession.new_session()
+        session.user = self.test_user_1
+        session.save()
 
-    def test_file_issue_flagged(self):
+        response = self.client.post(
+            reverse("recordtransfer:uploadfile"),
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            headers={"upload-session-token": "invalid_token"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertNotEqual(response_json["uploadSessionToken"], session.token)
+        self.assertEqual(len(session.uploadedfile_set.all()), 0)
+
+    def test_new_session_made_token_mismatch_user(self) -> None:
+        """Test that a new session is created if the token does not match the user."""
+        session = UploadSession.new_session()
+        session.user = User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
+        session.save()
+
+        response = self.client.post(
+            reverse("recordtransfer:uploadfile"),
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            headers={"upload-session-token": session.token},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertNotEqual(response_json["uploadSessionToken"], session.token)
+        self.assertEqual(len(session.uploadedfile_set.all()), 0)
+
+    def test_file_issue_flagged(self) -> None:
+        """Test that an issue is flagged if the file is not accepted."""
         self.patch__accept_file.return_value = {"accepted": False, "error": "ISSUE"}
 
         response = self.client.post(
@@ -126,10 +167,8 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
-
-    def test_session_issue_flagged(self):
+    def test_session_issue_flagged(self) -> None:
+        """Test that an issue is flagged if the session is not accepted."""
         self.patch__accept_session.return_value = {"accepted": False, "error": "ISSUE"}
 
         response = self.client.post(
@@ -149,10 +188,8 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
-
-    def test_malware_flagged(self):
+    def test_malware_flagged(self) -> None:
+        """Test that malware is flagged if the file contains malware."""
         self.patch_check_for_malware.side_effect = ValidationError("Malware found")
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
@@ -171,11 +208,8 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
-
     @skipIf(True, "File content scanning is not implemented yet")
-    def test_content_issue_flagged(self):
+    def test_content_issue_flagged(self) -> None:
         """
         self.patch__accept_contents.return_value = {
             "accepted": False,
@@ -187,11 +221,15 @@ class TestUploadFileView(TestCase):
         }
         """
 
-    def tearDown(self):
+    def tearDown(self) -> None:
+        """Tear down test environment."""
+        UploadSession.objects.all().delete()
+        UploadedFile.objects.all().delete()
         self.client.logout()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
+        """Tear down test class."""
         super().tearDownClass()
         logging.disable(logging.NOTSET)
         patch.stopall()
@@ -254,22 +292,26 @@ class TestListUploadedFilesView(TestCase):
     """Tests for recordtransfer:list_uploaded_files view."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
+        """Set logging level."""
         super().setUpClass()
         logging.disable(logging.CRITICAL)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session()
+        self.session.user = self.test_user_1
         self.session.save()
         self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
 
-    def test_list_uploaded_files_session_not_found(self):
+    def test_list_uploaded_files_session_not_found(self) -> None:
         """Invalid session token."""
         response = self.client.get(
             reverse("recordtransfer:list_uploaded_files", args=["invalid_token"])
@@ -278,14 +320,23 @@ class TestListUploadedFilesView(TestCase):
         response_json = response.json()
         self.assertIn("error", response_json)
 
-    def test_list_uploaded_files_empty_session(self):
+    def test_list_uploaded_files_invalid_user(self) -> None:
+        """Invalid user for the session."""
+        self.session.user = User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
+        self.session.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+
+    def test_list_uploaded_files_empty_session(self) -> None:
         """Session has no files."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json.get("files"), [])
 
-    def test_list_uploaded_files_with_files(self):
+    def test_list_uploaded_files_with_files(self) -> None:
         """Session has one file."""
         uploaded_file = UploadedFile(
             session=self.session,
@@ -302,7 +353,7 @@ class TestListUploadedFilesView(TestCase):
         self.assertEqual(responseFiles[0]["size"], uploaded_file.file_upload.size)
         self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
@@ -311,18 +362,22 @@ class TestUploadedFileView(TestCase):
     """Tests for recordtransfer:uploaded_file view."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
+        """Set logging level."""
         super().setUpClass()
         logging.disable(logging.CRITICAL)
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session()
+        self.session.user = self.test_user_1
         self.session.save()
         self.uploaded_file = UploadedFile(
             session=self.session,
@@ -334,7 +389,7 @@ class TestUploadedFileView(TestCase):
             "recordtransfer:uploaded_file", args=[self.session.token, self.uploaded_file.name]
         )
 
-    def test_uploaded_file_session_not_found(self):
+    def test_uploaded_file_session_not_found(self) -> None:
         """Invalid session token."""
         response = self.client.get(
             reverse("recordtransfer:uploaded_file", args=["invalid_token", "testfile.txt"])
@@ -342,9 +397,11 @@ class TestUploadedFileView(TestCase):
         self.assertEqual(response.status_code, 404)
         response_json = response.json()
         self.assertIn("error", response_json)
-        self.assertEqual(response_json["error"], gettext("Upload session not found"))
+        self.assertEqual(
+            response_json["error"], gettext("Invalid filename or upload session token.")
+        )
 
-    def test_uploaded_file_not_found(self):
+    def test_uploaded_file_not_found(self) -> None:
         """Invalid file name in a valid session."""
         response = self.client.get(
             reverse("recordtransfer:uploaded_file", args=[self.session.token, "invalid_file.txt"])
@@ -352,28 +409,62 @@ class TestUploadedFileView(TestCase):
         self.assertEqual(response.status_code, 404)
         response_json = response.json()
         self.assertIn("error", response_json)
-        self.assertEqual(response_json["error"], gettext("File not found in upload session"))
+        self.assertEqual(
+            response_json["error"], gettext("Invalid filename or upload session token.")
+        )
 
-    def test_delete_uploaded_file(self):
+    def test_uploaded_file_invalid_user(self) -> None:
+        """Invalid user for the session."""
+        self.session.user = User.objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
+        self.session.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertEqual(
+            response_json["error"], gettext("Invalid filename or upload session token.")
+        )
+
+    def test_delete_uploaded_file(self) -> None:
         """Delete an uploaded file."""
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 204)
         self.assertFalse(UploadedFile.objects.filter(name="testfile.txt").exists())
 
+    def test_delete_uploaded_file_invalid_user(self) -> None:
+        """Test delete with an invalid user for the session."""
+        self.session.user = User.objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
+        self.session.save()
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(UploadedFile.objects.filter(name="testfile.txt").exists())
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertEqual(
+            response_json["error"], gettext("Invalid filename or upload session token.")
+        )
+
     @patch("recordtransfer.views.settings.DEBUG", True)
-    def test_get_uploaded_file_in_debug(self):
+    def test_get_uploaded_file_in_debug(self) -> None:
+        """Test getting the file in DEBUG mode."""
         response = self.client.get(self.url)
         self.assertEqual(response.url, self.uploaded_file.get_file_media_url())
 
     @patch("recordtransfer.views.settings.DEBUG", False)
-    def test_get_uploaded_file_in_production(self):
+    def test_get_uploaded_file_in_production(self) -> None:
+        """Test getting the file in production mode."""
         response = self.client.get(self.url)
         self.assertIn("X-Accel-Redirect", response.headers)
         self.assertEqual(
             response.headers["X-Accel-Redirect"], self.uploaded_file.get_file_media_url()
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
+        """Tear down test environment."""
         UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 

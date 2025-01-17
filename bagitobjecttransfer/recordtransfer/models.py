@@ -45,6 +45,7 @@ class UploadSession(models.Model):
 
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     @classmethod
     def new_session(cls):

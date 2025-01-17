@@ -873,11 +873,15 @@ def upload_file(request: HttpRequest) -> JsonResponse:
     try:
         headers = request.headers
         session_token = headers.get("Upload-Session-Token")
+        user: User = cast(User, request.user)
         session = (
-            UploadSession.objects.filter(token=session_token).first() if session_token else None
+            UploadSession.objects.filter(token=session_token, user=user).first()
+            if session_token
+            else None
         )
         if not session:
             session = UploadSession.new_session()
+            session.user = user
             session.save()
 
         _file = request.FILES.get("file")
@@ -954,7 +958,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         JsonResponse: A JSON response containing the list of uploaded files and their details,
         or an error message if the session is not found.
     """
-    session = UploadSession.objects.filter(token=session_token).first()
+    session = UploadSession.objects.filter(token=session_token, user=request.user).first()
     if not session:
         return JsonResponse(
             {"error": gettext("Upload session not found")},
@@ -983,7 +987,7 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     Args:
         request: The HTTP request
         session_token: The upload session token from the URL
-        filename: The name of the file to delete
+        file_name: The name of the file to delete
 
     Returns:
         HttpResponse:
@@ -991,13 +995,13 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
             of getting a file, redirects to the file's media path in development, or returns an
             X-Accel-Redirect to the file's media path if in production.
     """
-    session = UploadSession.objects.filter(token=session_token).first()
+    session = UploadSession.objects.filter(token=session_token, user=request.user).first()
     if not session:
-        return JsonResponse({"error": gettext("Upload session not found")}, status=404)
+        return JsonResponse({"error": gettext("Invalid filename or upload session token.")}, status=404)
 
     uploaded_file: UploadedFile = session.uploadedfile_set.filter(name=file_name).first()
     if not uploaded_file:
-        return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
+        return JsonResponse({"error": gettext("Invalid filename or upload session token.")}, status=404)
 
     if request.method == "DELETE":
         uploaded_file.delete()
