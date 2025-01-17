@@ -1,10 +1,3 @@
-/**
- * Navigation bar styling adapted from:
- * https://webdesign.tutsplus.com/tutorials/how-to-build-a-responsive-navigation-bar-with-flexbox--cms-33535
- * Credit to: Anna Monus
- * Modifications made by: Daniel Lovegrove
- */
-
 header {
     background-color: rgb(137, 34, 26);
     width: 100%;
@@ -25,6 +18,25 @@ header.homepage {
     align-items: center;
     list-style-type: none;
     list-style: none;
+    position: relative;
+}
+
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 999;
+}
+
+.menu-overlay.show {
+    visibility: visible;
+    opacity: 1;
 }
 
 .nav-title {
@@ -41,13 +53,7 @@ header.homepage {
     line-height: 40px;
 }
 
-#app-title:hover,
-.nav-link:hover,
-.nav-link:hover::after {
-    color: #ee7421;
-}
-
-.nav-link:not(.title):hover {
+.nav-link:hover {
     text-decoration: underline;
     text-decoration-thickness: 4px;
     text-underline-offset: 12px;
@@ -62,46 +68,86 @@ header.homepage {
     order: 1;
     flex: 1;
     text-align: right;
+    display: block;
+    font-size: 20pt;
 }
 
-.nav-toggle-close {
-    display: none; /* Hide initially */
-    order: 1;
-    flex: 1;
-    text-align: right;
+.nav-toggle-icon {
+    padding: 4px 8px;
+}
+
+.nav-toggle-icon:hover {
+    background-color: #92929291;
+    border-radius: 4px;
+}
+
+/* Sliding menu styles */
+.nav-items-container {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    right: -350px;
+    height: 100vh;
+    max-height: 100vh;
+    width: 300px;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    padding: 60px 20px;
+    z-index: 1000;
+    visibility: hidden;
+    box-sizing: border-box;
+}
+
+.nav-items-container.open {
+    right: 0;
+    visibility: visible;
+}
+
+.nav-items-container .nav-link {
+    color: rgb(137, 34, 26);
 }
 
 .nav-item {
-    order: 2;
-    margin-left: 20px;
+    flex-grow: 0;
     width: 100%;
     text-align: center;
-    display: none;
-}
-
-.active .nav-item {
-    display: block;
+    margin-bottom: 20px;
 }
 
 .nav-button {
-    border: 3px solid rgba(255, 255, 255, 0.7);
+    border: 3px solid rgb(137, 34, 26);
     border-radius: 3rem;
-    padding: 0.5rem 1.5rem;   
+    padding: 0.5rem 1.5rem;
     color: #ffffff;
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 .nav-button:hover {
-    background-color: #ffffff;
-    color: #ee7421;
+    background-color: rgb(137, 34, 26);
+    color: #ffffff;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-toggle-close {
+    margin-top: auto;
+    margin-bottom: 0px;
+    width: 100%;
+    text-align: center;
 }
 
 #app-logo {
     height: 70px;
 }
 
-/* Desktop menu (design is mobile-first) */
+/* Mobile-only transitions */
+@media all and (max-width: 799px) {
+    .nav-items-container {
+        transition: right 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+}
+
+/* Desktop menu */
 @media all and (min-width: 800px) {
     .main-navbar {
         align-items: center;
@@ -110,12 +156,43 @@ header.homepage {
     }
     .nav-item {
         order: 1;
+        margin-bottom: 0;
+        margin-top: 0;
+        margin-left: 20px;
         position: relative;
         display: block;
         width: auto;
     }
     .nav-toggle-open,
     .nav-toggle-close {
-        display: none !important;
+        display: none;
+    }
+    .nav-items-container {
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        height: auto;
+        width: auto;
+        background: none;
+        box-shadow: none;
+        padding: 0;
+        display: flex;
+        visibility: visible;
+        transition: none;
+    }
+    .nav-items-container .nav-link {
+        color: white;
+    }
+    .nav-button {
+        border: 3px solid rgba(255, 255, 255, 0.7);
+        border-radius: 3rem;
+        padding: 0.5rem 1.5rem;
+        color: #ffffff;
+        text-decoration: none;
+    }
+    .nav-button:hover {
+        background-color: #ffffff;
+        color: #ee7421;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 }

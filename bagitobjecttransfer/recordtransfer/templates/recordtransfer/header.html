@@ -2,77 +2,82 @@
 {% load i18n %}
 
 <header class="header {% if request.path == "/" %}homepage{% endif %}">
+    <div class="menu-overlay"></div>
     <nav class="main-header-content">
-        <ul class="main-navbar">
-            <li class="nav-logo">
+        <div class="main-navbar">
+            <div class="nav-logo">
                 <img id="app-logo" src="{% static 'logo-white-cropped.webp'%}">
-            </li>
-            <li class="nav-title">
+            </div>
+            <div class="nav-title">
                 <a class="nav-link title" href="{% url 'recordtransfer:index' %}" title="Go to home page">
                     <span id="app-title" class="title-text-light">{% trans "NCTR Record Transfer" %}</span>
                 </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'recordtransfer:index' %}">
-                    {% trans "Home" %}
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'recordtransfer:about' %}">
-                    {% trans "About" %}
-                </a>
-            </li>
-            {% if user.is_staff %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'admin:index' %}">
-                        {% trans "Admin" %}
+            </div>
+            <div class="nav-items-container">
+                <div class="nav-item">
+                    <a class="nav-link" href="{% url 'recordtransfer:index' %}">
+                        {% trans "Home" %}
                     </a>
-                </li>
-            {% endif %}
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
-                        {% trans "Profile" %}
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" href="{% url 'recordtransfer:about' %}">
+                        {% trans "About" %}
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link main" href="{% url 'recordtransfer:transfer' %}">
-                        {% trans "Transfer" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link main" href="{% url 'logout' %}">
-                        {% trans "Logout" %}
-                    </a>
-                </li>
-            {% elif not user.is_authenticated %}
-                {% if SIGN_UP_ENABLED %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
-                            {% trans "Sign Up" %}
+                </div>
+                {% if user.is_staff %}
+                    <div class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">
+                            {% trans "Admin" %}
                         </a>
-                    </li>
+                    </div>
                 {% endif %}
-                {% if 'login' not in request.path %}
-                    <li class="nav-item">
-                        <a class="nav-button" href="{% url 'login' %}">
-                            {% trans "Log In" %}
+                {% if user.is_authenticated %}
+                    <div class="nav-item">
+                        <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
+                            {% trans "Profile" %}
                         </a>
-                    </li>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-link main" href="{% url 'recordtransfer:transfer' %}">
+                            {% trans "Transfer" %}
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-link main" href="{% url 'logout' %}">
+                            {% trans "Logout" %}
+                        </a>
+                    </div>
+                {% elif not user.is_authenticated %}
+                    {% if SIGN_UP_ENABLED %}
+                        <div class="nav-item">
+                            <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
+                                {% trans "Sign Up" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                    {% if 'login' not in request.path %}
+                        <div class="nav-item">
+                            <a class="nav-link nav-button" href="{% url 'login' %}">
+                                {% trans "Log In" %}
+                            </a>
+                        </div>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-            <span class="toggle-container">
-                <li class="nav-toggle-open">
+                <div class="nav-item nav-toggle-close">
                     <a class="nav-link" href="#">
-                        <img height="20" src="{% static 'menu_64x64px.webp'%}">
+                        <b>
+                            {% trans "Close" %}
+                            &nbsp;
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </b>
                     </a>
-                </li>
-                <li class="nav-toggle-close">
-                    <a class="nav-link" href="#">
-                        <img height="20" src="{% static 'close_menu_64x64px.webp'%}">
-                    </a>
-                </li>
-            </span>
-        </ul>
+                </div>
+            </div>
+            <div class="nav-toggle-open">
+                <a class="nav-link nav-toggle-icon" href="#">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
     </nav>
 </header>
