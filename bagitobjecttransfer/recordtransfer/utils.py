@@ -145,7 +145,7 @@ def count_file_types(file_names: list, accepted_file_groups: dict, logger=None):
     for name in file_names:
         split_name = name.split(".")
         if len(split_name) == 1:
-            logger.warning(msg=("Could not identify file type for file name: {0}".format(name)))
+            logger.warning("Could not identify file type for file name: %s", name)
         else:
             extension_name = split_name[-1].lower()
             if extension_name not in counted_extensions:
