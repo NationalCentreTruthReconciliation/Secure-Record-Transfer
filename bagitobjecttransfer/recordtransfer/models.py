@@ -242,6 +242,12 @@ class BaseUploadedFile(models.Model):
 class TempUploadedFile(BaseUploadedFile):
     """Represent a temporary file that a user uploaded during an upload session."""
 
+    class Meta(BaseUploadedFile.Meta):
+        """Meta information."""
+
+        verbose_name = "Temporary uploaded file"
+        verbose_name_plural = "Temporary uploaded files"
+
     file_upload = models.FileField(
         null=True, storage=TempFileStorage, upload_to=session_upload_location
     )
@@ -257,6 +263,12 @@ class TempUploadedFile(BaseUploadedFile):
 
 class PermUploadedFile(BaseUploadedFile):
     """Represent a file that a user uploaded and has been stored."""
+
+    class Meta(BaseUploadedFile.Meta):
+        """Meta information."""
+
+        verbose_name = "Permanent uploaded file"
+        verbose_name_plural = "Permanent uploaded files"
 
     file_upload = models.FileField(null=True, storage=UploadedFileStorage)
 
