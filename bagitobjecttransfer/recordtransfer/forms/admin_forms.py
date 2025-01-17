@@ -5,11 +5,10 @@ from django.utils.html import format_html
 from django.utils.translation import gettext
 
 from recordtransfer.models import (
-    SubmissionGroup,
+    BaseUploadedFile,
     Submission,
+    SubmissionGroup,
     UploadSession,
-    TempUploadedFile,
-    User,
 )
 
 
@@ -30,7 +29,7 @@ class RecordTransferModelForm(forms.ModelForm):
 
 class UploadedFileForm(RecordTransferModelForm):
     class Meta:
-        model = TempUploadedFile
+        model = BaseUploadedFile
         fields = ("name", "session", "file_upload")
 
     exists = forms.BooleanField()
@@ -38,7 +37,7 @@ class UploadedFileForm(RecordTransferModelForm):
 
 class InlineUploadedFileForm(RecordTransferModelForm):
     class Meta:
-        model = TempUploadedFile
+        model = BaseUploadedFile
         fields = ("name",)
 
     exists = forms.BooleanField()

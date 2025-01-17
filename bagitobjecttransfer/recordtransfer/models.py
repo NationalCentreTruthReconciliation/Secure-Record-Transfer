@@ -76,7 +76,7 @@ class UploadSession(models.Model):
             number of temporary files is returned.
         """
         if self.expired:
-            return len(self.storeduploadedfile_set.all())
+            return len(self.permuploadedfile_set.all())
         else:
             return len(self.tempuploadedfile_set.all())
 
@@ -116,6 +116,8 @@ class UploadSession(models.Model):
         )
         for uploaded_file in files:
             uploaded_file.move_to_permanent_storage()
+        self.expired = True
+        self.save()
 
     def copy_session_uploads(
         self, destination: str, logger: Optional[logging.Logger] = None
@@ -201,7 +203,7 @@ class BaseUploadedFile(models.Model):
     def remove(self) -> None:
         """Remove this file from the file system."""
         if self.exists:
-            self.file_upload.delete(save=False)
+            self.file_upload.delete()
 
     def get_file_media_url(self) -> str:
         """Generate the media URL to this file.
@@ -236,7 +238,7 @@ class BaseUploadedFile(models.Model):
 
 
 class TempUploadedFile(BaseUploadedFile):
-    """Represent a file that a user uploaded during an upload session."""
+    """Represent a temporary file that a user uploaded during an upload session."""
 
     file_upload = models.FileField(
         null=True, storage=TempFileStorage, upload_to=session_upload_location
@@ -275,8 +277,8 @@ def delete_file_on_model_delete(
         instance: The model uploaded file instance being deleted
         **kwargs: Additional keyword arguments passed to the signal handler
     """
-    if instance.file_upload:
-        instance.file_upload.delete(save=False)
+    if instance.exists:
+        instance.file_upload.delete()
 
 
 class SubmissionGroup(models.Model):
