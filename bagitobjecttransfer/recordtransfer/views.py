@@ -873,11 +873,15 @@ def upload_file(request: HttpRequest) -> JsonResponse:
     try:
         headers = request.headers
         session_token = headers.get("Upload-Session-Token")
+        user: User = cast(User, request.user)
         session = (
-            UploadSession.objects.filter(token=session_token).first() if session_token else None
+            UploadSession.objects.filter(token=session_token, user=user).first()
+            if session_token
+            else None
         )
         if not session:
             session = UploadSession.new_session()
+            session.user = user
             session.save()
 
         _file = request.FILES.get("file")
@@ -954,7 +958,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         JsonResponse: A JSON response containing the list of uploaded files and their details,
         or an error message if the session is not found.
     """
-    session = UploadSession.objects.filter(token=session_token).first()
+    session = UploadSession.objects.filter(token=session_token, user=request.user).first()
     if not session:
         return JsonResponse(
             {"error": gettext("Upload session not found")},
@@ -991,7 +995,7 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
             of getting a file, redirects to the file's media path in development, or returns an
             X-Accel-Redirect to the file's media path if in production.
     """
-    session = UploadSession.objects.filter(token=session_token).first()
+    session = UploadSession.objects.filter(token=session_token, user=request.user).first()
     if not session:
         return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
