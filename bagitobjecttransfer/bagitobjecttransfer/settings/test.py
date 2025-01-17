@@ -1,7 +1,7 @@
 # Minimal settings for either testing, or building docs with Sphinx
 import os
-
-from decouple import config
+import tempfile
+from pathlib import Path
 
 from .base import *
 
@@ -105,5 +105,10 @@ LOGGING = {
     },
 }
 
-BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/bags/"))
-UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default=os.path.join(BASE_DIR, "media/uploaded_files/"))
+BASE_DIR = tempfile.mkdtemp()
+MEDIA_ROOT = str(Path(BASE_DIR) / "media")
+TEMP_STORAGE_FOLDER = str(Path(MEDIA_ROOT) / "temp")
+Path(TEMP_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
+UPLOAD_STORAGE_FOLDER = str(Path(MEDIA_ROOT) / "uploads")
+Path(UPLOAD_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
+BAG_STORAGE_FOLDER = str(Path(MEDIA_ROOT) / "bags")

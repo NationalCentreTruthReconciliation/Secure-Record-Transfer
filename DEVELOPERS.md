@@ -8,10 +8,32 @@ Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthRec
 
 ## Linting + Formatting
 
-Before beginning development, please configure git to use the git hooks (`.git/hooks`) provided in the repository. This will ensure that the linting configuration is updated before each commit.
+Before beginning development, please configure git to use the git hooks (`.git/hooks`) provided in the repository. This will ensure that the linting configuration for Python is updated before each commit.
 
 ```bash
 git config core.hooksPath .githooks
+```
+
+Additionally, install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting:
+
+```json
+{
+    "[javascript]": {
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+        "editor.rulers": [
+            99
+        ]
+    }
+}
+```
+
+Finally, install Node dependencies for development:
+
+```shell
+npm install --include=dev
 ```
 
 ## Debugging the Application
@@ -66,21 +88,6 @@ Use this `launch.json` configuration in VSCode to debug the application:
 
 A GitHub Actions workflow is set up to run Django tests on every pull request to the master branch. All tests must pass before a merge is allowed. The workflow configuration can be found in `.github/workflows/django-tests.yml`.
 
-## Javascript Development
-
-If you're editing any of the `.js` files in this repo, add these settings to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project to set your environment up.
-
-```json
-{
-    "[javascript]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "vscode.typescript-language-features",
-        "editor.rulers": [
-            99
-        ]
-    }
-}
-```
 
 ### Re-build JS as Changes are Made
 
@@ -147,9 +154,19 @@ Use these settings in your [local VSCode settings.json](https://code.visualstudi
 }
 ```
 The tests can be run with [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (using [pytest-django](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml)):
-
+To run tests, use:
 ```shell
 pytest
+```
+
+For unit tests only:
+```shell
+pytest -k "unit"
+```
+
+For E2E tests only:
+```shell
+pytest -k "e2e"
 ```
 
 ## Building the Documentation

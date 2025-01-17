@@ -4,9 +4,10 @@ from unittest.mock import patch
 
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
+from django.utils.translation import gettext
 from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
@@ -48,8 +49,9 @@ class TestUploadFileView(TestCase):
 
     def setUp(self):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.patch__accept_file = patch("recordtransfer.views._accept_file").start()
-        self.patch__accept_session = patch("recordtransfer.views._accept_session").start()
+        self.patch__accept_file = patch("recordtransfer.views.accept_file").start()
+        self.patch__accept_session = patch("recordtransfer.views.accept_session").start()
+        self.patch_check_for_malware = patch("recordtransfer.views.check_for_malware").start()
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
 
@@ -92,7 +94,7 @@ class TestUploadFileView(TestCase):
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
-            headers={"upload-session-token": session.token}
+            headers={"upload-session-token": session.token},
         )
 
         self.assertEqual(response.status_code, 200)
@@ -113,11 +115,15 @@ class TestUploadFileView(TestCase):
         )
 
         response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response_json["issues"]), 1)
-        self.assertEqual(response_json["issues"][0]["error"], "ISSUE")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json.get("error"), "ISSUE")
+        self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
         session.uploadedfile_set.all().delete()
@@ -132,11 +138,37 @@ class TestUploadFileView(TestCase):
         )
 
         response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response_json["issues"]), 1)
-        self.assertEqual(response_json["issues"][0]["error"], "ISSUE")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json.get("error"), "ISSUE")
+        self.assertEqual(response_json.get("accepted"), False)
+        self.assertEqual(len(session.uploadedfile_set.all()), 0)
+
+        session.uploadedfile_set.all().delete()
+        session.delete()
+
+    def test_malware_flagged(self):
+        self.patch_check_for_malware.side_effect = ValidationError("Malware found")
+        response = self.client.post(
+            reverse("recordtransfer:uploadfile"),
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+        )
+
+        response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
+        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
+        self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(len(session.uploadedfile_set.all()), 0)
 
         session.uploadedfile_set.all().delete()
@@ -218,16 +250,8 @@ class TestMediaRequestView(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-@patch(
-    "django.conf.settings.ACCEPTED_FILE_FORMATS",
-    {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
-)
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
-@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
-@override_storage(storage=LocMemStorage())
-class TestAcceptFileView(TestCase):
-    """Tests for recordtransfer:checkfile view"""
+class TestListUploadedFilesView(TestCase):
+    """Tests for recordtransfer:list_uploaded_files view."""
 
     @classmethod
     def setUpClass(cls):
@@ -236,337 +260,120 @@ class TestAcceptFileView(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.session_1 = UploadSession.objects.create(
-            token="test_session_1",
-            started_at=timezone.now(),
-        )
-        cls.one_mib = bytearray([1] * (1024**2))
-        cls.half_mib = bytearray([1] * int((1024**2) / 2))
+        cls.one_kib = bytearray([1] * 1024)
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
 
     def setUp(self):
-        # Log in
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session()
+        self.session.save()
+        self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
 
-    def test_logged_out_error(self):
-        self.client.logout()
+    def test_list_uploaded_files_session_not_found(self):
+        """Invalid session token."""
         response = self.client.get(
-            reverse("recordtransfer:checkfile"), {"filesize": "190", "filename": "My File.pdf"}
+            reverse("recordtransfer:list_uploaded_files", args=["invalid_token"])
         )
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
 
-    def test_filename_missing(self):
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filesize": "190",
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_file_name_empty(self):
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "",
-                "filesize": "6123",
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_filesize_missing(self):
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "My File.pdf",
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_filesize_empty(self):
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "My File.pdf",
-                "filesize": "",
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-
-    @patch("recordtransfer.views._accept_file")
-    def test_500_error_caught(self, patch__accept_file):
-        patch__accept_file.side_effect = ValueError("err")
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "My File.pdf",
-                "filesize": "1024",
-            },
-        )
-        self.assertEqual(response.status_code, 500)
-
-    def test_filename_filesize_ok(self):
-        param_list = [
-            ("My File.pdf", "1"),
-            ("My File.PDF", "1"),
-            ("My File.PDf", "1"),
-            ("My.File.PDf", "1024"),
-            ("My File.docx", "991"),
-            ("My File.xlsx", "9081"),
-        ]
-        for filename, filesize in param_list:
-            with self.subTest():
-                response = self.client.get(
-                    reverse("recordtransfer:checkfile"),
-                    {
-                        "filename": filename,
-                        "filesize": filesize,
-                    },
-                )
-                self.assertEqual(response.status_code, 200)
-                response_json = response.json()
-                self.assertTrue(response_json["accepted"], True)
-
-    def test_file_extension_not_okay(self):
-        param_list = [
-            "p",
-            "mp3",
-            "docxx",
-        ]
-        for extension in param_list:
-            with self.subTest():
-                response = self.client.get(
-                    reverse("recordtransfer:checkfile"),
-                    {
-                        "filename": f"My File.{extension}",
-                        "filesize": "9012",
-                    },
-                )
-                self.assertEqual(response.status_code, 200)
-                response_json = response.json()
-                self.assertFalse(response_json["accepted"])
-                self.assertIn("extension", response_json["error"])
-
-    def test_file_extension_missing(self):
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "My File",
-                "filesize": "209",
-            },
-        )
+    def test_list_uploaded_files_empty_session(self):
+        """Session has no files."""
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
-        self.assertFalse(response_json["accepted"])
-        self.assertIn("extension", response_json["error"])
+        self.assertEqual(response_json.get("files"), [])
 
-    def test_invalid_size(self):
-        param_list = [
-            "-1",
-            "-1000",
-            "One thousand",
-        ]
-        for size in param_list:
-            with self.subTest():
-                response = self.client.get(
-                    reverse("recordtransfer:checkfile"),
-                    {
-                        "filename": "My File.pdf",
-                        "filesize": size,
-                    },
-                )
-                self.assertEqual(response.status_code, 200)
-                response_json = response.json()
-                self.assertFalse(response_json["accepted"])
-                self.assertIn("size is invalid", response_json["error"])
-
-    def test_empty_file(self):
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "My File.pdf",
-                "filesize": "0",
-            },
+    def test_list_uploaded_files_with_files(self):
+        """Session has one file."""
+        uploaded_file = UploadedFile(
+            session=self.session,
+            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
+            name="testfile.txt",
         )
+        uploaded_file.save()
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
-        self.assertFalse(response_json["accepted"])
-        self.assertIn("empty", response_json["error"])
+        responseFiles = response_json.get("files")
+        self.assertEqual(len(responseFiles), 1)
+        self.assertEqual(responseFiles[0]["name"], "testfile.txt")
+        self.assertEqual(responseFiles[0]["size"], uploaded_file.file_upload.size)
+        self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
 
-    def test_file_too_large(self):
-        # Max size is patched to 1 MiB
-        param_list = [
-            (1024**2) + 1,  # 1 MiB plus one byte
-            (1024**2) * 8,  # 8 MiB
-            (1024**2) * 32,  # 32 MiB
-            (1024**3),  # 1 GiB
-            (1024**4),  # 1 TiB
-        ]
-        for size in param_list:
-            with self.subTest():
-                response = self.client.get(
-                    reverse("recordtransfer:checkfile"),
-                    {
-                        "filename": "My File.pdf",
-                        "filesize": size,
-                    },
-                )
-                self.assertEqual(response.status_code, 200)
-                response_json = response.json()
-                self.assertFalse(response_json["accepted"])
-                self.assertIn("File is too big", response_json["error"])
+    def tearDown(self):
+        UploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
 
-    def test_file_exactly_max_size(self):
-        # Max size is patched to 1 MiB
-        response = self.client.get(
-            reverse("recordtransfer:checkfile"),
-            {
-                "filename": "My File.pdf",
-                "filesize": ((1024**2) * 1),  # 1 MiB
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        self.assertTrue(response_json["accepted"])
 
-    def test_session_has_room(self):
-        files = []
-        try:
-            # 2 MiB of files (one MiB x 2)
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    file_upload=SimpleUploadedFile(name, self.one_mib),
-                    name=name,
-                )
-                for name in ("File 1.docx", "File 2.docx")
-            ]
-
-            for size in ("1024", len(self.one_mib)):
-                with self.subTest():
-                    response = self.client.post(
-                        reverse("recordtransfer:checkfile"),
-                        {
-                            "filename": "My File.pdf",
-                            "filesize": size,
-                        },
-                        headers={"upload-session-token": "test_session_1"}
-                    )
-                    self.assertEqual(response.status_code, 200)
-                    response_json = response.json()
-                    self.assertTrue(response_json["accepted"])
-
-        finally:
-            for file_ in files:
-                file_.delete()
-
-    def test_session_file_count_full(self):
-        files = []
-        try:
-            # 2 MiB of files (half MiB x 4)
-            # Max file count is 4
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    name=name,
-                    file_upload=SimpleUploadedFile(name, self.half_mib),
-                )
-                for name in ("File 1.docx", "File 2.pdf", "File 3.pdf", "File 4.pdf")
-            ]
-
-            response = self.client.post(
-                reverse("recordtransfer:checkfile"),
-                {
-                    "filename": "My File.pdf",
-                    "filesize": "1024",
-                },
-                headers={"upload-session-token": "test_session_1"}
-            )
-
-            self.assertEqual(response.status_code, 200)
-            response_json = response.json()
-            self.assertFalse(response_json["accepted"])
-            self.assertIn("You can not upload anymore files", response_json["error"])
-
-        finally:
-            for file_ in files:
-                file_.delete()
-
-    def test_file_too_large_for_session(self):
-        files = []
-        try:
-            # 2.5 MiB of files (1 Mib x 2, 0.5 MiB x 1)
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    name=name,
-                    file_upload=SimpleUploadedFile(name, content),
-                )
-                for name, content in (
-                    ("File 1.docx", self.one_mib),
-                    ("File 2.pdf", self.one_mib),
-                    ("File 3.pdf", self.half_mib),
-                )
-            ]
-
-            response = self.client.post(
-                reverse("recordtransfer:checkfile"),
-                {
-                    "filename": "My File.pdf",
-                    "filesize": len(self.one_mib),
-                },
-                headers={"upload-session-token": "test_session_1"}
-            )
-
-            self.assertEqual(response.status_code, 200)
-            response_json = response.json()
-            self.assertFalse(response_json["accepted"])
-            self.assertIn("Maximum total upload size (3 MiB) exceeded", response_json["error"])
-
-        finally:
-            for file_ in files:
-                file_.delete()
-
-    def test_duplicate_file_name(self):
-        files = []
-        names = ("File.1.docx", "File.2.pdf")
-        try:
-            files = [
-                UploadedFile.objects.create(
-                    session=self.session_1,
-                    name=name,
-                    file_upload=SimpleUploadedFile(name, self.half_mib),
-                )
-                for name in names
-            ]
-
-            for name in names:
-                with self.subTest():
-                    response = self.client.post(
-                        reverse("recordtransfer:checkfile"),
-                        {
-                            "filename": name,
-                            "filesize": "1024",
-                        },
-                        headers={"upload-session-token": "test_session_1"}
-                    )
-
-                    self.assertEqual(response.status_code, 200)
-                    response_json = response.json()
-                    self.assertFalse(response_json["accepted"])
-                    self.assertIn(
-                        "A file with the same name has already been uploaded",
-                        response_json["error"],
-                    )
-
-        finally:
-            for file_ in files:
-                file_.delete()
+class TestUploadedFileView(TestCase):
+    """Tests for recordtransfer:uploaded_file view."""
 
     @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        logging.disable(logging.NOTSET)
+    def setUpClass(cls):
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.one_kib = bytearray([1] * 1024)
+        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
+
+    def setUp(self):
+        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session()
+        self.session.save()
+        self.uploaded_file = UploadedFile(
+            session=self.session,
+            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
+            name="testfile.txt",
+        )
+        self.uploaded_file.save()
+        self.url = reverse(
+            "recordtransfer:uploaded_file", args=[self.session.token, self.uploaded_file.name]
+        )
+
+    def test_uploaded_file_session_not_found(self):
+        """Invalid session token."""
+        response = self.client.get(
+            reverse("recordtransfer:uploaded_file", args=["invalid_token", "testfile.txt"])
+        )
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertEqual(response_json["error"], gettext("Upload session not found"))
+
+    def test_uploaded_file_not_found(self):
+        """Invalid file name in a valid session."""
+        response = self.client.get(
+            reverse("recordtransfer:uploaded_file", args=[self.session.token, "invalid_file.txt"])
+        )
+        self.assertEqual(response.status_code, 404)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+        self.assertEqual(response_json["error"], gettext("File not found in upload session"))
+
+    def test_delete_uploaded_file(self):
+        """Delete an uploaded file."""
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(UploadedFile.objects.filter(name="testfile.txt").exists())
+
+    @patch("recordtransfer.views.settings.DEBUG", True)
+    def test_get_uploaded_file_in_debug(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.url, self.uploaded_file.get_file_media_url())
+
+    @patch("recordtransfer.views.settings.DEBUG", False)
+    def test_get_uploaded_file_in_production(self):
+        response = self.client.get(self.url)
+        self.assertIn("X-Accel-Redirect", response.headers)
+        self.assertEqual(
+            response.headers["X-Accel-Redirect"], self.uploaded_file.get_file_media_url()
+        )
+
+    def tearDown(self):
         UploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
@@ -574,11 +381,20 @@ class TestAcceptFileView(TestCase):
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
 class TestUserProfileView(TestCase):
     def setUp(self):
+        self.test_username = "testuser"
+        self.test_first_name = "Test"
+        self.test_last_name = "User"
+        self.test_email = "testuser@example.com"
+        self.test_current_password = "old_password"
+        self.test_gets_notification_emails = True
+        self.test_new_password = "new_password123"
         self.user = User.objects.create_user(
-            username="testuser",
-            email="testuser@example.com",
-            password="old_password",
-            gets_notification_emails=True,
+            username=self.test_username,
+            first_name=self.test_first_name,
+            last_name=self.test_last_name,
+            email=self.test_email,
+            password=self.test_current_password,
+            gets_notification_emails=self.test_gets_notification_emails,
         )
         self.client.login(username="testuser", password="old_password")
         self.url = reverse("recordtransfer:userprofile")
@@ -596,12 +412,59 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
+    def test_valid_name_change(self):
+        form_data = {
+            "first_name": "New",
+            "last_name": "Name",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
+    def test_accented_name_change(self):
+        form_data = {
+            "first_name": "Áccéntéd",
+            "last_name": "Námé",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
+    def test_invalid_first_name(self):
+        form_data = {
+            "first_name": "123",
+            "last_name": self.test_last_name,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_invalid_last_name(self):
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": "123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
     def test_valid_notification_setting_change(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": False,
-            "current_password": "",
-            "new_password": "",
-            "confirm_new_password": "",
         }
         response = self.client.post(self.url, data=form_data)
         self.assertRedirects(response, self.url)
@@ -610,10 +473,9 @@ class TestUserProfileView(TestCase):
 
     def test_invalid_notification_setting_change(self):
         form_data = {
-            "gets_notification_emails": True,
-            "current_password": "",
-            "new_password": "",
-            "confirm_new_password": "",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "gets_notification_emails": self.test_gets_notification_emails,
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
@@ -626,8 +488,9 @@ class TestUserProfileView(TestCase):
 
     def test_valid_password_change(self):
         form_data = {
-            "gets_notification_emails": True,
-            "current_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
@@ -640,7 +503,8 @@ class TestUserProfileView(TestCase):
 
     def test_wrong_password(self):
         form_data = {
-            "gets_notification_emails": True,
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "current_password": "wrong_password",
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
@@ -656,8 +520,9 @@ class TestUserProfileView(TestCase):
 
     def test_passwords_do_not_match(self):
         form_data = {
-            "gets_notification_emails": True,
-            "current_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
             "new_password": "new_password123",
             "confirm_new_password": "different_password",
         }
@@ -672,10 +537,11 @@ class TestUserProfileView(TestCase):
 
     def test_same_password(self):
         form_data = {
-            "gets_notification_emails": True,
-            "current_password": "old_password",
-            "new_password": "old_password",
-            "confirm_new_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
+            "new_password": self.test_current_password,
+            "confirm_new_password": self.test_current_password,
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
@@ -688,7 +554,8 @@ class TestUserProfileView(TestCase):
 
     def test_missing_current_password(self):
         form_data = {
-            "gets_notification_emails": True,
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
@@ -703,8 +570,9 @@ class TestUserProfileView(TestCase):
 
     def test_missing_new_password(self):
         form_data = {
-            "gets_notification_emails": True,
-            "current_password": "old_password",
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
             "confirm_new_password": "new_password123",
         }
         response = self.client.post(self.url, data=form_data)
@@ -718,8 +586,10 @@ class TestUserProfileView(TestCase):
 
     def test_missing_confirm_new_password(self):
         form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
             "gets_notification_emails": True,
-            "current_password": "old_password",
+            "current_password": self.test_current_password,
             "new_password": "new_password123",
         }
         response = self.client.post(self.url, data=form_data)
@@ -733,7 +603,9 @@ class TestUserProfileView(TestCase):
 
     def test_no_changes(self):
         form_data = {
-            "gets_notification_emails": True,
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "gets_notification_emails": self.test_gets_notification_emails,
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)

@@ -1,16 +1,14 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- JS -->
         {% block javascript %}
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-            {% if FILE_UPLOAD_ENABLED %}
-                {% include "captcha/js_v2_invisible.html" %}
-            {% endif %}
             <script src="{% static 'base.bundle.js' %}"></script>
         {% endblock javascript %}
         {# Fonts #}
@@ -20,10 +18,12 @@
         {# Icons #}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {# CSS #}
+        {% block stylesheet %}
         <link rel="stylesheet"
               type="text/css"
               href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
         <link rel="stylesheet" href="{% static 'base.css' %}">
+        {% endblock stylesheet %}
         {# Favicon #}
         <link rel="shortcut icon"
               type="image/png"
