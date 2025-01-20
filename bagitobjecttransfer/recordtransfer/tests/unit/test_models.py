@@ -2,6 +2,7 @@
 import logging
 import shutil
 import tempfile
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, PropertyMock, patch
@@ -11,23 +12,45 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
 from django.test import TestCase
 
-from recordtransfer.models import TempUploadedFile, UploadSession
-from recordtransfer.storage import UploadedFileStorage
+from recordtransfer.models import PermUploadedFile, TempUploadedFile, UploadSession
 
 
-def get_mock_uploaded_file(
+def get_mock_temp_uploaded_file(
     name: str,
     exists: bool = True,
     session: Optional[UploadSession] = None,
-    upload_to: str = "/media/",
+    upload_to: str = "/media/temp/",
     size: int = 1024,
 ) -> MagicMock:
     """Create a new MagicMock that implements all the correct properties
-    required for an UploadedFile.
+    required for an TempUploadedFile.
     """
     if not exists:
         size = 0
     file_mock = MagicMock(spec=TempUploadedFile)
+    path = upload_to.rstrip("/") + "/" + name
+    type(file_mock).exists = PropertyMock(return_value=exists)
+    type(file_mock).name = PropertyMock(return_value=name)
+    type(file_mock).session = PropertyMock(return_value=session)
+    type(file_mock.file_upload).size = PropertyMock(return_value=size)
+    type(file_mock.file_upload).path = PropertyMock(return_value=path)
+    type(file_mock.file_upload).name = PropertyMock(return_value=name)
+    return file_mock
+
+
+def get_mock_perm_uploaded_file(
+    name: str,
+    exists: bool = True,
+    session: Optional[UploadSession] = None,
+    upload_to: str = "/media/uploaded_files/",
+    size: int = 1024,
+) -> MagicMock:
+    """Create a new MagicMock that implements all the correct properties
+    required for an PermUploadedFile.
+    """
+    if not exists:
+        size = 0
+    file_mock = MagicMock(spec=PermUploadedFile)
     path = upload_to.rstrip("/") + "/" + name
     type(file_mock).exists = PropertyMock(return_value=exists)
     type(file_mock).name = PropertyMock(return_value=name)
@@ -47,32 +70,69 @@ class TestUploadSession(TestCase):
         super().setUpClass()
         logging.disable(logging.CRITICAL)
 
+    def setUp(self) -> None:
+        """Set up test."""
+        self.session = UploadSession.new_session()
+        self.session.save()
+
+        self.test_temp_file = get_mock_temp_uploaded_file(
+            "test.pdf", size=1000, session=self.session
+        )
+
+        self.test_perm_file = get_mock_perm_uploaded_file(
+            "test.pdf", size=1000, session=self.session
+        )
+
+    def test_new_session_creation(self) -> None:
+        """Test creating a new upload session."""
+        self.assertIsInstance(self.session, UploadSession)
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
+        self.assertEqual(len(self.session.token), 32)
+
+    def test_upload_size_created_session(self) -> None:
+        """Test upload size should be zero for a newly created session."""
+        self.assertEqual(self.session.upload_size, 0)
+
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    def test_upload_size_one_file(self, tempuploadedfile_set_mock: BaseManager) -> None:
+        """Test upload size should be the size of the uploaded file."""
+        tempuploadedfile_set_mock.all = MagicMock(
+            return_value=[
+                self.test_temp_file,
+            ]
+        )
+        self.session.status = UploadSession.SessionStatus.TEMPORARY_FILES
+        self.assertEqual(self.session.upload_size, 1000)
+
+    def test_upload_size_raises_for_invalid_status(self) -> None:
+        """Test upload_size raises ValueError when session is expired or deleted."""
+        statuses = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                _ = self.session.upload_size
+
     def test_empty_session(self) -> None:
         """Test that a new session has no files."""
-        session = UploadSession.new_session()
-        session.save()
-
-        self.assertEqual(len(session.get_uploaded_files()), 0)
-        self.assertEqual(session.upload_size, 0)
-
-        session.delete()
+        self.assertEqual(self.session.file_count, 0)
+        self.assertEqual(self.session.upload_size, 0)
 
     @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
     def test_one_file_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
         """Test that a session with one file returns correct file count and size."""
-        session = UploadSession.new_session()
-        session.save()
-
         uploadedfile_set_mock.all = MagicMock(
             return_value=[
                 get_mock_uploaded_file("1.pdf", size=1000),
             ]
         )
 
-        self.assertEqual(len(session.get_uploaded_files()), 1)
+        self.assertEqual(session.file_count, 1)
         self.assertEqual(session.upload_size, 1000)
-
-        session.delete()
 
     @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
     def test_multiple_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
@@ -184,6 +244,20 @@ class TestUploadSession(TestCase):
         file_2.move_to_permanent_storage.assert_called_once()
         file_3.move_to_permanent_storage.assert_not_called()
 
+    def tearDown(self) -> None:
+        """Tear down test."""
+        TempUploadedFile.objects.all().delete()
+        PermUploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
+
+        # Clear everything in the temp and upload storage folders
+        shutil.rmtree(Path(settings.TEMP_STORAGE_FOLDER))
+        shutil.rmtree(Path(settings.UPLOAD_STORAGE_FOLDER))
+
+        # Recreate the directories
+        Path(settings.TEMP_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
+        Path(settings.UPLOAD_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
+
     @classmethod
     def tearDownClass(cls) -> None:
         """Restore logging settings."""
@@ -191,8 +265,14 @@ class TestUploadSession(TestCase):
         logging.disable(logging.NOTSET)
 
 
-class TestUploadedFile(TestCase):
-    """Tests for the UploadedFile model."""
+class TestBaseUploadedFile(TestCase, ABC):
+    """Tests for the BaseUploadedFile model."""
+
+    @property
+    @abstractmethod
+    def model_class(self) -> type:
+        """Must be implemented by child classes."""
+        pass
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -210,7 +290,7 @@ class TestUploadedFile(TestCase):
             "test.pdf", test_file_content, content_type="application/pdf"
         )
 
-        self.uploaded_file = TempUploadedFile(
+        self.uploaded_file = self.model_class.objects.create(
             name="test.pdf",
             session=self.session,
             file_upload=test_file,
@@ -236,49 +316,31 @@ class TestUploadedFile(TestCase):
             self.uploaded_file.file_upload.storage.exists(self.uploaded_file.file_upload.name)
         )
 
-    def test_move(self) -> None:
-        """Test that the file is moved."""
-        temp_dir = tempfile.mkdtemp()
-        self.uploaded_file.move(temp_dir)
-        # Check that file does not exist in old path
-        self.assertFalse(self.uploaded_file.exists)
-
     def test_remove(self) -> None:
         """Test that the file is removed."""
         self.uploaded_file.remove()
         self.assertFalse(self.uploaded_file.exists)
 
-    def test_move_to_permanent_storage(self) -> None:
-        """Test that the file is moved to permanent storage."""
-        relative_path = self.uploaded_file.file_upload.name
-        self.uploaded_file.move_to_permanent_storage()
-        self.assertTrue(Path(settings.UPLOAD_STORAGE_FOLDER, relative_path).exists())
-        self.assertTrue(self.uploaded_file.exists)
-        self.assertIsInstance(self.uploaded_file.file_upload.storage, UploadedFileStorage)
-        self.assertFalse(self.uploaded_file.temp)
-
-    def test_get_temp_file_media_url(self) -> None:
+    def test_get_file_media_url(self) -> None:
         """Test that the file media URL is returned."""
-        self.assertEqual(
-            self.uploaded_file.get_file_media_url(),
-            "/"
-            + (
-                Path(settings.TEMP_STORAGE_FOLDER).relative_to(settings.BASE_DIR)
-                / self.uploaded_file.file_upload.name
-            ).as_posix(),
-        )
-
-    def test_get_permanent_file_media_url(self) -> None:
-        """Test that the file media URL is returned."""
-        self.uploaded_file.move_to_permanent_storage()
-        self.assertEqual(
-            self.uploaded_file.get_file_media_url(),
-            "/"
-            + (
-                Path(settings.UPLOAD_STORAGE_FOLDER).relative_to(settings.BASE_DIR)
-                / self.uploaded_file.file_upload.name
-            ).as_posix(),
-        )
+        if self.model_class == TempUploadedFile:
+            self.assertEqual(
+                self.uploaded_file.get_file_media_url(),
+                "/"
+                + (
+                    Path(settings.TEMP_STORAGE_FOLDER).relative_to(settings.BASE_DIR)
+                    / self.uploaded_file.file_upload.name
+                ).as_posix(),
+            )
+        elif self.model_class == PermUploadedFile:
+            self.assertEqual(
+                self.uploaded_file.get_file_media_url(),
+                "/"
+                + (
+                    Path(settings.UPLOAD_STORAGE_FOLDER).relative_to(settings.BASE_DIR)
+                    / self.uploaded_file.file_upload.name
+                ).as_posix(),
+            )
 
     def test_get_file_media_url_no_file(self) -> None:
         """Test that an exception is raised when trying to get the media URL of a non-existent
@@ -290,6 +352,7 @@ class TestUploadedFile(TestCase):
     def tearDown(self) -> None:
         """Tear down test."""
         TempUploadedFile.objects.all().delete()
+        PermUploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
         # Clear everything in the temp and upload storage folders
@@ -305,3 +368,30 @@ class TestUploadedFile(TestCase):
         """Restore logging settings."""
         super().tearDownClass()
         logging.disable(logging.NOTSET)
+
+
+class TestTempUploadedFile(TestBaseUploadedFile):
+    """Tests for the TempUploadedFile model."""
+
+    @property
+    def model_class(self) -> type:
+        """Return the TempUploadedFile model class."""
+        return TempUploadedFile
+
+    def test_move_to_permanent_storage(self) -> None:
+        """Test that the file is moved to permanent storage."""
+        relative_path = self.uploaded_file.file_upload.name
+        self.uploaded_file.move_to_permanent_storage()
+        self.assertTrue(Path(settings.UPLOAD_STORAGE_FOLDER, relative_path).exists())
+        self.assertFalse(self.uploaded_file.exists)
+        perm_uploaded_file = PermUploadedFile.objects.get(session=self.session, name="test.pdf")
+        self.assertTrue(perm_uploaded_file.exists)
+
+
+class TestPermUploadedFile(TestBaseUploadedFile):
+    """Tests for the PermUploadedFile model."""
+
+    @property
+    def model_class(self) -> type:
+        """Return the PermUploadedFile model class."""
+        return PermUploadedFile
