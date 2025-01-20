@@ -52,9 +52,9 @@ class UploadSession(models.Model):
         CREATED = "CR", _("Session Created")
         EXPIRED = "EX", _("Session Expired")
         TEMPORARY_FILES = "TF", _("All Files in Temporary Storage")
-        COPYING_TO_PERMANENT = "CP", _("Copying Files to Permanent Storage")
+        COPYING_IN_PROGRESS = "CP", _("Copying Files to Permanent Storage")
         PERMANENT_FILES = "PF", _("All Files in Permanent Storage")
-        COPYING_TO_PERMANENT_FAILED = "FD", _("Copying to Permanent Storage Failed")
+        COPYING_FAILED = "FD", _("Copying Failed")
 
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
@@ -98,7 +98,7 @@ class UploadSession(models.Model):
 
     def remove_uploads(self) -> None:
         """Remove all uploaded files associated with this session."""
-        if self.status == self.SessionStatus.COPYING_TO_PERMANENT:
+        if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
                 f"""Cannot remove uploaded files from session {self.token} while copying files to
                 permanent storage"""
@@ -125,7 +125,7 @@ class UploadSession(models.Model):
             )
             return
 
-        if self.status == self.SessionStatus.COPYING_TO_PERMANENT:
+        if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             logger.warning(
                 "Uploaded files in session %s are already being copied to permanent storage.",
                 self.token,
@@ -149,7 +149,7 @@ class UploadSession(models.Model):
             logger.error(
                 "An error occurred while moving uploaded files to permanent storage: %s", e
             )
-            self.status = self.SessionStatus.COPYING_TO_PERMANENT_FAILED
+            self.status = self.SessionStatus.COPYING_FAILED
             self.save()
             return
         self.status = self.SessionStatus.PERMANENT_FILES
