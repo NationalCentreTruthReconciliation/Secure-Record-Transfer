@@ -132,6 +132,10 @@ class UploadSession(models.Model):
             )
             return
 
+        # Set the status to indicate that the files are being copied to permanent storage
+        self.status = self.SessionStatus.COPYING_IN_PROGRESS
+        self.save()
+
         files = self.get_temporary_uploads()
         if not files:
             logger.info("There are no uploaded files in the session %s", self.token)
