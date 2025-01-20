@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 import uuid
-from abc import abstractmethod
 from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Optional, Union
@@ -53,8 +52,10 @@ class UploadSession(models.Model):
         EXPIRED = "EX", _("Session Expired")
         TEMPORARY_FILES = "TF", _("All Files in Temporary Storage")
         COPYING_IN_PROGRESS = "CP", _("Copying Files to Permanent Storage")
-        PERMANENT_FILES = "PF", _("All Files in Permanent Storage")
+        STORED = "SD", _("All Files in Permanent Storage")
         COPYING_FAILED = "FD", _("Copying Failed")
+        REMOVING_IN_PROGRESS = "RP", _("Removing All Files")
+        DELETED = "DL", _("All Files Removed")
 
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
@@ -87,6 +88,14 @@ class UploadSession(models.Model):
 
         May be empty if temp uploads have already been moved to permanent storage.
         """
+        if self.status in (
+            self.SessionStatus.COPYING_IN_PROGRESS,
+            self.SessionStatus.REMOVING_IN_PROGRESS,
+        ):
+            raise ValueError(
+                f"""Cannot get temporary uploaded files from session {self.token} while copy or
+                removal of files is in progress"""
+            )
         return [f for f in self.tempuploadedfile_set.all() if f.exists]
 
     def get_permanent_uploads(self) -> list["PermUploadedFile"]:
@@ -94,6 +103,14 @@ class UploadSession(models.Model):
 
         May be empty if temp uploads have not been moved.
         """
+        if self.status in (
+            self.SessionStatus.COPYING_IN_PROGRESS,
+            self.SessionStatus.REMOVING_IN_PROGRESS,
+        ):
+            raise ValueError(
+                f"""Cannot get temporary uploaded files from session {self.token} while copy or
+                removal of files is in progress"""
+            )
         return [f for f in self.permuploadedfile_set.all() if f.exists]
 
     def remove_uploads(self) -> None:
