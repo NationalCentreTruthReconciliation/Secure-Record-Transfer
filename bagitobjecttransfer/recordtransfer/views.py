@@ -547,6 +547,10 @@ class TransferFormWizard(SessionWizardView):
             # Remove any empty dictionaries if there were any created without data
             return [data for data in formatted_data if data]
 
+        # Case where the form has no fields
+        if len(formatted_data) == 0:
+            return {}
+
         return formatted_data[0]
 
     def save_transfer(self, data: dict) -> None:
