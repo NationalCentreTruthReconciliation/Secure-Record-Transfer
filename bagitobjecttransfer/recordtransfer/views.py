@@ -928,7 +928,9 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             )
 
         uploaded_file = TempUploadedFile(session=session, file_upload=_file, name=_file.name)
+        session.status = UploadSession.SessionStatus.TEMPORARY_FILES
         uploaded_file.save()
+        session.save()
         file_url = uploaded_file.get_file_access_url()
 
         return JsonResponse(

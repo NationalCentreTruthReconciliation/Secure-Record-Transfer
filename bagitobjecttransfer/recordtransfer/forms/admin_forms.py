@@ -52,7 +52,8 @@ class UploadSessionForm(RecordTransferModelForm):
         model = UploadSession
         fields = ("token", "started_at")
 
-    number_of_files_uploaded = forms.IntegerField(required=False)
+    file_count = forms.IntegerField(required=False)
+    status = forms.CharField(required=False)
 
 
 class SubmissionForm(RecordTransferModelForm):

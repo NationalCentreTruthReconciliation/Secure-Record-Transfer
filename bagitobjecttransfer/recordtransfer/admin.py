@@ -231,7 +231,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         PermUploadedFileInline,
     ]
 
-    list_display = ["token", "started_at", "number_of_files_uploaded"]
+    list_display = ["token", "started_at", "file_count", "status"]
 
     ordering = [
         "-started_at",
@@ -391,7 +391,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = [
         "submission_date",
         "uuid",
-        "number_of_files_uploaded",
+        "file_count",
         linkify("metadata"),
         linkify("user"),
     ]
@@ -408,10 +408,10 @@ class SubmissionAdmin(admin.ModelAdmin):
         "uuid",
     ]
 
-    def number_of_files_uploaded(self, obj):
+    def file_count(self, obj):
         if not obj.upload_session:
             return 0
-        return obj.upload_session.number_of_files_uploaded()
+        return obj.upload_session.file_count
 
     def has_add_permission(self, request):
         return False

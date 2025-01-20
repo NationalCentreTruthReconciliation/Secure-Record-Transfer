@@ -14,7 +14,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files import File
 from django.db import models
-from django.db.models.signals import post_delete
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -273,11 +273,6 @@ class BaseUploadedFile(models.Model):
             },
         )
 
-    @abstractmethod
-    def move_to_permanent_storage(self) -> None:
-        """Abstract method that child classes must implement."""
-        pass
-
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
@@ -318,13 +313,9 @@ class PermUploadedFile(BaseUploadedFile):
 
     file_upload = models.FileField(null=True, storage=UploadedFileStorage)
 
-    def move_to_permanent_storage(self) -> None:
-        """Do nothing, the file is already in permanent storage."""
-        pass
 
-
-@receiver(post_delete, sender=TempUploadedFile)
-@receiver(post_delete, sender=PermUploadedFile)
+@receiver(pre_delete, sender=TempUploadedFile)
+@receiver(pre_delete, sender=PermUploadedFile)
 def delete_file_on_model_delete(
     sender: Union[TempUploadedFile, PermUploadedFile],
     instance: Union[TempUploadedFile, PermUploadedFile],
