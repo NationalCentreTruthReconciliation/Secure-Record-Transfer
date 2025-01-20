@@ -316,15 +316,8 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     if not session:
         return {"accepted": True}
 
-    if session.expired:
-        return {
-            "accepted": False,
-            "error": gettext("Session has expired."),
-            "verboseError": gettext("The session has expired and no more files can be uploaded."),
-        }
-
     # Check number of files is within allowed total
-    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
+    if session.file_count >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
             "accepted": False,
             "error": gettext("You can not upload anymore files."),
@@ -350,7 +343,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
         }
 
     # Check that a file with this name has not already been uploaded
-    filename_list = [f.name for f in session.get_uploaded_files()]
+    filename_list = [f.name for f in session.get_temporary_uploads()]
     if filename in filename_list:
         return {
             "accepted": False,
@@ -364,7 +357,9 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     return {"accepted": True}
 
 
-def find_uploaded_file_by_name(session: UploadSession, filename: str) -> Optional[BaseUploadedFile]:
+def find_uploaded_file_by_name(
+    session: UploadSession, filename: str
+) -> Optional[BaseUploadedFile]:
     """Find an uploaded file by its name.
 
     Args:
@@ -374,4 +369,9 @@ def find_uploaded_file_by_name(session: UploadSession, filename: str) -> Optiona
     Returns:
         The uploaded file if found, or None if not found
     """
-    return next((f for f in session.get_uploaded_files() if f.name == filename), None)
+    uploads = (
+        session.get_temporary_uploads()
+        if session.status == UploadSession.SessionStatus.TEMPORARY_FILES
+        else session.get_permanent_uploads()
+    )
+    return next((file_ for file_ in uploads if file_.name == filename), None)

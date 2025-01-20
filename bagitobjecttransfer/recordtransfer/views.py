@@ -776,7 +776,7 @@ class TransferFormWizard(SessionWizardView):
         size = get_human_readable_size(session.upload_size, base=1024, precision=2)
 
         count = get_human_readable_file_count(
-            [f.name for f in session.get_uploaded_files()],
+            [f.name for f in session.get_temporary_uploads()],
             settings.ACCEPTED_FILE_FORMATS,
             LOGGER,
         )
@@ -970,9 +970,14 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
             status=404,
         )
 
-    files = []
-    for uploaded_file in session.get_uploaded_files():
-        files.append(
+    file_metadata = []
+    uploaded_files = (
+        session.get_temporary_uploads()
+        if session.SessionStatus.TEMPORARY_FILES
+        else session.get_permanent_uploads()
+    )
+    for uploaded_file in uploaded_files:
+        file_metadata.append(
             {
                 "name": uploaded_file.name,
                 "size": uploaded_file.file_upload.size,
@@ -980,7 +985,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
             }
         )
 
-    response_data = {"files": files}
+    response_data = {"files": file_metadata}
 
     return JsonResponse(response_data, safe=False, status=200)
 
@@ -1009,16 +1014,6 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
         return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 
     if request.method == "DELETE":
-        if session.expired:
-            return JsonResponse(
-                {
-                    "error": gettext(
-                        "You are not allowed to delete a file from an expired session."
-                    )
-                },
-                status=400,
-            )
-
         uploaded_file.delete()
         # 204: No content (i.e., deletion succeeded, no message needed)
         return HttpResponse(status=204)
