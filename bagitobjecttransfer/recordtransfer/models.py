@@ -124,10 +124,7 @@ class UploadSession(models.Model):
 
         May be empty if temp uploads have already been moved to permanent storage.
         """
-        if self.status in (
-            self.SessionStatus.CREATED,
-            self.SessionStatus.STORED
-        ):
+        if self.status in (self.SessionStatus.CREATED, self.SessionStatus.STORED):
             return []
         elif self.status in (
             self.SessionStatus.EXPIRED,
@@ -177,10 +174,21 @@ class UploadSession(models.Model):
 
     def remove_uploads(self) -> None:
         """Remove all uploaded files associated with this session."""
-        if self.status != self.SessionStatus.STORED:
+        if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
+            LOGGER.info("File removal is already in progress for session %s", self.token)
+            return
+        elif self.status == self.SessionStatus.CREATED:
+            LOGGER.info("There are no uploaded files in the session %s to remove", self.token)
+            return
+        elif self.status in (self.SessionStatus.EXPIRED, self.SessionStatus.DELETED):
             raise ValueError(
-                f"""Cannot remove uploaded files from session {self.token} because the session
-                status is {self.status} and not {self.SessionStatus.STORED}"""
+                f"""Cannot remove uploaded files from session {self.token} because the session has
+                expired or has been deleted"""
+            )
+        elif self.status == self.SessionStatus.COPYING_IN_PROGRESS:
+            raise ValueError(
+                f"""Cannot remove uploaded files from session {self.token} while copying files is
+                in progress"""
             )
 
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
@@ -256,6 +264,12 @@ class UploadSession(models.Model):
             A tuple containing lists of copied and missing files
         """
         logger = logger or LOGGER
+
+        if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
+            raise ValueError(
+                f"""Cannot copy files from session {self.token} to {destination} because the
+                copying is already in progress"""
+            )
 
         if self.status != self.SessionStatus.STORED:
             raise ValueError(
