@@ -78,9 +78,14 @@ class TestUploadSession(TestCase):
         self.test_temp_file = get_mock_temp_uploaded_file(
             "test.pdf", size=1000, session=self.session
         )
-
         self.test_perm_file = get_mock_perm_uploaded_file(
             "test.pdf", size=1000, session=self.session
+        )
+        self.test_file_1 = SimpleUploadedFile(
+            "test1.pdf", b"Test file content", content_type="application/pdf"
+        )
+        self.test_file_2 = SimpleUploadedFile(
+            "test2.pdf", b"Test file content", content_type="application/pdf"
         )
 
     def test_new_session_creation(self) -> None:
@@ -117,43 +122,221 @@ class TestUploadSession(TestCase):
             with self.assertRaises(ValueError):
                 _ = self.session.upload_size
 
-    def test_empty_session(self) -> None:
-        """Test that a new session has no files."""
+    def test_file_count_created_session(self) -> None:
+        """Test file count should be zero for a newly created session."""
         self.assertEqual(self.session.file_count, 0)
-        self.assertEqual(self.session.upload_size, 0)
 
-    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
-    def test_one_file_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
-        """Test that a session with one file returns correct file count and size."""
-        uploadedfile_set_mock.all = MagicMock(
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
+    def test_file_count_one_file(self, permuploadedfile_set_mock: BaseManager) -> None:
+        """Test file count should be one for a session with one file."""
+        permuploadedfile_set_mock.all = MagicMock(
             return_value=[
-                get_mock_uploaded_file("1.pdf", size=1000),
+                self.test_perm_file,
             ]
         )
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.assertEqual(self.session.file_count, 1)
 
-        self.assertEqual(session.file_count, 1)
-        self.assertEqual(session.upload_size, 1000)
+    def test_file_count_raises_for_invalid_status(self) -> None:
+        """Test file_count raises ValueError when session is in an invalid state for checking
+        file count.
+        """
+        statuses = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                _ = self.session.file_count
 
-    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
-    def test_multiple_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
+    def test_multiple_files_in_session(
+        self, tempuploadedfile_set_mock: BaseManager, permuploadedfile_set_mock: BaseManager
+    ) -> None:
         """Test that a session with multiple files returns correct file count and size."""
-        session = UploadSession.new_session()
-        session.save()
-
-        uploadedfile_set_mock.all = MagicMock(
+        tempuploadedfile_set_mock.all = MagicMock(
             return_value=[
-                get_mock_uploaded_file("1.pdf", size=1000),
-                get_mock_uploaded_file("2.pdf", size=1000),
-                get_mock_uploaded_file("3.pdf", size=1000),
-                get_mock_uploaded_file("4.pdf", size=1000),
-                get_mock_uploaded_file("5.pdf", size=1000),
+                self.test_temp_file,
             ]
         )
+        permuploadedfile_set_mock.all = MagicMock(
+            return_value=[
+                self.test_perm_file,
+            ]
+        )
+        self.session.status = UploadSession.SessionStatus.UPLOADING
 
-        self.assertEqual(len(session.get_uploaded_files()), 5)
-        self.assertEqual(session.upload_size, 5000)
+        self.assertEqual(self.session.file_count, 2)
+        self.assertEqual(self.session.upload_size, 2000)
 
-        session.delete()
+    def test_add_temp_file(self) -> None:
+        """Test adding a temp file to the session."""
+        self.assertEqual(len(self.session.tempuploadedfile_set.all()), 0)
+        self.session.add_temp_file(self.test_file_1)
+        self.assertEqual(len(self.session.tempuploadedfile_set.all()), 1)
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
+
+    def test_add_temp_file_invalid_status(self) -> None:
+        """Test adding a temp file to the session raises an exception when the session is in an
+        invalid state.
+        """
+        statuses = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.add_temp_file(self.test_file_1)
+
+    def test_remove_temp_file_by_name(self) -> None:
+        """Test removing temp files from the session by name."""
+        self.session.add_temp_file(self.test_file_1)
+        self.session.add_temp_file(self.test_file_2)
+        self.session.remove_temp_file_by_name(self.test_file_1.name)
+        self.assertEqual(len(self.session.tempuploadedfile_set.all()), 1)
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
+        self.session.remove_temp_file_by_name(self.test_file_2.name)
+        self.assertEqual(len(self.session.tempuploadedfile_set.all()), 0)
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
+
+    def test_remove_temp_file_by_name_invalid_status(self) -> None:
+        """Test removing temp files from the session by name raises an exception when the session
+        is in an invalid state.
+        """
+        self.session.add_temp_file(self.test_file_1)
+        statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.remove_temp_file_by_name(self.test_file_1.name)
+
+    def test_remove_temp_file_by_name_file_not_found(self) -> None:
+        """Test removing temp files from the session by name raises an exception when the file is
+        not found.
+        """
+        self.session.add_temp_file(self.test_file_1)
+        with self.assertRaises(FileNotFoundError):
+            self.session.remove_temp_file_by_name("non_existent_file.pdf")
+
+    def test_get_temp_file_by_name(self) -> None:
+        """Test getting a temp file from the session by name."""
+        self.session.add_temp_file(self.test_file_1)
+        temp_uploaded_file = self.session.get_temp_file_by_name(self.test_file_1.name)
+        self.assertIsNotNone(temp_uploaded_file)
+        self.assertEqual(temp_uploaded_file.name, self.test_file_1.name)
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
+
+    def test_get_temp_file_by_name_new_session(self) -> None:
+        """Test getting a temp file from a new session by name."""
+        self.assertIsNone(self.session.get_temp_file_by_name("test.pdf"))
+
+    def test_get_temp_file_by_name_invalid_status(self) -> None:
+        """Test getting a temp file from the session by name raises an exception when the session
+        is in an invalid state.
+        """
+        self.session.add_temp_file(self.test_file_1)
+        statuses = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.get_temp_file_by_name(self.test_file_1.name)
+
+    def test_get_temporary_uploads(self) -> None:
+        """Test getting temporary uploads."""
+        self.session.add_temp_file(self.test_file_1)
+        self.session.add_temp_file(self.test_file_2)
+        temp_uploads = self.session.get_temporary_uploads()
+        self.assertEqual(len(temp_uploads), 2)
+        self.assertIn(self.test_file_1.name, [file.name for file in temp_uploads])
+        self.assertIn(self.test_file_2.name, [file.name for file in temp_uploads])
+
+    def test_get_temporary_uploads_empty(self) -> None:
+        """Test getting temporary uploads when the session is newly created or if all temporary
+        files have been moved to permanent storage.
+        """
+        temp_uploads = self.session.get_temporary_uploads()
+        self.assertEqual(len(temp_uploads), 0)
+        self.session.status = UploadSession.SessionStatus.STORED
+        temp_uploads = self.session.get_temporary_uploads()
+        self.assertEqual(len(temp_uploads), 0)
+
+    def test_get_temporary_uploads_invalid_status(self) -> None:
+        """Test getting temporary uploads raises an exception when the session is in an invalid
+        state.
+        """
+        statuses = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            # UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                _ = self.session.get_temporary_uploads()
+
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
+    def test_get_permanent_uploads(self, permuploadedfile_set_mock: BaseManager) -> None:
+        """Test getting permanent uploads."""
+        permuploadedfile_set_mock.all = MagicMock(
+            return_value=[
+                self.test_perm_file,
+            ]
+        )
+        self.session.status = UploadSession.SessionStatus.STORED
+        perm_uploads = self.session.get_permanent_uploads()
+        self.assertEqual(len(perm_uploads), 1)
+
+    def test_get_permanent_uploads_empty(self) -> None:
+        """Test getting permanent uploads when the session is newly created or if uploaded files
+        are still temporary.
+        """
+        perm_uploads = self.session.get_permanent_uploads()
+        self.assertEqual(len(perm_uploads), 0)
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        perm_uploads = self.session.get_permanent_uploads()
+        self.assertEqual(len(perm_uploads), 0)
+
+    def test_get_permanent_uploads_invalid_status(self) -> None:
+        """Test getting permanent uploads raises an exception when the session is in an invalid
+        state.
+        """
+        statuses = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            # UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for status in statuses:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                _ = self.session.get_permanent_uploads()
 
     @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
     def test_some_files_do_not_exist_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
