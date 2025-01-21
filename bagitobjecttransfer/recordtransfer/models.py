@@ -94,7 +94,7 @@ class UploadSession(models.Model):
             )
         return sum(
             f.file_upload.size
-            for f in chain(self.get_temporary_uploads(), self.get_permanent_uploads())
+            for f in chain(self.tempuploadedfile_set.all(), self.permuploadedfile_set.all())
         )
 
     @property
