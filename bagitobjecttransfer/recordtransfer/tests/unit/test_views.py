@@ -325,12 +325,13 @@ class TestUploadedFileView(TestCase):
     def setUp(self):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session()
-        self.session.save()
         self.uploaded_file = TempUploadedFile(
             session=self.session,
             file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
             name="testfile.txt",
         )
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.save()
         self.uploaded_file.save()
         self.url = reverse(
             "recordtransfer:uploaded_file", args=[self.session.token, self.uploaded_file.name]
