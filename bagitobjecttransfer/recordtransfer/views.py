@@ -81,7 +81,6 @@ from recordtransfer.models import (
     InProgressSubmission,
     Submission,
     SubmissionGroup,
-    TempUploadedFile,
     UploadSession,
     User,
 )
@@ -975,24 +974,17 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
     try:
         session = UploadSession.objects.filter(token=session_token).first()
         if not session:
-            return JsonResponse(
-                {"error": gettext("Upload session not found")},
-                status=404
-            )
+            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-        file_metadata = [{
-            "name": f.name,
-            "size": f.file_upload.size,
-            "url": f.get_file_access_url()
-        } for f in session.get_uploads()]
+        file_metadata = [
+            {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
+            for f in session.get_uploads()
+        ]
 
         return JsonResponse({"files": file_metadata}, status=200)
 
     except Exception:
-        return JsonResponse(
-            {"error": gettext("Internal server error")},
-            status=500
-        )
+        return JsonResponse({"error": gettext("Internal server error")}, status=500)
 
 
 @require_http_methods(["DELETE", "GET"])
