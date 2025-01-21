@@ -120,7 +120,7 @@ class UploadSession(models.Model):
             for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all())
         )
 
-    def add_temp_file(self, file: UploadedFile) -> None:
+    def add_temp_file(self, file: UploadedFile) -> "TempUploadedFile":
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
             raise ValueError(
@@ -135,6 +135,8 @@ class UploadSession(models.Model):
         if self.status == self.SessionStatus.CREATED:
             self.status = self.SessionStatus.UPLOADING
             self.save()
+
+        return temp_file
 
     def remove_temp_file_by_name(self, name: str) -> None:
         """Remove a temporary uploaded file from this session by name."""

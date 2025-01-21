@@ -925,7 +925,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             )
 
         try:
-            session.add_temp_file(_file)
+            uploaded_file = session.add_temp_file(_file)
         except ValueError as exc:
             LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
             return JsonResponse(

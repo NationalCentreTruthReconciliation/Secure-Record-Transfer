@@ -84,9 +84,6 @@ class TestUploadFileView(TestCase):
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
         self.assertTrue(session)
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
-
     def test_same_session_used(self):
         session = UploadSession.new_session()
         session.save()
@@ -100,11 +97,8 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["uploadSessionToken"], session.token)
-        self.assertEqual(len(session.uploadedfile_set.all()), 1)
-        self.assertEqual(session.uploadedfile_set.first().name, "File.PDF")
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 1)
+        self.assertEqual(session.tempuploadedfile_set.first().name, "File.PDF")
 
     def test_file_issue_flagged(self):
         self.patch__accept_file.return_value = {"accepted": False, "error": "ISSUE"}
@@ -124,10 +118,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.uploadedfile_set.all()), 0)
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
 
     def test_session_issue_flagged(self):
         self.patch__accept_session.return_value = {"accepted": False, "error": "ISSUE"}
@@ -147,10 +138,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.uploadedfile_set.all()), 0)
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
 
     def test_malware_flagged(self):
         self.patch_check_for_malware.side_effect = ValidationError("Malware found")
@@ -169,10 +157,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.uploadedfile_set.all()), 0)
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
 
     @skipIf(True, "File content scanning is not implemented yet")
     def test_content_issue_flagged(self):
@@ -188,6 +173,8 @@ class TestUploadFileView(TestCase):
         """
 
     def tearDown(self):
+        TempUploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
         self.client.logout()
 
     @classmethod
@@ -195,8 +182,6 @@ class TestUploadFileView(TestCase):
         super().tearDownClass()
         logging.disable(logging.NOTSET)
         patch.stopall()
-        TempUploadedFile.objects.all().delete()
-        UploadSession.objects.all().delete()
 
 
 class TestMediaRequestView(TestCase):
