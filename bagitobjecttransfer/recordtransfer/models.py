@@ -269,9 +269,6 @@ class UploadSession(models.Model):
         for f in files:
             f.remove()
 
-        if not files:
-            LOGGER.info("There are no existing uploaded files in the session %s", self.token)
-
         self.status = self.SessionStatus.DELETED
         self.save()
 
@@ -299,10 +296,7 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.COPYING_IN_PROGRESS
         self.save()
 
-        files = self.get_temporary_uploads()
-        if not files:
-            logger.info("There are no uploaded files in the session %s", self.token)
-            return
+        files = self.tempuploadedfile_set.all()
 
         logger.info(
             "Moving %d temporary uploaded files from the session %s to permanent storage",
@@ -356,10 +350,7 @@ class UploadSession(models.Model):
             logger.error("The destination path %s does not exist!", destination)
             raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
-        files = self.get_permanent_uploads()
-        if not files:
-            logger.warning("No existing files found in the session %s", self.token)
-            return [], []
+        files = self.permuploadedfile_set.all()
 
         logger.info("Copying %d files to %s", len(files), destination)
         copied, missing = [], []
