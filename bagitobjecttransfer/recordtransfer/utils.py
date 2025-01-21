@@ -371,7 +371,7 @@ def find_uploaded_file_by_name(
     """
     uploads = (
         session.get_temporary_uploads()
-        if session.status == UploadSession.SessionStatus.TEMPORARY_FILES
+        if session.status == UploadSession.SessionStatus.UPLOADING
         else session.get_permanent_uploads()
     )
     return next((file_ for file_ in uploads if file_.name == filename), None)

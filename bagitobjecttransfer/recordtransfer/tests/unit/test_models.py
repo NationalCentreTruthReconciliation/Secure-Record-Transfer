@@ -101,7 +101,7 @@ class TestUploadSession(TestCase):
                 self.test_temp_file,
             ]
         )
-        self.session.status = UploadSession.SessionStatus.TEMPORARY_FILES
+        self.session.status = UploadSession.SessionStatus.UPLOADING
         self.assertEqual(self.session.upload_size, 1000)
 
     def test_upload_size_raises_for_invalid_status(self) -> None:

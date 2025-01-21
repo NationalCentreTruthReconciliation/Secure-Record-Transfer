@@ -78,7 +78,6 @@ from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
-    BaseUploadedFile,
     InProgressSubmission,
     Submission,
     SubmissionGroup,
@@ -928,7 +927,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             )
 
         uploaded_file = TempUploadedFile(session=session, file_upload=_file, name=_file.name)
-        session.status = UploadSession.SessionStatus.TEMPORARY_FILES
+        session.status = UploadSession.SessionStatus.UPLOADING
         uploaded_file.save()
         session.save()
         file_url = uploaded_file.get_file_access_url()
@@ -975,7 +974,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
     file_metadata = []
     uploaded_files = (
         session.get_temporary_uploads()
-        if session.SessionStatus.TEMPORARY_FILES
+        if session.SessionStatus.UPLOADING
         else session.get_permanent_uploads()
     )
     for uploaded_file in uploaded_files:
