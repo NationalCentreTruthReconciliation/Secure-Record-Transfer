@@ -89,7 +89,6 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
-    find_uploaded_file_by_name,
     get_human_readable_file_count,
     get_human_readable_size,
 )
@@ -926,10 +925,20 @@ def upload_file(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        uploaded_file = TempUploadedFile(session=session, file_upload=_file, name=_file.name)
-        session.status = UploadSession.SessionStatus.UPLOADING
-        uploaded_file.save()
-        session.save()
+        try:
+            session.add_temp_file(_file)
+        except ValueError as exc:
+            LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
+            return JsonResponse(
+                {
+                    "file": _file.name,
+                    "accepted": False,
+                    "uploadSessionToken": session.token,
+                    "error": gettext("There was an error uploading the file"),
+                },
+                status=500,
+            )
+
         file_url = uploaded_file.get_file_access_url()
 
         return JsonResponse(
@@ -972,11 +981,14 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         )
 
     file_metadata = []
-    uploaded_files = (
-        session.get_temporary_uploads()
-        if session.SessionStatus.UPLOADING
-        else session.get_permanent_uploads()
-    )
+    try:
+        uploaded_files = session.get_uploads()
+    except ValueError:
+        return JsonResponse(
+            {"error": gettext("There was an error retrieving the uploaded files")},
+            status=500,
+        )
+
     for uploaded_file in uploaded_files:
         file_metadata.append(
             {
@@ -993,55 +1005,53 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
 
 @require_http_methods(["DELETE", "GET"])
 def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
-    """Get or delete a file that has been uploaded in a given upload session.
+    """Get or delete a file that has been uploaded in a given upload session."""
+    try:
+        session = UploadSession.objects.filter(token=session_token).first()
+        if not session:
+            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-    Args:
-        request: The HTTP request
-        session_token: The upload session token from the URL
-        filename: The name of the file to delete
-
-    Returns:
-        HttpResponse:
-            In the case of deletion, returns a 204 response when successfully deleted. In the case
-            of getting a file, redirects to the file's media path in development, or returns an
-            X-Accel-Redirect to the file's media path if in production.
-    """
-    session = UploadSession.objects.filter(token=session_token).first()
-    if not session:
-        return JsonResponse({"error": gettext("Upload session not found")}, status=404)
-
-    uploaded_file = find_uploaded_file_by_name(session, file_name)
-    if not uploaded_file:
-        return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
-
-    if request.method == "DELETE":
-        uploaded_file.delete()
-        # 204: No content (i.e., deletion succeeded, no message needed)
-        return HttpResponse(status=204)
-
-    elif settings.DEBUG:
+        uploaded_file = None
         try:
-            return HttpResponseRedirect(uploaded_file.get_file_media_url())
-        except FileNotFoundError:
-            return HttpResponseNotFound()
-
-    else:
-        try:
-            response = HttpResponse(
-                headers={"X-Accel-Redirect": uploaded_file.get_file_media_url()}
+            uploaded_file = session.get_temp_file_by_name(file_name)
+        except ValueError:
+            return JsonResponse(
+                {"error": gettext("Cannot access file in upload session")},
+                status=400,
             )
-        except FileNotFoundError:
-            return HttpResponseNotFound()
 
-        # Nginx will assign its own headers for the following:
-        del response["Content-Type"]
-        del response["Content-Disposition"]
-        del response["Accept-Ranges"]
-        del response["Set-Cookie"]
-        del response["Cache-Control"]
-        del response["Expires"]
+        if not uploaded_file:
+            return JsonResponse({"error": gettext("File not found in upload session")}, status=404)
 
-        return response
+        if request.method == "DELETE":
+            try:
+                session.remove_temp_file_by_name(file_name)
+            except ValueError:
+                return JsonResponse(
+                    {"error": gettext("Cannot remove file from upload session")},
+                    status=400,
+                )
+            return HttpResponse(status=204)
+
+        file_url = uploaded_file.get_file_media_url()
+        if settings.DEBUG:
+            return HttpResponseRedirect(file_url)
+        else:
+            response = HttpResponse(headers={"X-Accel-Redirect": file_url})
+            for header in [
+                "Content-Type",
+                "Content-Disposition",
+                "Accept-Ranges",
+                "Set-Cookie",
+                "Cache-Control",
+                "Expires",
+            ]:
+                del response[header]
+            return response
+
+    except Exception as exc:
+        LOGGER.error("Error handling uploaded file: %s", str(exc), exc_info=exc)
+        return JsonResponse({"error": gettext("Internal server error")}, status=500)
 
 
 class DeleteTransfer(TemplateView):

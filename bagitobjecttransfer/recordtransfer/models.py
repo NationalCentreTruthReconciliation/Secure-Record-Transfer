@@ -230,7 +230,7 @@ class UploadSession(models.Model):
             )
         return len(self.permuploadedfile_set.all()) + len(self.tempuploadedfile_set.all())
 
-    def add_temp_file(self, file: UploadedFile, file_name: str) -> None:
+    def add_temp_file(self, file: UploadedFile) -> None:
         """Add a temporary uploaded file to this session."""
         if self.state not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
             raise ValueError(
@@ -239,7 +239,7 @@ class UploadSession(models.Model):
                 {self.SessionStatus.UPLOADING}"""
             )
 
-        temp_file = TempUploadedFile(session=self, file_upload=file, name=file_name)
+        temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
         temp_file.save()
 
         if self.state == self.SessionStatus.CREATED:
@@ -265,6 +265,23 @@ class UploadSession(models.Model):
         if self.file_count == 0:
             self.state = self.SessionStatus.CREATED
             self.save()
+
+    def get_temp_file_by_name(self, name: str) -> Optional[TempUploadedFile]:
+        """Get an temporary uploaded file in this session by name.
+
+        Args:
+            name: The name of the file to find
+        """
+        if self.status == self.SessionStatus.CREATED:
+            return None
+
+        if self.status != self.SessionStatus.UPLOADING:
+            raise ValueError(
+                f"""Can only get temporary uploaded files from session {self.token} when the
+                session status is {self.SessionStatus.UPLOADING}"""
+            )
+
+        return self.tempuploadedfile_set.filter(name=name).first()
 
     def get_temporary_uploads(self) -> list["TempUploadedFile"]:
         """Get a list of temporary uploaded files associated with this session.
@@ -318,6 +335,22 @@ class UploadSession(models.Model):
                 removal of files is in progress"""
             )
         return [f for f in self.permuploadedfile_set.all() if f.exists]
+
+    def get_uploads(self) -> Union[list["TempUploadedFile"], list["PermUploadedFile"]]:
+        """Get a list of temporary or permanent uploaded files associated with this session. Will
+        return temporary files if in the UPLOADING state, and permanent files if in the STORED
+        state.
+        """
+        if self.status == self.SessionStatus.UPLOADING:
+            return self.get_temporary_uploads()
+        elif self.status == self.SessionStatus.STORED:
+            return self.get_permanent_uploads()
+        else:
+            raise ValueError(
+                f"""Cannot get uploaded files from session {self.token} because the session status
+                is {self.status} and not {self.SessionStatus.UPLOADING} or
+                {self.SessionStatus.STORED}"""
+            )
 
     def remove_uploads(self) -> None:
         """Remove all uploaded files associated with this session."""
