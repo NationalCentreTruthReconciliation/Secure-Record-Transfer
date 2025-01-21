@@ -963,44 +963,36 @@ def upload_file(request: HttpRequest) -> JsonResponse:
 
 @require_http_methods(["GET"])
 def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
-    """Get a list of metadata for files that have been uploaded in a given upload session.
+    """Get a list of metadata for files uploaded in a given upload session.
 
     Args:
         request: The HTTP request
         session_token: The upload session token from the URL
 
     Returns:
-        JsonResponse: A JSON response containing the list of uploaded files and their details,
-        or an error message if the session is not found.
+        JsonResponse: List of uploaded files and their details, or error message
     """
-    session = UploadSession.objects.filter(token=session_token).first()
-    if not session:
-        return JsonResponse(
-            {"error": gettext("Upload session not found")},
-            status=404,
-        )
-
-    file_metadata = []
     try:
-        uploaded_files = session.get_uploads()
-    except ValueError:
+        session = UploadSession.objects.filter(token=session_token).first()
+        if not session:
+            return JsonResponse(
+                {"error": gettext("Upload session not found")},
+                status=404
+            )
+
+        file_metadata = [{
+            "name": f.name,
+            "size": f.file_upload.size,
+            "url": f.get_file_access_url()
+        } for f in session.get_uploads()]
+
+        return JsonResponse({"files": file_metadata}, status=200)
+
+    except Exception:
         return JsonResponse(
-            {"error": gettext("There was an error retrieving the uploaded files")},
-            status=500,
+            {"error": gettext("Internal server error")},
+            status=500
         )
-
-    for uploaded_file in uploaded_files:
-        file_metadata.append(
-            {
-                "name": uploaded_file.name,
-                "size": uploaded_file.file_upload.size,
-                "url": uploaded_file.get_file_access_url(),
-            }
-        )
-
-    response_data = {"files": file_metadata}
-
-    return JsonResponse(response_data, safe=False, status=200)
 
 
 @require_http_methods(["DELETE", "GET"])
