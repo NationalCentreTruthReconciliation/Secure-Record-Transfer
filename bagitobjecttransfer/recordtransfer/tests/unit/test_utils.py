@@ -372,6 +372,7 @@ class TestAcceptSession(TestCase):
                 file_upload=SimpleUploadedFile(name, self.one_mib),
                 name=name,
             )
+        self.session_1.status = UploadSession.SessionStatus.UPLOADING
         for size in ("1024", len(self.one_mib)):
             with self.subTest():
                 result = accept_session("My File.pdf", size, self.session_1)
@@ -387,6 +388,7 @@ class TestAcceptSession(TestCase):
                 name=name,
                 file_upload=SimpleUploadedFile(name, self.half_mib),
             )
+        self.session_1.status = UploadSession.SessionStatus.UPLOADING
         result = accept_session("My File.pdf", "1024", self.session_1)
         self.assertFalse(result["accepted"])
         self.assertIn("You can not upload anymore files", result["error"])
@@ -404,6 +406,7 @@ class TestAcceptSession(TestCase):
                 name=name,
                 file_upload=SimpleUploadedFile(name, content),
             )
+        self.session_1.status = UploadSession.SessionStatus.UPLOADING
         result = accept_session("My File.pdf", len(self.one_mib), self.session_1)
         self.assertFalse(result["accepted"])
         self.assertIn("Maximum total upload size (3 MiB) exceeded", result["error"])
@@ -417,6 +420,7 @@ class TestAcceptSession(TestCase):
                 name=name,
                 file_upload=SimpleUploadedFile(name, self.half_mib),
             )
+        self.session_1.status = UploadSession.SessionStatus.UPLOADING
         for name in names:
             with self.subTest():
                 result = accept_session(name, "1024", self.session_1)
