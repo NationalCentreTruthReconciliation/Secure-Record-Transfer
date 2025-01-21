@@ -41,118 +41,6 @@ class User(AbstractUser):
         return self.first_name + " " + self.last_name
 
 
-class BaseUploadedFile(models.Model):
-    """Base class for uploaded files with shared methods."""
-
-    name = models.CharField(max_length=256, null=True, default="-")
-    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
-    file_upload = models.FileField(null=True)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def exists(self) -> bool:
-        """Determine if the file this object represents exists on the file system.
-
-        Returns:
-            (bool): True if file exists, False otherwise
-        """
-        return bool(self.file_upload) and self.file_upload.storage.exists(self.file_upload.name)
-
-    def copy(self, new_path: str) -> None:
-        """Copy this file to a new path.
-
-        Args:
-            new_path: The new path to copy this file to
-        """
-        if self.file_upload:
-            shutil.copy2(self.file_upload.path, new_path)
-
-    def remove(self) -> None:
-        """Remove this file from the file system."""
-        if self.exists:
-            self.file_upload.delete()
-
-    def get_file_media_url(self) -> str:
-        """Generate the media URL to this file.
-
-        Raises:
-            FileNotFoundError if the file does not exist.
-        """
-        if self.exists:
-            return self.file_upload.url
-        raise FileNotFoundError(f"{self.name} does not exist in session {self.session.token}")
-
-    def get_file_access_url(self) -> str:
-        """Generate URL to request access for this file."""
-        return reverse(
-            "recordtransfer:uploaded_file",
-            kwargs={
-                "session_token": self.session.token,
-                "file_name": self.name,
-            },
-        )
-
-    def __str__(self):
-        """Return a string representation of this object."""
-        if self.exists:
-            return f"{self.name} | Session {self.session}"
-        return f"{self.name} Removed! | Session {self.session}"
-
-
-class TempUploadedFile(BaseUploadedFile):
-    """Represent a temporary file that a user uploaded during an upload session."""
-
-    class Meta(BaseUploadedFile.Meta):
-        """Meta information."""
-
-        verbose_name = "Temporary uploaded file"
-        verbose_name_plural = "Temporary uploaded files"
-
-    file_upload = models.FileField(
-        null=True, storage=TempFileStorage, upload_to=session_upload_location
-    )
-
-    def move_to_permanent_storage(self) -> None:
-        """Move the file from TempFileStorage to UploadedFileStorage."""
-        if self.exists:
-            perm_file = PermUploadedFile(name=self.name, session=self.session)
-            perm_file.file_upload.save(self.file_upload.name, File(self.file_upload.file))
-            perm_file.save()
-            self.delete()
-
-
-class PermUploadedFile(BaseUploadedFile):
-    """Represent a file that a user uploaded and has been stored."""
-
-    class Meta(BaseUploadedFile.Meta):
-        """Meta information."""
-
-        verbose_name = "Permanent uploaded file"
-        verbose_name_plural = "Permanent uploaded files"
-
-    file_upload = models.FileField(null=True, storage=UploadedFileStorage)
-
-
-@receiver(pre_delete, sender=TempUploadedFile)
-@receiver(pre_delete, sender=PermUploadedFile)
-def delete_file_on_model_delete(
-    sender: Union[TempUploadedFile, PermUploadedFile],
-    instance: Union[TempUploadedFile, PermUploadedFile],
-    **kwargs,
-) -> None:
-    """Delete the actual file when an uploaded file model instance is deleted.
-
-    Args:
-        sender: The model class that sent the signal
-        instance: The model uploaded file instance being deleted
-        **kwargs: Additional keyword arguments passed to the signal handler
-    """
-    if instance.exists:
-        instance.file_upload.delete()
-
-
 class UploadSession(models.Model):
     """Represents a file upload session. This model is used to track the files that a
     user uploads during a session.
@@ -266,7 +154,7 @@ class UploadSession(models.Model):
             self.state = self.SessionStatus.CREATED
             self.save()
 
-    def get_temp_file_by_name(self, name: str) -> Optional[TempUploadedFile]:
+    def get_temp_file_by_name(self, name: str) -> Optional["TempUploadedFile"]:
         """Get an temporary uploaded file in this session by name.
 
         Args:
@@ -498,10 +386,123 @@ class UploadSession(models.Model):
         return f"{self.token} ({self.started_at}) | {self.status}"
 
 
-def session_upload_location(instance, filename):
+def session_upload_location(instance, filename: str) -> str:
+    """Generate the upload location for a session file."""
     if instance.session:
         return "{0}/{1}".format(instance.session.token, filename)
     return "NOSESSION/{0}".format(filename)
+
+
+class BaseUploadedFile(models.Model):
+    """Base class for uploaded files with shared methods."""
+
+    name = models.CharField(max_length=256, null=True, default="-")
+    session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
+    file_upload = models.FileField(null=True)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def exists(self) -> bool:
+        """Determine if the file this object represents exists on the file system.
+
+        Returns:
+            (bool): True if file exists, False otherwise
+        """
+        return bool(self.file_upload) and self.file_upload.storage.exists(self.file_upload.name)
+
+    def copy(self, new_path: str) -> None:
+        """Copy this file to a new path.
+
+        Args:
+            new_path: The new path to copy this file to
+        """
+        if self.file_upload:
+            shutil.copy2(self.file_upload.path, new_path)
+
+    def remove(self) -> None:
+        """Remove this file from the file system."""
+        if self.exists:
+            self.file_upload.delete()
+
+    def get_file_media_url(self) -> str:
+        """Generate the media URL to this file.
+
+        Raises:
+            FileNotFoundError if the file does not exist.
+        """
+        if self.exists:
+            return self.file_upload.url
+        raise FileNotFoundError(f"{self.name} does not exist in session {self.session.token}")
+
+    def get_file_access_url(self) -> str:
+        """Generate URL to request access for this file."""
+        return reverse(
+            "recordtransfer:uploaded_file",
+            kwargs={
+                "session_token": self.session.token,
+                "file_name": self.name,
+            },
+        )
+
+    def __str__(self):
+        """Return a string representation of this object."""
+        if self.exists:
+            return f"{self.name} | Session {self.session}"
+        return f"{self.name} Removed! | Session {self.session}"
+
+
+class TempUploadedFile(BaseUploadedFile):
+    """Represent a temporary file that a user uploaded during an upload session."""
+
+    class Meta(BaseUploadedFile.Meta):
+        """Meta information."""
+
+        verbose_name = "Temporary uploaded file"
+        verbose_name_plural = "Temporary uploaded files"
+
+    file_upload = models.FileField(
+        null=True, storage=TempFileStorage, upload_to=session_upload_location
+    )
+
+    def move_to_permanent_storage(self) -> None:
+        """Move the file from TempFileStorage to UploadedFileStorage."""
+        if self.exists:
+            perm_file = PermUploadedFile(name=self.name, session=self.session)
+            perm_file.file_upload.save(self.file_upload.name, File(self.file_upload.file))
+            perm_file.save()
+            self.delete()
+
+
+class PermUploadedFile(BaseUploadedFile):
+    """Represent a file that a user uploaded and has been stored."""
+
+    class Meta(BaseUploadedFile.Meta):
+        """Meta information."""
+
+        verbose_name = "Permanent uploaded file"
+        verbose_name_plural = "Permanent uploaded files"
+
+    file_upload = models.FileField(null=True, storage=UploadedFileStorage)
+
+
+@receiver(pre_delete, sender=TempUploadedFile)
+@receiver(pre_delete, sender=PermUploadedFile)
+def delete_file_on_model_delete(
+    sender: Union[TempUploadedFile, PermUploadedFile],
+    instance: Union[TempUploadedFile, PermUploadedFile],
+    **kwargs,
+) -> None:
+    """Delete the actual file when an uploaded file model instance is deleted.
+
+    Args:
+        sender: The model class that sent the signal
+        instance: The model uploaded file instance being deleted
+        **kwargs: Additional keyword arguments passed to the signal handler
+    """
+    if instance.exists:
+        instance.file_upload.delete()
 
 
 class SubmissionGroup(models.Model):
