@@ -74,9 +74,7 @@ class UploadSession(models.Model):
         """Get total size (in bytes) of all uploaded files in this session. This includes the size
         of both temporary and permanent files.
         """
-        if self.status == self.SessionStatus.CREATED:
-            return 0
-        elif self.status in (
+        if self.status in (
             self.SessionStatus.EXPIRED,
             self.SessionStatus.DELETED,
         ):
@@ -120,7 +118,7 @@ class UploadSession(models.Model):
 
     def add_temp_file(self, file: UploadedFile) -> None:
         """Add a temporary uploaded file to this session."""
-        if self.state not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+        if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
             raise ValueError(
                 f"""Cannot add temporary uploaded file to session {self.token} because the session
                 status is {self.status} and not {self.SessionStatus.CREATED} or
@@ -130,13 +128,13 @@ class UploadSession(models.Model):
         temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
         temp_file.save()
 
-        if self.state == self.SessionStatus.CREATED:
-            self.state = self.SessionStatus.UPLOADING
+        if self.status == self.SessionStatus.CREATED:
+            self.status = self.SessionStatus.UPLOADING
             self.save()
 
     def remove_temp_file_by_name(self, name: str) -> None:
         """Remove a temporary uploaded file from this session by name."""
-        if self.state != self.SessionStatus.UPLOADING:
+        if self.status != self.SessionStatus.UPLOADING:
             raise ValueError(
                 f"""Cannot remove temporary uploaded file from session {self.token} because the
                 session status is {self.status} and not {self.SessionStatus.UPLOADING}"""
@@ -151,7 +149,7 @@ class UploadSession(models.Model):
         temp_file.delete()
 
         if self.file_count == 0:
-            self.state = self.SessionStatus.CREATED
+            self.status = self.SessionStatus.CREATED
             self.save()
 
     def get_temp_file_by_name(self, name: str) -> Optional["TempUploadedFile"]:
