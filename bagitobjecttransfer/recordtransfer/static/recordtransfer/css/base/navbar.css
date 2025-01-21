@@ -60,7 +60,7 @@ header.homepage {
     flex-direction: column;
     top: 5vh;
     right: -350px;
-    height: 90vh;
+    height: auto;
     max-height: 100vh;
     width: 300px;
     background: #fff;
@@ -89,7 +89,7 @@ header.homepage {
 
 /* Container for login/logout button */
 .nav-item-button {
-    margin-top: auto;
+    margin-top: 40px;
     margin-bottom: 0px;
     width: 100%;
     text-align: center;
