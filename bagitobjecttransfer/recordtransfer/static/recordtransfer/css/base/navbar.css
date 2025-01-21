@@ -213,6 +213,11 @@ header.homepage {
         display: none;
     }
 
+    /* Hide the close button in desktop mode */
+    .nav-close-button {
+        display: none;
+    }
+
     .nav-link {
         color: white;
     }
