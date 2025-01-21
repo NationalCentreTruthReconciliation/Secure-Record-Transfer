@@ -93,6 +93,7 @@ class UploadSession(models.Model):
         return sum(
             f.file_upload.size
             for f in chain(self.tempuploadedfile_set.all(), self.permuploadedfile_set.all())
+            if f.exists
         )
 
     @property
@@ -114,7 +115,10 @@ class UploadSession(models.Model):
                 f"""Cannot get file count from session {self.token} while copying or removing files
                 is in progress"""
             )
-        return len(self.permuploadedfile_set.all()) + len(self.tempuploadedfile_set.all())
+        return sum(
+            f.exists
+            for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all())
+        )
 
     def add_temp_file(self, file: UploadedFile) -> None:
         """Add a temporary uploaded file to this session."""
@@ -153,7 +157,8 @@ class UploadSession(models.Model):
             self.save()
 
     def get_temp_file_by_name(self, name: str) -> Optional["TempUploadedFile"]:
-        """Get an temporary uploaded file in this session by name.
+        """Get an temporary uploaded file in this session by name. Returns None if the file does
+        not exist.
 
         Args:
             name: The name of the file to find
