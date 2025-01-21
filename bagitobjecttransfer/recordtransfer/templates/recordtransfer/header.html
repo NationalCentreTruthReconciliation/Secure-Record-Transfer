@@ -57,10 +57,11 @@
                     </a>
                 {% elif not user.is_authenticated %}
                     {% if SIGN_UP_ENABLED %}
-                        <a class="nav-item" href="{% url 'recordtransfer:createaccount' %}">
+                        <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:createaccount' %}">
                             <div class="nav-link">
                                 {% trans "Sign Up" %}
                             </div>
+                            <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                         </a>
                     {% endif %}
                     {% if 'login' not in request.path %}

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.querySelector(".menu-overlay");
 
     openToggle.addEventListener("click", (e) => {
+        e.preventDefault();
         e.stopPropagation();
         navItemsContainer.classList.toggle("open");
         overlay.classList.add("show");
