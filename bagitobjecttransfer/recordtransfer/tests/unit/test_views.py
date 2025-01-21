@@ -292,6 +292,8 @@ class TestListUploadedFilesView(TestCase):
             file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
             name="testfile.txt",
         )
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.save()
         uploaded_file.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

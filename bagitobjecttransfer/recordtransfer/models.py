@@ -232,7 +232,9 @@ class UploadSession(models.Model):
         return temporary files if in the UPLOADING state, and permanent files if in the STORED
         state.
         """
-        if self.status == self.SessionStatus.UPLOADING:
+        if self.status == self.SessionStatus.CREATED:
+            return []
+        elif self.status == self.SessionStatus.UPLOADING:
             return self.get_temporary_uploads()
         elif self.status == self.SessionStatus.STORED:
             return self.get_permanent_uploads()
