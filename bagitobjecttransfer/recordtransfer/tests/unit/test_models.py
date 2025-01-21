@@ -5,7 +5,7 @@ import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -338,94 +338,196 @@ class TestUploadSession(TestCase):
             with self.assertRaises(ValueError):
                 _ = self.session.get_permanent_uploads()
 
-    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
-    def test_some_files_do_not_exist_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
-        """Test that a session with some files that do not exist returns correct file count and
-        size.
-        """
-        session = UploadSession.new_session()
-        session.save()
+    @patch("recordtransfer.models.UploadSession.get_temporary_uploads")
+    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
+    def test_get_uploads(
+        self, mock_get_permanent: MagicMock, mock_get_temporary: MagicMock
+    ) -> None:
+        """Test getting uploads returns correct files based on session status."""
+        # Setup mock returns
+        temp_files = [self.test_temp_file]
+        perm_files = [self.test_perm_file]
+        mock_get_temporary.return_value = temp_files
+        mock_get_permanent.return_value = perm_files
 
-        uploadedfile_set_mock.all = MagicMock(
+        # Test UPLOADING state
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        result = self.session.get_uploads()
+        self.assertEqual(result, temp_files)
+        mock_get_temporary.assert_called_once()
+        mock_get_permanent.assert_not_called()
+
+        # Reset mocks
+        mock_get_temporary.reset_mock()
+        mock_get_permanent.reset_mock()
+
+        # Test STORED state
+        self.session.status = UploadSession.SessionStatus.STORED
+        result = self.session.get_uploads()
+        self.assertEqual(result, perm_files)
+        mock_get_permanent.assert_called_once()
+        mock_get_temporary.assert_not_called()
+
+        # Test invalid states
+        invalid_states = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+        ]
+
+        for status in invalid_states:
+            mock_get_temporary.reset_mock()
+            mock_get_permanent.reset_mock()
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.get_uploads()
+            mock_get_temporary.assert_not_called()
+            mock_get_permanent.assert_not_called()
+
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set")
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set")
+    def test_remove_uploads(self, mock_temp_files, mock_perm_files):
+        """Test the remove_uploads method of UploadSession."""
+        # Setup mock files
+        mock_file1 = Mock()
+        mock_file2 = Mock()
+        mock_perm_files.all.return_value = [mock_file1]
+        mock_temp_files.all.return_value = [mock_file2]
+
+        # Valid statuses for upload removal
+        valid_statuses = [
+            UploadSession.SessionStatus.UPLOADING,
+            UploadSession.SessionStatus.STORED,
+        ]
+
+        # Test successful removal
+        for status in valid_statuses:
+            self.session.status = status
+            self.session.remove_uploads()
+
+            mock_file1.remove.assert_called_once()
+            mock_file2.remove.assert_called_once()
+            self.assertEqual(self.session.status, UploadSession.SessionStatus.DELETED)
+
+            # Reset mock files
+            mock_file1.reset_mock()
+            mock_file2.reset_mock()
+
+        valid_unchanged_statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+        ]
+        for status in valid_unchanged_statuses:
+            self.session.status = status
+            self.session.remove_uploads()
+            mock_file1.remove.assert_not_called()
+            mock_file2.remove.assert_not_called()
+            self.assertEqual(self.session.status, status)
+
+        # Test invalid states
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+        ]
+        for status in invalid_states:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.remove_uploads()
+
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    def test_make_uploads_permanent(self, tempuploadedfile_set_mock: BaseManager) -> None:
+        """Test making temporary uploaded files permanent in different session states."""
+        # Create mock uploaded files
+        mock_file = get_mock_temp_uploaded_file("1.pdf", session=self.session)
+        tempuploadedfile_set_mock.all = MagicMock(return_value=[mock_file])
+
+        # Test already stored state - should not attempt to move files
+        self.session.status = UploadSession.SessionStatus.STORED
+        self.session.make_uploads_permanent()
+        mock_file.move_to_permanent_storage.assert_not_called()
+
+        mock_file.reset_mock()
+
+        # Test successful move to permanent storage
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.make_uploads_permanent()
+        mock_file.move_to_permanent_storage.assert_called_once()
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.STORED)
+
+        mock_file.reset_mock()
+
+        # Test error during move
+        mock_file.move_to_permanent_storage.side_effect = Exception("Test error")
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.make_uploads_permanent()
+        mock_file.move_to_permanent_storage.assert_called_once()
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.COPYING_FAILED)
+
+        # Test invalid states
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for status in invalid_states:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.make_uploads_permanent()
+
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
+    def test_copy_session_uploads(self, permuploadedfile_set_mock: BaseManager) -> None:
+        """Test copying session uploads to destination."""
+        # Setup
+        dest_path = tempfile.mkdtemp()
+        permuploadedfile_set_mock.all = MagicMock(
             return_value=[
-                get_mock_uploaded_file("1.pdf", size=1000),
-                get_mock_uploaded_file("2.pdf", size=1000),
-                get_mock_uploaded_file("3.pdf", exists=False),
-                get_mock_uploaded_file("4.pdf", exists=False),
+                self.test_perm_file,
             ]
         )
+        self.session.status = UploadSession.SessionStatus.STORED
 
-        self.assertEqual(len(session.get_uploaded_files()), 2)
-        self.assertEqual(session.upload_size, 2000)
+        # Test successful copy
+        copied, missing = self.session.copy_session_uploads(str(dest_path))
+        self.assertEqual(len(copied), 1)
+        self.assertEqual(len(missing), 0)
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.STORED)
 
-        session.delete()
-
-    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
-    def test_delete_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
-        """Test that a session with files that exist are removed when delete is called
-        on the session.
-        """
-        session = UploadSession.new_session()
-        session.save()
-
-        file_1 = get_mock_uploaded_file("1.pdf")
-        file_2 = get_mock_uploaded_file("2.pdf")
-        file_3 = get_mock_uploaded_file("3.pdf", exists=False)
-
-        uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
-
-        session._remove_temp_uploads()
-
-        file_1.remove.assert_called_once()
-        file_2.remove.assert_called_once()
-        file_3.remove.assert_not_called()
-
-        session.delete()
-
-    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
-    def test_copy_files_in_session(self, uploadedfile_set_mock: BaseManager) -> None:
-        """Test that a session with files that exist are copied when copy is called."""
-        mock_path_exists = patch.object(Path, "exists").start()
-        mock_path_exists.return_value = True
-
-        session = UploadSession.new_session()
-        session.save()
-
-        file_1 = get_mock_uploaded_file("1.pdf")
-        file_2 = get_mock_uploaded_file("2.pdf")
-        file_3 = get_mock_uploaded_file("3.pdf", exists=False)
-
-        uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
-
-        copied, missing = session.copy_session_uploads("/home/")
-
-        file_1.copy.assert_called_once_with(Path("/home/1.pdf"))
-        file_2.copy.assert_called_once_with(Path("/home/2.pdf"))
-        file_3.copy.assert_not_called()
-        self.assertIn(str(Path("/home/1.pdf")), copied)
-        self.assertIn(str(Path("/home/2.pdf")), copied)
+        # Test copying a file that does not exist
+        type(self.test_perm_file).exists = PropertyMock(return_value=False)
+        copied, missing = self.session.copy_session_uploads(str(dest_path))
+        self.assertEqual(len(copied), 0)
         self.assertEqual(len(missing), 1)
 
-        session.delete()
-        mock_path_exists.stop()
+        # Reset exists property
+        type(self.test_perm_file).exists = PropertyMock(return_value=True)
 
-    @patch("recordtransfer.models.UploadSession.uploadedfile_set", spec=BaseManager)
-    def test_move_file_to_permanent_storage(self, uploadedfile_set_mock: BaseManager) -> None:
-        """Test that files are moved to permanent storage."""
-        session = UploadSession.new_session()
-        session.save()
+        # Test copying a file that is missing its name
+        type(self.test_perm_file).name = PropertyMock(return_value=None)
+        copied, missing = self.session.copy_session_uploads(str(dest_path))
+        self.assertEqual(len(copied), 0)
+        self.assertEqual(len(missing), 1)
 
-        file_1 = get_mock_uploaded_file("1.pdf")
-        file_2 = get_mock_uploaded_file("2.pdf")
-        file_3 = get_mock_uploaded_file("3.pdf", exists=False)
+        # Test invalid session states
+        invalid_states = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+        ]
+        for status in invalid_states:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.copy_session_uploads(str(dest_path))
 
-        uploadedfile_set_mock.all = MagicMock(return_value=[file_1, file_2, file_3])
-
-        session.move_temp_uploads_to_permanent_storage()
-
-        file_1.move_to_permanent_storage.assert_called_once()
-        file_2.move_to_permanent_storage.assert_called_once()
-        file_3.move_to_permanent_storage.assert_not_called()
+        # Test non-existent destination
+        self.session.status = UploadSession.SessionStatus.STORED
+        with self.assertRaises(FileNotFoundError):
+            self.session.copy_session_uploads("/nonexistent/path")
 
     def tearDown(self) -> None:
         """Tear down test."""
