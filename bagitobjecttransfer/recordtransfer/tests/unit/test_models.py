@@ -27,14 +27,18 @@ def get_mock_temp_uploaded_file(
     """
     if not exists:
         size = 0
-    file_mock = MagicMock(spec=TempUploadedFile)
-    path = upload_to.rstrip("/") + "/" + name
-    type(file_mock).exists = PropertyMock(return_value=exists)
-    type(file_mock).name = PropertyMock(return_value=name)
-    type(file_mock).session = PropertyMock(return_value=session)
-    type(file_mock.file_upload).size = PropertyMock(return_value=size)
-    type(file_mock.file_upload).path = PropertyMock(return_value=path)
-    type(file_mock.file_upload).name = PropertyMock(return_value=name)
+    file_mock = MagicMock(spec_set=TempUploadedFile)
+    file_mock.exists = exists
+    file_mock.name = name
+    file_mock.session = session
+
+    file_upload_mock = MagicMock()
+    file_upload_mock.size = size
+    file_upload_mock.path = f"{upload_to.rstrip('/')}/{name}"
+    file_upload_mock.name = name
+
+    file_mock.file_upload = file_upload_mock
+
     return file_mock
 
 
@@ -50,14 +54,18 @@ def get_mock_perm_uploaded_file(
     """
     if not exists:
         size = 0
-    file_mock = MagicMock(spec=PermUploadedFile)
-    path = upload_to.rstrip("/") + "/" + name
-    type(file_mock).exists = PropertyMock(return_value=exists)
-    type(file_mock).name = PropertyMock(return_value=name)
-    type(file_mock).session = PropertyMock(return_value=session)
-    type(file_mock.file_upload).size = PropertyMock(return_value=size)
-    type(file_mock.file_upload).path = PropertyMock(return_value=path)
-    type(file_mock.file_upload).name = PropertyMock(return_value=name)
+    file_mock = MagicMock(spec_set=PermUploadedFile)
+    file_mock.exists = exists
+    file_mock.name = name
+    file_mock.session = session
+
+    file_upload_mock = MagicMock()
+    file_upload_mock.size = size
+    file_upload_mock.path = f"{upload_to.rstrip('/')}/{name}"
+    file_upload_mock.name = name
+
+    file_mock.file_upload = file_upload_mock
+
     return file_mock
 
 
@@ -197,22 +205,45 @@ class TestUploadSession(TestCase):
             with self.assertRaises(ValueError):
                 self.session.add_temp_file(self.test_file_1)
 
-    def test_remove_temp_file_by_name(self) -> None:
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    def test_remove_temp_file_by_name(self, mock_temp_files: BaseManager) -> None:
         """Test removing temp files from the session by name."""
-        self.session.add_temp_file(self.test_file_1)
-        self.session.add_temp_file(self.test_file_2)
-        self.session.remove_temp_file_by_name(self.test_file_1.name)
-        self.assertEqual(len(self.session.tempuploadedfile_set.all()), 1)
+        # Setup
+        test_temp_file_1 = get_mock_temp_uploaded_file(
+            "test1.pdf", size=1000, session=self.session
+        )
+        test_temp_file_2 = get_mock_temp_uploaded_file(
+            "test2.pdf", size=1000, session=self.session
+        )
+        mock_temp_files.all = MagicMock(
+            return_value=[
+                test_temp_file_1,
+                test_temp_file_2,
+            ]
+        )
+        temp_file_dict = {"test1.pdf": test_temp_file_1, "test2.pdf": test_temp_file_2}
+        mock_temp_files.get = MagicMock(side_effect=lambda name: temp_file_dict[name])
+
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        # Remove first file
+        self.session.remove_temp_file_by_name(test_temp_file_1.name)
+        test_temp_file_1.delete.assert_called_once()
+        # Modify mock to reflect the removal
+        mock_temp_files.all = MagicMock(return_value=[test_temp_file_2])
+        temp_file_dict.pop(test_temp_file_1.name)
         self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
-        self.session.remove_temp_file_by_name(self.test_file_2.name)
-        self.assertEqual(len(self.session.tempuploadedfile_set.all()), 0)
+
+        # Remove second file
+        self.session.remove_temp_file_by_name(test_temp_file_2.name)
+        test_temp_file_2.delete.assert_called_once()
+        mock_temp_files.all = MagicMock(return_value=[])
+        temp_file_dict.pop(test_temp_file_2.name)
         self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
 
     def test_remove_temp_file_by_name_invalid_status(self) -> None:
         """Test removing temp files from the session by name raises an exception when the session
         is in an invalid state.
         """
-        self.session.add_temp_file(self.test_file_1)
         statuses = [
             UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.DELETED,
@@ -231,17 +262,19 @@ class TestUploadSession(TestCase):
         """Test removing temp files from the session by name raises an exception when the file is
         not found.
         """
-        self.session.add_temp_file(self.test_file_1)
+        self.session.status = UploadSession.SessionStatus.UPLOADING
         with self.assertRaises(FileNotFoundError):
             self.session.remove_temp_file_by_name("non_existent_file.pdf")
 
-    def test_get_temp_file_by_name(self) -> None:
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    def test_get_temp_file_by_name(self, mock_temp_files: BaseManager) -> None:
         """Test getting a temp file from the session by name."""
-        self.session.add_temp_file(self.test_file_1)
-        temp_uploaded_file = self.session.get_temp_file_by_name(self.test_file_1.name)
+        mock_temp_files.filter = MagicMock()
+        mock_temp_files.filter.return_value.first.return_value = self.test_temp_file
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        temp_uploaded_file = self.session.get_temp_file_by_name(self.test_temp_file.name)
         self.assertIsNotNone(temp_uploaded_file)
-        self.assertEqual(temp_uploaded_file.name, self.test_file_1.name)
-        self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
+        self.assertEqual(temp_uploaded_file.name, self.test_temp_file.name)
 
     def test_get_temp_file_by_name_new_session(self) -> None:
         """Test getting a temp file from a new session by name."""
@@ -265,10 +298,23 @@ class TestUploadSession(TestCase):
             with self.assertRaises(ValueError):
                 self.session.get_temp_file_by_name(self.test_file_1.name)
 
-    def test_get_temporary_uploads(self) -> None:
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    def test_get_temporary_uploads(self, mock_temp_files: BaseManager) -> None:
         """Test getting temporary uploads."""
-        self.session.add_temp_file(self.test_file_1)
-        self.session.add_temp_file(self.test_file_2)
+        test_temp_file_1 = get_mock_temp_uploaded_file(
+            "test1.pdf", size=1000, session=self.session
+        )
+        test_temp_file_2 = get_mock_temp_uploaded_file(
+            "test2.pdf", size=1000, session=self.session
+        )
+        mock_temp_files.all = MagicMock(
+            return_value=[
+                test_temp_file_1,
+                test_temp_file_2,
+            ]
+        )
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+
         temp_uploads = self.session.get_temporary_uploads()
         self.assertEqual(len(temp_uploads), 2)
         self.assertIn(self.test_file_1.name, [file.name for file in temp_uploads])
@@ -387,13 +433,15 @@ class TestUploadSession(TestCase):
 
     @patch("recordtransfer.models.UploadSession.permuploadedfile_set")
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set")
-    def test_remove_uploads(self, mock_temp_files, mock_perm_files):
+    def test_remove_uploads(
+        self, mock_temp_files: BaseManager, mock_perm_files: BaseManager
+    ) -> None:
         """Test the remove_uploads method of UploadSession."""
         # Setup mock files
         mock_file1 = Mock()
         mock_file2 = Mock()
-        mock_perm_files.all.return_value = [mock_file1]
-        mock_temp_files.all.return_value = [mock_file2]
+        mock_temp_files.all = MagicMock(return_value=[mock_file1])
+        mock_perm_files.all = MagicMock(return_value=[mock_file2])
 
         # Valid statuses for upload removal
         valid_statuses = [
@@ -496,16 +544,16 @@ class TestUploadSession(TestCase):
         self.assertEqual(self.session.status, UploadSession.SessionStatus.STORED)
 
         # Test copying a file that does not exist
-        type(self.test_perm_file).exists = PropertyMock(return_value=False)
+        self.test_perm_file.exists = False
         copied, missing = self.session.copy_session_uploads(str(dest_path))
         self.assertEqual(len(copied), 0)
         self.assertEqual(len(missing), 1)
 
         # Reset exists property
-        type(self.test_perm_file).exists = PropertyMock(return_value=True)
+        self.test_perm_file.exists = True
 
         # Test copying a file that is missing its name
-        type(self.test_perm_file).name = PropertyMock(return_value=None)
+        self.test_perm_file.name = None
         copied, missing = self.session.copy_session_uploads(str(dest_path))
         self.assertEqual(len(copied), 0)
         self.assertEqual(len(missing), 1)
