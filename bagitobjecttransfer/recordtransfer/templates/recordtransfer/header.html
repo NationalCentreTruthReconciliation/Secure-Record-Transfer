@@ -6,7 +6,7 @@
     <nav class="main-header-content">
         <div class="main-navbar">
             <div class="nav-logo">
-                <img id="app-logo" src="{% static 'recordtransfer/img/NCTR-Logo-White.svg'%}">
+                <img id="app-logo" height="60" width="60" src="{% static 'recordtransfer/img/NCTR-Logo-White.svg'%}">
             </div>
             <div class="nav-title">
                 <a class="nav-link title" href="{% url 'recordtransfer:index' %}" title="Go to home page">
@@ -14,64 +14,60 @@
                 </a>
             </div>
             <div class="nav-items-container">
-                <div class="nav-item">
-                    <a class="nav-link" href="{% url 'recordtransfer:index' %}">
+                <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:index' %}">
+                    <div class="nav-link">
                         {% trans "Home" %}
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link" href="{% url 'recordtransfer:about' %}">
-                        {% trans "About" %}
-                    </a>
-                </div>
-                {% if user.is_staff %}
-                    <div class="nav-item">
-                        <a class="nav-link" href="{% url 'admin:index' %}">
-                            {% trans "Admin" %}
-                        </a>
                     </div>
+                    <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
+                </a>
+                <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:about' %}">
+                    <div class="nav-link">
+                        {% trans "About" %}
+                    </div>
+                    <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
+                </a>
+                {% if user.is_staff %}
+                    <a class="nav-item nav-item-flex" href="{% url 'admin:index' %}">
+                        <div class="nav-link">
+                            {% trans "Admin" %}
+                        </div>
+                        <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
+                    </a>
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <div class="nav-item">
-                        <a class="nav-link" href="{% url 'recordtransfer:userprofile' %}">
+                    <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:userprofile' %}">
+                        <div class="nav-link">
                             {% trans "Profile" %}
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link" href="{% url 'recordtransfer:transfer' %}">
+                        </div>
+                        <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
+                    </a>
+                    <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:transfer' %}">
+                        <div class="nav-link">
                             {% trans "Transfer" %}
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link nav-button" href="{% url 'logout' %}">
+                        </div>
+                        <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
+                    </a>
+                    <a class="nav-item-button nav-item-flex" href="{% url 'logout' %}">
+                        <div class="nav-link nav-button">
                             {% trans "Logout" %}
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                 {% elif not user.is_authenticated %}
                     {% if SIGN_UP_ENABLED %}
-                        <div class="nav-item">
-                            <a class="nav-link" href="{% url 'recordtransfer:createaccount' %}">
+                        <a class="nav-item" href="{% url 'recordtransfer:createaccount' %}">
+                            <div class="nav-link">
                                 {% trans "Sign Up" %}
-                            </a>
-                        </div>
+                            </div>
+                        </a>
                     {% endif %}
                     {% if 'login' not in request.path %}
-                        <div class="nav-item">
-                            <a class="nav-link nav-button" href="{% url 'login' %}">
+                        <a class="nav-item-button nav-item-flex" href="{% url 'login' %}">
+                            <div class="nav-link nav-button">
                                 {% trans "Log In" %}
-                            </a>
-                        </div>
+                            </div>
+                        </a>
                     {% endif %}
                 {% endif %}
-                <div class="nav-item nav-toggle-close">
-                    <a class="nav-link" href="#">
-                        <b>
-                            {% trans "Close" %}
-                            &nbsp;
-                            <i class="fa fa-times" aria-hidden="true"></i>
-                        </b>
-                    </a>
-                </div>
             </div>
             <div class="nav-toggle-open">
                 <a class="nav-link nav-toggle-icon" href="#">

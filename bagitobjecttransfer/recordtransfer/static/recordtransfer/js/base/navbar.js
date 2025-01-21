@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     const openToggle = document.querySelector(".nav-toggle-open");
-    const closeToggle = document.querySelector(".nav-toggle-close");
     const navItemsContainer = document.querySelector(".nav-items-container");
     const overlay = document.querySelector(".menu-overlay");
 
@@ -8,11 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         navItemsContainer.classList.toggle("open");
         overlay.classList.add("show");
-    });
-
-    closeToggle.addEventListener("click", (e) => {
-        navItemsContainer.classList.remove("open");
-        overlay.classList.remove("show");
     });
 
     // Close menu when clicking outside
