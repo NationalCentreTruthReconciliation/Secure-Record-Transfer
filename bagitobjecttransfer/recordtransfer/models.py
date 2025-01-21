@@ -142,7 +142,7 @@ class UploadSession(models.Model):
         try:
             temp_file = self.tempuploadedfile_set.get(name=name)
         except TempUploadedFile.DoesNotExist:
-            raise ValueError(
+            raise FileNotFoundError(
                 f"No temporary file with name {name} exists in session {self.token}"
             ) from None
 

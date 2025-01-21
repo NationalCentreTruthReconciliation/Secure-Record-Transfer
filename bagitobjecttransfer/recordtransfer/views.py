@@ -1010,6 +1010,11 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
         if request.method == "DELETE":
             try:
                 session.remove_temp_file_by_name(file_name)
+            except FileNotFoundError:
+                return JsonResponse(
+                    {"error": gettext("File not found in upload session")},
+                    status=404,
+                )
             except ValueError:
                 return JsonResponse(
                     {"error": gettext("Cannot remove file from upload session")},
