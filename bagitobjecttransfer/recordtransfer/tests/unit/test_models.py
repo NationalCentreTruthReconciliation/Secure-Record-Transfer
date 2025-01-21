@@ -225,19 +225,26 @@ class TestUploadSession(TestCase):
         mock_temp_files.get = MagicMock(side_effect=lambda name: temp_file_dict[name])
 
         self.session.status = UploadSession.SessionStatus.UPLOADING
+
+        def delete_first_file_side_effect():
+            # Modify mock to reflect the removal
+            mock_temp_files.all = MagicMock(return_value=[test_temp_file_2])
+            temp_file_dict.pop(test_temp_file_1.name)
+        test_temp_file_1.delete.side_effect = delete_first_file_side_effect
         # Remove first file
         self.session.remove_temp_file_by_name(test_temp_file_1.name)
         test_temp_file_1.delete.assert_called_once()
-        # Modify mock to reflect the removal
-        mock_temp_files.all = MagicMock(return_value=[test_temp_file_2])
-        temp_file_dict.pop(test_temp_file_1.name)
         self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
 
+        def delete_second_file_side_effect():
+            # Modify mock to reflect the removal
+            mock_temp_files.all = MagicMock(return_value=[])
+            temp_file_dict.pop(test_temp_file_2.name)
+
+        test_temp_file_2.delete.side_effect = delete_second_file_side_effect
         # Remove second file
         self.session.remove_temp_file_by_name(test_temp_file_2.name)
         test_temp_file_2.delete.assert_called_once()
-        mock_temp_files.all = MagicMock(return_value=[])
-        temp_file_dict.pop(test_temp_file_2.name)
         self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
 
     def test_remove_temp_file_by_name_invalid_status(self) -> None:
