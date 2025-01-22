@@ -318,7 +318,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
                 }
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return Promise.reject(response);
+                    }
+
+                    return response.json();
+                })
                 .then(data => {
                     if (data.group) {
                         clearCreateGroupForm();
@@ -326,8 +332,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         hideCreateNewGroupModal();
                     }
                 })
-                .catch(error => {
-                    alert(error);
+                .catch(response => {
+                    response.json().then(data => {
+                        const message = data?.message ?? "Could not create submission group";
+                        alert(message);
+                    });
                 });
         });
     }
