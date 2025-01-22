@@ -5,7 +5,7 @@
  * https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
  */
 
-let groupDescriptions = {};
+import { setupSubmissionGroupModal } from "./submissionGroupModal";
 
 /**
  * Function to setup on click handlers for select boxes to toggle text fields when selecting "Other"
@@ -114,80 +114,6 @@ function toggleFlexItems(selectors, state) {
     }
 }
 
-/**
- * Update the group description text to display based on the selected submission group.
- */
-const updateGroupDescription = () => {
-    const groupDescription = document.getElementById(ID_DISPLAY_GROUP_DESCRIPTION);
-    const selectedGroupId = document.getElementById(ID_SUBMISSION_GROUP_SELECTION).value;
-    let description = groupDescriptions[selectedGroupId];
-    if (!description) {
-        description = "No description available";
-    }
-    groupDescription.textContent = description;
-}
-
-/**
- * Asynchronously populates group descriptions by making an AJAX request to fetch user group descriptions.
- *
- * @returns {Promise<void>} A promise that resolves when the group descriptions have been successfully populated,
- * or rejects if the AJAX request fails.
- */
-async function populateGroupDescriptions() {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: fetchUsersGroupDescriptionsUrl,
-            success: function (groups) {
-                groups.forEach(function (group) {
-                    groupDescriptions[group.uuid] = group.description;
-                });
-                resolve();
-            },
-            error: function () {
-                alert('Failed to populate group descriptions.');
-                reject();
-            }
-        });
-    });
-}
-
-function selectDefaultGroup(groupId) {
-    if (groupId) {
-        const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
-        selectField.val(groupId).change();
-    }
-}
-
-async function initializeGroupTransferForm() {
-    await populateGroupDescriptions();
-    selectDefaultGroup(DEFAULT_GROUP_ID);
-    updateGroupDescription();
-}
-
-/**
- * Handles the addition of a new group to the selection field.
- * @param {Object} group - The group object containing details of the new group.
- * The `group` object should have the following properties:
- * - `name` (String): The name of the group.
- * - `uuid` (String): The UUID of the group.
- * - `description` (String): The description of the group.
- */
-function handleNewGroupAdded(group) {
-    const selectField = document.getElementById(ID_SUBMISSION_GROUP_SELECTION);
-    selectField.append(new Option(group.name, group.uuid));
-    groupDescriptions[group.uuid] = group.description;
-    selectField.value = group.uuid;
-    selectField.dispatchEvent(new Event('change'));
-}
-
-function clearCreateGroupForm() {
-    const groupName = document.getElementById(ID_SUBMISSION_GROUP_NAME);
-    const groupDesc = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
-    groupName.value = "";
-    groupDesc.value = "";
-}
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     /***************************************************************************
@@ -285,61 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
      * Dialog Box Setup
      **************************************************************************/
 
-    const addNewGroupButton = document.getElementById("show-add-new-group-dialog");
-
-    if (addNewGroupButton) {
-        const createNewGroupForm = document.getElementById("submission-group-form");
-        const createNewGroupModal = document.getElementById("create-new-submissiongroup-modal");
-        const closeModalButton = document.getElementById("close-new-submissiongroup-modal");
-        //const createButton = document.getElementById("id_save_button");
-
-        const hideCreateNewGroupModal = () => createNewGroupModal.classList.remove("visible");
-        const showCreateNewGroupModal = () => createNewGroupModal.classList.add("visible");
-
-        addNewGroupButton.addEventListener("click", function (event) {
-            event.preventDefault();
-            showCreateNewGroupModal();
-        });
-
-        closeModalButton.addEventListener("click", function (event) {
-            event.preventDefault();
-            hideCreateNewGroupModal();
-        });
-
-        createNewGroupForm.addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-
-            fetch(this.action, {
-                method: this.method,
-                body: formData,
-                headers: {
-                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return Promise.reject(response);
-                    }
-
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.group) {
-                        clearCreateGroupForm();
-                        handleNewGroupAdded(data.group);
-                        hideCreateNewGroupModal();
-                    }
-                })
-                .catch(response => {
-                    response.json().then(data => {
-                        const message = data?.message ?? "Could not create submission group";
-                        alert(message);
-                    });
-                });
-        });
-    }
+    setupSubmissionGroupModal();
 
     /***************************************************************************
      * Expandable Forms Setup

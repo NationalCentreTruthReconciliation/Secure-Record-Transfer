@@ -4,14 +4,7 @@
 
 {% block javascript %}
     {{ block.super }}
-    <script>
-    const ID_DISPLAY_GROUP_DESCRIPTION = "{{ ID_DISPLAY_GROUP_DESCRIPTION }}";
-    const ID_SUBMISSION_GROUP_SELECTION = "{{ ID_SUBMISSION_GROUP_SELECTION }}";
-    const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
-    const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
-    const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_user_submission_groups' user_id=request.user.id %}";
-    const DEFAULT_GROUP_ID = {% if DEFAULT_GROUP_ID is not None %}"{{ DEFAULT_GROUP_ID }}"{% else %}null{% endif %};
-    </script>
+    {{ js_context|json_script:"py_context_submission_group" }}
     <script src="{% static 'submissiongroup.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block buttonarrayclass %}flex-item{% endblock %}
