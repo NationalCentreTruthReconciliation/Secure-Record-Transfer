@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
@@ -65,7 +67,7 @@ class UploadSession(models.Model):
     )
 
     @classmethod
-    def new_session(cls) -> "UploadSession":
+    def new_session(cls) -> UploadSession:
         """Start a new upload session."""
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
@@ -120,7 +122,7 @@ class UploadSession(models.Model):
             for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all())
         )
 
-    def add_temp_file(self, file: UploadedFile) -> "TempUploadedFile":
+    def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
             raise ValueError(
@@ -176,7 +178,7 @@ class UploadSession(models.Model):
 
         return self.tempuploadedfile_set.filter(name=name).first()
 
-    def get_temporary_uploads(self) -> list["TempUploadedFile"]:
+    def get_temporary_uploads(self) -> list[TempUploadedFile]:
         """Get a list of temporary uploaded files associated with this session.
 
         May be empty if temp uploads have already been moved to permanent storage.
@@ -201,7 +203,7 @@ class UploadSession(models.Model):
             )
         return [f for f in self.tempuploadedfile_set.all() if f.exists]
 
-    def get_permanent_uploads(self) -> list["PermUploadedFile"]:
+    def get_permanent_uploads(self) -> list[PermUploadedFile]:
         """Get a list of permanent uploaded files associated with this session.
 
         May be empty if temp uploads have not been moved.
@@ -229,7 +231,7 @@ class UploadSession(models.Model):
             )
         return [f for f in self.permuploadedfile_set.all() if f.exists]
 
-    def get_uploads(self) -> Union[list["TempUploadedFile"], list["PermUploadedFile"]]:
+    def get_uploads(self) -> Union[list[TempUploadedFile], list[PermUploadedFile]]:
         """Get a list of temporary or permanent uploaded files associated with this session. Will
         return temporary files if in the UPLOADING state, and permanent files if in the STORED
         state.
