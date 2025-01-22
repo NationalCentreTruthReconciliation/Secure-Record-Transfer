@@ -47,19 +47,13 @@ class UploadSession(models.Model):
     """Represents a file upload session. This model is used to track the files that a
     user uploads during a session.
 
+    The following state diagram illustrates the possible states and transitions for an
+    UploadSession:
+
     .. mermaid::
        :caption: UploadSession State Diagram
 
        flowchart TD
-       CREATED
-       EXPIRED
-       UPLOADING
-       COPYING_IN_PROGRESS
-       COPYING_FAILED
-       STORED
-       REMOVING_IN_PROGRESS
-       DELETED
-
        CREATED --> EXPIRED
        CREATED --> UPLOADING
        UPLOADING --> CREATED
