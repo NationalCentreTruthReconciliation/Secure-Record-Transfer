@@ -257,10 +257,10 @@ class UploadSession(models.Model):
     def remove_uploads(self) -> None:
         """Remove all uploaded files associated with this session."""
         if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
-            LOGGER.info("File removal is already in progress for session %s", self.token)
+            LOGGER.warning("File removal is already in progress for session %s", self.token)
             return
         elif self.status == self.SessionStatus.CREATED:
-            LOGGER.info("There are no uploaded files in the session %s to remove", self.token)
+            LOGGER.warning("There are no uploaded files in the session %s to remove", self.token)
             return
         elif self.status in (self.SessionStatus.EXPIRED, self.SessionStatus.DELETED):
             raise ValueError(
