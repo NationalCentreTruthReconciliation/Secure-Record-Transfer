@@ -85,16 +85,16 @@ class UploadSession(models.Model):
             self.SessionStatus.DELETED,
         ):
             raise ValueError(
-                f"""Cannot get upload size from session {self.token} because the session has
-                expired or has been deleted"""
+                f"Cannot get upload size from session {self.token} because the session has "
+                "expired or has been deleted"
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
         ):
             raise ValueError(
-                f"""Cannot get upload size from session {self.token} while copying or removing
-                files is in progress"""
+                f"Cannot get upload size from session {self.token} while copying or removing "
+                "files is in progress"
             )
         return sum(
             f.file_upload.size
@@ -110,16 +110,16 @@ class UploadSession(models.Model):
             self.SessionStatus.DELETED,
         ):
             raise ValueError(
-                f"""Cannot get file count from session {self.token} because the session has
-                expired or has been deleted"""
+                f"Cannot get file count from session {self.token} because the session has "
+                "expired or has been deleted"
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
         ):
             raise ValueError(
-                f"""Cannot get file count from session {self.token} while copying or removing files
-                is in progress"""
+                f"Cannot get file count from session {self.token} while copying or removing files "
+                "is in progress"
             )
         return sum(
             f.exists
@@ -130,9 +130,9 @@ class UploadSession(models.Model):
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
             raise ValueError(
-                f"""Cannot add temporary uploaded file to session {self.token} because the session
-                status is {self.status} and not {self.SessionStatus.CREATED} or
-                {self.SessionStatus.UPLOADING}"""
+                f"Cannot add temporary uploaded file to session {self.token} because the session "
+                f"status is {self.status} and not {self.SessionStatus.CREATED} or "
+                f"{self.SessionStatus.UPLOADING}"
             )
 
         temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
@@ -148,8 +148,8 @@ class UploadSession(models.Model):
         """Remove a temporary uploaded file from this session by name."""
         if self.status != self.SessionStatus.UPLOADING:
             raise ValueError(
-                f"""Cannot remove temporary uploaded file from session {self.token} because the
-                session status is {self.status} and not {self.SessionStatus.UPLOADING}"""
+                f"Cannot remove temporary uploaded file from session {self.token} because the "
+                f"session status is {self.status} and not {self.SessionStatus.UPLOADING}"
             )
         try:
             temp_file = self.tempuploadedfile_set.get(name=name)
@@ -176,8 +176,8 @@ class UploadSession(models.Model):
 
         if self.status != self.SessionStatus.UPLOADING:
             raise ValueError(
-                f"""Can only get temporary uploaded files from session {self.token} when the
-                session status is {self.SessionStatus.UPLOADING}"""
+                f"Can only get temporary uploaded files from session {self.token} when the "
+                f"session status is {self.SessionStatus.UPLOADING}"
             )
 
         return self.tempuploadedfile_set.filter(name=name).first()
@@ -194,16 +194,16 @@ class UploadSession(models.Model):
             self.SessionStatus.DELETED,
         ):
             raise ValueError(
-                f"""Cannot get temporary uploaded files from session {self.token} because the
-                session has expired or has been deleted"""
+                f"Cannot get temporary uploaded files from session {self.token} because the "
+                "session has expired or has been deleted"
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
         ):
             raise ValueError(
-                f"""Cannot get temporary uploaded files from session {self.token} while copy or
-                removal of files is in progress"""
+                f"Cannot get temporary uploaded files from session {self.token} while copy or "
+                "removal of files is in progress"
             )
         return [f for f in self.tempuploadedfile_set.all() if f.exists]
 
@@ -222,16 +222,16 @@ class UploadSession(models.Model):
             self.SessionStatus.DELETED,
         ):
             raise ValueError(
-                f"""Cannot get permanent uploaded files from session {self.token} because the
-                session has expired or has been deleted"""
+                f"Cannot get permanent uploaded files from session {self.token} because the "
+                "session has expired or has been deleted"
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
         ):
             raise ValueError(
-                f"""Cannot get permanent uploaded files from session {self.token} while copy or
-                removal of files is in progress"""
+                f"Cannot get permanent uploaded files from session {self.token} while copy or "
+                "removal of files is in progress"
             )
         return [f for f in self.permuploadedfile_set.all() if f.exists]
 
@@ -248,9 +248,9 @@ class UploadSession(models.Model):
             return self.get_permanent_uploads()
         else:
             raise ValueError(
-                f"""Cannot get uploaded files from session {self.token} because the session status
-                is {self.status} and not {self.SessionStatus.UPLOADING} or
-                {self.SessionStatus.STORED}"""
+                f"Cannot get uploaded files from session {self.token} because the session status "
+                f"is {self.status} and not {self.SessionStatus.UPLOADING} or "
+                f"{self.SessionStatus.STORED}"
             )
 
     def remove_uploads(self) -> None:
@@ -263,13 +263,13 @@ class UploadSession(models.Model):
             return
         elif self.status in (self.SessionStatus.EXPIRED, self.SessionStatus.DELETED):
             raise ValueError(
-                f"""Cannot remove uploaded files from session {self.token} because the session has
-                expired or has been deleted"""
+                f"Cannot remove uploaded files from session {self.token} because the session has "
+                "expired or has been deleted"
             )
         elif self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
-                f"""Cannot remove uploaded files from session {self.token} while copying files is
-                in progress"""
+                f"Cannot remove uploaded files from session {self.token} while copying files is "
+                "in progress"
             )
 
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
@@ -298,8 +298,8 @@ class UploadSession(models.Model):
 
         if self.status != self.SessionStatus.UPLOADING:
             raise ValueError(
-                f"""Cannot make uploaded files permanent in session {self.token} because session
-                status is {self.status} and not {self.SessionStatus.UPLOADING}"""
+                f"Cannot make uploaded files permanent in session {self.token} because session "
+                f"status is {self.status} and not {self.SessionStatus.UPLOADING}"
             )
 
         # Set the status to indicate that the files are being copied to permanent storage
@@ -342,14 +342,14 @@ class UploadSession(models.Model):
 
         if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
-                f"""Cannot copy files from session {self.token} to {destination} because the
-                copying is already in progress"""
+                f"Cannot copy files from session {self.token} to {destination} because the "
+                "copying is already in progress"
             )
 
         if self.status != self.SessionStatus.STORED:
             raise ValueError(
-                f"""Cannot copy files from session {self.token} to {destination} because the
-                session status is {self.status} and not {self.SessionStatus.STORED}"""
+                f"Cannot copy files from session {self.token} to {destination} because the"
+                f"session status is {self.status} and not {self.SessionStatus.STORED}"
             )
 
         self.status = self.SessionStatus.COPYING_IN_PROGRESS
