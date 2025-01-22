@@ -355,13 +355,6 @@ document.addEventListener("DOMContentLoaded", function () {
         initializeGroupTransferForm();
     }
 
-    /***************************************************************************
-     * New Group Creation Submission
-    **************************************************************************/
-    if (typeof MODAL_MODE !== 'undefined' && MODAL_MODE) {
-        initializeModalMode();
-    }
-
     /**********************************************************************************************
      * Source information form setup
      *********************************************************************************************/

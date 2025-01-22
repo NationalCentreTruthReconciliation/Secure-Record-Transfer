@@ -11,7 +11,6 @@
     const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
     const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_user_submission_groups' user_id=request.user.id %}";
     const DEFAULT_GROUP_ID = {% if DEFAULT_GROUP_ID is not None %}"{{ DEFAULT_GROUP_ID }}"{% else %}null{% endif %};
-    const MODAL_MODE = {% if MODAL_MODE %}true{% else %}false{% endif %};
     </script>
     <script src="{% static 'submissiongroup.bundle.js' %}"></script>
 {% endblock javascript %}
