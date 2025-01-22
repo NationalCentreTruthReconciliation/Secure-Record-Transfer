@@ -46,6 +46,31 @@ class User(AbstractUser):
 class UploadSession(models.Model):
     """Represents a file upload session. This model is used to track the files that a
     user uploads during a session.
+
+    .. mermaid::
+       :caption: UploadSession State Diagram
+
+       flowchart TD
+       CREATED
+       EXPIRED
+       UPLOADING
+       COPYING_IN_PROGRESS
+       COPYING_FAILED
+       STORED
+       REMOVING_IN_PROGRESS
+       DELETED
+
+       CREATED --> EXPIRED
+       CREATED --> UPLOADING
+       UPLOADING --> CREATED
+       UPLOADING --> EXPIRED
+       UPLOADING --> COPYING_IN_PROGRESS
+       UPLOADING --> REMOVING_IN_PROGRESS
+       COPYING_IN_PROGRESS --> COPYING_FAILED
+       COPYING_IN_PROGRESS --> STORED
+       STORED --> COPYING_IN_PROGRESS
+       STORED --> REMOVING_IN_PROGRESS
+       REMOVING_IN_PROGRESS --> DELETED
     """
 
     class SessionStatus(models.TextChoices):
