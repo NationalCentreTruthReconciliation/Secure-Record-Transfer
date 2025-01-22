@@ -60,6 +60,10 @@ class UploadSession(models.Model):
         REMOVING_IN_PROGRESS = "RP", _("File Removal in Progress")
         DELETED = "DL", _("All Files Removed")
 
+        def __str__(self) -> str:
+            """Return the string representation of the session status."""
+            return self.name
+
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
     status = models.CharField(
