@@ -153,10 +153,10 @@ class UploadSession(models.Model):
             )
         try:
             temp_file = self.tempuploadedfile_set.get(name=name)
-        except TempUploadedFile.DoesNotExist:
+        except TempUploadedFile.DoesNotExist as exc:
             raise FileNotFoundError(
                 f"No temporary file with name {name} exists in session {self.token}"
-            ) from None
+            ) from exc
 
         temp_file.delete()
 
