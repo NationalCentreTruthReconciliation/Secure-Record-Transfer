@@ -272,22 +272,16 @@ class TestListUploadedFilesView(TestCase):
 
     def test_list_uploaded_files_with_files(self):
         """Session has one file."""
-        uploaded_file = TempUploadedFile(
-            session=self.session,
-            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
-            name="testfile.txt",
-        )
-        self.session.status = UploadSession.SessionStatus.UPLOADING
-        self.session.save()
-        uploaded_file.save()
+        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
+        temp_file = self.session.add_temp_file(file_to_upload)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         responseFiles = response_json.get("files")
         self.assertEqual(len(responseFiles), 1)
         self.assertEqual(responseFiles[0]["name"], "testfile.txt")
-        self.assertEqual(responseFiles[0]["size"], uploaded_file.file_upload.size)
-        self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
+        self.assertEqual(responseFiles[0]["size"], file_to_upload.size)
+        self.assertEqual(responseFiles[0]["url"], temp_file.get_file_access_url())
 
     def tearDown(self):
         TempUploadedFile.objects.all().delete()
