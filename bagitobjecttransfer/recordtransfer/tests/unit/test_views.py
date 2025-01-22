@@ -304,16 +304,11 @@ class TestUploadedFileView(TestCase):
     def setUp(self):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session()
-        self.uploaded_file = TempUploadedFile(
-            session=self.session,
-            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
-            name="testfile.txt",
-        )
-        self.session.status = UploadSession.SessionStatus.UPLOADING
         self.session.save()
-        self.uploaded_file.save()
+        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
+        self.temp_file = self.session.add_temp_file(SimpleUploadedFile("testfile.txt", self.one_kib))
         self.url = reverse(
-            "recordtransfer:uploaded_file", args=[self.session.token, self.uploaded_file.name]
+            "recordtransfer:uploaded_file", args=[self.session.token, file_to_upload.name]
         )
 
     def test_uploaded_file_session_not_found(self):
@@ -345,14 +340,14 @@ class TestUploadedFileView(TestCase):
     @patch("recordtransfer.views.settings.DEBUG", True)
     def test_get_uploaded_file_in_debug(self):
         response = self.client.get(self.url)
-        self.assertEqual(response.url, self.uploaded_file.get_file_media_url())
+        self.assertEqual(response.url, self.temp_file.get_file_media_url())
 
     @patch("recordtransfer.views.settings.DEBUG", False)
     def test_get_uploaded_file_in_production(self):
         response = self.client.get(self.url)
         self.assertIn("X-Accel-Redirect", response.headers)
         self.assertEqual(
-            response.headers["X-Accel-Redirect"], self.uploaded_file.get_file_media_url()
+            response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url()
         )
 
     def tearDown(self):
