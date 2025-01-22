@@ -12,6 +12,7 @@
         html[data-theme="light"], :root {
             --primary: #b13d32;
             --secondary: #f0f0f0;
+            --breadcrumbs-fg: #b6cbdd;
             --breadcrumbs-bg: #b13d32;
             --header-color: #333333;
             --header-link-color: #ffffff;
@@ -28,6 +29,18 @@
             /* Override the section:visited having color: var(--header-color) */
             .section:visited {
                 color: var(--secondary) !important;
+            }
+
+            #header a:link, #header a:visited, #logout-form button {
+                color: var(--link-fg);
+            }
+
+            .theme-icon-when-light {
+                fill: var(--link-fg); 
+            }
+
+            #user-tools a, #logout-form button {
+                border-bottom: 1px solid rgb(194, 194, 194);
             }
         }
 
