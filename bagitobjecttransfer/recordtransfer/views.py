@@ -999,20 +999,6 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
         if not session:
             return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
-        uploaded_file = None
-        try:
-            uploaded_file = session.get_temp_file_by_name(file_name)
-        except FileNotFoundError:
-            return JsonResponse(
-                {"error": gettext("File not found in upload session")},
-                status=404,
-            )
-        except ValueError:
-            return JsonResponse(
-                {"error": gettext("Cannot access file in upload session")},
-                status=400,
-            )
-
         if request.method == "DELETE":
             try:
                 session.remove_temp_file_by_name(file_name)
@@ -1027,6 +1013,20 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
                     status=400,
                 )
             return HttpResponse(status=204)
+
+        uploaded_file = None
+        try:
+            uploaded_file = session.get_temp_file_by_name(file_name)
+        except FileNotFoundError:
+            return JsonResponse(
+                {"error": gettext("File not found in upload session")},
+                status=404,
+            )
+        except ValueError:
+            return JsonResponse(
+                {"error": gettext("Cannot access file in upload session")},
+                status=400,
+            )
 
         file_url = uploaded_file.get_file_media_url()
         if settings.DEBUG:
