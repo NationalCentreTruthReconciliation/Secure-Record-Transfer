@@ -276,16 +276,11 @@ class TestUploadSession(TestCase):
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_get_temp_file_by_name(self, mock_temp_files: BaseManager) -> None:
         """Test getting a temp file from the session by name."""
-        mock_temp_files.filter = MagicMock()
-        mock_temp_files.filter.return_value.first.return_value = self.test_temp_file
+        mock_temp_files.get = MagicMock(return_value=self.test_temp_file)
         self.session.status = UploadSession.SessionStatus.UPLOADING
         temp_uploaded_file = self.session.get_temp_file_by_name(self.test_temp_file.name)
         self.assertIsNotNone(temp_uploaded_file)
         self.assertEqual(temp_uploaded_file.name, self.test_temp_file.name)
-
-    def test_get_temp_file_by_name_new_session(self) -> None:
-        """Test getting a temp file from a new session by name."""
-        self.assertIsNone(self.session.get_temp_file_by_name("test.pdf"))
 
     def test_get_temp_file_by_name_invalid_status(self) -> None:
         """Test getting a temp file from the session by name raises an exception when the session
@@ -293,6 +288,7 @@ class TestUploadSession(TestCase):
         """
         self.session.add_temp_file(self.test_file_1)
         statuses = [
+            UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,

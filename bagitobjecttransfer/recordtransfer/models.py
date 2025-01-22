@@ -164,23 +164,24 @@ class UploadSession(models.Model):
             self.status = self.SessionStatus.CREATED
             self.save()
 
-    def get_temp_file_by_name(self, name: str) -> Optional["TempUploadedFile"]:
-        """Get an temporary uploaded file in this session by name. Returns None if the file does
-        not exist.
+    def get_temp_file_by_name(self, name: str) -> TempUploadedFile:
+        """Get an temporary uploaded file in this session by name.
 
         Args:
             name: The name of the file to find
         """
-        if self.status == self.SessionStatus.CREATED:
-            return None
-
         if self.status != self.SessionStatus.UPLOADING:
             raise ValueError(
                 f"Can only get temporary uploaded files from session {self.token} when the "
                 f"session status is {self.SessionStatus.UPLOADING}"
             )
 
-        return self.tempuploadedfile_set.filter(name=name).first()
+        try:
+            return self.tempuploadedfile_set.get(name=name)
+        except TempUploadedFile.DoesNotExist as exc:
+            raise FileNotFoundError(
+                f"No temporary file with name {name} exists in session {self.token}"
+            ) from exc
 
     def get_temporary_uploads(self) -> list[TempUploadedFile]:
         """Get a list of temporary uploaded files associated with this session.
