@@ -48,9 +48,15 @@ export async function setupSubmissionGroupForm() {
 
         // Set the group description to the data-description attribute from the selected option
         if (index > 0) {
-            const selectedOption = selectField.options[index];
-            const groupDescription = selectedOption.getAttribute("data-description");
-            groupDescDisplay.textContent = groupDescription;
+            const selected = selectField.options[index];
+            const description = selected.getAttribute("data-description").trim();
+
+            if (!description) {
+                groupDescDisplay.textContent = noDescription;
+            }
+            else {
+                groupDescDisplay.textContent = description;
+            }
         }
         else {
             groupDescDisplay.textContent = noDescription;
