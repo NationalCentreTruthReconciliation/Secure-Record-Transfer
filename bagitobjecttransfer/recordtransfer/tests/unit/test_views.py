@@ -102,16 +102,18 @@ class TestUploadFileView(TestCase):
 
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
-            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
             headers={"upload-session-token": session.token},
         )
+
+        session.refresh_from_db()
 
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["uploadSessionToken"], session.token)
         self.assertEqual(session.file_count, 1)
         # Check that no error is raised if the uploaded file is looked up within the session
-        session.get_temp_file_by_name("File.PDF")
+        session.get_temp_file_by_name("File.pdf")
 
     def test_new_session_made_invalid_token(self) -> None:
         """Test that a new session is made if the token is invalid."""
