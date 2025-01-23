@@ -388,7 +388,7 @@ class TestUploadedFileView(TestCase):
         response_json = response.json()
         self.assertIn("error", response_json)
         self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token.")
+            response_json["error"], gettext("Invalid filename or upload session token")
         )
 
     def test_uploaded_file_not_found(self) -> None:
@@ -400,7 +400,7 @@ class TestUploadedFileView(TestCase):
         response_json = response.json()
         self.assertIn("error", response_json)
         self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token.")
+            response_json["error"], gettext("File not found in upload session")
         )
 
     def test_uploaded_file_invalid_user(self) -> None:
@@ -414,7 +414,7 @@ class TestUploadedFileView(TestCase):
         response_json = response.json()
         self.assertIn("error", response_json)
         self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token.")
+            response_json["error"], gettext("Invalid filename or upload session token")
         )
 
     def test_delete_uploaded_file(self) -> None:
@@ -435,7 +435,7 @@ class TestUploadedFileView(TestCase):
         response_json = response.json()
         self.assertIn("error", response_json)
         self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token.")
+            response_json["error"], gettext("Invalid filename or upload session token")
         )
 
     @patch("recordtransfer.views.settings.DEBUG", True)

@@ -1013,7 +1013,7 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     try:
         session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
-            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
+            return JsonResponse({"error": gettext("Invalid filename or upload session token")}, status=404)
 
         if request.method == "DELETE":
             try:
