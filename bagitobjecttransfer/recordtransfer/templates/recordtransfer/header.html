@@ -14,9 +14,6 @@
                 </a>
             </div>
             <div class="nav-items-container">
-                <div class="nav-close-button">
-                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
-                </div>
                 <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:index' %}">
                     <div class="nav-link">
                         {% trans "Home" %}
@@ -74,8 +71,9 @@
                 {% endif %}
             </div>
             <div class="nav-toggle-open">
-                <a class="nav-link non-nav-link nav-toggle-icon" href="#">
-                    <i class="fa fa-bars" aria-hidden="true"></i>
+                <a class="nav-link non-nav-link nav-toggle-button" href="#">
+                    <i class="fa fa-bars nav-icon-bars" aria-hidden="true"></i>
+                    <i class="fas fa-times nav-icon-close" aria-hidden="true"></i>
                 </a>
             </div>
         </div>

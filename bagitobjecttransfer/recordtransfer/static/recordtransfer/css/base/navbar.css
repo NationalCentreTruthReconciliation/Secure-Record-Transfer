@@ -39,6 +39,7 @@ header.homepage {
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     z-index: 999;
 }
+
 .menu-overlay.show {
     visibility: visible;
     opacity: 1;
@@ -55,25 +56,28 @@ header.homepage {
 
 /* Sliding menu styles */
 .nav-items-container {
-    position: fixed;
+    position: absolute;
     display: flex;
     flex-direction: column;
-    top: 5vh;
-    right: -350px;
+    top: 60%;
+    right: 0;
+    transform: translateY(0);
     height: auto;
     max-height: 100vh;
     width: 300px;
     background: #fff;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     padding: 50px 20px;
     z-index: 1000;
     visibility: hidden;
     box-sizing: border-box;
-    border-radius: 3px;
+    border-radius: 5px;
 }
+
 .nav-items-container.open {
-    right: 0;
+    top: 80%;
     visibility: visible;
+    transition: top 0.3s ease, opacity 0.3s ease;
 }
 
 /* Container for each nav item */
@@ -120,14 +124,41 @@ header.homepage {
     font-size: 20pt;
 }
 
-/* Burger icon */
-.nav-toggle-icon {
-    padding: 4px 8px;
-    color: white;
+/* Burger button */
+.nav-icon-bars {
+    display: inline-block;
 }
-.nav-toggle-icon:hover {
-    background-color: #92929291;
-    border-radius: 4px;
+
+.nav-icon-close {
+    display: none;
+}
+
+.nav-toggle-button.active .nav-icon-bars {
+    display: none;
+}
+
+.nav-toggle-button.active .nav-icon-close {
+    display: inline-block;
+}
+
+.nav-toggle-button {
+    padding: 4px 15px;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-toggle-button.active {
+    background-color: white;
+    color: #ee7421;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-bottom: 20px;
+    z-index: 1001;
+    transition: all 0.3s ease;
 }
 
 /* Login/logout button */
@@ -136,39 +167,17 @@ header.homepage {
     border-radius: 3rem;
     text-decoration: none !important;
 }
+
 .nav-button:hover {
     background-color: rgb(137, 34, 26);
     color: #ffffff;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Mobile menu close button */
-.nav-close-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    left: -34px;
-    width: 35px;
-    height: 35px;
-    transform: translateY(-50%);
-    background-color: #dadada;
-    border-radius: 3px;
-    color: #6d6d6d;
-    cursor: pointer;
-    font-size: 14pt;
-    box-shadow: 0px 0px 6px 0px #232323;
-}
-.nav-close-button:hover {
-    background-color: #b1b1b1;
-    color: #484848;
-}
-
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
-        transition: right 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        transition: opacity 0.3s ease-out;
     }
 
     .nav-item:hover {
@@ -210,11 +219,6 @@ header.homepage {
 
     /* Hide the burger menu in desktop mode */
     .nav-toggle-open {
-        display: none;
-    }
-
-    /* Hide the close button in desktop mode */
-    .nav-close-button {
         display: none;
     }
 
