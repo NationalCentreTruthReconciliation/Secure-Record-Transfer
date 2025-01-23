@@ -9,13 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleButton.addEventListener("click", function(e) {
         e.preventDefault();
         toggleButton.classList.toggle("active");
+        overlay.classList.toggle("show");
     });
 
     openToggle.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
         navItemsContainer.classList.toggle("open");
-        overlay.classList.add("show");
     });
 
     closeToggle.addEventListener("click", (e) => {
@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
             !navItemsContainer.contains(e.target)) {
             navItemsContainer.classList.remove("open");
             overlay.classList.remove("show");
+            toggleButton.classList.toggle("active");
         }
     });
 

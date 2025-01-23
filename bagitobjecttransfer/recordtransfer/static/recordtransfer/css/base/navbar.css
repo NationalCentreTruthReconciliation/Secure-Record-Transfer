@@ -133,6 +133,7 @@ header.homepage {
     color: white;
     transition: all 0.3s ease;
     position: relative;
+    transition: color 0.3s ease;
 }
 
 .nav-toggle-button.active {
@@ -144,6 +145,7 @@ header.homepage {
     border-bottom-left-radius: 0;
     padding-bottom: 20px;
     z-index: 1001;
+    transition: all 0.3s ease;
 }
 
 /* Login/logout button */
