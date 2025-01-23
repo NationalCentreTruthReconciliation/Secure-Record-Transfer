@@ -177,30 +177,6 @@ header.homepage {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Mobile menu close button */
-.nav-close-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    left: -34px;
-    width: 35px;
-    height: 35px;
-    transform: translateY(-50%);
-    background-color: #dadada;
-    border-radius: 3px;
-    color: #6d6d6d;
-    cursor: pointer;
-    font-size: 14pt;
-    box-shadow: 0px 0px 6px 0px #232323;
-}
-
-.nav-close-button:hover {
-    background-color: #b1b1b1;
-    color: #484848;
-}
-
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
@@ -246,11 +222,6 @@ header.homepage {
 
     /* Hide the burger menu in desktop mode */
     .nav-toggle-open {
-        display: none;
-    }
-
-    /* Hide the close button in desktop mode */
-    .nav-close-button {
         display: none;
     }
 
