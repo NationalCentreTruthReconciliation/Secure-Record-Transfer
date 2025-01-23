@@ -4,6 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const navItemsContainer = document.querySelector(".nav-items-container");
     const overlay = document.querySelector(".menu-overlay");
 
+    const toggleButton = document.querySelector(".nav-toggle-button");
+    
+    toggleButton.addEventListener("click", function(e) {
+        e.preventDefault();
+        toggleButton.classList.toggle("active");
+    });
+
     openToggle.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();

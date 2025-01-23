@@ -121,11 +121,16 @@ header.homepage {
 }
 
 /* Burger icon */
-.nav-toggle-icon {
+.nav-toggle-button {
     padding: 4px 8px;
     color: white;
+    transition: all 0.3s ease;
 }
-.nav-toggle-icon:hover {
+.nav-toggle-button.active {
+    background-color: white;
+    color: red;
+}
+.nav-toggle-button:hover {
     background-color: #92929291;
     border-radius: 4px;
 }
