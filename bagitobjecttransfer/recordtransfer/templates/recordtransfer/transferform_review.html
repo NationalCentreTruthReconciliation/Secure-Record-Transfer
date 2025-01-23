@@ -4,3 +4,27 @@
 
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block submitbuttontype %}button{% endblock %}
+
+{% block formfields %}
+
+    {% comment %} {% for form in form_list %}
+        <h2>{{ form.form_name }}</h2>
+        <ul>
+            {% if form.fields|length > 0 and form.fields.items %}
+                {% for label, value in form.fields.items %}
+                    <li><strong>{{ label }}:</strong> {{ value }}</li>
+                {% endfor %}
+            {% else %}
+                {% for entry in form.fields %}
+                    <ul>
+                        {% for label, value in entry.items %}
+                            <li><strong>{{ label }}:</strong> {{ value }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            {% endif %}
+        </ul>
+    {% endfor %} {% endcomment %}
+    <p>{{ form_list }}</p>
+
+{% endblock formfields %}

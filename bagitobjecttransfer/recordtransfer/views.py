@@ -1,7 +1,7 @@
 import logging
 import pickle
 import re
-from typing import Any, ClassVar, Optional, Union, cast
+from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
@@ -88,6 +88,7 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
+    extract_form_data,
     get_human_readable_file_count,
     get_human_readable_size,
 )
@@ -653,6 +654,18 @@ class TransferFormWizard(SessionWizardView):
 
         return kwargs
 
+    def get_final_forms(self) -> list:
+        final_forms = OrderedDict()
+        for form_key in self.get_form_list():
+            form_obj = self.get_form(
+                step=form_key,
+                data=self.storage.get_step_data(form_key),
+                files=self.storage.get_step_files(form_key)
+            )
+            form_obj.is_valid()
+            final_forms[form_key] = form_obj
+        return list(final_forms.values())
+
     def get_context_data(self, form, **kwargs):
         """Retrieve context data for the current form template.
 
@@ -733,6 +746,9 @@ class TransferFormWizard(SessionWizardView):
                     },
                 }
             )
+
+        elif self.current_step == TransferStep.REVIEW:
+            context["form_list"] = extract_form_data(self.get_final_forms())
 
         return context
 
