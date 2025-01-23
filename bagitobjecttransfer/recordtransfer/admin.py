@@ -163,6 +163,7 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
 
     ordering = ["-session", "name"]
 
+
 class TempUploadedFileInline(admin.TabularInline):
     """Inline admin for the BaseUploadedFile model. Used to view the files
     associated with an upload session.
@@ -186,6 +187,7 @@ class TempUploadedFileInline(admin.TabularInline):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
 
 class PermUploadedFileInline(admin.TabularInline):
     """Inline admin for the BaseUploadedFile model. Used to view the files
@@ -231,7 +233,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         PermUploadedFileInline,
     ]
 
-    list_display = ["token", "started_at", "file_count", "status"]
+    list_display = ["token", linkify("user"), "started_at", "file_count", "status"]
 
     ordering = [
         "-started_at",
