@@ -92,7 +92,7 @@ class TestUploadFileView(TestCase):
             token=response_json["uploadSessionToken"], user=self.test_user_1
         ).first()
         self.assertIsNotNone(session)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 1)
+        self.assertEqual(session.file_count, 1)
 
     def test_same_session_used(self) -> None:
         """Test that the same session is used if the token is provided."""
@@ -109,8 +109,9 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["uploadSessionToken"], session.token)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 1)
-        self.assertEqual(session.tempuploadedfile_set.first().name, "File.PDF")
+        self.assertEqual(session.file_count, 1)
+        # Check that no error is raised if the uploaded file is looked up within the session
+        session.get_temp_file_by_name("File.PDF")
 
     def test_new_session_made_invalid_token(self) -> None:
         """Test that a new session is made if the token is invalid."""
@@ -127,7 +128,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertNotEqual(response_json["uploadSessionToken"], session.token)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
+        self.assertEqual(session.file_count, 0)
 
     def test_new_session_made_token_mismatch_user(self) -> None:
         """Test that a new session is created if the token does not match the user."""
@@ -144,7 +145,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertNotEqual(response_json["uploadSessionToken"], session.token)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
+        self.assertEqual(session.file_count, 0)
 
     def test_file_issue_flagged(self) -> None:
         """Test that an issue is flagged if the file is not accepted."""
@@ -165,7 +166,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
+        self.assertEqual(session.file_count, 0)
 
     def test_session_issue_flagged(self) -> None:
         """Test that an issue is flagged if the session is not accepted."""
@@ -186,7 +187,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
+        self.assertEqual(session.file_count, 0)
 
     def test_malware_flagged(self) -> None:
         """Test that malware is flagged if the file contains malware."""
@@ -206,7 +207,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
+        self.assertEqual(session.file_count, 0)
 
     @skipIf(True, "File content scanning is not implemented yet")
     def test_content_issue_flagged(self) -> None:
