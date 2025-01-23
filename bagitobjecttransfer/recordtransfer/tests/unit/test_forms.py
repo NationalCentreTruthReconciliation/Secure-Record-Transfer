@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.transfer_forms import SourceInfoForm, UploadFilesForm
-from recordtransfer.models import UploadedFile, UploadSession, User
+from recordtransfer.models import TempUploadedFile, UploadSession, User
 
 
 class UserProfileFormTest(TestCase):
@@ -389,7 +389,7 @@ class UploadFilesFormTest(TestCase):
         """Create a test session and include one uploaded file as part of session."""
         self.upload_session = UploadSession.new_session()
         self.upload_session.save()
-        self.uploaded_file = UploadedFile.objects.create(
+        self.uploaded_file = TempUploadedFile.objects.create(
             session=self.upload_session,
             file_upload=SimpleUploadedFile("test_file.txt", bytearray([1] * (1024**2))),
             name="test_file.txt",

@@ -11,9 +11,9 @@
 # documentation root, use os.path.abspath to make it absolute.
 import os
 import sys
-import django
 import tempfile
-import sphinx_rtd_theme
+
+import django
 
 sys.path.insert(0, os.path.abspath("../bagitobjecttransfer"))
 os.environ["DJANGO_SETTINGS_MODULE"] = "bagitobjecttransfer.settings.test"
@@ -40,6 +40,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosectionlabel',
     'sphinx_rtd_theme',
+    'sphinxcontrib.mermaid'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

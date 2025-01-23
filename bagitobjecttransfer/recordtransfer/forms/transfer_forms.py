@@ -868,7 +868,7 @@ class UploadFilesForm(TransferForm):
             self.add_error("session_token", "Invalid upload. Please try again.")
             return cleaned_data
 
-        if upload_session.number_of_files_uploaded() == 0:
+        if upload_session.file_count == 0:
             self.add_error("session_token", "You must upload at least one file")
 
         return cleaned_data

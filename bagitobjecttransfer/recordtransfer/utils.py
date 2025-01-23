@@ -317,7 +317,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
         return {"accepted": True}
 
     # Check number of files is within allowed total
-    if session.number_of_files_uploaded() >= settings.MAX_TOTAL_UPLOAD_COUNT:
+    if session.file_count >= settings.MAX_TOTAL_UPLOAD_COUNT:
         return {
             "accepted": False,
             "error": gettext("You can not upload anymore files."),
@@ -343,7 +343,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
         }
 
     # Check that a file with this name has not already been uploaded
-    filename_list = session.uploadedfile_set.all().values_list("name", flat=True)
+    filename_list = [f.name for f in session.get_temporary_uploads()]
     if filename in filename_list:
         return {
             "accepted": False,
