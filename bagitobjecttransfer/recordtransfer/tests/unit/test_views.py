@@ -96,9 +96,7 @@ class TestUploadFileView(TestCase):
 
     def test_same_session_used(self) -> None:
         """Test that the same session is used if the token is provided."""
-        session = UploadSession.new_session()
-        session.user = self.test_user_1
-        session.save()
+        session = UploadSession.new_session(user=self.test_user_1)
 
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
@@ -117,9 +115,7 @@ class TestUploadFileView(TestCase):
 
     def test_new_session_made_invalid_token(self) -> None:
         """Test that a new session is made if the token is invalid."""
-        session = UploadSession.new_session()
-        session.user = self.test_user_1
-        session.save()
+        session = UploadSession.new_session(user=self.test_user_1)
 
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
@@ -134,9 +130,8 @@ class TestUploadFileView(TestCase):
 
     def test_new_session_made_token_mismatch_user(self) -> None:
         """Test that a new session is created if the token does not match the user."""
-        session = UploadSession.new_session()
-        session.user = User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
-        session.save()
+        test_user_2 = User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
+        session = UploadSession.new_session(user=test_user_2)
 
         response = self.client.post(
             reverse("recordtransfer:uploadfile"),
@@ -307,9 +302,7 @@ class TestListUploadedFilesView(TestCase):
     def setUp(self) -> None:
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.session = UploadSession.new_session()
-        self.session.user = self.test_user_1
-        self.session.save()
+        self.session = UploadSession.new_session(user=self.test_user_1)
         self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
 
     def test_list_uploaded_files_session_not_found(self) -> None:
@@ -373,9 +366,7 @@ class TestUploadedFileView(TestCase):
     def setUp(self) -> None:
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.session = UploadSession.new_session()
-        self.session.user = self.test_user_1
-        self.session.save()
+        self.session = UploadSession.new_session(user=self.test_user_1)
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
         self.temp_file = self.session.add_temp_file(SimpleUploadedFile("testfile.txt", self.one_kib))
         self.url = reverse(

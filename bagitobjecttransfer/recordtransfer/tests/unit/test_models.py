@@ -81,7 +81,6 @@ class TestUploadSession(TestCase):
     def setUp(self) -> None:
         """Set up test."""
         self.session = UploadSession.new_session()
-        self.session.save()
 
         self.test_temp_file = get_mock_temp_uploaded_file(
             "test.pdf", size=1000, session=self.session
@@ -619,7 +618,6 @@ class TestBaseUploadedFile(TestCase, ABC):
     def setUp(self) -> None:
         """Set up test."""
         self.session = UploadSession.new_session()
-        self.session.save()
 
         test_file_content = b"Test file content"
         test_file = SimpleUploadedFile(

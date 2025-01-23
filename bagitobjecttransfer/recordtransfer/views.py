@@ -890,9 +890,7 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             else None
         )
         if not session:
-            session = UploadSession.new_session()
-            session.user = user
-            session.save()
+            session = UploadSession.new_session(user=user)
 
         _file = request.FILES.get("file")
         if not _file:

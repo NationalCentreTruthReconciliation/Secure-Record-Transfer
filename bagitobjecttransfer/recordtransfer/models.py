@@ -93,7 +93,9 @@ class UploadSession(models.Model):
     @classmethod
     def new_session(cls, user: Optional[User] = None) -> UploadSession:
         """Start a new upload session."""
-        return cls(token=get_random_string(length=32), started_at=timezone.now(), user=user)
+        return cls.objects.create(
+            token=get_random_string(32), started_at=timezone.now(), user=user
+        )
 
     @property
     def upload_size(self) -> int:
