@@ -7,7 +7,7 @@
 
 {% block formfields %}
 
-    {% comment %} {% for form in form_list %}
+    {% for form in form_list %}
         <h2>{{ form.form_name }}</h2>
         <ul>
             {% if form.fields|length > 0 and form.fields.items %}
@@ -24,7 +24,7 @@
                 {% endfor %}
             {% endif %}
         </ul>
-    {% endfor %} {% endcomment %}
+    {% endfor %}
     <p>{{ form_list }}</p>
 
 {% endblock formfields %}
