@@ -91,9 +91,9 @@ class UploadSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     @classmethod
-    def new_session(cls) -> UploadSession:
+    def new_session(cls, user: Optional[User] = None) -> UploadSession:
         """Start a new upload session."""
-        return cls(token=get_random_string(length=32), started_at=timezone.now())
+        return cls(token=get_random_string(length=32), started_at=timezone.now(), user=user)
 
     @property
     def upload_size(self) -> int:
