@@ -68,22 +68,18 @@ module.exports = {
         base: [
             ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/base/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" + 
+            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" +
                 "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
         ],
         transferform: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/" + 
+            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/" +
                 "transferform/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/" + 
+            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/" +
                 "transferform/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
             require.resolve("@uppy/core/dist/style.css"),
             require.resolve("@uppy/dashboard/dist/style.css"),
-        ],
-        dropzone: [
-            ...glob.sync('./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/dropzone/*.js')
-                .map(file => './' + path.relative(__dirname, file)),
         ],
         profile: [
             ...glob.sync(
@@ -95,12 +91,12 @@ module.exports = {
         ],
         submissiondetail: [
             ...glob.sync(
-                "./bagitobjecttransfer/recordtransfer/static/" + 
+                "./bagitobjecttransfer/recordtransfer/static/" +
                 "recordtransfer/css/submission_detail/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         submissiongroup: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" + 
+            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" +
                 "recordtransfer/js/submission_group/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
@@ -112,7 +108,7 @@ module.exports = {
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         admin_uploadedfile: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" + 
+            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" +
                 "recordtransfer/js/admin/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ]
