@@ -13,7 +13,10 @@ import {
     updateCapacityDisplay,
 } from "./utils";
 
-document.addEventListener("DOMContentLoaded", async () => {
+/**
+ * Sets up the Uppy space for uploading files.
+ */
+export async function setupUppy() {
     const settings = getFileUploadSettings();
     // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
@@ -171,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 progress: { uploadComplete: true, uploadStarted: true, percentage: 100 },
                 uploadURL: file.url,
             });
-            
+
         });
     }
-});
+}
