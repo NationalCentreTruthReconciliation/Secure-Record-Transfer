@@ -59,8 +59,12 @@ header.homepage {
     position: absolute;
     display: flex;
     flex-direction: column;
-    top: 80%;
-    right: -350px;
+    top: 60%;
+    /* Change from right: -350px */
+    right: 0;
+    /* Add fixed right position */
+    transform: translateY(0);
+    /* Match button timing */
     height: auto;
     max-height: 100vh;
     width: 300px;
@@ -74,8 +78,9 @@ header.homepage {
 }
 
 .nav-items-container.open {
-    right: 0;
+    top: 80%;
     visibility: visible;
+    transition: top 0.3s ease, opacity 0.3s ease;
 }
 
 /* Container for each nav item */
@@ -127,6 +132,7 @@ header.homepage {
     padding: 4px 8px;
     color: white;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .nav-toggle-button.active {
@@ -137,11 +143,7 @@ header.homepage {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
     padding-bottom: 20px;
-}
-
-.nav-toggle-button:hover {
-    background-color: #92929291;
-    border-radius: 4px;
+    z-index: 1001;
 }
 
 /* Login/logout button */
@@ -184,7 +186,7 @@ header.homepage {
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
-        transition: right 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        transition: opacity 0.3s ease-out;
     }
 
     .nav-item:hover {
