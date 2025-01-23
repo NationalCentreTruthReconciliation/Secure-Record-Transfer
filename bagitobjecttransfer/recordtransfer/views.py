@@ -1170,8 +1170,10 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         context["IS_NEW"] = False
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
+        context["js_context"] = {
+            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+        }
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -1218,8 +1220,10 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["IS_NEW"] = True
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
+        context["js_context"] = {
+            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+        }
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
