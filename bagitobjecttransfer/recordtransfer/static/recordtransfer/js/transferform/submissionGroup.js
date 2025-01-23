@@ -5,7 +5,7 @@ export async function setupSubmissionGroupForm() {
     const addNewGroupButton = document.getElementById("show-add-new-group-dialog");
     const contextElement = document.getElementById("py_context_submission_group");
 
-    if (!addNewGroupButton || !context) {
+    if (!addNewGroupButton || !contextElement) {
         return;
     }
 
@@ -14,10 +14,12 @@ export async function setupSubmissionGroupForm() {
     const selectField = document.getElementById(context["id_submission_group_selection"]);
     const groupName = document.getElementById(context["id_submission_group_name"]);
     const groupDesc = document.getElementById(context["id_submission_group_description"]);
+    const groupDescDisplay = document.getElementById(context["id_display_group_description"]);
+    const noDescription = "No description available";
 
     // Set the initial content of the group description
     // This will be updated after the group descriptions have been fetched asynchronously
-    groupDesc.textContent = "No description available";
+    groupDescDisplay.textContent = noDescription;
 
     // Fetch initial group descriptions when creating the form
     fetch(context["fetch_group_descriptions_url"], {
@@ -33,7 +35,8 @@ export async function setupSubmissionGroupForm() {
         .then(groups => {
             // Apply the group description to the data-description attribute of each option
             groups.forEach(function (group) {
-                console.log(`${group.uuid}: ${group.description}`);
+                document.querySelector(`option[value='${group.uuid}']`)
+                    .setAttribute("data-description", group.description);
             });
 
             updateGroupDescription();
@@ -41,8 +44,17 @@ export async function setupSubmissionGroupForm() {
 
     const updateGroupDescription = () => {
         // Find the currently selected group
+        const index = selectField.selectedIndex;
 
         // Set the group description to the data-description attribute from the selected option
+        if (index > 0) {
+            const selectedOption = selectField.options[index];
+            const groupDescription = selectedOption.getAttribute("data-description");
+            groupDescDisplay.textContent = groupDescription;
+        }
+        else {
+            groupDescDisplay.textContent = noDescription;
+        }
     };
 
     const selectGroup = (groupUUID) => {
@@ -70,6 +82,8 @@ export async function setupSubmissionGroupForm() {
 
     // Select the default group at first
     selectGroup(context?.default_group_id);
+
+    selectField.addEventListener("change", updateGroupDescription);
 
     const createNewGroupForm = document.getElementById("submission-group-form");
     const createNewGroupModal = document.getElementById("create-new-submissiongroup-modal");

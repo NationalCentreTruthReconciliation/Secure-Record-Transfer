@@ -677,6 +677,7 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "IS_NEW": True,
+                    "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "new_group_form": SubmissionGroupForm(),
                     "js_context": {
                         "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
