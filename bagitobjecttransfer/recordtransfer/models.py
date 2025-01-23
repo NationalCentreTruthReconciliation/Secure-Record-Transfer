@@ -295,8 +295,7 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
-        files = list(chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all()))
-        for f in files:
+        for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all()):
             f.remove()
 
         self.status = self.SessionStatus.DELETED
