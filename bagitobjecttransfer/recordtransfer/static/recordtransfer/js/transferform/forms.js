@@ -5,7 +5,7 @@
  * https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0
  */
 
-import { setupSubmissionGroupModal } from "./submissionGroupModal";
+import { setupSubmissionGroupForm } from "./submissionGroup";
 
 /**
  * Function to setup on click handlers for select boxes to toggle text fields when selecting "Other"
@@ -207,34 +207,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /***************************************************************************
-     * Dialog Box Setup
-     **************************************************************************/
-
-    setupSubmissionGroupModal();
+    setupSubmissionGroupForm();
 
     /***************************************************************************
      * Expandable Forms Setup
     **************************************************************************/
 
-    setupSelectOtherToggle(['#id_contactinfo-other_province_or_state'], removeOther);
+    setupSelectOtherToggle(["#id_contactinfo-other_province_or_state"], removeOther);
 
-    setupSelectOtherToggle(['.rights-select-other'], removeOther);
+    setupSelectOtherToggle([".rights-select-other"], removeOther);
 
     // Add a new click handler (with namespace) to fix the event handlers that were cloned.
-    $('.add-form-row', '#transfer-form').on('click.transfer-form', (event) => {
-        setupSelectOtherToggle(['.rights-select-other'], removeOther);
-    })
-
-    /***************************************************************************
-     * Group Description Display
-    **************************************************************************/
-    // Add a change event listener to the group selection field
-    if (typeof ID_SUBMISSION_GROUP_SELECTION !== 'undefined') {
-        const selectField = $('#' + ID_SUBMISSION_GROUP_SELECTION);
-        selectField.on('change', updateGroupDescription);
-        initializeGroupTransferForm();
-    }
+    $(".add-form-row", "#transfer-form").on("click.transfer-form", (event) => {
+        setupSelectOtherToggle([".rights-select-other"], removeOther);
+    });
 
     /**********************************************************************************************
      * Source information form setup
