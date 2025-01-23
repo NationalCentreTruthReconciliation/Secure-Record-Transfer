@@ -55,10 +55,10 @@ header.homepage {
 
 /* Sliding menu styles */
 .nav-items-container {
-    position: fixed;
+    position: absolute;
     display: flex;
     flex-direction: column;
-    top: 5vh;
+    top: 100%;
     right: -350px;
     height: auto;
     max-height: 100vh;
