@@ -1,17 +1,16 @@
-{% extends 'recordtransfer/transferform_standard.html' %}
+{% extends "recordtransfer/transferform_standard.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block javascript %}
     {{ block.super }}
-    {{ js_context|json_script:"py_context_dropzone" }}
-    <script src="{% static 'dropzone.bundle.js' %}"></script>
-{% endblock %}
-
-{% block buttonarrayclass %}flex-med-width-item{% endblock buttonarrayclass %}
-{% block savelinkclass %}flex-med-width-item{% endblock savelinkclass %}
-{% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
-{% block submitbuttontype %}button{% endblock %}
+    {{ js_context|json_script:"py_context_file_upload_settings" }}
+{% endblock javascript %}
+{% block buttonarrayclass %}
+    flex-med-width-item
+{% endblock buttonarrayclass %}
+{% block savelinkclass %}
+    flex-med-width-item
+{% endblock savelinkclass %}
 {% block formfields %}
     {{ block.super }}
     <p class="flex-med-width-item margin-top-25px">
@@ -25,22 +24,8 @@
         minutes, so please do not reload the web page when your files are being uploaded.
         {% endblocktrans %}
     </p>
-    <div id="dropzone-errors" class="flex-full-width-error"></div>
     <div class="flex-med-width-item">
-        <div id="file-dropzone" class="dz-clickable custom-dropzone dropzone">
-            <div class="dz-message">
-                <table class="dz-message-table">
-                    <tr>
-                        <td>
-                            <img src="{% static 'file_upload_32x32px.webp' %}">
-                        </td>
-                        <td>
-                            {% trans "Drop files here or click to upload" %}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+        <div id="uppy-dashboard"></div>
     </div>
     <div class="flex-med-width-item">
         <div>
@@ -52,4 +37,4 @@
             <span id="remaining-size">{{ MAX_TOTAL_UPLOAD_SIZE }}</span> {% trans "MiB" %}
         </div>
     </div>
-{% endblock %}
+{% endblock formfields %}

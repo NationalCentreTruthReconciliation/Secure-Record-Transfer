@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
 from django.urls import path, re_path
@@ -16,6 +17,7 @@ if settings.FILE_UPLOAD_ENABLED:
         ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
         ("grouptransfer", forms.GroupTransferForm),
         ("uploadfiles", forms.UploadFilesForm),
+        ("review", forms.ReviewForm),
     ]
 else:
     _transfer_forms = [
@@ -27,6 +29,7 @@ else:
         ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
         ("grouptransfer", forms.GroupTransferForm),
         ("finalnotes", forms.FinalStepFormNoUpload),  # Different
+        ("review", forms.ReviewForm),
     ]
 
 app_name = "recordtransfer"
@@ -78,7 +81,11 @@ urlpatterns = [
     ),
 ]
 
-if settings.TESTING or not settings.DEBUG:
+if settings.DEBUG:
+    # Serve media files directly without nginx in development
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # Check permissions and serve through nginx in production
     urlpatterns.append(
         re_path(r"media/(?P<path>.*)", login_required(views.media_request), name="media")
     )
@@ -86,8 +93,17 @@ if settings.TESTING or not settings.DEBUG:
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
-            path("transfer/checkfile/", login_required(views.accept_file), name="checkfile"),
-            path("transfer/uploadfile/", login_required(views.uploadfiles), name="uploadfile"),
+            path("transfer/uploadfile/", login_required(views.upload_file), name="uploadfile"),
+            path(
+                "transfer/upload-session/<session_token>/files/",
+                login_required(views.list_uploaded_files),
+                name="list_uploaded_files",
+            ),
+            path(
+                "transfer/upload-session/<session_token>/files/<file_name>/",
+                login_required(views.uploaded_file),
+                name="uploaded_file",
+            ),
         ]
     )
 
@@ -118,3 +134,4 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             ),
         ]
     )
+

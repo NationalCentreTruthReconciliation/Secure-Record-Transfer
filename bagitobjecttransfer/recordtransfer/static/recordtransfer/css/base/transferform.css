@@ -113,31 +113,6 @@
     display: none !important;
 }
 
-#file-dropzone {
-    min-height: 250px;
-    background-color: #f9f9f9;
-    border-radius: 3px;
-    border: 1.5px dashed #919191;
-}
-
-.dz-progress {
-    /* Move file progress bar below the file name */
-    margin-top: 20px !important;
-}
-
-.dz-message-table {
-    /* Center table in dropzone */
-    margin: auto;
-}
-
-.dz-submit-disabled {
-    box-shadow: 0px 0px 7px red;
-}
-
-.custom-dropzone {
-    margin-top: 10px;
-}
-
 .required-field:after,
 .faux-required-field:after {
     content: "  *";

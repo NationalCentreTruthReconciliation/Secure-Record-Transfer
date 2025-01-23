@@ -3,15 +3,18 @@
   "version": "2024.10.22",
   "description": "The secure record transfer application has been designed for the purpose of transferring files and standardized metadata over the internet to an institution.",
   "scripts": {
-    "build": "webpack --config webpack.config.js && node scripts/compress_images.js",
+    "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",
     "lint": "eslint"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.6.12",
+    "@uppy/core": "^4.4.0",
+    "@uppy/dashboard": "^4.1.3",
+    "@uppy/golden-retriever": "^4.0.2",
+    "@uppy/xhr-upload": "^4.3.1",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
-    "dropzone": "^5.9.3",
     "glob": "^11.0.0",
     "imask": "^7.6.1",
     "mini-css-extract-plugin": "^2.9.2",

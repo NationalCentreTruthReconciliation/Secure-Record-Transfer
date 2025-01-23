@@ -44,6 +44,8 @@ services:
     build:
       context: .
       dockerfile: Containerfile
+      args:
+          WEBPACK_MODE: production
     command: python manage.py rqworker default
     restart: unless-stopped
     env_file:
@@ -64,6 +66,8 @@ services:
     build:
       context: .
       dockerfile: Containerfile
+      args:
+        WEBPACK_MODE: production
     command: gunicorn bagitobjecttransfer.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
     expose:
@@ -93,8 +97,13 @@ services:
     volumes:
       - static-volume:/app/static/
       - media-volume:/app/media/
-      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:z
+      - ./docker/nginx/templates/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:z
       - ./bagitobjecttransfer/templates/:/var/www/html/:z
+    env_file:
+      - .prod.env
+    environment:
+      - STATIC_ROOT=/app/static/
+      - MEDIA_ROOT=/app/media/
 
 volumes:
   mysql-database:

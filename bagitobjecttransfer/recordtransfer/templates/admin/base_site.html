@@ -12,9 +12,10 @@
         html[data-theme="light"], :root {
             --primary: #b13d32;
             --secondary: #f0f0f0;
+            --breadcrumbs-fg: #b6cbdd;
             --breadcrumbs-bg: #b13d32;
             --header-color: #333333;
-            --header-link-color: #000a92;
+            --header-link-color: #ffffff;
             --default-button-bg: #3c83a3;
             --button-bg: #81b6ce;
             --accent: #333333;
@@ -29,18 +30,31 @@
             .section:visited {
                 color: var(--secondary) !important;
             }
+
+            #header a:link, #header a:visited, #logout-form button {
+                color: var(--link-fg);
+            }
+
+            .theme-icon-when-light {
+                fill: var(--link-fg); 
+            }
+
+            #user-tools a, #logout-form button {
+                border-bottom: 1px solid #c2c2c2;
+            }
         }
 
-        html[data-theme="dark"] {
+        html[data-theme="dark"], :root {
             --primary: #6b0900;
             --secondary: #5c5c5c;
-            --accent:#ebebeb;
+            --accent: #ebebeb;
             --header-color: #cecece;
             --header-link-color: var(--accent);
             --header-bg: #1a1a1a;
             --default-button-bg: #3c83a3;
             --button-bg: #325261;
             --breadcrumbs-bg: #292929;
+            --selected-row: #4e636d;
 
             /* Override the section having color: var(--header-link-color) */
             .section {
@@ -50,30 +64,6 @@
             /* Override the section:visited having color: var(--header-color) */
             .section:visited {
                 color: var(--primary-fg) !important;
-            }
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary: #6b0900;
-                --secondary: #5c5c5c;
-                --accent: #ebebeb;
-                --header-color: #cecece;
-                --header-link-color: var(--accent);
-                --header-bg: #1a1a1a;
-                --default-button-bg: #3c83a3;
-                --button-bg: #325261;
-                --breadcrumbs-bg: #292929;
-
-                /* Override the section having color: var(--header-link-color) */
-                .section {
-                    color: var(--primary-fg);
-                }
-
-                /* Override the section:visited having color: var(--header-color) */
-                .section:visited {
-                    color: var(--primary-fg) !important;
-                }
             }
         }
 

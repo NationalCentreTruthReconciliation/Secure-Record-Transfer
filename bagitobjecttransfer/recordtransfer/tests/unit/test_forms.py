@@ -1,9 +1,10 @@
 from caais.models import SourceRole, SourceType
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from recordtransfer.forms import UserProfileForm
-from recordtransfer.forms.transfer_forms import SourceInfoForm
-from recordtransfer.models import User
+from recordtransfer.forms.transfer_forms import SourceInfoForm, UploadFilesForm
+from recordtransfer.models import UploadedFile, UploadSession, User
 
 
 class UserProfileFormTest(TestCase):
@@ -45,7 +46,7 @@ class UserProfileFormTest(TestCase):
         user = form.save()
         self.assertEqual(user.first_name, "Áccéntéd")
         self.assertEqual(user.last_name, "Námé")
-    
+
     def test_form_invalid_first_name(self):
         form_data = {
             "first_name": "123",
@@ -54,7 +55,7 @@ class UserProfileFormTest(TestCase):
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("first_name", form.errors)
-    
+
     def test_form_invalid_last_name(self):
         form_data = {
             "first_name": self.test_first_name,
@@ -379,3 +380,57 @@ class SourceInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
         self.assertIn("other_source_role", form.errors)
+
+
+class UploadFilesFormTest(TestCase):
+    """Tests for the UploadFilesForm."""
+
+    def setUp(self) -> None:
+        """Create a test session and include one uploaded file as part of session."""
+        self.upload_session = UploadSession.new_session()
+        self.upload_session.save()
+        self.uploaded_file = UploadedFile.objects.create(
+            session=self.upload_session,
+            file_upload=SimpleUploadedFile("test_file.txt", bytearray([1] * (1024**2))),
+            name="test_file.txt",
+        )
+        self.uploaded_file.save()
+
+    def test_form_valid(self) -> None:
+        """Case where the form is valid."""
+        form_data = {
+            "session_token": self.upload_session.token,
+            "general_note": "Some general note",
+        }
+        form = UploadFilesForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_missing_session_token(self) -> None:
+        """Case where the session token is missing."""
+        form_data = {
+            "general_note": "Some general note",
+        }
+        form = UploadFilesForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)
+
+    def test_form_invalid_session_token(self) -> None:
+        """Case where the session token is invalid."""
+        form_data = {
+            "session_token": "invalidtoken",
+            "general_note": "Some general note",
+        }
+        form = UploadFilesForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)
+
+    def test_form_no_files_uploaded(self) -> None:
+        """Case where no files have been uploaded."""
+        self.uploaded_file.delete()
+        form_data = {
+            "session_token": self.upload_session.token,
+            "general_note": "Some general note",
+        }
+        form = UploadFilesForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)

@@ -1,6 +1,9 @@
 FROM nikolaik/python-nodejs:python3.10-nodejs22-slim
 
 ENV PYTHONUNBUFFERED=1
+# Make arg passed from compose files into environment variable
+ARG WEBPACK_MODE
+ENV WEBPACK_MODE $WEBPACK_MODE
 
 # Install poetry
 RUN python -m pip install --user pipx && \
@@ -15,9 +18,6 @@ RUN poetry config virtualenvs.create false && poetry install
 
 # Copy Node-related files, and install NodeJS dependencies
 COPY package*.json webpack.config.js /app/
-# Copy script files
-COPY ./scripts /app/scripts
-
 RUN npm install --no-color
 
 # Copy entrypoint script to image
