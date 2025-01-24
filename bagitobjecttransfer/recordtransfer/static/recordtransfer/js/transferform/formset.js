@@ -1,17 +1,8 @@
 /**
  * Sets up the formset for the page, if one exists.
+ * @param {string} prefix The prefix of the formset, e.g., rights or otheridentifiers.
  */
-export function setupFormset() {
-    const contextElement = document.getElementById("py_context_formset");
-
-    // Set up adding and removing formset forms
-    if (!contextElement) {
-        return;
-    }
-
-    const contextContent = JSON.parse(contextElement.textContent);
-
-    const prefix = contextContent.formset_prefix;
+export function setupFormset(prefix) {
     const formRowRegex = new RegExp(`${prefix}-\\d+-`, "g");
 
     const maxFormsInput = document.getElementById(`id_${prefix}-MAX_NUM_FORMS`);

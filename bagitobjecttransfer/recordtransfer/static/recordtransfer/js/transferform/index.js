@@ -1,5 +1,5 @@
 import { setupContactInfoForm } from "./contactInfo";
-import { setupFormset } from "./formset";
+import { setupOtherIdentifiersForm } from "./otherIdentifiers";
 import { setupRightsForm } from "./rights";
 import { setupSourceInfoForm } from "./sourceInfo";
 import { setupSubmissionGroupForm } from "./submissionGroup";
@@ -13,10 +13,10 @@ import {
 document.addEventListener("DOMContentLoaded", function () {
     setupDatePickers();
     setupInputMasks();
-    setupFormset();
     setupContactInfoForm();
     setupSourceInfoForm();
     setupRightsForm();
+    setupOtherIdentifiersForm();
     setupSubmissionGroupForm();
     setupUppy();
 

@@ -1,3 +1,4 @@
+import { setupFormset } from "./formset";
 import { setupSelectOtherToggle } from "./otherField";
 
 /**
@@ -11,6 +12,10 @@ export function setupRightsForm() {
     }
 
     const context = JSON.parse(contextElement.textContent);
+
+    const formsetPrefix = context["formset_prefix"];
+
+    setupFormset(formsetPrefix);
 
     setupSelectOtherToggle(
         context["id_rights_type"],
