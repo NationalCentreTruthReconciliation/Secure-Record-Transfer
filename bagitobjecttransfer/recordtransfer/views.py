@@ -659,6 +659,9 @@ class TransferFormWizard(SessionWizardView):
         final_forms = OrderedDict()
         form_list = self.get_form_list() or []
         for form_step in form_list:
+            transfer_step = TransferStep(form_step)
+            if transfer_step in (TransferStep.ACCEPT_LEGAL, TransferStep.REVIEW):
+                continue
             form_obj = self.get_form(
                 step=form_step,
                 data=self.storage.get_step_data(form_step),
