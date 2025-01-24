@@ -3,6 +3,7 @@ import { setupOtherIdentifiersForm } from "./otherIdentifiers";
 import { setupRightsForm } from "./rights";
 import { setupSourceInfoForm } from "./sourceInfo";
 import { setupSubmissionGroupForm } from "./submissionGroup";
+import { setupUnsavedChangesProtection } from "./unsavedChanges";
 import { setupUppy } from "./uppyForm";
 import {
     setupDatePickers,
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setupRightsForm();
     setupOtherIdentifiersForm();
     setupSubmissionGroupForm();
+    setupUnsavedChangesProtection();
     setupUppy();
 
     const submitButton = document.getElementById("submit-form-btn");
