@@ -45,7 +45,7 @@ export function setupSourceInfoForm() {
         return;
     }
 
-    enterManualInfoInputElement.addEventListener("change", () => {
+    enterManualInfoInputElement.addEventListener("change", function () {
         const selected = this.querySelector("input[type=radio]:checked").value;
 
         if (selected === "yes") {

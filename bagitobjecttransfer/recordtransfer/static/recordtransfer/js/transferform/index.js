@@ -4,10 +4,16 @@ import { setupRightsForm } from "./rights";
 import { setupSourceInfoForm } from "./sourceInfo";
 import { setupSubmissionGroupForm } from "./submissionGroup";
 import { setupUppy } from "./uppyForm";
+import {
+    setupDatePickers,
+    setupInputMasks,
+    setupHelpTooltips,
+} from "./widgets";
 
 document.addEventListener("DOMContentLoaded", function () {
+    setupDatePickers();
+    setupInputMasks();
     setupFormset();
-
     setupContactInfoForm();
     setupSourceInfoForm();
     setupRightsForm();
@@ -20,4 +26,8 @@ document.addEventListener("DOMContentLoaded", function () {
             singleCaptchaFn();
         });
     }
+});
+
+window.addEventListener("load", function () {
+    setupHelpTooltips();
 });

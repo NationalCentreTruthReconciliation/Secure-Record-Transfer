@@ -1,3 +1,6 @@
+import "@uppy/core/dist/style.css";
+import "@uppy/dashboard/dist/style.css";
+
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHR from "@uppy/xhr-upload";
@@ -34,7 +37,7 @@ export async function setupUppy() {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
         updateCapacityDisplay(uppyFiles.length, totalSize);
-    };   
+    };
 
     const uppy = new Uppy(
         {
@@ -104,8 +107,8 @@ export async function setupUppy() {
             shouldRetry: (response) => {
                 const status = response.status;
                 return (
-                    status >= 500 && status < 600 || 
-                    status === 408 || 
+                    status >= 500 && status < 600 ||
+                    status === 408 ||
                     status === 429
                 );
             }
@@ -151,7 +154,7 @@ export async function setupUppy() {
         );
         if (hasIssues) {
             uppy.info(
-                "Remove the files with issues to proceed.", 
+                "Remove the files with issues to proceed.",
                 "error",
                 5000
             );
