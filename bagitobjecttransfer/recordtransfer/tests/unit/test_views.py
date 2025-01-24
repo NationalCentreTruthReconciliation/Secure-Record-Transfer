@@ -70,7 +70,7 @@ class TestUploadFileView(TestCase):
 
     def test_no_files_uploaded(self):
         response = self.client.post(reverse("recordtransfer:uploadfile"), {})
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_new_session_created(self):
         response = self.client.post(
