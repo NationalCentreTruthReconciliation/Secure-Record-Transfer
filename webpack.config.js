@@ -54,7 +54,7 @@ class WebPConverterPlugin {
 
 module.exports = {
     mode: process.env.WEBPACK_MODE === "production" ? "production" : "development",
-    devtool: false,
+    devtool: "eval-source-map",
     watchOptions: {
         aggregateTimeout: 500,
         poll: 1000,
