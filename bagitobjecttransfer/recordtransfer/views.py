@@ -697,6 +697,11 @@ class TransferFormWizard(SessionWizardView):
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
+        # This is actually checking the step from which the user is coming from, not the step
+        # they are currently on/going to
+        if self.request.POST.get("transfer_form_wizard-current_step") == TransferStep.REVIEW:
+            context["SENT_FROM_REVIEW"] = True
+
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
             context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
 
