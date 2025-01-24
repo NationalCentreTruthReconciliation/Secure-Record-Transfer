@@ -449,52 +449,19 @@ class SourceInfoForm(TransferForm):
 
 
 class RecordDescriptionForm(TransferForm):
-    """The Description Information portion of the form. Contains fields from Section 3 of CAAIS"""
+    """The Description Information portion of the form.
 
-    def clean(self):
-        """Clean form data, and create a date_of_materials field derived from the start and end
-        date fields.
-        """
+    Contains fields from Section 3 of CAAIS.
+    """
+
+    def clean(self) -> dict:
+        """Form date as approximate if user chose to mark the date as approximate."""
         cleaned_data = super().clean()
 
-        err = False
-
-        if not settings.USE_DATE_WIDGETS:
-            start_date_text = cleaned_data["start_date_of_material_text"]
-            end_date_text = cleaned_data["end_date_of_material_text"]
-
-        else:
-            start_date = cleaned_data.get("start_date_of_material")
-            end_date = cleaned_data.get("end_date_of_material")
-
-            err = False
-
-            if not start_date:
-                self.add_error("start_date_of_material", "Start date was not valid")
-                err = True
-
-            if not end_date:
-                self.add_error("end_date_of_material", "End date was not valid")
-                err = True
-
-            if start_date and end_date and end_date < start_date:
-                self.add_error("end_date_of_material", "End date cannot be before start date")
-                err = True
-
-            if not err:
-                start_date_text = start_date.strftime(r"%Y-%m-%d")
-                end_date_text = end_date.strftime(r"%Y-%m-%d")
-
-        if not err:
-            if cleaned_data.get("start_date_is_approximate", False):
-                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date_text)
-            if cleaned_data.get("end_date_is_approximate", False):
-                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date_text)
-
-            if start_date == end_date:
-                cleaned_data["date_of_materials"] = start_date
-            else:
-                cleaned_data["date_of_materials"] = f"{start_date} - {end_date}"
+        if cleaned_data.get("date_is_approximate", False) and (
+            date := cleaned_data.get("date_of_materials")
+        ):
+            cleaned_data["date_of_materials"] = settings.APPROXIMATE_DATE_FORMAT.format(date=date)
 
         return cleaned_data
 
@@ -506,85 +473,32 @@ class RecordDescriptionForm(TransferForm):
         label=gettext("Title"),
     )
 
-    if not settings.USE_DATE_WIDGETS:
-        # Use _text to avoid jQuery input masks
-        start_date_of_material_text = forms.CharField(
-            min_length=2,
-            max_length=64,
-            required=True,
-            widget=forms.TextInput(attrs={"placeholder": gettext("e.g., 2000-03-14")}),
-            label=gettext("Earliest date"),
-            help_text=gettext(
-                "Enter the earliest date relevant to the files you're transferring."
-            ),
-        )
-        end_date_of_material_text = forms.CharField(
-            min_length=2,
-            max_length=64,
-            required=True,
-            widget=forms.TextInput(
-                attrs={
-                    "placeholder": "e.g., Fall 1925",
-                }
-            ),
-            label=gettext("Latest date"),
-            help_text=gettext("Enter the latest date relevant to the files you're transferring."),
-        )
-        start_date_is_approximate = False
-        end_date_is_approximate = False
+    date_of_materials = forms.RegexField(
+        regex=r"^(\d{4}-\d{2}-\d{2})(?:\s+-\s+(\d{4}-\d{2}-\d{2}))?$",
+        min_length=2,
+        max_length=64,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": gettext("2000-03-14 - 2001-05-06"),
+                "class": "date-range-picker" if settings.USE_DATE_WIDGETS else "date-range-text",
+            }
+        ),
+        label=gettext("Date of materials"),
+        help_text=gettext(
+            "Enter the range of dates that the materials cover, or a single date if there is "
+            "no range."
+        ),
+    )
 
-    else:
-        start_date_of_material = forms.DateField(
-            input_formats=[r"%Y-%m-%d"],
-            required=True,
-            widget=forms.DateInput(
-                attrs={
-                    "class": "start_date_picker reduce-form-field-width",
-                    "autocomplete": "off",
-                    "placeholder": "yyyy-mm-dd",
-                }
-            ),
-            label=gettext("Earliest date"),
-            help_text=gettext(
-                "Enter the earliest date relevant to the files you're transferring."
-            ),
-        )
-
-        # This field is intended to be tied to a button in a date picker for the start date
-        start_date_is_approximate = forms.BooleanField(
-            required=False,
-            widget=forms.CheckboxInput(
-                attrs={
-                    "hidden": True,
-                }
-            ),
-            label="hidden",
-        )
-
-        end_date_of_material = forms.DateField(
-            input_formats=[r"%Y-%m-%d"],
-            required=True,
-            widget=forms.DateInput(
-                attrs={
-                    "class": "end_date_picker reduce-form-field-width",
-                    "autocomplete": "off",
-                    "placeholder": "yyyy-mm-dd",
-                }
-            ),
-            label=gettext("Latest date"),
-            help_text=gettext("Enter the latest date relevant to the files you're transferring."),
-        )
-
-        # This field is intended to be tied to a button in a date picker for the end date
-        end_date_is_approximate = forms.BooleanField(
-            required=False,
-            widget=forms.CheckboxInput(
-                attrs={
-                    "hidden": True,
-                }
-            ),
-            label="hidden",
-        )
+    date_is_approximate = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(),
+        label=gettext("Date is approximated"),
+        help_text=gettext(
+            "Check this box if the date is approximate, or if you are unsure of the date."
+        ),
+    )
 
     language_of_material = forms.CharField(
         required=True,
