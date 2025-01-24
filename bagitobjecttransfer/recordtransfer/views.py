@@ -699,7 +699,7 @@ class TransferFormWizard(SessionWizardView):
 
         # This is actually checking the step from which the user is coming from, not the step
         # they are currently on/going to
-        if self.request.POST.get("transfer_form_wizard-current_step") == TransferStep.REVIEW:
+        if self.request.POST.get("transfer_form_wizard-current_step") == TransferStep.REVIEW.value:
             context["SENT_FROM_REVIEW"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
@@ -1050,7 +1050,9 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     try:
         session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
-            return JsonResponse({"error": gettext("Invalid filename or upload session token")}, status=404)
+            return JsonResponse(
+                {"error": gettext("Invalid filename or upload session token")}, status=404
+            )
 
         if request.method == "DELETE":
             try:

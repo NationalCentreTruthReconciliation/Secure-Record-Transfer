@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const safeElements = [
         document.getElementById("form-next-button"),
         document.getElementById("form-previous-button"),
+        document.getElementById("form-review-button"),
         document.getElementById("submit-form-btn"),
         elements.formSaveButton,
         ...document.getElementsByClassName("step-link")

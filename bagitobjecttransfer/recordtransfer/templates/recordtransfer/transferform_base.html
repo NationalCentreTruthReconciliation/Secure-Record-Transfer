@@ -55,13 +55,19 @@
                         id="form-next-button"
                         {% endblock submitbuttonattributes %}
                         type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                        class="blue-button">
+                        class="blue-button margin-right-20px">
                     {% if wizard.steps.step1 == wizard.steps.count %}
                         {% trans "Submit" %}
                     {% else %}
                         {% trans "Next Step" %}
                     {% endif %}
                 </button>
+                {% if SENT_FROM_REVIEW %}
+                    <button id="form-review-button"
+                            name="wizard_goto_step"
+                            value="{{ wizard.steps.last }}"
+                            class="blue-button margin-right-20px">{% trans "Return to Review" %}</button>
+                {% endif %}
             </div>
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
