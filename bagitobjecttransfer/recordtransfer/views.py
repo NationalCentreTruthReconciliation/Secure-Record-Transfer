@@ -88,7 +88,7 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
-    extract_form_data,
+    format_form_data,
     get_human_readable_file_count,
     get_human_readable_size,
 )
@@ -755,7 +755,7 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.REVIEW:
-            context["form_list"] = extract_form_data(self.get_final_forms(), user=self.request.user)
+            context["form_list"] = format_form_data(self.get_final_forms(), user=self.request.user)
 
         return context
 

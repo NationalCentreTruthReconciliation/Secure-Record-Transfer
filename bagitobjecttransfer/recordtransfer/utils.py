@@ -358,8 +358,8 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     return {"accepted": True}
 
 
-def extract_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> list[dict[str, Any]]:
-    """Extract form data from a list of forms and formsets."""
+def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> list[dict[str, Any]]:
+    """Format form data to be used in a form review page."""
     preview_data = []
 
     for step_title, form in form_dict.items():
