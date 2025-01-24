@@ -1,28 +1,38 @@
-/**
- * Close and open navigation bar drawer. Code adapted from:
- * https://webdesign.tutsplus.com/tutorials/how-to-build-a-responsive-navigation-bar-with-flexbox--cms-33535
- * Credit to: Anna Monus
- * Modifications made by: Daniel Lovegrove
- */
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     const openToggle = document.querySelector(".nav-toggle-open");
-    const closeToggle = document.querySelector(".nav-toggle-close");
-    const toggleContainer = document.querySelector(".toggle-container");
-    const menu = document.querySelector(".main-navbar");
+    const navItemsContainer = document.querySelector(".nav-items-container");
+    const overlay = document.querySelector(".menu-overlay");
 
-    toggleContainer.addEventListener("click", (e) => {
-        // Close it if its open
-        if (menu.classList.contains("active")) {
-            menu.classList.remove("active")
-            openToggle.style.display = "block"
-            closeToggle.style.display = "none"
+    const toggleButton = document.querySelector(".nav-toggle-button");
+
+    toggleButton.addEventListener("click", function(e) {
+        e.preventDefault();
+        toggleButton.classList.toggle("active");
+        overlay.classList.toggle("show");
+    });
+
+    openToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navItemsContainer.classList.toggle("open");
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener("click", (e) => {
+        if (navItemsContainer.classList.contains("open") &&
+            !navItemsContainer.contains(e.target)) {
+            navItemsContainer.classList.remove("open");
+            overlay.classList.remove("show");
+            toggleButton.classList.toggle("active");
         }
-        // Open it if it's closed
-        else {
-            menu.classList.add("active")
-            openToggle.style.display = "none"
-            closeToggle.style.display = "block"
+    });
+
+    // Handle resize events
+    window.addEventListener("resize", () => {
+        if (window.innerWidth >= 800) {
+            navItemsContainer.classList.remove("open");
+            overlay.classList.remove("show");
+            toggleButton.classList.remove("active");
         }
-    }, false);
+    });
 });

@@ -8,11 +8,17 @@
         {% block javascript %}
             <script src="{% static 'base.bundle.js' %}"></script>
         {% endblock javascript %}
-        <!-- CSS -->
+        {# Fonts #}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+        {# Icons #}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        {# CSS #}
         {% block stylesheet %}
             <link rel="stylesheet" href="{% static 'base.css' %}">
         {% endblock stylesheet %}
-        <!-- Favicon -->
+        {# Favicon #}
         <link rel="shortcut icon"
               type="image/png"
               href="{% static "recordtransfer/img/favicon.ico" %}" />
@@ -26,7 +32,9 @@
                 {% include "recordtransfer/banner.html" %}
             {% endblock banner %}
             {% block header %}
-                {% include "recordtransfer/header.html" %}
+                {% if request.path != "/" %}
+                    {% include "recordtransfer/header.html" %}
+                {% endif %}
             {% endblock header %}
             {% block dialog %}
             {% endblock %}

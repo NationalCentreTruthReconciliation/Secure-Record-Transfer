@@ -577,7 +577,7 @@ class RightsForm(TransferForm):
         rights_type = cleaned_data.get("rights_type", None)
         other_rights_type = cleaned_data.get("other_rights_type", "")
 
-        if rights_type.name.lower() == "other" and not other_rights_type:
+        if rights_type and rights_type.name.lower() == "other" and not other_rights_type:
             self.add_error(
                 "rights_type",
                 gettext(
@@ -782,7 +782,7 @@ class UploadFilesForm(TransferForm):
             self.add_error("session_token", "Invalid upload. Please try again.")
             return cleaned_data
 
-        if upload_session.number_of_files_uploaded() == 0:
+        if upload_session.file_count == 0:
             self.add_error("session_token", "You must upload at least one file")
 
         return cleaned_data

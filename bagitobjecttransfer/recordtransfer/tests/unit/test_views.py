@@ -11,7 +11,7 @@ from django.utils.translation import gettext
 from override_storage import override_storage
 from override_storage.storage import LocMemStorage
 
-from recordtransfer.models import UploadedFile, UploadSession, User
+from recordtransfer.models import TempUploadedFile, UploadSession, User
 
 
 class TestHomepage(TestCase):
@@ -23,7 +23,7 @@ class TestHomepage(TestCase):
     def test_index(self):
         response = self.client.get(reverse("recordtransfer:index"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Welcome")
+        self.assertContains(response, "NCTR Record Transfer")
 
 
 @patch(
@@ -84,9 +84,6 @@ class TestUploadFileView(TestCase):
         session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
         self.assertTrue(session)
 
-        session.uploadedfile_set.all().delete()
-        session.delete()
-
     def test_same_session_used(self):
         session = UploadSession.new_session()
         session.save()
@@ -100,11 +97,8 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["uploadSessionToken"], session.token)
-        self.assertEqual(len(session.uploadedfile_set.all()), 1)
-        self.assertEqual(session.uploadedfile_set.first().name, "File.PDF")
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 1)
+        self.assertEqual(session.tempuploadedfile_set.first().name, "File.PDF")
 
     def test_file_issue_flagged(self):
         self.patch__accept_file.return_value = {"accepted": False, "error": "ISSUE"}
@@ -124,10 +118,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.uploadedfile_set.all()), 0)
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
 
     def test_session_issue_flagged(self):
         self.patch__accept_session.return_value = {"accepted": False, "error": "ISSUE"}
@@ -147,10 +138,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.uploadedfile_set.all()), 0)
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
 
     def test_malware_flagged(self):
         self.patch_check_for_malware.side_effect = ValidationError("Malware found")
@@ -169,10 +157,7 @@ class TestUploadFileView(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(len(session.uploadedfile_set.all()), 0)
-
-        session.uploadedfile_set.all().delete()
-        session.delete()
+        self.assertEqual(len(session.tempuploadedfile_set.all()), 0)
 
     @skipIf(True, "File content scanning is not implemented yet")
     def test_content_issue_flagged(self):
@@ -188,6 +173,8 @@ class TestUploadFileView(TestCase):
         """
 
     def tearDown(self):
+        TempUploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
         self.client.logout()
 
     @classmethod
@@ -195,8 +182,6 @@ class TestUploadFileView(TestCase):
         super().tearDownClass()
         logging.disable(logging.NOTSET)
         patch.stopall()
-        UploadedFile.objects.all().delete()
-        UploadSession.objects.all().delete()
 
 
 class TestMediaRequestView(TestCase):
@@ -287,23 +272,19 @@ class TestListUploadedFilesView(TestCase):
 
     def test_list_uploaded_files_with_files(self):
         """Session has one file."""
-        uploaded_file = UploadedFile(
-            session=self.session,
-            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
-            name="testfile.txt",
-        )
-        uploaded_file.save()
+        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
+        temp_file = self.session.add_temp_file(file_to_upload)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         responseFiles = response_json.get("files")
         self.assertEqual(len(responseFiles), 1)
         self.assertEqual(responseFiles[0]["name"], "testfile.txt")
-        self.assertEqual(responseFiles[0]["size"], uploaded_file.file_upload.size)
-        self.assertEqual(responseFiles[0]["url"], uploaded_file.get_file_access_url())
+        self.assertEqual(responseFiles[0]["size"], file_to_upload.size)
+        self.assertEqual(responseFiles[0]["url"], temp_file.get_file_access_url())
 
     def tearDown(self):
-        UploadedFile.objects.all().delete()
+        TempUploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
 
@@ -324,14 +305,10 @@ class TestUploadedFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session()
         self.session.save()
-        self.uploaded_file = UploadedFile(
-            session=self.session,
-            file_upload=SimpleUploadedFile("testfile.txt", self.one_kib),
-            name="testfile.txt",
-        )
-        self.uploaded_file.save()
+        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
+        self.temp_file = self.session.add_temp_file(SimpleUploadedFile("testfile.txt", self.one_kib))
         self.url = reverse(
-            "recordtransfer:uploaded_file", args=[self.session.token, self.uploaded_file.name]
+            "recordtransfer:uploaded_file", args=[self.session.token, file_to_upload.name]
         )
 
     def test_uploaded_file_session_not_found(self):
@@ -358,23 +335,23 @@ class TestUploadedFileView(TestCase):
         """Delete an uploaded file."""
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 204)
-        self.assertFalse(UploadedFile.objects.filter(name="testfile.txt").exists())
+        self.assertFalse(TempUploadedFile.objects.filter(name="testfile.txt").exists())
 
     @patch("recordtransfer.views.settings.DEBUG", True)
     def test_get_uploaded_file_in_debug(self):
         response = self.client.get(self.url)
-        self.assertEqual(response.url, self.uploaded_file.get_file_media_url())
+        self.assertEqual(response.url, self.temp_file.get_file_media_url())
 
     @patch("recordtransfer.views.settings.DEBUG", False)
     def test_get_uploaded_file_in_production(self):
         response = self.client.get(self.url)
         self.assertIn("X-Accel-Redirect", response.headers)
         self.assertEqual(
-            response.headers["X-Accel-Redirect"], self.uploaded_file.get_file_media_url()
+            response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url()
         )
 
     def tearDown(self):
-        UploadedFile.objects.all().delete()
+        TempUploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
 
 

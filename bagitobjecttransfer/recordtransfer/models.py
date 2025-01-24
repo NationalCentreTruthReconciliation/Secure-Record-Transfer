@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
 import uuid
+from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Optional, Union
 
@@ -10,8 +13,10 @@ from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.files import File
+from django.core.files.uploadedfile import UploadedFile
 from django.db import models
-from django.db.models.signals import post_delete
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -39,138 +44,387 @@ class User(AbstractUser):
 
 
 class UploadSession(models.Model):
-    """Represents a file upload session, that may or may not be split into
-    multiple parallel uploads
+    """Represents a file upload session. This model is used to track the files that a
+    user uploads during a session.
+
+    The following state diagram illustrates the possible states and transitions for an
+    UploadSession:
+
+    .. mermaid::
+       :caption: UploadSession State Diagram
+
+       flowchart TD
+       CREATED --> EXPIRED
+       CREATED --> UPLOADING
+       UPLOADING --> CREATED
+       UPLOADING --> EXPIRED
+       UPLOADING --> COPYING_IN_PROGRESS
+       UPLOADING --> REMOVING_IN_PROGRESS
+       COPYING_IN_PROGRESS --> COPYING_FAILED
+       COPYING_IN_PROGRESS --> STORED
+       STORED --> COPYING_IN_PROGRESS
+       STORED --> REMOVING_IN_PROGRESS
+       REMOVING_IN_PROGRESS --> DELETED
     """
+
+    class SessionStatus(models.TextChoices):
+        """The status of the session."""
+
+        CREATED = "CR", _("Session Created")
+        EXPIRED = "EX", _("Session Expired")
+        UPLOADING = "UG", _("Uploading Files")
+        COPYING_IN_PROGRESS = "CP", _("File Copy in Progress")
+        STORED = "SD", _("All Files in Permanent Storage")
+        COPYING_FAILED = "FD", _("Copying Failed")
+        REMOVING_IN_PROGRESS = "RP", _("File Removal in Progress")
+        DELETED = "DL", _("All Files Removed")
+
+        def __str__(self) -> str:
+            """Return the string representation of the session status."""
+            return self.name
 
     token = models.CharField(max_length=32)
     started_at = models.DateTimeField()
+    status = models.CharField(
+        max_length=2, choices=SessionStatus.choices, default=SessionStatus.CREATED
+    )
 
     @classmethod
-    def new_session(cls):
-        """Start a new upload session"""
+    def new_session(cls) -> UploadSession:
+        """Start a new upload session."""
         return cls(token=get_random_string(length=32), started_at=timezone.now())
 
     @property
-    def upload_size(self):
-        """Get total size (in bytes) of all uploaded files in this session"""
-        return sum(f.file_upload.size for f in self.get_existing_file_set())
-
-    def get_existing_file_set(self):
-        """Get all files from the uploadedfile_set where the file exists"""
-        return [f for f in self.uploadedfile_set.all() if f.exists]
-
-    def number_of_files_uploaded(self):
-        """Get the number of files associated with this session.
-
-        Returns:
-            (int): The number of files
+    def upload_size(self) -> int:
+        """Get total size (in bytes) of all uploaded files in this session. This includes the size
+        of both temporary and permanent files.
         """
-        return len(self.uploadedfile_set.all())
+        if self.status in (
+            self.SessionStatus.EXPIRED,
+            self.SessionStatus.DELETED,
+        ):
+            raise ValueError(
+                f"Cannot get upload size from session {self.token} because the session has "
+                "expired or has been deleted"
+            )
+        elif self.status in (
+            self.SessionStatus.COPYING_IN_PROGRESS,
+            self.SessionStatus.REMOVING_IN_PROGRESS,
+        ):
+            raise ValueError(
+                f"Cannot get upload size from session {self.token} while copying or removing "
+                "files is in progress"
+            )
+        return sum(
+            f.file_upload.size
+            for f in chain(self.tempuploadedfile_set.all(), self.permuploadedfile_set.all())
+            if f.exists
+        )
 
-    def remove_session_uploads(self, logger=None):
-        """Remove uploaded files associated with this session.
+    @property
+    def file_count(self) -> int:
+        """Get the total count of temporary + permanent uploaded files."""
+        if self.status in (
+            self.SessionStatus.EXPIRED,
+            self.SessionStatus.DELETED,
+        ):
+            raise ValueError(
+                f"Cannot get file count from session {self.token} because the session has "
+                "expired or has been deleted"
+            )
+        elif self.status in (
+            self.SessionStatus.COPYING_IN_PROGRESS,
+            self.SessionStatus.REMOVING_IN_PROGRESS,
+        ):
+            raise ValueError(
+                f"Cannot get file count from session {self.token} while copying or removing files "
+                "is in progress"
+            )
+        return sum(
+            f.exists
+            for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all())
+        )
+
+    def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
+        """Add a temporary uploaded file to this session."""
+        if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+            raise ValueError(
+                f"Cannot add temporary uploaded file to session {self.token} because the session "
+                f"status is {self.status} and not {self.SessionStatus.CREATED} or "
+                f"{self.SessionStatus.UPLOADING}"
+            )
+
+        temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
+        temp_file.save()
+
+        if self.status == self.SessionStatus.CREATED:
+            self.status = self.SessionStatus.UPLOADING
+            self.save()
+
+        return temp_file
+
+    def remove_temp_file_by_name(self, name: str) -> None:
+        """Remove a temporary uploaded file from this session by name."""
+        if self.status != self.SessionStatus.UPLOADING:
+            raise ValueError(
+                f"Cannot remove temporary uploaded file from session {self.token} because the "
+                f"session status is {self.status} and not {self.SessionStatus.UPLOADING}"
+            )
+        try:
+            temp_file = self.tempuploadedfile_set.get(name=name)
+        except TempUploadedFile.DoesNotExist as exc:
+            raise FileNotFoundError(
+                f"No temporary file with name {name} exists in session {self.token}"
+            ) from exc
+
+        temp_file.delete()
+
+        if self.file_count == 0:
+            self.status = self.SessionStatus.CREATED
+            self.save()
+
+    def get_temp_file_by_name(self, name: str) -> TempUploadedFile:
+        """Get an temporary uploaded file in this session by name.
 
         Args:
-            logger: A logger object
+            name: The name of the file to find
         """
-        logger = logger or LOGGER
-        existing_files = self.get_existing_file_set()
-        if existing_files:
-            for uploaded_file in existing_files:
-                uploaded_file.remove()
-        else:
-            logger.info("There are no existing uploaded files in the session %s", self.token)
+        if self.status != self.SessionStatus.UPLOADING:
+            raise ValueError(
+                f"Can only get temporary uploaded files from session {self.token} when the "
+                f"session status is {self.SessionStatus.UPLOADING}"
+            )
 
-    def move_uploads_to_permanent_storage(self, logger: Optional[logging.Logger] = None) -> None:
-        """Move uploaded files from temporary to permanent storage.
+        try:
+            return self.tempuploadedfile_set.get(name=name)
+        except TempUploadedFile.DoesNotExist as exc:
+            raise FileNotFoundError(
+                f"No temporary file with name {name} exists in session {self.token}"
+            ) from exc
+
+    def get_temporary_uploads(self) -> list[TempUploadedFile]:
+        """Get a list of temporary uploaded files associated with this session.
+
+        May be empty if temp uploads have already been moved to permanent storage.
+        """
+        if self.status in (self.SessionStatus.CREATED, self.SessionStatus.STORED):
+            return []
+        elif self.status in (
+            self.SessionStatus.EXPIRED,
+            self.SessionStatus.DELETED,
+        ):
+            raise ValueError(
+                f"Cannot get temporary uploaded files from session {self.token} because the "
+                "session has expired or has been deleted"
+            )
+        elif self.status in (
+            self.SessionStatus.COPYING_IN_PROGRESS,
+            self.SessionStatus.REMOVING_IN_PROGRESS,
+        ):
+            raise ValueError(
+                f"Cannot get temporary uploaded files from session {self.token} while copy or "
+                "removal of files is in progress"
+            )
+        return [f for f in self.tempuploadedfile_set.all() if f.exists]
+
+    def get_permanent_uploads(self) -> list[PermUploadedFile]:
+        """Get a list of permanent uploaded files associated with this session.
+
+        May be empty if temp uploads have not been moved.
+        """
+        if self.status in (
+            self.SessionStatus.CREATED,
+            self.SessionStatus.UPLOADING,
+        ):
+            return []
+        elif self.status in (
+            self.SessionStatus.EXPIRED,
+            self.SessionStatus.DELETED,
+        ):
+            raise ValueError(
+                f"Cannot get permanent uploaded files from session {self.token} because the "
+                "session has expired or has been deleted"
+            )
+        elif self.status in (
+            self.SessionStatus.COPYING_IN_PROGRESS,
+            self.SessionStatus.REMOVING_IN_PROGRESS,
+        ):
+            raise ValueError(
+                f"Cannot get permanent uploaded files from session {self.token} while copy or "
+                "removal of files is in progress"
+            )
+        return [f for f in self.permuploadedfile_set.all() if f.exists]
+
+    def get_uploads(self) -> Union[list[TempUploadedFile], list[PermUploadedFile]]:
+        """Get a list of temporary or permanent uploaded files associated with this session. Will
+        return temporary files if in the UPLOADING state, and permanent files if in the STORED
+        state.
+        """
+        if self.status == self.SessionStatus.CREATED:
+            return []
+        elif self.status == self.SessionStatus.UPLOADING:
+            return self.get_temporary_uploads()
+        elif self.status == self.SessionStatus.STORED:
+            return self.get_permanent_uploads()
+        else:
+            raise ValueError(
+                f"Cannot get uploaded files from session {self.token} because the session status "
+                f"is {self.status} and not {self.SessionStatus.UPLOADING} or "
+                f"{self.SessionStatus.STORED}"
+            )
+
+    def remove_uploads(self) -> None:
+        """Remove all uploaded files associated with this session."""
+        if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
+            LOGGER.warning("File removal is already in progress for session %s", self.token)
+            return
+        elif self.status == self.SessionStatus.CREATED:
+            LOGGER.warning("There are no uploaded files in the session %s to remove", self.token)
+            return
+        elif self.status in (self.SessionStatus.EXPIRED, self.SessionStatus.DELETED):
+            raise ValueError(
+                f"Cannot remove uploaded files from session {self.token} because the session has "
+                "expired or has been deleted"
+            )
+        elif self.status == self.SessionStatus.COPYING_IN_PROGRESS:
+            raise ValueError(
+                f"Cannot remove uploaded files from session {self.token} while copying files is "
+                "in progress"
+            )
+
+        self.status = self.SessionStatus.REMOVING_IN_PROGRESS
+        self.save()
+
+        for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all()):
+            f.remove()
+
+        self.status = self.SessionStatus.DELETED
+        self.save()
+
+    def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
+        """Make all temporary uploaded files associated with this session permanent.
 
         Args:
             logger: Optional logger instance to use for logging operations
         """
         logger = logger or LOGGER
-        existing_files = self.get_existing_file_set()
-        if not existing_files:
-            logger.info("There are no existing uploaded files in the session %s", self.token)
-        else:
-            logger.info(
-                "Moving %d uploaded files from the session %s to permanent storage",
-                len(existing_files),
-                self.token,
-            )
-            for uploaded_file in existing_files:
-                uploaded_file.move_to_permanent_storage()
 
-    def copy_session_uploads(self, destination, logger=None):
-        """Copy uploaded files associated with this session to a destination directory. Files are
-        not removed from their original location.
+        if self.status == self.SessionStatus.STORED:
+            logger.info(
+                "All uploaded files in session %s are already in permanent storage", self.token
+            )
+            return
+
+        if self.status != self.SessionStatus.UPLOADING:
+            raise ValueError(
+                f"Cannot make uploaded files permanent in session {self.token} because session "
+                f"status is {self.status} and not {self.SessionStatus.UPLOADING}"
+            )
+
+        # Set the status to indicate that the files are being copied to permanent storage
+        self.status = self.SessionStatus.COPYING_IN_PROGRESS
+        self.save()
+
+        files = self.tempuploadedfile_set.all()
+
+        logger.info(
+            "Moving %d temporary uploaded files from the session %s to permanent storage",
+            len(files),
+            self.token,
+        )
+        try:
+            for uploaded_file in files:
+                uploaded_file.move_to_permanent_storage()
+        except Exception as e:
+            logger.error(
+                "An error occurred while moving uploaded files to permanent storage: %s", e
+            )
+            self.status = self.SessionStatus.COPYING_FAILED
+            self.save()
+            return
+        self.status = self.SessionStatus.STORED
+        self.save()
+
+    def copy_session_uploads(
+        self, destination: str, logger: Optional[logging.Logger] = None
+    ) -> tuple[list[str], list[str]]:
+        """Copy permanent uploaded files associated with this session to a destination directory.
 
         Args:
-            destination (str): The destination directory
+            destination: The destination directory
             logger: A logger object
 
         Returns:
-            (tuple): A two tuple containing a list of the copied, and missing files
+            A tuple containing lists of copied and missing files
         """
-        return self._copy_session_uploads(destination, delete=False, logger=logger)
-
-    def _copy_session_uploads(self, destination, delete=True, logger=None):
         logger = logger or LOGGER
+
+        if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
+            raise ValueError(
+                f"Cannot copy files from session {self.token} to {destination} because the "
+                "copying is already in progress"
+            )
+
+        if self.status != self.SessionStatus.STORED:
+            raise ValueError(
+                f"Cannot copy files from session {self.token} to {destination} because the"
+                f"session status is {self.status} and not {self.SessionStatus.STORED}"
+            )
+
+        self.status = self.SessionStatus.COPYING_IN_PROGRESS
+        self.save()
 
         destination_path = Path(destination)
         if not destination_path.exists():
             logger.error("The destination path %s does not exist!", destination)
             raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
-        files = self.uploadedfile_set.all()
+        files = self.permuploadedfile_set.all()
 
-        if not files:
-            logger.warning("No existing files found in the session %s", self.token)
-            return ([], [])
-
-        verb = "Moving" if delete else "Copying"
-        logger.info("%s %d temp files to %s", verb, len(files), destination)
-        copied = []
-        missing = []
-        for uploaded_file in files:
-            source_path = uploaded_file.file_upload.path
-
-            if not uploaded_file.exists:
-                logger.error('File "%s" was moved or deleted', source_path)
-                missing.append(str(source_path))
+        logger.info("Copying %d files to %s", len(files), destination)
+        copied, missing = [], []
+        for f in files:
+            if not f.exists:
+                logger.error('File "%s" was moved or deleted', f.file_upload.path)
+                missing.append(f.file_upload.path)
                 continue
 
-            new_path = destination_path / uploaded_file.name
-            logger.info("%s %s to %s", verb, source_path, new_path)
-
-            if delete:
-                uploaded_file.move(new_path)
+            if f.name is not None:
+                new_path = destination_path / f.name
+                logger.info("Copying %s to %s", f.file_upload.path, new_path)
+                f.copy(str(new_path))
+                copied.append(str(new_path))
             else:
-                uploaded_file.copy(new_path)
+                logger.error('File name is None for file "%s"', f.file_upload.path)
+                missing.append(f.file_upload.path)
 
-            copied.append(str(new_path))
+        # No need to set status to COPYING_FAILED even if some files are missing
+        self.status = self.SessionStatus.STORED
+        self.save()
 
-        return (copied, missing)
+        return copied, missing
 
     def __str__(self):
-        return f"{self.token} ({self.started_at})"
+        """Return a string representation of this object."""
+        return f"{self.token} ({self.started_at}) | {self.status}"
 
 
-def session_upload_location(instance, filename):
+def session_upload_location(instance, filename: str) -> str:
+    """Generate the upload location for a session file."""
     if instance.session:
         return "{0}/{1}".format(instance.session.token, filename)
     return "NOSESSION/{0}".format(filename)
 
 
-class UploadedFile(models.Model):
-    """Represent a file that a user uploaded during an upload session."""
+class BaseUploadedFile(models.Model):
+    """Base class for uploaded files with shared methods."""
 
     name = models.CharField(max_length=256, null=True, default="-")
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
-    file_upload = models.FileField(
-        null=True, storage=TempFileStorage, upload_to=session_upload_location
-    )
-    temp = models.BooleanField(default=True)
+    file_upload = models.FileField(null=True)
+
+    class Meta:
+        abstract = True
 
     @property
     def exists(self) -> bool:
@@ -190,25 +444,10 @@ class UploadedFile(models.Model):
         if self.file_upload:
             shutil.copy2(self.file_upload.path, new_path)
 
-    def move(self, new_path: str) -> None:
-        """Move this file to a new path.
-
-        Args:
-            new_path: The new path to move this file to
-        """
-        if not self.file_upload:
-            return
-
-        directory = os.path.dirname(new_path)
-        os.makedirs(directory, exist_ok=True)
-
-        shutil.move(self.file_upload.path, new_path)
-        self.remove()
-
     def remove(self) -> None:
-        """Delete the real file-system representation of this model."""
-        if self.file_upload:
-            self.file_upload.delete(save=True)
+        """Remove this file from the file system."""
+        if self.exists:
+            self.file_upload.delete()
 
     def get_file_media_url(self) -> str:
         """Generate the media URL to this file.
@@ -230,20 +469,6 @@ class UploadedFile(models.Model):
             },
         )
 
-    def move_to_permanent_storage(self) -> None:
-        """Move the file from TempFileStorage to UploadedFileStorage."""
-        if self.temp and self.file_upload:
-            new_storage = UploadedFileStorage()
-            # Relative path of file to the storage root
-            relative_path = self.file_upload.name
-            new_path = new_storage.path(self.file_upload.name)
-            self.move(new_path)
-            # After actual file is moved, all FileField attributes are lost
-            self.file_upload.storage = new_storage
-            self.file_upload.name = relative_path
-            self.temp = False
-            self.save()
-
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
@@ -251,17 +476,56 @@ class UploadedFile(models.Model):
         return f"{self.name} Removed! | Session {self.session}"
 
 
-@receiver(post_delete, sender=UploadedFile)
-def delete_file_on_model_delete(sender: UploadedFile, instance: UploadedFile, **kwargs) -> None:
-    """Delete the actual file when an UploadedFile model instance is deleted.
+class TempUploadedFile(BaseUploadedFile):
+    """Represent a temporary file that a user uploaded during an upload session."""
+
+    class Meta(BaseUploadedFile.Meta):
+        """Meta information."""
+
+        verbose_name = "Temporary uploaded file"
+        verbose_name_plural = "Temporary uploaded files"
+
+    file_upload = models.FileField(
+        null=True, storage=TempFileStorage, upload_to=session_upload_location
+    )
+
+    def move_to_permanent_storage(self) -> None:
+        """Move the file from TempFileStorage to UploadedFileStorage."""
+        if self.exists:
+            perm_file = PermUploadedFile(name=self.name, session=self.session)
+            perm_file.file_upload.save(self.file_upload.name, File(self.file_upload.file))
+            perm_file.save()
+            self.delete()
+
+
+class PermUploadedFile(BaseUploadedFile):
+    """Represent a file that a user uploaded and has been stored."""
+
+    class Meta(BaseUploadedFile.Meta):
+        """Meta information."""
+
+        verbose_name = "Permanent uploaded file"
+        verbose_name_plural = "Permanent uploaded files"
+
+    file_upload = models.FileField(null=True, storage=UploadedFileStorage)
+
+
+@receiver(pre_delete, sender=TempUploadedFile)
+@receiver(pre_delete, sender=PermUploadedFile)
+def delete_file_on_model_delete(
+    sender: Union[TempUploadedFile, PermUploadedFile],
+    instance: Union[TempUploadedFile, PermUploadedFile],
+    **kwargs,
+) -> None:
+    """Delete the actual file when an uploaded file model instance is deleted.
 
     Args:
         sender: The model class that sent the signal
-        instance: The UploadedFile instance being deleted
+        instance: The model uploaded file instance being deleted
         **kwargs: Additional keyword arguments passed to the signal handler
     """
-    if instance.file_upload:
-        instance.file_upload.delete(save=False)
+    if instance.exists:
+        instance.file_upload.delete()
 
 
 class SubmissionGroup(models.Model):
@@ -434,7 +698,10 @@ class Submission(models.Model):
         return f"Submission by {self.user} at {self.submission_date}"
 
     def make_bag(
-        self, algorithms: Union[str, list] = "sha512", file_perms: str = "644", logger=None
+        self,
+        algorithms: Union[str, list] = "sha512",
+        file_perms: str = "644",
+        logger: Optional[logging.Logger] = None,
     ):
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
         is determined by self.location. Checks the validity of the Bag post-creation to ensure that
@@ -450,6 +717,12 @@ class Submission(models.Model):
 
         if not algorithms:
             raise ValueError("algorithms cannot be empty")
+
+        if not self.upload_session:
+            raise ValueError("This submission has no associated upload session")
+
+        if not self.metadata:
+            raise ValueError("This submission has no associated metadata")
 
         if isinstance(algorithms, str):
             algorithms = [a.strip() for a in algorithms.split(",")]

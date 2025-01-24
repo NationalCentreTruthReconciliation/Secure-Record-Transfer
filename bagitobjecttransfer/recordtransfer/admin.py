@@ -29,9 +29,10 @@ from recordtransfer.forms import (
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
     Job,
+    PermUploadedFile,
     Submission,
     SubmissionGroup,
-    UploadedFile,
+    TempUploadedFile,
     UploadSession,
     User,
 )
@@ -99,8 +100,8 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(UploadedFile)
-class UploadedFileAdmin(ReadOnlyAdmin):
+@admin.register(TempUploadedFile)
+class TempUploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model
 
     Permissions:
@@ -110,9 +111,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
     """
 
     class Media:
-        js = (
-            "admin_uploadedfile.bundle.js",
-        )
+        js = ("admin_uploadedfile.bundle.js",)
 
     change_form_template = "admin/readonly_change_form.html"
 
@@ -132,16 +131,41 @@ class UploadedFileAdmin(ReadOnlyAdmin):
 
     @admin.action(description=gettext("Remove temp files on filesystem"))
     def clean_temp_files(self, request, queryset):
-        """Remove temporary files stored on the file system by the uploaded
-        files
+        """Remove temporary files stored on the file system by the temporary uploaded
+        files.
         """
-        for uploaded_file in queryset:
-            uploaded_file.remove()
+        for temp_file in queryset:
+            temp_file.remove()
 
 
-class UploadedFileInline(admin.TabularInline):
-    """Inline admin for the UploadedFile model. Used to view the files
-    associated with an upload session
+@admin.register(PermUploadedFile)
+class PermUploadedFileAdmin(ReadOnlyAdmin):
+    """Admin for the UploadedFile model.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
+    """
+
+    class Media:
+        js = ("admin_uploadedfile.bundle.js",)
+
+    change_form_template = "admin/readonly_change_form.html"
+
+    form = UploadedFileForm
+
+    list_display = [
+        "name",
+        "exists",
+        linkify("session"),
+    ]
+
+    ordering = ["-session", "name"]
+
+class TempUploadedFileInline(admin.TabularInline):
+    """Inline admin for the BaseUploadedFile model. Used to view the files
+    associated with an upload session.
 
     Permission:
         - add: Not allowed
@@ -150,7 +174,31 @@ class UploadedFileInline(admin.TabularInline):
     """
 
     form = InlineUploadedFileForm
-    model = UploadedFile
+    model = TempUploadedFile
+    max_num = 0
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class PermUploadedFileInline(admin.TabularInline):
+    """Inline admin for the BaseUploadedFile model. Used to view the files
+    associated with an upload session.
+
+    Permission:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
+    """
+
+    form = InlineUploadedFileForm
+    model = PermUploadedFile
     max_num = 0
     show_change_link = True
 
@@ -166,7 +214,7 @@ class UploadedFileInline(admin.TabularInline):
 
 @admin.register(UploadSession)
 class UploadSessionAdmin(ReadOnlyAdmin):
-    """Admin for the UploadSession model
+    """Admin for the UploadSession model.
 
     Permissions:
         - add: Not allowed
@@ -179,10 +227,11 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     form = UploadSessionForm
 
     inlines = [
-        UploadedFileInline,
+        TempUploadedFileInline,
+        PermUploadedFileInline,
     ]
 
-    list_display = ["token", "started_at", "number_of_files_uploaded"]
+    list_display = ["token", "started_at", "file_count", "status"]
 
     ordering = [
         "-started_at",
@@ -342,7 +391,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = [
         "submission_date",
         "uuid",
-        "number_of_files_uploaded",
+        "file_count",
         linkify("metadata"),
         linkify("user"),
     ]
@@ -359,10 +408,10 @@ class SubmissionAdmin(admin.ModelAdmin):
         "uuid",
     ]
 
-    def number_of_files_uploaded(self, obj):
+    def file_count(self, obj):
         if not obj.upload_session:
             return 0
-        return obj.upload_session.number_of_files_uploaded()
+        return obj.upload_session.file_count
 
     def has_add_permission(self, request):
         return False

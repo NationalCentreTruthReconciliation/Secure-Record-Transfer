@@ -30,6 +30,13 @@ body {
     padding: 18px 12px 18px 12px;
 }
 
+.main-header-content,
+.main-content {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .main-header-content {
     padding: 10px 0px;
 }
@@ -41,23 +48,15 @@ h1,
     font-size: 20pt;
 }
 
-h2,
+.title-text-light {
+    color: white;
+    font-size: 20pt;
+}
+
 .medium-text {
     font-weight: normal;
     color: #333333;
     font-size: 16pt;
-}
-
-li {
-    margin-top: 5px;
-}
-
-#main-graphic-container {
-    width: 100%;
-}
-
-#main-graphic {
-    width: 100%;
 }
 
 .red-button,
@@ -127,7 +126,7 @@ li {
     cursor: default;
 }
 
-/* 
+/*
  * Credits: Adapted from https://codepen.io/adevade/pen/AeZBVV
  */
 .btn-arrow {
@@ -243,28 +242,6 @@ li {
     background-color: #eee;
 }
 
-/**
- * Responsive design section
- */
-@media (min-width: 1200px) {
-
-    .main-header-content,
-    .main-content {
-        width: 80%;
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
-@media (max-width: 1199px) {
-
-    .main-header-content,
-    .main-content {
-        width: 95%;
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
 
 /**
  * Messages styles
@@ -316,4 +293,13 @@ li {
     color: gray;
     text-decoration: none;
     cursor: not-allowed;
+}
+
+@media (max-width: 1199px) {
+    .main-header-content,
+    .main-content {
+        width: 95%;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
