@@ -54,7 +54,7 @@ class WebPConverterPlugin {
 
 module.exports = {
     mode: process.env.WEBPACK_MODE === "production" ? "production" : "development",
-    devtool: "eval-source-map",
+    devtool: process.env.WEBPACK_MODE === "production" ? false : "eval-source-map",
     watchOptions: {
         aggregateTimeout: 500,
         poll: 1000,
@@ -71,9 +71,7 @@ module.exports = {
             ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" +
                 "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
         ],
-        transferform: [
-            "./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/transferform/index.js",
-        ],
+        transferform: "./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/transferform/index.js", // eslint-disable-line
         profile: [
             ...glob.sync(
                 "./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/profile/*.js")
