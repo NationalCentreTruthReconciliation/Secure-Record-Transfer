@@ -467,12 +467,23 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
-    def render_goto_step(self, *args, **kwargs) -> HttpResponse:
+    def render_goto_step(self, goto_step: str, *args, **kwargs) -> HttpResponse:
         """Save current step data before going back to a previous step."""
-        form = self.get_form(data=self.request.POST, files=self.request.FILES)
-        self.storage.set_step_data(self.steps.current, self.process_step(form))
-        self.storage.set_step_files(self.steps.current, self.process_step_files(form))
-        return super().render_goto_step(*args, **kwargs)
+        # Check if the user is trying to go to a previous step or a future step
+        goto_step_index = self.steps.all.index(goto_step)
+        current_step_index = self.steps.all.index(self.steps.current)
+        if goto_step_index <= current_step_index:
+            form = self.get_form(data=self.request.POST, files=self.request.FILES)
+            self.storage.set_step_data(self.steps.current, self.process_step(form))
+            self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+        else:
+            # Validate each form before the goto step
+            for step in self.steps.all[:goto_step_index]:
+                form = self.get_form(step, data=self.storage.get_step_data(step))
+                if not form.is_valid():
+                    messages.error(self.request, gettext("Please correct the errors below."))
+                    return self.render(form, **kwargs)
+        return super().render_goto_step(goto_step, *args, **kwargs)
 
     def render_next_step(self, form, **kwargs):
         """Render next step of form. Overrides parent method to clear errors from the form."""
