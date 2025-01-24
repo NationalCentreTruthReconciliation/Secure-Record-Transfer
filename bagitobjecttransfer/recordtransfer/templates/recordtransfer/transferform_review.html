@@ -10,10 +10,12 @@
     {% for form in form_list %}
         <h2>{{ form.form_name }}</h2>
         <ul>
+            {% comment %} Handling regular form fields {% endcomment %}
             {% if form.fields|length > 0 and form.fields.items %}
                 {% for label, value in form.fields.items %}
                     <li><strong>{{ label }}:</strong> {{ value }}</li>
                 {% endfor %}
+            {% comment %} Handling formsets {% endcomment %}
             {% else %}
                 {% for entry in form.fields %}
                     <ul>
