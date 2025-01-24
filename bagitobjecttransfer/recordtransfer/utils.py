@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Union
+from typing import Any, Optional, OrderedDict, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -8,7 +8,8 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.models import UploadSession
+from recordtransfer.forms.transfer_forms import GroupTransferForm, UploadFilesForm
+from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -355,3 +356,60 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
 
     # All checks succeded
     return {"accepted": True}
+
+
+def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> list[dict[str, Any]]:
+    """Format form data to be used in a form review page."""
+    preview_data = []
+
+    for step_title, form in form_dict.items():
+        transfer_step = form.__class__.Meta.transfer_step
+
+        if hasattr(form, "forms"):  # Handle formsets (which contain multiple sub-forms)
+            formset_data = [
+                {
+                    subform.fields[field].label or field: subform.cleaned_data.get(field, "")
+                    for field in subform.fields
+                    if subform.fields[field].label != "hidden"
+                }
+                for subform in form.forms
+            ]
+            preview_data.append(
+                {
+                    "step_title": step_title,
+                    "step_name": transfer_step.value,
+                    "fields": formset_data,
+                }
+            )
+
+        elif hasattr(form, "cleaned_data"):  # Handle regular forms
+            fields_data = {
+                form.fields[field].label or field: form.cleaned_data.get(field, "")
+                for field in form.fields
+                if form.fields[field].label != "hidden"
+            }
+
+            if isinstance(form, GroupTransferForm):
+                group_id = form.cleaned_data.get("group_id")
+                try:
+                    group = SubmissionGroup.objects.get(created_by=user, uuid=group_id)
+                    fields_data[form.fields["group_id"].label] = group.name
+                except SubmissionGroup.DoesNotExist:
+                    pass  # continue to use the group_id as is
+
+            elif isinstance(form, UploadFilesForm):
+                session_token = form.cleaned_data.get("session_token")
+                try:
+                    session = UploadSession.objects.get(token=session_token, user=user)
+                    fields_data["Uploaded Files"] = [
+                        {"name": f.name, "url": f.get_file_access_url()}
+                        for f in session.get_temporary_uploads()
+                    ]
+                except UploadSession.DoesNotExist:
+                    pass  # no need to do anything, uploaded files will not be shown
+
+            preview_data.append(
+                {"step_title": step_title, "step_name": transfer_step.value, "fields": fields_data}
+            )
+
+    return preview_data

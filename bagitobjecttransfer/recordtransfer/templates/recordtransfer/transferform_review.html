@@ -4,3 +4,71 @@
 
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block submitbuttontype %}button{% endblock %}
+
+{% block formfields %}
+
+    <div class="review-summary">
+        {% for form in form_list %}
+            <div class="review-section">
+                <div class="section-header">
+                    <h2 class="section-title">{{ form.step_title }}</h2>
+                    <button 
+                        class="step-link" 
+                        formnovalidate="formnovalidate" 
+                        name="wizard_goto_step" 
+                        value="{{ form.step_name }}">
+                        Go to step <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                
+                {% if form.fields|length > 0 %}
+                    <div class="section-content">
+                        {% if form.fields.items %}
+                            {# Regular form fields #}
+                            <dl class="field-list">
+                                {% for label, value in form.fields.items %}
+                                    <dt>{{ label }}</dt>
+                                    <dd>
+                                        {% if label == "Uploaded Files" %}
+                                            {% for file in value %}
+                                                <div class="file-entry">
+                                                    <i class="fas fa-file"></i>
+                                                    <a class="non-nav-link" href="{{ file.url }}" target="_blank">
+                                                        {{ file.name }}
+                                                    </a>
+                                                </div>
+                                            {% endfor %}
+                                        {% elif value == True %}
+                                            ✓ Yes
+                                        {% elif value == False %}
+                                            ✗ No
+                                        {% elif value == '-' or value == None or value == '' %}
+                                            <span class="empty-value">Not provided</span>
+                                        {% elif value|date %}
+                                            {{ value|date:"F j, Y" }}
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </dd>
+                                {% endfor %}
+                            </dl>
+                        {% else %}
+                            {# Formset entries #}
+                            {% for entry in form.fields %}
+                                <div class="formset-entry">
+                                    <dl class="field-list">
+                                        {% for label, value in entry.items %}
+                                            <dt>{{ label }}</dt>
+                                            <dd>{{ value|default:"Not provided" }}</dd>
+                                        {% endfor %}
+                                    </dl>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock formfields %}
