@@ -8,7 +8,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.forms.transfer_forms import GroupTransferForm
+from recordtransfer.forms.transfer_forms import GroupTransferForm, UploadFilesForm
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 LOGGER = logging.getLogger("recordtransfer")
@@ -384,9 +384,20 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
                 group_id = form.cleaned_data.get("group_id")
                 try:
                     group = SubmissionGroup.objects.get(created_by=user, uuid=group_id)
-                    fields_data["group_id"] = group.name
+                    fields_data[form.fields["group_id"].label] = group.name
                 except SubmissionGroup.DoesNotExist:
                     # continue to use the group_id as is
+                    pass
+            elif isinstance(form, UploadFilesForm):
+                session_token = form.cleaned_data.get("session_token")
+                try:
+                    session = UploadSession.objects.get(token=session_token, user=user)
+                    fields_data["Uploaded Files"] = [
+                        {"name": f.name, "url": f.get_file_access_url()}
+                        for f in session.get_temporary_uploads()
+                    ]
+                except UploadSession.DoesNotExist:
+                    # no need to do anything, uploaded files will not be shown
                     pass
             preview_data.append({"step_title": step_title, "fields": fields_data})
 
