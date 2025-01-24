@@ -1,8 +1,10 @@
 /**
  * Sets up the formset for the page, if one exists.
  * @param {string} prefix The prefix of the formset, e.g., rights or otheridentifiers.
+ * @param {Function} onnewform An optional callback to be called after the formset is created.
+ *                             The formset is passed as the first argument.
  */
-export function setupFormset(prefix) {
+export function setupFormset(prefix, onnewform = undefined) {
     const formRowRegex = new RegExp(`${prefix}-\\d+-`, "g");
 
     const maxFormsInput = document.getElementById(`id_${prefix}-MAX_NUM_FORMS`);
@@ -81,6 +83,11 @@ export function setupFormset(prefix) {
 
             // Insert the new form after the last form
             lastForm.parentNode.insertBefore(newForm, lastForm.nextSibling);
+
+            // Send the new form to the callback function
+            if (onnewform) {
+                onnewform(newForm);
+            }
         }
 
         refreshFormset();
