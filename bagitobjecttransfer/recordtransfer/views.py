@@ -654,19 +654,21 @@ class TransferFormWizard(SessionWizardView):
 
         return kwargs
 
-    def get_final_forms(self) -> list[Union[BaseModelForm, BaseModelFormSet]]:
+    def get_final_forms(self) -> OrderedDict[str, Union[BaseModelForm, BaseModelFormSet]]:
         """Retrieve and validate all forms in the wizard."""
         final_forms = OrderedDict()
         form_list = self.get_form_list() or []
-        for form_key in form_list:
+        for form_step in form_list:
             form_obj = self.get_form(
-                step=form_key,
-                data=self.storage.get_step_data(form_key),
-                files=self.storage.get_step_files(form_key),
+                step=form_step,
+                data=self.storage.get_step_data(form_step),
+                files=self.storage.get_step_files(form_step),
             )
             form_obj.is_valid()  # This populates the cleaned_data attribute of the form
-            final_forms[form_key] = form_obj
-        return list(final_forms.values())
+            final_forms[TransferFormWizard._TEMPLATES[TransferStep(form_step)][FORMTITLE]] = (
+                form_obj
+            )
+        return final_forms
 
     def get_context_data(self, form, **kwargs):
         """Retrieve context data for the current form template.

@@ -1,7 +1,6 @@
 import logging
 import os
-from typing import Any, Union, List, Dict
-from django.forms import BaseForm, BaseFormSet
+from typing import Any, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -358,13 +357,12 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     return {"accepted": True}
 
 
-def extract_form_data(form_list) -> list[dict[str, Any]]:
+def extract_form_data(form_dict) -> list[dict[str, Any]]:
     """Extract form data from a list of forms and formsets."""
     preview_data = []
 
-    for form in form_list:
+    for step_title, form in form_dict.items():
         if hasattr(form, "forms"):  # Handle formsets (which contain multiple sub-forms)
-            formset_name = form.__class__.__name__.replace("FormSet", "")
             formset_data = [
                 {
                     subform.fields[field].label or field: subform.cleaned_data.get(field, "") or "-"
@@ -373,15 +371,14 @@ def extract_form_data(form_list) -> list[dict[str, Any]]:
                 }
                 for subform in form.forms
             ]
-            preview_data.append({"form_name": formset_name, "fields": formset_data})
+            preview_data.append({"step_title": step_title, "fields": formset_data})
 
         elif hasattr(form, "cleaned_data"):  # Handle regular forms
-            form_name = form.__class__.__name__.replace("Form", "").replace("FormSet", "")
             fields_data = {
                 form.fields[field].label or field: form.cleaned_data.get(field, "") or "-"
                 for field in form.fields
                 if form.fields[field].label != "hidden"
             }
-            preview_data.append({"form_name": form_name, "fields": fields_data})
+            preview_data.append({"step_title": step_title, "fields": fields_data})
 
     return preview_data

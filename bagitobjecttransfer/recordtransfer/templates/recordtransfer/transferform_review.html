@@ -8,7 +8,7 @@
 {% block formfields %}
 
     {% for form in form_list %}
-        <h2>{{ form.form_name }}</h2>
+        <h2>{{ form.step_title }}</h2>
         <ul>
             {% comment %} Handling regular form fields {% endcomment %}
             {% if form.fields|length > 0 and form.fields.items %}
