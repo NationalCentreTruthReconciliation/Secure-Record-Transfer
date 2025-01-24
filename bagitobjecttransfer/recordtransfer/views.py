@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
-from django.forms import BaseModelForm
+from django.forms import BaseModelForm, BaseModelFormSet
 from django.http import (
     Http404,
     HttpRequest,
@@ -654,15 +654,17 @@ class TransferFormWizard(SessionWizardView):
 
         return kwargs
 
-    def get_final_forms(self) -> list:
+    def get_final_forms(self) -> list[Union[BaseModelForm, BaseModelFormSet]]:
+        """Retrieve and validate all forms in the wizard."""
         final_forms = OrderedDict()
-        for form_key in self.get_form_list():
+        form_list = self.get_form_list() or []
+        for form_key in form_list:
             form_obj = self.get_form(
                 step=form_key,
                 data=self.storage.get_step_data(form_key),
-                files=self.storage.get_step_files(form_key)
+                files=self.storage.get_step_files(form_key),
             )
-            form_obj.is_valid()
+            form_obj.is_valid()  # This populates the cleaned_data attribute of the form
             final_forms[form_key] = form_obj
         return list(final_forms.values())
 

@@ -367,8 +367,9 @@ def extract_form_data(form_list) -> list[dict[str, Any]]:
             formset_name = form.__class__.__name__.replace("FormSet", "")
             formset_data = [
                 {
-                    subform.fields[field].label or field: subform.cleaned_data.get(field, "")
+                    subform.fields[field].label or field: subform.cleaned_data.get(field, "") or "-"
                     for field in subform.fields
+                    if subform.fields[field].label != "hidden"
                 }
                 for subform in form.forms
             ]
@@ -377,10 +378,10 @@ def extract_form_data(form_list) -> list[dict[str, Any]]:
         elif hasattr(form, "cleaned_data"):  # Handle regular forms
             form_name = form.__class__.__name__.replace("Form", "").replace("FormSet", "")
             fields_data = {
-                form.fields[field].label or field: form.cleaned_data.get(field, "")
+                form.fields[field].label or field: form.cleaned_data.get(field, "") or "-"
                 for field in form.fields
+                if form.fields[field].label != "hidden"
             }
             preview_data.append({"form_name": form_name, "fields": fields_data})
-
 
     return preview_data

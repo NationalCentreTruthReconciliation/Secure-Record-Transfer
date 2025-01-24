@@ -200,6 +200,7 @@ class ContactInfoForm(TransferForm):
             ("WY", "Wyoming"),
         ],
         initial="",
+        label="Province or state",
     )
 
     other_province_or_state = forms.CharField(
@@ -237,7 +238,8 @@ class ContactInfoForm(TransferForm):
             attrs={
                 "class": "reduce-form-field-width",
             }
-        )
+        ),
+        label=gettext("Country"),
     )
 
 
