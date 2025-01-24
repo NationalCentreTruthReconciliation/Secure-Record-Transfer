@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Union
+from typing import Any, Optional, OrderedDict, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -8,7 +8,8 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.models import UploadSession
+from recordtransfer.forms.transfer_forms import GroupTransferForm
+from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -357,7 +358,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     return {"accepted": True}
 
 
-def extract_form_data(form_dict) -> list[dict[str, Any]]:
+def extract_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> list[dict[str, Any]]:
     """Extract form data from a list of forms and formsets."""
     preview_data = []
 
@@ -365,7 +366,7 @@ def extract_form_data(form_dict) -> list[dict[str, Any]]:
         if hasattr(form, "forms"):  # Handle formsets (which contain multiple sub-forms)
             formset_data = [
                 {
-                    subform.fields[field].label or field: subform.cleaned_data.get(field, "") or "-"
+                    subform.fields[field].label or field: subform.cleaned_data.get(field, "")
                     for field in subform.fields
                     if subform.fields[field].label != "hidden"
                 }
@@ -375,10 +376,18 @@ def extract_form_data(form_dict) -> list[dict[str, Any]]:
 
         elif hasattr(form, "cleaned_data"):  # Handle regular forms
             fields_data = {
-                form.fields[field].label or field: form.cleaned_data.get(field, "") or "-"
+                form.fields[field].label or field: form.cleaned_data.get(field, "")
                 for field in form.fields
                 if form.fields[field].label != "hidden"
             }
+            if isinstance(form, GroupTransferForm):
+                group_id = form.cleaned_data.get("group_id")
+                try:
+                    group = SubmissionGroup.objects.get(created_by=user, uuid=group_id)
+                    fields_data["group_id"] = group.name
+                except SubmissionGroup.DoesNotExist:
+                    # continue to use the group_id as is
+                    pass
             preview_data.append({"step_title": step_title, "fields": fields_data})
 
     return preview_data

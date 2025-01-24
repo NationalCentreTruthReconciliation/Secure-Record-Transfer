@@ -755,7 +755,7 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.REVIEW:
-            context["form_list"] = extract_form_data(self.get_final_forms())
+            context["form_list"] = extract_form_data(self.get_final_forms(), user=self.request.user)
 
         return context
 
