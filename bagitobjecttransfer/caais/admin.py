@@ -204,7 +204,10 @@ class MetadataAdmin(admin.ModelAdmin):
 
     class Media:
         css = {"all": ("admin_metadata.css",)}
-        js = ("admin_metadata.bundle.js",)
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",
+            "admin_metadata.bundle.js",
+        )
 
     change_form_template = "admin/metadata_change_form.html"
 
