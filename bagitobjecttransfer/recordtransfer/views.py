@@ -349,7 +349,7 @@ class TransferFormWizard(SessionWizardView):
             ),
         },
         TransferStep.OTHER_IDENTIFIERS: {
-            TEMPLATEREF: "recordtransfer/transferform_formset.html",
+            TEMPLATEREF: "recordtransfer/transferform_otheridentifiers.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
             INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
