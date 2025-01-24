@@ -7,26 +7,50 @@
 
 {% block formfields %}
 
-    {% for form in form_list %}
-        <h2>{{ form.step_title }}</h2>
-        <ul>
-            {% comment %} Handling regular form fields {% endcomment %}
-            {% if form.fields|length > 0 and form.fields.items %}
-                {% for label, value in form.fields.items %}
-                    <li><strong>{{ label }}:</strong> {{ value }}</li>
-                {% endfor %}
-            {% comment %} Handling formsets {% endcomment %}
-            {% else %}
-                {% for entry in form.fields %}
-                    <ul>
-                        {% for label, value in entry.items %}
-                            <li><strong>{{ label }}:</strong> {{ value }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endfor %}
-            {% endif %}
-        </ul>
-    {% endfor %}
-    <p>{{ form_list }}</p>
+    <div class="review-summary">
+        {% for form in form_list %}
+            <div class="review-section">
+                <h2 class="section-title">{{ form.step_title }}</h2>
+                
+                {% if form.fields|length > 0 %}
+                    <div class="section-content">
+                        {% if form.fields.items %}
+                            {# Regular form fields #}
+                            <dl class="field-list">
+                                {% for label, value in form.fields.items %}
+                                    <dt>{{ label }}</dt>
+                                    <dd>
+                                        {% if value == True %}
+                                            ✓ Yes
+                                        {% elif value == False %}
+                                            ✗ No
+                                        {% elif value == '-' or value == None or value == '' %}
+                                            <span class="empty-value">Not provided</span>
+                                        {% elif value|date %}
+                                            {{ value|date:"F j, Y" }}
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </dd>
+                                {% endfor %}
+                            </dl>
+                        {% else %}
+                            {# Formset entries #}
+                            {% for entry in form.fields %}
+                                <div class="formset-entry">
+                                    <dl class="field-list">
+                                        {% for label, value in entry.items %}
+                                            <dt>{{ label }}</dt>
+                                            <dd>{{ value|default:"Not provided" }}</dd>
+                                        {% endfor %}
+                                    </dl>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock formfields %}
