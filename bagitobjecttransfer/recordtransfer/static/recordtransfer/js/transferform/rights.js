@@ -17,9 +17,12 @@ export function setupRightsForm() {
 
     setupFormset(formsetPrefix);
 
-    setupSelectOtherToggle(
-        context["id_rights_type"],
-        context["id_other_rights_type"],
-        context["other_rights_type_id"]
-    );
+    document.querySelectorAll("[id$=\"-rights_type\"]").forEach(element => {
+        const index = element.id.match(/\d+/)[0];
+        setupSelectOtherToggle(
+            element.id,
+            `id_rights-${index}-other_rights_type`,
+            context["other_rights_type_id"],
+        );
+    });
 }

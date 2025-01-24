@@ -723,10 +723,13 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.RIGHTS:
+            other_rights = RightsType.objects.filter(name="Other").first()
+
             context.update(
                 {
                     "js_context": {
                         "formset_prefix": "rights",
+                        "other_rights_type_id": other_rights.pk if other_rights else 0,
                     },
                 }
             )
