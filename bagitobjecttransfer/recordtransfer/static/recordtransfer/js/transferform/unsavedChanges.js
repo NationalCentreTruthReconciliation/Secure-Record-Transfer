@@ -1,6 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Sets up a modal form that is displayed if a user tries to leave the page with unsaved changes.
+ */
+export function setupUnsavedChangesProtection() {
     const transferUuid = new URLSearchParams(window.location.search).get('transfer_uuid');
-    
+
     // Skip click-away protection if on the first step of a fresh form
     if (currentFormStep <= 1 && !transferUuid) {
         return;
@@ -67,4 +70,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('beforeunload', beforeUnloadListener);
-});
+}

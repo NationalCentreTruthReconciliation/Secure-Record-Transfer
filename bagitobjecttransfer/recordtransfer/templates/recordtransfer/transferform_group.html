@@ -1,19 +1,10 @@
-{% extends "recordtransfer/transferform_base.html" %}
-
+{% extends "recordtransfer/transferform_standard.html" %}
 {% load static %}
 {% load i18n %}
 
 {% block javascript %}
     {{ block.super }}
-    <script>
-    const ID_DISPLAY_GROUP_DESCRIPTION = "{{ ID_DISPLAY_GROUP_DESCRIPTION }}";
-    const ID_SUBMISSION_GROUP_SELECTION = "{{ ID_SUBMISSION_GROUP_SELECTION }}";
-    const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
-    const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
-    const fetchUsersGroupDescriptionsUrl = "{% url 'recordtransfer:get_user_submission_groups' user_id=request.user.id %}";
-    const DEFAULT_GROUP_ID = {% if DEFAULT_GROUP_ID is not None %}"{{ DEFAULT_GROUP_ID }}"{% else %}null{% endif %};
-    const MODAL_MODE = {% if MODAL_MODE %}true{% else %}false{% endif %};
-    </script>
+    {{ js_context|json_script:"py_context_submission_group" }}
     <script src="{% static 'submissiongroup.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block buttonarrayclass %}flex-item{% endblock %}
@@ -47,8 +38,23 @@
         <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}">Describe the group and its purpose.</p>
     </div>
 {% endblock formfields %}
+
 {% block dialog %}
-    <div id="add-new-group-dialog" title="Create New Submission Group">
-        {% include "includes/submission_group_form.html" with form=new_group_form %}
-    </div>
+    <dialog id="create-new-submissiongroup-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>{% trans "Create New Submission Group" %}</h3>
+                <button class="close-modal-button" id="close-new-submissiongroup-modal">
+                    <img height="20"
+                            width="20"
+                            alt="Close"
+                            src="{% static 'close_menu_64x64px.webp' %}"
+                            draggable="false">
+                </button>
+            </div>
+            <div class="modal-body">
+                {% include "includes/submission_group_form.html" with form=new_group_form %}
+            </div>
+        </div>
+    </dialog>
 {% endblock dialog %}
