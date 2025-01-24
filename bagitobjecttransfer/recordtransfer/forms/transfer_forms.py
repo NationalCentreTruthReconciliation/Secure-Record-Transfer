@@ -21,26 +21,15 @@ from recordtransfer.constants import (
     ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_SELECTION,
 )
-from recordtransfer.enums import TransferStep
 from recordtransfer.models import SubmissionGroup, UploadSession
 
 
 class TransferForm(forms.Form):
-    """Base form for all transfer forms."""
-
     required_css_class = "required-field"
 
 
 class AcceptLegal(TransferForm):
-    """Form for accepting legal terms."""
-
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.ACCEPT_LEGAL
-
-    def clean(self) -> dict:
-        """Clean form data and validate the session token."""
+    def clean(self):
         cleaned_data = super().clean()
         if not cleaned_data["agreement_accepted"]:
             self.add_error("agreement_accepted", "You must accept before continuing")
@@ -56,15 +45,7 @@ class AcceptLegal(TransferForm):
 class ContactInfoForm(TransferForm):
     """The Contact Information portion of the form. Contains fields from Section 2 of CAAIS."""
 
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.CONTACT_INFO
-
-    def clean(self) -> dict:
-        """Clean form data and ensure that the province_or_state field is filled out if 'Other'
-        is.
-        """
+    def clean(self):
         cleaned_data = super().clean()
         region = cleaned_data.get("province_or_state")
         if not region or region.lower() == "":
@@ -270,11 +251,6 @@ class SourceInfoForm(TransferForm):
     to fill in the form, we use defaults from the initial data for those fields.
     """
 
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.SOURCE_INFO
-
     def __init__(self, *args, **kwargs):
         if "defaults" not in kwargs:
             raise ValueError(
@@ -475,14 +451,9 @@ class SourceInfoForm(TransferForm):
 
 
 class RecordDescriptionForm(TransferForm):
-    """The Description Information portion of the form. Contains fields from Section 3 of CAAIS."""
+    """The Description Information portion of the form. Contains fields from Section 3 of CAAIS"""
 
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.RECORD_DESCRIPTION
-
-    def clean(self) -> dict:
+    def clean(self):
         """Clean form data, and create a date_of_materials field derived from the start and end
         date fields.
         """
@@ -678,7 +649,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
 
 
 class RightsFormSet(BaseFormSet):
-    """Special formset to enforce at least one rights form to have a value."""
+    """Special formset to enforce at least one rights form to have a value"""
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
@@ -686,15 +657,9 @@ class RightsFormSet(BaseFormSet):
 
 
 class RightsForm(TransferForm):
-    """The Rights portion of the form. Contains fields from Section 4 of CAAIS."""
-
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.RIGHTS
+    """The Rights portion of the form. Contains fields from Section 4 of CAAIS"""
 
     def clean(self):
-        """Check that the rights type is set if the other rights type is not."""
         cleaned_data = super().clean()
 
         rights_type = cleaned_data.get("rights_type", None)
@@ -765,15 +730,9 @@ class RightsForm(TransferForm):
 
 
 class OtherIdentifiersForm(TransferForm):
-    """The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS."""
-
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.OTHER_IDENTIFIERS
+    """The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS"""
 
     def clean(self):
-        """Check that the other identifier type and value are set if the note is set."""
         cleaned_data = super().clean()
 
         id_type = cleaned_data.get("other_identifier_type")
@@ -833,11 +792,6 @@ class OtherIdentifiersForm(TransferForm):
 class GroupTransferForm(TransferForm):
     """Form for assigning a transfer to a specific group."""
 
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.GROUP_TRANSFER
-
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
@@ -876,11 +830,6 @@ class GroupTransferForm(TransferForm):
 
 class UploadFilesForm(TransferForm):
     """The form where users upload their files and write any final notes."""
-
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.UPLOAD_FILES
 
     general_note = forms.CharField(
         required=False,
@@ -932,11 +881,6 @@ class FinalStepFormNoUpload(TransferForm):
     when file uploads are disabled.
     """
 
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.FINAL_NOTES
-
     general_note = forms.CharField(
         required=False,
         min_length=4,
@@ -959,10 +903,5 @@ class ReviewForm(TransferForm):
     """The final step of the form where the user can review their submission before sending
     it.
     """
-
-    class Meta:
-        """Meta information for the form."""
-
-        transfer_step = TransferStep.REVIEW
 
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
