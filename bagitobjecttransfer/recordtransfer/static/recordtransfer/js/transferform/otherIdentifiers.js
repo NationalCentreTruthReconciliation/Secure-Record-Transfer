@@ -1,7 +1,7 @@
 import { setupFormset } from "./formset";
 
 /**
- * Sets up the rights form.
+ * Sets up the other identifiers form.
  */
 export function setupOtherIdentifiersForm() {
     const contextElement = document.getElementById("py_context_otheridentifiers");
