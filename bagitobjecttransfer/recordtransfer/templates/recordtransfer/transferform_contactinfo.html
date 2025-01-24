@@ -1,0 +1,6 @@
+{% extends "recordtransfer/transferform_standard.html" %}
+
+{% block javascript %}
+    {{ block.super }}
+    {{ js_context|json_script:"py_context_contact_info" }}
+{% endblock javascript %}

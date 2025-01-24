@@ -320,7 +320,7 @@ class TransferFormWizard(SessionWizardView):
             FORMTITLE: gettext("Legal Agreement"),
         },
         TransferStep.CONTACT_INFO: {
-            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            TEMPLATEREF: "recordtransfer/transferform_contactinfo.html",
             FORMTITLE: gettext("Contact Information"),
             INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
@@ -690,6 +690,17 @@ class TransferFormWizard(SessionWizardView):
                         ),
                         "default_group_id": self.submission_group_uuid,
                     },
+                }
+            )
+
+        elif self.current_step == TransferStep.CONTACT_INFO:
+            context.update(
+                {
+                    "js_context": {
+                        "id_province_or_state": "id_contactinfo-province_or_state",
+                        "id_other_province_or_state": "id_contactinfo-other_province_or_state",
+                        "other_province_or_state_id": "Other",
+                    }
                 }
             )
 
