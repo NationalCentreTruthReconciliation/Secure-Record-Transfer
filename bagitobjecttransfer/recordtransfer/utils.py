@@ -363,6 +363,8 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
     preview_data = []
 
     for step_title, form in form_dict.items():
+        transfer_step = form.__class__.Meta.transfer_step
+
         if hasattr(form, "forms"):  # Handle formsets (which contain multiple sub-forms)
             formset_data = [
                 {
@@ -372,7 +374,13 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
                 }
                 for subform in form.forms
             ]
-            preview_data.append({"step_title": step_title, "fields": formset_data})
+            preview_data.append(
+                {
+                    "step_title": step_title,
+                    "step_name": transfer_step.value,
+                    "fields": formset_data,
+                }
+            )
 
         elif hasattr(form, "cleaned_data"):  # Handle regular forms
             fields_data = {
@@ -380,14 +388,15 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
                 for field in form.fields
                 if form.fields[field].label != "hidden"
             }
+
             if isinstance(form, GroupTransferForm):
                 group_id = form.cleaned_data.get("group_id")
                 try:
                     group = SubmissionGroup.objects.get(created_by=user, uuid=group_id)
                     fields_data[form.fields["group_id"].label] = group.name
                 except SubmissionGroup.DoesNotExist:
-                    # continue to use the group_id as is
-                    pass
+                    pass  # continue to use the group_id as is
+
             elif isinstance(form, UploadFilesForm):
                 session_token = form.cleaned_data.get("session_token")
                 try:
@@ -397,8 +406,10 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
                         for f in session.get_temporary_uploads()
                     ]
                 except UploadSession.DoesNotExist:
-                    # no need to do anything, uploaded files will not be shown
-                    pass
-            preview_data.append({"step_title": step_title, "fields": fields_data})
+                    pass  # no need to do anything, uploaded files will not be shown
+
+            preview_data.append(
+                {"step_title": step_title, "step_name": transfer_step.value, "fields": fields_data}
+            )
 
     return preview_data

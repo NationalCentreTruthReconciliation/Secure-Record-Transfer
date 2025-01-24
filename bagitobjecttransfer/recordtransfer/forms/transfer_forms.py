@@ -680,6 +680,11 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
 class RightsFormSet(BaseFormSet):
     """Special formset to enforce at least one rights form to have a value."""
 
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.RIGHTS
+
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
         self.forms[0].empty_permitted = False
@@ -829,6 +834,13 @@ class OtherIdentifiersForm(TransferForm):
         label=gettext("Notes for identifier"),
     )
 
+class OtherIdentifiersFormSet(BaseFormSet):
+    """Special formset to add metadata to the other identifiers formset."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.OTHER_IDENTIFIERS
 
 class GroupTransferForm(TransferForm):
     """Form for assigning a transfer to a specific group."""

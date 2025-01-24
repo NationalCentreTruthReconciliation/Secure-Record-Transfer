@@ -10,7 +10,16 @@
     <div class="review-summary">
         {% for form in form_list %}
             <div class="review-section">
-                <h2 class="section-title">{{ form.step_title }}</h2>
+                <div class="section-header">
+                    <h2 class="section-title">{{ form.step_title }}</h2>
+                    <button 
+                        class="step-link" 
+                        formnovalidate="formnovalidate" 
+                        name="wizard_goto_step" 
+                        value="{{ form.step_name }}">
+                        Go back to step <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
                 
                 {% if form.fields|length > 0 %}
                     <div class="section-content">

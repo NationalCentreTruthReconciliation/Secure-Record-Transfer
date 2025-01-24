@@ -14,7 +14,12 @@ if settings.FILE_UPLOAD_ENABLED:
         ("sourceinfo", forms.SourceInfoForm),
         ("recorddescription", forms.RecordDescriptionForm),
         ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
-        ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
+        (
+            "otheridentifiers",
+            formset_factory(
+                forms.OtherIdentifiersForm, formset=forms.OtherIdentifiersFormSet, extra=1
+            ),
+        ),
         ("grouptransfer", forms.GroupTransferForm),
         ("uploadfiles", forms.UploadFilesForm),
         ("review", forms.ReviewForm),
@@ -26,7 +31,12 @@ else:
         ("sourceinfo", forms.SourceInfoForm),
         ("recorddescription", forms.ExtendedRecordDescriptionForm),  # Different
         ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
-        ("otheridentifiers", formset_factory(forms.OtherIdentifiersForm, extra=1)),
+        (
+            "otheridentifiers",
+            formset_factory(
+                forms.OtherIdentifiersForm, formset=forms.OtherIdentifiersFormSet, extra=1
+            ),
+        ),
         ("grouptransfer", forms.GroupTransferForm),
         ("finalnotes", forms.FinalStepFormNoUpload),  # Different
         ("review", forms.ReviewForm),
@@ -134,4 +144,3 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             ),
         ]
     )
-
