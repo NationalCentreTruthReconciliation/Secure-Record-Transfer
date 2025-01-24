@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("form-previous-button"),
         document.getElementById("submit-form-btn"),
         elements.formSaveButton,
+        ...document.getElementsByClassName("step-link")
     ];
 
     safeElements.forEach(element => {
