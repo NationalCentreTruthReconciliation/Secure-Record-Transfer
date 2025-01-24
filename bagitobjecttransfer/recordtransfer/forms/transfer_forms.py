@@ -577,7 +577,7 @@ class RightsForm(TransferForm):
         rights_type = cleaned_data.get("rights_type", None)
         other_rights_type = cleaned_data.get("other_rights_type", "")
 
-        if not rights_type and not other_rights_type:
+        if rights_type.name.lower() == "other" and not other_rights_type:
             self.add_error(
                 "rights_type",
                 gettext(
