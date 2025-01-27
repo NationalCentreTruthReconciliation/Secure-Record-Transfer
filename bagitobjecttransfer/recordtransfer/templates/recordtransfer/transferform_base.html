@@ -49,24 +49,33 @@
                             value="{{ wizard.steps.prev }}"
                             class="blue-button margin-right-20px">{% trans "Previous Step" %}</button>
                 {% endif %}
-                <button {% block submitbuttonattributes %}
+                {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
+                    <button 
+                        {% block submitbuttonattributes %}
                         {% comment %} Button is "next" by default, but the id for a "submit" button can be
                         overrided using this block {% endcomment %}
                         id="form-next-button"
                         {% endblock submitbuttonattributes %}
                         type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
                         class="blue-button margin-right-20px">
-                    {% if wizard.steps.step1 == wizard.steps.count %}
-                        {% trans "Submit" %}
-                    {% else %}
-                        {% trans "Next Step" %}
-                    {% endif %}
-                </button>
-                {% if SENT_FROM_REVIEW %}
+                        {% if wizard.steps.step1 == wizard.steps.count %}
+                            {% trans "Submit" %}
+                        {% else %}
+                            {% trans "Next Step" %}
+                        {% endif %}
+                    </button>
+                {% endif %}
+                {% if SENT_FROM_REVIEW or wizard.steps.step1 == wizard.steps.count|add:"-1" %}
                     <button id="form-review-button"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.last }}"
-                            class="blue-button margin-right-20px">{% trans "Return to Review" %}</button>
+                            class="blue-button margin-right-20px">
+                        {% if wizard.steps.step1 == wizard.steps.count|add:"-1" %}
+                            {% trans "Review" %}
+                        {% else %}
+                            {% trans "Return to Review" %}
+                        {% endif %}
+                    </button>
                 {% endif %}
             </div>
         </div>
