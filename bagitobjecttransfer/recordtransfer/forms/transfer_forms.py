@@ -77,6 +77,11 @@ class ContactInfoForm(TransferForm):
                 "other_province_or_state",
                 'This field must be filled out if "Other" province or state is selected',
             )
+        elif region.lower() != "other":
+            cleaned_data["other_province_or_state"] = "" # Clear this field since it's not needed
+            other_province_or_state_field = self.fields.get("other_province_or_state")
+            if other_province_or_state_field:
+                other_province_or_state_field.label = "hidden"
 
         return cleaned_data
 
