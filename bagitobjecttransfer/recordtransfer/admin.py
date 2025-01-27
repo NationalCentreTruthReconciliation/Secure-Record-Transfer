@@ -112,8 +112,6 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
     class Media:
         js = ("admin_uploadedfile.bundle.js",)
 
-    change_form_template = "admin/readonly_change_form.html"
-
     actions = [
         "clean_temp_files",
     ]
@@ -147,8 +145,6 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
 
     class Media:
         js = ("admin_uploadedfile.bundle.js",)
-
-    change_form_template = "admin/readonly_change_form.html"
 
     list_display = [
         "name",
@@ -218,8 +214,6 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - change: Not allowed
         - delete: Not allowed
     """
-
-    change_form_template = "admin/readonly_change_form.html"
 
     form = UploadSessionForm
 
