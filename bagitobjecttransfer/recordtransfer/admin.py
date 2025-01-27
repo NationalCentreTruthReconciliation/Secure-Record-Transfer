@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Callable
 
 from caais.export import ExportVersion
 from django.conf import settings
@@ -39,8 +40,8 @@ from recordtransfer.models import (
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def linkify(field_name):
-    """Converts a foreign key value into clickable links.
+def linkify(field_name: str) -> Callable:
+    """Convert a foreign key value into clickable links.
 
     If field_name is 'parent', link text will be str(obj.parent)
     Link will be admin url for the admin url for obj.parent.id:change
@@ -66,13 +67,13 @@ def linkify(field_name):
 
 
 @receiver(pre_delete, sender=Job)
-def job_file_delete(sender, instance, **kwargs):
+def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
     """FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
     instance.attached_file.delete(False)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
-    """A model admin that does not allow any editing/changing/ or deletions
+    """A model admin that does not allow any editing/changing/ or deletions.
 
     Permissions:
         - add: Not allowed
@@ -101,7 +102,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 @admin.register(TempUploadedFile)
 class TempUploadedFileAdmin(ReadOnlyAdmin):
-    """Admin for the UploadedFile model
+    """Admin for the UploadedFile model.
 
     Permissions:
         - add: Not allowed
@@ -414,7 +415,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         return obj and request.user.is_superuser
 
     def get_urls(self):
-        """Add extra views to admin"""
+        """Add extra views to admin."""
         return [
             path(
                 "<path:object_id>/zip/",
@@ -436,8 +437,8 @@ class SubmissionAdmin(admin.ModelAdmin):
             extra_context["generated_bag_url"] = job.get_admin_download_url()
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def create_zipped_bag(self, request, object_id):
-        """Start a background job to create a downloadable bag
+    def create_zipped_bag(self, request, object_id) -> HttpResponseRedirect:
+        """Start a background job to create a downloadable bag.
 
         Args:
             request: The originating request
@@ -507,7 +508,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 class JobAdmin(ReadOnlyAdmin):
     """Admin for the Job model. Adds a view to download the file associated
     with the job, if there is a file. The file download view can be accessed at
-    code:`job/<id>/download/`
+    code:`job/<id>/download/`.
 
     Permissions:
         - add: Not allowed
@@ -635,7 +636,7 @@ class CustomUserAdmin(UserAdmin):
 
     def save_model(self, request, obj, form, change):
         """Enforce superuser permissions checks and send notification emails
-        for other account updates
+        for other account updates.
         """
         if change and obj.is_superuser and not request.user.is_superuser:
             messages.set_level(request, messages.ERROR)
