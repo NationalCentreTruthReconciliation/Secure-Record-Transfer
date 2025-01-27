@@ -479,11 +479,11 @@ class TransferFormWizard(SessionWizardView):
         # Check if the user is trying to go to a previous step or a future step
         goto_step_index = self.steps.all.index(goto_step)
         current_step_index = self.steps.all.index(self.steps.current)
-        show_goto_review = False
-        if goto_step_index == self.steps.all.index(
-            self.steps.last
-        ) or current_step_index == self.steps.all.index(self.steps.last):
-            show_goto_review = True
+        show_goto_review = self.steps.all.index(self.steps.last) in (
+            goto_step_index,
+            current_step_index,
+        )
+
         if goto_step_index <= current_step_index:
             form = self.get_form(data=self.request.POST, files=self.request.FILES)
             self.save_current_step(form)
@@ -503,6 +503,7 @@ class TransferFormWizard(SessionWizardView):
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
                     return self.render(form, show_goto_review=show_goto_review, **kwargs)
+
         return super().render_goto_step(
             goto_step, *args, show_goto_review=show_goto_review, **kwargs
         )
@@ -722,7 +723,7 @@ class TransferFormWizard(SessionWizardView):
 
         # This is actually checking the step from which the user came from, not the step
         # they are currently on/going to
-        if show_goto_review:
+        if show_goto_review and self.current_step != TransferStep.REVIEW:
             context["SENT_FROM_REVIEW"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
