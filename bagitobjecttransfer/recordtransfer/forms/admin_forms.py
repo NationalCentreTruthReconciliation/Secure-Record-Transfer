@@ -28,6 +28,10 @@ class RecordTransferModelForm(forms.ModelForm):
 
 
 class InlineUploadedFileForm(RecordTransferModelForm):
+    """Form for viewing UploadedFiles in-line. This form should not be used to provide edit
+    capabilities in-line for UploadedFiles.
+    """
+
     class Meta:
         model = BaseUploadedFile
         fields = ("name",)
