@@ -333,9 +333,12 @@ class SourceInfoForm(TransferForm):
 
         elif source_type.name.lower() == "other" and not other_source_type:
             self.add_error(
-                "other_source_type",
-                gettext('If "Source type" is Other, you must enter your own source type here'),
+            "other_source_type",
+            gettext('If "Source type" is Other, you must enter your own source type here'),
             )
+        elif source_type.name.lower() != "other":
+            cleaned_data["other_source_type"] = ""  # Clear this field since it's not needed
+            self.fields["other_source_type"].label = "hidden"
 
         source_role = cleaned_data.get("source_role", None)
         other_source_role = cleaned_data.get("other_source_role", "")
@@ -348,6 +351,9 @@ class SourceInfoForm(TransferForm):
                 "other_source_role",
                 gettext('If "Source role" is Other, you must enter your own source role here'),
             )
+        elif source_role.name.lower() != "other":
+            cleaned_data["other_source_role"] = ""
+            self.fields["other_source_role"].label = "hidden"
 
         return cleaned_data
 
