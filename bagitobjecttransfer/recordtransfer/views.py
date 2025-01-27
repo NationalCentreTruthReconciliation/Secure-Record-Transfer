@@ -520,7 +520,11 @@ class TransferFormWizard(SessionWizardView):
         )
         ##########################
         # This part is different from the parent class. We need to clear the errors from the form
-        new_form.errors.clear()
+        if isinstance(new_form.errors, list):
+            for form in new_form.errors:
+                form.clear()
+        elif isinstance(new_form.errors, dict):
+            new_form.errors.clear()
         ##########################
 
         # change the stored current step
