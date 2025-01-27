@@ -78,10 +78,8 @@ class ContactInfoForm(TransferForm):
                 'This field must be filled out if "Other" province or state is selected',
             )
         elif region.lower() != "other":
-            cleaned_data["other_province_or_state"] = "" # Clear this field since it's not needed
-            other_province_or_state_field = self.fields.get("other_province_or_state")
-            if other_province_or_state_field:
-                other_province_or_state_field.label = "hidden"
+            cleaned_data["other_province_or_state"] = ""  # Clear this field since it's not needed
+            self.fields["other_province_or_state"].label = "hidden"
 
         return cleaned_data
 
@@ -312,11 +310,15 @@ class SourceInfoForm(TransferForm):
         if enter_manual == "no":
             cleaned_data["source_name"] = self.default_source_name
             cleaned_data["source_type"] = self.default_source_type
-            cleaned_data["other_source_type"] = ""
             cleaned_data["source_role"] = self.default_source_role
-            cleaned_data["other_source_role"] = ""
-            cleaned_data["source_note"] = ""
-            cleaned_data["preliminary_custodial_history"] = ""
+            for field in [
+                "other_source_type",
+                "other_source_role",
+                "source_note",
+                "preliminary_custodial_history",
+            ]:
+                cleaned_data[field] = ""
+                self.fields[field].label = "hidden"
 
         source_name = cleaned_data.get("source_name", "")
 
@@ -839,6 +841,7 @@ class OtherIdentifiersForm(TransferForm):
         label=gettext("Notes for identifier"),
     )
 
+
 class OtherIdentifiersFormSet(BaseFormSet):
     """Special formset to add metadata to the other identifiers formset."""
 
@@ -846,6 +849,7 @@ class OtherIdentifiersFormSet(BaseFormSet):
         """Meta information for the form."""
 
         transfer_step = TransferStep.OTHER_IDENTIFIERS
+
 
 class GroupTransferForm(TransferForm):
     """Form for assigning a transfer to a specific group."""
