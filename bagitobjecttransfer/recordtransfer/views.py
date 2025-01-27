@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
-from django.forms import BaseModelForm, BaseModelFormSet
+from django.forms import BaseInlineFormSet, BaseModelForm, BaseModelFormSet, ModelForm
 from django.http import (
     Http404,
     HttpRequest,
@@ -467,6 +467,13 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
+    def save_current_step(
+        self, form: Union[BaseInlineFormSet, BaseModelFormSet, ModelForm]
+    ) -> None:
+        """Save the data from the current step."""
+        self.storage.set_step_data(self.steps.current, self.process_step(form))
+        self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+
     def render_goto_step(self, goto_step: str, *args, **kwargs) -> HttpResponse:
         """Save current step data before going back to a previous step."""
         # Check if the user is trying to go to a previous step or a future step
@@ -474,19 +481,19 @@ class TransferFormWizard(SessionWizardView):
         current_step_index = self.steps.all.index(self.steps.current)
         if goto_step_index <= current_step_index:
             form = self.get_form(data=self.request.POST, files=self.request.FILES)
-            self.storage.set_step_data(self.steps.current, self.process_step(form))
-            self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+            self.save_current_step(form)
         else:
             # Validate each form before the goto step
             for step in self.steps.all[:goto_step_index]:
                 form = None
                 if step == self.steps.current:
                     form = self.get_form(step, data=self.request.POST, files=self.request.FILES)
+                    self.save_current_step(form)
                 else:
                     form = self.get_form(step, data=self.storage.get_step_data(step))
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
-                    return self.render(form, **kwargs)
+                    return self.render(form, show_goto_review=True, **kwargs)
         return super().render_goto_step(goto_step, *args, **kwargs)
 
     def render_next_step(self, form, **kwargs):
@@ -698,12 +705,17 @@ class TransferFormWizard(SessionWizardView):
             dict: A dictionary of context data to be used to render the form template.
         """
         context = super().get_context_data(form, **kwargs)
+        show_goto_review = kwargs.get("show_goto_review", False)
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
-        # This is actually checking the step from which the user is coming from, not the step
+        # This is actually checking the step from which the user came from, not the step
         # they are currently on/going to
-        if self.request.POST.get("transfer_form_wizard-current_step") == TransferStep.REVIEW.value:
+        if (
+            show_goto_review
+            or self.request.POST.get("transfer_form_wizard-current_step")
+            == TransferStep.REVIEW.value
+        ):
             context["SENT_FROM_REVIEW"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
