@@ -33,9 +33,13 @@ dd {
     color: #212529;
 }
 
-.empty-value {
+.empty-value, .section-note {
     color: #6c757d;
     font-style: italic;
+}
+
+.section-note {
+    margin-left: 1rem;
 }
 
 .formset-entry {

@@ -67,6 +67,11 @@
                         {% endif %}
                     </div>
                 {% endif %}
+                {% if form.note %}
+                    <div class="section-note">
+                        {{ form.note }}
+                    </div>
+                {% endif %}
             </div>
         {% endfor %}
     </div>

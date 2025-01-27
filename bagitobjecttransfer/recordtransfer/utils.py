@@ -8,7 +8,11 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.forms.transfer_forms import GroupTransferForm, UploadFilesForm
+from recordtransfer.forms.transfer_forms import (
+    GroupTransferForm,
+    OtherIdentifiersFormSet,
+    UploadFilesForm,
+)
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 LOGGER = logging.getLogger("recordtransfer")
@@ -366,19 +370,24 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
         transfer_step = form.__class__.Meta.transfer_step
 
         if hasattr(form, "forms"):  # Handle formsets (which contain multiple sub-forms)
-            formset_data = [
-                {
+            formset_data = []
+            note = None
+            for subform in form.forms:
+                subform_data = {
                     subform.fields[field].label or field: subform.cleaned_data.get(field, "")
                     for field in subform.fields
                     if subform.fields[field].label != "hidden"
                 }
-                for subform in form.forms
-            ]
+                if not any(subform_data.values()) and isinstance(form, OtherIdentifiersFormSet):
+                    note = gettext("No other identifiers were provided.")
+                else:
+                    formset_data.append(subform_data)
             preview_data.append(
                 {
                     "step_title": step_title,
                     "step_name": transfer_step.value,
                     "fields": formset_data,
+                    "note": note,
                 }
             )
 
