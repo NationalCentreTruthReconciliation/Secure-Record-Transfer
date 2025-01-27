@@ -23,7 +23,6 @@ from recordtransfer.forms import (
     InlineSubmissionGroupForm,
     InlineUploadedFileForm,
     SubmissionForm,
-    UploadedFileForm,
     UploadSessionForm,
 )
 from recordtransfer.jobs import create_downloadable_bag
@@ -115,8 +114,6 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
 
     change_form_template = "admin/readonly_change_form.html"
 
-    form = UploadedFileForm
-
     actions = [
         "clean_temp_files",
     ]
@@ -152,8 +149,6 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
         js = ("admin_uploadedfile.bundle.js",)
 
     change_form_template = "admin/readonly_change_form.html"
-
-    form = UploadedFileForm
 
     list_display = [
         "name",

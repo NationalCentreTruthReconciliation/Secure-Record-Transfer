@@ -27,14 +27,6 @@ class RecordTransferModelForm(forms.ModelForm):
                     self.fields[field].disabled = True
 
 
-class UploadedFileForm(RecordTransferModelForm):
-    class Meta:
-        model = BaseUploadedFile
-        fields = ("name", "session", "file_upload")
-
-    exists = forms.BooleanField()
-
-
 class InlineUploadedFileForm(RecordTransferModelForm):
     class Meta:
         model = BaseUploadedFile
