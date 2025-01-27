@@ -485,18 +485,22 @@ class TransferFormWizard(SessionWizardView):
         else:
             # Validate each form before the goto step
             for step in self.steps.all[:goto_step_index]:
-                form = None
+                # Use current step data if the step is the current step, otherwise grab form data
+                # from storage
+                form = self.get_form(
+                    step,
+                    data=self.request.POST
+                    if step == self.steps.current
+                    else self.storage.get_step_data(step),
+                )
                 if step == self.steps.current:
-                    form = self.get_form(step, data=self.request.POST, files=self.request.FILES)
                     self.save_current_step(form)
-                else:
-                    form = self.get_form(step, data=self.storage.get_step_data(step))
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
                     return self.render(form, show_goto_review=True, **kwargs)
         return super().render_goto_step(goto_step, *args, **kwargs)
 
-    def render_next_step(self, form, **kwargs):
+    def render_next_step(self, form, **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
         # get the form instance based on the data from the storage backend
         # (if available).
