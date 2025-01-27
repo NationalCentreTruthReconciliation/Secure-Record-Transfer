@@ -479,7 +479,11 @@ class TransferFormWizard(SessionWizardView):
         else:
             # Validate each form before the goto step
             for step in self.steps.all[:goto_step_index]:
-                form = self.get_form(step, data=self.storage.get_step_data(step))
+                form = None
+                if step == self.steps.current:
+                    form = self.get_form(step, data=self.request.POST, files=self.request.FILES)
+                else:
+                    form = self.get_form(step, data=self.storage.get_step_data(step))
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
                     return self.render(form, **kwargs)
