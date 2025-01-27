@@ -298,59 +298,39 @@ class SourceInfoForm(TransferForm):
         super().__init__(*args, **kwargs)
 
     def clean(self) -> dict:
-        """Clean form and set defaults if the user chose not to enter source info manually.
-
-        As none of the fields are required, we need to check whether they are set here.
-        """
+        """Clean form and set defaults if the user chose not to enter source info manually."""
         cleaned_data = super().clean()
 
-        enter_manual = cleaned_data["enter_manual_source_info"]
-
-        # Set defaults if manual entry is not selected
-        if enter_manual == "no":
-            cleaned_data["source_name"] = self.default_source_name
-            cleaned_data["source_type"] = self.default_source_type
-            cleaned_data["source_role"] = self.default_source_role
-            for field in [
-                "other_source_type",
-                "other_source_role",
-                "source_note",
-                "preliminary_custodial_history",
-            ]:
-                cleaned_data[field] = ""
+        if cleaned_data["enter_manual_source_info"] == "no":
+            cleaned_data.update({
+                "source_name": self.default_source_name,
+                "source_type": self.default_source_type,
+                "source_role": self.default_source_role,
+                "other_source_type": "",
+                "other_source_role": "",
+                "source_note": "",
+                "preliminary_custodial_history": "",
+            })
+            for field in ["other_source_type", "other_source_role"]:
                 self.fields[field].label = "hidden"
 
-        source_name = cleaned_data.get("source_name", "")
-
-        if not source_name:
+        if not cleaned_data.get("source_name"):
             self.add_error("source_name", gettext("This field is required."))
 
-        source_type = cleaned_data.get("source_type", None)
-        other_source_type = cleaned_data.get("other_source_type", "")
-
+        source_type = cleaned_data.get("source_type")
         if not source_type:
             self.add_error("source_type", gettext("This field is required."))
-
-        elif source_type.name.lower() == "other" and not other_source_type:
-            self.add_error(
-            "other_source_type",
-            gettext('If "Source type" is Other, you must enter your own source type here'),
-            )
+        elif source_type.name.lower() == "other" and not cleaned_data.get("other_source_type"):
+            self.add_error("other_source_type", gettext('If "Source type" is Other, enter your own source type'))
         elif source_type.name.lower() != "other":
-            cleaned_data["other_source_type"] = ""  # Clear this field since it's not needed
+            cleaned_data["other_source_type"] = ""
             self.fields["other_source_type"].label = "hidden"
 
-        source_role = cleaned_data.get("source_role", None)
-        other_source_role = cleaned_data.get("other_source_role", "")
-
+        source_role = cleaned_data.get("source_role")
         if not source_role:
             self.add_error("source_role", gettext("This field is required."))
-
-        elif source_role.name.lower() == "other" and not other_source_role:
-            self.add_error(
-                "other_source_role",
-                gettext('If "Source role" is Other, you must enter your own source role here'),
-            )
+        elif source_role.name.lower() == "other" and not cleaned_data.get("other_source_role"):
+            self.add_error("other_source_role", gettext('If "Source role" is Other, enter your own source role'))
         elif source_role.name.lower() != "other":
             cleaned_data["other_source_role"] = ""
             self.fields["other_source_role"].label = "hidden"
