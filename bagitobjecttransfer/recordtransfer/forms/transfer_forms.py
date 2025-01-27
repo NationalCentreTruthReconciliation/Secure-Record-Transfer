@@ -724,6 +724,9 @@ class RightsForm(TransferForm):
                 "other_rights_type",
                 gettext('If "Type of rights" is empty, you must enter a different type here'),
             )
+        elif rights_type != RightsType.objects.get(name="Other"):
+            cleaned_data["other_rights_type"] = ""  # Clear this field since it's not needed
+            self.fields["other_rights_type"].label = "hidden"
 
         return cleaned_data
 

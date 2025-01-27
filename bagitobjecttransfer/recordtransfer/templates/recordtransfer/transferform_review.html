@@ -17,7 +17,7 @@
                         formnovalidate="formnovalidate" 
                         name="wizard_goto_step" 
                         value="{{ form.step_name }}">
-                        Go to step <i class="fas fa-arrow-right"></i>
+                        {% trans "Go to step" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
                 
@@ -39,11 +39,11 @@
                                                 </div>
                                             {% endfor %}
                                         {% elif value == True %}
-                                            ✓ Yes
+                                            ✓ {% trans "Yes" %}
                                         {% elif value == False %}
-                                            ✗ No
+                                            ✗ {% trans "No" %}
                                         {% elif value == '-' or value == None or value == '' %}
-                                            <span class="empty-value">Not provided</span>
+                                            <span class="empty-value">{% trans "Not provided" %}</span>
                                         {% elif value|date %}
                                             {{ value|date:"F j, Y" }}
                                         {% else %}
@@ -59,7 +59,7 @@
                                     <dl class="field-list">
                                         {% for label, value in entry.items %}
                                             <dt>{{ label }}</dt>
-                                            <dd>{{ value|default:"Not provided" }}</dd>
+                                            <dd>{{ value|default:_("<span class='empty-value'>Not provided</span>")|safe }}</dd>
                                         {% endfor %}
                                     </dl>
                                 </div>
