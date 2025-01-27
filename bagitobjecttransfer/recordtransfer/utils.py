@@ -391,22 +391,19 @@ def format_form_data(form_dict: OrderedDict, user: Optional[User] = None) -> lis
 
             if isinstance(form, GroupTransferForm):
                 group_id = form.cleaned_data.get("group_id")
-                try:
-                    group = SubmissionGroup.objects.get(created_by=user, uuid=group_id)
-                    fields_data[form.fields["group_id"].label] = group.name
-                except SubmissionGroup.DoesNotExist:
-                    pass  # continue to use the group_id as is
+                if group_id:
+                    group = SubmissionGroup.objects.filter(created_by=user, uuid=group_id).first()
+                    if group:
+                        fields_data[form.fields["group_id"].label] = group.name
 
             elif isinstance(form, UploadFilesForm):
                 session_token = form.cleaned_data.get("session_token")
-                try:
-                    session = UploadSession.objects.get(token=session_token, user=user)
+                session = UploadSession.objects.filter(token=session_token, user=user).first()
+                if session:
                     fields_data["Uploaded Files"] = [
                         {"name": f.name, "url": f.get_file_access_url()}
                         for f in session.get_temporary_uploads()
                     ]
-                except UploadSession.DoesNotExist:
-                    pass  # no need to do anything, uploaded files will not be shown
 
             preview_data.append(
                 {"step_title": step_title, "step_name": transfer_step.value, "fields": fields_data}
