@@ -479,6 +479,11 @@ class TransferFormWizard(SessionWizardView):
         # Check if the user is trying to go to a previous step or a future step
         goto_step_index = self.steps.all.index(goto_step)
         current_step_index = self.steps.all.index(self.steps.current)
+        show_goto_review = False
+        if goto_step_index == self.steps.all.index(
+            self.steps.last
+        ) or current_step_index == self.steps.all.index(self.steps.last):
+            show_goto_review = True
         if goto_step_index <= current_step_index:
             form = self.get_form(data=self.request.POST, files=self.request.FILES)
             self.save_current_step(form)
@@ -497,8 +502,10 @@ class TransferFormWizard(SessionWizardView):
                     self.save_current_step(form)
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
-                    return self.render(form, show_goto_review=True, **kwargs)
-        return super().render_goto_step(goto_step, *args, **kwargs)
+                    return self.render(form, show_goto_review=show_goto_review, **kwargs)
+        return super().render_goto_step(
+            goto_step, *args, show_goto_review=show_goto_review, **kwargs
+        )
 
     def render_next_step(self, form, **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
@@ -715,11 +722,7 @@ class TransferFormWizard(SessionWizardView):
 
         # This is actually checking the step from which the user came from, not the step
         # they are currently on/going to
-        if (
-            show_goto_review
-            or self.request.POST.get("transfer_form_wizard-current_step")
-            == TransferStep.REVIEW.value
-        ):
+        if show_goto_review:
             context["SENT_FROM_REVIEW"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
