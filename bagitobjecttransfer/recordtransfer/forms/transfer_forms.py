@@ -1,5 +1,6 @@
 """Forms specific to transferring files with a new submission."""
 
+from typing import Any
 from uuid import UUID
 
 from caais.models import RightsType, SourceRole, SourceType
@@ -301,6 +302,7 @@ class SourceInfoForm(TransferForm):
         """Clean form and set defaults if the user chose not to enter source info manually."""
         cleaned_data = super().clean()
 
+        # Set defaults if manual entry is not selected
         if cleaned_data["enter_manual_source_info"] == "no":
             cleaned_data.update({
                 "source_name": self.default_source_name,
@@ -317,6 +319,13 @@ class SourceInfoForm(TransferForm):
         if not cleaned_data.get("source_name"):
             self.add_error("source_name", gettext("This field is required."))
 
+        self._validate_source_type(cleaned_data)
+        self._validate_source_role(cleaned_data)
+
+        return cleaned_data
+
+    def _validate_source_type(self, cleaned_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate the source type field."""
         source_type = cleaned_data.get("source_type")
         if not source_type:
             self.add_error("source_type", gettext("This field is required."))
@@ -325,7 +334,10 @@ class SourceInfoForm(TransferForm):
         elif source_type.name.lower() != "other":
             cleaned_data["other_source_type"] = ""
             self.fields["other_source_type"].label = "hidden"
+        return cleaned_data
 
+    def _validate_source_role(self, cleaned_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate the source role field."""
         source_role = cleaned_data.get("source_role")
         if not source_role:
             self.add_error("source_role", gettext("This field is required."))
@@ -334,7 +346,6 @@ class SourceInfoForm(TransferForm):
         elif source_role.name.lower() != "other":
             cleaned_data["other_source_role"] = ""
             self.fields["other_source_role"].label = "hidden"
-
         return cleaned_data
 
     enter_manual_source_info = forms.ChoiceField(
