@@ -7,6 +7,7 @@ from typing import Callable
 from caais.export import ExportVersion
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import Q
@@ -32,6 +33,7 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
+from recordtransfer.utils import get_human_readable_size
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -186,6 +188,7 @@ class TempUploadedFileInline(ReadOnlyInline):
 
     model = TempUploadedFile
     fields = ["name", "exists"]
+    readonly_fields = ["exists"]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -200,6 +203,7 @@ class PermUploadedFileInline(ReadOnlyInline):
 
     model = PermUploadedFile
     fields = ["name", "exists"]
+    readonly_fields = ["exists"]
 
 
 @admin.register(UploadSession)
@@ -211,6 +215,10 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - change: Not allowed
         - delete: Not allowed
     """
+
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj):
+        return get_human_readable_size(obj.upload_size, 1000, 2)
 
     fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
     list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]

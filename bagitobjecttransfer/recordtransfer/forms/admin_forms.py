@@ -6,7 +6,6 @@ from django.utils.translation import gettext
 
 from recordtransfer.models import (
     Submission,
-    SubmissionGroup,
 )
 
 
