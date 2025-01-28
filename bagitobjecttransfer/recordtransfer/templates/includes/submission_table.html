@@ -9,7 +9,7 @@
             <th>{% trans "View Report" %}</th>
             <th>{% trans "Download CSV" %}</th>
         </tr>
-        {% for submission in submissions_page_obj %}
+        {% for submission in submissions %}
             <tr>
                 <td class="uuid-column">{{ submission.uuid }}</td>
                 <td>{{ submission.submission_date }}</td>

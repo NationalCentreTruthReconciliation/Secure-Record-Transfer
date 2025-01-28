@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     "formtools",
     "django_rq",
     "django_recaptcha",
-    "dbtemplates",
 ]
 
 MIDDLEWARE = [
@@ -44,21 +43,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "bagitobjecttransfer.urls"
 
-
-# django-dbtemplates configuration
-DBTEMPLATES_ENABLED = config("DBTEMPLATES_ENABLED", default=False, cast=bool)
-DBTEMPLATES_USE_CODEMIRROR = True
-DBTEMPLATES_AUTO_POPULATE_CONTENT = False
-
-
 loaders = [
     "django.template.loaders.filesystem.Loader",
     "django.template.loaders.app_directories.Loader",
 ]
-
-if DBTEMPLATES_ENABLED:
-    loaders.append("dbtemplates.loader.Loader")
-
 
 TEMPLATES = [
     {
