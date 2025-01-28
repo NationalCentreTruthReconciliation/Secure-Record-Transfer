@@ -28,7 +28,7 @@
                             {# Regular form fields #}
                             <dl class="field-list">
                                 {% for label, value in form.fields.items %}
-                                    <dt>{{ label }}</dt>
+                                <dt {% if label == "Uploaded Files" %}class="align-center"{% endif %}>{{ label }}</dt>
                                     <dd>
                                         {% if label == "Uploaded Files" %}
                                             {% for file in value %}
