@@ -27,18 +27,6 @@ class RecordTransferModelForm(forms.ModelForm):
                     self.fields[field].disabled = True
 
 
-class InlineUploadedFileForm(RecordTransferModelForm):
-    """Form for viewing UploadedFiles in-line. This form should not be used to provide edit
-    capabilities in-line for UploadedFiles.
-    """
-
-    class Meta:
-        model = BaseUploadedFile
-        fields = ("name",)
-
-    exists = forms.BooleanField()
-
-
 class UploadSessionForm(RecordTransferModelForm):
     """For for vieweing UploadSessions. This form should not be used to provide edit
     capabilities in-line for UploadSessions.

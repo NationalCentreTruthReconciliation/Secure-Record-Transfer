@@ -22,7 +22,6 @@ from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
     InlineSubmissionForm,
     InlineSubmissionGroupForm,
-    InlineUploadedFileForm,
     SubmissionForm,
     UploadSessionForm,
 )
@@ -188,8 +187,9 @@ class TempUploadedFileInline(ReadOnlyInline):
         - delete: Not allowed
     """
 
-    form = InlineUploadedFileForm
     model = TempUploadedFile
+    fields = ["name", "exists"]
+    readonly_fields = ["name", "exists"]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -202,8 +202,9 @@ class PermUploadedFileInline(ReadOnlyInline):
         - delete: Not allowed
     """
 
-    form = InlineUploadedFileForm
     model = PermUploadedFile
+    fields = ["name", "exists"]
+    readonly_fields = ["name", "exists"]
 
 
 @admin.register(UploadSession)
