@@ -808,7 +808,9 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.REVIEW:
-            context["form_list"] = format_form_data(self.get_forms_for_review(), user=self.request.user)
+            context["form_list"] = format_form_data(
+                self.get_forms_for_review(), user=cast(User, self.request.user)
+            )
 
         return context
 

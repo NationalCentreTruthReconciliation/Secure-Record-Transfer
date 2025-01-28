@@ -19,8 +19,8 @@ from recordtransfer.models import SubmissionGroup, UploadSession, User
 LOGGER = logging.getLogger("recordtransfer")
 
 
-class ReviewItem(TypedDict):
-    """A dictionary representing a review item.
+class ReviewFormItem(TypedDict):
+    """A dictionary representing a form item for review by the user.
 
     Attributes:
         step_title: The human-readable title of the step.
@@ -447,9 +447,9 @@ def _get_base_fields_data(form: BaseForm) -> dict[str, Any]:
     }
 
 
-def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewItem]:
+def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewFormItem]:
     """Format form data to be used in a form review page."""
-    preview_data: list[ReviewItem] = []
+    preview_data: list[ReviewFormItem] = []
 
     for step_title, form in form_dict.items():
         transfer_step = form.__class__.Meta.transfer_step
