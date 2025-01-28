@@ -475,7 +475,11 @@ class TransferFormWizard(SessionWizardView):
         self.storage.set_step_files(self.steps.current, self.process_step_files(form))
 
     def render_goto_step(self, goto_step: str, *args, **kwargs) -> HttpResponse:
-        """Save current step data before going back to a previous step."""
+        """Perform necessary validation and data saving before going to to desired step. Skips
+        validation if the user is trying to go to a previous step. Otherwise, validates each form
+        before the goto step, and takes user to the step with the first error if any form is
+        invalid.
+        """
         # Check if the user is trying to go to a previous step or a future step
         goto_step_index = self.steps.all.index(goto_step)
         current_step_index = self.steps.all.index(self.steps.current)
@@ -686,8 +690,10 @@ class TransferFormWizard(SessionWizardView):
 
         return kwargs
 
-    def get_final_forms(self) -> OrderedDict[str, Union[BaseModelForm, BaseModelFormSet]]:
-        """Retrieve and validate all forms in the wizard."""
+    def get_forms_for_review(self) -> OrderedDict[str, Union[BaseModelForm, BaseModelFormSet]]:
+        """Retrieve the relevant forms to be processed for the review step. This method does not
+        validate the forms, but populates the cleaned_data attribute of each form.
+        """
         final_forms = OrderedDict()
         form_list = self.get_form_list() or []
         for form_step in form_list:
@@ -707,8 +713,10 @@ class TransferFormWizard(SessionWizardView):
 
     @property
     def review_step_reached(self) -> bool:
-        """Check if the user has reached the review step before."""
-        # The number of populated steps should match the total number of steps
+        """Check if the user has reached the review step at some point throughout this form. This
+        check is valid even after resuming an in-progress transfer.
+        """
+        # If there are entries for every step of the form, then the review step has been reached
         return len(self.storage.data.get("step_data", [])) == self.steps.count
 
     def get_context_data(self, form, **kwargs):
@@ -724,6 +732,8 @@ class TransferFormWizard(SessionWizardView):
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
+        # Show the review button if the user is on the step before the review step, or if the user
+        # has reached the review step before
         if self.steps.step1 < self.steps.count and (
             self.steps.step1 == self.steps.count - 1 or self.review_step_reached
         ):
@@ -798,7 +808,7 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.REVIEW:
-            context["form_list"] = format_form_data(self.get_final_forms(), user=self.request.user)
+            context["form_list"] = format_form_data(self.get_forms_for_review(), user=self.request.user)
 
         return context
 
