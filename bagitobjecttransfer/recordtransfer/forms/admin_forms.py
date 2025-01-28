@@ -54,18 +54,3 @@ class SubmissionForm(RecordTransferModelForm):
                 ]
             )
         self.fields["metadata"].widget.can_add_related = False
-
-
-class InlineSubmissionGroupForm(RecordTransferModelForm):
-    """Form used to view SubmissionGroups in-line. This form should not be used to provide edit
-    capabilities in-line for a SubmissionGroup.
-    """
-
-    class Meta:
-        model = SubmissionGroup
-        fields = (
-            "name",
-            "description",
-        )
-
-    number_of_submissions_in_group = forms.IntegerField(required=False)

@@ -20,7 +20,6 @@ from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
-    InlineSubmissionGroupForm,
     SubmissionForm,
 )
 from recordtransfer.jobs import create_downloadable_bag
@@ -318,7 +317,9 @@ class SubmissionGroupInline(ReadOnlyInline):
     """
 
     model = SubmissionGroup
-    form = InlineSubmissionGroupForm
+    fields = ["name", "description", "number_of_submissions_in_group"]
+    # Tells Django this is a computed field
+    readonly_fields = ["number_of_submissions_in_group"]
 
 
 @admin.register(Submission)
