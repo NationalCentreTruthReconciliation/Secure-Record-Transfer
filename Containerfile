@@ -21,41 +21,72 @@ RUN apt-get update && \
 COPY pyproject.toml poetry.lock README.md /app/
 RUN poetry config virtualenvs.create true && \
     poetry config virtualenvs.in-project true && \
-    poetry install -E prod
+    poetry install
 
-# Copy Node-related files, and install NodeJS dependencies
-COPY package*.json webpack.config.js /app/
+# Install Node.js dependencies
+COPY package*.json /app/
 RUN npm install --no-color
 
 # Copy application code to image
 COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
 # Run webpack to bundle and minify assets
+COPY webpack.config.js /app/
 RUN npm run build
 
+# Copy entrypoint script to image
+COPY ./docker/entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 
-FROM python:3.10-slim
+################################################################################
+#
+# DEVELOPMENT IMAGE
+#
+
+FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS dev
 
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app/
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-mysql-client && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy built assets from builder image
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/bagitobjecttransfer /app/bagitobjecttransfer
+# Copy everything from builder image
+COPY --from=builder /app/ /app/
 
 # Activate virtual environment
 ENV PATH="/app/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="/app/.venv"
 
-# Copy entrypoint script to image
-COPY ./docker/entrypoint.sh /app/
-RUN chmod +x /app/entrypoint.sh
+WORKDIR /app/bagitobjecttransfer/
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+################################################################################
+#
+# PRODUCTION IMAGE
+#
+
+FROM builder AS prod-builder
+
+# Install production dependencies (e.g., mysqlclient)
+RUN poetry install -E prod
+
+
+FROM python:3.10-slim AS prod
+
+ENV PYTHONUNBUFFERED=1
+
+# Install required dependencies for mysqlclient
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
+
+# Selectively copy files from builder image
+COPY --from=prod-builder /app/entrypoint.sh /app/entrypoint.sh
+COPY --from=prod-builder /app/.venv /app/.venv
+COPY --from=prod-builder /app/dist /app/dist
+COPY --from=prod-builder /app/bagitobjecttransfer /app/bagitobjecttransfer
+
+# Activate virtual environment
+ENV PATH="/app/.venv/bin:$PATH"
+ENV VIRTUAL_ENV="/app/.venv"
 
 WORKDIR /app/bagitobjecttransfer/
 
