@@ -25,6 +25,7 @@ from recordtransfer.forms import (
 )
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
+    BaseUploadedFile,
     Job,
     PermUploadedFile,
     Submission,
@@ -68,6 +69,12 @@ def linkify(field_name: str) -> Callable:
 def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
     """FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
     instance.attached_file.delete(False)
+
+
+@display(description=gettext("Upload Size"))
+def format_upload_size(obj: BaseUploadedFile) -> str:
+    """Format file size of an BaseUploadedFile instance for display."""
+    return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -115,15 +122,11 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
         "clean_temp_files",
     ]
 
-    @display(description=gettext("Upload Size"))
-    def upload_size(self, obj):
-        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
-
-    fields = ["id", "name", "upload_size", "exists", linkify("session"), "file_upload"]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
     list_display = [
         "name",
-        "upload_size",
+        format_upload_size,
         "exists",
         linkify("session"),
     ]
@@ -152,15 +155,11 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
     class Media:
         js = ("admin_uploadedfile.bundle.js",)
 
-    @display(description=gettext("Upload Size"))
-    def upload_size(self, obj):
-        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
-
-    fields = ["id", "name", "upload_size", "exists", linkify("session"), "file_upload"]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
     list_display = [
         "name",
-        "upload_size",
+        format_upload_size,
         "exists",
         linkify("session"),
     ]
@@ -200,13 +199,9 @@ class TempUploadedFileInline(ReadOnlyInline):
         - delete: Not allowed
     """
 
-    @display(description=gettext("Upload Size"))
-    def upload_size(self, obj):
-        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
-
     model = TempUploadedFile
-    fields = ["name", "upload_size", "exists"]
-    readonly_fields = ["exists", "upload_size"]
+    fields = ["name", format_upload_size, "exists"]
+    readonly_fields = ["exists", format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -219,13 +214,9 @@ class PermUploadedFileInline(ReadOnlyInline):
         - delete: Not allowed
     """
 
-    @display(description=gettext("Upload Size"))
-    def upload_size(self, obj):
-        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
-
     model = PermUploadedFile
-    fields = ["name", "upload_size", "exists"]
-    readonly_fields = ["exists", "upload_size"]
+    fields = ["name", format_upload_size, "exists"]
+    readonly_fields = ["exists", format_upload_size]
 
 
 @admin.register(UploadSession)
