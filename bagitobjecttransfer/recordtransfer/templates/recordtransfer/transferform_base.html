@@ -47,7 +47,7 @@
                             formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.prev }}"
-                            class="blue-button-outline margin-right-20px">{% trans "Previous Step" %}</button>
+                            class="blue-button-outline margin-right-10px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
                     <button 
@@ -57,7 +57,7 @@
                         id="form-next-button"
                         {% endblock submitbuttonattributes %}
                         type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                        class="blue-button margin-right-20px">
+                        class="blue-button margin-right-30px">
                         {% if wizard.steps.step1 == wizard.steps.count %}
                             {% trans "Submit" %}
                         {% else %}
@@ -69,7 +69,7 @@
                     <button id="form-review-button"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.last }}"
-                            class="blue-button margin-right-20px">
+                            class="green-button">
                         {% if wizard.steps.step1 == wizard.steps.count|add:"-1" %}
                             {% trans "Review" %}
                         {% else %}
