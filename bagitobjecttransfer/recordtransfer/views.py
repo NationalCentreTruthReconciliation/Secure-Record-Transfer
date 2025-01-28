@@ -479,10 +479,6 @@ class TransferFormWizard(SessionWizardView):
         # Check if the user is trying to go to a previous step or a future step
         goto_step_index = self.steps.all.index(goto_step)
         current_step_index = self.steps.all.index(self.steps.current)
-        show_goto_review = self.steps.all.index(self.steps.last) in (
-            goto_step_index,
-            current_step_index,
-        )
 
         if goto_step_index <= current_step_index:
             form = self.get_form(data=self.request.POST, files=self.request.FILES)
@@ -502,11 +498,9 @@ class TransferFormWizard(SessionWizardView):
                     self.save_current_step(form)
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
-                    return self.render(form, show_goto_review=show_goto_review, **kwargs)
+                    return self.render(form, **kwargs)
 
-        return super().render_goto_step(
-            goto_step, *args, show_goto_review=show_goto_review, **kwargs
-        )
+        return super().render_goto_step(goto_step, *args, **kwargs)
 
     def render_next_step(self, form, **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
@@ -711,6 +705,12 @@ class TransferFormWizard(SessionWizardView):
             )
         return final_forms
 
+    @property
+    def review_step_reached(self) -> bool:
+        """Check if the user has reached the review step before."""
+        # The number of populated steps should match the total number of steps
+        return len(self.storage.data.get("step_data", [])) == self.steps.count
+
     def get_context_data(self, form, **kwargs):
         """Retrieve context data for the current form template.
 
@@ -721,14 +721,11 @@ class TransferFormWizard(SessionWizardView):
             dict: A dictionary of context data to be used to render the form template.
         """
         context = super().get_context_data(form, **kwargs)
-        show_goto_review = kwargs.get("show_goto_review", False)
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
-        # This is actually checking the step from which the user came from, not the step
-        # they are currently on/going to
-        if show_goto_review and self.current_step != TransferStep.REVIEW:
-            context["SENT_FROM_REVIEW"] = True
+        if self.steps.index == self.steps.count - 1 or self.review_step_reached:
+            context["SHOW_REVIEW_BUTTON"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
             context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})

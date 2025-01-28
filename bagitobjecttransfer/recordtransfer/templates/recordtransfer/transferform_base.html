@@ -65,7 +65,7 @@
                         {% endif %}
                     </button>
                 {% endif %}
-                {% if SENT_FROM_REVIEW or wizard.steps.step1 == wizard.steps.count|add:"-1" %}
+                {% if SHOW_REVIEW_BUTTON %}
                     <button id="form-review-button"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.last }}"
