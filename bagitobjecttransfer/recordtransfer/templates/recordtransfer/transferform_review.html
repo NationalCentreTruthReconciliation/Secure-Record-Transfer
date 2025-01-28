@@ -1,9 +1,10 @@
-{% extends 'recordtransfer/transferform_standard.html' %}
+{% extends 'recordtransfer/transferform_base.html' %}
 {% load static %}
 {% load i18n %}
 
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block submitbuttontype %}button{% endblock %}
+{% block savelinkclass %}flex-med-width-item{% endblock savelinkclass %}
 
 {% block formfields %}
 
