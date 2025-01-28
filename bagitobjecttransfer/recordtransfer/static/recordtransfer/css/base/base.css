@@ -58,15 +58,16 @@ body {
 
 .red-button,
 .green-button,
-.blue-button {
+.blue-button,
+.blue-button-outline {
     margin: auto;
     font-size: 11pt;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     padding: 6px 12px 6px 12px;
     margin: 0;
     text-decoration: none;
-    transition: background 150ms ease;
+    transition: background 50ms ease;
     -webkit-appearance: none;
 }
 
@@ -94,23 +95,44 @@ body {
     color: #fefefe;
 }
 
+.blue-button-outline {
+    background: transparent;
+    color: #2d30d4;
+    border: 2px solid #2d30d4;
+}
+
+.blue-button-outline:hover,
+.blue-button-outline:focus {
+    background: #2d30d4;
+    color: #ffffff;
+    transition: background 150ms ease;
+}
+
+.red-button:hover,
+.red-button:focus,
+.green-button:hover,
+.green-button:focus,
+.blue-button:hover,
+.blue-button:focus,
+.blue-button-outline:hover,
+.blue-button-outline:focus {
+    cursor: pointer;
+}
+
 .red-button:hover,
 .red-button:focus {
-    cursor: pointer;
     background: #ff7070;
     color: #ffffff;
 }
 
 .green-button:hover,
 .green-button:focus {
-    cursor: pointer;
     background: #3fb953;
     color: #ffffff;
 }
 
 .blue-button:hover,
 .blue-button:focus {
-    cursor: pointer;
     background: #316dee;
     color: #ffffff;
 }
@@ -120,6 +142,13 @@ body {
 .blue-button:disabled {
     background: #747474;
     color: #ffffff;
+    cursor: default;
+}
+
+.blue-button-outline:disabled {
+    background: transparent;
+    color: #747474;
+    border: 2px solid #747474;
     cursor: default;
 }
 
@@ -293,6 +322,7 @@ body {
 }
 
 @media (max-width: 1199px) {
+
     .main-header-content,
     .main-content {
         width: 95%;

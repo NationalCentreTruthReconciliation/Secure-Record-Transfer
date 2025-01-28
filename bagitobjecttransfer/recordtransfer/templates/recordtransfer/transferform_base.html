@@ -47,7 +47,7 @@
                             formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.prev }}"
-                            class="blue-button margin-right-20px">{% trans "Previous Step" %}</button>
+                            class="blue-button-outline margin-right-20px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
                     <button 
