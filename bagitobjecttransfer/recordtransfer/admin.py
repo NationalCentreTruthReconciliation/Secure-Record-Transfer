@@ -156,7 +156,29 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
     ordering = ["-session", "name"]
 
 
-class TempUploadedFileInline(admin.TabularInline):
+class ReadOnlyInline(admin.TabularInline):
+    """Inline admin that does not allow any editing/changing/ or deletions.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
+    """
+
+    max_num = 0
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class TempUploadedFileInline(ReadOnlyInline):
     """Inline admin for the BaseUploadedFile model. Used to view the files
     associated with an upload session.
 
@@ -168,20 +190,9 @@ class TempUploadedFileInline(admin.TabularInline):
 
     form = InlineUploadedFileForm
     model = TempUploadedFile
-    max_num = 0
-    show_change_link = True
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
-class PermUploadedFileInline(admin.TabularInline):
+class PermUploadedFileInline(ReadOnlyInline):
     """Inline admin for the BaseUploadedFile model. Used to view the files
     associated with an upload session.
 
@@ -193,17 +204,6 @@ class PermUploadedFileInline(admin.TabularInline):
 
     form = InlineUploadedFileForm
     model = PermUploadedFile
-    max_num = 0
-    show_change_link = True
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(UploadSession)
@@ -230,7 +230,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ]
 
 
-class SubmissionInline(admin.TabularInline):
+class SubmissionInline(ReadOnlyInline):
     """Inline admin for the Submission model.
 
     Permissions:
@@ -240,17 +240,9 @@ class SubmissionInline(admin.TabularInline):
     """
 
     model = Submission
-    max_num = 0
-    show_change_link = True
     form = InlineSubmissionForm
 
     ordering = ["-submission_date"]
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
 
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
@@ -291,12 +283,6 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "export_atom_2_1_csv",
     ]
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
 
@@ -326,7 +312,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
 
 
-class SubmissionGroupInline(admin.TabularInline):
+class SubmissionGroupInline(ReadOnlyInline):
     """Inline admin for viewing submission groups.
 
     Permissions:
@@ -336,19 +322,7 @@ class SubmissionGroupInline(admin.TabularInline):
     """
 
     model = SubmissionGroup
-    max_num = 0
-    show_change_link = True
-
     form = InlineSubmissionGroupForm
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(Submission)
@@ -526,9 +500,6 @@ class JobAdmin(ReadOnlyAdmin):
     ]
 
     ordering = ["-start_time"]
-
-    def has_add_permission(self, request):
-        return False
 
     def has_delete_permission(self, request, obj=None):
         return obj and (request.user == obj.user_triggered or request.user.is_superuser)
