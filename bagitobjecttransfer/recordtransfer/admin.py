@@ -115,8 +115,15 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
         "clean_temp_files",
     ]
 
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj):
+        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
+    fields = ["id", "name", "upload_size", "exists", linkify("session"), "file_upload"]
+
     list_display = [
         "name",
+        "upload_size",
         "exists",
         linkify("session"),
     ]
@@ -145,8 +152,15 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
     class Media:
         js = ("admin_uploadedfile.bundle.js",)
 
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj):
+        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
+    fields = ["id", "name", "upload_size", "exists", linkify("session"), "file_upload"]
+
     list_display = [
         "name",
+        "upload_size",
         "exists",
         linkify("session"),
     ]
@@ -186,9 +200,13 @@ class TempUploadedFileInline(ReadOnlyInline):
         - delete: Not allowed
     """
 
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj):
+        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
     model = TempUploadedFile
-    fields = ["name", "exists"]
-    readonly_fields = ["exists"]
+    fields = ["name", "upload_size", "exists"]
+    readonly_fields = ["exists", "upload_size"]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -201,9 +219,13 @@ class PermUploadedFileInline(ReadOnlyInline):
         - delete: Not allowed
     """
 
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj):
+        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
     model = PermUploadedFile
-    fields = ["name", "exists"]
-    readonly_fields = ["exists"]
+    fields = ["name", "upload_size", "exists"]
+    readonly_fields = ["exists", "upload_size"]
 
 
 @admin.register(UploadSession)
