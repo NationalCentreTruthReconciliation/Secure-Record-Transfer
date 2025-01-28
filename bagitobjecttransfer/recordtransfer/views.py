@@ -724,7 +724,9 @@ class TransferFormWizard(SessionWizardView):
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
-        if self.steps.index == self.steps.count - 1 or self.review_step_reached:
+        if self.steps.step1 < self.steps.count and (
+            self.steps.step1 == self.steps.count - 1 or self.review_step_reached
+        ):
             context["SHOW_REVIEW_BUTTON"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
