@@ -5,10 +5,8 @@ from django.utils.html import format_html
 from django.utils.translation import gettext
 
 from recordtransfer.models import (
-    BaseUploadedFile,
     Submission,
     SubmissionGroup,
-    UploadSession,
 )
 
 
@@ -56,20 +54,6 @@ class SubmissionForm(RecordTransferModelForm):
                 ]
             )
         self.fields["metadata"].widget.can_add_related = False
-
-
-class InlineSubmissionForm(RecordTransferModelForm):
-    """Form for viewing Submissions in-line. This form should not be used to provide edit
-    capabilities in-line for Submissions.
-    """
-
-    class Meta:
-        model = Submission
-        fields = (
-            "uuid",
-            "metadata",
-            "part_of_group",
-        )
 
 
 class InlineSubmissionGroupForm(RecordTransferModelForm):

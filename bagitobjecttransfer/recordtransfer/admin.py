@@ -20,10 +20,8 @@ from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
-    InlineSubmissionForm,
     InlineSubmissionGroupForm,
     SubmissionForm,
-    UploadSessionForm,
 )
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
@@ -189,7 +187,6 @@ class TempUploadedFileInline(ReadOnlyInline):
 
     model = TempUploadedFile
     fields = ["name", "exists"]
-    readonly_fields = ["name", "exists"]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -204,7 +201,6 @@ class PermUploadedFileInline(ReadOnlyInline):
 
     model = PermUploadedFile
     fields = ["name", "exists"]
-    readonly_fields = ["name", "exists"]
 
 
 @admin.register(UploadSession)
@@ -218,7 +214,6 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     """
 
     fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
-    readonly_fields = fields
     list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
 
     inlines = [
@@ -241,7 +236,7 @@ class SubmissionInline(ReadOnlyInline):
     """
 
     model = Submission
-    form = InlineSubmissionForm
+    fields = ["uuid", "metadata"]
 
     ordering = ["-submission_date"]
 
