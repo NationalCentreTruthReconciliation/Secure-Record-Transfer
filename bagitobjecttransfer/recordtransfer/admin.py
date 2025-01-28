@@ -217,14 +217,14 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    form = UploadSessionForm
+    fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    readonly_fields = fields
+    list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
 
     inlines = [
         TempUploadedFileInline,
         PermUploadedFileInline,
     ]
-
-    list_display = ["token", linkify("user"), "started_at", "file_count", "status"]
 
     ordering = [
         "-started_at",

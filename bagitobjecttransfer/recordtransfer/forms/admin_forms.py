@@ -27,19 +27,6 @@ class RecordTransferModelForm(forms.ModelForm):
                     self.fields[field].disabled = True
 
 
-class UploadSessionForm(RecordTransferModelForm):
-    """For for vieweing UploadSessions. This form should not be used to provide edit
-    capabilities in-line for UploadSessions.
-    """
-
-    class Meta:
-        model = UploadSession
-        fields = ("token", "started_at")
-
-    file_count = forms.IntegerField(required=False)
-    status = forms.CharField(required=False)
-
-
 class SubmissionForm(RecordTransferModelForm):
     """Form for editing Submissions."""
 
