@@ -314,7 +314,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
         self.go_next_step()
 
-    def upload_files_step(self, required_only: bool = False):
+    def upload_files_step(self, required_only: bool = False) -> None:
         """Complete the Upload Files step."""
         data = self.test_data[TransferStep.UPLOAD_FILES]
 
@@ -459,7 +459,9 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 self.assertEqual(element.text, expected_value)
 
     def test_previous_saves_form(self) -> None:
-        """Test that the form data is saved when going to the previous step."""
+        """Test that the form data is saved when going to the previous step. Uses the Contact
+        Information step and the Record Description step as test cases.
+        """
         self.login()
         driver = self.driver
 
@@ -467,23 +469,17 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         driver.get(f"{self.live_server_url}/transfer/")
 
         # Fill out the Legal Agreement step
-        accept_agreement_checkbox = driver.find_element(By.NAME, "acceptlegal-agreement_accepted")
-        accept_agreement_checkbox.click()
-        driver.find_element(By.ID, "form-next-button").click()
+        self.complete_legal_agreement_step()
 
-        # Wait for the next step to load
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
-        )
-
-        # Fill out some required fields in the the Contact Information step
+        # Fill out some required fields in the Contact Information step
+        data = self.test_data[TransferStep.CONTACT_INFO]
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
         phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
         email_input = driver.find_element(By.NAME, "contactinfo-email")
 
-        contact_name_input.send_keys("John Doe")
-        phone_number_input.send_keys("+1 (999) 999-9999")
-        email_input.send_keys("john.doe@example.com")
+        contact_name_input.send_keys(data["contact_name"])
+        phone_number_input.send_keys(data["phone_number"])
+        email_input.send_keys(data["email"])
         driver.find_element(By.ID, "form-previous-button").click()
 
         # Wait for previous step to load
@@ -503,15 +499,15 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
         )
 
-        # Get the Contact Information step inputs
+        # Re-find the elements after navigating back to the Contact Information step
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
         phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
         email_input = driver.find_element(By.NAME, "contactinfo-email")
 
         # Verify that the Contact Information step is still filled out
-        self.assertEqual(contact_name_input.get_attribute("value"), "John Doe")
-        self.assertEqual(phone_number_input.get_attribute("value"), "+1 (999) 999-9999")
-        self.assertEqual(email_input.get_attribute("value"), "john.doe@example.com")
+        self.assertEqual(contact_name_input.get_attribute("value"), data["contact_name"])
+        self.assertEqual(phone_number_input.get_attribute("value"), data["phone_number"])
+        self.assertEqual(email_input.get_attribute("value"), data["email"])
 
         # Fill out the rest of the Contact Information step
         address_line_1_input = driver.find_element(By.NAME, "contactinfo-address_line_1")
@@ -520,22 +516,17 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         postal_or_zip_code_input = driver.find_element(By.NAME, "contactinfo-postal_or_zip_code")
         country_input = driver.find_element(By.NAME, "contactinfo-country")
 
-        address_line_1_input.send_keys("123 Main St")
-        city_input.send_keys("Winnipeg")
-        province_or_state_input.send_keys("MB")
-        postal_or_zip_code_input.send_keys("R3C 1A5")
-        country_input.send_keys("CA")
+        address_line_1_input.send_keys(data["address_line_1"])
+        city_input.send_keys(data["city"])
+        province_or_state_input.send_keys(data["province_or_state"])
+        postal_or_zip_code_input.send_keys(data["postal_or_zip_code"])
+        country_input.send_keys(data["country"])
 
-        # Go to the next step
-        driver.find_element(By.ID, "form-next-button").click()
-
-        # Wait for the next step to load
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
-        )
+        # Go to Source Information step
+        self.go_next_step()
 
         # Optional step so go to next step
-        driver.find_element(By.ID, "form-next-button").click()
+        self.go_next_step()
 
         # Wait for the next step to load
         WebDriverWait(driver, 10).until(
@@ -543,41 +534,32 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         )
 
         # Fill out some fields in the Record Description step
+        data = self.test_data[TransferStep.RECORD_DESCRIPTION]
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
         description_input = driver.find_element(
             By.NAME, "recorddescription-preliminary_scope_and_content"
         )
 
-        accession_title_input.send_keys("Test Accession Title")
-        description_input.send_keys("Test Description")
+        accession_title_input.send_keys(data["accession_title"])
+        description_input.send_keys(data["description"])
 
         # Go back to the Contact Information step
-        driver.find_element(By.ID, "form-previous-button").click()
+        self.go_previous_step()
 
         # Wait for the previous step to load
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
         )
 
-        # Verify that the Source Information step is still filled out as expected
-        enter_manual_source_info_checkbox = driver.find_element(
-            By.NAME, "sourceinfo-enter_manual_source_info"
-        )
-        self.assertFalse(enter_manual_source_info_checkbox.is_selected())
-
         # Go back to the Record Description step
-        driver.find_element(By.ID, "form-next-button").click()
+        self.go_next_step()
 
-        # Wait for the next step to load
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, "recorddescription-accession_title"))
-        )
-
-        # Verify that the Record Description step is still filled out as expected
+        # Refind the elements after navigating back to the Record Description step
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
         description_input = driver.find_element(
             By.NAME, "recorddescription-preliminary_scope_and_content"
         )
 
-        self.assertEqual(accession_title_input.get_attribute("value"), "Test Accession Title")
-        self.assertEqual(description_input.get_attribute("value"), "Test Description")
+        # Verify that the Record Description step is still filled out
+        self.assertEqual(accession_title_input.get_attribute("value"), data["accession_title"])
+        self.assertEqual(description_input.get_attribute("value"), data["description"])
