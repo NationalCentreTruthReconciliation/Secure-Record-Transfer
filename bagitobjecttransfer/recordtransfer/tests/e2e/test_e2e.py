@@ -1,7 +1,8 @@
 import os
-from unittest.mock import patch
+import tempfile
+from typing import ClassVar
 
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -11,15 +12,60 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from recordtransfer.models import User
 
 
-class TransferFormWizardTest(LiveServerTestCase):
+class TransferFormWizardTest(StaticLiveServerTestCase):
     """End-to-end tests for the transfer form wizard."""
+
+    test_data: ClassVar[dict] = {
+        "contact_info": {
+            "contact_name": "John Doe",
+            "phone_number": "+1 (999) 999-9999",
+            "email": "john.doe@example.com",
+            "address_line_1": "123 Main St",
+            "city": "Winnipeg",
+            "province_or_state": "MB",
+            "postal_or_zip_code": "R3C 1A5",
+            "country": "CA",
+            "job_title": "Archivist",
+            "organization": "Test Organization",
+        },
+        "source_info": {
+            "source_name": "Test Source Name",
+            "source_type": "2",  # Individual
+            "source_role": "2",  # Donor
+            "source_note": "Test Source Note",
+            "preliminary_custodial_history": "Test Custodial History",
+        },
+        "record_description": {
+            "accession_title": "Test Accession Title",
+            "start_date": "2021-01-01",
+            "end_date": "2021-12-31",
+            "language": "English",
+            "description": "Test Description",
+            "condition": "Test Condition",
+        },
+        "record_rights": {
+            "rights_type": "7",  # Copyright
+            "rights_value": "Copyright until 2050, applies to all files",
+        },
+        "other_identifiers": {
+            "type": "Receipt number",
+            "value": "123456",
+            "note": "Test note for identifier",
+        },
+        "group": {"name": "Test Group", "description": "Test description for group"},
+        "upload_files": {
+            "general_note": "Test general note",
+            "filename": "test_upload.txt",
+            "content": b"Test content" * 512,  # 5 KB
+        },
+    }
 
     def setUp(self) -> None:
         """Set up the web driver and create a test user."""
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         prefs = {"autofill.profile_enabled": False}
@@ -60,6 +106,10 @@ class TransferFormWizardTest(LiveServerTestCase):
         driver = self.driver
         driver.find_element(By.ID, "form-previous-button").click()
 
+    def go_to_review_step(self) -> None:
+        driver = self.driver
+        driver.find_element(By.ID, "form-review-button").click()
+
     def complete_legal_agreement_step(self) -> None:
         driver = self.driver
 
@@ -70,6 +120,7 @@ class TransferFormWizardTest(LiveServerTestCase):
 
     def complete_contact_information_step(self, required_only: bool = False) -> None:
         driver = self.driver
+        data = self.test_data["contact_info"]
 
         # Complete the Contact Information step
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
@@ -81,26 +132,27 @@ class TransferFormWizardTest(LiveServerTestCase):
         postal_or_zip_code_input = driver.find_element(By.NAME, "contactinfo-postal_or_zip_code")
         country_input = driver.find_element(By.NAME, "contactinfo-country")
 
-        contact_name_input.send_keys("John Doe")
-        phone_number_input.send_keys("+1 (999) 999-9999")
-        email_input.send_keys("john.doe@example.com")
-        address_line_1_input.send_keys("123 Main St")
-        city_input.send_keys("Winnipeg")
-        province_or_state_input.send_keys("MB")
-        postal_or_zip_code_input.send_keys("R3C 1A5")
-        country_input.send_keys("CA")
+        contact_name_input.send_keys(data["contact_name"])
+        phone_number_input.send_keys(data["phone_number"])
+        email_input.send_keys(data["email"])
+        address_line_1_input.send_keys(data["address_line_1"])
+        city_input.send_keys(data["city"])
+        province_or_state_input.send_keys(data["province_or_state"])
+        postal_or_zip_code_input.send_keys(data["postal_or_zip_code"])
+        country_input.send_keys(data["country"])
 
         if not required_only:
             job_title_input = driver.find_element(By.NAME, "contactinfo-job_title")
             organization_input = driver.find_element(By.NAME, "contactinfo-organization")
 
-            job_title_input.send_keys("Archivist")
-            organization_input.send_keys("Test Organization")
+            job_title_input.send_keys(data["job_title"])
+            organization_input.send_keys(data["organization"])
 
         self.go_next_step()
 
     def complete_source_information_step(self, required_only: bool = False) -> None:
         driver = self.driver
+        data = self.test_data["source_info"]
 
         # Complete the Source Information step
         enter_manual_source_info_radio_0 = driver.find_element(
@@ -113,9 +165,9 @@ class TransferFormWizardTest(LiveServerTestCase):
         source_type_select = Select(driver.find_element(By.NAME, "sourceinfo-source_type"))
         source_role_select = Select(driver.find_element(By.NAME, "sourceinfo-source_role"))
 
-        source_name_input.send_keys("Test Source Name")
-        source_type_select.select_by_value("2")  # Select "Individual"
-        source_role_select.select_by_value("2")  # Select "Donor"
+        source_name_input.send_keys(data["source_name"])
+        source_type_select.select_by_value(data["source_type"])
+        source_role_select.select_by_value(data["source_role"])
 
         if not required_only:
             source_note_input = driver.find_element(By.NAME, "sourceinfo-source_note")
@@ -123,53 +175,51 @@ class TransferFormWizardTest(LiveServerTestCase):
                 By.NAME, "sourceinfo-preliminary_custodial_history"
             )
 
-            source_note_input.send_keys("Test Source Note")
-            preliminary_custodial_history.send_keys("Test Custodial History")
+            source_note_input.send_keys(data["source_note"])
+            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
         self.go_next_step()
 
     def complete_record_description_step(self, required_only: bool = False) -> None:
-        accession_title_input = self.driver.find_element(
-            By.NAME, "recorddescription-accession_title"
-        )
-        start_date_input = self.driver.find_element(
-            By.NAME, "recorddescription-start_date_of_material"
-        )
-        end_date_input = self.driver.find_element(
-            By.NAME, "recorddescription-end_date_of_material"
-        )
-        language_input = self.driver.find_element(
-            By.NAME, "recorddescription-language_of_material"
-        )
-        description_of_contents_input = self.driver.find_element(
+        driver = self.driver
+        data = self.test_data["record_description"]
+
+        accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
+        start_date_input = driver.find_element(By.NAME, "recorddescription-start_date_of_material")
+        end_date_input = driver.find_element(By.NAME, "recorddescription-end_date_of_material")
+        language_input = driver.find_element(By.NAME, "recorddescription-language_of_material")
+        description_of_contents_input = driver.find_element(
             By.NAME, "recorddescription-preliminary_scope_and_content"
         )
 
-        accession_title_input.send_keys("Test Accession Title")
-        start_date_input.send_keys("2021-01-01")
-        end_date_input.send_keys("2021-12-31")
-        language_input.send_keys("English")
-        description_of_contents_input.send_keys("Test Description")
+        accession_title_input.send_keys(data["accession_title"])
+        start_date_input.send_keys(data["start_date"])
+        end_date_input.send_keys(data["end_date"])
+        language_input.send_keys(data["language"])
+        description_of_contents_input.send_keys(data["description"])
 
         if not required_only:
-            condition_input = self.driver.find_element(
+            condition_input = driver.find_element(
                 By.NAME, "recorddescription-condition_assessment"
             )
 
-            condition_input.send_keys("Test Condition")
+            condition_input.send_keys(data["condition"])
 
         self.go_next_step()
 
     def complete_record_rights_step(self, required_only: bool = False) -> None:
         driver = self.driver
+        data = self.test_data["record_rights"]
 
         # Complete the Record Rights step
         rights_type_select = Select(driver.find_element(By.NAME, "rights-0-rights_type"))
-        rights_value_textarea = driver.find_element(By.NAME, "rights-0-rights_value")
+
+        rights_type_select.select_by_value(data["rights_type"])
 
         rights_type_select.select_by_value("7")  # Select "Copyright"
         if not required_only:
-            rights_value_textarea.send_keys("Copyright until 2050, applies to all files")
+            rights_value_textarea = driver.find_element(By.NAME, "rights-0-rights_value")
+            rights_value_textarea.send_keys(data["rights_value"])
 
         self.go_next_step()
 
@@ -179,6 +229,7 @@ class TransferFormWizardTest(LiveServerTestCase):
             return
 
         driver = self.driver
+        data = self.test_data["other_identifiers"]
 
         # Complete the Other Identifiers step
         identifier_type_input = driver.find_element(
@@ -187,14 +238,13 @@ class TransferFormWizardTest(LiveServerTestCase):
         identifier_value_input = driver.find_element(
             By.NAME, "otheridentifiers-0-other_identifier_value"
         )
-
-        identifier_type_input.send_keys("Receipt number")
-        identifier_value_input.send_keys("123456")
-
         identifier_note_input = driver.find_element(
             By.NAME, "otheridentifiers-0-other_identifier_note"
         )
-        identifier_note_input.send_keys("Test note for identifier")
+
+        identifier_type_input.send_keys(data["type"])
+        identifier_value_input.send_keys(data["value"])
+        identifier_note_input.send_keys(data["note"])
 
         self.go_next_step()
 
@@ -204,19 +254,20 @@ class TransferFormWizardTest(LiveServerTestCase):
             return
 
         driver = self.driver
+        data = self.test_data["group"]
 
         # Click the button to show the add new group dialog
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
 
         # Wait for the modal to appear
-        WebDriverWait(driver, 0.2)
+        WebDriverWait(driver, 2)
 
         # Fill out the form in the modal
         group_name_input = driver.find_element(By.ID, "id_submission_group_name")
         group_description_input = driver.find_element(By.ID, "id_submission_group_description")
 
-        group_name_input.send_keys("Test Group")
-        group_description_input.send_keys("Test description for group")
+        group_name_input.send_keys(data["name"])
+        group_description_input.send_keys(data["description"])
 
         # Submit the form to create the new group
         driver.find_element(By.ID, "id_create_group_button").click()
@@ -229,9 +280,37 @@ class TransferFormWizardTest(LiveServerTestCase):
         # Check that the new group is selected
         group_select = Select(driver.find_element(By.NAME, "grouptransfer-group_id"))
         selected_option = group_select.first_selected_option
-        self.assertEqual(selected_option.text, "Test Group")
+        self.assertEqual(selected_option.text, data["name"])
 
         self.go_next_step()
+
+    def upload_files_step(self, required_only=False):
+        data = self.test_data["upload_files"]
+
+        # Create temp file with specified name
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, data["filename"])
+
+        try:
+            with open(temp_path, "wb") as temp_file:
+                temp_file.write(data["content"])
+
+            file_input = self.driver.find_element(By.CSS_SELECTOR, "input[type='file']")
+            file_input.send_keys(temp_path)
+
+            WebDriverWait(self.driver, 2).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "uppy-Dashboard-Item"))
+            )
+
+            if not required_only:
+                general_note_input = self.driver.find_element(By.NAME, "uploadfiles-general_note")
+                general_note_input.send_keys(data["general_note"])
+
+            self.go_to_review_step()
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
 
     def test_complete_form_till_review_step(self) -> None:
         self.login()
@@ -247,12 +326,78 @@ class TransferFormWizardTest(LiveServerTestCase):
         self.complete_record_rights_step()
         self.complete_other_identifiers_step()
         self.complete_assign_to_group_step()
+        self.upload_files_step()
 
     def test_login(self) -> None:
         """Test that the user can log in."""
         self.login()
         # Verify that the user is logged in by checking the presence of a specific element
         self.assertTrue(self.driver.find_element(By.ID, "logout-btn"))
+
+    # def test_review_step(self) -> None:
+    #     self.complete_form_till_review_step()
+
+    #     # Verify that the review summary shows the correct information
+    #     review_summary = self.driver.find_element(By.CLASS_NAME, "review-summary")
+
+    #     # Contact Information
+    #     contact_info_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Contact Information']/following-sibling::div"
+    #     )
+    #     self.assertIn("John Doe", contact_info_section.text)
+    #     self.assertIn("+1 (999) 999-9999", contact_info_section.text)
+    #     self.assertIn("john.doe@example.com", contact_info_section.text)
+    #     self.assertIn("123 Main St", contact_info_section.text)
+    #     self.assertIn("Winnipeg", contact_info_section.text)
+    #     self.assertIn("MB", contact_info_section.text)
+    #     self.assertIn("R3C 1A5", contact_info_section.text)
+    #     self.assertIn("CA", contact_info_section.text)
+
+    #     # Source Information
+    #     source_info_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Source Information (Optional)']/following-sibling::div"
+    #     )
+    #     self.assertIn("Test Source Name", source_info_section.text)
+    #     self.assertIn("Individual", source_info_section.text)
+    #     self.assertIn("Donor", source_info_section.text)
+
+    #     # Record Description
+    #     record_description_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Record Description']/following-sibling::div"
+    #     )
+    #     self.assertIn("Test Accession Title", record_description_section.text)
+    #     self.assertIn("2021-01-01", record_description_section.text)
+    #     self.assertIn("2021-12-31", record_description_section.text)
+    #     self.assertIn("English", record_description_section.text)
+    #     self.assertIn("Test Description", record_description_section.text)
+
+    #     # Record Rights
+    #     record_rights_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Record Rights']/following-sibling::div"
+    #     )
+    #     self.assertIn("Copyright", record_rights_section.text)
+    #     self.assertIn("Copyright until 2050, applies to all files", record_rights_section.text)
+
+    #     # Other Identifiers
+    #     other_identifiers_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Other Identifiers (Optional)']/following-sibling::div"
+    #     )
+    #     self.assertIn("Receipt number", other_identifiers_section.text)
+    #     self.assertIn("123456", other_identifiers_section.text)
+    #     self.assertIn("Test note for identifier", other_identifiers_section.text)
+
+    #     # Assign Transfer to Group
+    #     group_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Assign Transfer to Group (Optional)']/following-sibling::div"
+    #     )
+    #     self.assertIn("Test Group", group_section.text)
+
+    #     # Upload Files
+    #     upload_files_section = review_summary.find_element(
+    #         By.XPATH, "//h2[text()='Upload Files']/following-sibling::div"
+    #     )
+    #     self.assertIn("test_upload.txt", upload_files_section.text)
+    #     self.assertIn("Test general note", upload_files_section.text)
 
     def test_previous_saves_form(self) -> None:
         """Test that the form data is saved when going to the previous step."""
