@@ -133,7 +133,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         linkify("session"),
     ]
 
-    ordering = ["-session", "name"]
+    ordering = ["-pk"]
 
 
 class ReadOnlyInline(admin.TabularInline):
