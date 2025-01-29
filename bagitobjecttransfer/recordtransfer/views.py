@@ -481,16 +481,16 @@ class TransferFormWizard(SessionWizardView):
         before the goto step, and takes user to the step with the first error if any form is
         invalid.
         """
-        # Check if the user is trying to go to a previous step or a future step
-        goto_step_index = self.steps.all.index(goto_step)
-        current_step_index = self.steps.all.index(self.steps.current)
-
         current_step_form = self.get_form(data=self.request.POST, files=self.request.FILES)
         self.save_current_step(current_step_form)
 
-        if goto_step_index > current_step_index:
+        # Get step indices
+        goto_index = self.steps.all.index(goto_step)
+        current_index = self.steps.all.index(self.steps.current)
+
+        if goto_index > current_index:
             # Validate each form before the goto step
-            for step in self.steps.all[: goto_step_index + 1]:
+            for step in self.steps.all[:goto_index]:
                 # Populate form with saved data
                 form = (
                     current_step_form
@@ -501,17 +501,18 @@ class TransferFormWizard(SessionWizardView):
                         files=self.storage.get_step_files(step),
                     )
                 )
-                if step != goto_step and not form.is_valid():
+                if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
                     self.storage.current_step = step
                     return self.render(form, **kwargs)
 
         self.storage.current_step = goto_step
-        form = self.get_form(
+        next_form = self.get_form(
             data=self.storage.get_step_data(self.steps.current),
-            files=self.storage.get_step_files(self.steps.current))
-        clear_form_errors(form)
-        return self.render(form, **kwargs)
+            files=self.storage.get_step_files(self.steps.current),
+        )
+        clear_form_errors(next_form)
+        return self.render(next_form, **kwargs)
 
     def render_next_step(self, form, **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
