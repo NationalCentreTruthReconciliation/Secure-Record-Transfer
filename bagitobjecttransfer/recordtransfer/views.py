@@ -714,7 +714,7 @@ class TransferFormWizard(SessionWizardView):
     @property
     def review_step_reached(self) -> bool:
         """Check if the user has reached the review step at some point throughout this form. This
-        check is valid even after resuming an in-progress transfer.
+        check is valid for a resumed in-progress transfer as well.
         """
         # If there are entries for every step of the form, then the review step has been reached
         return len(self.storage.data.get("step_data", [])) == self.steps.count
