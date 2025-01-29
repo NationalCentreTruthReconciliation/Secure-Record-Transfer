@@ -120,6 +120,12 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
 
     fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
+    search_fields = [
+        "name",
+        "session__token",
+        "session__user__username",
+    ]
+
     list_display = [
         "name",
         format_upload_size,
@@ -144,6 +150,11 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
         js = ("admin_uploadedfile.bundle.js",)
 
     fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
+    search_fields = [
+        "name",
+        "session__token",
+        "session__user__username",
+    ]
 
     list_display = [
         "name",
@@ -222,6 +233,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         return get_human_readable_size(obj.upload_size, 1000, 2)
 
     fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    search_fields = ["token", "user__username"]
     list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
 
     inlines = [
