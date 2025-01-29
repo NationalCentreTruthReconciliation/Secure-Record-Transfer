@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
 
-# Install build dependencies and poetry
+# Install poetry
 RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
 
 # Copy poetry-related files, and install Python dependencies
