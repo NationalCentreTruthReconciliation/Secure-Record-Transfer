@@ -105,6 +105,28 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
+class ReadOnlyInline(admin.TabularInline):
+    """Inline admin that does not allow any editing/changing/ or deletions.
+
+    Permissions:
+        - add: Not allowed
+        - change: Not allowed
+        - delete: Not allowed
+    """
+
+    max_num = 0
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(TempUploadedFile, PermUploadedFile)
 class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model.
@@ -134,28 +156,6 @@ class UploadedFileAdmin(ReadOnlyAdmin):
     ]
 
     ordering = ["-pk"]
-
-
-class ReadOnlyInline(admin.TabularInline):
-    """Inline admin that does not allow any editing/changing/ or deletions.
-
-    Permissions:
-        - add: Not allowed
-        - change: Not allowed
-        - delete: Not allowed
-    """
-
-    max_num = 0
-    show_change_link = True
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 class TempUploadedFileInline(ReadOnlyInline):
