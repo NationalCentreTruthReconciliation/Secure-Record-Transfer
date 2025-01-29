@@ -11,6 +11,7 @@ import {
     makeMockBlob,
     sendDeleteRequestForFile,
     updateCapacityDisplay,
+    fetchNewSessionToken,
 } from "./utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -70,8 +71,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             timeout: 180000,
             limit: 2,
             responseType: "json",
-            onBeforeRequest(xhr) {
-                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
+            async onBeforeRequest(xhr) {
+                const sessionToken = getSessionToken() || await fetchNewSessionToken();
+                if (!sessionToken) {
+                    throw new Error("Failed to fetch new session token");
+                }
+                xhr.setRequestHeader("Upload-Session-Token", sessionToken);
             },
             // Turns the response into a JSON object
             getResponseData: (xhr) => {

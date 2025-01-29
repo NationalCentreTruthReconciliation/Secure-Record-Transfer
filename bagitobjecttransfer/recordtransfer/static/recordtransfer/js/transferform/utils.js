@@ -31,6 +31,35 @@ export const getSessionToken = () => {
 };
 
 /**
+ * Fetches a new session token from the backend.
+ * This function sends a POST request to the server to create a new upload session and retrieve
+ * the session token.
+ * @returns {Promise<string|null>} - A promise that resolves to the new session token, or null if
+ * the request fails.
+ */
+export const fetchNewSessionToken = async () => {
+    try {
+        const response = await fetch("/upload-session/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+        });
+
+        if (response.ok) {
+            const responseJson = await response.json();
+            return responseJson.uploadSessionToken || null;
+        } else {
+            console.error("Failed to fetch new session token:", response.statusText);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching new session token:", error);
+        return null;
+    }
+};
+
+/**
  * Sets the upload session token in the DOM.
  * Looks for an input element with an ID ending in "session_token", which should exist on the
  * upload step of the transfer form.
