@@ -86,31 +86,6 @@ USE_DATE_WIDGETS
       USE_DATE_WIDGETS=false
 
 
-DBTEMPLATES_ENABLED
-^^^^^^^^^^^^^^^^^^^
-
-  *Enable or disable changing templates from Django admin*
-
-  .. table::
-
-      ============  =========
-      Default       Type
-      ============  =========
-      False         bool
-      ============  =========
-
-  It is possible to enable this setting so that site templates can be changed without having to
-  re-deploy the application. Be careful with enabling this - it is very easy to break templates,
-  hence why it is **disabled** by default.
-
-  **.env Example:**
-
-  ::
-
-      #file: .env
-      DBTEMPLATES_ENABLED=false
-
-
 Services
 --------
 
