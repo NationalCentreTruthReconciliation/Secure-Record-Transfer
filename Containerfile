@@ -1,21 +1,11 @@
-FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS builder
+FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS base
 
 ENV PYTHONUNBUFFERED=1
-
-# Make arg passed from compose files into environment variable
-ARG WEBPACK_MODE
-ENV WEBPACK_MODE $WEBPACK_MODE
 
 WORKDIR /app/
 
 # Install build dependencies and poetry
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        default-libmysqlclient-dev \
-        pkg-config \
-    && \
-    curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
+RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
 
 # Copy poetry-related files, and install Python dependencies
 COPY pyproject.toml poetry.lock README.md /app/
@@ -30,6 +20,10 @@ RUN npm install --no-color
 # Copy application code to image
 COPY ./bagitobjecttransfer /app/bagitobjecttransfer
 
+# Make arg passed from compose files into environment variable
+ARG WEBPACK_MODE
+ENV WEBPACK_MODE $WEBPACK_MODE
+
 # Run webpack to bundle and minify assets
 COPY webpack.config.js /app/
 RUN npm run build
@@ -43,12 +37,9 @@ RUN chmod +x /app/entrypoint.sh
 # DEVELOPMENT IMAGE
 #
 
-FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS dev
+FROM base as dev
 
 ENV PYTHONUNBUFFERED=1
-
-# Copy everything from builder image
-COPY --from=builder /app/ /app/
 
 # Activate virtual environment
 ENV PATH="/app/.venv/bin:$PATH"
@@ -63,7 +54,14 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 # PRODUCTION IMAGE
 #
 
-FROM builder AS prod-builder
+FROM base AS builder
+
+# Install build tools for production dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        default-libmysqlclient-dev \
+        pkg-config
 
 # Install production dependencies (e.g., mysqlclient)
 RUN poetry install -E prod
@@ -78,11 +76,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends default-mysql-client && \
     rm -rf /var/lib/apt/lists/*
 
-# Selectively copy files from builder image
-COPY --from=prod-builder /app/entrypoint.sh /app/entrypoint.sh
-COPY --from=prod-builder /app/.venv /app/.venv
-COPY --from=prod-builder /app/dist /app/dist
-COPY --from=prod-builder /app/bagitobjecttransfer /app/bagitobjecttransfer
+COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/bagitobjecttransfer /app/bagitobjecttransfer
 
 # Activate virtual environment
 ENV PATH="/app/.venv/bin:$PATH"
