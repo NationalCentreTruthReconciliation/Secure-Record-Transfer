@@ -24,9 +24,6 @@ DATABASES = {
         "USER": config("MYSQL_USER"),
         "PASSWORD": config("MYSQL_PASSWORD"),
         "NAME": config("MYSQL_DATABASE"),
-        # "OPTIONS": {
-        #    "converter_str_fallback": True,
-        # },
     }
 }
 
