@@ -384,6 +384,7 @@ def _process_formset(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[
     """Process a formset and return formatted data with optional note."""
     formset_data = []
     note = None
+    all_empty = True
 
     for subform in form.forms:
         subform_data = {
@@ -392,10 +393,12 @@ def _process_formset(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[
             if subform.fields[field].label != "hidden"
         }
 
-        if not any(subform_data.values()) and isinstance(form, OtherIdentifiersFormSet):
-            note = gettext("No other identifiers were provided.")
-        else:
+        if any(subform_data.values()):
+            all_empty = False
             formset_data.append(subform_data)
+
+    if all_empty and isinstance(form, OtherIdentifiersFormSet):
+        note = gettext("No other identifiers were provided.")
 
     return formset_data, note
 
