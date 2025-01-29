@@ -467,7 +467,7 @@ def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewFormItem]
                     "step_title": step_title,
                     "step_name": transfer_step.value,
                     "fields": formset_data,
-                    "note": note,
+                    "note": note, # A note is included if the formset is empty
                 }
             )
 
