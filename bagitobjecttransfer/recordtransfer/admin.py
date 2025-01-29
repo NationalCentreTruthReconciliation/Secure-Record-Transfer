@@ -105,8 +105,8 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(TempUploadedFile)
-class TempUploadedFileAdmin(ReadOnlyAdmin):
+@admin.register(TempUploadedFile, PermUploadedFile)
+class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model.
 
     Permissions:
@@ -120,36 +120,6 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
 
     fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
-    search_fields = [
-        "name",
-        "session__token",
-        "session__user__username",
-    ]
-
-    list_display = [
-        "name",
-        format_upload_size,
-        "exists",
-        linkify("session"),
-    ]
-
-    ordering = ["-session", "name"]
-
-
-@admin.register(PermUploadedFile)
-class PermUploadedFileAdmin(ReadOnlyAdmin):
-    """Admin for the UploadedFile model.
-
-    Permissions:
-        - add: Not allowed
-        - change: Not allowed
-        - delete: Not allowed
-    """
-
-    class Media:
-        js = ("admin_uploadedfile.bundle.js",)
-
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
     search_fields = [
         "name",
         "session__token",
