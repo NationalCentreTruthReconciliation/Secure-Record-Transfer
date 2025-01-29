@@ -484,22 +484,22 @@ class TransferFormWizard(SessionWizardView):
         goto_step_index = self.steps.all.index(goto_step)
         current_step_index = self.steps.all.index(self.steps.current)
 
-        if goto_step_index <= current_step_index:
-            form = self.get_form(data=self.request.POST, files=self.request.FILES)
-            self.save_current_step(form)
-        else:
+        current_step_form = self.get_form(data=self.request.POST, files=self.request.FILES)
+        self.save_current_step(current_step_form)
+
+        if goto_step_index > current_step_index:
             # Validate each form before the goto step
             for step in self.steps.all[:goto_step_index]:
-                # Use current step data if the step is the current step, otherwise grab form data
-                # from storage
-                form = self.get_form(
-                    step,
-                    data=self.request.POST
+                # Populate form with saved data
+                form = (
+                    current_step_form
                     if step == self.steps.current
-                    else self.storage.get_step_data(step),
+                    else self.get_form(
+                        step,
+                        data=self.storage.get_step_data(step),
+                        files=self.storage.get_step_files(step),
+                    )
                 )
-                if step == self.steps.current:
-                    self.save_current_step(form)
                 if not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
                     return self.render(form, **kwargs)
