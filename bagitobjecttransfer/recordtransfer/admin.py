@@ -118,10 +118,6 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
     class Media:
         js = ("admin_uploadedfile.bundle.js",)
 
-    actions = [
-        "clean_temp_files",
-    ]
-
     fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
     list_display = [
@@ -132,14 +128,6 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
     ]
 
     ordering = ["-session", "name"]
-
-    @admin.action(description=gettext("Remove temp files on filesystem"))
-    def clean_temp_files(self, request, queryset):
-        """Remove temporary files stored on the file system by the temporary uploaded
-        files.
-        """
-        for temp_file in queryset:
-            temp_file.remove()
 
 
 @admin.register(PermUploadedFile)
