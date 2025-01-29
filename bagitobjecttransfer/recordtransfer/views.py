@@ -518,10 +518,10 @@ class TransferFormWizard(SessionWizardView):
         )
         ##########################
         # This part is different from the parent class. We need to clear the errors from the form
-        if isinstance(new_form.errors, list):
-            for form in new_form.errors:
-                form.clear()
-        elif isinstance(new_form.errors, dict):
+        if isinstance(new_form.errors, list): # Formset
+            for subform in new_form.errors:
+                subform.clear()
+        elif isinstance(new_form.errors, dict): # Regular form
             new_form.errors.clear()
         ##########################
 
