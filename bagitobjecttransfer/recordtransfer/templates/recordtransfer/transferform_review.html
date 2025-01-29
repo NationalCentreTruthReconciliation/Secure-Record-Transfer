@@ -1,13 +1,14 @@
-{% extends 'recordtransfer/transferform_base.html' %}
+{% extends 'recordtransfer/transferform_standard.html' %}
 {% load static %}
 {% load i18n %}
 
 {% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
 {% block submitbuttontype %}button{% endblock %}
 {% block savelinkclass %}flex-med-width-item{% endblock savelinkclass %}
+{% block buttonarrayclass %}flex-med-width-item{% endblock buttonarrayclass %}
 
 {% block formfields %}
-
+    {{ block.super }}
     <div class="review-summary">
         {% for form in form_list %}
             <div class="review-section">
