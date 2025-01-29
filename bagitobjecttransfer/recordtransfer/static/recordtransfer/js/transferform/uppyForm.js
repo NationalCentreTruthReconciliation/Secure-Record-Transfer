@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             showLinkToFileUploadResult: true,
         })
         .use(XHR, {
-            endpoint: "/transfer/uploadfile/",
+            endpoint: `/upload-session/${getSessionToken()}/files/`,
             method: "POST",
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -71,12 +71,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             timeout: 180000,
             limit: 2,
             responseType: "json",
-            async onBeforeRequest(xhr) {
+            async onBeforeRequest() {
                 const sessionToken = getSessionToken() || await fetchNewSessionToken();
                 if (!sessionToken) {
                     throw new Error("Failed to fetch new session token");
                 }
-                xhr.setRequestHeader("Upload-Session-Token", sessionToken);
+                setSessionToken(sessionToken);
             },
             // Turns the response into a JSON object
             getResponseData: (xhr) => {

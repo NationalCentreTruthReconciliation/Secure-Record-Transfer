@@ -863,6 +863,7 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
     """Retrieve an in-progress submission for a given user and UUID."""
     return InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
 
+
 @require_http_methods(["POST"])
 def create_upload_session(request: HttpRequest) -> JsonResponse:
     """Create a new upload session and return the session token.
@@ -884,11 +885,12 @@ def create_upload_session(request: HttpRequest) -> JsonResponse:
             status=500,
         )
 
+
 @require_http_methods(["POST"])
-def upload_file(request: HttpRequest) -> JsonResponse:
-    """Upload a single file to the server, and return a token representing the file upload
-    session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded file will be added to the corresponding session.
+def upload_file(request: HttpRequest, session_token: str) -> JsonResponse:
+    """Upload a single file to the server. The file is added to the upload session using the
+    session token passed as a parameter in the request. If an session token is invalid, an
+    error message is returned.
 
     The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
     file is not an accepted type, an error message is returned.
@@ -901,16 +903,10 @@ def upload_file(request: HttpRequest) -> JsonResponse:
         'upload_session_token'. If not successful, the error description is returned in 'error'.
     """
     try:
-        headers = request.headers
-        session_token = headers.get("Upload-Session-Token")
         user: User = cast(User, request.user)
-        session = (
-            UploadSession.objects.filter(token=session_token, user=user).first()
-            if session_token
-            else None
-        )
+        session = UploadSession.objects.filter(token=session_token, user=user).first()
         if not session:
-            session = UploadSession.new_session(user=user)
+            return JsonResponse({"error": gettext("Invalid upload session token")}, status=400)
 
         _file = request.FILES.get("file")
         if not _file:
@@ -1031,7 +1027,9 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
     try:
         session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
-            return JsonResponse({"error": gettext("Invalid filename or upload session token")}, status=404)
+            return JsonResponse(
+                {"error": gettext("Invalid filename or upload session token")}, status=404
+            )
 
         if request.method == "DELETE":
             try:
