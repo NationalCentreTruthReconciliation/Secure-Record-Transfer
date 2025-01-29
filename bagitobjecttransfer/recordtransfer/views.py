@@ -88,6 +88,7 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
+    clear_form_errors,
     format_form_data,
     get_human_readable_file_count,
     get_human_readable_size,
@@ -489,7 +490,7 @@ class TransferFormWizard(SessionWizardView):
 
         if goto_step_index > current_step_index:
             # Validate each form before the goto step
-            for step in self.steps.all[:goto_step_index]:
+            for step in self.steps.all[: goto_step_index + 1]:
                 # Populate form with saved data
                 form = (
                     current_step_form
@@ -500,11 +501,17 @@ class TransferFormWizard(SessionWizardView):
                         files=self.storage.get_step_files(step),
                     )
                 )
-                if not form.is_valid():
+                if step != goto_step and not form.is_valid():
                     messages.error(self.request, gettext("Please correct the errors below."))
+                    self.storage.current_step = step
                     return self.render(form, **kwargs)
 
-        return super().render_goto_step(goto_step, *args, **kwargs)
+        self.storage.current_step = goto_step
+        form = self.get_form(
+            data=self.storage.get_step_data(self.steps.current),
+            files=self.storage.get_step_files(self.steps.current))
+        clear_form_errors(form)
+        return self.render(form, **kwargs)
 
     def render_next_step(self, form, **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
@@ -518,11 +525,7 @@ class TransferFormWizard(SessionWizardView):
         )
         ##########################
         # This part is different from the parent class. We need to clear the errors from the form
-        if isinstance(new_form.errors, list): # Formset
-            for subform in new_form.errors:
-                subform.clear()
-        elif isinstance(new_form.errors, dict): # Regular form
-            new_form.errors.clear()
+        clear_form_errors(new_form)
         ##########################
 
         # change the stored current step

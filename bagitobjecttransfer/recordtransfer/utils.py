@@ -380,6 +380,18 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
     return {"accepted": True}
 
 
+def clear_form_errors(form: Union[BaseForm, BaseFormSet]) -> None:
+    """Clear all errors on a form or formset."""
+    if isinstance(form, BaseForm):
+        form.errors.clear()
+        for field in form.fields:
+            form.fields[field].error_messages.clear()
+    elif isinstance(form, BaseFormSet):
+        for subform in form.forms:
+            subform.errors.clear()
+            for field in subform.fields:
+                subform.fields[field].error_messages.clear()
+
 def _process_formset(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[str]]:
     """Process a formset and return formatted data with optional note."""
     formset_data = []
