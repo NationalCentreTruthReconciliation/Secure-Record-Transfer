@@ -9,14 +9,23 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from recordtransfer.constants import FORMTITLE
+from recordtransfer.enums import TransferStep
 from recordtransfer.models import User
+from recordtransfer.views import TransferFormWizard
+
+
+def get_section_title(step: TransferStep) -> str:
+    """Get section title for a given step."""
+    return TransferFormWizard._TEMPLATES[step][FORMTITLE]
 
 
 class TransferFormWizardTest(StaticLiveServerTestCase):
     """End-to-end tests for the transfer form wizard."""
 
     test_data: ClassVar[dict] = {
-        "contact_info": {
+        TransferStep.CONTACT_INFO: {
+            "section_title": get_section_title(TransferStep.CONTACT_INFO),
             "contact_name": "John Doe",
             "phone_number": "+1 (999) 999-9999",
             "email": "john.doe@example.com",
@@ -28,14 +37,16 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             "job_title": "Archivist",
             "organization": "Test Organization",
         },
-        "source_info": {
+        TransferStep.SOURCE_INFO: {
+            "section_title": get_section_title(TransferStep.SOURCE_INFO),
             "source_name": "Test Source Name",
             "source_type": "2",  # Individual
             "source_role": "2",  # Donor
             "source_note": "Test Source Note",
             "preliminary_custodial_history": "Test Custodial History",
         },
-        "record_description": {
+        TransferStep.RECORD_DESCRIPTION: {
+            "section_title": get_section_title(TransferStep.RECORD_DESCRIPTION),
             "accession_title": "Test Accession Title",
             "start_date": "2021-01-01",
             "end_date": "2021-12-31",
@@ -43,17 +54,24 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             "description": "Test Description",
             "condition": "Test Condition",
         },
-        "record_rights": {
+        TransferStep.RIGHTS: {
+            "section_title": get_section_title(TransferStep.RIGHTS),
             "rights_type": "7",  # Copyright
             "rights_value": "Copyright until 2050, applies to all files",
         },
-        "other_identifiers": {
+        TransferStep.OTHER_IDENTIFIERS: {
+            "section_title": get_section_title(TransferStep.OTHER_IDENTIFIERS),
             "type": "Receipt number",
             "value": "123456",
             "note": "Test note for identifier",
         },
-        "group": {"name": "Test Group", "description": "Test description for group"},
-        "upload_files": {
+        TransferStep.GROUP_TRANSFER: {
+            "section_title": get_section_title(TransferStep.GROUP_TRANSFER),
+            "name": "Test Group",
+            "description": "Test description for group",
+        },
+        TransferStep.UPLOAD_FILES: {
+            "section_title": get_section_title(TransferStep.UPLOAD_FILES),
             "general_note": "Test general note",
             "filename": "test_upload.txt",
             "content": b"Test content" * 512,  # 5 KB
@@ -99,18 +117,22 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
     def go_next_step(self) -> None:
+        """Go to the next step in the form."""
         driver = self.driver
         driver.find_element(By.ID, "form-next-button").click()
 
     def go_previous_step(self) -> None:
+        """Go to the previous step in the form."""
         driver = self.driver
         driver.find_element(By.ID, "form-previous-button").click()
 
     def go_to_review_step(self) -> None:
+        """Go to the review step in the form."""
         driver = self.driver
         driver.find_element(By.ID, "form-review-button").click()
 
     def complete_legal_agreement_step(self) -> None:
+        """Complete the Legal Agreement step."""
         driver = self.driver
 
         # Complete the Legal Agreement step
@@ -119,8 +141,9 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         driver.find_element(By.ID, "form-next-button").click()
 
     def complete_contact_information_step(self, required_only: bool = False) -> None:
+        """Complete the Contact Information step."""
         driver = self.driver
-        data = self.test_data["contact_info"]
+        data = self.test_data[TransferStep.CONTACT_INFO]
 
         # Complete the Contact Information step
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
@@ -151,8 +174,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.go_next_step()
 
     def complete_source_information_step(self, required_only: bool = False) -> None:
+        """Complete the Source Information step. Opts for the option of submitting on behalf of an
+        organization/another person.
+        """
         driver = self.driver
-        data = self.test_data["source_info"]
+        data = self.test_data[TransferStep.SOURCE_INFO]
 
         # Complete the Source Information step
         enter_manual_source_info_radio_0 = driver.find_element(
@@ -181,8 +207,9 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.go_next_step()
 
     def complete_record_description_step(self, required_only: bool = False) -> None:
+        """Complete the Record Description step."""
         driver = self.driver
-        data = self.test_data["record_description"]
+        data = self.test_data[TransferStep.RECORD_DESCRIPTION]
 
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
         start_date_input = driver.find_element(By.NAME, "recorddescription-start_date_of_material")
@@ -208,8 +235,9 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.go_next_step()
 
     def complete_record_rights_step(self, required_only: bool = False) -> None:
+        """Complete the Record Rights step."""
         driver = self.driver
-        data = self.test_data["record_rights"]
+        data = self.test_data[TransferStep.RIGHTS]
 
         # Complete the Record Rights step
         rights_type_select = Select(driver.find_element(By.NAME, "rights-0-rights_type"))
@@ -224,12 +252,13 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.go_next_step()
 
     def complete_other_identifiers_step(self, required_only: bool = False) -> None:
+        """Complete the Other Identifiers step."""
         if required_only:
             self.go_next_step()
             return
 
         driver = self.driver
-        data = self.test_data["other_identifiers"]
+        data = self.test_data[TransferStep.OTHER_IDENTIFIERS]
 
         # Complete the Other Identifiers step
         identifier_type_input = driver.find_element(
@@ -248,13 +277,14 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
         self.go_next_step()
 
-    def complete_assign_to_group_step(self, required_only=False) -> None:
+    def complete_assign_to_group_step(self, required_only: bool = False) -> None:
+        """Complete the Assign to Group step."""
         if required_only:
             self.go_next_step()
             return
 
         driver = self.driver
-        data = self.test_data["group"]
+        data = self.test_data[TransferStep.GROUP_TRANSFER]
 
         # Click the button to show the add new group dialog
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
@@ -284,8 +314,9 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
         self.go_next_step()
 
-    def upload_files_step(self, required_only=False):
-        data = self.test_data["upload_files"]
+    def upload_files_step(self, required_only: bool = False):
+        """Complete the Upload Files step."""
+        data = self.test_data[TransferStep.UPLOAD_FILES]
 
         # Create temp file with specified name
         temp_dir = tempfile.gettempdir()
@@ -312,7 +343,8 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             if os.path.exists(temp_path):
                 os.unlink(temp_path)
 
-    def test_complete_form_till_review_step(self) -> None:
+    def complete_form_till_review_step(self) -> None:
+        """Complete the form till the review step."""
         self.login()
         driver = self.driver
 
@@ -334,70 +366,97 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         # Verify that the user is logged in by checking the presence of a specific element
         self.assertTrue(self.driver.find_element(By.ID, "logout-btn"))
 
-    # def test_review_step(self) -> None:
-    #     self.complete_form_till_review_step()
+    def test_review_step(self) -> None:
+        """Verify that the displayed information on the review page matches the test data."""
+        self.complete_form_till_review_step()
+        driver = self.driver
 
-    #     # Verify that the review summary shows the correct information
-    #     review_summary = self.driver.find_element(By.CLASS_NAME, "review-summary")
+        # Verify section titles and content for each step
+        for step, data in self.test_data.items():
+            section_title = driver.find_element(
+                By.XPATH,
+                f"//h2[contains(@class, 'section-title') and contains(text(), '{data['section_title']}')]",
+            )
+            self.assertTrue(section_title.is_displayed())
 
-    #     # Contact Information
-    #     contact_info_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Contact Information']/following-sibling::div"
-    #     )
-    #     self.assertIn("John Doe", contact_info_section.text)
-    #     self.assertIn("+1 (999) 999-9999", contact_info_section.text)
-    #     self.assertIn("john.doe@example.com", contact_info_section.text)
-    #     self.assertIn("123 Main St", contact_info_section.text)
-    #     self.assertIn("Winnipeg", contact_info_section.text)
-    #     self.assertIn("MB", contact_info_section.text)
-    #     self.assertIn("R3C 1A5", contact_info_section.text)
-    #     self.assertIn("CA", contact_info_section.text)
+            # Check specific fields based on step
+            if step == TransferStep.CONTACT_INFO:
+                fields = {
+                    "Contact name": data["contact_name"],
+                    "Phone number": data["phone_number"],
+                    "Email": data["email"],
+                    "Address line 1": data["address_line_1"],
+                    "City": data["city"],
+                    "Province or state": data["province_or_state"],
+                    "Postal / Zip code": data["postal_or_zip_code"],
+                    "Country": data["country"],
+                    "Job title": data["job_title"],
+                    "Organization": data["organization"],
+                }
+                self._verify_field_values("contactinfo", fields)
 
-    #     # Source Information
-    #     source_info_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Source Information (Optional)']/following-sibling::div"
-    #     )
-    #     self.assertIn("Test Source Name", source_info_section.text)
-    #     self.assertIn("Individual", source_info_section.text)
-    #     self.assertIn("Donor", source_info_section.text)
+            elif step == TransferStep.SOURCE_INFO:
+                fields = {
+                    "Name of source": data["source_name"],
+                    "Source type": "Individual",
+                    "Source role": "Donor",
+                    "Source notes": data["source_note"],
+                    "Custodial history": data["preliminary_custodial_history"],
+                }
+                self._verify_field_values("sourceinfo", fields)
 
-    #     # Record Description
-    #     record_description_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Record Description']/following-sibling::div"
-    #     )
-    #     self.assertIn("Test Accession Title", record_description_section.text)
-    #     self.assertIn("2021-01-01", record_description_section.text)
-    #     self.assertIn("2021-12-31", record_description_section.text)
-    #     self.assertIn("English", record_description_section.text)
-    #     self.assertIn("Test Description", record_description_section.text)
+            elif step == TransferStep.RECORD_DESCRIPTION:
+                fields = {
+                    "Title": data["accession_title"],
+                    "Language(s)": data["language"],
+                    "Description of contents": data["description"],
+                    "Condition of files": data["condition"],
+                }
+                self._verify_field_values("recorddescription", fields)
 
-    #     # Record Rights
-    #     record_rights_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Record Rights']/following-sibling::div"
-    #     )
-    #     self.assertIn("Copyright", record_rights_section.text)
-    #     self.assertIn("Copyright until 2050, applies to all files", record_rights_section.text)
+            elif step == TransferStep.RIGHTS:
+                rights_type = driver.find_element(
+                    By.XPATH, "//dt[text()='Type of rights']/following-sibling::dd[1]"
+                )
+                rights_value = driver.find_element(
+                    By.XPATH, "//dt[text()='Notes for rights']/following-sibling::dd[1]"
+                )
+                self.assertEqual(rights_type.text, "Copyright")
+                self.assertEqual(rights_value.text, data["rights_value"])
 
-    #     # Other Identifiers
-    #     other_identifiers_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Other Identifiers (Optional)']/following-sibling::div"
-    #     )
-    #     self.assertIn("Receipt number", other_identifiers_section.text)
-    #     self.assertIn("123456", other_identifiers_section.text)
-    #     self.assertIn("Test note for identifier", other_identifiers_section.text)
+            elif step == TransferStep.OTHER_IDENTIFIERS:
+                identifier_fields = {
+                    "Type of identifier": data["type"],
+                    "Identifier value": data["value"],
+                    "Notes for identifier": data["note"],
+                }
+                self._verify_field_values("otheridentifiers", identifier_fields)
 
-    #     # Assign Transfer to Group
-    #     group_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Assign Transfer to Group (Optional)']/following-sibling::div"
-    #     )
-    #     self.assertIn("Test Group", group_section.text)
+            elif step == TransferStep.GROUP_TRANSFER:
+                group_name = driver.find_element(
+                    By.XPATH, "//dt[text()='Assigned group']/following-sibling::dd[1]"
+                )
+                self.assertEqual(group_name.text, data["name"])
 
-    #     # Upload Files
-    #     upload_files_section = review_summary.find_element(
-    #         By.XPATH, "//h2[text()='Upload Files']/following-sibling::div"
-    #     )
-    #     self.assertIn("test_upload.txt", upload_files_section.text)
-    #     self.assertIn("Test general note", upload_files_section.text)
+            elif step == TransferStep.UPLOAD_FILES:
+                # Verify file upload
+                file_element = driver.find_element(By.CLASS_NAME, "file-entry")
+                self.assertTrue(file_element.is_displayed())
+                self.assertTrue(data["filename"] in file_element.text)
+
+                if data["general_note"]:
+                    note_element = driver.find_element(
+                        By.XPATH, "//dt[text()='Other notes']/following-sibling::dd[1]"
+                    )
+                    self.assertEqual(note_element.text, data["general_note"])
+
+    def _verify_field_values(self, section_id: str, fields: dict) -> None:
+        """Verify field values in a section."""
+        for label, expected_value in fields.items():
+            if expected_value:  # Only check non-empty values
+                xpath = f"//dt[text()='{label}']/following-sibling::dd[1]"
+                element = self.driver.find_element(By.XPATH, xpath)
+                self.assertEqual(element.text, expected_value)
 
     def test_previous_saves_form(self) -> None:
         """Test that the form data is saved when going to the previous step."""

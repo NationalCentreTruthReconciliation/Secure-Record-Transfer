@@ -14,6 +14,7 @@
                 <div class="section-header">
                     <h2 class="section-title">{{ form.step_title }}</h2>
                     <button 
+                        id="goto_step_{{ form.step_name }}_link"
                         class="step-link" 
                         formnovalidate="formnovalidate" 
                         name="wizard_goto_step" 
@@ -26,9 +27,9 @@
                     <div class="section-content">
                         {% if form.fields.items %}
                             {# Regular form fields #}
-                            <dl class="field-list">
+                            <dl id="field-list-{{ form.step_name }}" class="field-list">
                                 {% for label, value in form.fields.items %}
-                                <dt {% if label == "Uploaded Files" %}class="align-center"{% endif %}>{{ label }}</dt>
+                                    <dt {% if label == "Uploaded Files" %}class="align-center"{% endif %}>{{ label }}</dt>
                                     <dd>
                                         {% if label == "Uploaded Files" %}
                                             {% for file in value %}
