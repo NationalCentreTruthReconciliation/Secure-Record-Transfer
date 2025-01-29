@@ -415,6 +415,7 @@ def _process_group_transfer(form: GroupTransferForm, user: User) -> dict[str, An
     if not group:
         return fields_data
 
+    # Replaces group UUID with group name
     group_id_label = form.fields["group_id"].label
     if group_id_label:
         fields_data[group_id_label] = group.name
@@ -434,7 +435,8 @@ def _process_file_upload(form: UploadFilesForm, user: User) -> dict[str, Any]:
     if not session:
         return fields_data
 
-    fields_data["Uploaded Files"] = [
+    # Adds on links to access uploaded files
+    fields_data["Uploaded files"] = [
         {"name": f.name, "url": f.get_file_access_url()} for f in session.get_temporary_uploads()
     ]
 
@@ -442,7 +444,7 @@ def _process_file_upload(form: UploadFilesForm, user: User) -> dict[str, Any]:
 
 
 def _get_base_fields_data(form: BaseForm) -> dict[str, Any]:
-    """Extract base fields data from a form."""
+    """Extract fields data from a form."""
     return {
         form.fields[field].label or field: form.cleaned_data.get(field, "")
         for field in form.fields
@@ -455,6 +457,7 @@ def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewFormItem]
     preview_data: list[ReviewFormItem] = []
 
     for step_title, form in form_dict.items():
+        # Each form has metadata that links it to a step in the transfer form
         transfer_step = form.__class__.Meta.transfer_step
 
         if hasattr(form, "forms"):  # Handle formsets
