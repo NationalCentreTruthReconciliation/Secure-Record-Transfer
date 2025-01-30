@@ -77,7 +77,7 @@ from recordtransfer.emails import (
 from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.transfer_forms import clear_form_errors, format_form_data
+from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -811,7 +811,7 @@ class TransferFormWizard(SessionWizardView):
             )
 
         elif self.current_step == TransferStep.REVIEW:
-            context["form_list"] = format_form_data(
+            context["form_list"] = ReviewForm.format_form_data(
                 self.get_forms_for_review(), user=cast(User, self.request.user)
             )
 
