@@ -1106,13 +1106,12 @@ def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewFormItem]
             )
 
         elif hasattr(form, "cleaned_data"):  # Handle regular forms
-            fields_data = (
-                _process_group_transfer(form, user)
-                if isinstance(form, GroupTransferForm)
-                else _process_file_upload(form, user)
-                if isinstance(form, UploadFilesForm)
-                else _get_base_fields_data(form)
-            )
+            if isinstance(form, GroupTransferForm):
+                fields_data = _process_group_transfer(form, user)
+            elif isinstance(form, UploadFilesForm):
+                fields_data = _process_file_upload(form, user)
+            else:
+                fields_data = _get_base_fields_data(form)
 
             preview_data.append(
                 {
