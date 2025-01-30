@@ -319,13 +319,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         data = self.test_data[TransferStep.UPLOAD_FILES]
 
         # Create temp file with specified name
-        temp_dir = tempfile.gettempdir()
-        temp_path = os.path.join(temp_dir, data["filename"])
+        with tempfile.NamedTemporaryFile(delete=False, suffix=data["filename"]) as temp_file:
+            temp_file.write(data["content"])
+            temp_path = temp_file.name
 
         try:
-            with open(temp_path, "wb") as temp_file:
-                temp_file.write(data["content"])
-
             file_input = self.driver.find_element(By.CSS_SELECTOR, "input[type='file']")
             file_input.send_keys(temp_path)
 
@@ -340,8 +338,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             self.go_to_review_step()
         finally:
             # Clean up temp file
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
+            os.remove(temp_path)
 
     def complete_form_till_review_step(self) -> None:
         """Complete the form till the review step."""
