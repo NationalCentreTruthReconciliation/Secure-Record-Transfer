@@ -7,7 +7,7 @@ from caais.models import RightsType, SourceRole, SourceType
 from django import forms
 from django.conf import settings
 from django.db.models import Case, CharField, Value, When
-from django.forms import BaseForm, BaseFormSet
+from django.forms import BaseForm, BaseFormSet, BaseModelForm, BaseModelFormSet
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
@@ -1037,7 +1037,8 @@ class ReviewForm(TransferForm):
 
         # Adds on links to access uploaded files
         fields_data["Uploaded files"] = [
-            {"name": f.name, "url": f.get_file_access_url()} for f in session.get_temporary_uploads()
+            {"name": f.name, "url": f.get_file_access_url()}
+            for f in session.get_temporary_uploads()
         ]
 
         return fields_data
@@ -1085,28 +1086,30 @@ class ReviewForm(TransferForm):
 
         return formset_data, note
 
-
     @staticmethod
-    def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewFormItem]:
+    def format_form_data(
+        form_dict: OrderedDict[str, Union[BaseModelForm, BaseModelFormSet]], user: User
+    ) -> list[ReviewFormItem]:
         """Format form data to be used in a form review page."""
         preview_data: list[ReviewFormItem] = []
 
         for step_title, form in form_dict.items():
             # Each form has metadata that links it to a step in the transfer form
-            transfer_step = form.__class__.Meta.transfer_step
+            meta = getattr(form.__class__, "Meta", None)
+            transfer_step = meta.transfer_step if meta else None
 
-            if hasattr(form, "forms"):  # Handle formsets
+            if isinstance(form, BaseModelFormSet):  # Handle formsets
                 formset_data, note = ReviewForm._process_formset(form)
                 preview_data.append(
                     {
                         "step_title": step_title,
-                        "step_name": transfer_step.value,
+                        "step_name": transfer_step.value if transfer_step else "",
                         "fields": formset_data,
                         "note": note,  # A note is included if the formset is empty
                     }
                 )
 
-            elif hasattr(form, "cleaned_data"):  # Handle regular forms
+            elif isinstance(form, BaseModelForm):  # Handle regular forms
                 if isinstance(form, GroupTransferForm):
                     fields_data = ReviewForm._process_group_transfer(form, user)
                 elif isinstance(form, UploadFilesForm):
@@ -1117,7 +1120,7 @@ class ReviewForm(TransferForm):
                 preview_data.append(
                     {
                         "step_title": step_title,
-                        "step_name": transfer_step.value,
+                        "step_name": transfer_step.value if transfer_step else "",
                         "fields": fields_data,
                         "note": None,
                     }
