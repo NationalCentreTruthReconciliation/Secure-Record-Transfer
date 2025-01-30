@@ -886,7 +886,22 @@ def create_upload_session(request: HttpRequest) -> JsonResponse:
         )
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
+def upload_or_list_files(request: HttpRequest, session_token: str) -> HttpResponse:
+    """Upload a file to the server or list the files uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+    Returns:
+        HttpResponse: The response to the request
+    """
+    if request.method == "GET":
+        return list_uploaded_files(request, session_token)
+    elif request.method == "POST":
+        return upload_file(request, session_token)
+
+
 def upload_file(request: HttpRequest, session_token: str) -> JsonResponse:
     """Upload a single file to the server. The file is added to the upload session using the
     session token passed as a parameter in the request. If an session token is invalid, an
@@ -897,6 +912,7 @@ def upload_file(request: HttpRequest, session_token: str) -> JsonResponse:
 
     Args:
         request: The POST request sent by the user.
+        session_token: The upload session token from the URL.
 
     Returns:
         JsonResponse: If the upload was successful, the session token is returned in
@@ -982,7 +998,6 @@ def upload_file(request: HttpRequest, session_token: str) -> JsonResponse:
         )
 
 
-@require_http_methods(["GET"])
 def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
     """Get a list of metadata for files uploaded in a given upload session.
 
