@@ -1,3 +1,6 @@
+import "../../css/transferform/review_step.css";
+import "../../css/transferform/uppy.css";
+
 import { setupContactInfoForm } from "./contactInfo";
 import { setupOtherIdentifiersForm } from "./otherIdentifiers";
 import { setupRightsForm } from "./rights";
