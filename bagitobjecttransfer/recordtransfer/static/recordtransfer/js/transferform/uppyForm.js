@@ -63,7 +63,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             showLinkToFileUploadResult: true,
         })
         .use(XHR, {
-            endpoint: `/upload-session/${getSessionToken()}/files/`,
             method: "POST",
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -71,13 +70,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             timeout: 180000,
             limit: 2,
             responseType: "json",
-            async onBeforeRequest() {
-                const sessionToken = getSessionToken() || await fetchNewSessionToken();
-                if (!sessionToken) {
-                    throw new Error("Failed to fetch new session token");
-                }
-                setSessionToken(sessionToken);
-            },
             // Turns the response into a JSON object
             getResponseData: (xhr) => {
                 try {
@@ -160,6 +152,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
         transferForm.submit();
+    });
+
+    uppy.addPreProcessor(async () => {
+        let sessionToken = getSessionToken();
+        if (!sessionToken) {
+            sessionToken = await fetchNewSessionToken();
+            if (!sessionToken) {
+                throw new Error("Failed to fetch new session token");
+            }
+            setSessionToken(sessionToken);
+        }
+        uppy.getPlugin("XHRUpload").setOptions({
+            endpoint: `/upload-session/${sessionToken}/files/`
+        });
     });
 
     // Add mock files to represent files that have already been uploaded to the upload session
