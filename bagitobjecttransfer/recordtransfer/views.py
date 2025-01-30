@@ -953,33 +953,71 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def upload_file(request: HttpRequest) -> JsonResponse:
-    """Upload a single file to the server, and return a token representing the file upload
-    session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded file will be added to the corresponding session.
+def create_upload_session(request: HttpRequest) -> JsonResponse:
+    """Create a new upload session and return the session token.
+
+    Args:
+        request: The POST request sent by the user.
+
+    Returns:
+        JsonResponse: The session token of the newly created upload session.
+    """
+    try:
+        user: User = cast(User, request.user)
+        session = UploadSession.new_session(user=user)
+        return JsonResponse({"uploadSessionToken": session.token}, status=201)
+    except Exception as exc:
+        LOGGER.error("Error creating upload session: %s", str(exc), exc_info=exc)
+        return JsonResponse(
+            {"error": gettext("There was an internal server error. Please try again.")},
+            status=500,
+        )
+
+
+@require_http_methods(["GET", "POST"])
+def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
+    """Upload a file to the server or list the files uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+    Returns:
+        HttpResponse: The response to the request
+    """
+    user: User = cast(User, request.user)
+    session = UploadSession.objects.filter(token=session_token, user=user).first()
+    if not session:
+        return JsonResponse(
+            {
+                "uploadSessionToken": session_token,
+                "error": gettext("Invalid upload session token"),
+            },
+            status=400,
+        )
+
+    if request.method == "GET":
+        return _list_uploaded_files(request, session)
+    else:
+        return _upload_file(request, session)
+
+
+def _upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
+    """Upload a single file to the server. The file is added to the upload session using the
+    session token passed as a parameter in the request. If an session token is invalid, an
+    error message is returned.
 
     The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
     file is not an accepted type, an error message is returned.
 
     Args:
         request: The POST request sent by the user.
+        session_token: The upload session token from the URL.
 
     Returns:
         JsonResponse: If the upload was successful, the session token is returned in
         'upload_session_token'. If not successful, the error description is returned in 'error'.
     """
     try:
-        headers = request.headers
-        session_token = headers.get("Upload-Session-Token")
-        user: User = cast(User, request.user)
-        session = (
-            UploadSession.objects.filter(token=session_token, user=user).first()
-            if session_token
-            else None
-        )
-        if not session:
-            session = UploadSession.new_session(user=user)
-
         _file = request.FILES.get("file")
         if not _file:
             return JsonResponse(
@@ -1054,22 +1092,17 @@ def upload_file(request: HttpRequest) -> JsonResponse:
         )
 
 
-@require_http_methods(["GET"])
-def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
+def _list_uploaded_files(request: HttpRequest, session: UploadSession) -> JsonResponse:
     """Get a list of metadata for files uploaded in a given upload session.
 
     Args:
         request: The HTTP request
-        session_token: The upload session token from the URL
+        session: The upload session to get the files from
 
     Returns:
         JsonResponse: List of uploaded files and their details, or error message
     """
     try:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-        if not session:
-            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
-
         file_metadata = [
             {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
             for f in session.get_uploads()
