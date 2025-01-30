@@ -5,10 +5,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext
 
 from recordtransfer.models import (
-    BaseUploadedFile,
     Submission,
-    SubmissionGroup,
-    UploadSession,
 )
 
 
@@ -25,35 +22,6 @@ class RecordTransferModelForm(forms.ModelForm):
             for field in self.disabled_fields:
                 if field in self.fields:
                     self.fields[field].disabled = True
-
-
-class UploadedFileForm(RecordTransferModelForm):
-    class Meta:
-        model = BaseUploadedFile
-        fields = ("name", "session", "file_upload")
-
-    exists = forms.BooleanField()
-
-
-class InlineUploadedFileForm(RecordTransferModelForm):
-    class Meta:
-        model = BaseUploadedFile
-        fields = ("name",)
-
-    exists = forms.BooleanField()
-
-
-class UploadSessionForm(RecordTransferModelForm):
-    """For for vieweing UploadSessions. This form should not be used to provide edit
-    capabilities in-line for UploadSessions.
-    """
-
-    class Meta:
-        model = UploadSession
-        fields = ("token", "started_at")
-
-    file_count = forms.IntegerField(required=False)
-    status = forms.CharField(required=False)
 
 
 class SubmissionForm(RecordTransferModelForm):
@@ -85,32 +53,3 @@ class SubmissionForm(RecordTransferModelForm):
                 ]
             )
         self.fields["metadata"].widget.can_add_related = False
-
-
-class InlineSubmissionForm(RecordTransferModelForm):
-    """Form for viewing Submissions in-line. This form should not be used to provide edit
-    capabilities in-line for Submissions.
-    """
-
-    class Meta:
-        model = Submission
-        fields = (
-            "uuid",
-            "metadata",
-            "part_of_group",
-        )
-
-
-class InlineSubmissionGroupForm(RecordTransferModelForm):
-    """Form used to view SubmissionGroups in-line. This form should not be used to provide edit
-    capabilities in-line for a SubmissionGroup.
-    """
-
-    class Meta:
-        model = SubmissionGroup
-        fields = (
-            "name",
-            "description",
-        )
-
-    number_of_submissions_in_group = forms.IntegerField(required=False)

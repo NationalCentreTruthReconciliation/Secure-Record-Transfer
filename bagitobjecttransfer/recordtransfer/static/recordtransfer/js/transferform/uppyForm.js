@@ -24,7 +24,7 @@ export async function setupUppy() {
     // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
 
-    const nextButton = document.getElementById("form-next-button");
+    const reviewButton = document.getElementById("form-review-button");
     const transferForm = document.getElementById("transfer-form");
     const issueFileIds = [];
 
@@ -138,7 +138,7 @@ export async function setupUppy() {
         sendDeleteRequestForFile(file.name);
     });
 
-    nextButton.addEventListener("click", async (event) => {
+    reviewButton.addEventListener("click", async (event) => {
         event.preventDefault();
 
         // Make sure user cannot proceed to next form step if there are files with issues

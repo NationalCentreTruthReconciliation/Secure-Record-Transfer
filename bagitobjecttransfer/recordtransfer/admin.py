@@ -2,10 +2,12 @@
 
 import logging
 from pathlib import Path
+from typing import Callable
 
 from caais.export import ExportVersion
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import Q
@@ -19,15 +21,11 @@ from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
-    InlineSubmissionForm,
-    InlineSubmissionGroupForm,
-    InlineUploadedFileForm,
     SubmissionForm,
-    UploadedFileForm,
-    UploadSessionForm,
 )
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
+    BaseUploadedFile,
     Job,
     PermUploadedFile,
     Submission,
@@ -36,12 +34,13 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
+from recordtransfer.utils import get_human_readable_size
 
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def linkify(field_name):
-    """Converts a foreign key value into clickable links.
+def linkify(field_name: str) -> Callable:
+    """Convert a foreign key value into clickable links.
 
     If field_name is 'parent', link text will be str(obj.parent)
     Link will be admin url for the admin url for obj.parent.id:change
@@ -67,13 +66,19 @@ def linkify(field_name):
 
 
 @receiver(pre_delete, sender=Job)
-def job_file_delete(sender, instance, **kwargs):
+def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
     """FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
     instance.attached_file.delete(False)
 
 
+@display(description=gettext("Upload Size"))
+def format_upload_size(obj: BaseUploadedFile) -> str:
+    """Format file size of an BaseUploadedFile instance for display."""
+    return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
+
 class ReadOnlyAdmin(admin.ModelAdmin):
-    """A model admin that does not allow any editing/changing/ or deletions
+    """A model admin that does not allow any editing/changing/ or deletions.
 
     Permissions:
         - add: Not allowed
@@ -100,9 +105,8 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(TempUploadedFile)
-class TempUploadedFileAdmin(ReadOnlyAdmin):
-    """Admin for the UploadedFile model
+class ReadOnlyInline(admin.TabularInline):
+    """Inline admin that does not allow any editing/changing/ or deletions.
 
     Permissions:
         - add: Not allowed
@@ -110,36 +114,21 @@ class TempUploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    class Media:
-        js = ("admin_uploadedfile.bundle.js",)
+    max_num = 0
+    show_change_link = True
 
-    change_form_template = "admin/readonly_change_form.html"
+    def has_add_permission(self, request, obj=None):
+        return False
 
-    form = UploadedFileForm
+    def has_change_permission(self, request, obj=None):
+        return False
 
-    actions = [
-        "clean_temp_files",
-    ]
-
-    list_display = [
-        "name",
-        "exists",
-        linkify("session"),
-    ]
-
-    ordering = ["-session", "name"]
-
-    @admin.action(description=gettext("Remove temp files on filesystem"))
-    def clean_temp_files(self, request, queryset):
-        """Remove temporary files stored on the file system by the temporary uploaded
-        files.
-        """
-        for temp_file in queryset:
-            temp_file.remove()
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
-@admin.register(PermUploadedFile)
-class PermUploadedFileAdmin(ReadOnlyAdmin):
+@admin.register(TempUploadedFile, PermUploadedFile)
+class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model.
 
     Permissions:
@@ -151,19 +140,25 @@ class PermUploadedFileAdmin(ReadOnlyAdmin):
     class Media:
         js = ("admin_uploadedfile.bundle.js",)
 
-    change_form_template = "admin/readonly_change_form.html"
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
-    form = UploadedFileForm
+    search_fields = [
+        "name",
+        "session__token",
+        "session__user__username",
+    ]
 
     list_display = [
         "name",
+        format_upload_size,
         "exists",
         linkify("session"),
     ]
 
-    ordering = ["-session", "name"]
+    ordering = ["-pk"]
 
-class TempUploadedFileInline(admin.TabularInline):
+
+class TempUploadedFileInline(ReadOnlyInline):
     """Inline admin for the BaseUploadedFile model. Used to view the files
     associated with an upload session.
 
@@ -173,21 +168,12 @@ class TempUploadedFileInline(admin.TabularInline):
         - delete: Not allowed
     """
 
-    form = InlineUploadedFileForm
     model = TempUploadedFile
-    max_num = 0
-    show_change_link = True
+    fields = ["name", format_upload_size, "exists"]
+    readonly_fields = ["exists", format_upload_size]
 
-    def has_add_permission(self, request, obj=None):
-        return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class PermUploadedFileInline(admin.TabularInline):
+class PermUploadedFileInline(ReadOnlyInline):
     """Inline admin for the BaseUploadedFile model. Used to view the files
     associated with an upload session.
 
@@ -197,19 +183,9 @@ class PermUploadedFileInline(admin.TabularInline):
         - delete: Not allowed
     """
 
-    form = InlineUploadedFileForm
     model = PermUploadedFile
-    max_num = 0
-    show_change_link = True
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+    fields = ["name", format_upload_size, "exists"]
+    readonly_fields = ["exists", format_upload_size]
 
 
 @admin.register(UploadSession)
@@ -222,23 +198,25 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    change_form_template = "admin/readonly_change_form.html"
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj):
+        return get_human_readable_size(obj.upload_size, 1000, 2)
 
-    form = UploadSessionForm
+    fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    search_fields = ["token", "user__username"]
+    list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
 
     inlines = [
         TempUploadedFileInline,
         PermUploadedFileInline,
     ]
 
-    list_display = ["token", "started_at", "file_count", "status"]
-
     ordering = [
         "-started_at",
     ]
 
 
-class SubmissionInline(admin.TabularInline):
+class SubmissionInline(ReadOnlyInline):
     """Inline admin for the Submission model.
 
     Permissions:
@@ -248,17 +226,9 @@ class SubmissionInline(admin.TabularInline):
     """
 
     model = Submission
-    max_num = 0
-    show_change_link = True
-    form = InlineSubmissionForm
+    fields = ["uuid", "metadata"]
 
     ordering = ["-submission_date"]
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
 
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
@@ -299,12 +269,6 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "export_atom_2_1_csv",
     ]
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
 
@@ -334,7 +298,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
 
 
-class SubmissionGroupInline(admin.TabularInline):
+class SubmissionGroupInline(ReadOnlyInline):
     """Inline admin for viewing submission groups.
 
     Permissions:
@@ -344,19 +308,9 @@ class SubmissionGroupInline(admin.TabularInline):
     """
 
     model = SubmissionGroup
-    max_num = 0
-    show_change_link = True
-
-    form = InlineSubmissionGroupForm
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+    fields = ["name", "description", "number_of_submissions_in_group"]
+    # Tells Django this is a computed field
+    readonly_fields = ["number_of_submissions_in_group"]
 
 
 @admin.register(Submission)
@@ -423,7 +377,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         return obj and request.user.is_superuser
 
     def get_urls(self):
-        """Add extra views to admin"""
+        """Add extra views to admin."""
         return [
             path(
                 "<path:object_id>/zip/",
@@ -445,8 +399,8 @@ class SubmissionAdmin(admin.ModelAdmin):
             extra_context["generated_bag_url"] = job.get_admin_download_url()
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def create_zipped_bag(self, request, object_id):
-        """Start a background job to create a downloadable bag
+    def create_zipped_bag(self, request, object_id) -> HttpResponseRedirect:
+        """Start a background job to create a downloadable bag.
 
         Args:
             request: The originating request
@@ -516,7 +470,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 class JobAdmin(ReadOnlyAdmin):
     """Admin for the Job model. Adds a view to download the file associated
     with the job, if there is a file. The file download view can be accessed at
-    code:`job/<id>/download/`
+    code:`job/<id>/download/`.
 
     Permissions:
         - add: Not allowed
@@ -534,9 +488,6 @@ class JobAdmin(ReadOnlyAdmin):
     ]
 
     ordering = ["-start_time"]
-
-    def has_add_permission(self, request):
-        return False
 
     def has_delete_permission(self, request, obj=None):
         return obj and (request.user == obj.user_triggered or request.user.is_superuser)
@@ -644,7 +595,7 @@ class CustomUserAdmin(UserAdmin):
 
     def save_model(self, request, obj, form, change):
         """Enforce superuser permissions checks and send notification emails
-        for other account updates
+        for other account updates.
         """
         if change and obj.is_superuser and not request.user.is_superuser:
             messages.set_level(request, messages.ERROR)

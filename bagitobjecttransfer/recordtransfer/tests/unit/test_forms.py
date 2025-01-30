@@ -388,7 +388,6 @@ class UploadFilesFormTest(TestCase):
     def setUp(self) -> None:
         """Create a test session and include one uploaded file as part of session."""
         self.upload_session = UploadSession.new_session()
-        self.upload_session.save()
         self.uploaded_file = TempUploadedFile.objects.create(
             session=self.upload_session,
             file_upload=SimpleUploadedFile("test_file.txt", bytearray([1] * (1024**2))),

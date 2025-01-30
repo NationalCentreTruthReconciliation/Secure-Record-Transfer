@@ -10,8 +10,11 @@
     {{ block.super }}
     <script src="{% static 'transferform.bundle.js' %}"></script>
     <script>currentFormStep = {{ wizard.steps.step1 }}</script>
-    <link rel="stylesheet" href="{% static 'transferform.css' %}">
 {% endblock javascript %}
+{% block stylesheet %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'transferform.css' %}">
+{% endblock stylesheet%}
 {% block content %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
@@ -42,21 +45,36 @@
                             formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.prev }}"
-                            class="blue-button margin-right-20px">{% trans "Previous Step" %}</button>
+                            class="blue-button-outline margin-right-10px">{% trans "Previous Step" %}</button>
                 {% endif %}
-                <button {% block submitbuttonattributes %}
+                {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
+                    <button 
+                        {% block submitbuttonattributes %}
                         {% comment %} Button is "next" by default, but the id for a "submit" button can be
                         overrided using this block {% endcomment %}
                         id="form-next-button"
                         {% endblock submitbuttonattributes %}
                         type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                        class="blue-button">
-                    {% if wizard.steps.step1 == wizard.steps.count %}
-                        {% trans "Submit" %}
-                    {% else %}
-                        {% trans "Next Step" %}
-                    {% endif %}
-                </button>
+                        class="blue-button margin-right-30px">
+                        {% if wizard.steps.step1 == wizard.steps.count %}
+                            {% trans "Submit" %}
+                        {% else %}
+                            {% trans "Next Step" %}
+                        {% endif %}
+                    </button>
+                {% endif %}
+                {% if SHOW_REVIEW_BUTTON %}
+                    <button id="form-review-button"
+                            name="wizard_goto_step"
+                            value="{{ wizard.steps.last }}"
+                            class="green-button">
+                        {% if wizard.steps.step1 == wizard.steps.count|add:"-1" %}
+                            {% trans "Review" %}
+                        {% else %}
+                            {% trans "Return to Review" %}
+                        {% endif %}
+                    </button>
+                {% endif %}
             </div>
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">

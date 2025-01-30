@@ -35,7 +35,7 @@
             <label class="medium-text">{% trans "Past Transfers" %}</label>
         </div>
         {% if submissions_page_obj and submissions_page_obj|length > 0 %}
-            {% include "includes/submission_table.html" %}
+            {% include "includes/submission_table.html" with submissions=submissions_page_obj %}
             {% include "includes/pagination.html" with page_obj=submissions_page_obj pagination_name=SUBMISSIONS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">

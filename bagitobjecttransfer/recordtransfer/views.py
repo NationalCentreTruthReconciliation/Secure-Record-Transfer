@@ -1,7 +1,7 @@
 import logging
 import pickle
 import re
-from typing import Any, ClassVar, Optional, Union, cast
+from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
 from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
@@ -13,7 +13,14 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
-from django.forms import BaseModelForm
+from django.forms import (
+    BaseForm,
+    BaseFormSet,
+    BaseInlineFormSet,
+    BaseModelForm,
+    BaseModelFormSet,
+    ModelForm,
+)
 from django.http import (
     Http404,
     HttpRequest,
@@ -77,6 +84,7 @@ from recordtransfer.emails import (
 from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
+from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -469,14 +477,53 @@ class TransferFormWizard(SessionWizardView):
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
 
-    def render_goto_step(self, *args, **kwargs) -> HttpResponse:
-        """Save current step data before going back to a previous step."""
-        form = self.get_form(data=self.request.POST, files=self.request.FILES)
+    def save_current_step(
+        self, form: Union[BaseInlineFormSet, BaseModelFormSet, ModelForm]
+    ) -> None:
+        """Save the data from the current step."""
         self.storage.set_step_data(self.steps.current, self.process_step(form))
         self.storage.set_step_files(self.steps.current, self.process_step_files(form))
-        return super().render_goto_step(*args, **kwargs)
 
-    def render_next_step(self, form, **kwargs):
+    def render_goto_step(self, goto_step: str, *args, **kwargs) -> HttpResponse:
+        """Perform necessary validation and data saving before going to to desired step. Skips
+        validation if the user is trying to go to a previous step. Otherwise, validates each form
+        before the goto step, and takes user to the step with the first error if any form is
+        invalid.
+        """
+        current_step_form = self.get_form(data=self.request.POST, files=self.request.FILES)
+        self.save_current_step(current_step_form)
+
+        # Get step indices
+        goto_index = self.steps.all.index(goto_step)
+        current_index = self.steps.all.index(self.steps.current)
+
+        if goto_index > current_index:
+            # Validate each form before the goto step
+            for step in self.steps.all[:goto_index]:
+                # Populate form with saved data
+                form = (
+                    current_step_form
+                    if step == self.steps.current
+                    else self.get_form(
+                        step,
+                        data=self.storage.get_step_data(step),
+                        files=self.storage.get_step_files(step),
+                    )
+                )
+                if not form.is_valid():
+                    messages.error(self.request, gettext("Please correct the errors below."))
+                    self.storage.current_step = step
+                    return self.render(form, **kwargs)
+
+        self.storage.current_step = goto_step
+        next_form = self.get_form(
+            data=self.storage.get_step_data(self.steps.current),
+            files=self.storage.get_step_files(self.steps.current),
+        )
+        clear_form_errors(next_form)
+        return self.render(next_form, **kwargs)
+
+    def render_next_step(self, form, **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
         # get the form instance based on the data from the storage backend
         # (if available).
@@ -488,7 +535,7 @@ class TransferFormWizard(SessionWizardView):
         )
         ##########################
         # This part is different from the parent class. We need to clear the errors from the form
-        new_form.errors.clear()
+        clear_form_errors(new_form)
         ##########################
 
         # change the stored current step
@@ -656,6 +703,35 @@ class TransferFormWizard(SessionWizardView):
 
         return kwargs
 
+    def get_forms_for_review(self) -> OrderedDict[str, Union[BaseForm, BaseFormSet]]:
+        """Retrieve the relevant forms to be processed for the review step. This method does not
+        validate the forms, but populates the cleaned_data attribute of each form.
+        """
+        final_forms = OrderedDict()
+        form_list = self.get_form_list() or []
+        for form_step in form_list:
+            transfer_step = TransferStep(form_step)
+            if transfer_step in (TransferStep.ACCEPT_LEGAL, TransferStep.REVIEW):
+                continue
+            form_obj = self.get_form(
+                step=form_step,
+                data=self.storage.get_step_data(form_step),
+                files=self.storage.get_step_files(form_step),
+            )
+            form_obj.is_valid()  # This populates the cleaned_data attribute of the form
+            final_forms[TransferFormWizard._TEMPLATES[TransferStep(form_step)][FORMTITLE]] = (
+                form_obj
+            )
+        return final_forms
+
+    @property
+    def review_step_reached(self) -> bool:
+        """Check if the user has reached the review step at some point throughout this form. This
+        check is valid for a resumed in-progress transfer as well.
+        """
+        # If there are entries for every step of the form, then the review step has been reached
+        return len(self.storage.data.get("step_data", [])) == self.steps.count
+
     def get_context_data(self, form, **kwargs):
         """Retrieve context data for the current form template.
 
@@ -668,6 +744,13 @@ class TransferFormWizard(SessionWizardView):
         context = super().get_context_data(form, **kwargs)
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
+
+        # Show the review button if the user is on the step before the review step, or if the user
+        # has reached the review step before
+        if self.steps.step1 < self.steps.count and (
+            self.steps.step1 == self.steps.count - 1 or self.review_step_reached
+        ):
+            context["SHOW_REVIEW_BUTTON"] = True
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
             context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
@@ -761,6 +844,11 @@ class TransferFormWizard(SessionWizardView):
                         ],
                     },
                 }
+            )
+
+        elif self.current_step == TransferStep.REVIEW:
+            context["form_list"] = ReviewForm.format_form_data(
+                self.get_forms_for_review(), user=cast(User, self.request.user)
             )
 
         return context
@@ -912,12 +1000,14 @@ def upload_file(request: HttpRequest) -> JsonResponse:
     try:
         headers = request.headers
         session_token = headers.get("Upload-Session-Token")
+        user: User = cast(User, request.user)
         session = (
-            UploadSession.objects.filter(token=session_token).first() if session_token else None
+            UploadSession.objects.filter(token=session_token, user=user).first()
+            if session_token
+            else None
         )
         if not session:
-            session = UploadSession.new_session()
-            session.save()
+            session = UploadSession.new_session(user=user)
 
         _file = request.FILES.get("file")
         if not _file:
@@ -1005,7 +1095,7 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
         JsonResponse: List of uploaded files and their details, or error message
     """
     try:
-        session = UploadSession.objects.filter(token=session_token).first()
+        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
             return JsonResponse({"error": gettext("Upload session not found")}, status=404)
 
@@ -1022,11 +1112,25 @@ def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonRespons
 
 @require_http_methods(["DELETE", "GET"])
 def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
-    """Get or delete a file that has been uploaded in a given upload session."""
+    """Get or delete a file that has been uploaded in a given upload session.
+
+    Args:
+        request: The HTTP request
+        session_token: The upload session token from the URL
+        file_name: The name of the file to delete
+
+    Returns:
+        HttpResponse:
+            In the case of deletion, returns a 204 response when successfully deleted. In the case
+            of getting a file, redirects to the file's media path in development, or returns an
+            X-Accel-Redirect to the file's media path if in production.
+    """
     try:
-        session = UploadSession.objects.filter(token=session_token).first()
+        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
-            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
+            return JsonResponse(
+                {"error": gettext("Invalid filename or upload session token")}, status=404
+            )
 
         if request.method == "DELETE":
             try:
