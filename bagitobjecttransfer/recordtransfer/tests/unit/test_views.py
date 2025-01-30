@@ -35,7 +35,7 @@ class TestHomepage(TestCase):
 @patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 @override_storage(storage=LocMemStorage())
 class TestUploadFileView(TestCase):
-    """Tests for recordtransfer:uploadfile view."""
+    """Tests for recordtransfer:session_files view."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -61,27 +61,27 @@ class TestUploadFileView(TestCase):
     def test_logged_out_error(self):
         """Test that a 302 is returned if the user is not logged in."""
         self.client.logout()
-        response = self.client.post(reverse("recordtransfer:uploadfile"), {})
+        response = self.client.post(reverse("recordtransfer:session_files"), {})
         self.assertEqual(response.status_code, 302)
 
     def test_500_error_caught(self) -> None:
         """Test that a 500 is returned if an error is raised."""
         self.patch__accept_file.side_effect = ValueError("err")
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
         )
         self.assertEqual(response.status_code, 500)
 
     def test_no_files_uploaded(self) -> None:
         """Test that a 400 is returned if no files are uploaded."""
-        response = self.client.post(reverse("recordtransfer:uploadfile"), {})
+        response = self.client.post(reverse("recordtransfer:session_files"), {})
         self.assertEqual(response.status_code, 400)
 
     def test_new_session_created(self) -> None:
         """Test that a new session associated with the user is created."""
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
         )
 
@@ -99,7 +99,7 @@ class TestUploadFileView(TestCase):
         session = UploadSession.new_session(user=self.test_user_1)
 
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
             headers={"upload-session-token": session.token},
         )
@@ -118,7 +118,7 @@ class TestUploadFileView(TestCase):
         session = UploadSession.new_session(user=self.test_user_1)
 
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
             headers={"upload-session-token": "invalid_token"},
         )
@@ -134,7 +134,7 @@ class TestUploadFileView(TestCase):
         session = UploadSession.new_session(user=test_user_2)
 
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
             headers={"upload-session-token": session.token},
         )
@@ -149,7 +149,7 @@ class TestUploadFileView(TestCase):
         self.patch__accept_file.return_value = {"accepted": False, "error": "ISSUE"}
 
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
         )
 
@@ -170,7 +170,7 @@ class TestUploadFileView(TestCase):
         self.patch__accept_session.return_value = {"accepted": False, "error": "ISSUE"}
 
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
         )
 
@@ -190,7 +190,7 @@ class TestUploadFileView(TestCase):
         """Test that malware is flagged if the file contains malware."""
         self.patch_check_for_malware.side_effect = ValidationError("Malware found")
         response = self.client.post(
-            reverse("recordtransfer:uploadfile"),
+            reverse("recordtransfer:session_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
         )
 
