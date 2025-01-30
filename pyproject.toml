@@ -42,3 +42,6 @@ build-backend = "poetry.core.masonry.api"
 pythonpath = "bagitobjecttransfer"
 python_files = "test_*.py"
 DJANGO_SETTINGS_MODULE = "bagitobjecttransfer.settings.test"
+
+[tool.poetry.plugins."pytest11"]
+npm_build = "conftest"
