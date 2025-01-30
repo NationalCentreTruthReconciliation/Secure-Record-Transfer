@@ -1,42 +1,19 @@
-import logging
-from typing import Any, Optional, Union
+from typing import Any
 
 from caais.export import ExportVersion
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models.base import Model as Model
-from django.forms import (
-    BaseModelForm,
-)
-from django.http import (
-    Http404,
-    HttpRequest,
-    HttpResponse,
-    HttpResponseForbidden,
-    JsonResponse,
-)
+from django.forms import BaseModelForm
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
-from django.views.generic import (
-    CreateView,
-    DetailView,
-    UpdateView,
-    View,
-)
+from django.views.generic import CreateView, DetailView, UpdateView, View
 
-from recordtransfer.constants import (
-    ID_SUBMISSION_GROUP_DESCRIPTION,
-    ID_SUBMISSION_GROUP_NAME,
-)
+from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.models import (
-    Submission,
-    SubmissionGroup,
-)
-
-LOGGER = logging.getLogger(__name__)
+from recordtransfer.models import Submission, SubmissionGroup
 
 
 class SubmissionDetail(UserPassesTestMixin, DetailView):
