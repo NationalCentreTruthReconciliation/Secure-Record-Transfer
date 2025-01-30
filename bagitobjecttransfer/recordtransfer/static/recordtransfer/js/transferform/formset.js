@@ -84,6 +84,14 @@ export function setupFormset(prefix, onnewform = undefined) {
             // Insert the new form after the last form
             lastForm.parentNode.insertBefore(newForm, lastForm.nextSibling);
 
+            // Clear inputs
+            newForm.querySelectorAll("input,textarea").forEach(el => {
+                el.value = "";
+            });
+
+            // Clear error messages
+            newForm.querySelectorAll(".flex-error").forEach(el => el.remove());
+
             // Send the new form to the callback function
             if (onnewform) {
                 onnewform(newForm);
