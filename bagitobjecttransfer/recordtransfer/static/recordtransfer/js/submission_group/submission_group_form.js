@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const submissionGroupDescription = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
 
     const inputFields = [submissionGroupName, submissionGroupDescription];
-    const saveButton = document.getElementById("id_save_button");
+    const saveButton = document.getElementById("id_create_group_button");
 
     const initialValues = {
         submissionGroupName: submissionGroupName.value,

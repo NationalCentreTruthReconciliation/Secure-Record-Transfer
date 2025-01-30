@@ -1,7 +1,7 @@
 {
-  "name": "bagitobjecttransfer",
-  "version": "2024.10.22",
-  "description": "The secure record transfer application has been designed for the purpose of transferring files and standardized metadata over the internet to an institution.",
+  "name": "secure-record-transfer",
+  "version": "2025.01.30",
+  "description": "Transfer files and metadata to an archive based on accession standards",
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",
