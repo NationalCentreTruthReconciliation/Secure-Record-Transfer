@@ -285,7 +285,7 @@ class TestMediaRequestView(TestCase):
 
 
 class TestListUploadedFilesView(TestCase):
-    """Tests for recordtransfer:list_uploaded_files view."""
+    """Tests for recordtransfer:session_files view."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -303,12 +303,12 @@ class TestListUploadedFilesView(TestCase):
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
-        self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
+        self.url = reverse("recordtransfer:session_files", args=[self.session.token])
 
     def test_list_uploaded_files_session_not_found(self) -> None:
         """Invalid session token."""
         response = self.client.get(
-            reverse("recordtransfer:list_uploaded_files", args=["invalid_token"])
+            reverse("recordtransfer:session_files", args=["invalid_token"])
         )
         self.assertEqual(response.status_code, 404)
         response_json = response.json()
