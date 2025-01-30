@@ -8,7 +8,7 @@ from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
@@ -34,15 +34,12 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 from django.views.generic import (
     CreateView,
     DetailView,
-    FormView,
     TemplateView,
     UpdateView,
     View,
@@ -78,11 +75,10 @@ from recordtransfer.emails import (
     send_submission_creation_success,
     send_thank_you_for_your_transfer,
     send_user_account_updated,
-    send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
 from recordtransfer.enums import TransferStep
-from recordtransfer.forms import SignUpForm, UserProfileForm
+from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
@@ -92,7 +88,6 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
-from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
@@ -232,59 +227,6 @@ class UserProfile(UpdateView):
         profile_form = cast(UserProfileForm, form)
         profile_form.reset_form()
         return super().form_invalid(profile_form)
-
-
-class ActivationSent(TemplateView):
-    """The page a user sees after creating an account."""
-
-    template_name = "recordtransfer/activationsent.html"
-
-
-class ActivationComplete(TemplateView):
-    """The page a user sees when their account has been activated."""
-
-    template_name = "recordtransfer/activationcomplete.html"
-
-
-class ActivationInvalid(TemplateView):
-    """The page a user sees if their account could not be activated."""
-
-    template_name = "recordtransfer/activationinvalid.html"
-
-
-class CreateAccount(FormView):
-    """Allows a user to create a new account with the SignUpForm. When the form is submitted
-    successfully, send an email to that user with a link that lets them activate their account.
-    """
-
-    template_name = "recordtransfer/signupform.html"
-    form_class = SignUpForm
-    success_url = reverse_lazy("recordtransfer:activationsent")
-
-    def form_valid(self, form):
-        new_user = form.save(commit=False)
-        new_user.is_active = False
-        new_user.gets_submission_email_updates = False
-        new_user.save()
-        send_user_activation_email.delay(new_user)
-        return super().form_valid(form)
-
-
-def activate_account(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.confirmed_email = True
-        user.save()
-        login(request, user)
-        return HttpResponseRedirect(reverse("recordtransfer:accountcreated"))
-
-    return HttpResponseRedirect(reverse("recordtransfer:activationinvalid"))
 
 
 class TransferFormWizard(SessionWizardView):
