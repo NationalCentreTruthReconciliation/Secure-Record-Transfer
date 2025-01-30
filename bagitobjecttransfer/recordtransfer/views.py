@@ -77,6 +77,7 @@ from recordtransfer.emails import (
 from recordtransfer.enums import TransferStep
 from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
+from recordtransfer.forms.transfer_forms import clear_form_errors, format_form_data
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -88,8 +89,6 @@ from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import (
     accept_file,
     accept_session,
-    clear_form_errors,
-    format_form_data,
     get_human_readable_file_count,
     get_human_readable_size,
 )

@@ -1,39 +1,16 @@
 import logging
 import os
-from typing import Any, Optional, OrderedDict, TypedDict, Union
+from typing import Union
 from zipfile import ZipFile
 
 from django.conf import settings
-from django.forms import BaseForm, BaseFormSet
 from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.forms.transfer_forms import (
-    GroupTransferForm,
-    OtherIdentifiersFormSet,
-    UploadFilesForm,
-)
-from recordtransfer.models import SubmissionGroup, UploadSession, User
+from recordtransfer.models import UploadSession
 
 LOGGER = logging.getLogger("recordtransfer")
-
-
-class ReviewFormItem(TypedDict):
-    """A dictionary representing a form item for review by the user.
-
-    Attributes:
-        step_title: The human-readable title of the step.
-        step_name: The name of the step.
-        fields: The fields of the step.
-        note: An optional note, intended to be used as a message to the user if a section is empty,
-        for example.
-    """
-
-    step_title: str
-    step_name: str
-    fields: Union[list[dict[str, Any]], dict[str, Any]]
-    note: Optional[str]
 
 
 def zip_directory(directory: str, zipf: ZipFile):
@@ -378,127 +355,3 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
 
     # All checks succeded
     return {"accepted": True}
-
-
-def clear_form_errors(form: Union[BaseForm, BaseFormSet]) -> None:
-    """Clear all errors on a form or formset."""
-    if isinstance(form, BaseForm):
-        form.errors.clear()
-        for field in form.fields:
-            form.fields[field].error_messages.clear()
-    elif isinstance(form, BaseFormSet):
-        for subform in form.forms:
-            subform.errors.clear()
-            for field in subform.fields:
-                subform.fields[field].error_messages.clear()
-
-def _process_formset(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[str]]:
-    """Process a formset and return formatted data with optional note."""
-    formset_data = []
-    note = None
-    all_empty = True
-
-    for subform in form.forms:
-        subform_data = {
-            subform.fields[field].label or field: subform.cleaned_data.get(field, "")
-            for field in subform.fields
-            if subform.fields[field].label != "hidden"
-        }
-
-        if any(subform_data.values()):
-            all_empty = False
-            formset_data.append(subform_data)
-
-    if all_empty and isinstance(form, OtherIdentifiersFormSet):
-        note = gettext("No other identifiers were provided.")
-
-    return formset_data, note
-
-
-def _process_group_transfer(form: GroupTransferForm, user: User) -> dict[str, Any]:
-    """Handle group transfer specific field processing."""
-    fields_data = _get_base_fields_data(form)
-    group_id = form.cleaned_data.get("group_id")
-
-    if not (group_id and user):
-        return fields_data
-
-    group = SubmissionGroup.objects.filter(created_by=user, uuid=group_id).first()
-    if not group:
-        return fields_data
-
-    # Replaces group UUID with group name
-    group_id_label = form.fields["group_id"].label
-    if group_id_label:
-        fields_data[group_id_label] = group.name
-
-    return fields_data
-
-
-def _process_file_upload(form: UploadFilesForm, user: User) -> dict[str, Any]:
-    """Handle file upload specific field processing."""
-    fields_data = _get_base_fields_data(form)
-    session_token = form.cleaned_data.get("session_token")
-
-    if not (session_token and user):
-        return fields_data
-
-    session = UploadSession.objects.filter(token=session_token, user=user).first()
-    if not session:
-        return fields_data
-
-    # Adds on links to access uploaded files
-    fields_data["Uploaded files"] = [
-        {"name": f.name, "url": f.get_file_access_url()} for f in session.get_temporary_uploads()
-    ]
-
-    return fields_data
-
-
-def _get_base_fields_data(form: BaseForm) -> dict[str, Any]:
-    """Extract fields data from a form."""
-    return {
-        form.fields[field].label or field: form.cleaned_data.get(field, "")
-        for field in form.fields
-        if form.fields[field].label != "hidden"
-    }
-
-
-def format_form_data(form_dict: OrderedDict, user: User) -> list[ReviewFormItem]:
-    """Format form data to be used in a form review page."""
-    preview_data: list[ReviewFormItem] = []
-
-    for step_title, form in form_dict.items():
-        # Each form has metadata that links it to a step in the transfer form
-        transfer_step = form.__class__.Meta.transfer_step
-
-        if hasattr(form, "forms"):  # Handle formsets
-            formset_data, note = _process_formset(form)
-            preview_data.append(
-                {
-                    "step_title": step_title,
-                    "step_name": transfer_step.value,
-                    "fields": formset_data,
-                    "note": note, # A note is included if the formset is empty
-                }
-            )
-
-        elif hasattr(form, "cleaned_data"):  # Handle regular forms
-            fields_data = (
-                _process_group_transfer(form, user)
-                if isinstance(form, GroupTransferForm)
-                else _process_file_upload(form, user)
-                if isinstance(form, UploadFilesForm)
-                else _get_base_fields_data(form)
-            )
-
-            preview_data.append(
-                {
-                    "step_title": step_title,
-                    "step_name": transfer_step.value,
-                    "fields": fields_data,
-                    "note": None,
-                }
-            )
-
-    return preview_data
