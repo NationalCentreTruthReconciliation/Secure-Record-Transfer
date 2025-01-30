@@ -987,7 +987,13 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
     user: User = cast(User, request.user)
     session = UploadSession.objects.filter(token=session_token, user=user).first()
     if not session:
-        return JsonResponse({"error": gettext("Invalid upload session token")}, status=400)
+        return JsonResponse(
+            {
+                "uploadSessionToken": session_token,
+                "error": gettext("Invalid upload session token"),
+            },
+            status=400,
+        )
 
     if request.method == "GET":
         return _list_uploaded_files(request, session)
