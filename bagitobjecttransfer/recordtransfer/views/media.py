@@ -1,4 +1,7 @@
+import logging
 from typing import cast
+
+from clamav.scan import check_for_malware
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import (
@@ -9,13 +12,13 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
+from django.utils.translation import gettext
+from django.views.decorators.http import require_http_methods
 
-from clamav.scan import check_for_malware
 from recordtransfer.models import UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
-from recordtransfer.views import LOGGER
-from django.utils.translation import gettext
-from django.views.decorators.http import require_http_methods, JsonResponse
+
+LOGGER = logging.getLogger(__name__)
 
 
 def media_request(request: HttpRequest, path: str) -> HttpResponse:
