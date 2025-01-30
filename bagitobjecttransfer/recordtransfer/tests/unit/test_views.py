@@ -76,7 +76,7 @@ class TestUploadFileView(TestCase):
     def test_no_files_uploaded(self) -> None:
         """Test that a 400 is returned if no files are uploaded."""
         response = self.client.post(reverse("recordtransfer:uploadfile"), {})
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_new_session_created(self) -> None:
         """Test that a new session associated with the user is created."""

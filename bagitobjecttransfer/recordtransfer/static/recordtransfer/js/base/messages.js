@@ -1,7 +1,8 @@
-$(() => {
-    $(document).ready(function () {
-        $("button.close[data-dismiss=alert]").on("click", function (evt) {
-            $(evt.currentTarget).parents(".alert-dismissible").hide();
+document.addEventListener("DOMContentLoaded", () => {
+    const closeButtons = document.querySelectorAll("button.close[data-dismiss=alert]");
+    closeButtons.forEach(button => {
+        button.addEventListener("click", (event) => {
+            event.target.closest(".alert-dismissible").style.display = "none";
         });
     });
-})
+});
