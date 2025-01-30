@@ -43,6 +43,7 @@ services:
   rq:
     build:
       context: .
+      target: prod
       dockerfile: Containerfile
       args:
           WEBPACK_MODE: production
@@ -65,6 +66,7 @@ services:
   app:
     build:
       context: .
+      target: prod
       dockerfile: Containerfile
       args:
         WEBPACK_MODE: production
