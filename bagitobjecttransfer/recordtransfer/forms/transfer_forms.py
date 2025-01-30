@@ -1023,7 +1023,7 @@ class ReviewForm(TransferForm):
         }
 
     @staticmethod
-    def _process_file_upload(form: UploadFilesForm, user: User) -> dict[str, Any]:
+    def _get_file_upload_fields_data(form: UploadFilesForm, user: User) -> dict[str, Any]:
         """Handle file upload specific field processing."""
         fields_data = ReviewForm._get_base_fields_data(form)
         session_token = form.cleaned_data.get("session_token")
@@ -1044,7 +1044,7 @@ class ReviewForm(TransferForm):
         return fields_data
 
     @staticmethod
-    def _process_group_transfer(form: GroupTransferForm, user: User) -> dict[str, Any]:
+    def _get_group_transfer_fields_data(form: GroupTransferForm, user: User) -> dict[str, Any]:
         """Handle group transfer specific field processing."""
         fields_data = ReviewForm._get_base_fields_data(form)
         group_id = form.cleaned_data.get("group_id")
@@ -1064,7 +1064,7 @@ class ReviewForm(TransferForm):
         return fields_data
 
     @staticmethod
-    def _process_formset(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[str]]:
+    def _get_formset_fields_data(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[str]]:
         """Process a formset and return formatted data with optional note."""
         formset_data = []
         note = None
@@ -1099,7 +1099,7 @@ class ReviewForm(TransferForm):
             transfer_step = meta.transfer_step if meta else None
 
             if isinstance(form, BaseFormSet):  # Handle formsets
-                formset_data, note = ReviewForm._process_formset(form)
+                formset_data, note = ReviewForm._get_formset_fields_data(form)
                 preview_data.append(
                     {
                         "step_title": step_title,
@@ -1111,9 +1111,9 @@ class ReviewForm(TransferForm):
 
             elif isinstance(form, BaseForm):  # Handle regular forms
                 if isinstance(form, GroupTransferForm):
-                    fields_data = ReviewForm._process_group_transfer(form, user)
+                    fields_data = ReviewForm._get_group_transfer_fields_data(form, user)
                 elif isinstance(form, UploadFilesForm):
-                    fields_data = ReviewForm._process_file_upload(form, user)
+                    fields_data = ReviewForm._get_file_upload_fields_data(form, user)
                 else:
                     fields_data = ReviewForm._get_base_fields_data(form)
 
