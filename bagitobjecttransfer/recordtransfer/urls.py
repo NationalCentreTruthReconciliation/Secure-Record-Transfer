@@ -104,7 +104,7 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
                 name="session_files",
             ),
             path(
-                "transfer/upload-session/<session_token>/files/<file_name>/",
+                "upload-session/<session_token>/files/<file_name>/",
                 login_required(views.uploaded_file),
                 name="uploaded_file",
             ),
