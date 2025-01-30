@@ -13,7 +13,14 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
-from django.forms import BaseForm, BaseFormSet, BaseInlineFormSet, BaseModelForm, BaseModelFormSet, ModelForm
+from django.forms import (
+    BaseForm,
+    BaseFormSet,
+    BaseInlineFormSet,
+    BaseModelForm,
+    BaseModelFormSet,
+    ModelForm,
+)
 from django.http import (
     Http404,
     HttpRequest,
