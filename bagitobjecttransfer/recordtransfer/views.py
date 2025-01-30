@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
-from django.forms import BaseInlineFormSet, BaseModelForm, BaseModelFormSet, ModelForm
+from django.forms import BaseForm, BaseFormSet, BaseInlineFormSet, BaseModelForm, BaseModelFormSet, ModelForm
 from django.http import (
     Http404,
     HttpRequest,
@@ -693,7 +693,7 @@ class TransferFormWizard(SessionWizardView):
 
         return kwargs
 
-    def get_forms_for_review(self) -> OrderedDict[str, Union[BaseModelForm, BaseModelFormSet]]:
+    def get_forms_for_review(self) -> OrderedDict[str, Union[BaseForm, BaseFormSet]]:
         """Retrieve the relevant forms to be processed for the review step. This method does not
         validate the forms, but populates the cleaned_data attribute of each form.
         """

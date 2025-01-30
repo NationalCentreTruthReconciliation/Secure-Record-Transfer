@@ -1088,7 +1088,7 @@ class ReviewForm(TransferForm):
 
     @staticmethod
     def format_form_data(
-        form_dict: OrderedDict[str, Union[BaseModelForm, BaseModelFormSet]], user: User
+        form_dict: OrderedDict[str, Union[BaseForm, BaseFormSet]], user: User
     ) -> list[ReviewFormItem]:
         """Format form data to be used in a form review page."""
         preview_data: list[ReviewFormItem] = []
@@ -1098,7 +1098,7 @@ class ReviewForm(TransferForm):
             meta = getattr(form.__class__, "Meta", None)
             transfer_step = meta.transfer_step if meta else None
 
-            if isinstance(form, BaseModelFormSet):  # Handle formsets
+            if isinstance(form, BaseFormSet):  # Handle formsets
                 formset_data, note = ReviewForm._process_formset(form)
                 preview_data.append(
                     {
@@ -1109,7 +1109,7 @@ class ReviewForm(TransferForm):
                     }
                 )
 
-            elif isinstance(form, BaseModelForm):  # Handle regular forms
+            elif isinstance(form, BaseForm):  # Handle regular forms
                 if isinstance(form, GroupTransferForm):
                     fields_data = ReviewForm._process_group_transfer(form, user)
                 elif isinstance(form, UploadFilesForm):
