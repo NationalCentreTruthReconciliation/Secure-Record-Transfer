@@ -1,14 +1,12 @@
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from recordtransfer.emails import send_user_activation_email
-from recordtransfer.forms import SignUpForm
-
-
-from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
 
+from recordtransfer.emails import send_user_activation_email
+from recordtransfer.forms import SignUpForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
 

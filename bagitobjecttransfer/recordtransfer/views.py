@@ -8,10 +8,8 @@ from caais.models import RightsType, SourceRole, SourceType
 from clamav.scan import check_for_malware
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
 from django.db.models.base import Model as Model
 from django.forms import (
     BaseForm,
@@ -32,7 +30,7 @@ from django.http import (
     QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -49,14 +47,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
-    GROUPS_PAGE,
-    ID_CONFIRM_NEW_PASSWORD,
-    ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
-    ID_FIRST_NAME,
-    ID_GETS_NOTIFICATION_EMAILS,
-    ID_LAST_NAME,
-    ID_NEW_PASSWORD,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
     ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
@@ -65,20 +56,16 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
-    IN_PROGRESS_PAGE,
     INFOMESSAGE,
-    SUBMISSIONS_PAGE,
     TEMPLATEREF,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
     send_thank_you_for_your_transfer,
-    send_user_account_updated,
     send_your_transfer_did_not_go_through,
 )
 from recordtransfer.enums import TransferStep
-from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
@@ -127,106 +114,6 @@ class TransferSent(TemplateView):
     """The page a user sees when they finish a transfer."""
 
     template_name = "recordtransfer/transfersent.html"
-
-
-class UserProfile(UpdateView):
-    """View to show two things:
-    - The user's profile information
-    - A list of the Submissions a user has created via transfer.
-    """
-
-    template_name = "recordtransfer/profile.html"
-    paginate_by = 10
-    form_class = UserProfileForm
-    success_url = reverse_lazy("recordtransfer:userprofile")
-    success_message = gettext("Preferences updated")
-    password_change_success_message = gettext("Password updated")
-    error_message = gettext("There was an error updating your preferences. Please try again.")
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        """Add context data for the user profile view."""
-        context = super().get_context_data(**kwargs)
-
-        # Paginate InProgressSubmission
-        in_progress_submissions = InProgressSubmission.objects.filter(
-            user=self.request.user
-        ).order_by("-last_updated")
-        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
-        in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
-        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
-
-        # Paginate Submission
-        user_submissions = Submission.objects.filter(user=self.request.user).order_by(
-            "-submission_date"
-        )
-        submissions_paginator = Paginator(user_submissions, self.paginate_by)
-        submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
-        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
-
-        # Paginate SubmissionGroup
-        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
-            "name"
-        )
-        groups_paginator = Paginator(submission_groups, self.paginate_by)
-        groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
-        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
-
-        context.update(
-            {
-                # Form field element IDs
-                "js_context": {
-                    "ID_FIRST_NAME": ID_FIRST_NAME,
-                    "ID_LAST_NAME": ID_LAST_NAME,
-                    "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
-                    "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
-                    "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
-                    "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
-                },
-                # Pagination
-                "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
-                "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
-                "GROUPS_PAGE": GROUPS_PAGE,
-            }
-        )
-
-        return context
-
-    def get_form_kwargs(self) -> dict[str, Any]:
-        """Pass User instance to form to initialize it."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_object()
-        return kwargs
-
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle valid form submission."""
-        response = super().form_valid(form)
-        message = self.success_message
-        if form.cleaned_data.get("new_password"):
-            update_session_auth_hash(self.request, form.instance)
-            message = self.password_change_success_message
-
-            context = {
-                "subject": gettext("Password updated"),
-                "changed_item": gettext("password"),
-                "changed_status": gettext("updated"),
-            }
-            send_user_account_updated.delay(self.get_object(), context)
-
-        messages.success(self.request, message)
-        return response
-
-    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle invalid form submission."""
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        profile_form = cast(UserProfileForm, form)
-        profile_form.reset_form()
-        return super().form_invalid(profile_form)
 
 
 class TransferFormWizard(SessionWizardView):
