@@ -154,6 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         transferForm.submit();
     });
 
+    // Set the endpoint for file upload dynamically, based on the current upload session token
     uppy.addPreProcessor(async () => {
         let sessionToken = getSessionToken();
         if (!sessionToken) {
