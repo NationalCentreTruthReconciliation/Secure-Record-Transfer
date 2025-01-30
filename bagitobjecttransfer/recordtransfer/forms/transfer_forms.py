@@ -1,12 +1,13 @@
 """Forms specific to transferring files with a new submission."""
 
+from typing import Any, Optional, OrderedDict, TypedDict, Union
 from uuid import UUID
 
 from caais.models import RightsType, SourceRole, SourceType
 from django import forms
 from django.conf import settings
 from django.db.models import Case, CharField, Value, When
-from django.forms import BaseFormSet
+from django.forms import BaseForm, BaseFormSet
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
@@ -21,15 +22,43 @@ from recordtransfer.constants import (
     ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_SELECTION,
 )
-from recordtransfer.models import SubmissionGroup, UploadSession
+from recordtransfer.enums import TransferStep
+from recordtransfer.models import SubmissionGroup, UploadSession, User
+
+
+class ReviewFormItem(TypedDict):
+    """A dictionary representing a form item for review by the user.
+
+    Attributes:
+        step_title: The human-readable title of the step.
+        step_name: The name of the step.
+        fields: The fields of the step.
+        note: An optional note, intended to be used as a message to the user if a section is empty,
+        for example.
+    """
+
+    step_title: str
+    step_name: str
+    fields: Union[list[dict[str, Any]], dict[str, Any]]
+    note: Optional[str]
 
 
 class TransferForm(forms.Form):
+    """Base form for all transfer forms."""
+
     required_css_class = "required-field"
 
 
 class AcceptLegal(TransferForm):
-    def clean(self):
+    """Form for accepting legal terms."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.ACCEPT_LEGAL
+
+    def clean(self) -> dict:
+        """Clean form data and validate the session token."""
         cleaned_data = super().clean()
         if not cleaned_data["agreement_accepted"]:
             self.add_error("agreement_accepted", "You must accept before continuing")
@@ -45,7 +74,15 @@ class AcceptLegal(TransferForm):
 class ContactInfoForm(TransferForm):
     """The Contact Information portion of the form. Contains fields from Section 2 of CAAIS."""
 
-    def clean(self):
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.CONTACT_INFO
+
+    def clean(self) -> dict:
+        """Clean form data and ensure that the province_or_state field is filled out if 'Other'
+        is.
+        """
         cleaned_data = super().clean()
         region = cleaned_data.get("province_or_state")
         if not region or region.lower() == "":
@@ -58,6 +95,9 @@ class ContactInfoForm(TransferForm):
                 "other_province_or_state",
                 'This field must be filled out if "Other" province or state is selected',
             )
+        elif region.lower() != "other":
+            cleaned_data["other_province_or_state"] = ""  # Clear this field since it's not needed
+            self.fields["other_province_or_state"].label = "hidden"
 
         return cleaned_data
 
@@ -200,6 +240,7 @@ class ContactInfoForm(TransferForm):
             ("WY", "Wyoming"),
         ],
         initial="",
+        label="Province or state",
     )
 
     other_province_or_state = forms.CharField(
@@ -237,7 +278,8 @@ class ContactInfoForm(TransferForm):
             attrs={
                 "class": "reduce-form-field-width",
             }
-        )
+        ),
+        label=gettext("Country"),
     )
 
 
@@ -248,6 +290,11 @@ class SourceInfoForm(TransferForm):
     source name, source type, and source role are all required in CAAIS, so if a user chooses not
     to fill in the form, we use defaults from the initial data for those fields.
     """
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.SOURCE_INFO
 
     def __init__(self, *args, **kwargs):
         if "defaults" not in kwargs:
@@ -269,53 +316,61 @@ class SourceInfoForm(TransferForm):
         super().__init__(*args, **kwargs)
 
     def clean(self) -> dict:
-        """Clean form and set defaults if the user chose not to enter source info manually.
-
-        As none of the fields are required, we need to check whether they are set here.
-        """
+        """Clean form and set defaults if the user chose not to enter source info manually."""
         cleaned_data = super().clean()
 
-        enter_manual = cleaned_data["enter_manual_source_info"]
-
         # Set defaults if manual entry is not selected
-        if enter_manual == "no":
-            cleaned_data["source_name"] = self.default_source_name
-            cleaned_data["source_type"] = self.default_source_type
-            cleaned_data["other_source_type"] = ""
-            cleaned_data["source_role"] = self.default_source_role
-            cleaned_data["other_source_role"] = ""
-            cleaned_data["source_note"] = ""
-            cleaned_data["preliminary_custodial_history"] = ""
+        if cleaned_data["enter_manual_source_info"] == "no":
+            cleaned_data.update(
+                {
+                    "source_name": self.default_source_name,
+                    "source_type": self.default_source_type,
+                    "source_role": self.default_source_role,
+                    "other_source_type": "",
+                    "other_source_role": "",
+                    "source_note": "",
+                    "preliminary_custodial_history": "",
+                }
+            )
+            for field in ["other_source_type", "other_source_role"]:
+                self.fields[field].label = "hidden"
 
-        source_name = cleaned_data.get("source_name", "")
-
-        if not source_name:
+        if not cleaned_data.get("source_name"):
             self.add_error("source_name", gettext("This field is required."))
 
-        source_type = cleaned_data.get("source_type", None)
-        other_source_type = cleaned_data.get("other_source_type", "")
+        self._validate_source_type(cleaned_data)
+        self._validate_source_role(cleaned_data)
 
+        return cleaned_data
+
+    def _validate_source_type(self, cleaned_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate the source type field."""
+        source_type = cleaned_data.get("source_type")
         if not source_type:
             self.add_error("source_type", gettext("This field is required."))
-
-        elif source_type.name.lower() == "other" and not other_source_type:
+        elif source_type.name.lower() == "other" and not cleaned_data.get("other_source_type"):
             self.add_error(
                 "other_source_type",
-                gettext('If "Source type" is Other, you must enter your own source type here'),
+                gettext('If "Source type" is Other, enter your own source type'),
             )
+        elif source_type.name.lower() != "other":
+            cleaned_data["other_source_type"] = ""
+            self.fields["other_source_type"].label = "hidden"
+        return cleaned_data
 
-        source_role = cleaned_data.get("source_role", None)
-        other_source_role = cleaned_data.get("other_source_role", "")
-
+    def _validate_source_role(self, cleaned_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate the source role field."""
+        source_role = cleaned_data.get("source_role")
         if not source_role:
             self.add_error("source_role", gettext("This field is required."))
-
-        elif source_role.name.lower() == "other" and not other_source_role:
+        elif source_role.name.lower() == "other" and not cleaned_data.get("other_source_role"):
             self.add_error(
                 "other_source_role",
-                gettext('If "Source role" is Other, you must enter your own source role here'),
+                gettext('If "Source role" is Other, enter your own source role'),
             )
-
+        elif source_role.name.lower() != "other":
+            cleaned_data["other_source_role"] = ""
+            self.fields["other_source_role"].label = "hidden"
         return cleaned_data
 
     enter_manual_source_info = forms.ChoiceField(
@@ -449,9 +504,14 @@ class SourceInfoForm(TransferForm):
 
 
 class RecordDescriptionForm(TransferForm):
-    """The Description Information portion of the form. Contains fields from Section 3 of CAAIS"""
+    """The Description Information portion of the form. Contains fields from Section 3 of CAAIS."""
 
-    def clean(self):
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.RECORD_DESCRIPTION
+
+    def clean(self) -> dict:
         """Clean form data, and create a date_of_materials field derived from the start and end
         date fields.
         """
@@ -647,7 +707,12 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
 
 
 class RightsFormSet(BaseFormSet):
-    """Special formset to enforce at least one rights form to have a value"""
+    """Special formset to enforce at least one rights form to have a value."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.RIGHTS
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
@@ -655,9 +720,15 @@ class RightsFormSet(BaseFormSet):
 
 
 class RightsForm(TransferForm):
-    """The Rights portion of the form. Contains fields from Section 4 of CAAIS"""
+    """The Rights portion of the form. Contains fields from Section 4 of CAAIS."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.RIGHTS
 
     def clean(self):
+        """Check that the rights type is set if the other rights type is not."""
         cleaned_data = super().clean()
 
         rights_type = cleaned_data.get("rights_type", None)
@@ -675,6 +746,9 @@ class RightsForm(TransferForm):
                 "other_rights_type",
                 gettext('If "Type of rights" is empty, you must enter a different type here'),
             )
+        elif rights_type != RightsType.objects.get(name="Other"):
+            cleaned_data["other_rights_type"] = ""  # Clear this field since it's not needed
+            self.fields["other_rights_type"].label = "hidden"
 
         return cleaned_data
 
@@ -728,9 +802,15 @@ class RightsForm(TransferForm):
 
 
 class OtherIdentifiersForm(TransferForm):
-    """The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS"""
+    """The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.OTHER_IDENTIFIERS
 
     def clean(self):
+        """Check that the other identifier type and value are set if the note is set."""
         cleaned_data = super().clean()
 
         id_type = cleaned_data.get("other_identifier_type")
@@ -787,8 +867,22 @@ class OtherIdentifiersForm(TransferForm):
     )
 
 
+class OtherIdentifiersFormSet(BaseFormSet):
+    """Special formset to add metadata to the other identifiers formset."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.OTHER_IDENTIFIERS
+
+
 class GroupTransferForm(TransferForm):
     """Form for assigning a transfer to a specific group."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.GROUP_TRANSFER
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
@@ -828,6 +922,11 @@ class GroupTransferForm(TransferForm):
 
 class UploadFilesForm(TransferForm):
     """The form where users upload their files and write any final notes."""
+
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.UPLOAD_FILES
 
     general_note = forms.CharField(
         required=False,
@@ -879,6 +978,11 @@ class FinalStepFormNoUpload(TransferForm):
     when file uploads are disabled.
     """
 
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.FINAL_NOTES
+
     general_note = forms.CharField(
         required=False,
         min_length=4,
@@ -902,4 +1006,137 @@ class ReviewForm(TransferForm):
     it.
     """
 
+    class Meta:
+        """Meta information for the form."""
+
+        transfer_step = TransferStep.REVIEW
+
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
+
+    @staticmethod
+    def _get_base_fields_data(form: BaseForm) -> dict[str, Any]:
+        """Extract fields data from a form."""
+        return {
+            form.fields[field].label or field: form.cleaned_data.get(field, "")
+            for field in form.fields
+            if form.fields[field].label != "hidden"
+        }
+
+    @staticmethod
+    def _get_file_upload_fields_data(form: UploadFilesForm, user: User) -> dict[str, Any]:
+        """Handle file upload specific field processing."""
+        fields_data = ReviewForm._get_base_fields_data(form)
+        session_token = form.cleaned_data.get("session_token")
+
+        if not (session_token and user):
+            return fields_data
+
+        session = UploadSession.objects.filter(token=session_token, user=user).first()
+        if not session:
+            return fields_data
+
+        # Adds on links to access uploaded files
+        fields_data["Uploaded files"] = [
+            {"name": f.name, "url": f.get_file_access_url()}
+            for f in session.get_temporary_uploads()
+        ]
+
+        return fields_data
+
+    @staticmethod
+    def _get_group_transfer_fields_data(form: GroupTransferForm, user: User) -> dict[str, Any]:
+        """Handle group transfer specific field processing."""
+        fields_data = ReviewForm._get_base_fields_data(form)
+        group_id = form.cleaned_data.get("group_id")
+
+        if not (group_id and user):
+            return fields_data
+
+        group = SubmissionGroup.objects.filter(created_by=user, uuid=group_id).first()
+        if not group:
+            return fields_data
+
+        # Replaces group UUID with group name
+        group_id_label = form.fields["group_id"].label
+        if group_id_label:
+            fields_data[group_id_label] = group.name
+
+        return fields_data
+
+    @staticmethod
+    def _get_formset_fields_data(form: BaseFormSet) -> tuple[list[dict[str, Any]], Optional[str]]:
+        """Process a formset and return formatted data with optional note."""
+        formset_data = []
+        note = None
+        all_empty = True
+
+        for subform in form.forms:
+            subform_data = {
+                subform.fields[field].label or field: subform.cleaned_data.get(field, "")
+                for field in subform.fields
+                if subform.fields[field].label != "hidden"
+            }
+
+            if any(subform_data.values()):
+                all_empty = False
+                formset_data.append(subform_data)
+
+        if all_empty and isinstance(form, OtherIdentifiersFormSet):
+            note = gettext("No other identifiers were provided.")
+
+        return formset_data, note
+
+    @staticmethod
+    def format_form_data(
+        form_dict: OrderedDict[str, Union[BaseForm, BaseFormSet]], user: User
+    ) -> list[ReviewFormItem]:
+        """Format form data to be used in a form review page."""
+        preview_data: list[ReviewFormItem] = []
+
+        for step_title, form in form_dict.items():
+            # Each form has metadata that links it to a step in the transfer form
+            meta = getattr(form.__class__, "Meta", None)
+            transfer_step = meta.transfer_step if meta else None
+
+            if isinstance(form, BaseFormSet):  # Handle formsets
+                formset_data, note = ReviewForm._get_formset_fields_data(form)
+                preview_data.append(
+                    {
+                        "step_title": step_title,
+                        "step_name": transfer_step.value if transfer_step else "",
+                        "fields": formset_data,
+                        "note": note,  # A note is included if the formset is empty
+                    }
+                )
+
+            elif isinstance(form, BaseForm):  # Handle regular forms
+                if isinstance(form, GroupTransferForm):
+                    fields_data = ReviewForm._get_group_transfer_fields_data(form, user)
+                elif isinstance(form, UploadFilesForm):
+                    fields_data = ReviewForm._get_file_upload_fields_data(form, user)
+                else:
+                    fields_data = ReviewForm._get_base_fields_data(form)
+
+                preview_data.append(
+                    {
+                        "step_title": step_title,
+                        "step_name": transfer_step.value if transfer_step else "",
+                        "fields": fields_data,
+                        "note": None,
+                    }
+                )
+
+        return preview_data
+
+
+def clear_form_errors(form: Union[BaseForm, BaseFormSet]) -> None:
+    """Clear all errors on a form or formset."""
+    if isinstance(form, BaseForm):
+        form.errors.clear()
+        for field in form.fields:
+            form.fields[field].error_messages.clear()
+    elif isinstance(form, BaseFormSet):
+        for subform in form.forms:
+            subform.errors.clear()
+            for field in subform.fields:
+                subform.fields[field].error_messages.clear()

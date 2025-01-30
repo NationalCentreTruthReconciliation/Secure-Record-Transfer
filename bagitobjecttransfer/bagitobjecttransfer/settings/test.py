@@ -112,3 +112,12 @@ Path(TEMP_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
 UPLOAD_STORAGE_FOLDER = str(Path(MEDIA_ROOT) / "uploads")
 Path(UPLOAD_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
 BAG_STORAGE_FOLDER = str(Path(MEDIA_ROOT) / "bags")
+
+STATICFILES_DIRS = [
+    os.path.join(
+        os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        ),
+        "dist",
+    ),
+]
