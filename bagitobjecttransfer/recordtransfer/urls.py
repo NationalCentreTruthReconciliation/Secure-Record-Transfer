@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
 from django.urls import path, re_path
 
+import recordtransfer.views.home
+
 from . import forms, views
 
 # Set up transfer forms depending on whether file uploads are enabled or disabled
@@ -44,13 +46,17 @@ else:
 
 app_name = "recordtransfer"
 urlpatterns = [
-    path("", views.Index.as_view(), name="index"),
+    path("", recordtransfer.views.home.Index.as_view(), name="index"),
     path(
         "transfer/",
         login_required(views.TransferFormWizard.as_view(_transfer_forms)),
         name="transfer",
     ),
-    path("transfer/error/", login_required(views.SystemErrorPage.as_view()), name="systemerror"),
+    path(
+        "transfer/error/",
+        login_required(recordtransfer.views.home.SystemErrorPage.as_view()),
+        name="systemerror",
+    ),
     path("transfer/sent/", views.TransferSent.as_view(), name="transfersent"),
     path(
         "inprogress/<uuid:uuid>/delete/",
@@ -62,7 +68,7 @@ urlpatterns = [
         login_required(views.DeleteTransfer.as_view()),
         name="confirmtransferdelete",
     ),
-    path("about/", views.About.as_view(), name="about"),
+    path("about/", recordtransfer.views.home.About.as_view(), name="about"),
     path("profile/", login_required(views.UserProfile.as_view()), name="userprofile"),
     path(
         "submission/<uuid:uuid>/",
@@ -120,7 +126,11 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
 if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
-            path("createaccount/", views.CreateAccount.as_view(), name="createaccount"),
+            path(
+                "createaccount/",
+                recordtransfer.views.account.CreateAccount.as_view(),
+                name="createaccount",
+            ),
             path("createaccount/sent/", views.ActivationSent.as_view(), name="activationsent"),
             path(
                 "createaccount/complete/",
