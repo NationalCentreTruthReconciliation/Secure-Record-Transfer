@@ -1,6 +1,6 @@
 import logging
 from unittest import skipIf
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -658,3 +658,49 @@ class TestUserProfileView(TestCase):
             str(messages[0]),
             self.error_message,
         )
+class TestCreateUploadSessionView(TestCase):
+    """Tests for recordtransfer:create_upload_session view."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Disable logging."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Create user accounts."""
+        cls.test_user = User.objects.create_user(username="testuser", password="1X<ISRUkw+tuK")
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.client.login(username="testuser", password="1X<ISRUkw+tuK")
+        self.url = reverse("recordtransfer:create_upload_session")
+
+    def tearDown(self) -> None:
+        """Tear down test environment."""
+        self.client.logout()
+
+    def test_create_upload_session_success(self) -> None:
+        """Test successful creation of an upload session."""
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 201)
+        response_json = response.json()
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(UploadSession.objects.filter(token=response_json["uploadSessionToken"]).exists())
+
+    def test_create_upload_session_logged_out(self) -> None:
+        """Test that a 302 is returned if the user is not logged in."""
+        self.client.logout()
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    @patch("recordtransfer.views.UploadSession.new_session")
+    def test_create_upload_session_error(self, mock_new_session: MagicMock) -> None:
+        """Test that a 500 is returned if an error is raised."""
+        mock_new_session.side_effect = Exception("Error creating session")
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 500)
+        response_json = response.json()
+        self.assertIn("error", response_json)
+
