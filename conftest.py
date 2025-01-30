@@ -3,7 +3,6 @@ pytest during test collection and execution.
 """
 
 import subprocess
-from pathlib import Path
 
 import pytest
 
