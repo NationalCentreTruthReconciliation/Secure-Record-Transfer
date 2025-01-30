@@ -52,9 +52,9 @@ class TestUploadFileView(TestCase):
     def setUp(self) -> None:
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.patch__accept_file = patch("recordtransfer.views.accept_file").start()
-        self.patch__accept_session = patch("recordtransfer.views.accept_session").start()
-        self.patch_check_for_malware = patch("recordtransfer.views.check_for_malware").start()
+        self.patch__accept_file = patch("recordtransfer.views.media.accept_file").start()
+        self.patch__accept_session = patch("recordtransfer.views.media.accept_session").start()
+        self.patch_check_for_malware = patch("recordtransfer.views.media.check_for_malware").start()
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
 
@@ -316,7 +316,9 @@ class TestListUploadedFilesView(TestCase):
 
     def test_list_uploaded_files_invalid_user(self) -> None:
         """Invalid user for the session."""
-        self.session.user = User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
+        self.session.user = User.objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
         self.session.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
@@ -368,7 +370,9 @@ class TestUploadedFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
-        self.temp_file = self.session.add_temp_file(SimpleUploadedFile("testfile.txt", self.one_kib))
+        self.temp_file = self.session.add_temp_file(
+            SimpleUploadedFile("testfile.txt", self.one_kib)
+        )
         self.url = reverse(
             "recordtransfer:uploaded_file", args=[self.session.token, file_to_upload.name]
         )
@@ -393,9 +397,7 @@ class TestUploadedFileView(TestCase):
         self.assertEqual(response.status_code, 404)
         response_json = response.json()
         self.assertIn("error", response_json)
-        self.assertEqual(
-            response_json["error"], gettext("File not found in upload session")
-        )
+        self.assertEqual(response_json["error"], gettext("File not found in upload session"))
 
     def test_uploaded_file_invalid_user(self) -> None:
         """Invalid user for the session."""
@@ -432,20 +434,18 @@ class TestUploadedFileView(TestCase):
             response_json["error"], gettext("Invalid filename or upload session token")
         )
 
-    @patch("recordtransfer.views.settings.DEBUG", True)
+    @patch("recordtransfer.views.media.settings.DEBUG", True)
     def test_get_uploaded_file_in_debug(self) -> None:
         """Test getting the file in DEBUG mode."""
         response = self.client.get(self.url)
         self.assertEqual(response.url, self.temp_file.get_file_media_url())
 
-    @patch("recordtransfer.views.settings.DEBUG", False)
+    @patch("recordtransfer.views.media.settings.DEBUG", False)
     def test_get_uploaded_file_in_production(self) -> None:
         """Test getting the file in production mode."""
         response = self.client.get(self.url)
         self.assertIn("X-Accel-Redirect", response.headers)
-        self.assertEqual(
-            response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url()
-        )
+        self.assertEqual(response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url())
 
     def tearDown(self) -> None:
         """Tear down test environment."""
