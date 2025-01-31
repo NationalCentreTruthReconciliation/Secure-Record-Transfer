@@ -839,7 +839,7 @@ class TransferFormWizard(SessionWizardView):
                     "other_type_id": other_type.pk if other_type else 0,
                 }
             )
-        elif step == TransferStep.GROUP_TRANSFER:
+        elif step == TransferStep.UPLOAD_FILES:
             js_context.update(
                 {
                     "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
