@@ -50,7 +50,7 @@ def main() -> None:
         os.environ["DJANGO_SETTINGS_MODULE"] = str(
             config(
                 "DJANGO_SETTINGS_MODULE",
-                default="bagitobjecttransfer.settings.test",
+                default="app.settings.test",
             )
         )
 

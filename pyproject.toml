@@ -39,6 +39,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-pythonpath = "bagitobjecttransfer"
+pythonpath = "app"
 python_files = "test_*.py"
-DJANGO_SETTINGS_MODULE = "bagitobjecttransfer.settings.test"
+DJANGO_SETTINGS_MODULE = "app.settings.test"

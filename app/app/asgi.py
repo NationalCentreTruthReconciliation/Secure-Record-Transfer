@@ -1,5 +1,5 @@
 """
-ASGI config for bagitobjecttransfer project.
+ASGI config for the project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bagitobjecttransfer.settings.docker_prod')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings.docker_prod')
 
 application = get_asgi_application()

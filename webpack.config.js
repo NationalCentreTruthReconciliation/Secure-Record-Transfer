@@ -62,20 +62,20 @@ module.exports = {
     },
     entry: {
         images: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp}") // eslint-disable-line
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         base: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/base/*.js")
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/js/base/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" + 
+            ...glob.sync("./app/recordtransfer/static/" + 
                 "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
         ],
         transferform: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/" + 
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/js/" + 
                 "transferform/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/" + 
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/css/" + 
                 "transferform/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
             require.resolve("@uppy/core/dist/style.css"),
@@ -83,32 +83,32 @@ module.exports = {
         ],
         profile: [
             ...glob.sync(
-                "./bagitobjecttransfer/recordtransfer/static/recordtransfer/js/profile/*.js")
+                "./app/recordtransfer/static/recordtransfer/js/profile/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
             ...glob.sync(
-                "./bagitobjecttransfer/recordtransfer/static/recordtransfer/css/profile/*.css")
+                "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         submissiondetail: [
             ...glob.sync(
-                "./bagitobjecttransfer/recordtransfer/static/" + 
+                "./app/recordtransfer/static/" + 
                 "recordtransfer/css/submission_detail/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         submissiongroup: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" + 
+            ...glob.sync("./app/recordtransfer/static/" + 
                 "recordtransfer/js/submission_group/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         // Admin Site static assets
         admin_metadata: [
-            ...glob.sync("./bagitobjecttransfer/caais/static/caais/css/base/*.css")
+            ...glob.sync("./app/caais/static/caais/css/base/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync("./bagitobjecttransfer/caais/static/caais/js/admin/*.js")
+            ...glob.sync("./app/caais/static/caais/js/admin/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         admin_uploadedfile: [
-            ...glob.sync("./bagitobjecttransfer/recordtransfer/static/" + 
+            ...glob.sync("./app/recordtransfer/static/" + 
                 "recordtransfer/js/admin/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ]
