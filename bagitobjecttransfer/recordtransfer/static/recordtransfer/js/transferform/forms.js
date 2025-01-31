@@ -573,7 +573,7 @@ $(() => {
      *********************************************************************************************/
 
     // Context passed from template to JS
-    const sourceInfoContextElement = document.getElementById("py_context_source_info");
+    const sourceInfoContextElement = document.getElementById("py_context");
 
     if (sourceInfoContextElement) {
         const sourceInfoContext = JSON.parse(sourceInfoContextElement.textContent);

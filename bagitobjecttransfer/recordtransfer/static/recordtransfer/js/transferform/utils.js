@@ -50,7 +50,7 @@ export const setSessionToken = (token) => {
  * @returns {?object} The parsed JSON settings object if element exists, null otherwise.
  */
 export const getFileUploadSettings = () => {
-    const settingsElement = document.getElementById("py_context_file_upload_settings");
+    const settingsElement = document.getElementById("py_context");
     if (!settingsElement) {
         return null;
     }

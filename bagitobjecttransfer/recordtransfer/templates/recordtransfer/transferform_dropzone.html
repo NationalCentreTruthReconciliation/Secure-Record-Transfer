@@ -3,7 +3,6 @@
 {% load i18n %}
 {% block javascript %}
     {{ block.super }}
-    {{ js_context|json_script:"py_context_file_upload_settings" }}
 {% endblock javascript %}
 {% block buttonarrayclass %}
     flex-med-width-item
