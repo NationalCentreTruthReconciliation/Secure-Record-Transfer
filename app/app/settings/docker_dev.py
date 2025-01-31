@@ -86,8 +86,8 @@ LOGGING = {
     },
 }
 
-BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/bags/")
+BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default="/app/app/media/bags/")
 UPLOAD_STORAGE_FOLDER = config(
-    "UPLOAD_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/uploaded_files/"
+    "UPLOAD_STORAGE_FOLDER", default="/app/app/media/uploaded_files/"
 )
-TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default="/app/bagitobjecttransfer/media/temp/")
+TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default="/app/app/media/temp/")

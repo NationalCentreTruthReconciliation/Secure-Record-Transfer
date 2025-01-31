@@ -25,11 +25,11 @@ COPY ./docker/entrypoint.sh /app/
 RUN chmod +x /app/entrypoint.sh
 
 # Copy application code to image
-COPY ./bagitobjecttransfer /app/bagitobjecttransfer
+COPY ./app /app/app/
 
 # Run webpack to bundle and minify assets
 RUN npm run build
 
-WORKDIR /app/bagitobjecttransfer/
+WORKDIR /app/app/
 
 ENTRYPOINT ["/app/entrypoint.sh"]

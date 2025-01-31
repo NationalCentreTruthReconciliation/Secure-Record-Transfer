@@ -12,7 +12,7 @@ export default [
             "{env,venv,.env,.venv}/**",
             "dist/",
             "node_modules/",
-            "bagitobjecttransfer/static/",
+            "app/static/",
         ],
     },
     {
