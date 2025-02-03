@@ -452,46 +452,45 @@ class SubmissionGroupFormTest(TestCase):
         form = SubmissionGroupForm(data=form_data, user=self.user)
         assert form.is_valid()
         group = form.save()
-        assert group.name == "New Group"
-        assert group.description == "A new submission group"
-        assert group.created_by == self.user
+        self.assertEqual(group.name, "New Group")
+        self.assertEqual(group.description, "A new submission group")
+        self.assertEqual(group.created_by, self.user)
 
     def test_form_empty_data(self) -> None:
         """Case where the form is empty."""
         form = SubmissionGroupForm(data={}, user=self.user)
-        assert not form.is_valid()
+        self.assertFalse(form.is_valid())
 
     def test_form_missing_name(self) -> None:
         """Case where the name is missing."""
         form_data = {"description": "A new submission group"}
         form = SubmissionGroupForm(data=form_data, user=self.user)
-        assert not form.is_valid()
-        assert "name" in form.errors
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
 
     def test_form_duplicate_name(self) -> None:
         """Case where the name is a duplicate of an existing group name."""
         form_data = {"name": "Existing Group", "description": "A duplicate submission group"}
         form = SubmissionGroupForm(data=form_data, user=self.user)
-        assert not form.is_valid()
-        assert "name" in form.errors
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
 
     def test_form_no_changes(self) -> None:
         """Case where no changes are detected."""
         form_data = {"name": "Existing Group", "description": "A new description"}
         form = SubmissionGroupForm(data=form_data, user=self.user)
-        form.is_valid()  # Trigger the clean method
-        assert not form.is_valid()
+        self.assertFalse(form.is_valid())
 
     def test_form_save(self) -> None:
         """Case where the form is saved."""
         form_data = {"name": "New Group", "description": "A new submission group"}
         form = SubmissionGroupForm(data=form_data, instance=self.existing_group, user=self.user)
-        assert form.is_valid()
+        self.assertTrue(form.is_valid())
         form.save()
         self.existing_group.refresh_from_db()
-        assert self.existing_group.name == "New Group"
-        assert self.existing_group.description == "A new submission group"
-        assert self.existing_group.created_by == self.user
+        self.assertEqual(self.existing_group.name, "New Group")
+        self.assertEqual(self.existing_group.description, "A new submission group")
+        self.assertEqual(self.existing_group.created_by, self.user)
 
     def test_form_invalid_fields(self) -> None:
         """Case where the form is passed fields that are not allowed to be modified."""
@@ -508,5 +507,5 @@ class SubmissionGroupFormTest(TestCase):
         form.save()
         self.existing_group.refresh_from_db()
         # Check that the fields were not modified
-        assert self.existing_group.created_by == original_created_by
-        assert self.existing_group.uuid == original_uuid
+        self.assertEqual(self.existing_group.created_by, original_created_by)
+        self.assertEqual(self.existing_group.uuid, original_uuid)
