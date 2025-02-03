@@ -976,111 +976,104 @@ def create_upload_session(request: HttpRequest) -> JsonResponse:
 
 @require_http_methods(["GET", "POST"])
 def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
-    """Upload a file to the server or list the files uploaded in a given upload session.
-
-    Args:
-        request: The HTTP request
-        session_token: The upload session token from the URL
-    Returns:
-        HttpResponse: The response to the request
-    """
-    user: User = cast(User, request.user)
-    session = UploadSession.objects.filter(token=session_token, user=user).first()
-    if not session:
-        return JsonResponse(
-            {
-                "uploadSessionToken": session_token,
-                "error": gettext("Invalid upload session token"),
-            },
-            status=400,
-        )
-
-    if request.method == "GET":
-        return _list_uploaded_files(request, session)
-    else:
-        return _upload_file(request, session)
-
-
-def _upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
-    """Upload a single file to the server. The file is added to the upload session using the
-    session token passed as a parameter in the request. If an session token is invalid, an
-    error message is returned.
+    """Upload a single file to the server list the files uploaded in a given upload session. The
+    file is added to the upload session using the session token passed as a parameter in the
+    request. If an session token is invalid, an error message is returned.
 
     The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
     file is not an accepted type, an error message is returned.
 
     Args:
-        request: The POST request sent by the user.
-        session_token: The upload session token from the URL.
+        request: The HTTP GET or POST request
+        session_token: The upload session token from the URL
 
     Returns:
-        JsonResponse: If the upload was successful, the session token is returned in
-        'upload_session_token'. If not successful, the error description is returned in 'error'.
+        JsonResponse: If the upload or list operation was successful, the session token is returned
+        in `uploadSessionToken`. If not successful, the error description is returned in `error`.
     """
     try:
-        _file = request.FILES.get("file")
-        if not _file:
+        user: User = cast(User, request.user)
+        session = UploadSession.objects.filter(token=session_token, user=user).first()
+        if not session:
             return JsonResponse(
                 {
-                    "uploadSessionToken": session.token,
-                    "error": gettext("No file was uploaded"),
+                    "uploadSessionToken": session_token,
+                    "error": gettext("Invalid upload session token"),
                 },
                 status=400,
             )
 
-        file_check = accept_file(_file.name, _file.size)
-        if not file_check["accepted"]:
-            return JsonResponse(
-                {"file": _file.name, "uploadSessionToken": session.token, **file_check},
-                status=400,
-            )
+        if request.method == "GET":
+            file_metadata = [
+                {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
+                for f in session.get_uploads()
+            ]
 
-        session_check = accept_session(_file.name, _file.size, session)
-        if not session_check["accepted"]:
-            return JsonResponse(
-                {"file": _file.name, "uploadSessionToken": session.token, **session_check},
-                status=400,
-            )
+            return JsonResponse({"files": file_metadata}, status=200)
+        else:
+            _file = request.FILES.get("file")
+            if not _file:
+                return JsonResponse(
+                    {
+                        "uploadSessionToken": session.token,
+                        "error": gettext("No file was uploaded"),
+                    },
+                    status=400,
+                )
 
-        try:
-            check_for_malware(_file)
-        except ValidationError as exc:
-            LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+            file_check = accept_file(_file.name, _file.size)
+            if not file_check["accepted"]:
+                return JsonResponse(
+                    {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+                    status=400,
+                )
+
+            session_check = accept_session(_file.name, _file.size, session)
+            if not session_check["accepted"]:
+                return JsonResponse(
+                    {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+                    status=400,
+                )
+
+            try:
+                check_for_malware(_file)
+            except ValidationError as exc:
+                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+                return JsonResponse(
+                    {
+                        "file": _file.name,
+                        "accepted": False,
+                        "uploadSessionToken": session.token,
+                        "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                    },
+                    status=400,
+                )
+
+            try:
+                uploaded_file = session.add_temp_file(_file)
+            except ValueError as exc:
+                LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
+                return JsonResponse(
+                    {
+                        "file": _file.name,
+                        "accepted": False,
+                        "uploadSessionToken": session.token,
+                        "error": gettext("There was an error uploading the file"),
+                    },
+                    status=500,
+                )
+
+            file_url = uploaded_file.get_file_access_url()
+
             return JsonResponse(
                 {
                     "file": _file.name,
-                    "accepted": False,
+                    "accepted": True,
                     "uploadSessionToken": session.token,
-                    "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                    "url": file_url,
                 },
-                status=400,
+                status=200,
             )
-
-        try:
-            uploaded_file = session.add_temp_file(_file)
-        except ValueError as exc:
-            LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": False,
-                    "uploadSessionToken": session.token,
-                    "error": gettext("There was an error uploading the file"),
-                },
-                status=500,
-            )
-
-        file_url = uploaded_file.get_file_access_url()
-
-        return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": True,
-                "uploadSessionToken": session.token,
-                "url": file_url,
-            },
-            status=200,
-        )
 
     except Exception as exc:
         LOGGER.error("Uncaught exception in upload_file view: %s", str(exc), exc_info=exc)
@@ -1090,28 +1083,6 @@ def _upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
             },
             status=500,
         )
-
-
-def _list_uploaded_files(request: HttpRequest, session: UploadSession) -> JsonResponse:
-    """Get a list of metadata for files uploaded in a given upload session.
-
-    Args:
-        request: The HTTP request
-        session: The upload session to get the files from
-
-    Returns:
-        JsonResponse: List of uploaded files and their details, or error message
-    """
-    try:
-        file_metadata = [
-            {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
-            for f in session.get_uploads()
-        ]
-
-        return JsonResponse({"files": file_metadata}, status=200)
-
-    except Exception:
-        return JsonResponse({"error": gettext("Internal server error")}, status=500)
 
 
 @require_http_methods(["DELETE", "GET"])
