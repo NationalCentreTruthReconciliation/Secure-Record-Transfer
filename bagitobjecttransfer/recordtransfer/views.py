@@ -978,7 +978,7 @@ def create_upload_session(request: HttpRequest) -> JsonResponse:
 def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
     """Upload a single file to the server list the files uploaded in a given upload session. The
     file is added to the upload session using the session token passed as a parameter in the
-    request. If an session token is invalid, an error message is returned.
+    request. If a session token is invalid, an error message is returned.
 
     The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
     file is not an accepted type, an error message is returned.
