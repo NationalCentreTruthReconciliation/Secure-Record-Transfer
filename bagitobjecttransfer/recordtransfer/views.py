@@ -988,8 +988,9 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
         session_token: The upload session token from the URL
 
     Returns:
-        JsonResponse: If the upload or list operation was successful, the session token is returned
-        in `uploadSessionToken`. If not successful, the error description is returned in `error`.
+        JsonResponse: If the list or upload operation was successful, the session token
+        `uploadSessionToken` is included in the response. If not successful, the error description
+        `error` is included.
     """
     try:
         user: User = cast(User, request.user)
