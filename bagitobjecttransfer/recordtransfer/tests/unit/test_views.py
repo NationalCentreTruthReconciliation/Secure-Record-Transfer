@@ -846,7 +846,7 @@ class TestSubmissionGroupDetailView(TestCase):
         non_creator_user = User.objects.create_user(username="noncreator", password="password")
         self.client.login(username="noncreator", password="password")
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_access_staff_user(self) -> None:
         """Test that a staff user can access the view."""
