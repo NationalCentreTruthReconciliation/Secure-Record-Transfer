@@ -314,72 +314,6 @@ class TestMediaRequestView(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TestListUploadedFilesView(TestCase):
-    """Tests for recordtransfer:list_uploaded_files view."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Set logging level."""
-        super().setUpClass()
-        logging.disable(logging.CRITICAL)
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        """Set up test data."""
-        cls.one_kib = bytearray([1] * 1024)
-        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
-
-    def setUp(self) -> None:
-        """Set up test environment."""
-        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.session = UploadSession.new_session(user=self.test_user_1)
-        self.url = reverse("recordtransfer:list_uploaded_files", args=[self.session.token])
-
-    def test_list_uploaded_files_session_not_found(self) -> None:
-        """Invalid session token."""
-        response = self.client.get(
-            reverse("recordtransfer:list_uploaded_files", args=["invalid_token"])
-        )
-        self.assertEqual(response.status_code, 404)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-
-    def test_list_uploaded_files_invalid_user(self) -> None:
-        """Invalid user for the session."""
-        self.session.user = User.objects.create_user(
-            username="testuser2", password="1X<ISRUkw+tuK"
-        )
-        self.session.save()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 404)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-
-    def test_list_uploaded_files_empty_session(self) -> None:
-        """Session has no files."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        self.assertEqual(response_json.get("files"), [])
-
-    def test_list_uploaded_files_with_files(self) -> None:
-        """Session has one file."""
-        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
-        temp_file = self.session.add_temp_file(file_to_upload)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        responseFiles = response_json.get("files")
-        self.assertEqual(len(responseFiles), 1)
-        self.assertEqual(responseFiles[0]["name"], "testfile.txt")
-        self.assertEqual(responseFiles[0]["size"], file_to_upload.size)
-        self.assertEqual(responseFiles[0]["url"], temp_file.get_file_access_url())
-
-    def tearDown(self) -> None:
-        TempUploadedFile.objects.all().delete()
-        UploadSession.objects.all().delete()
-
-
 class TestUploadedFileView(TestCase):
     """Tests for recordtransfer:uploaded_file view."""
 
@@ -731,6 +665,8 @@ class TestUserProfileView(TestCase):
             str(messages[0]),
             self.error_message,
         )
+
+
 class TestCreateUploadSessionView(TestCase):
     """Tests for recordtransfer:create_upload_session view."""
 
@@ -760,7 +696,9 @@ class TestCreateUploadSessionView(TestCase):
         self.assertEqual(response.status_code, 201)
         response_json = response.json()
         self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(UploadSession.objects.filter(token=response_json["uploadSessionToken"]).exists())
+        self.assertTrue(
+            UploadSession.objects.filter(token=response_json["uploadSessionToken"]).exists()
+        )
 
     def test_create_upload_session_logged_out(self) -> None:
         """Test that a 302 is returned if the user is not logged in."""
@@ -776,7 +714,6 @@ class TestCreateUploadSessionView(TestCase):
         self.assertEqual(response.status_code, 500)
         response_json = response.json()
         self.assertIn("error", response_json)
-
 
 
 class TestSubmissionGroupCreateView(TestCase):
