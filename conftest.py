@@ -3,6 +3,7 @@ pytest during test collection and execution.
 """
 
 import os
+import shutil
 import subprocess
 
 import pytest
@@ -15,7 +16,7 @@ def pytest_collection_modifyitems(session, config, items) -> None:
     # Check if running unit tests via -e2e parameter or running all tests
     if config.getoption("-k") == "e2e" or not config.getoption("-k"):
         try:
-            npm_cmd = "npm.cmd" if os.name == "nt" else "npm"
+            npm_cmd = shutil.which("npm") or "npm"
             subprocess.run(
                 [npm_cmd, "run", "build"],
                 check=True,
