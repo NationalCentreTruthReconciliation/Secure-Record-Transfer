@@ -14,6 +14,19 @@ def pytest_collection_modifyitems(session, config, items) -> None:
     # Check if running unit tests via -e2e parameter
     if config.getoption("-k") == "e2e":
         try:
-            subprocess.run(["npm", "run", "build"], check=True)
+            npm_cmd = "npm.cmd" if os.name == "nt" else "npm"
+            subprocess.run(
+                [npm_cmd, "run", "build"],
+                check=True,
+                env={
+                    **os.environ,
+                    "WEBPACK_MODE": "development",
+                },
+            )
         except subprocess.CalledProcessError as e:
             pytest.exit(f"Failed to run npm build: {e}")
+        except FileNotFoundError as e:
+            pytest.exit(
+                f"npm command not found (got: {e}). npm must be installed to run e2e tests."
+            )
+
