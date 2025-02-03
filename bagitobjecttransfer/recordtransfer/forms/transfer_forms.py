@@ -535,6 +535,12 @@ class RecordDescriptionForm(TransferForm):
         min_length=2,
         max_length=64,
         required=True,
+        error_messages={
+            "required": gettext("This field is required."),
+            "invalid": gettext(
+                "Date must be in the format YYYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"
+            ),
+        },
         widget=forms.TextInput(
             attrs={
                 "placeholder": gettext("2000-03-14 - 2001-05-06"),

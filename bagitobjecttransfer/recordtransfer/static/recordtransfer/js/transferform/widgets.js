@@ -21,6 +21,7 @@ export function setupDatePickers() {
     new AirDatepicker(dateInput, {
         locale: localeEn,
         minDate: new Date(1800, 1, 1),
+        maxDate: new Date(),
         autoClose: true,
         range: true,
         multipleDatesSeparator: " - ",
