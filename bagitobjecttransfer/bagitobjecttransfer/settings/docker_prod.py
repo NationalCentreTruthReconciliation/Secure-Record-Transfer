@@ -18,15 +18,12 @@ CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
 
 DATABASES = {
     "default": {
-        "ENGINE": "mysql.connector.django",
+        "ENGINE": "django.db.backends.mysql",
         "HOST": config("MYSQL_HOST"),
         "PORT": config("MYSQL_PORT", cast=int, default=3306),
         "USER": config("MYSQL_USER"),
         "PASSWORD": config("MYSQL_PASSWORD"),
         "NAME": config("MYSQL_DATABASE"),
-        "OPTIONS": {
-            "converter_str_fallback": True,
-        },
     }
 }
 
