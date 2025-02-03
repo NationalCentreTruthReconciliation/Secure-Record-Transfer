@@ -664,9 +664,13 @@ class Submission(models.Model):
     @property
     def extent_statements(self):
         """Return the first extent statement for this submission."""
-        for e in self.metadata.extent_statements.get_queryset().all():
-            return e.quantity_and_unit_of_measure
-        return ""
+        return (
+            next(
+                (e.quantity_and_unit_of_measure for e in self.metadata.extent_statements.all()), ""
+            )
+            if self.metadata
+            else ""
+        )
 
     def get_admin_metadata_change_url(self):
         """Get the URL to change the metadata object in the admin"""

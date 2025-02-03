@@ -1209,7 +1209,10 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
     def handle_no_permission(self):
-        return HttpResponseForbidden("You do not have permission to access this page.")
+        """Override to return 404 instead of 403. This is to prevent users from knowing that the
+        submission exists if they do not have permission to view it.
+        """
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -1261,8 +1264,11 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
-    def handle_no_permission(self) -> HttpResponseForbidden:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    def handle_no_permission(self):
+        """Override to return 404 instead of 403. This is to prevent users from knowing that the
+        group exists if they do not have permission to view it.
+        """
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""

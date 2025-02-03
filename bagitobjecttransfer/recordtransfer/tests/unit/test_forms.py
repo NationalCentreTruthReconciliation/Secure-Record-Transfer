@@ -3,8 +3,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from recordtransfer.forms import UserProfileForm
+from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.transfer_forms import SourceInfoForm, UploadFilesForm
-from recordtransfer.models import TempUploadedFile, UploadSession, User
+from recordtransfer.models import SubmissionGroup, TempUploadedFile, UploadSession, User
 
 
 class UserProfileFormTest(TestCase):
@@ -433,3 +434,78 @@ class UploadFilesFormTest(TestCase):
         form = UploadFilesForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
+
+
+class SubmissionGroupFormTest(TestCase):
+    """Tests for the SubmissionGroupForm."""
+
+    def setUp(self) -> None:
+        """Create initial test data."""
+        self.user = User.objects.create_user(username="testuser", password="12345")
+        self.existing_group = SubmissionGroup.objects.create(
+            name="Existing Group", description="An existing submission group", created_by=self.user
+        )
+
+    def test_form_valid_data(self) -> None:
+        """Case where the form is valid."""
+        form_data = {"name": "New Group", "description": "A new submission group"}
+        form = SubmissionGroupForm(data=form_data, user=self.user)
+        assert form.is_valid()
+        group = form.save()
+        self.assertEqual(group.name, "New Group")
+        self.assertEqual(group.description, "A new submission group")
+        self.assertEqual(group.created_by, self.user)
+
+    def test_form_empty_data(self) -> None:
+        """Case where the form is empty."""
+        form = SubmissionGroupForm(data={}, user=self.user)
+        self.assertFalse(form.is_valid())
+
+    def test_form_missing_name(self) -> None:
+        """Case where the name is missing."""
+        form_data = {"description": "A new submission group"}
+        form = SubmissionGroupForm(data=form_data, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+
+    def test_form_duplicate_name(self) -> None:
+        """Case where the name is a duplicate of an existing group name."""
+        form_data = {"name": "Existing Group", "description": "A duplicate submission group"}
+        form = SubmissionGroupForm(data=form_data, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+
+    def test_form_no_changes(self) -> None:
+        """Case where no changes are detected."""
+        form_data = {"name": "Existing Group", "description": "A new description"}
+        form = SubmissionGroupForm(data=form_data, user=self.user)
+        self.assertFalse(form.is_valid())
+
+    def test_form_save(self) -> None:
+        """Case where the form is saved."""
+        form_data = {"name": "New Group", "description": "A new submission group"}
+        form = SubmissionGroupForm(data=form_data, instance=self.existing_group, user=self.user)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.existing_group.refresh_from_db()
+        self.assertEqual(self.existing_group.name, "New Group")
+        self.assertEqual(self.existing_group.description, "A new submission group")
+        self.assertEqual(self.existing_group.created_by, self.user)
+
+    def test_form_invalid_fields(self) -> None:
+        """Case where the form is passed fields that are not allowed to be modified."""
+        original_created_by = self.existing_group.created_by
+        original_uuid = self.existing_group.uuid
+        different_user = User.objects.create_user(username="differentuser", password="12345")
+        form_data = {
+            "name": "New Group",
+            "description": "A new submission group",
+            "created_by": different_user,
+            "uuid": "12345",
+        }
+        form = SubmissionGroupForm(data=form_data, instance=self.existing_group, user=self.user)
+        form.save()
+        self.existing_group.refresh_from_db()
+        # Check that the fields were not modified
+        self.assertEqual(self.existing_group.created_by, original_created_by)
+        self.assertEqual(self.existing_group.uuid, original_uuid)
