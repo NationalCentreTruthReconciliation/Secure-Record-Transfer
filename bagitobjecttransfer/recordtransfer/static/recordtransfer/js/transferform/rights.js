@@ -14,9 +14,10 @@ export function setupRightsForm() {
     const context = JSON.parse(contextElement.textContent);
 
     const formsetPrefix = context["formset_prefix"];
+    const numExtraForms = context["num_extra_forms"];
 
     // Set up the formset, and setup the select other toggle when a new form is added.
-    setupFormset(formsetPrefix, newForm => {
+    setupFormset(formsetPrefix, numExtraForms, newForm => {
         const selectElement = newForm.querySelector("[id$=\"-rights_type\"]");
         const index = selectElement.id.match(/\d+/)[0];
         setupSelectOtherToggle(

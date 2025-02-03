@@ -810,6 +810,7 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "js_context": {
+                        "num_extra_forms": self.num_extra_forms,
                         "formset_prefix": "rights",
                         "other_rights_type_id": other_rights.pk if other_rights else 0,
                     },
@@ -820,6 +821,7 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "js_context": {
+                        "num_extra_forms": self.num_extra_forms,
                         "formset_prefix": "otheridentifiers",
                     },
                 },

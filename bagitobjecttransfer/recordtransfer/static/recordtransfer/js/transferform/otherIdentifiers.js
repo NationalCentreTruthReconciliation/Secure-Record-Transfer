@@ -13,6 +13,7 @@ export function setupOtherIdentifiersForm() {
     const context = JSON.parse(contextElement.textContent);
 
     const formsetPrefix = context["formset_prefix"];
+    const numExtraForms = context["num_extra_forms"];
 
-    setupFormset(formsetPrefix);
+    setupFormset(formsetPrefix, numExtraForms);
 }

@@ -1,10 +1,11 @@
 /**
  * Sets up the formset for the page, if one exists.
  * @param {string} prefix The prefix of the formset, e.g., rights or otheridentifiers.
+ * @param {Number} numExtraForms The number of extra empty forms that should be in the form set.
  * @param {Function} onnewform An optional callback to be called after the formset is created.
  *                             The formset is passed as the first argument.
  */
-export function setupFormset(prefix, onnewform = undefined) {
+export function setupFormset(prefix, numExtraForms, onnewform = undefined) {
     const formRowRegex = new RegExp(`${prefix}-\\d+-`, "g");
 
     const maxFormsInput = document.getElementById(`id_${prefix}-MAX_NUM_FORMS`);
@@ -18,17 +19,20 @@ export function setupFormset(prefix, onnewform = undefined) {
         formsetForms = document.querySelectorAll(".form-row");
         numForms = formsetForms.length;
         totalFormsInput.setAttribute("value", numForms);
+
+        // Update button states
+        removeFormButton.disabled = numForms <= 1;
+        addFormButton.disabled = numForms >= maxForms;
     };
 
     const removeFormButton = document.querySelector(".remove-form-row");
     const addFormButton = document.querySelector(".add-form-row");
 
-    const refreshButtonState = () => {
-        removeFormButton.disabled = numForms <= 1;
-        addFormButton.disabled = numForms >= maxForms;
-    };
+    if (numExtraForms === 0 && numForms > 1) {
+        formsetForms[formsetForms.length - 1].remove();
+    }
 
-    refreshButtonState();
+    refreshFormset();
 
     // Remove the last form on click
     removeFormButton.addEventListener("click", function (event) {
@@ -41,7 +45,6 @@ export function setupFormset(prefix, onnewform = undefined) {
         }
 
         refreshFormset();
-        refreshButtonState();
     });
 
     // Add imminent-removal class to the last form when about to click the button
@@ -99,6 +102,5 @@ export function setupFormset(prefix, onnewform = undefined) {
         }
 
         refreshFormset();
-        refreshButtonState();
     });
 }
