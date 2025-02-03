@@ -11,6 +11,7 @@ import {
     makeMockBlob,
     sendDeleteRequestForFile,
     updateCapacityDisplay,
+    fetchNewSessionToken,
 } from "./utils";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -62,7 +63,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             showLinkToFileUploadResult: true,
         })
         .use(XHR, {
-            endpoint: "/transfer/uploadfile/",
             method: "POST",
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -70,9 +70,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             timeout: 180000,
             limit: 2,
             responseType: "json",
-            onBeforeRequest(xhr) {
-                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
-            },
             // Turns the response into a JSON object
             getResponseData: (xhr) => {
                 try {
@@ -155,6 +152,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
         transferForm.submit();
+    });
+
+    // Set the endpoint for file upload dynamically, based on the current upload session token
+    uppy.addPreProcessor(async () => {
+        let sessionToken = getSessionToken();
+        if (!sessionToken) {
+            sessionToken = await fetchNewSessionToken();
+            if (!sessionToken) {
+                throw new Error("Failed to fetch new session token");
+            }
+            setSessionToken(sessionToken);
+        }
+        uppy.getPlugin("XHRUpload").setOptions({
+            endpoint: `/upload-session/${sessionToken}/files/`
+        });
     });
 
     // Add mock files to represent files that have already been uploaded to the upload session
