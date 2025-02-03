@@ -112,11 +112,11 @@ class TestUploadFilesView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
-        responseFiles = response_json.get("files")
-        self.assertEqual(len(responseFiles), 1)
-        self.assertEqual(responseFiles[0]["name"], "testfile.txt")
-        self.assertEqual(responseFiles[0]["size"], file_to_upload.size)
-        self.assertEqual(responseFiles[0]["url"], temp_file.get_file_access_url())
+        response_files = response_json.get("files")
+        self.assertEqual(len(response_files), 1)
+        self.assertEqual(response_files[0]["name"], "testfile.txt")
+        self.assertEqual(response_files[0]["size"], file_to_upload.size)
+        self.assertEqual(response_files[0]["url"], temp_file.get_file_access_url())
 
     ## --- POST Request Tests --- ##
 
