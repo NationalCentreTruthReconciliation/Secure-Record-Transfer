@@ -620,6 +620,7 @@ class RecordDescriptionForm(TransferForm):
             attrs={
                 "placeholder": gettext("2000-03-14 - 2001-05-06"),
                 "class": "date-range-picker" if settings.USE_DATE_WIDGETS else "date-range-text",
+                **({"readonly": "readonly"} if settings.USE_DATE_WIDGETS else {}),
             }
         ),
         label=gettext("Date of materials"),
