@@ -781,17 +781,6 @@ class TransferFormWizard(SessionWizardView):
                     "IS_NEW": True,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "new_group_form": SubmissionGroupForm(),
-                    "js_context": {
-                        "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
-                        "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
-                        "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
-                        "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
-                        "fetch_group_descriptions_url": reverse(
-                            "recordtransfer:get_user_submission_groups",
-                            kwargs={"user_id": self.request.user.pk},
-                        ),
-                        "default_group_id": self.submission_group_uuid,
-                    },
                 }
             )
 
@@ -866,6 +855,20 @@ class TransferFormWizard(SessionWizardView):
                     "other_role_id": other_role.pk if other_role else 0,
                     "other_type_id": other_type.pk if other_type else 0,
                 }
+            )
+        elif step == TransferStep.GROUP_TRANSFER:
+            js_context.update(
+                {
+                    "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+                    "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+                    "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
+                    "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
+                    "fetch_group_descriptions_url": reverse(
+                        "recordtransfer:get_user_submission_groups",
+                        kwargs={"user_id": self.request.user.pk},
+                    ),
+                    "default_group_id": self.submission_group_uuid,
+                },
             )
         elif step == TransferStep.UPLOAD_FILES:
             js_context.update(
