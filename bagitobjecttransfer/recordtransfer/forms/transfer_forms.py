@@ -1,5 +1,9 @@
 """Forms specific to transferring files with a new submission."""
 
+from __future__ import annotations
+
+import re
+from datetime import datetime
 from typing import Any, Optional, OrderedDict, TypedDict, Union
 from uuid import UUID
 
@@ -506,6 +510,13 @@ class SourceInfoForm(TransferForm):
 class RecordDescriptionForm(TransferForm):
     """The Description Information portion of the form. Contains fields from Section 3 of CAAIS."""
 
+    DATE_REGEX = (
+        r"^(?P<start_date>\d{4}-\d{2}-\d{2})"
+        r"(?:\s-\s"
+        r"(?P<end_date>\d{4}-\d{2}-\d{2})"
+        r")?$"
+    )
+
     class Meta:
         """Meta information for the form."""
 
@@ -514,6 +525,72 @@ class RecordDescriptionForm(TransferForm):
     def clean(self) -> dict:
         """Form date as approximate if user chose to mark the date as approximate."""
         cleaned_data = super().clean()
+
+        if date := cleaned_data.get("date_of_materials"):
+            match_obj = re.match(RecordDescriptionForm.DATE_REGEX, date)
+
+            if match_obj is None:
+                self.add_error("date_of_materials", gettext("Invalid date format"))
+                return cleaned_data
+
+            raw_start_date = match_obj.group("start_date")
+
+            try:
+                raw_end_date = match_obj.group("end_date")
+            except IndexError:
+                raw_end_date = None
+
+            invalid_date_message_added = False
+            future_date_message_added = False
+            early_date_message_added = False
+
+            start_date = None
+
+            try:
+                start_date = datetime.strptime(raw_start_date, r"%Y-%m-%d").date()
+
+                if start_date > datetime.now().date():
+                    self.add_error("date_of_materials", gettext("Date cannot be in the future"))
+                    future_date_message_added = True
+
+                if start_date < datetime(1800, 1, 1).date():
+                    self.add_error("date_of_materials", gettext("Date cannot be before 1800"))
+                    early_date_message_added = True
+
+            except ValueError:
+                self.add_error("date_of_materials", gettext("Invalid date format"))
+                invalid_date_message_added = True
+
+            end_date = None
+            if raw_end_date:
+                try:
+                    end_date = datetime.strptime(raw_end_date, r"%Y-%m-%d").date()
+
+                    if not future_date_message_added and end_date > datetime.now().date():
+                        self.add_error(
+                            "date_of_materials", gettext("End date cannot be in the future")
+                        )
+
+                    if not early_date_message_added and end_date < datetime(1800, 1, 1).date():
+                        self.add_error(
+                            "date_of_materials", gettext("End date cannot be before 1800")
+                        )
+
+                except ValueError:
+                    if not invalid_date_message_added:
+                        self.add_error(
+                            "date_of_materials", gettext("Invalid date format for end date")
+                        )
+
+            if end_date and start_date:
+                if end_date < start_date:
+                    self.add_error(
+                        "date_of_materials",
+                        gettext("End date must be later than start date"),
+                    )
+
+                if end_date == start_date:
+                    cleaned_data["date_of_materials"] = raw_start_date
 
         if cleaned_data.get("date_is_approximate", False) and (
             date := cleaned_data.get("date_of_materials")
@@ -531,15 +608,13 @@ class RecordDescriptionForm(TransferForm):
     )
 
     date_of_materials = forms.RegexField(
-        regex=r"^(\d{4}-\d{2}-\d{2})(?:\s+-\s+(\d{4}-\d{2}-\d{2}))?$",
-        min_length=2,
-        max_length=64,
+        regex=DATE_REGEX,
+        min_length=10,
+        max_length=23,
         required=True,
         error_messages={
             "required": gettext("This field is required."),
-            "invalid": gettext(
-                "Date must be in the format YYYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"
-            ),
+            "invalid": gettext("Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"),
         },
         widget=forms.TextInput(
             attrs={
