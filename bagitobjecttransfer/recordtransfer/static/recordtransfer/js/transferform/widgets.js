@@ -122,8 +122,8 @@ export function setupHelpTooltips() {
                 }[placement.split("-")[0]];
 
                 Object.assign(arrowElement.style, {
-                    left: arrowX != null ? `${arrowX}px` : "",
-                    top: arrowY != null ? `${arrowY}px` : "",
+                    left: arrowX !== null ? `${arrowX}px` : "",
+                    top: arrowY !== null ? `${arrowY}px` : "",
                     right: "",
                     bottom: "",
                     [staticSide]: "-4px",

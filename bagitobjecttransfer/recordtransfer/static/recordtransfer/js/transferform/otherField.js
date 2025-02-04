@@ -9,7 +9,7 @@ export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, ot
     const selectField = document.getElementById(selectFieldInputId);
 
     // Hide element at first (if needed)
-    if (selectField.value != otherValue) {
+    if (selectField.value !== otherValue) {
         const otherInput = document.getElementById(otherFieldInputId);
 
         if (otherInput) {
@@ -19,7 +19,7 @@ export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, ot
     }
 
     // Update other element when the select field changes
-    selectField.addEventListener("change", function (event) {
+    selectField.addEventListener("change", function () {
         const otherInput = document.getElementById(otherFieldInputId);
 
         if (!otherInput) {
@@ -28,7 +28,7 @@ export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, ot
 
         const container = otherInput.parentElement;
 
-        if (this.value == otherValue) {
+        if (this.value === otherValue) {
             container.classList.remove("hidden-item");
         }
         else {
