@@ -5,7 +5,7 @@ import { setupSelectOtherToggle } from "./otherField";
  */
 export function setupSourceInfoForm() {
     // Context passed from template to JS
-    const sourceInfoContextElement = document.getElementById("py_context_source_info");
+    const sourceInfoContextElement = document.getElementById("py_context_" + currentFormStepName);
 
     if (!sourceInfoContextElement) {
         return;

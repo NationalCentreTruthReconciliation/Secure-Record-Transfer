@@ -15,6 +15,10 @@ import {
 } from "./widgets";
 
 document.addEventListener("DOMContentLoaded", function () {
+    if (typeof(currentFormStepName) === "undefined") {
+        return;
+    }
+    
     setupDatePickers();
     setupInputMasks();
     setupContactInfoForm();
