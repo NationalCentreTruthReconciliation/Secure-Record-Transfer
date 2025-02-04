@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "secure-record-transfer"
-version = "2024.10.22"
+version = "2025.01.30"
 description = "Transfer files and metadata to an archive based on accession standards"
 repository = "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer"
 documentation = "https://secure-record-transfer.readthedocs.io/en/latest/"
@@ -42,3 +42,6 @@ build-backend = "poetry.core.masonry.api"
 pythonpath = "bagitobjecttransfer"
 python_files = "test_*.py"
 DJANGO_SETTINGS_MODULE = "bagitobjecttransfer.settings.test"
+
+[tool.poetry.plugins.pytest11]
+npm_build = "conftest"

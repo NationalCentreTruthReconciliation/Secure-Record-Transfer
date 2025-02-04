@@ -367,6 +367,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.complete_form_till_review_step()
         driver = self.driver
 
+        # Wait for the review step to load
+        WebDriverWait(driver, 2).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "review-summary"))
+        )
+
         # Verify section titles and content for each step
         for step, data in self.test_data.items():
             section_title = driver.find_element(

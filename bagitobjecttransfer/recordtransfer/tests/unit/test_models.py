@@ -5,7 +5,7 @@ import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -229,6 +229,7 @@ class TestUploadSession(TestCase):
             # Modify mock to reflect the removal
             mock_temp_files.all = MagicMock(return_value=[test_temp_file_2])
             temp_file_dict.pop(test_temp_file_1.name)
+
         test_temp_file_1.delete.side_effect = delete_first_file_side_effect
         # Remove first file
         self.session.remove_temp_file_by_name(test_temp_file_1.name)

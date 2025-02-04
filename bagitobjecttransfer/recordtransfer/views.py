@@ -973,96 +973,128 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def upload_file(request: HttpRequest) -> JsonResponse:
-    """Upload a single file to the server, and return a token representing the file upload
-    session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded file will be added to the corresponding session.
-
-    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
-    file is not an accepted type, an error message is returned.
+def create_upload_session(request: HttpRequest) -> JsonResponse:
+    """Create a new upload session and return the session token.
 
     Args:
         request: The POST request sent by the user.
 
     Returns:
-        JsonResponse: If the upload was successful, the session token is returned in
-        'upload_session_token'. If not successful, the error description is returned in 'error'.
+        JsonResponse: The session token of the newly created upload session.
     """
     try:
-        headers = request.headers
-        session_token = headers.get("Upload-Session-Token")
         user: User = cast(User, request.user)
-        session = (
-            UploadSession.objects.filter(token=session_token, user=user).first()
-            if session_token
-            else None
-        )
-        if not session:
-            session = UploadSession.new_session(user=user)
-
-        _file = request.FILES.get("file")
-        if not _file:
-            return JsonResponse(
-                {
-                    "uploadSessionToken": session.token,
-                    "error": gettext("No file was uploaded"),
-                },
-                status=422,
-            )
-
-        file_check = accept_file(_file.name, _file.size)
-        if not file_check["accepted"]:
-            return JsonResponse(
-                {"file": _file.name, "uploadSessionToken": session.token, **file_check},
-                status=400,
-            )
-
-        session_check = accept_session(_file.name, _file.size, session)
-        if not session_check["accepted"]:
-            return JsonResponse(
-                {"file": _file.name, "uploadSessionToken": session.token, **session_check},
-                status=400,
-            )
-
-        try:
-            check_for_malware(_file)
-        except ValidationError as exc:
-            LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": False,
-                    "uploadSessionToken": session.token,
-                    "error": gettext(f'Malware was detected in the file "{_file.name}"'),
-                },
-                status=400,
-            )
-
-        try:
-            uploaded_file = session.add_temp_file(_file)
-        except ValueError as exc:
-            LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": False,
-                    "uploadSessionToken": session.token,
-                    "error": gettext("There was an error uploading the file"),
-                },
-                status=500,
-            )
-
-        file_url = uploaded_file.get_file_access_url()
-
+        session = UploadSession.new_session(user=user)
+        return JsonResponse({"uploadSessionToken": session.token}, status=201)
+    except Exception as exc:
+        LOGGER.error("Error creating upload session: %s", str(exc), exc_info=exc)
         return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": True,
-                "uploadSessionToken": session.token,
-                "url": file_url,
-            },
-            status=200,
+            {"error": gettext("There was an internal server error. Please try again.")},
+            status=500,
         )
+
+
+@require_http_methods(["GET", "POST"])
+def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
+    """Upload a single file to the server list the files uploaded in a given upload session. The
+    file is added to the upload session using the session token passed as a parameter in the
+    request. If a session token is invalid, an error message is returned.
+
+    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
+    file is not an accepted type, an error message is returned.
+
+    Args:
+        request: The HTTP GET or POST request
+        session_token: The upload session token from the URL
+
+    Returns:
+        JsonResponse: If the list or upload operation was successful, the session token
+        `uploadSessionToken` is included in the response. If not successful, the error description
+        `error` is included.
+    """
+    try:
+        user: User = cast(User, request.user)
+        session = UploadSession.objects.filter(token=session_token, user=user).first()
+        if not session:
+            return JsonResponse(
+                {
+                    "uploadSessionToken": session_token,
+                    "error": gettext("Invalid upload session token"),
+                },
+                status=400,
+            )
+
+        if request.method == "GET":
+            file_metadata = [
+                {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
+                for f in session.get_uploads()
+            ]
+
+            return JsonResponse({"files": file_metadata}, status=200)
+        else:
+            _file = request.FILES.get("file")
+            if not _file:
+                return JsonResponse(
+                    {
+                        "uploadSessionToken": session.token,
+                        "error": gettext("No file was uploaded"),
+                    },
+                    status=400,
+                )
+
+            file_check = accept_file(_file.name, _file.size)
+            if not file_check["accepted"]:
+                return JsonResponse(
+                    {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+                    status=400,
+                )
+
+            session_check = accept_session(_file.name, _file.size, session)
+            if not session_check["accepted"]:
+                return JsonResponse(
+                    {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+                    status=400,
+                )
+
+            try:
+                check_for_malware(_file)
+            except ValidationError as exc:
+                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+                return JsonResponse(
+                    {
+                        "file": _file.name,
+                        "accepted": False,
+                        "uploadSessionToken": session.token,
+                        "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                    },
+                    status=400,
+                )
+
+            try:
+                uploaded_file = session.add_temp_file(_file)
+            except ValueError as exc:
+                LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
+                return JsonResponse(
+                    {
+                        "file": _file.name,
+                        "accepted": False,
+                        "uploadSessionToken": session.token,
+                        "error": gettext("There was an error uploading the file"),
+                    },
+                    status=500,
+                )
+
+            file_url = uploaded_file.get_file_access_url()
+
+            return JsonResponse(
+                {
+                    "file": _file.name,
+                    "accepted": True,
+                    "uploadSessionToken": session.token,
+                    "url": file_url,
+                },
+                status=200,
+            )
 
     except Exception as exc:
         LOGGER.error("Uncaught exception in upload_file view: %s", str(exc), exc_info=exc)
@@ -1072,33 +1104,6 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             },
             status=500,
         )
-
-
-@require_http_methods(["GET"])
-def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
-    """Get a list of metadata for files uploaded in a given upload session.
-
-    Args:
-        request: The HTTP request
-        session_token: The upload session token from the URL
-
-    Returns:
-        JsonResponse: List of uploaded files and their details, or error message
-    """
-    try:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-        if not session:
-            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
-
-        file_metadata = [
-            {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
-            for f in session.get_uploads()
-        ]
-
-        return JsonResponse({"files": file_metadata}, status=200)
-
-    except Exception:
-        return JsonResponse({"error": gettext("Internal server error")}, status=500)
 
 
 @require_http_methods(["DELETE", "GET"])
@@ -1224,7 +1229,10 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
     def handle_no_permission(self):
-        return HttpResponseForbidden("You do not have permission to access this page.")
+        """Override to return 404 instead of 403. This is to prevent users from knowing that the
+        submission exists if they do not have permission to view it.
+        """
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -1276,8 +1284,11 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
-    def handle_no_permission(self) -> HttpResponseForbidden:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    def handle_no_permission(self):
+        """Override to return 404 instead of 403. This is to prevent users from knowing that the
+        group exists if they do not have permission to view it.
+        """
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""

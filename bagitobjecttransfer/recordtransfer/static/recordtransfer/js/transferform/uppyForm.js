@@ -14,6 +14,7 @@ import {
     makeMockBlob,
     sendDeleteRequestForFile,
     updateCapacityDisplay,
+    fetchNewSessionToken,
 } from "./utils";
 
 /**
@@ -68,7 +69,6 @@ export async function setupUppy() {
             showLinkToFileUploadResult: true,
         })
         .use(XHR, {
-            endpoint: "/transfer/uploadfile/",
             method: "POST",
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -76,9 +76,6 @@ export async function setupUppy() {
             timeout: 180000,
             limit: 2,
             responseType: "json",
-            onBeforeRequest(xhr) {
-                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
-            },
             // Turns the response into a JSON object
             getResponseData: (xhr) => {
                 try {
@@ -161,6 +158,21 @@ export async function setupUppy() {
             return;
         }
         transferForm.submit();
+    });
+
+    // Set the endpoint for file upload dynamically, based on the current upload session token
+    uppy.addPreProcessor(async () => {
+        let sessionToken = getSessionToken();
+        if (!sessionToken) {
+            sessionToken = await fetchNewSessionToken();
+            if (!sessionToken) {
+                throw new Error("Failed to fetch new session token");
+            }
+            setSessionToken(sessionToken);
+        }
+        uppy.getPlugin("XHRUpload").setOptions({
+            endpoint: `/upload-session/${sessionToken}/files/`
+        });
     });
 
     // Add mock files to represent files that have already been uploaded to the upload session
