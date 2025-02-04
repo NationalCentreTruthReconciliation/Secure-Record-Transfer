@@ -40,23 +40,22 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         TransferStep.SOURCE_INFO: {
             "section_title": get_section_title(TransferStep.SOURCE_INFO),
             "source_name": "Test Source Name",
-            "source_type": "2",  # Individual
-            "source_role": "2",  # Donor
+            "source_type": "Individual",
+            "source_role": "Donor",
             "source_note": "Test Source Note",
             "preliminary_custodial_history": "Test Custodial History",
         },
         TransferStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(TransferStep.RECORD_DESCRIPTION),
             "accession_title": "Test Accession Title",
-            "start_date": "2021-01-01",
-            "end_date": "2021-12-31",
+            "date_of_materials": "2021-01-01 - 2021-12-31",
             "language": "English",
             "description": "Test Description",
             "condition": "Test Condition",
         },
         TransferStep.RIGHTS: {
             "section_title": get_section_title(TransferStep.RIGHTS),
-            "rights_type": "7",  # Copyright
+            "rights_type": "Copyright",
             "rights_value": "Copyright until 2050, applies to all files",
         },
         TransferStep.OTHER_IDENTIFIERS: {
@@ -83,7 +82,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         prefs = {"autofill.profile_enabled": False}
@@ -192,8 +191,8 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         source_role_select = Select(driver.find_element(By.NAME, "sourceinfo-source_role"))
 
         source_name_input.send_keys(data["source_name"])
-        source_type_select.select_by_value(data["source_type"])
-        source_role_select.select_by_value(data["source_role"])
+        source_type_select.select_by_visible_text(data["source_type"])
+        source_role_select.select_by_visible_text(data["source_role"])
 
         if not required_only:
             source_note_input = driver.find_element(By.NAME, "sourceinfo-source_note")
@@ -212,16 +211,22 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         data = self.test_data[TransferStep.RECORD_DESCRIPTION]
 
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
-        start_date_input = driver.find_element(By.NAME, "recorddescription-start_date_of_material")
-        end_date_input = driver.find_element(By.NAME, "recorddescription-end_date_of_material")
+        date_input = driver.find_element(By.NAME, "recorddescription-date_of_materials")
+        approx_date_input = driver.find_element(By.NAME, "recorddescription-date_is_approximate")
         language_input = driver.find_element(By.NAME, "recorddescription-language_of_material")
         description_of_contents_input = driver.find_element(
             By.NAME, "recorddescription-preliminary_scope_and_content"
         )
 
         accession_title_input.send_keys(data["accession_title"])
-        start_date_input.send_keys(data["start_date"])
-        end_date_input.send_keys(data["end_date"])
+        date_input.send_keys(data["date_of_materials"])
+
+        # Need to click away after date input
+        accession_title_input.click()
+
+        # Click checkbox to mark date as approximate
+        approx_date_input.click()
+
         language_input.send_keys(data["language"])
         description_of_contents_input.send_keys(data["description"])
 
@@ -239,12 +244,9 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
         data = self.test_data[TransferStep.RIGHTS]
 
-        # Complete the Record Rights step
         rights_type_select = Select(driver.find_element(By.NAME, "rights-0-rights_type"))
+        rights_type_select.select_by_visible_text(data["rights_type"])
 
-        rights_type_select.select_by_value(data["rights_type"])
-
-        rights_type_select.select_by_value("7")  # Select "Copyright"
         if not required_only:
             rights_value_textarea = driver.find_element(By.NAME, "rights-0-rights_value")
             rights_value_textarea.send_keys(data["rights_value"])
@@ -304,7 +306,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
         # Wait for the modal to close and the new group to be added to the select options
         WebDriverWait(driver, 2).until(
-            EC.presence_of_element_located((By.NAME, "grouptransfer-group_id"))
+            EC.invisibility_of_element_located((By.ID, "id_create_group_button"))
         )
 
         # Check that the new group is selected
@@ -319,16 +321,16 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         data = self.test_data[TransferStep.UPLOAD_FILES]
 
         # Create temp file with specified name
-        with tempfile.NamedTemporaryFile(delete=False, suffix=data["filename"]) as temp_file:
+        with tempfile.NamedTemporaryFile(suffix=data["filename"]) as temp_file:
             temp_file.write(data["content"])
+            temp_file.flush()
             temp_path = temp_file.name
 
-        try:
             file_input = self.driver.find_element(By.CSS_SELECTOR, "input[type='file']")
             file_input.send_keys(temp_path)
 
-            WebDriverWait(self.driver, 2).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "uppy-Dashboard-Item"))
+            WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "is-complete"))
             )
 
             if not required_only:
@@ -336,9 +338,6 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 general_note_input.send_keys(data["general_note"])
 
             self.go_to_review_step()
-        finally:
-            # Clean up temp file
-            os.remove(temp_path)
 
     def complete_form_till_review_step(self) -> None:
         """Complete the form till the review step."""
@@ -367,6 +366,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         """Verify that the displayed information on the review page matches the test data."""
         self.complete_form_till_review_step()
         driver = self.driver
+
+        # Wait for the review step to load
+        WebDriverWait(driver, 2).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "review-summary"))
+        )
 
         # Verify section titles and content for each step
         for step, data in self.test_data.items():

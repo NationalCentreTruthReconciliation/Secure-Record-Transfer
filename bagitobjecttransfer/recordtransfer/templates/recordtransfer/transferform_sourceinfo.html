@@ -41,8 +41,8 @@
                 <div>
                     <i>
                         {% blocktrans %}
-                        <a id="show-source-types-dialog" class="non-nav-link" href="#">Click here</a> for an explanation
-                        of the different types of source types.
+                        <a class="non-nav-link" target="_blank" href="/about/#source-types">Click here</a>
+                        for an explanation of the different types of source types.
                         {% endblocktrans %}
                     </i>
                 </div>
@@ -54,8 +54,8 @@
                 <div>
                     <i>
                         {% blocktrans %}
-                        <a id="show-source-roles-dialog" class="non-nav-link" href="#">Click here</a> for an explanation
-                        of the different types of source roles.
+                        <a class="non-nav-link" target="_blank" href="/about/#source-roles">Click here</a>
+                        for an explanation of the different types of source roles.
                         {% endblocktrans %}
                     </i>
                 </div>
@@ -65,34 +65,4 @@
     {% endfor %}
 {% endblock formfields %}
 
-{% block form_explanation %}
-    <div id="source-types-dialog" title="Explanation of Source Types">
-        <p>
-            {% blocktrans %}
-            The source type describes what type of entity the source of the records is. If none of
-            the provided options properly describe the source entity, select <b>Other</b> in the
-            source types dropdown and enter your own type.
-            {% endblocktrans %}
-        </p>
-        {% for stype in source_types %}
-            <p>
-                <b>{{ stype.name }}:</b> {{ stype.description }}
-            </p>
-        {% endfor %}
-    </div>
-    <div id="source-roles-dialog" title="Explanation of Source Roles">
-        <p>
-            {% blocktrans %}
-            The source role describes how the entity relates to the records. If none of the
-            provided options properly describe the source's relationship to the records, select
-            <b>Other</b> in the source roles dropdown and enter your own type.
-            {% endblocktrans %}
-        </p>
-        {% for role in source_roles %}
-            <p>
-                <b>{{ role.name }}:</b> {{ role.description }}
-            </p>
-        {% endfor %}
-    </div>
-{% endblock form_explanation %}
 {% block buttonarrayclass %}flex-item{% endblock buttonarrayclass %}

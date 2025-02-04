@@ -1,3 +1,6 @@
+import "@uppy/core/dist/style.css";
+import "@uppy/dashboard/dist/style.css";
+
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHR from "@uppy/xhr-upload";
@@ -11,9 +14,13 @@ import {
     makeMockBlob,
     sendDeleteRequestForFile,
     updateCapacityDisplay,
+    fetchNewSessionToken,
 } from "./utils";
 
-document.addEventListener("DOMContentLoaded", async () => {
+/**
+ * Sets up the Uppy space for uploading files.
+ */
+export async function setupUppy() {
     const settings = getFileUploadSettings();
     // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
@@ -31,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
         updateCapacityDisplay(uppyFiles.length, totalSize);
-    };   
+    };
 
     const uppy = new Uppy(
         {
@@ -62,7 +69,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             showLinkToFileUploadResult: true,
         })
         .use(XHR, {
-            endpoint: "/transfer/uploadfile/",
             method: "POST",
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -70,9 +76,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             timeout: 180000,
             limit: 2,
             responseType: "json",
-            onBeforeRequest(xhr) {
-                xhr.setRequestHeader("Upload-Session-Token", getSessionToken());
-            },
             // Turns the response into a JSON object
             getResponseData: (xhr) => {
                 try {
@@ -101,8 +104,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             shouldRetry: (response) => {
                 const status = response.status;
                 return (
-                    status >= 500 && status < 600 || 
-                    status === 408 || 
+                    status >= 500 && status < 600 ||
+                    status === 408 ||
                     status === 429
                 );
             }
@@ -148,13 +151,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         if (hasIssues) {
             uppy.info(
-                "Remove the files with issues to proceed.", 
+                "Remove the files with issues to proceed.",
                 "error",
                 5000
             );
             return;
         }
         transferForm.submit();
+    });
+
+    // Set the endpoint for file upload dynamically, based on the current upload session token
+    uppy.addPreProcessor(async () => {
+        let sessionToken = getSessionToken();
+        if (!sessionToken) {
+            sessionToken = await fetchNewSessionToken();
+            if (!sessionToken) {
+                throw new Error("Failed to fetch new session token");
+            }
+            setSessionToken(sessionToken);
+        }
+        uppy.getPlugin("XHRUpload").setOptions({
+            endpoint: `/upload-session/${sessionToken}/files/`
+        });
     });
 
     // Add mock files to represent files that have already been uploaded to the upload session
@@ -171,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 progress: { uploadComplete: true, uploadStarted: true, percentage: 100 },
                 uploadURL: file.url,
             });
-            
+
         });
     }
-});
+}

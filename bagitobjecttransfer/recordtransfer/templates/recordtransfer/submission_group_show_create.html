@@ -5,11 +5,7 @@
 
 {% block javascript %}
     {{ block.super }}
-    <script>
-        // Pass IDs of form fields elements to JavaScript
-        const ID_SUBMISSION_GROUP_DESCRIPTION = "{{ ID_SUBMISSION_GROUP_DESCRIPTION }}";
-        const ID_SUBMISSION_GROUP_NAME = "{{ ID_SUBMISSION_GROUP_NAME }}";
-    </script>
+    {{ js_context|json_script:"py_context_submission_group" }}
     <script src="{% static 'submissiongroup.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block title %}

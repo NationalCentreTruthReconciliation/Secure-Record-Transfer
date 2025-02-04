@@ -254,6 +254,9 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
+        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
+        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
+        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
         context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
         context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
         context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
@@ -324,7 +327,7 @@ class TransferFormWizard(SessionWizardView):
             FORMTITLE: gettext("Legal Agreement"),
         },
         TransferStep.CONTACT_INFO: {
-            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            TEMPLATEREF: "recordtransfer/transferform_contactinfo.html",
             FORMTITLE: gettext("Contact Information"),
             INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
@@ -353,7 +356,7 @@ class TransferFormWizard(SessionWizardView):
             ),
         },
         TransferStep.OTHER_IDENTIFIERS: {
-            TEMPLATEREF: "recordtransfer/transferform_formset.html",
+            TEMPLATEREF: "recordtransfer/transferform_otheridentifiers.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
             INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
@@ -772,33 +775,41 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "IS_NEW": True,
-                    "new_group_form": SubmissionGroupForm(),
-                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
-                    "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
-                    "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
-                    "DEFAULT_GROUP_ID": self.submission_group_uuid,
-                    "MODAL_MODE": True,
+                    "new_group_form": SubmissionGroupForm(),
+                    "js_context": {
+                        "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+                        "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+                        "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
+                        "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
+                        "fetch_group_descriptions_url": reverse(
+                            "recordtransfer:get_user_submission_groups",
+                            kwargs={"user_id": self.request.user.pk},
+                        ),
+                        "default_group_id": self.submission_group_uuid,
+                    },
                 }
             )
 
-        elif self.current_step == TransferStep.RIGHTS:
-            all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
-
-        elif self.current_step == TransferStep.SOURCE_INFO:
-            all_roles = SourceRole.objects.all().exclude(name="Other")
-            all_types = SourceType.objects.all().exclude(name="Other")
-
+        elif self.current_step == TransferStep.CONTACT_INFO:
             context.update(
                 {
-                    "source_roles": all_roles,
-                    "source_types": all_types,
+                    "js_context": {
+                        "id_province_or_state": "id_contactinfo-province_or_state",
+                        "id_other_province_or_state": "id_contactinfo-other_province_or_state",
+                        "other_province_or_state_id": "Other",
+                    }
                 }
             )
 
         elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
-            context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
+            context.update(
+                {
+                    "js_context": {
+                        "formset_prefix": "otheridentifiers",
+                    },
+                },
+            )
 
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
@@ -808,12 +819,6 @@ class TransferFormWizard(SessionWizardView):
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
                 }
             )
-
-        elif self.current_step == TransferStep.REVIEW:
-            context["form_list"] = ReviewForm.format_form_data(
-                self.get_forms_for_review(), user=cast(User, self.request.user)
-            )
-
         return context
 
     def _get_javascript_context(self) -> dict[str, Any]:
@@ -825,9 +830,19 @@ class TransferFormWizard(SessionWizardView):
         js_context = {}
 
         step = self.current_step
-        if step == TransferStep.SOURCE_INFO:
+        if step == TransferStep.RIGHTS:
+            other_rights = RightsType.objects.filter(name="Other").first()
+
+            js_context.update(
+                {
+                    "formset_prefix": "rights",
+                    "other_rights_type_id": other_rights.pk if other_rights else 0,
+                }
+            )
+        elif step == TransferStep.SOURCE_INFO:
             other_role = SourceRole.objects.filter(name="Other").first()
             other_type = SourceType.objects.filter(name="Other").first()
+
             js_context.update(
                 {
                     "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
@@ -853,15 +868,6 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
         return js_context
-
-    @property
-    def num_extra_forms(self) -> int:
-        """Compute the number of extra forms to generate if current step uses a formset."""
-        num_extra_forms = 1
-        if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
-            num_forms = len(self.get_form_initial(self.current_step.value))
-            num_extra_forms = 0 if num_forms > 0 else 1
-        return num_extra_forms
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
@@ -983,96 +989,128 @@ def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubm
 
 
 @require_http_methods(["POST"])
-def upload_file(request: HttpRequest) -> JsonResponse:
-    """Upload a single file to the server, and return a token representing the file upload
-    session. If a token is passed in the request header using the Upload-Session-Token header, the
-    uploaded file will be added to the corresponding session.
-
-    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
-    file is not an accepted type, an error message is returned.
+def create_upload_session(request: HttpRequest) -> JsonResponse:
+    """Create a new upload session and return the session token.
 
     Args:
         request: The POST request sent by the user.
 
     Returns:
-        JsonResponse: If the upload was successful, the session token is returned in
-        'upload_session_token'. If not successful, the error description is returned in 'error'.
+        JsonResponse: The session token of the newly created upload session.
     """
     try:
-        headers = request.headers
-        session_token = headers.get("Upload-Session-Token")
         user: User = cast(User, request.user)
-        session = (
-            UploadSession.objects.filter(token=session_token, user=user).first()
-            if session_token
-            else None
-        )
-        if not session:
-            session = UploadSession.new_session(user=user)
-
-        _file = request.FILES.get("file")
-        if not _file:
-            return JsonResponse(
-                {
-                    "uploadSessionToken": session.token,
-                    "error": gettext("No file was uploaded"),
-                },
-                status=400,
-            )
-
-        file_check = accept_file(_file.name, _file.size)
-        if not file_check["accepted"]:
-            return JsonResponse(
-                {"file": _file.name, "uploadSessionToken": session.token, **file_check},
-                status=400,
-            )
-
-        session_check = accept_session(_file.name, _file.size, session)
-        if not session_check["accepted"]:
-            return JsonResponse(
-                {"file": _file.name, "uploadSessionToken": session.token, **session_check},
-                status=400,
-            )
-
-        try:
-            check_for_malware(_file)
-        except ValidationError as exc:
-            LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": False,
-                    "uploadSessionToken": session.token,
-                    "error": gettext(f'Malware was detected in the file "{_file.name}"'),
-                },
-                status=400,
-            )
-
-        try:
-            uploaded_file = session.add_temp_file(_file)
-        except ValueError as exc:
-            LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": False,
-                    "uploadSessionToken": session.token,
-                    "error": gettext("There was an error uploading the file"),
-                },
-                status=500,
-            )
-
-        file_url = uploaded_file.get_file_access_url()
-
+        session = UploadSession.new_session(user=user)
+        return JsonResponse({"uploadSessionToken": session.token}, status=201)
+    except Exception as exc:
+        LOGGER.error("Error creating upload session: %s", str(exc), exc_info=exc)
         return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": True,
-                "uploadSessionToken": session.token,
-                "url": file_url,
-            },
-            status=200,
+            {"error": gettext("There was an internal server error. Please try again.")},
+            status=500,
         )
+
+
+@require_http_methods(["GET", "POST"])
+def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
+    """Upload a single file to the server list the files uploaded in a given upload session. The
+    file is added to the upload session using the session token passed as a parameter in the
+    request. If a session token is invalid, an error message is returned.
+
+    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
+    file is not an accepted type, an error message is returned.
+
+    Args:
+        request: The HTTP GET or POST request
+        session_token: The upload session token from the URL
+
+    Returns:
+        JsonResponse: If the list or upload operation was successful, the session token
+        `uploadSessionToken` is included in the response. If not successful, the error description
+        `error` is included.
+    """
+    try:
+        user: User = cast(User, request.user)
+        session = UploadSession.objects.filter(token=session_token, user=user).first()
+        if not session:
+            return JsonResponse(
+                {
+                    "uploadSessionToken": session_token,
+                    "error": gettext("Invalid upload session token"),
+                },
+                status=400,
+            )
+
+        if request.method == "GET":
+            file_metadata = [
+                {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
+                for f in session.get_uploads()
+            ]
+
+            return JsonResponse({"files": file_metadata}, status=200)
+        else:
+            _file = request.FILES.get("file")
+            if not _file:
+                return JsonResponse(
+                    {
+                        "uploadSessionToken": session.token,
+                        "error": gettext("No file was uploaded"),
+                    },
+                    status=400,
+                )
+
+            file_check = accept_file(_file.name, _file.size)
+            if not file_check["accepted"]:
+                return JsonResponse(
+                    {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+                    status=400,
+                )
+
+            session_check = accept_session(_file.name, _file.size, session)
+            if not session_check["accepted"]:
+                return JsonResponse(
+                    {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+                    status=400,
+                )
+
+            try:
+                check_for_malware(_file)
+            except ValidationError as exc:
+                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+                return JsonResponse(
+                    {
+                        "file": _file.name,
+                        "accepted": False,
+                        "uploadSessionToken": session.token,
+                        "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                    },
+                    status=400,
+                )
+
+            try:
+                uploaded_file = session.add_temp_file(_file)
+            except ValueError as exc:
+                LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
+                return JsonResponse(
+                    {
+                        "file": _file.name,
+                        "accepted": False,
+                        "uploadSessionToken": session.token,
+                        "error": gettext("There was an error uploading the file"),
+                    },
+                    status=500,
+                )
+
+            file_url = uploaded_file.get_file_access_url()
+
+            return JsonResponse(
+                {
+                    "file": _file.name,
+                    "accepted": True,
+                    "uploadSessionToken": session.token,
+                    "url": file_url,
+                },
+                status=200,
+            )
 
     except Exception as exc:
         LOGGER.error("Uncaught exception in upload_file view: %s", str(exc), exc_info=exc)
@@ -1082,33 +1120,6 @@ def upload_file(request: HttpRequest) -> JsonResponse:
             },
             status=500,
         )
-
-
-@require_http_methods(["GET"])
-def list_uploaded_files(request: HttpRequest, session_token: str) -> JsonResponse:
-    """Get a list of metadata for files uploaded in a given upload session.
-
-    Args:
-        request: The HTTP request
-        session_token: The upload session token from the URL
-
-    Returns:
-        JsonResponse: List of uploaded files and their details, or error message
-    """
-    try:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-        if not session:
-            return JsonResponse({"error": gettext("Upload session not found")}, status=404)
-
-        file_metadata = [
-            {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
-            for f in session.get_uploads()
-        ]
-
-        return JsonResponse({"files": file_metadata}, status=200)
-
-    except Exception:
-        return JsonResponse({"error": gettext("Internal server error")}, status=500)
 
 
 @require_http_methods(["DELETE", "GET"])
@@ -1234,7 +1245,10 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
     def handle_no_permission(self):
-        return HttpResponseForbidden("You do not have permission to access this page.")
+        """Override to return 404 instead of 403. This is to prevent users from knowing that the
+        submission exists if they do not have permission to view it.
+        """
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -1286,17 +1300,21 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
-    def handle_no_permission(self) -> HttpResponseForbidden:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    def handle_no_permission(self):
+        """Override to return 404 instead of 403. This is to prevent users from knowing that the
+        group exists if they do not have permission to view it.
+        """
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         context["IS_NEW"] = False
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        context["MODAL_MODE"] = False
+        context["js_context"] = {
+            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+        }
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -1343,9 +1361,10 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["IS_NEW"] = True
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        context["MODAL_MODE"] = False
+        context["js_context"] = {
+            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+        }
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
