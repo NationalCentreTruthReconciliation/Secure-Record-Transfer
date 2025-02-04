@@ -330,7 +330,7 @@ class TransferFormWizard(SessionWizardView):
             FORMTITLE: gettext("Legal Agreement"),
         },
         TransferStep.CONTACT_INFO: {
-            TEMPLATEREF: "recordtransfer/transferform_contactinfo.html",
+            TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Contact Information"),
             INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
@@ -359,7 +359,7 @@ class TransferFormWizard(SessionWizardView):
             ),
         },
         TransferStep.OTHER_IDENTIFIERS: {
-            TEMPLATEREF: "recordtransfer/transferform_otheridentifiers.html",
+            TEMPLATEREF: "recordtransfer/transferform_formset.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
             INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
@@ -375,7 +375,7 @@ class TransferFormWizard(SessionWizardView):
             ),
         },
         TransferStep.UPLOAD_FILES: {
-            TEMPLATEREF: "recordtransfer/transferform_dropzone.html",
+            TEMPLATEREF: "recordtransfer/transferform_uploadfiles.html",
             FORMTITLE: gettext("Upload Files"),
             INFOMESSAGE: gettext(
                 "Add any final notes you would like to add, and upload your files"
