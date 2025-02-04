@@ -13,6 +13,13 @@ ID_SUBMISSION_GROUP_DESCRIPTION = "id_submission_group_description"
 ID_SUBMISSION_GROUP_SELECTION = "id_submission_group_selection"
 ID_DISPLAY_GROUP_DESCRIPTION = "id_display_group_description"
 
+# Contact Information Form Field IDs
+ID_CONTACT_INFO_PROVINCE_OR_STATE = "id_contactinfo-province_or_state"
+ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE = "id_contactinfo-other_province_or_state"
+# Value to use for the "Other" option in the Province/State dropdown
+OTHER_PROVINCE_OR_STATE_VALUE = "Other"
+
+# Source Information Form Field IDs
 ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO = "id_sourceinfo-enter_manual_source_info"
 ID_SOURCE_INFO_SOURCE_TYPE = "id_sourceinfo-source_type"
 ID_SOURCE_INFO_OTHER_SOURCE_TYPE = "id_sourceinfo-other_source_type"

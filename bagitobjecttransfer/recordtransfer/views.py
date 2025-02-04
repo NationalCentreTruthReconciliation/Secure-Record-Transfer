@@ -54,6 +54,8 @@ from recordtransfer.constants import (
     FORMTITLE,
     GROUPS_PAGE,
     ID_CONFIRM_NEW_PASSWORD,
+    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+    ID_CONTACT_INFO_PROVINCE_OR_STATE,
     ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
     ID_FIRST_NAME,
@@ -70,6 +72,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_SELECTION,
     IN_PROGRESS_PAGE,
     INFOMESSAGE,
+    OTHER_PROVINCE_OR_STATE_VALUE,
     SUBMISSIONS_PAGE,
     TEMPLATEREF,
 )
@@ -760,6 +763,7 @@ class TransferFormWizard(SessionWizardView):
         # Add template and JS contexts
         context.update(self._get_template_context())
         context["js_context"] = self._get_javascript_context()
+        context["js_context_id"] = "py_context_" + self.steps.current
 
         return context
 
@@ -830,7 +834,16 @@ class TransferFormWizard(SessionWizardView):
         js_context = {}
 
         step = self.current_step
-        if step == TransferStep.RIGHTS:
+        if step == TransferStep.CONTACT_INFO:
+            js_context.update(
+                {
+                    "id_province_or_state": ID_CONTACT_INFO_PROVINCE_OR_STATE,
+                    "id_other_province_or_state": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+                    "other_province_or_state_id": OTHER_PROVINCE_OR_STATE_VALUE,
+                }
+            )
+
+        elif step == TransferStep.RIGHTS:
             other_rights = RightsType.objects.filter(name="Other").first()
 
             js_context.update(
