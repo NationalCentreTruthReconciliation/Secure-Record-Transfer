@@ -1,11 +1,6 @@
 {% extends 'recordtransfer/transferform_formset.html' %}
 {% load i18n %}
 
-{% block javascript %}
-    {{ block.super }}
-    {{ js_context|json_script:"py_context_rights" }}
-{% endblock javascript %}
-
 {% block form_explanation %}
     <p>
         {% blocktrans %}

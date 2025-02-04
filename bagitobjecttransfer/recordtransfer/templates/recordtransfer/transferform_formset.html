@@ -2,11 +2,6 @@
 {% load static %}
 {% load i18n %}
 
-{% block javascript %}
-    {{ block.super }}
-    {{ js_context|json_script:"py_context_formset" }}
-{% endblock javascript %}
-
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
     {% for form in wizard.form.forms %}
