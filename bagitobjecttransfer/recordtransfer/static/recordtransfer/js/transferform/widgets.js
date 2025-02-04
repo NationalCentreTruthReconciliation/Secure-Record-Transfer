@@ -146,10 +146,14 @@ export function setupHelpTooltips() {
 
         icon.addEventListener("mouseenter", () => {
             tooltip.style.display = "block";
+            // Small delay to ensure display:block is processed before starting transition
+            requestAnimationFrame(() => {
+                tooltip.classList.add("visible");
+            });
         });
 
         icon.addEventListener("mouseleave", () => {
-            tooltip.style.display = "none";
+            tooltip.classList.remove("visible");
         });
     });
 }

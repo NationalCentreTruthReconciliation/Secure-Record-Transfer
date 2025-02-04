@@ -13,12 +13,20 @@
     top: 0;
     left: 0;
 
+    /* Fade in/out */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+
     padding: 6px;
     font-size: 11pt;
     background-color: #333333;
     color: white;
     border: 5px;
     border-radius: 5px;
+}
+
+.form-tooltip.visible {
+    opacity: 1;
 }
 
 .tooltip-arrow {
