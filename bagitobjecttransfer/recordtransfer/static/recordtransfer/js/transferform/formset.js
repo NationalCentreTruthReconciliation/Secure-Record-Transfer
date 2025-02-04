@@ -1,15 +1,16 @@
 /**
  * Sets up the formset for the page, if one exists.
  * @param {string} prefix The prefix of the formset, e.g., rights or otheridentifiers.
- * @param {Number} numExtraForms The number of extra empty forms that should be in the form set.
  * @param {Function} onnewform An optional callback to be called after the formset is created.
  *                             The formset is passed as the first argument.
  */
-export function setupFormset(prefix, numExtraForms, onnewform = undefined) {
+export function setupFormset(prefix, onnewform = undefined) {
     const formRowRegex = new RegExp(`${prefix}-\\d+-`, "g");
 
     const maxFormsInput = document.getElementById(`id_${prefix}-MAX_NUM_FORMS`);
     const maxForms = parseInt(maxFormsInput.getAttribute("value"));
+    const initialFormsInput = document.getElementById(`id_${prefix}-INITIAL_FORMS`);
+    const initialForms = parseInt(initialFormsInput.getAttribute("value"));
     const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
 
     let formsetForms = document.querySelectorAll(".form-row");
@@ -28,8 +29,12 @@ export function setupFormset(prefix, numExtraForms, onnewform = undefined) {
     const removeFormButton = document.querySelector(".remove-form-row");
     const addFormButton = document.querySelector(".add-form-row");
 
-    if (numExtraForms === 0 && numForms > 1) {
-        formsetForms[formsetForms.length - 1].remove();
+    // Django may add extra forms when the formset is first created.
+    // Initial forms may be set to zero, though, so don't remove all the forms.
+    if (numForms > Math.max(initialForms, 1)) {
+        for (let i = numForms - 1; i >= Math.max(initialForms, 1); i--) {
+            formsetForms[i].remove();
+        }
     }
 
     refreshFormset();

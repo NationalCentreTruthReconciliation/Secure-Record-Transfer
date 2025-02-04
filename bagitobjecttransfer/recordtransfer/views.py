@@ -810,7 +810,6 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "js_context": {
-                        "num_extra_forms": self.num_extra_forms,
                         "formset_prefix": "rights",
                         "other_rights_type_id": other_rights.pk if other_rights else 0,
                     },
@@ -821,7 +820,6 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "js_context": {
-                        "num_extra_forms": self.num_extra_forms,
                         "formset_prefix": "otheridentifiers",
                     },
                 },
@@ -854,15 +852,6 @@ class TransferFormWizard(SessionWizardView):
             )
 
         return context
-
-    @property
-    def num_extra_forms(self) -> int:
-        """Compute the number of extra forms to generate if current step uses a formset."""
-        num_extra_forms = 1
-        if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
-            num_forms = len(self.get_form_initial(self.current_step.value))
-            num_extra_forms = 0 if num_forms > 0 else 1
-        return num_extra_forms
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
