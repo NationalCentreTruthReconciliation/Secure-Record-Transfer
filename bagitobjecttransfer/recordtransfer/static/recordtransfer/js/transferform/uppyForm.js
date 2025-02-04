@@ -1,3 +1,6 @@
+import "@uppy/core/dist/style.css";
+import "@uppy/dashboard/dist/style.css";
+
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
 import XHR from "@uppy/xhr-upload";
@@ -14,7 +17,10 @@ import {
     fetchNewSessionToken,
 } from "./utils";
 
-document.addEventListener("DOMContentLoaded", async () => {
+/**
+ * Sets up the Uppy space for uploading files.
+ */
+export async function setupUppy() {
     const settings = getFileUploadSettings();
     // Don't render Uppy at all if settings are not available
     if (!settings) {return;}
@@ -32,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
         updateCapacityDisplay(uppyFiles.length, totalSize);
-    };   
+    };
 
     const uppy = new Uppy(
         {
@@ -98,8 +104,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             shouldRetry: (response) => {
                 const status = response.status;
                 return (
-                    status >= 500 && status < 600 || 
-                    status === 408 || 
+                    status >= 500 && status < 600 ||
+                    status === 408 ||
                     status === 429
                 );
             }
@@ -145,7 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         if (hasIssues) {
             uppy.info(
-                "Remove the files with issues to proceed.", 
+                "Remove the files with issues to proceed.",
                 "error",
                 5000
             );
@@ -183,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 progress: { uploadComplete: true, uploadStarted: true, percentage: 100 },
                 uploadURL: file.url,
             });
-            
+
         });
     }
-});
+}

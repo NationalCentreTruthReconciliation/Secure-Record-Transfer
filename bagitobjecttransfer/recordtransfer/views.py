@@ -254,6 +254,9 @@ class About(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
+        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
+        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
+        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
         context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
         context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
         context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
@@ -324,7 +327,7 @@ class TransferFormWizard(SessionWizardView):
             FORMTITLE: gettext("Legal Agreement"),
         },
         TransferStep.CONTACT_INFO: {
-            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            TEMPLATEREF: "recordtransfer/transferform_contactinfo.html",
             FORMTITLE: gettext("Contact Information"),
             INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
@@ -353,7 +356,7 @@ class TransferFormWizard(SessionWizardView):
             ),
         },
         TransferStep.OTHER_IDENTIFIERS: {
-            TEMPLATEREF: "recordtransfer/transferform_formset.html",
+            TEMPLATEREF: "recordtransfer/transferform_otheridentifiers.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
             INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
@@ -756,24 +759,34 @@ class TransferFormWizard(SessionWizardView):
             context.update(
                 {
                     "IS_NEW": True,
-                    "new_group_form": SubmissionGroupForm(),
-                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
-                    "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
-                    "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
-                    "DEFAULT_GROUP_ID": self.submission_group_uuid,
-                    "MODAL_MODE": True,
+                    "new_group_form": SubmissionGroupForm(),
+                    "js_context": {
+                        "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+                        "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+                        "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
+                        "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
+                        "fetch_group_descriptions_url": reverse(
+                            "recordtransfer:get_user_submission_groups",
+                            kwargs={"user_id": self.request.user.pk},
+                        ),
+                        "default_group_id": self.submission_group_uuid,
+                    },
                 }
             )
 
-        elif self.current_step == TransferStep.RIGHTS:
-            all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
+        elif self.current_step == TransferStep.CONTACT_INFO:
+            context.update(
+                {
+                    "js_context": {
+                        "id_province_or_state": "id_contactinfo-province_or_state",
+                        "id_other_province_or_state": "id_contactinfo-other_province_or_state",
+                        "other_province_or_state_id": "Other",
+                    }
+                }
+            )
 
         elif self.current_step == TransferStep.SOURCE_INFO:
-            all_roles = SourceRole.objects.all().exclude(name="Other")
-            all_types = SourceType.objects.all().exclude(name="Other")
-
             other_role = SourceRole.objects.filter(name="Other").first()
             other_type = SourceType.objects.filter(name="Other").first()
 
@@ -788,13 +801,29 @@ class TransferFormWizard(SessionWizardView):
                         "other_role_id": other_role.pk if other_role else 0,
                         "other_type_id": other_type.pk if other_type else 0,
                     },
-                    "source_roles": all_roles,
-                    "source_types": all_types,
+                }
+            )
+
+        elif self.current_step == TransferStep.RIGHTS:
+            other_rights = RightsType.objects.filter(name="Other").first()
+
+            context.update(
+                {
+                    "js_context": {
+                        "formset_prefix": "rights",
+                        "other_rights_type_id": other_rights.pk if other_rights else 0,
+                    },
                 }
             )
 
         elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
-            context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
+            context.update(
+                {
+                    "js_context": {
+                        "formset_prefix": "otheridentifiers",
+                    },
+                },
+            )
 
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
@@ -823,15 +852,6 @@ class TransferFormWizard(SessionWizardView):
             )
 
         return context
-
-    @property
-    def num_extra_forms(self) -> int:
-        """Compute the number of extra forms to generate if current step uses a formset."""
-        num_extra_forms = 1
-        if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
-            num_forms = len(self.get_form_initial(self.current_step.value))
-            num_extra_forms = 0 if num_forms > 0 else 1
-        return num_extra_forms
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
@@ -1275,9 +1295,10 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         context["IS_NEW"] = False
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        context["MODAL_MODE"] = False
+        context["js_context"] = {
+            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+        }
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -1324,9 +1345,10 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["IS_NEW"] = True
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        context["MODAL_MODE"] = False
+        context["js_context"] = {
+            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+        }
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:

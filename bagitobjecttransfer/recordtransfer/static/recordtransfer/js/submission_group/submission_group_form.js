@@ -1,6 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const submissionGroupName = document.getElementById(ID_SUBMISSION_GROUP_NAME);
-    const submissionGroupDescription = document.getElementById(ID_SUBMISSION_GROUP_DESCRIPTION);
+    const contextElement = document.getElementById("py_context_submission_group");
+
+    if (!contextElement) {
+        return;
+    }
+
+    const context = JSON.parse(contextElement.textContent);
+
+    const submissionGroupName = document.getElementById(context["id_submission_group_name"]);
+    const submissionGroupDescription = document.getElementById(context["id_submission_group_description"]);
 
     const inputFields = [submissionGroupName, submissionGroupDescription];
     const saveButton = document.getElementById("id_create_group_button");

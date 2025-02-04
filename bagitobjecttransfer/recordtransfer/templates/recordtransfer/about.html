@@ -42,4 +42,77 @@
         {% endif %}
     {% endfor %}
 {% endif %}
+
+<h1 class="margin-top-25px" id="form-help">{% trans "Form Help" %}</h1>
+<p>
+    {% blocktrans %}
+    Refer to the following section if you come across a part of the form that you need assistance
+    with.
+    {% endblocktrans %}
+</p>
+
+<h2 class="margin-top-25px" id="source-types">{% trans "Source Types" %}</h2>
+<p>
+    {% blocktrans %}
+    The <i>source type</i> describes what type of entity the source of the records is. If none of
+    the provided options properly describe the source entity, select <b>Other</b> in the
+    source types dropdown and enter your own type.
+    {% endblocktrans %}
+</p>
+{% if source_types %}
+    <p>
+        {% blocktrans %}
+        The following is a description of each source type:
+        {% endblocktrans %}
+    </p>
+    <ul>
+    {% for source_type in source_types %}
+        <li><b>{{ source_type.name }}:</b> {{ source_type.description }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+<h2 class="margin-top-25px" id="source-roles">{% trans "Source Roles" %}</h2>
+<p>
+    {% blocktrans %}
+    The <i>source role</i> describes how the entity relates to the records. If none of the
+    provided options properly describe the source's relationship to the records, select
+    <b>Other</b> in the source roles dropdown and enter your own type.
+    {% endblocktrans %}
+</p>
+{% if source_roles %}
+    <p>
+        {% blocktrans %}
+        The following is a description of each source role:
+        {% endblocktrans %}
+    </p>
+    <ul>
+    {% for source_role in source_roles %}
+        <li><b>{{ source_role.name }}:</b> {{ source_role.description }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+<h2 class="margin-top-25px" id="rights-types">{% trans "Rights Types" %}</h2>
+<p>
+    {% blocktrans %}
+    Depending on the records you are transferring, there may be specific rights that govern
+    the access of your records. The following is a brief description about the types of
+    rights that are available to be used. If none suit your needs, select <b>Other</b> in
+    the rights dropdown.
+    {% endblocktrans %}
+</p>
+{% if rights_types %}
+    <p>
+        {% blocktrans %}
+        The following is a description of each rights type:
+        {% endblocktrans %}
+    </p>
+    <ul>
+    {% for rights_type in rights_types %}
+        <li><b>{{ rights_type.name }}:</b> {{ rights_type.description }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
 {% endblock %}

@@ -1,10 +1,18 @@
+from datetime import datetime, timedelta
+from typing import Union
+from unittest.mock import patch
+
 from caais.models import SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.transfer_forms import SourceInfoForm, UploadFilesForm
+from recordtransfer.forms.transfer_forms import (
+    RecordDescriptionForm,
+    SourceInfoForm,
+    UploadFilesForm,
+)
 from recordtransfer.models import SubmissionGroup, TempUploadedFile, UploadSession, User
 
 
@@ -191,6 +199,131 @@ class UserProfileFormTest(TestCase):
         form = UserProfileForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("No fields have been changed.", form.errors["__all__"])
+
+
+class RecordDescriptionFormTest(TestCase):
+    """Tests the record description form (part of the transfer form)."""
+
+    def setUp(self) -> None:
+        """Set up the test data."""
+        self.form_data: dict[str, Union[str, bool]] = {
+            "accession_title": "Test Records",
+            "date_of_materials": "2020-01-01",
+            "language_of_material": "English",
+            "preliminary_scope_and_content": "Test content description",
+        }
+
+    def test_valid_single_date(self) -> None:
+        """Test that a single yyyy-mm-dd date is accepted."""
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_valid_date_range(self) -> None:
+        """Test that a date range is accepted."""
+        self.form_data["date_of_materials"] = "2020-01-01 - 2020-01-05"
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_date_format(self) -> None:
+        """Test that invalid date formats are rejected."""
+        invalid_formats = [
+            "01-01-2020",
+            "2020/01/01",
+            "2020-1-1",
+            "2020-00-00",
+            "2020.01.01",
+            "01/01/2020 - 12/31/2020",
+        ]
+        for date_format in invalid_formats:
+            self.form_data["date_of_materials"] = date_format
+            form = RecordDescriptionForm(data=self.form_data)
+            self.assertFalse(form.is_valid())
+            self.assertIn("date_of_materials", form.errors)
+
+    def test_invalid_month_day_combinations(self) -> None:
+        """Test that invalid month-day combinations are rejected."""
+        invalid_dates = [
+            "2020-02-30",  # Invalid February date
+            "2020-04-31",  # April has 30 days
+            "2020-06-31",  # June has 30 days
+            "2020-09-31",  # September has 30 days
+            "2020-11-31",  # November has 30 days
+        ]
+        for date in invalid_dates:
+            self.form_data["date_of_materials"] = date
+            form = RecordDescriptionForm(data=self.form_data)
+            self.assertFalse(form.is_valid())
+            self.assertIn("Invalid date format", form.errors["date_of_materials"])
+
+    def test_future_start_date(self) -> None:
+        """Test that a future start date is rejected."""
+        future_date = datetime.now() + timedelta(days=365)
+        self.form_data["date_of_materials"] = future_date.strftime(r"%Y-%m-%d")
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("Date cannot be in the future", form.errors["date_of_materials"])
+
+    def test_future_end_date(self) -> None:
+        """Test that a future end date is rejected."""
+        start_date = datetime.now() - timedelta(days=30)
+        end_date = datetime.now() + timedelta(days=30)
+        date_of_materials = (
+            start_date.strftime(r"%Y-%m-%d") + " - " + end_date.strftime(r"%Y-%m-%d")
+        )
+        self.form_data["date_of_materials"] = date_of_materials
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("End date cannot be in the future", form.errors["date_of_materials"])
+
+    def test_dates_before_earliest(self) -> None:
+        """Test that dates before the earliest date are rejected."""
+        self.form_data["date_of_materials"] = "1799-12-31"
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("Date cannot be before 1800", form.errors["date_of_materials"])
+
+    def test_end_date_before_start_date(self) -> None:
+        """Test that an end date before a start date is rejected."""
+        self.form_data["date_of_materials"] = "2020-12-31 - 2020-01-01"
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("End date must be later than start date", form.errors["date_of_materials"])
+
+    def test_same_start_and_end_date(self) -> None:
+        """Test that a start and end date of the same day is accepted.
+
+        If this is the case, the end date is ignored.
+        """
+        self.form_data["date_of_materials"] = "2020-01-01 - 2020-01-01"
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["date_of_materials"], "2020-01-01")
+
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "CIRCA {date}")
+    def test_approximate_date(self) -> None:
+        """Test that the approximate date format is applied."""
+        self.form_data["date_is_approximate"] = True
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["date_of_materials"], "CIRCA 2020-01-01")
+
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "~ {date}")
+    def test_approximate_date_range(self) -> None:
+        """Test that the approximate date format is applied to a date range."""
+        self.form_data["date_of_materials"] = "2020-01-01 - 2020-12-31"
+        self.form_data["date_is_approximate"] = True
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["date_of_materials"], "~ 2020-01-01 - 2020-12-31")
+
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "[ca. {date}]")
+    def test_approximate_date_same_start_and_end(self) -> None:
+        """Test that approximate dates when the start/end dates are the same."""
+        self.form_data["date_of_materials"] = "2024-02-03 - 2024-02-03"
+        self.form_data["date_is_approximate"] = True
+        form = RecordDescriptionForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["date_of_materials"], "[ca. 2024-02-03]")
 
 
 class SourceInfoFormTest(TestCase):
