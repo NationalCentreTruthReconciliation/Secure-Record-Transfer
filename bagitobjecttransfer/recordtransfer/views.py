@@ -784,26 +784,6 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif self.current_step == TransferStep.CONTACT_INFO:
-            context.update(
-                {
-                    "js_context": {
-                        "id_province_or_state": "id_contactinfo-province_or_state",
-                        "id_other_province_or_state": "id_contactinfo-other_province_or_state",
-                        "other_province_or_state_id": "Other",
-                    }
-                }
-            )
-
-        elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
-            context.update(
-                {
-                    "js_context": {
-                        "formset_prefix": "otheridentifiers",
-                    },
-                },
-            )
-
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
                 {
@@ -811,6 +791,11 @@ class TransferFormWizard(SessionWizardView):
                     "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
                 }
+            )
+
+        elif self.current_step == TransferStep.REVIEW:
+            context["form_list"] = ReviewForm.format_form_data(
+                self.get_forms_for_review(), user=cast(User, self.request.user)
             )
         return context
 
@@ -837,9 +822,15 @@ class TransferFormWizard(SessionWizardView):
 
             js_context.update(
                 {
-                    "formset_prefix": "rights",
+                    "formset_prefix": TransferStep.RIGHTS.value,
                     "other_rights_type_id": other_rights.pk if other_rights else 0,
                 }
+            )
+        elif step == TransferStep.OTHER_IDENTIFIERS:
+            js_context.update(
+                {
+                    "formset_prefix": TransferStep.OTHER_IDENTIFIERS.value,
+                },
             )
         elif step == TransferStep.SOURCE_INFO:
             other_role = SourceRole.objects.filter(name="Other").first()
