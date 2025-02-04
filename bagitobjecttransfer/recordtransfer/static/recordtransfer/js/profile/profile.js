@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Context passed from template to JS
-    const userProfileContextElement = document.getElementById("py_context");
+    const userProfileContextElement = document.getElementById("py_context_user_profile");
 
     if (!userProfileContextElement) {
         return;
