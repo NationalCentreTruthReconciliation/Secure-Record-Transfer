@@ -11,7 +11,6 @@
     <script src="{% static 'transferform.bundle.js' %}"></script>
     <script>
         const currentFormStep = {{ wizard.steps.step1 }}
-        const currentFormStepName = "{{ wizard.steps.current }}"
     </script>
     {{ js_context|json_script:js_context_id }}
 {% endblock javascript %}
