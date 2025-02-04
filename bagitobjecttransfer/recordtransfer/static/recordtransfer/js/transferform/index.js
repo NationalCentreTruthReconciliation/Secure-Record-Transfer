@@ -14,11 +14,7 @@ import {
     setupHelpTooltips,
 } from "./widgets";
 
-document.addEventListener("DOMContentLoaded", function () {
-    if (typeof(currentFormStepName) === "undefined") {
-        return;
-    }
-    
+document.addEventListener("DOMContentLoaded", function () {  
     setupDatePickers();
     setupInputMasks();
     setupContactInfoForm();

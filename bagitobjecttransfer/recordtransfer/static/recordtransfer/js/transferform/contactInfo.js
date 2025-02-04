@@ -4,7 +4,7 @@ import { setupSelectOtherToggle } from "./otherField";
  * Sets up the contact info form.
  */
 export function setupContactInfoForm() {
-    const contextElement = document.getElementById("py_context_" + currentFormStepName);
+    const contextElement = document.getElementById("py_context_contactinfo");
 
     if (!contextElement) {
         return;

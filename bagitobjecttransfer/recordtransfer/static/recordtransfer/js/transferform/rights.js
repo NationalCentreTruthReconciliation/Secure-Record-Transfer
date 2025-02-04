@@ -5,7 +5,7 @@ import { setupSelectOtherToggle } from "./otherField";
  * Sets up the rights form.
  */
 export function setupRightsForm() {
-    const contextElement = document.getElementById("py_context_" + currentFormStepName);
+    const contextElement = document.getElementById("py_context_rights");
 
     if (!contextElement) {
         return;
