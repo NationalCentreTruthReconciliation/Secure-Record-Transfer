@@ -17,6 +17,13 @@ export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, ot
     });
 }
 
+/**
+ * Helper function to show/hide an "other" field based on the value of a select field.
+ * @param {HTMLSelectElement} selectField - The select element that triggers the visibility change
+ * @param {HTMLInputElement} otherInput - The "Other" input field element to show/hide
+ * @param {number} otherValue - The select option value that should trigger showing the "Other"
+ * field
+ */
 const updateOtherFieldVisibility = (selectField, otherInput, otherValue) => {
     if (!otherInput) {
         return;
