@@ -1,7 +1,7 @@
 import logging
 import pickle
 import re
-from typing import ClassVar, Optional, OrderedDict, Union, cast
+from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
@@ -19,6 +19,8 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
+    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+    ID_CONTACT_INFO_PROVINCE_OR_STATE,
     ID_DISPLAY_GROUP_DESCRIPTION,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
     ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
@@ -29,6 +31,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
     INFOMESSAGE,
+    OTHER_PROVINCE_OR_STATE_VALUE,
     TEMPLATEREF,
 )
 from recordtransfer.emails import (

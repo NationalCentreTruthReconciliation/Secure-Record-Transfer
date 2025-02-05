@@ -109,17 +109,17 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
         [
             path(
                 "upload-session/",
-                login_required(views.create_upload_session),
+                login_required(views.media.create_upload_session),
                 name="create_upload_session",
             ),
             path(
                 "upload-session/<session_token>/files/",
-                login_required(views.upload_or_list_files),
+                login_required(views.media.upload_or_list_files),
                 name="upload_files",
             ),
             path(
                 "upload-session/<session_token>/files/<file_name>/",
-                login_required(views.uploaded_file),
+                login_required(views.media.uploaded_file),
                 name="uploaded_file",
             ),
         ]
