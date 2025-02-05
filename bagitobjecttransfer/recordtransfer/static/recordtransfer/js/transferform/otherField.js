@@ -27,8 +27,7 @@ export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, ot
         }
 
         const container = otherInput.parentElement;
-
-        if (this.value === otherValue) {
+        if (Number(this.value) === Number(otherValue)) {
             container.classList.remove("hidden-item");
         }
         else {
