@@ -19,12 +19,15 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
+    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+    ID_CONTACT_INFO_PROVINCE_OR_STATE,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
     ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
     ID_SOURCE_INFO_SOURCE_ROLE,
     ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_SELECTION,
+    OTHER_PROVINCE_OR_STATE_VALUE,
 )
 from recordtransfer.enums import TransferStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
@@ -171,13 +174,14 @@ class ContactInfoForm(TransferForm):
         required=True,
         widget=forms.Select(
             attrs={
+                "id": ID_CONTACT_INFO_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext("Other")),
+            ("Other", gettext(OTHER_PROVINCE_OR_STATE_VALUE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
@@ -253,6 +257,7 @@ class ContactInfoForm(TransferForm):
         max_length=64,
         widget=forms.TextInput(
             attrs={
+                "id": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),

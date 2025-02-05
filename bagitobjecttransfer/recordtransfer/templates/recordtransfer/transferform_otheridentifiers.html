@@ -1,6 +1,0 @@
-{% extends 'recordtransfer/transferform_formset.html' %}
-
-{% block javascript %}
-    {{ block.super }}
-    {{ js_context|json_script:"py_context_otheridentifiers" }}
-{% endblock javascript %}
