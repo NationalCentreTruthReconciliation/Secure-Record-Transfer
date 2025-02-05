@@ -706,7 +706,7 @@ class TestCreateUploadSessionView(TestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
 
-    @patch("recordtransfer.views.UploadSession.new_session")
+    @patch("recordtransfer.views.media.UploadSession.new_session")
     def test_create_upload_session_error(self, mock_new_session: MagicMock) -> None:
         """Test that a 500 is returned if an error is raised."""
         mock_new_session.side_effect = Exception("Error creating session")
@@ -764,7 +764,7 @@ class TestSubmissionGroupCreateView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("There was an error creating the group"))
 
-    @patch("recordtransfer.views.SubmissionGroupCreateView.form_valid")
+    @patch("recordtransfer.views.submission.SubmissionGroupCreateView.form_valid")
     def test_form_valid_json_response(self, mock_form_valid: MagicMock) -> None:
         """Test that a JsonResponse is returned when the form is valid and submitted from the
         transfer page.
@@ -791,7 +791,7 @@ class TestSubmissionGroupCreateView(TestCase):
         self.assertEqual(response_json["message"], gettext("Group created"))
         self.assertEqual(response_json["status"], "success")
 
-    @patch("recordtransfer.views.SubmissionGroupCreateView.form_invalid")
+    @patch("recordtransfer.views.submission.SubmissionGroupCreateView.form_invalid")
     def test_form_invalid_json_response(self, mock_form_invalid: MagicMock) -> None:
         """Test that a JsonResponse is returned when the form is invalid and submitted from the
         transfer page.
