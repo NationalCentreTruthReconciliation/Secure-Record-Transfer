@@ -14,7 +14,7 @@ import {
     setupHelpTooltips,
 } from "./widgets";
 
-document.addEventListener("DOMContentLoaded", function () {  
+document.addEventListener("DOMContentLoaded", function () {
     setupDatePickers();
     setupInputMasks();
     setupContactInfoForm();
