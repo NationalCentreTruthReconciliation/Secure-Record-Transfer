@@ -31,6 +31,35 @@ export const getSessionToken = () => {
 };
 
 /**
+ * Fetches a new session token from the backend.
+ * This function sends a POST request to the server to create a new upload session and retrieve
+ * the session token.
+ * @returns {Promise<string|null>} - A promise that resolves to the new session token, or null if
+ * the request fails.
+ */
+export const fetchNewSessionToken = async () => {
+    try {
+        const response = await fetch("/upload-session/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+        });
+
+        if (response.ok) {
+            const responseJson = await response.json();
+            return responseJson.uploadSessionToken || null;
+        } else {
+            console.error("Failed to fetch new session token:", response.statusText);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching new session token:", error);
+        return null;
+    }
+};
+
+/**
  * Sets the upload session token in the DOM.
  * Looks for an input element with an ID ending in "session_token", which should exist on the
  * upload step of the transfer form.
@@ -50,7 +79,7 @@ export const setSessionToken = (token) => {
  * @returns {?object} The parsed JSON settings object if element exists, null otherwise.
  */
 export const getFileUploadSettings = () => {
-    const settingsElement = document.getElementById("py_context_file_upload_settings");
+    const settingsElement = document.getElementById("py_context_uploadfiles");
     if (!settingsElement) {
         return null;
     }
@@ -75,7 +104,7 @@ export const fetchUploadedFiles = async () => {
     let response;
 
     while (attempt < maxRetries) {
-        response = await fetch(`/transfer/upload-session/${sessionToken}/files/`, {
+        response = await fetch(`/upload-session/${sessionToken}/files/`, {
             method: "GET",
         });
 
@@ -124,7 +153,7 @@ export const sendDeleteRequestForFile = async (filename) => {
         console.error("Cannot delete file without a session token");
         return null;
     }
-    const response = await fetch(`/transfer/upload-session/${sessionToken}/files/${filename}`, {
+    const response = await fetch(`/upload-session/${sessionToken}/files/${filename}`, {
         method: "DELETE",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"),

@@ -40,6 +40,7 @@ services:
   rq:
     build:
       context: .
+      target: dev
       dockerfile: Containerfile
       args:
           WEBPACK_MODE: development
@@ -68,6 +69,7 @@ services:
   app:
     build:
       context: .
+      target: dev
       dockerfile: Containerfile
       args:
           WEBPACK_MODE: development

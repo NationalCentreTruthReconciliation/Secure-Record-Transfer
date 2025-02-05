@@ -1,5 +1,9 @@
 """Forms specific to transferring files with a new submission."""
 
+from __future__ import annotations
+
+import re
+from datetime import datetime
 from typing import Any, Optional, OrderedDict, TypedDict, Union
 from uuid import UUID
 
@@ -15,12 +19,15 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
+    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+    ID_CONTACT_INFO_PROVINCE_OR_STATE,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
     ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
     ID_SOURCE_INFO_SOURCE_ROLE,
     ID_SOURCE_INFO_SOURCE_TYPE,
     ID_SUBMISSION_GROUP_SELECTION,
+    OTHER_PROVINCE_OR_STATE_VALUE,
 )
 from recordtransfer.enums import TransferStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
@@ -167,13 +174,14 @@ class ContactInfoForm(TransferForm):
         required=True,
         widget=forms.Select(
             attrs={
+                "id": ID_CONTACT_INFO_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext("Other")),
+            ("Other", gettext(OTHER_PROVINCE_OR_STATE_VALUE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
@@ -249,6 +257,7 @@ class ContactInfoForm(TransferForm):
         max_length=64,
         widget=forms.TextInput(
             attrs={
+                "id": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
@@ -506,55 +515,92 @@ class SourceInfoForm(TransferForm):
 class RecordDescriptionForm(TransferForm):
     """The Description Information portion of the form. Contains fields from Section 3 of CAAIS."""
 
+    DATE_REGEX = (
+        r"^(?P<start_date>\d{4}-\d{2}-\d{2})"
+        r"(?:\s-\s"
+        r"(?P<end_date>\d{4}-\d{2}-\d{2})"
+        r")?$"
+    )
+
     class Meta:
         """Meta information for the form."""
 
         transfer_step = TransferStep.RECORD_DESCRIPTION
 
     def clean(self) -> dict:
-        """Clean form data, and create a date_of_materials field derived from the start and end
-        date fields.
-        """
+        """Form date as approximate if user chose to mark the date as approximate."""
         cleaned_data = super().clean()
 
-        err = False
+        if date := cleaned_data.get("date_of_materials"):
+            match_obj = re.match(RecordDescriptionForm.DATE_REGEX, date)
 
-        if not settings.USE_DATE_WIDGETS:
-            start_date_text = cleaned_data["start_date_of_material_text"]
-            end_date_text = cleaned_data["end_date_of_material_text"]
+            if match_obj is None:
+                self.add_error("date_of_materials", gettext("Invalid date format"))
+                return cleaned_data
 
-        else:
-            start_date = cleaned_data.get("start_date_of_material")
-            end_date = cleaned_data.get("end_date_of_material")
+            raw_start_date = match_obj.group("start_date")
 
-            err = False
+            try:
+                raw_end_date = match_obj.group("end_date")
+            except IndexError:
+                raw_end_date = None
 
-            if not start_date:
-                self.add_error("start_date_of_material", "Start date was not valid")
-                err = True
+            invalid_date_message_added = False
+            future_date_message_added = False
+            early_date_message_added = False
 
-            if not end_date:
-                self.add_error("end_date_of_material", "End date was not valid")
-                err = True
+            start_date = None
 
-            if start_date and end_date and end_date < start_date:
-                self.add_error("end_date_of_material", "End date cannot be before start date")
-                err = True
+            try:
+                start_date = datetime.strptime(raw_start_date, r"%Y-%m-%d").date()
 
-            if not err:
-                start_date_text = start_date.strftime(r"%Y-%m-%d")
-                end_date_text = end_date.strftime(r"%Y-%m-%d")
+                if start_date > datetime.now().date():
+                    self.add_error("date_of_materials", gettext("Date cannot be in the future"))
+                    future_date_message_added = True
 
-        if not err:
-            if cleaned_data.get("start_date_is_approximate", False):
-                start_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=start_date_text)
-            if cleaned_data.get("end_date_is_approximate", False):
-                end_date_text = settings.APPROXIMATE_DATE_FORMAT.format(date=end_date_text)
+                if start_date < datetime(1800, 1, 1).date():
+                    self.add_error("date_of_materials", gettext("Date cannot be before 1800"))
+                    early_date_message_added = True
 
-            if start_date == end_date:
-                cleaned_data["date_of_materials"] = start_date
-            else:
-                cleaned_data["date_of_materials"] = f"{start_date} - {end_date}"
+            except ValueError:
+                self.add_error("date_of_materials", gettext("Invalid date format"))
+                invalid_date_message_added = True
+
+            end_date = None
+            if raw_end_date:
+                try:
+                    end_date = datetime.strptime(raw_end_date, r"%Y-%m-%d").date()
+
+                    if not future_date_message_added and end_date > datetime.now().date():
+                        self.add_error(
+                            "date_of_materials", gettext("End date cannot be in the future")
+                        )
+
+                    if not early_date_message_added and end_date < datetime(1800, 1, 1).date():
+                        self.add_error(
+                            "date_of_materials", gettext("End date cannot be before 1800")
+                        )
+
+                except ValueError:
+                    if not invalid_date_message_added:
+                        self.add_error(
+                            "date_of_materials", gettext("Invalid date format for end date")
+                        )
+
+            if end_date and start_date:
+                if end_date < start_date:
+                    self.add_error(
+                        "date_of_materials",
+                        gettext("End date must be later than start date"),
+                    )
+
+                if end_date == start_date:
+                    cleaned_data["date_of_materials"] = raw_start_date
+
+        if cleaned_data.get("date_is_approximate", False) and (
+            date := cleaned_data.get("date_of_materials")
+        ):
+            cleaned_data["date_of_materials"] = settings.APPROXIMATE_DATE_FORMAT.format(date=date)
 
         return cleaned_data
 
@@ -566,85 +612,37 @@ class RecordDescriptionForm(TransferForm):
         label=gettext("Title"),
     )
 
-    if not settings.USE_DATE_WIDGETS:
-        # Use _text to avoid jQuery input masks
-        start_date_of_material_text = forms.CharField(
-            min_length=2,
-            max_length=64,
-            required=True,
-            widget=forms.TextInput(attrs={"placeholder": gettext("e.g., 2000-03-14")}),
-            label=gettext("Earliest date"),
-            help_text=gettext(
-                "Enter the earliest date relevant to the files you're transferring."
-            ),
-        )
-        end_date_of_material_text = forms.CharField(
-            min_length=2,
-            max_length=64,
-            required=True,
-            widget=forms.TextInput(
-                attrs={
-                    "placeholder": "e.g., Fall 1925",
-                }
-            ),
-            label=gettext("Latest date"),
-            help_text=gettext("Enter the latest date relevant to the files you're transferring."),
-        )
-        start_date_is_approximate = False
-        end_date_is_approximate = False
+    date_of_materials = forms.RegexField(
+        regex=DATE_REGEX,
+        min_length=10,
+        max_length=23,
+        required=True,
+        error_messages={
+            "required": gettext("This field is required."),
+            "invalid": gettext("Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"),
+        },
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": gettext("2000-03-14 - 2001-05-06"),
+                "class": "date-range-picker" if settings.USE_DATE_WIDGETS else "date-range-text",
+                **({"readonly": "readonly"} if settings.USE_DATE_WIDGETS else {}),
+            }
+        ),
+        label=gettext("Date of materials"),
+        help_text=gettext(
+            "Enter the range of dates that the materials cover, or a single date if there is "
+            "no range."
+        ),
+    )
 
-    else:
-        start_date_of_material = forms.DateField(
-            input_formats=[r"%Y-%m-%d"],
-            required=True,
-            widget=forms.DateInput(
-                attrs={
-                    "class": "start_date_picker reduce-form-field-width",
-                    "autocomplete": "off",
-                    "placeholder": "yyyy-mm-dd",
-                }
-            ),
-            label=gettext("Earliest date"),
-            help_text=gettext(
-                "Enter the earliest date relevant to the files you're transferring."
-            ),
-        )
-
-        # This field is intended to be tied to a button in a date picker for the start date
-        start_date_is_approximate = forms.BooleanField(
-            required=False,
-            widget=forms.CheckboxInput(
-                attrs={
-                    "hidden": True,
-                }
-            ),
-            label="hidden",
-        )
-
-        end_date_of_material = forms.DateField(
-            input_formats=[r"%Y-%m-%d"],
-            required=True,
-            widget=forms.DateInput(
-                attrs={
-                    "class": "end_date_picker reduce-form-field-width",
-                    "autocomplete": "off",
-                    "placeholder": "yyyy-mm-dd",
-                }
-            ),
-            label=gettext("Latest date"),
-            help_text=gettext("Enter the latest date relevant to the files you're transferring."),
-        )
-
-        # This field is intended to be tied to a button in a date picker for the end date
-        end_date_is_approximate = forms.BooleanField(
-            required=False,
-            widget=forms.CheckboxInput(
-                attrs={
-                    "hidden": True,
-                }
-            ),
-            label="hidden",
-        )
+    date_is_approximate = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(),
+        label=gettext("Date is approximated"),
+        help_text=gettext(
+            "Check this box if the date is approximate, or if you are unsure of the date."
+        ),
+    )
 
     language_of_material = forms.CharField(
         required=True,
@@ -734,7 +732,7 @@ class RightsForm(TransferForm):
         rights_type = cleaned_data.get("rights_type", None)
         other_rights_type = cleaned_data.get("other_rights_type", "")
 
-        if not rights_type and not other_rights_type:
+        if rights_type and rights_type.name.lower() == "other" and not other_rights_type:
             self.add_error(
                 "rights_type",
                 gettext(

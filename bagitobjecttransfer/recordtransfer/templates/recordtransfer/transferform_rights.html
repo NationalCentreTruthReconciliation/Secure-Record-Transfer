@@ -4,24 +4,8 @@
 {% block form_explanation %}
     <p>
         {% blocktrans %}
-        <a id="show-rights-dialog" class="non-nav-link" href="#">Click here</a> for an explanation of the different types
-        of rights.
+        <a class="non-nav-link" target="_blank" href="/about/#rights-types">Click here</a>
+        for an explanation of the different types of rights.
         {% endblocktrans %}
     </p>
-    <br/>
-    <div id="rights-dialog" title="Explanation of Rights">
-        <p>
-            {% blocktrans %}
-            Depending on the records you are transferring, there may be specific rights that govern
-            the access of your records. The following is a brief description about the types of
-            rights that are available to be used. If none suit your needs, select <b>Other</b> in
-            the rights dropdown.
-            {% endblocktrans %}
-        </p>
-        {% for right in rights %}
-            <p>
-                <b>{{ right.name }}:</b> {{ right.description }}
-            </p>
-        {% endfor %}
-    </div>
 {% endblock %}

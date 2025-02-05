@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.querySelector(".menu-overlay");
 
     const toggleButton = document.querySelector(".nav-toggle-button");
-    
+
     toggleButton.addEventListener("click", function(e) {
         e.preventDefault();
         toggleButton.classList.toggle("active");

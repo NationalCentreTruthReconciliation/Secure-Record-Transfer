@@ -107,15 +107,19 @@ else:
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
-            path("transfer/uploadfile/", login_required(views.media.upload_file), name="uploadfile"),
             path(
-                "transfer/upload-session/<session_token>/files/",
-                login_required(views.media.list_uploaded_files),
-                name="list_uploaded_files",
+                "upload-session/",
+                login_required(views.create_upload_session),
+                name="create_upload_session",
             ),
             path(
-                "transfer/upload-session/<session_token>/files/<file_name>/",
-                login_required(views.media.uploaded_file),
+                "upload-session/<session_token>/files/",
+                login_required(views.upload_or_list_files),
+                name="upload_files",
+            ),
+            path(
+                "upload-session/<session_token>/files/<file_name>/",
+                login_required(views.uploaded_file),
                 name="uploaded_file",
             ),
         ]

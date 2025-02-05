@@ -2,13 +2,6 @@
 {% load static %}
 {% load i18n %}
 
-{% block javascript %}
-    {{ block.super }}
-    <script>
-        const NUM_EXTRA_FORMS = {{ NUM_EXTRA_FORMS }};
-    </script>
-{% endblock javascript %}
-
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
     {% for form in wizard.form.forms %}

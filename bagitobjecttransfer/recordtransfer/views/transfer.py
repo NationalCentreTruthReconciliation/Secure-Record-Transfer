@@ -114,7 +114,7 @@ class TransferFormWizard(SessionWizardView):
             ),
         },
         TransferStep.UPLOAD_FILES: {
-            TEMPLATEREF: "recordtransfer/transferform_dropzone.html",
+            TEMPLATEREF: "recordtransfer/transferform_uploadfiles.html",
             FORMTITLE: gettext("Upload Files"),
             INFOMESSAGE: gettext(
                 "Add any final notes you would like to add, and upload your files"
@@ -474,11 +474,13 @@ class TransferFormWizard(SessionWizardView):
         # If there are entries for every step of the form, then the review step has been reached
         return len(self.storage.data.get("step_data", [])) == self.steps.count
 
-    def get_context_data(self, form, **kwargs):
-        """Retrieve context data for the current form template.
+    def get_context_data(self, form, **kwargs) -> dict[str, Any]:
+        """Retrieve context data for the current form template, including context for the
+        JavaScript files used alongside the template.
 
         Args:
             form: The form to display to the user.
+            **kwargs: Additional keyword arguments.
 
         Returns:
             dict: A dictionary of context data to be used to render the form template.
@@ -487,78 +489,46 @@ class TransferFormWizard(SessionWizardView):
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
 
-        # Show the review button if the user is on the step before the review step, or if the user
-        # has reached the review step before
+        if INFOMESSAGE in self._TEMPLATES[self.current_step]:
+            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
+
+        # Show the review button if the user has reached the step before the review step
+        # or if they have reached the review step once before
         if self.steps.step1 < self.steps.count and (
             self.steps.step1 == self.steps.count - 1 or self.review_step_reached
         ):
             context["SHOW_REVIEW_BUTTON"] = True
 
-        if INFOMESSAGE in self._TEMPLATES[self.current_step]:
-            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
+        # Add template and JS contexts
+        context.update(self._get_template_context())
+        context["js_context"] = self._get_javascript_context()
+        context["js_context_id"] = "py_context_" + self.steps.current
+
+        return context
+
+    def _get_template_context(self) -> dict[str, Any]:
+        """Retrieve context data for the current form template.
+
+        Returns:
+            A dictionary of context data to be used to render the form template.
+        """
+        context = {}
 
         if self.current_step == TransferStep.GROUP_TRANSFER:
             context.update(
                 {
                     "IS_NEW": True,
-                    "new_group_form": SubmissionGroupForm(),
-                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
-                    "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
-                    "ID_SUBMISSION_GROUP_SELECTION": ID_SUBMISSION_GROUP_SELECTION,
-                    "DEFAULT_GROUP_ID": self.submission_group_uuid,
-                    "MODAL_MODE": True,
+                    "new_group_form": SubmissionGroupForm(),
                 }
             )
-
-        elif self.current_step == TransferStep.RIGHTS:
-            all_rights = RightsType.objects.all().exclude(name="Other")
-            context.update({"rights": all_rights, "NUM_EXTRA_FORMS": self.num_extra_forms})
-
-        elif self.current_step == TransferStep.SOURCE_INFO:
-            all_roles = SourceRole.objects.all().exclude(name="Other")
-            all_types = SourceType.objects.all().exclude(name="Other")
-
-            other_role = SourceRole.objects.filter(name="Other").first()
-            other_type = SourceType.objects.filter(name="Other").first()
-
-            context.update(
-                {
-                    "js_context": {
-                        "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-                        "id_source_type": ID_SOURCE_INFO_SOURCE_TYPE,
-                        "id_other_source_type": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
-                        "id_source_role": ID_SOURCE_INFO_SOURCE_ROLE,
-                        "id_other_source_role": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
-                        "other_role_id": other_role.pk if other_role else 0,
-                        "other_type_id": other_type.pk if other_type else 0,
-                    },
-                    "source_roles": all_roles,
-                    "source_types": all_types,
-                }
-            )
-
-        elif self.current_step == TransferStep.OTHER_IDENTIFIERS:
-            context.update({"NUM_EXTRA_FORMS": self.num_extra_forms})
 
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
                 {
-                    # For use in template
                     "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
                     "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
-                    # For use in JS
-                    "js_context": {
-                        "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
-                        "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
-                        "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
-                        "ACCEPTED_FILE_FORMATS": [
-                            f".{format}"
-                            for formats in settings.ACCEPTED_FILE_FORMATS.values()
-                            for format in formats
-                        ],
-                    },
                 }
             )
 
@@ -566,17 +536,84 @@ class TransferFormWizard(SessionWizardView):
             context["form_list"] = ReviewForm.format_form_data(
                 self.get_forms_for_review(), user=cast(User, self.request.user)
             )
-
         return context
 
-    @property
-    def num_extra_forms(self) -> int:
-        """Compute the number of extra forms to generate if current step uses a formset."""
-        num_extra_forms = 1
-        if self.current_step in [TransferStep.RIGHTS, TransferStep.OTHER_IDENTIFIERS]:
-            num_forms = len(self.get_form_initial(self.current_step.value))
-            num_extra_forms = 0 if num_forms > 0 else 1
-        return num_extra_forms
+    def _get_javascript_context(self) -> dict[str, Any]:
+        """Get context for the current form template that gets passed to the JavaScript files.
+
+        Returns:
+            A dictionary of context data to be used in the JavaScript files. Can be empty.
+        """
+        js_context = {}
+
+        step = self.current_step
+        if step == TransferStep.CONTACT_INFO:
+            js_context.update(
+                {
+                    "id_province_or_state": ID_CONTACT_INFO_PROVINCE_OR_STATE,
+                    "id_other_province_or_state": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+                    "other_province_or_state_id": OTHER_PROVINCE_OR_STATE_VALUE,
+                }
+            )
+
+        elif step == TransferStep.RIGHTS:
+            other_rights = RightsType.objects.filter(name="Other").first()
+
+            js_context.update(
+                {
+                    "formset_prefix": TransferStep.RIGHTS.value,
+                    "other_rights_type_id": other_rights.pk if other_rights else 0,
+                }
+            )
+        elif step == TransferStep.OTHER_IDENTIFIERS:
+            js_context.update(
+                {
+                    "formset_prefix": TransferStep.OTHER_IDENTIFIERS.value,
+                },
+            )
+        elif step == TransferStep.SOURCE_INFO:
+            other_role = SourceRole.objects.filter(name="Other").first()
+            other_type = SourceType.objects.filter(name="Other").first()
+
+            js_context.update(
+                {
+                    "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                    "id_source_type": ID_SOURCE_INFO_SOURCE_TYPE,
+                    "id_other_source_type": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                    "id_source_role": ID_SOURCE_INFO_SOURCE_ROLE,
+                    "id_other_source_role": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+                    "other_role_id": other_role.pk if other_role else 0,
+                    "other_type_id": other_type.pk if other_type else 0,
+                }
+            )
+        elif step == TransferStep.GROUP_TRANSFER:
+            js_context.update(
+                {
+                    "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
+                    "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+                    "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
+                    "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
+                    "fetch_group_descriptions_url": reverse(
+                        "recordtransfer:get_user_submission_groups",
+                        kwargs={"user_id": self.request.user.pk},
+                    ),
+                    "default_group_id": self.submission_group_uuid,
+                },
+            )
+        elif step == TransferStep.UPLOAD_FILES:
+            js_context.update(
+                {
+                    "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
+                    "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                    "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    "ACCEPTED_FILE_FORMATS": [
+                        f".{format}"
+                        for formats in settings.ACCEPTED_FILE_FORMATS.values()
+                        for format in formats
+                    ],
+                }
+            )
+        return js_context
 
     def get_all_cleaned_data(self):
         """Clean data, and populate CAAIS fields that are deferred to being created until after the
@@ -725,8 +762,3 @@ class DeleteTransfer(TemplateView):
         except KeyError:
             LOGGER.error("No UUID provided for deletion")
         return redirect("recordtransfer:userprofile")
-
-
-def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubmission]:
-    """Retrieve an in-progress submission for a given user and UUID."""
-    return InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
