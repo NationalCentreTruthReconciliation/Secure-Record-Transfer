@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'transferform.css' %}">
 {% endblock stylesheet%}
 {% block content %}
+    {% include "includes/messages.html" %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
             {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
@@ -26,8 +27,6 @@
             <b>{{ info_message }}</b>
         </p>
     {% endif %}
-    {% block messages %}
-    {% endblock messages %}
     {% block form_explanation %}
     {% endblock form_explanation %}
     <form id="transfer-form" action="" method="post">
