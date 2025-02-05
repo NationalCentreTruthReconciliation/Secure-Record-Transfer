@@ -7,31 +7,20 @@
  */
 export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, otherValue) {
     const selectField = document.getElementById(selectFieldInputId);
+    const otherInput = document.getElementById(otherFieldInputId);
 
-    // Hide element at first (if needed)
-    if (selectField.value !== otherValue) {
-        const otherInput = document.getElementById(otherFieldInputId);
-
-        if (otherInput) {
-            const container = otherInput.parentElement;
-            container.classList.add("hidden-item");
-        }
-    }
+    updateOtherFieldVisibility(selectField, otherInput, otherValue);
 
     // Update other element when the select field changes
     selectField.addEventListener("change", function () {
-        const otherInput = document.getElementById(otherFieldInputId);
-
-        if (!otherInput) {
-            return;
-        }
-
-        const container = otherInput.parentElement;
-        if (Number(this.value) === Number(otherValue)) {
-            container.classList.remove("hidden-item");
-        }
-        else {
-            container.classList.add("hidden-item");
-        }
+        updateOtherFieldVisibility(selectField, otherInput, otherValue);
     });
 }
+
+const updateOtherFieldVisibility = (selectField, otherInput, otherValue) => {
+    if (!otherInput) {
+        return;
+    }
+    const shouldShow = Number(selectField.value) === Number(otherValue);
+    otherInput.parentElement.classList.toggle("hidden-item", !shouldShow);
+};
