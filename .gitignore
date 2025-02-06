@@ -10,7 +10,7 @@
 Icon
 
 # Media folder
-bagitobjecttransfer/media/
+app/media/
 
 # Thumbnails
 ._*
@@ -90,7 +90,7 @@ __pycache__/
 local_settings.py
 
 # Collected static files
-bagitobjecttransfer/static/
+app/static/
 
 .env
 .dev.env

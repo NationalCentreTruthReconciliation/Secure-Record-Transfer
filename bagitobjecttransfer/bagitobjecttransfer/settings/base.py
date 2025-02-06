@@ -41,7 +41,7 @@ MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
 ]
 
-ROOT_URLCONF = "bagitobjecttransfer.urls"
+ROOT_URLCONF = "app.urls"
 
 loaders = [
     "django.template.loaders.filesystem.Loader",
@@ -73,7 +73,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # WSGI
 
-WSGI_APPLICATION = "bagitobjecttransfer.wsgi.application"
+WSGI_APPLICATION = "app.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
