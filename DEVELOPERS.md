@@ -58,8 +58,8 @@ Use this `launch.json` configuration in VSCode to debug the application:
             "justMyCode": true,
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/bagitobjecttransfer/",
-                    "remoteRoot": "/app/bagitobjecttransfer/"
+                    "localRoot": "${workspaceFolder}/app/",
+                    "remoteRoot": "/opt/secure-record-transfer/app/"
                 },
             ]
         },
@@ -75,8 +75,8 @@ Use this `launch.json` configuration in VSCode to debug the application:
             "justMyCode": true,
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/bagitobjecttransfer/",
-                    "remoteRoot": "/app/bagitobjecttransfer/"
+                    "localRoot": "${workspaceFolder}/app/",
+                    "remoteRoot": "/opt/secure-record-transfer/app/"
                 },
             ]
         }
@@ -149,7 +149,7 @@ Use these settings in your [local VSCode settings.json](https://code.visualstudi
 {
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
-        "./bagitobjecttransfer"
+        "./app"
     ],
 }
 ```
