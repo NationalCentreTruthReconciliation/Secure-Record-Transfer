@@ -18,6 +18,10 @@ def pytest_collection_modifyitems(session, config, items) -> None:
         try:
             npm_cmd = shutil.which("npm") or "npm"
             subprocess.run(
+                [npm_cmd, "install"],
+                check=True,
+            )
+            subprocess.run(
                 [npm_cmd, "run", "build"],
                 check=True,
                 env={
@@ -26,7 +30,7 @@ def pytest_collection_modifyitems(session, config, items) -> None:
                 },
             )
         except subprocess.CalledProcessError as e:
-            pytest.exit(f"Failed to run npm build: {e}")
+            pytest.exit(f"Failed to run npm install or build: {e}")
         except FileNotFoundError as e:
             pytest.exit(
                 f"npm command not found (got: {e}). npm must be installed to run e2e tests."
