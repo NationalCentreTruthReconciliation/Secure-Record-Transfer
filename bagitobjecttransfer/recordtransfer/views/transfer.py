@@ -1,67 +1,31 @@
+"""Views for the transfer form and submission process, responsible for creating, saving, and
+deleting in-progress submissions, as well as handling the final submission of a transfer.
+"""
+
 import logging
 import pickle
 import re
 from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
-from caais.export import ExportVersion
 from caais.models import RightsType, SourceRole, SourceType
-from clamav.scan import check_for_malware
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login, update_session_auth_hash
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
-from django.db.models.base import Model as Model
-from django.forms import (
-    BaseForm,
-    BaseFormSet,
-    BaseInlineFormSet,
-    BaseModelForm,
-    BaseModelFormSet,
-    ModelForm,
-)
-from django.http import (
-    Http404,
-    HttpRequest,
-    HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    HttpResponseRedirect,
-    JsonResponse,
-    QueryDict,
-)
+from django.forms import BaseForm, BaseFormSet, BaseInlineFormSet, BaseModelFormSet, ModelForm
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
-from django.utils.text import slugify
 from django.utils.translation import gettext
-from django.views.decorators.http import require_http_methods
-from django.views.generic import (
-    CreateView,
-    DetailView,
-    FormView,
-    TemplateView,
-    UpdateView,
-    View,
-)
+from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
     FORMTITLE,
-    GROUPS_PAGE,
-    ID_CONFIRM_NEW_PASSWORD,
     ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
     ID_CONTACT_INFO_PROVINCE_OR_STATE,
-    ID_CURRENT_PASSWORD,
     ID_DISPLAY_GROUP_DESCRIPTION,
-    ID_FIRST_NAME,
-    ID_GETS_NOTIFICATION_EMAILS,
-    ID_LAST_NAME,
-    ID_NEW_PASSWORD,
     ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
     ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
     ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
@@ -70,22 +34,17 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_DESCRIPTION,
     ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_SELECTION,
-    IN_PROGRESS_PAGE,
     INFOMESSAGE,
     OTHER_PROVINCE_OR_STATE_VALUE,
-    SUBMISSIONS_PAGE,
     TEMPLATEREF,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
     send_thank_you_for_your_transfer,
-    send_user_account_updated,
-    send_user_activation_email,
     send_your_transfer_did_not_go_through,
 )
 from recordtransfer.enums import TransferStep
-from recordtransfer.forms import SignUpForm, UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
@@ -95,228 +54,15 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
-from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import (
-    accept_file,
-    accept_session,
-    get_human_readable_file_count,
-    get_human_readable_size,
-)
+from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
 LOGGER = logging.getLogger(__name__)
-
-
-class Index(TemplateView):
-    """The homepage."""
-
-    template_name = "recordtransfer/home.html"
-
-
-def media_request(request: HttpRequest, path: str) -> HttpResponse:
-    """Respond to whether a media request is allowed or not."""
-    if not request.user.is_authenticated:
-        return HttpResponseForbidden("You do not have permission to access this resource.")
-
-    if not path:
-        return HttpResponseNotFound("The requested resource could not be found")
-
-    user = request.user
-    if not user.is_staff:
-        return HttpResponseForbidden("You do not have permission to access this resource.")
-
-    response = HttpResponse(headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")})
-
-    # Nginx will assign its own headers for the following:
-    del response["Content-Type"]
-    del response["Content-Disposition"]
-    del response["Accept-Ranges"]
-    del response["Set-Cookie"]
-    del response["Cache-Control"]
-    del response["Expires"]
-
-    return response
 
 
 class TransferSent(TemplateView):
     """The page a user sees when they finish a transfer."""
 
     template_name = "recordtransfer/transfersent.html"
-
-
-class SystemErrorPage(TemplateView):
-    """The page a user sees when there is some system error."""
-
-    template_name = "recordtransfer/systemerror.html"
-
-
-class UserProfile(UpdateView):
-    """View to show two things:
-    - The user's profile information
-    - A list of the Submissions a user has created via transfer.
-    """
-
-    template_name = "recordtransfer/profile.html"
-    paginate_by = 10
-    form_class = UserProfileForm
-    success_url = reverse_lazy("recordtransfer:userprofile")
-    success_message = gettext("Preferences updated")
-    password_change_success_message = gettext("Password updated")
-    error_message = gettext("There was an error updating your preferences. Please try again.")
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        """Add context data for the user profile view."""
-        context = super().get_context_data(**kwargs)
-
-        # Paginate InProgressSubmission
-        in_progress_submissions = InProgressSubmission.objects.filter(
-            user=self.request.user
-        ).order_by("-last_updated")
-        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
-        in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
-        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
-
-        # Paginate Submission
-        user_submissions = Submission.objects.filter(user=self.request.user).order_by(
-            "-submission_date"
-        )
-        submissions_paginator = Paginator(user_submissions, self.paginate_by)
-        submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
-        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
-
-        # Paginate SubmissionGroup
-        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
-            "name"
-        )
-        groups_paginator = Paginator(submission_groups, self.paginate_by)
-        groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
-        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
-
-        context.update(
-            {
-                # Form field element IDs
-                "js_context": {
-                    "ID_FIRST_NAME": ID_FIRST_NAME,
-                    "ID_LAST_NAME": ID_LAST_NAME,
-                    "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
-                    "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
-                    "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
-                    "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
-                },
-                # Pagination
-                "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
-                "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
-                "GROUPS_PAGE": GROUPS_PAGE,
-            }
-        )
-
-        return context
-
-    def get_form_kwargs(self) -> dict[str, Any]:
-        """Pass User instance to form to initialize it."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_object()
-        return kwargs
-
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle valid form submission."""
-        response = super().form_valid(form)
-        message = self.success_message
-        if form.cleaned_data.get("new_password"):
-            update_session_auth_hash(self.request, form.instance)
-            message = self.password_change_success_message
-
-            context = {
-                "subject": gettext("Password updated"),
-                "changed_item": gettext("password"),
-                "changed_status": gettext("updated"),
-            }
-            send_user_account_updated.delay(self.get_object(), context)
-
-        messages.success(self.request, message)
-        return response
-
-    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle invalid form submission."""
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        profile_form = cast(UserProfileForm, form)
-        profile_form.reset_form()
-        return super().form_invalid(profile_form)
-
-
-class About(TemplateView):
-    """About the application."""
-
-    template_name = "recordtransfer/about.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["accepted_files"] = settings.ACCEPTED_FILE_FORMATS
-        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
-        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
-        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
-        context["max_total_upload_size"] = settings.MAX_TOTAL_UPLOAD_SIZE
-        context["max_single_upload_size"] = settings.MAX_SINGLE_UPLOAD_SIZE
-        context["max_total_upload_count"] = settings.MAX_TOTAL_UPLOAD_COUNT
-        return context
-
-
-class ActivationSent(TemplateView):
-    """The page a user sees after creating an account."""
-
-    template_name = "recordtransfer/activationsent.html"
-
-
-class ActivationComplete(TemplateView):
-    """The page a user sees when their account has been activated."""
-
-    template_name = "recordtransfer/activationcomplete.html"
-
-
-class ActivationInvalid(TemplateView):
-    """The page a user sees if their account could not be activated."""
-
-    template_name = "recordtransfer/activationinvalid.html"
-
-
-class CreateAccount(FormView):
-    """Allows a user to create a new account with the SignUpForm. When the form is submitted
-    successfully, send an email to that user with a link that lets them activate their account.
-    """
-
-    template_name = "recordtransfer/signupform.html"
-    form_class = SignUpForm
-    success_url = reverse_lazy("recordtransfer:activationsent")
-
-    def form_valid(self, form):
-        new_user = form.save(commit=False)
-        new_user.is_active = False
-        new_user.gets_submission_email_updates = False
-        new_user.save()
-        send_user_activation_email.delay(new_user)
-        return super().form_valid(form)
-
-
-def activate_account(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.confirmed_email = True
-        user.save()
-        login(request, user)
-        return HttpResponseRedirect(reverse("recordtransfer:accountcreated"))
-
-    return HttpResponseRedirect(reverse("recordtransfer:activationinvalid"))
 
 
 class TransferFormWizard(SessionWizardView):
@@ -990,217 +736,6 @@ class TransferFormWizard(SessionWizardView):
         return group
 
 
-def get_in_progress_submission(user: User, uuid: str) -> Optional[InProgressSubmission]:
-    """Retrieve an in-progress submission for a given user and UUID."""
-    return InProgressSubmission.objects.filter(user=user, uuid=uuid).first()
-
-
-@require_http_methods(["POST"])
-def create_upload_session(request: HttpRequest) -> JsonResponse:
-    """Create a new upload session and return the session token.
-
-    Args:
-        request: The POST request sent by the user.
-
-    Returns:
-        JsonResponse: The session token of the newly created upload session.
-    """
-    try:
-        user: User = cast(User, request.user)
-        session = UploadSession.new_session(user=user)
-        return JsonResponse({"uploadSessionToken": session.token}, status=201)
-    except Exception as exc:
-        LOGGER.error("Error creating upload session: %s", str(exc), exc_info=exc)
-        return JsonResponse(
-            {"error": gettext("There was an internal server error. Please try again.")},
-            status=500,
-        )
-
-
-@require_http_methods(["GET", "POST"])
-def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
-    """Upload a single file to the server list the files uploaded in a given upload session. The
-    file is added to the upload session using the session token passed as a parameter in the
-    request. If a session token is invalid, an error message is returned.
-
-    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
-    file is not an accepted type, an error message is returned.
-
-    Args:
-        request: The HTTP GET or POST request
-        session_token: The upload session token from the URL
-
-    Returns:
-        JsonResponse: If the list or upload operation was successful, the session token
-        `uploadSessionToken` is included in the response. If not successful, the error description
-        `error` is included.
-    """
-    try:
-        user: User = cast(User, request.user)
-        session = UploadSession.objects.filter(token=session_token, user=user).first()
-        if not session:
-            return JsonResponse(
-                {
-                    "uploadSessionToken": session_token,
-                    "error": gettext("Invalid upload session token"),
-                },
-                status=400,
-            )
-
-        if request.method == "GET":
-            file_metadata = [
-                {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
-                for f in session.get_uploads()
-            ]
-
-            return JsonResponse({"files": file_metadata}, status=200)
-        else:
-            _file = request.FILES.get("file")
-            if not _file:
-                return JsonResponse(
-                    {
-                        "uploadSessionToken": session.token,
-                        "error": gettext("No file was uploaded"),
-                    },
-                    status=400,
-                )
-
-            file_check = accept_file(_file.name, _file.size)
-            if not file_check["accepted"]:
-                return JsonResponse(
-                    {"file": _file.name, "uploadSessionToken": session.token, **file_check},
-                    status=400,
-                )
-
-            session_check = accept_session(_file.name, _file.size, session)
-            if not session_check["accepted"]:
-                return JsonResponse(
-                    {"file": _file.name, "uploadSessionToken": session.token, **session_check},
-                    status=400,
-                )
-
-            try:
-                check_for_malware(_file)
-            except ValidationError as exc:
-                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
-                return JsonResponse(
-                    {
-                        "file": _file.name,
-                        "accepted": False,
-                        "uploadSessionToken": session.token,
-                        "error": gettext(f'Malware was detected in the file "{_file.name}"'),
-                    },
-                    status=400,
-                )
-
-            try:
-                uploaded_file = session.add_temp_file(_file)
-            except ValueError as exc:
-                LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
-                return JsonResponse(
-                    {
-                        "file": _file.name,
-                        "accepted": False,
-                        "uploadSessionToken": session.token,
-                        "error": gettext("There was an error uploading the file"),
-                    },
-                    status=500,
-                )
-
-            file_url = uploaded_file.get_file_access_url()
-
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": True,
-                    "uploadSessionToken": session.token,
-                    "url": file_url,
-                },
-                status=200,
-            )
-
-    except Exception as exc:
-        LOGGER.error("Uncaught exception in upload_file view: %s", str(exc), exc_info=exc)
-        return JsonResponse(
-            {
-                "error": gettext("There was an internal server error. Please try again."),
-            },
-            status=500,
-        )
-
-
-@require_http_methods(["DELETE", "GET"])
-def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
-    """Get or delete a file that has been uploaded in a given upload session.
-
-    Args:
-        request: The HTTP request
-        session_token: The upload session token from the URL
-        file_name: The name of the file to delete
-
-    Returns:
-        HttpResponse:
-            In the case of deletion, returns a 204 response when successfully deleted. In the case
-            of getting a file, redirects to the file's media path in development, or returns an
-            X-Accel-Redirect to the file's media path if in production.
-    """
-    try:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-        if not session:
-            return JsonResponse(
-                {"error": gettext("Invalid filename or upload session token")}, status=404
-            )
-
-        if request.method == "DELETE":
-            try:
-                session.remove_temp_file_by_name(file_name)
-            except FileNotFoundError:
-                return JsonResponse(
-                    {"error": gettext("File not found in upload session")},
-                    status=404,
-                )
-            except ValueError:
-                return JsonResponse(
-                    {"error": gettext("Cannot remove file from upload session")},
-                    status=400,
-                )
-            return HttpResponse(status=204)
-
-        uploaded_file = None
-        try:
-            uploaded_file = session.get_temp_file_by_name(file_name)
-        except FileNotFoundError:
-            return JsonResponse(
-                {"error": gettext("File not found in upload session")},
-                status=404,
-            )
-        except ValueError:
-            return JsonResponse(
-                {"error": gettext("Cannot access file in upload session")},
-                status=400,
-            )
-
-        file_url = uploaded_file.get_file_media_url()
-        if settings.DEBUG:
-            return HttpResponseRedirect(file_url)
-        else:
-            response = HttpResponse(headers={"X-Accel-Redirect": file_url})
-            for header in [
-                "Content-Type",
-                "Content-Disposition",
-                "Accept-Ranges",
-                "Set-Cookie",
-                "Cache-Control",
-                "Expires",
-            ]:
-                del response[header]
-            return response
-
-    except Exception as exc:
-        LOGGER.error("Error handling uploaded file: %s", str(exc), exc_info=exc)
-        return JsonResponse({"error": gettext("Internal server error")}, status=500)
-
-
 class DeleteTransfer(TemplateView):
     """View to handle the deletion of an in-progress submission."""
 
@@ -1234,196 +769,3 @@ class DeleteTransfer(TemplateView):
         except KeyError:
             LOGGER.error("No UUID provided for deletion")
         return redirect("recordtransfer:userprofile")
-
-
-class SubmissionDetail(UserPassesTestMixin, DetailView):
-    """Generates a report for a given submission."""
-
-    model = Submission
-    template_name = "recordtransfer/submission_detail.html"
-    context_object_name = "submission"
-
-    def get_object(self, queryset=None) -> Submission:
-        """Retrieve the Submission object based on the UUID in the URL."""
-        return get_object_or_404(Submission, uuid=self.kwargs.get("uuid"))
-
-    def test_func(self) -> bool:
-        """Check if the user is the creator of the submission group or is a staff member."""
-        return self.request.user.is_staff or self.get_object().user == self.request.user
-
-    def handle_no_permission(self):
-        """Override to return 404 instead of 403. This is to prevent users from knowing that the
-        submission exists if they do not have permission to view it.
-        """
-        raise Http404("Page not found")
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["current_date"] = timezone.now()
-        context["metadata"] = context["submission"].metadata
-        return context
-
-
-class SubmissionCsv(UserPassesTestMixin, View):
-    """Generates a CSV containing the submission and downloads that CSV."""
-
-    def get_object(self):
-        self.get_queryset().first()
-
-    def get_queryset(self):
-        uuid = self.kwargs["uuid"]
-        try:
-            return Submission.objects.filter(uuid=str(uuid))
-        except Submission.DoesNotExist:
-            raise Http404
-
-    def test_func(self):
-        submission = self.get_object()
-        # Check if the user is the creator of the submission or is a staff member
-        return self.request.user.is_staff or submission.user == self.request.user
-
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        prefix = slugify(queryset.first().user.username) + "_export-"
-        return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
-
-
-class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
-    """Displays the associated submissions for a given submission group, and allows modification
-    of submission group details.
-    """
-
-    model = SubmissionGroup
-    form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_show_create.html"
-    context_object_name = "group"
-    success_message = gettext("Group updated")
-    error_message = gettext("There was an error updating the group")
-
-    def get_object(self):
-        return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
-
-    def test_func(self):
-        """Check if the user is the creator of the submission group or is a staff member."""
-        return self.request.user.is_staff or self.get_object().created_by == self.request.user
-
-    def handle_no_permission(self):
-        """Override to return 404 instead of 403. This is to prevent users from knowing that the
-        group exists if they do not have permission to view it.
-        """
-        raise Http404("Page not found")
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Pass submissions associated with the group to the template."""
-        context = super().get_context_data(**kwargs)
-        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
-        context["IS_NEW"] = False
-        context["js_context"] = {
-            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
-            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
-        }
-        return context
-
-    def get_form_kwargs(self) -> dict[str, Any]:
-        """Pass User instance to form to initialize it."""
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle valid form submission."""
-        response = super().form_valid(form)
-        messages.success(self.request, self.success_message)
-        return response
-
-    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle invalid form submission."""
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        return super().form_invalid(form)
-
-    def get_success_url(self) -> str:
-        """Redirect back to the same page after updating the group."""
-        return self.request.path
-
-
-class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
-    """Creates a new submission group."""
-
-    model = SubmissionGroup
-    form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_show_create.html"
-    success_message = gettext("Group created")
-    error_message = gettext("There was an error creating the group")
-
-    def test_func(self):
-        """Check if the user is authenticated."""
-        return self.request.user.is_authenticated
-
-    def handle_no_permission(self) -> HttpResponseForbidden:
-        return HttpResponseForbidden("You do not have permission to access this page.")
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["IS_NEW"] = True
-        context["js_context"] = {
-            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
-            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
-        }
-        return context
-
-    def get_form_kwargs(self) -> dict[str, Any]:
-        """Pass User instance to form to initialize it."""
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle valid form submission."""
-        response = super().form_valid(form)
-        referer = self.request.headers.get("referer", "")
-        if "transfer" in referer:
-            return JsonResponse(
-                {
-                    "message": self.success_message,
-                    "status": "success",
-                    "group": {
-                        "uuid": str(self.object.uuid),
-                        "name": self.object.name,
-                        "description": self.object.description,
-                    },
-                },
-                status=200,
-            )
-        messages.success(self.request, self.success_message)
-        return response
-
-    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle invalid form submission."""
-        referer = self.request.headers.get("referer", "")
-        error_message = next(iter(form.errors.values()))[0]
-        if "transfer" in referer:
-            return JsonResponse({"message": error_message, "status": "error"}, status=400)
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        return super().form_invalid(form)
-
-
-def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
-    """Retrieve the groups associated with the current user."""
-    if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
-        return JsonResponse(
-            {"error": gettext("You do not have permission to view these groups.")},
-            status=403,
-        )
-
-    submission_groups = SubmissionGroup.objects.filter(created_by=user_id)
-    groups = [
-        {"uuid": str(group.uuid), "name": group.name, "description": group.description}
-        for group in submission_groups
-    ]
-    return JsonResponse(groups, safe=False)
