@@ -20,6 +20,8 @@ export function setupFormset(prefix, onnewform = undefined) {
         formsetForms = document.querySelectorAll(".form-row");
         numForms = formsetForms.length;
         totalFormsInput.setAttribute("value", numForms);
+        // Update the initial forms input to the current number of forms
+        initialFormsInput.setAttribute("value", numForms);
 
         // Update button states
         removeFormButton.disabled = numForms <= 1;
