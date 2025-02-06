@@ -1,8 +1,10 @@
 FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS base
 
 ENV PYTHONUNBUFFERED=1
+ENV PROJ_DIR="/opt/secure-record-transfer/""
+ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-WORKDIR /app/
+WORKDIR ${APP_DIR}
 
 # Install poetry
 RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
@@ -18,19 +20,19 @@ COPY package*.json /app/
 RUN npm install --no-color
 
 # Copy application code to image
-COPY ./bagitobjecttransfer /app/bagitobjecttransfer
+COPY ./app ${APP_DIR}
 
 # Make arg passed from compose files into environment variable
 ARG WEBPACK_MODE
-ENV WEBPACK_MODE $WEBPACK_MODE
+ENV WEBPACK_MODE ${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
-COPY webpack.config.js /app/
+COPY webpack.config.js ${PROJ_DIR}}
 RUN npm run build
 
 # Copy entrypoint script to image
-COPY ./docker/entrypoint.sh /app/
-RUN chmod +x /app/entrypoint.sh
+COPY ./docker/entrypoint.sh ${PROJ_DIR}}
+RUN chmod +x ${PROJ_DIR}}/entrypoint.sh
 
 ################################################################################
 #
@@ -42,12 +44,12 @@ FROM base as dev
 ENV PYTHONUNBUFFERED=1
 
 # Activate virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
-ENV VIRTUAL_ENV="/app/.venv"
+ENV PATH="${PROJ_DIR}/.venv/bin:${PATH}"
+ENV VIRTUAL_ENV="${PROJ_DIR}/.venv"
 
-WORKDIR /app/bagitobjecttransfer/
+WORKDIR ${APP_DIR}
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["${PROJ_DIR}/entrypoint.sh"]
 
 ################################################################################
 #
@@ -76,15 +78,14 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends default-mysql-client && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/bagitobjecttransfer /app/bagitobjecttransfer
-
+COPY --from=builder ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
+COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
+COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
+COPY --from=builder ${APP_DIR} ${APP_DIR}
 # Activate virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
-ENV VIRTUAL_ENV="/app/.venv"
+ENV PATH="${PROJ_DIR}/.venv/bin:$PATH"
+ENV VIRTUAL_ENV="${PROJ_DIR}/.venv"
 
-WORKDIR /app/bagitobjecttransfer/
+WORKDIR ${APP_DIR}
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["${PROJ_DIR}/entrypoint.sh"]
