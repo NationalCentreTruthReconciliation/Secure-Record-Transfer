@@ -1,22 +1,22 @@
 FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS base
 
 ENV PYTHONUNBUFFERED=1
-ENV PROJ_DIR="/opt/secure-record-transfer/""
+ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-WORKDIR ${APP_DIR}
+WORKDIR ${PROJ_DIR}
 
 # Install poetry
 RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
 
 # Copy poetry-related files, and install Python dependencies
-COPY pyproject.toml poetry.lock README.md /app/
+COPY pyproject.toml poetry.lock README.md ${PROJ_DIR}
 RUN poetry config virtualenvs.create true && \
     poetry config virtualenvs.in-project true && \
     poetry install
 
 # Install Node.js dependencies
-COPY package*.json /app/
+COPY package*.json ${PROJ_DIR}
 RUN npm install --no-color
 
 # Copy application code to image
@@ -27,12 +27,12 @@ ARG WEBPACK_MODE
 ENV WEBPACK_MODE ${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
-COPY webpack.config.js ${PROJ_DIR}}
+COPY webpack.config.js ${PROJ_DIR}
 RUN npm run build
 
 # Copy entrypoint script to image
-COPY ./docker/entrypoint.sh ${PROJ_DIR}}
-RUN chmod +x ${PROJ_DIR}}/entrypoint.sh
+COPY ./docker/entrypoint.sh ${PROJ_DIR}
+RUN chmod +x ${PROJ_DIR}/entrypoint.sh
 
 ################################################################################
 #
