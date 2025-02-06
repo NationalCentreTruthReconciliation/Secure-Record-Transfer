@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
+
 from recordtransfer.models import Submission, SubmissionGroup, User
 
 

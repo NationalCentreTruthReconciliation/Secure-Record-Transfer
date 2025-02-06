@@ -3,6 +3,7 @@ from unittest.mock import patch
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
+
 from recordtransfer.models import User
 
 
