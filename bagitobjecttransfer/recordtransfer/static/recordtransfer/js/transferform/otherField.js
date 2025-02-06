@@ -7,32 +7,27 @@
  */
 export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, otherValue) {
     const selectField = document.getElementById(selectFieldInputId);
+    const otherInput = document.getElementById(otherFieldInputId);
 
-    // Hide element at first (if needed)
-    if (selectField.value !== otherValue) {
-        const otherInput = document.getElementById(otherFieldInputId);
-
-        if (otherInput) {
-            const container = otherInput.parentElement;
-            container.classList.add("hidden-item");
-        }
-    }
+    updateOtherFieldVisibility(selectField, otherInput, otherValue);
 
     // Update other element when the select field changes
     selectField.addEventListener("change", function () {
-        const otherInput = document.getElementById(otherFieldInputId);
-
-        if (!otherInput) {
-            return;
-        }
-
-        const container = otherInput.parentElement;
-
-        if (this.value === otherValue) {
-            container.classList.remove("hidden-item");
-        }
-        else {
-            container.classList.add("hidden-item");
-        }
+        updateOtherFieldVisibility(selectField, otherInput, otherValue);
     });
 }
+
+/**
+ * Helper function to show/hide an "other" field based on the value of a select field.
+ * @param {HTMLSelectElement} selectField - The select element that triggers the visibility change
+ * @param {HTMLInputElement} otherInput - The "Other" input field element to show/hide
+ * @param {number} otherValue - The select option value that should trigger showing the "Other"
+ * field
+ */
+const updateOtherFieldVisibility = (selectField, otherInput, otherValue) => {
+    if (!otherInput) {
+        return;
+    }
+    const shouldShow = Number(selectField.value) === Number(otherValue);
+    otherInput.parentElement.classList.toggle("hidden-item", !shouldShow);
+};
