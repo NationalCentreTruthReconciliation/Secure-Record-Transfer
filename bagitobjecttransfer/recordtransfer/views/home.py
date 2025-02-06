@@ -1,3 +1,5 @@
+"""Views for the homepage and static pages navigable from the home page."""
+
 from django.conf import settings
 from django.views.generic import TemplateView
 

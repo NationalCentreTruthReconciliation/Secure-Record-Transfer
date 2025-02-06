@@ -1,3 +1,5 @@
+"""Views to manage user profile information and view their submission history."""
+
 from typing import Any, cast
 
 from django.contrib import messages

@@ -1,3 +1,7 @@
+"""Views for handling media requests, such as uploading and deleting files. This also includes
+viewing and listing uploaded files.
+"""
+
 import logging
 from typing import cast
 

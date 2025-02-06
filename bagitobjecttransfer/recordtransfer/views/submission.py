@@ -1,3 +1,5 @@
+"""Views for completed submissions, and creating and managing submission groups."""
+
 from typing import Any
 
 from caais.export import ExportVersion

@@ -1,3 +1,7 @@
+"""Views for the transfer form and submission process, responsible for creating, saving, and
+deleting in-progress submissions, as well as handling the final submission of a transfer.
+"""
+
 import logging
 import pickle
 import re

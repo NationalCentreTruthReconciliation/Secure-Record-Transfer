@@ -1,3 +1,5 @@
+"""Views for creating and activating user accounts."""
+
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
