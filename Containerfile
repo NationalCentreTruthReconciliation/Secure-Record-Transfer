@@ -42,8 +42,6 @@ RUN chmod +x ${PROJ_DIR}/entrypoint.sh
 FROM base as dev
 
 ENV PYTHONUNBUFFERED=1
-ENV PROJ_DIR="/opt/secure-record-transfer/"
-ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 # Activate virtual environment
 ENV PATH="${PROJ_DIR}/.venv/bin:${PATH}"
