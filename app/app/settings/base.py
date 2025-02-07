@@ -257,6 +257,7 @@ ACCEPTED_FILE_FORMATS = config(
     default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
 )
 
+# Media file storage locations
 BAG_STORAGE_FOLDER = config(
     "BAG_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "bags")
 )
