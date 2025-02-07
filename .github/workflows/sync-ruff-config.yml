@@ -1,0 +1,32 @@
+name: Sync Ruff Configuration
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Runs every week
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Fetch file from another repo
+        run: |
+          curl -o ruff.toml https://raw.githubusercontent.com/NationalCentreTruthReconciliation/Python-Development-Guide/main/ruff.toml
+
+      - name: Compare and push if needed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          if ! cmp -s ruff.toml ./ruff.toml; then
+            mv ruff.toml ./ruff.toml
+            git add ./ruff.toml
+            git commit -m "Sync ruff.toml from NationalCentreTruthReconciliation/Python-Development-Guide"
+            git push
+          fi
