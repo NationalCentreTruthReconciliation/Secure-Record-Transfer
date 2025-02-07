@@ -256,3 +256,14 @@ ACCEPTED_FILE_FORMATS = config(
     cast=AcceptedFileTypes(),
     default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
 )
+
+BAG_STORAGE_FOLDER = config(
+    "BAG_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "bags")
+)
+UPLOAD_STORAGE_FOLDER = config(
+    "UPLOAD_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "uploaded_files")
+)
+print("UPLOAD_STORAGE_FOLDER: ", UPLOAD_STORAGE_FOLDER)
+TEMP_STORAGE_FOLDER = config(
+    "TEMP_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "temp")
+)

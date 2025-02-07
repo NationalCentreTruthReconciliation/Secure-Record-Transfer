@@ -4,10 +4,6 @@ from decouple import config
 
 from .base import *
 
-# Overwrite base.py settings for media and static roots
-MEDIA_ROOT = "/app/media"
-STATIC_ROOT = "/app/static"
-
 DEBUG = False
 SITE_ID = config("SITE_ID", default=1, cast=int)
 
@@ -89,7 +85,3 @@ LOGGING = {
         },
     },
 }
-
-BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default="/app/media/bags/")
-UPLOAD_STORAGE_FOLDER = config("UPLOAD_STORAGE_FOLDER", default="/app/media/uploaded_files/")
-TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default="/app/media/temp/")

@@ -85,13 +85,3 @@ LOGGING = {
         },
     },
 }
-
-BAG_STORAGE_FOLDER = config(
-    "BAG_STORAGE_FOLDER", default="/opt/secure-record-transfer/app/media/bags/"
-)
-UPLOAD_STORAGE_FOLDER = config(
-    "UPLOAD_STORAGE_FOLDER", default="/opt/secure-record-transfer/app/media/uploaded_files/"
-)
-TEMP_STORAGE_FOLDER = config(
-    "TEMP_STORAGE_FOLDER", default="/opt/secure-record-transfer/app/media/temp/"
-)
