@@ -1,0 +1,64 @@
+# Version: 2024.9.11
+# NCTR ruff.toml
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".eggs",
+    ".git",
+    ".ipynb_checkpoints",
+    ".pyenv",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    "env",
+]
+
+line-length = 99
+indent-width = 4
+
+[lint]
+# See: https://docs.astral.sh/ruff/rules/
+select = [
+    "ANN001",
+    "ANN201",
+    "ANN205",
+    "ANN206",
+    "B",
+    "C4",
+    "C90",
+    "D",
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "G",
+    "I",
+    "SIM",
+    "RUF",
+    "W",
+]
+
+# Docstring rules are too strict, ignore these rules:
+ignore = ["D100", "D107", "D205", "D407", "D413"]
+
+fixable = ["ALL"]
+
+[lint.pycodestyle]
+max-doc-length = 99
+
+[lint.mccabe]
+max-complexity = 9
+
+[format]
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"

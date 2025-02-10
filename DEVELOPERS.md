@@ -4,17 +4,11 @@ The developer documentation here assumes you are using [VSCode](https://code.vis
 
 ## Contributions
 
-Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. The only difference is that the `ruff.toml` is automatically pulled when the git pre-commit hook is set up in the following section.
+Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions.
 
 ## Linting + Formatting
 
-Before beginning development, please configure git to use the git hooks (`.git/hooks`) provided in the repository. This will ensure that the linting configuration for Python is updated before each commit.
-
-```bash
-git config core.hooksPath .githooks
-```
-
-Additionally, install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting:
+Install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting:
 
 ```json
 {
