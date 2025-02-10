@@ -24,17 +24,17 @@ jobs:
 
       - name: Fetch ruff.toml from NCTR's Python Development Guide
         run: |
-          curl -o ruff.toml https://raw.githubusercontent.com/NationalCentreTruthReconciliation/Python-Development-Guide/main/ruff.toml
+          curl -o ./ruff_new.toml https://raw.githubusercontent.com/NationalCentreTruthReconciliation/Python-Development-Guide/main/ruff.toml
 
       - name: Set up Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Compare and commit changes if different
+      - name: Update ruff.toml if different
         run: |
-          if ! cmp -s ruff.toml ./ruff.toml; then
-            mv ruff.toml ./ruff.toml
+          if ! cmp -s ./ruff_new.toml ./ruff.toml; then
+            mv ./ruff_new.toml ./ruff.toml
             git add ./ruff.toml
             git commit -m "Sync ruff.toml from NationalCentreTruthReconciliation/Python-Development-Guide"
           fi
