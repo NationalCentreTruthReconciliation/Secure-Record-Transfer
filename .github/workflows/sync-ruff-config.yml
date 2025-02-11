@@ -20,6 +20,7 @@ jobs:
             git reset --hard origin/master
           else
             git checkout -b sync-ruff-config
+            git push -u origin sync-ruff-config
           fi
 
       - name: Fetch ruff.toml from NCTR's Python Development Guide
