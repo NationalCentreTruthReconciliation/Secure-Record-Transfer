@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-curl --fail -s -S -o "$REPO_ROOT/ruff.toml" \
-    https://raw.githubusercontent.com/NationalCentreTruthReconciliation/Python-Development-Guide/refs/heads/main/ruff.toml
