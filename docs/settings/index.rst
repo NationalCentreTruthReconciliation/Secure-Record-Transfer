@@ -410,11 +410,11 @@ BAG_STORAGE_FOLDER
 
     .. table::
 
-        ===========================================  ================  ======
-        Default in Dev                               Default in Prod   Type
-        ===========================================  ================  ======
-        /opt/secure-record-transfer/app/media/bags/  /app/media/bags/  string
-        ===========================================  ================  ======
+        ===========================================  ============================================  ======
+        Default in Dev                               Default in Prod                               Type
+        ===========================================  ============================================  ======
+        /opt/secure-record-transfer/app/media/bags/  /opt/secure-record-transfer/app/media/bags/   string
+        ===========================================  ============================================  ======
 
     The folder on the server where bags are to be stored.
 
@@ -433,11 +433,11 @@ UPLOAD_STORAGE_FOLDER
 
     .. table::
 
-        ======================================================  ==========================  ======
-        Default in Dev                                          Default in Prod             Type
-        ======================================================  ==========================  ======
-        /opt/secure-record-transfer/app//media/uploaded_files/  /app/media/uploaded_files/  string
-        ======================================================  ==========================  ======
+        ======================================================  ======================================================  ======
+        Default in Dev                                          Default in Prod                                         Type
+        ======================================================  ======================================================  ======
+        /opt/secure-record-transfer/app//media/uploaded_files/  /opt/secure-record-transfer/app//media/uploaded_files/  string
+        ======================================================  ======================================================  ======
 
     The files users upload will be copied here after being uploaded with either of the Django
     file upload handlers. Uploaded files will first be uploaded in memory or to a temporary file
