@@ -60,8 +60,8 @@ services:
       - db
       - redis
     volumes:
-      - static-volume:/opt/secure-record-transfer/static/
-      - media-volume:/opt/secure-record-transfer/media/
+      - static-volume:/opt/secure-record-transfer/app/static/
+      - media-volume:/opt/secure-record-transfer/app/media/
 
   app:
     build:
