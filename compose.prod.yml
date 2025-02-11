@@ -86,8 +86,8 @@ services:
       - rq
       - clamav
     volumes:
-      - static-volume:/opt/secure-record-transfer/static/
-      - media-volume:/opt/secure-record-transfer/media/
+      - static-volume:/opt/secure-record-transfer/app/static/
+      - media-volume:/opt/secure-record-transfer/app/media/
 
   nginx:
     image: docker.io/nginx:stable
