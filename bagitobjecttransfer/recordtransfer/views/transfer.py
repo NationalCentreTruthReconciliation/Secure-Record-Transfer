@@ -699,6 +699,9 @@ class TransferFormWizard(SessionWizardView):
             LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
             submission.save()
 
+            if self.in_progress_submission:
+                self.in_progress_submission.delete()
+
             send_submission_creation_success.delay(form_data, submission)
             send_thank_you_for_your_transfer.delay(form_data, submission)
 
