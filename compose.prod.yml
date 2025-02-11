@@ -55,13 +55,13 @@ services:
       - ENV=prod
       - IS_RQ=yes
       - WEBPACK_MODE=production
-      - DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.docker_prod
+      - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
       - db
       - redis
     volumes:
-      - static-volume:/app/static/
-      - media-volume:/app/media/
+      - static-volume:/opt/secure-record-transfer/app/static/
+      - media-volume:/opt/secure-record-transfer/app/media/
 
   app:
     build:
@@ -70,7 +70,7 @@ services:
       dockerfile: Containerfile
       args:
         WEBPACK_MODE: production
-    command: gunicorn bagitobjecttransfer.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
+    command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
     expose:
       - 8000
@@ -80,14 +80,14 @@ services:
       - ENV=prod
       - IS_RQ=no
       - WEBPACK_MODE=production
-      - DJANGO_SETTINGS_MODULE=bagitobjecttransfer.settings.docker_prod
+      - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
       - db
       - rq
       - clamav
     volumes:
-      - static-volume:/app/static/
-      - media-volume:/app/media/
+      - static-volume:/opt/secure-record-transfer/app/static/
+      - media-volume:/opt/secure-record-transfer/app/media/
 
   nginx:
     image: docker.io/nginx:stable
@@ -97,15 +97,15 @@ services:
     depends_on:
       - app
     volumes:
-      - static-volume:/app/static/
-      - media-volume:/app/media/
+      - static-volume:/opt/secure-record-transfer/static/
+      - media-volume:/opt/secure-record-transfer/media/
       - ./docker/nginx/templates/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:z
-      - ./bagitobjecttransfer/templates/:/var/www/html/:z
+      - ./app/templates/:/var/www/html/:z
     env_file:
       - .prod.env
     environment:
-      - STATIC_ROOT=/app/static/
-      - MEDIA_ROOT=/app/media/
+      - STATIC_ROOT=/opt/secure-record-transfer/static/
+      - MEDIA_ROOT=/opt/secure-record-transfer/media/
 
 volumes:
   mysql-database:

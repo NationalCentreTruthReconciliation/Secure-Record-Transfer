@@ -41,7 +41,7 @@ MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
 ]
 
-ROOT_URLCONF = "bagitobjecttransfer.urls"
+ROOT_URLCONF = "app.urls"
 
 loaders = [
     "django.template.loaders.filesystem.Loader",
@@ -73,7 +73,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # WSGI
 
-WSGI_APPLICATION = "bagitobjecttransfer.wsgi.application"
+WSGI_APPLICATION = "app.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -255,4 +255,15 @@ ACCEPTED_FILE_FORMATS = config(
     "ACCEPTED_FILE_TYPES",
     cast=AcceptedFileTypes(),
     default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
+)
+
+# Media file storage locations
+BAG_STORAGE_FOLDER = config(
+    "BAG_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "bags")
+)
+UPLOAD_STORAGE_FOLDER = config(
+    "UPLOAD_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "uploaded_files")
+)
+TEMP_STORAGE_FOLDER = config(
+    "TEMP_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "temp")
 )
