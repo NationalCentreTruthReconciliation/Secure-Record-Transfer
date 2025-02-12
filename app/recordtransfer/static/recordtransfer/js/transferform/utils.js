@@ -174,8 +174,8 @@ export const sendDeleteRequestForFile = async (filename) => {
 export const updateCapacityDisplay = (totalNumFiles, totalSizeBytes) => {
     const totalSizeElement = document.getElementById("total-size");
     const remainingSizeElement = document.getElementById("remaining-size");
-    const { MAX_TOTAL_UPLOAD_SIZE } = getFileUploadSettings();
-    const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
+    const { MAX_TOTAL_UPLOAD_SIZE_MB } = getFileUploadSettings();
+    const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE_MB * 1024 * 1024;
 
     const updateElement = (element, value, isError) => {
         if (element) {
