@@ -322,10 +322,10 @@ ACCEPTED_FILE_FORMATS
 
 
 
-MAX_SINGLE_UPLOAD_SIZE
-^^^^^^^^^^^^^^^^^^^^^^
+MAX_SINGLE_UPLOAD_SIZE_MB
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    *Choose the maximum size (in MiB) an uploaded file is allowed to be*
+    *Choose the maximum size (in MB) an uploaded file is allowed to be*
 
     .. table::
 
@@ -336,7 +336,7 @@ MAX_SINGLE_UPLOAD_SIZE
         ============  =========
 
     Sets the maximum allowed size a single file can be when uploaded with the transfer form. The
-    size is expressed in **MiB**, *not* MB.
+    size is expressed in **MB**, *not* MiB.
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
 
@@ -345,13 +345,13 @@ MAX_SINGLE_UPLOAD_SIZE
     ::
 
         #file: .env
-        MAX_SINGLE_UPLOAD_SIZE=512
+        MAX_SINGLE_UPLOAD_SIZE_MB=512
 
 
-MAX_TOTAL_UPLOAD_SIZE
-^^^^^^^^^^^^^^^^^^^^^
+MAX_TOTAL_UPLOAD_SIZE_MB
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-    *Choose the maximum total size (in MiB) of a file transfer*
+    *Choose the maximum total size (in MB) of a file transfer*
 
     .. table::
 
@@ -362,7 +362,7 @@ MAX_TOTAL_UPLOAD_SIZE
         ============  =========
 
     Sets the maximum allowed total size of all files being transferred at one time. The size is
-    expressed in **MiB**, *not* MB.
+    expressed in **MB**, *not* MiB.
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
 
@@ -371,7 +371,7 @@ MAX_TOTAL_UPLOAD_SIZE
     ::
 
         #file: .env
-        MAX_TOTAL_UPLOAD_SIZE=1024
+        MAX_TOTAL_UPLOAD_SIZE_MB=1024
 
 
 MAX_TOTAL_UPLOAD_COUNT

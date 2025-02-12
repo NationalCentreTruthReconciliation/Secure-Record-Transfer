@@ -107,16 +107,16 @@ def verify_storage_folder_settings():
 def verify_max_upload_size():
     """Verify the settings:
 
-    - MAX_TOTAL_UPLOAD_SIZE
-    - MAX_SINGLE_UPLOAD_SIZE
+    - MAX_TOTAL_UPLOAD_SIZE_MB
+    - MAX_SINGLE_UPLOAD_SIZE_MB
     - MAX_TOTAL_UPLOAD_COUNT
 
     Throws an ImproperlyConfigured exception if any are less than or equal to
     zero, or if the single upload size is greater than the total upload size.
     """
     for setting_name in [
-        "MAX_TOTAL_UPLOAD_SIZE",
-        "MAX_SINGLE_UPLOAD_SIZE",
+        "MAX_TOTAL_UPLOAD_SIZE_MB",
+        "MAX_SINGLE_UPLOAD_SIZE_MB",
         "MAX_TOTAL_UPLOAD_COUNT",
     ]:
         value = getattr(settings, setting_name)
@@ -140,13 +140,13 @@ def verify_max_upload_size():
                 ).format(setting_name, value)
             )
 
-    max_total_size = settings.MAX_TOTAL_UPLOAD_SIZE
-    max_single_size = settings.MAX_SINGLE_UPLOAD_SIZE
+    max_total_size = settings.MAX_TOTAL_UPLOAD_SIZE_MB
+    max_single_size = settings.MAX_SINGLE_UPLOAD_SIZE_MB
     if max_total_size < max_single_size:
         raise ImproperlyConfigured(
             (
-                "The MAX_TOTAL_UPLOAD_SIZE setting (currently: {0}) cannot be less "
-                "than the MAX_SINGLE_UPLOAD_SIZE setting (currently: {1})"
+                "The MAX_TOTAL_UPLOAD_SIZE_MB setting (currently: {0}) cannot be less "
+                "than the MAX_SINGLE_UPLOAD_SIZE_MB setting (currently: {1})"
             ).format(max_total_size, max_single_size)
         )
 

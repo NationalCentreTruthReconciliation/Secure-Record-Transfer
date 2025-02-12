@@ -274,8 +274,8 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
 
     # Check file size is less than the maximum allowed size for a single file
     max_single_size = min(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
+        settings.MAX_SINGLE_UPLOAD_SIZE_MB,
+        settings.MAX_TOTAL_UPLOAD_SIZE_MB,
     )
     max_single_size_bytes = mib_to_bytes(max_single_size)
     size_mib = bytes_to_mib(size)
@@ -299,7 +299,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
 
     These checks are applied:
     - The session has room for more files according to the MAX_TOTAL_UPLOAD_COUNT
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE
+    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE_MB
     - A file with the same name has not already been uploaded
 
     Args:
@@ -324,13 +324,13 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
             "verboseError": gettext(
                 'The file "{0}" would push the total file count past the '
                 "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE),
+            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE_MB),
         }
 
     # Check total size of all files plus current one is within allowed size
     max_size = max(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
+        settings.MAX_SINGLE_UPLOAD_SIZE_MB,
+        settings.MAX_TOTAL_UPLOAD_SIZE_MB,
     )
     max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
