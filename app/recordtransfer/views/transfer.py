@@ -651,7 +651,7 @@ class TransferFormWizard(SessionWizardView):
             )
             return
 
-        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
+        size = get_human_readable_size(session.upload_size, base=1000, precision=2)
 
         count = get_human_readable_file_count(
             [f.name for f in session.get_temporary_uploads()],
