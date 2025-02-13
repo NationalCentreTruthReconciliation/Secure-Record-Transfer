@@ -537,7 +537,10 @@ class UploadFilesFormTest(TestCase):
         }
         form = UploadFilesForm(data=form_data)
         self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data["quantity_and_unit_of_measure"], self.upload_session.get_quantity_and_unit_of_measure())
+        self.assertEqual(
+            form.cleaned_data["quantity_and_unit_of_measure"],
+            self.upload_session.get_quantity_and_unit_of_measure(),
+        )
 
     def test_form_missing_session_token(self) -> None:
         """Case where the session token is missing."""

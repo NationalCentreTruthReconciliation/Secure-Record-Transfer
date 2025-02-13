@@ -968,7 +968,9 @@ class UploadFilesForm(TransferForm):
         if upload_session.file_count == 0:
             self.add_error("session_token", "You must upload at least one file")
 
-        cleaned_data["quantity_and_unit_of_measure"] = upload_session.get_quantity_and_unit_of_measure()
+        cleaned_data["quantity_and_unit_of_measure"] = (
+            upload_session.get_quantity_and_unit_of_measure()
+        )
 
         return cleaned_data
 

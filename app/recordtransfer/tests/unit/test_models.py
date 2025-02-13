@@ -580,8 +580,6 @@ class TestUploadSession(TestCase):
         with self.assertRaises(FileNotFoundError):
             self.session.copy_session_uploads("/nonexistent/path")
 
-
-
     def tearDown(self) -> None:
         """Tear down test."""
         TempUploadedFile.objects.all().delete()
@@ -600,7 +598,10 @@ class TestUploadSession(TestCase):
     @patch("recordtransfer.models.get_human_readable_file_count")
     @patch("recordtransfer.models.get_human_readable_size")
     def test_get_quantity_and_unit_of_measure(
-        self, mock_get_human_readable_size: MagicMock, mock_get_human_readable_file_count: MagicMock, mock_get_uploads: MagicMock
+        self,
+        mock_get_human_readable_size: MagicMock,
+        mock_get_human_readable_file_count: MagicMock,
+        mock_get_uploads: MagicMock,
     ) -> None:
         """Test the get_quantity_and_unit_of_measure method of UploadSession."""
         # Setup mock returns
