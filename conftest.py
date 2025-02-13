@@ -9,12 +9,12 @@ import subprocess
 import pytest
 
 
-def pytest_collection_modifyitems(session, config, items) -> None:
-    """Run npm build only if e2e tests are being run. `items` is a list of test items to be
+def pytest_runtestloop(session: pytest.Session) -> None:
+    """Install node dependencies and install static assets only if E2E tests are selected to
     run.
     """
-    # Check if running unit tests via -e2e parameter or running all tests
-    if config.getoption("-k") == "e2e" or not config.getoption("-k"):
+    selected_items = session.items
+    if any("/e2e/" in item.nodeid for item in selected_items):
         try:
             npm_cmd = shutil.which("npm") or "npm"
             subprocess.run(
