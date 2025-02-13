@@ -580,6 +580,8 @@ class TestUploadSession(TestCase):
         with self.assertRaises(FileNotFoundError):
             self.session.copy_session_uploads("/nonexistent/path")
 
+
+
     def tearDown(self) -> None:
         """Tear down test."""
         TempUploadedFile.objects.all().delete()
@@ -593,6 +595,50 @@ class TestUploadSession(TestCase):
         # Recreate the directories
         Path(settings.TEMP_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
         Path(settings.UPLOAD_STORAGE_FOLDER).mkdir(parents=True, exist_ok=True)
+
+    @patch("recordtransfer.models.UploadSession.get_uploads")
+    @patch("recordtransfer.models.get_human_readable_file_count")
+    @patch("recordtransfer.models.get_human_readable_size")
+    def test_get_quantity_and_unit_of_measure(
+        self, mock_get_human_readable_size: MagicMock, mock_get_human_readable_file_count: MagicMock, mock_get_uploads: MagicMock
+    ) -> None:
+        """Test the get_quantity_and_unit_of_measure method of UploadSession."""
+        # Setup mock returns
+        mock_get_uploads.return_value = []
+        mock_get_human_readable_size.return_value = "0 KB"
+        mock_get_human_readable_file_count.return_value = "No files"
+
+        # Test CREATED state
+        self.session.status = UploadSession.SessionStatus.CREATED
+        result = self.session.get_quantity_and_unit_of_measure()
+        self.assertEqual(result, "No files, totalling 0 KB")
+
+        # Setup mock returns
+        mock_get_uploads.return_value = [self.test_temp_file]
+        mock_get_human_readable_size.return_value = "1 KB"
+        mock_get_human_readable_file_count.return_value = "1 file"
+
+        # Test UPLOADING state
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        result = self.session.get_quantity_and_unit_of_measure()
+        self.assertEqual(result, "1 file, totalling 1 KB")
+
+        # Test STORED state
+        self.session.status = UploadSession.SessionStatus.STORED
+        result = self.session.get_quantity_and_unit_of_measure()
+        self.assertEqual(result, "1 file, totalling 1 KB")
+
+        # Test invalid states
+        invalid_states = [
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+        ]
+        for status in invalid_states:
+            self.session.status = status
+            with self.assertRaises(ValueError):
+                self.session.get_quantity_and_unit_of_measure()
 
     @classmethod
     def tearDownClass(cls) -> None:
