@@ -156,38 +156,21 @@ class TransferFormWizard(SessionWizardView):
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Dispatch the request to the appropriate handler method."""
-        result = self.validate_transfer_request(request)
-        if isinstance(result, HttpResponse):
-            return result
-        return super().dispatch(request, *args, **kwargs)
-
-    def validate_transfer_request(self, request: HttpRequest) -> Optional[HttpResponse]:
-        """Validate the transfer request and return an appropriate response if invalid."""
         self.in_progress_uuid = request.GET.get("transfer_uuid")
 
-        # Handle no transfer UUID case
         if not self.in_progress_uuid:
             self.submission_group_uuid = request.GET.get("group_uuid")
-            return None
+            return super().dispatch(request, *args, **kwargs)
 
-        # Handle transfer UUID case
-        try:
-            self.in_progress_submission = InProgressSubmission.objects.filter(
-                user=request.user, uuid=self.in_progress_uuid
-            ).first()
-        except ValidationError:
-            LOGGER.error("Invalid UUID %s", self.in_progress_uuid)
-            return redirect("recordtransfer:transfer")
+        self.in_progress_submission = InProgressSubmission.objects.filter(
+            user=request.user, uuid=self.in_progress_uuid
+        ).first()
 
+        # If the user is trying to resume an in-progress submission that doesn't exist
         if not self.in_progress_submission:
-            LOGGER.error(
-                "Expected at least 1 saved transfer for user %s and ID %s, found 0",
-                request.user,
-                self.in_progress_uuid,
-            )
             return redirect("recordtransfer:transfer")
 
-        return None
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         if self.in_progress_submission:
