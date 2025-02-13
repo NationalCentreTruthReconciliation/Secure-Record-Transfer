@@ -392,9 +392,10 @@ class TransferFormWizard(SessionWizardView):
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
-        if step == TransferStep.CONTACT_INFO.value and isinstance(self.request.user, User):
-            initial["contact_name"] = self.get_name_of_user(self.request.user)
-            initial["email"] = str(self.request.user.email)
+        if not self.in_progress_submission and step == TransferStep.CONTACT_INFO.value:
+            user = cast(User, self.request.user)
+            initial["contact_name"] = self.get_name_of_user(user)
+            initial["email"] = str(user.email)
 
         return initial
 
