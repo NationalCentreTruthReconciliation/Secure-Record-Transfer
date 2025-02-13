@@ -10,7 +10,7 @@ import pytest
 
 
 def pytest_runtestloop(session: pytest.Session) -> None:
-    """Install node dependencies and install static assets only if E2E tests are selected to
+    """Install node dependencies and build static assets only if E2E tests are selected to
     run.
     """
     selected_items = session.items
