@@ -10,7 +10,6 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from django.forms import BaseForm, BaseFormSet, BaseInlineFormSet, BaseModelFormSet, ModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
 from django.shortcuts import get_object_or_404, redirect
@@ -175,10 +174,18 @@ class TransferFormWizard(SessionWizardView):
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle GET request to load a transfer."""
         if self.in_progress_submission:
-            self.load_transfer_data(self.in_progress_submission)
+            self.load_form_data()
             return self.render(self.get_form())
 
         return super().get(request, *args, **kwargs)
+
+    def load_form_data(self) -> None:
+        """Load form data from an InProgressSubmission instance."""
+        if not self.in_progress_submission:
+            raise ValueError("No in-progress submission to load")
+
+        self.storage.data = pickle.loads(self.in_progress_submission.step_data)["past"]
+        self.storage.current_step = self.in_progress_submission.current_step
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a transfer."""
@@ -273,11 +280,6 @@ class TransferFormWizard(SessionWizardView):
         # change the stored current step
         self.storage.current_step = next_step
         return self.render(new_form, **kwargs)
-
-    def load_transfer_data(self, transfer: InProgressSubmission) -> None:
-        """Load the transfer data from an InProgressSubmission instance."""
-        self.storage.data = pickle.loads(transfer.step_data)["past"]
-        self.storage.current_step = transfer.current_step
 
     @classmethod
     def format_step_data(cls, step: TransferStep, data: QueryDict) -> Union[dict, list[dict]]:
