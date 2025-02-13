@@ -9,6 +9,7 @@ from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
 
+ # This is to avoid a circular import
 if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
 
