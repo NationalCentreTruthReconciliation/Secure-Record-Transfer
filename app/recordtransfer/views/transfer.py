@@ -172,12 +172,13 @@ class TransferFormWizard(SessionWizardView):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Handle GET request to load a transfer."""
         if self.in_progress_submission:
             self.load_transfer_data(self.in_progress_submission)
             return self.render(self.get_form())
 
-        return super().get(self, request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a transfer."""
