@@ -11,7 +11,7 @@ from caais.models import RightsType, SourceRole, SourceType
 from django import forms
 from django.conf import settings
 from django.db.models import Case, CharField, Value, When
-from django.forms import BaseForm, BaseFormSet
+from django.forms import BaseForm, BaseFormSet, ValidationError
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
@@ -897,11 +897,11 @@ class GroupTransferForm(TransferForm):
         cleaned_data = super().clean()
         group_id = cleaned_data.get("group_id")
 
-        if (
-            group_id
-            and not SubmissionGroup.objects.filter(created_by=self.user, uuid=group_id).exists()
-        ):
-            self.add_error("group_id", "Invalid group selected.")
+        group = SubmissionGroup.objects.filter(created_by=self.user, uuid=group_id).first()
+        if not group:
+            raise ValidationError({"group_id": "Invalid group selected."})
+
+        cleaned_data["submission_group"] = group
 
         return cleaned_data
 

@@ -618,7 +618,7 @@ class TransferFormWizard(SessionWizardView):
                     )
                 )
 
-            submission.part_of_group = self.get_submission_group(form_data)
+            submission.part_of_group = form_data.get("submission_group")
 
             LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
             submission.save()
@@ -638,30 +638,6 @@ class TransferFormWizard(SessionWizardView):
             send_submission_creation_failure.delay(form_data, self.request.user)
 
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
-
-    def get_submission_group(self, cleaned_form_data: dict) -> Optional[SubmissionGroup]:
-        """Get a submission group to associate the submission with, depending on how the user
-        filled out the submission group section of the form.
-        """
-        group = None
-
-        group_id = cleaned_form_data["group_id"]
-        if group_id:
-            try:
-                group = SubmissionGroup.objects.get(uuid=group_id, created_by=self.request.user)
-                LOGGER.info('Associating Submission with "%s" SubmissionGroup', group.name)
-
-            except SubmissionGroup.DoesNotExist as exc:
-                LOGGER.error(
-                    "Could not find SubmissionGroup with UUID %s",
-                    group_id,
-                    exc_info=exc,
-                )
-        else:
-            LOGGER.info("Not associating submission with a group")
-
-        return group
-
 
 class DeleteTransfer(TemplateView):
     """View to handle the deletion of an in-progress submission."""
