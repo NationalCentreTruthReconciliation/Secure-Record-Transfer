@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Django",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "127.0.0.1",
+                "port": 8009,
+            },
+            "django": true,
+            "justMyCode": false,
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/app/",
+                    "remoteRoot": "/opt/secure-record-transfer/app/"
+                },
+            ]
+        },
+        {
+            "name": "Python Debugger: RQ",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "127.0.0.1",
+                "port": 8010,
+            },
+            "django": true,
+            "justMyCode": false,
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/app/",
+                    "remoteRoot": "/opt/secure-record-transfer/app/"
+                },
+            ]
+        },
+    ]
+}
