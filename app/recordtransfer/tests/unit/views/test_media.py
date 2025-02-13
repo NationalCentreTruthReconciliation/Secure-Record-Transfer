@@ -277,19 +277,6 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(session.file_count, 0)
 
-    @skipIf(True, "File content scanning is not implemented yet")
-    def test_content_issue_flagged(self) -> None:
-        """
-        self.patch__accept_contents.return_value = {
-            "accepted": False,
-            "error": "ISSUE",
-            "clamav": {
-                "reason": "Virus",
-                "status": "FOUND",
-            },
-        }
-        """
-
 
 class TestMediaRequestView(TestCase):
     """Test the recordtransfer:media view."""
