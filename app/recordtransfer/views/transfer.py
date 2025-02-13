@@ -622,47 +622,6 @@ class TransferFormWizard(SessionWizardView):
             )
         return js_context
 
-    def get_all_cleaned_data(self):
-        """Clean data, and populate CAAIS fields that are deferred to being created until after the
-        submission is completed.
-        """
-        cleaned_data = super().get_all_cleaned_data()
-        self.set_quantity_and_unit_of_measure(cleaned_data)
-        return cleaned_data
-
-    def set_quantity_and_unit_of_measure(self, cleaned_data):
-        """Create a summary for the quantity_and_unit_of_measure from the type of files submitted.
-
-        Args:
-            cleaned_data (dict): The cleaned data submitted by the user
-
-        Returns:
-            (None): The cleaned form data is modified in-place
-        """
-        if not settings.FILE_UPLOAD_ENABLED:
-            return
-
-        session = UploadSession.objects.filter(token=cleaned_data["session_token"]).first()
-
-        if not session:
-            LOGGER.error(
-                "No UploadSession found with token %s",
-                cleaned_data["session_token"],
-            )
-            return
-
-        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
-
-        count = get_human_readable_file_count(
-            [f.name for f in session.get_temporary_uploads()],
-            settings.ACCEPTED_FILE_FORMATS,
-            LOGGER,
-        )
-
-        cleaned_data["quantity_and_unit_of_measure"] = gettext("{0}, totalling {1}").format(
-            count, size
-        )
-
     def done(self, form_list, **kwargs):
         """Retrieve all of the form data, and creates a Submission from it.
 

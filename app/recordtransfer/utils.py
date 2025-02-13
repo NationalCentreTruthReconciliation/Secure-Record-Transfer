@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -8,7 +8,9 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
-from recordtransfer.models import UploadSession
+
+if TYPE_CHECKING:
+    from recordtransfer.models import UploadSession
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -294,7 +296,7 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
     return {"accepted": True}
 
 
-def accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
+def accept_session(filename: str, filesize: Union[str, int], session: "UploadSession") -> dict:
     """Determine if a new file should be accepted as part of the session.
 
     These checks are applied:

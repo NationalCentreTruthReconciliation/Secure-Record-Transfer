@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from recordtransfer.enums import TransferStep
 from recordtransfer.managers import SubmissionQuerySet
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
+from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -406,6 +407,40 @@ class UploadSession(models.Model):
         self.save()
 
         return copied, missing
+
+    def get_quantity_and_unit_of_measure(self) -> str:
+        """Create a human-readable statement of how many files are in this session.
+
+        If the session is in the state UPLOADING, returns a count of temp files. If the session is
+        in the state STORED, returns a count of permanent files.
+
+        Uses the :ref:`ACCEPTED_FILE_FORMATS` setting to group file types together.
+
+        Returns:
+            A human readable count and size of all files in this session.
+        """
+        if not settings.FILE_UPLOAD_ENABLED:
+            return
+
+        if self.status not in (
+            self.SessionStatus.UPLOADING,
+            self.SessionStatus.STORED,
+        ):
+            raise ValueError(
+                f"Cannot get quantity and unit of measure from session {self.token} because the "
+                f"session status is {self.status} and not {self.SessionStatus.UPLOADING} or "
+                f"{self.SessionStatus.STORED}"
+            )
+
+        size = get_human_readable_size(self.upload_size, base=1024, precision=2)
+
+        count = get_human_readable_file_count(
+            [f.name for f in self.get_uploads()],
+            settings.ACCEPTED_FILE_FORMATS,
+            LOGGER,
+        )
+
+        return _("{0}, totalling {1}").format(count, size)
 
     def __str__(self):
         """Return a string representation of this object."""
