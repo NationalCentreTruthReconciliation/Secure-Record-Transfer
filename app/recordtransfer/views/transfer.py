@@ -54,7 +54,6 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
-from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
 LOGGER = logging.getLogger(__name__)
 
