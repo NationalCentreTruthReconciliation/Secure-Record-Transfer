@@ -165,7 +165,7 @@ class TransferFormWizard(SessionWizardView):
             user=request.user, uuid=self.in_progress_uuid
         ).first()
 
-        # If the user is trying to resume an in-progress submission that doesn't exist
+        # Redirect user to a fresh submission form if the in-progress submission is not found
         if not self.in_progress_submission:
             return redirect("recordtransfer:transfer")
 
@@ -193,8 +193,21 @@ class TransferFormWizard(SessionWizardView):
         if not request.POST.get("save_form_step", None):
             return super().post(request, *args, **kwargs)
 
-        past_data = self.storage.data
+        try:
+            self.save_form_data(request)
+            messages.success(request, gettext("Transfer saved successfully."))
+        except Exception:
+            messages.error(request, gettext("There was an error saving the transfer."))
+        return redirect("recordtransfer:userprofile")
+
+    def save_form_data(self, request: HttpRequest) -> None:
+        """Save the current state of the form to the database.
+
+        Args:
+            request: The HTTP request object.
+        """
         current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
+        form_data = {"past": self.storage.data, "current": current_data}
 
         title = None
         if isinstance(current_data, dict):
@@ -202,19 +215,17 @@ class TransferFormWizard(SessionWizardView):
         if not title:
             title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
-        data = {
-            "save_form_step": self.current_step,
-            "form_data": {"past": past_data, "current": current_data},
-            "submission": self.in_progress_submission,
-            "title": title,
-        }
+        submission = self.in_progress_submission
+        if submission:
+            submission.last_updated = timezone.now()
+        else:
+            submission = InProgressSubmission()
 
-        try:
-            self.save_transfer(data)
-            messages.success(request, gettext("Transfer saved successfully."))
-        except Exception:
-            messages.error(request, gettext("There was an error saving the transfer."))
-        return redirect("recordtransfer:userprofile")
+        submission.current_step = self.current_step.value
+        submission.user = cast(User, self.request.user)
+        submission.step_data = pickle.dumps(form_data)
+        submission.title = title
+        submission.save()
 
     def save_current_step(
         self, form: Union[BaseInlineFormSet, BaseModelFormSet, ModelForm]
@@ -335,40 +346,6 @@ class TransferFormWizard(SessionWizardView):
             return {}
 
         return formatted_data[0]
-
-    def save_transfer(self, data: dict) -> None:
-        """Save the current state of a transfer.
-
-        Args:
-            user: The user who is saving the transfer.
-            data: The form data containing the submission data to save.
-            `data` is a dictionary containing the following:
-                - save_form_step: The current step of the form.
-                - step_data: The past and current data of the form.
-                - submission (optional): The in-progress submission model object to update.
-                - title: The accession title of the submission.
-
-        Returns:
-            A JSON response indicating the result of the save operation.
-        """
-        submission = data.get("submission")
-        form_data = data.get("form_data")
-        save_form_step = data.get("save_form_step")
-        title = data.get("title")
-
-        if not form_data or not save_form_step:
-            raise ValueError("Missing form data or save form step")
-
-        if submission:
-            submission.last_updated = timezone.now()
-        else:
-            submission = InProgressSubmission()
-
-        submission.current_step = save_form_step.value
-        submission.user = self.request.user
-        submission.step_data = pickle.dumps(form_data)
-        submission.title = title
-        submission.save()
 
     def get_form_value(self, step: TransferStep, field: str) -> Optional[str]:
         """Get the value of a field in a form step.
