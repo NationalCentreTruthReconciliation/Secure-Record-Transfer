@@ -434,7 +434,7 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.STORED}"
             )
 
-        size = get_human_readable_size(self.upload_size, base=1024, precision=2)
+        size = get_human_readable_size(self.upload_size, base=1000, precision=2)
 
         count = get_human_readable_file_count(
             [f.name for f in self.get_uploads()],
