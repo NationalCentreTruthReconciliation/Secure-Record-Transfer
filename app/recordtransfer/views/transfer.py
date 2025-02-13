@@ -587,12 +587,13 @@ class TransferFormWizard(SessionWizardView):
             )
         return js_context
 
-    def done(self, form_list, **kwargs):
+    def done(self, form_list, **kwargs) -> HttpResponseRedirect:
         """Retrieve all of the form data, and creates a Submission from it.
 
         Returns:
             HttpResponseRedirect: Redirects the user to their User Profile page.
         """
+        form_data = {}
         try:
             form_data = self.get_all_cleaned_data()
 
@@ -609,7 +610,7 @@ class TransferFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.make_uploads_permanent()
+                submission.upload_session.make_uploads_permanent() # type: ignore
             else:
                 LOGGER.info(
                     (
@@ -634,8 +635,8 @@ class TransferFormWizard(SessionWizardView):
         except Exception as exc:
             LOGGER.error("Encountered error creating Submission object", exc_info=exc)
 
-            send_your_transfer_did_not_go_through.delay(form_data, self.request.user)
-            send_submission_creation_failure.delay(form_data, self.request.user)
+            send_your_transfer_did_not_go_through.delay(form_data, cast(User, self.request.user))
+            send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
 
