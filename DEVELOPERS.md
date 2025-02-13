@@ -4,27 +4,13 @@ The developer documentation here assumes you are using [VSCode](https://code.vis
 
 ## Contributions
 
-Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions.
+Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. You can skip the "Setup" section of the guide as this repository already includes the necessary VSCode settings in `.vscode/settings.json`.
 
 ## Linting + Formatting
 
-Install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and add this configuration to your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for JavaScript linting:
+Install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
 
-```json
-{
-    "[javascript]": {
-        "editor.formatOnSave": false,
-        "editor.codeActionsOnSave": {
-            "source.fixAll.eslint": "explicit"
-        },
-        "editor.rulers": [
-            99
-        ]
-    }
-}
-```
-
-Finally, install Node dependencies for development:
+Then, install Node dependencies for development:
 
 ```shell
 npm install --include=dev
@@ -34,49 +20,7 @@ npm install --include=dev
 
 The ports 8009 and 8010 are exposed to allow you to debug the web application, and the asynchronous job queue, respectively. This functionality is only available when `DEBUG = True`. These ports can be attached to with `debugpy`
 
-Use this `launch.json` configuration in VSCode to debug the application:
-
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: Django",
-            "type": "debugpy",
-            "request": "attach",
-            "connect": {
-                "host": "127.0.0.1",
-                "port": 8009,
-            },
-            "django": true,
-            "justMyCode": true,
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}/app/",
-                    "remoteRoot": "/opt/secure-record-transfer/app/"
-                },
-            ]
-        },
-        {
-            "name": "Python Debugger: RQ",
-            "type": "debugpy",
-            "request": "attach",
-            "connect": {
-                "host": "127.0.0.1",
-                "port": 8010,
-            },
-            "django": true,
-            "justMyCode": true,
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}/app/",
-                    "remoteRoot": "/opt/secure-record-transfer/app/"
-                },
-            ]
-        }
-    ]
-}
-```
+The debugging configuration has already been set up in the `.vscode/launch.json` file. To start debugging, select the appropriate configuration from the dropdown in the top menu of VSCode and press the green play button.
 
 ## Continuous Integration
 
@@ -137,16 +81,6 @@ Install the `dev` dependencies with Poetry:
 poetry install --extras "dev"
 ```
 
-Use these settings in your [local VSCode settings.json](https://code.visualstudio.com/docs/getstarted/settings#_settings-json-file) for this project so that tests are discovered correctly in the Testing menu:
-
-```json
-{
-    "python.testing.pytestEnabled": true,
-    "python.analysis.extraPaths": [
-        "./app"
-    ],
-}
-```
 The tests can be run with [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (using [pytest-django](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml)):
 To run tests, use:
 ```shell
@@ -162,6 +96,8 @@ For E2E tests only:
 ```shell
 pytest -k "e2e"
 ```
+
+The tests should also be discoverable and runnable from the VSCode test explorer.
 
 ## Building the Documentation
 

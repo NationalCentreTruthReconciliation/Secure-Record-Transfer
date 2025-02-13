@@ -1,0 +1,28 @@
+{   
+    // Python linting and formatting
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.rulers": [
+            99
+        ]
+    },
+    "ruff.nativeServer": "on",
+    "python.analysis.typeCheckingMode": "standard",
+    "editor.formatOnSave": true,
+    // Python Testing
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./app"
+    ],
+    // JavaScript linting and formatting
+    "[javascript]": {
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+        "editor.rulers": [
+            99
+        ]
+    },
+}
