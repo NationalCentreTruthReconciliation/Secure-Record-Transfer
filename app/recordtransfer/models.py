@@ -412,7 +412,8 @@ class UploadSession(models.Model):
         """Create a human-readable statement of how many files are in this session.
 
         If the session is in the state UPLOADING, returns a count of temp files. If the session is
-        in the state STORED, returns a count of permanent files.
+        in the state STORED, returns a count of permanent files. If the session is in the state CREATED,
+        returns an appropriate value that indicates the lack of files.
 
         Uses the :ref:`ACCEPTED_FILE_FORMATS` setting to group file types together.
 
@@ -423,6 +424,7 @@ class UploadSession(models.Model):
             return
 
         if self.status not in (
+            self.SessionStatus.CREATED,
             self.SessionStatus.UPLOADING,
             self.SessionStatus.STORED,
         ):
