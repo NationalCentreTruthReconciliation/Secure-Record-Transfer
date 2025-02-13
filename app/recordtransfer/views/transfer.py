@@ -360,8 +360,10 @@ class TransferFormWizard(SessionWizardView):
         step_data = self.storage.get_step_data(step.value) or {}
         return step_data.get(f"{step.value}-{field}")
 
-    def get_template_names(self):
-        """Retrieve the name of the template for the current step."""
+    def get_template_names(self) -> list[str]:
+        """Override the parent method to return the template name to render for the current
+        step.
+        """
         return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
 
     def get_name_of_user(self, user: User) -> str:
