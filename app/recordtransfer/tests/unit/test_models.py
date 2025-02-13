@@ -1,8 +1,6 @@
-# pylint: disable=too-many-public-methods
 import logging
 import shutil
 import tempfile
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, Mock, patch
@@ -648,14 +646,10 @@ class TestUploadSession(TestCase):
         logging.disable(logging.NOTSET)
 
 
-class TestBaseUploadedFile(TestCase, ABC):
-    """Tests for the BaseUploadedFile model."""
+class TestPermUploadedFile(TestCase):
+    """Test the PermUploadedFile model."""
 
-    @property
-    @abstractmethod
-    def model_class(self) -> type:
-        """Must be implemented by child classes."""
-        pass
+    model_class = PermUploadedFile
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -752,13 +746,13 @@ class TestBaseUploadedFile(TestCase, ABC):
         logging.disable(logging.NOTSET)
 
 
-class TestTempUploadedFile(TestBaseUploadedFile):
-    """Tests for the TempUploadedFile model."""
+class TestTempUploadedFile(TestPermUploadedFile):
+    """Tests for the TempUploadedFile model.
 
-    @property
-    def model_class(self) -> type:
-        """Return the TempUploadedFile model class."""
-        return TempUploadedFile
+    These tests are basically the same as the permanent file tests.
+    """
+
+    model_class = TempUploadedFile
 
     def test_move_to_permanent_storage(self) -> None:
         """Test that the file is moved to permanent storage."""
@@ -768,12 +762,3 @@ class TestTempUploadedFile(TestBaseUploadedFile):
         self.assertFalse(self.uploaded_file.exists)
         perm_uploaded_file = PermUploadedFile.objects.get(session=self.session, name="test.pdf")
         self.assertTrue(perm_uploaded_file.exists)
-
-
-class TestPermUploadedFile(TestBaseUploadedFile):
-    """Tests for the PermUploadedFile model."""
-
-    @property
-    def model_class(self) -> type:
-        """Return the PermUploadedFile model class."""
-        return PermUploadedFile
