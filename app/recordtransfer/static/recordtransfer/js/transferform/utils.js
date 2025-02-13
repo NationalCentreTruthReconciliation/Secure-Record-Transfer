@@ -174,8 +174,8 @@ export const sendDeleteRequestForFile = async (filename) => {
 export const updateCapacityDisplay = (totalNumFiles, totalSizeBytes) => {
     const totalSizeElement = document.getElementById("total-size");
     const remainingSizeElement = document.getElementById("remaining-size");
-    const { MAX_TOTAL_UPLOAD_SIZE } = getFileUploadSettings();
-    const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024;
+    const { MAX_TOTAL_UPLOAD_SIZE_MB } = getFileUploadSettings();
+    const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE_MB * 1000 * 1000;
 
     const updateElement = (element, value, isError) => {
         if (element) {
@@ -184,9 +184,9 @@ export const updateCapacityDisplay = (totalNumFiles, totalSizeBytes) => {
         }
     };
 
-    const totalMiB = totalSizeBytes / (1024 * 1024);
-    const remainingMiB = (maxTotalUploadSizeBytes - totalSizeBytes) / (1024 * 1024);
+    const totalMB = totalSizeBytes / (1000 * 1000);
+    const remainingMB = (maxTotalUploadSizeBytes - totalSizeBytes) / (1000 * 1000);
 
-    updateElement(totalSizeElement, totalMiB, totalSizeBytes > maxTotalUploadSizeBytes);
-    updateElement(remainingSizeElement, Math.max(remainingMiB, 0), remainingMiB < 0);
+    updateElement(totalSizeElement, totalMB, totalSizeBytes > maxTotalUploadSizeBytes);
+    updateElement(remainingSizeElement, Math.max(remainingMB, 0), remainingMB < 0);
 };

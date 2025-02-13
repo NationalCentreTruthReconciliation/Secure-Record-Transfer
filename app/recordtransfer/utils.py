@@ -175,28 +175,28 @@ def count_file_types(file_names: list, accepted_file_groups: dict, logger=None):
     return counted_extensions_per_group
 
 
-def mib_to_bytes(m: int) -> int:
-    """Convert MiB to bytes.
+def mb_to_bytes(m: int) -> int:
+    """Convert MB to bytes.
 
     Args:
-        m (int): Size in MiB.
+        m (int): Size in MB.
 
     Returns:
         int: Size in bytes.
     """
-    return m * 1024**2
+    return m * 1000**2
 
 
-def bytes_to_mib(b: int) -> float:
-    """Convert bytes to MiB.
+def bytes_to_mb(b: int) -> float:
+    """Convert bytes to MB.
 
     Args:
         b (int): Size in bytes.
 
     Returns:
-        float: Size in MiB.
+        float: Size in MB.
     """
-    return b / 1024**2
+    return b / 1000**2
 
 
 def accept_file(filename: str, filesize: Union[str, int]) -> dict:
@@ -274,20 +274,20 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
 
     # Check file size is less than the maximum allowed size for a single file
     max_single_size = min(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
+        settings.MAX_SINGLE_UPLOAD_SIZE_MB,
+        settings.MAX_TOTAL_UPLOAD_SIZE_MB,
     )
-    max_single_size_bytes = mib_to_bytes(max_single_size)
-    size_mib = bytes_to_mib(size)
+    max_single_size_bytes = mb_to_bytes(max_single_size)
+    size_mb = bytes_to_mb(size)
     if size > max_single_size_bytes:
         return {
             "accepted": False,
-            "error": gettext("File is too big ({0:.2f}MiB). Max filesize: {1}MiB").format(
-                size_mib, max_single_size
+            "error": gettext("File is too big ({0:.2f}MB). Max filesize: {1}MB").format(
+                size_mb, max_single_size
             ),
             "verboseError": gettext(
-                'The file "{0}" is too big ({1:.2f}MiB). Max filesize: {2}MiB'
-            ).format(filename, size_mib, max_single_size),
+                'The file "{0}" is too big ({1:.2f}MB). Max filesize: {2}MB'
+            ).format(filename, size_mb, max_single_size),
         }
 
     # All checks succeded
@@ -299,7 +299,7 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
 
     These checks are applied:
     - The session has room for more files according to the MAX_TOTAL_UPLOAD_COUNT
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE
+    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE_MB
     - A file with the same name has not already been uploaded
 
     Args:
@@ -324,21 +324,21 @@ def accept_session(filename: str, filesize: Union[str, int], session: UploadSess
             "verboseError": gettext(
                 'The file "{0}" would push the total file count past the '
                 "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE),
+            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE_MB),
         }
 
     # Check total size of all files plus current one is within allowed size
     max_size = max(
-        settings.MAX_SINGLE_UPLOAD_SIZE,
-        settings.MAX_TOTAL_UPLOAD_SIZE,
+        settings.MAX_SINGLE_UPLOAD_SIZE_MB,
+        settings.MAX_TOTAL_UPLOAD_SIZE_MB,
     )
-    max_remaining_size_bytes = mib_to_bytes(max_size) - session.upload_size
+    max_remaining_size_bytes = mb_to_bytes(max_size) - session.upload_size
     if int(filesize) > max_remaining_size_bytes:
         return {
             "accepted": False,
-            "error": gettext("Maximum total upload size ({0} MiB) exceeded").format(max_size),
+            "error": gettext("Maximum total upload size ({0} MB) exceeded").format(max_size),
             "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the {1}MiB max'
+                'The file "{0}" would push the total transfer size past the {1}MB max'
             ).format(filename, max_size),
         }
 

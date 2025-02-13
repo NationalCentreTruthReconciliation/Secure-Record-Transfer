@@ -271,7 +271,7 @@ class TestMetadata(TestCase):
         extent_1 = ExtentStatement(
             metadata=metadata,
             extent_type=extent_type,
-            quantity_and_unit_of_measure="10 PDF Files, worth 5MiB",
+            quantity_and_unit_of_measure="10 PDF Files, worth 5MB",
             content_type=content_type,
             carrier_type=carrier_type,
         )
@@ -310,7 +310,7 @@ class TestMetadata(TestCase):
 
         self.assertEqual(flat["dateOfMaterials"], "Circa 2018")
         self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
-        self.assertEqual(flat["quantityAndUnitOfMeasure"], "10 PDF Files, worth 5MiB|1 XLSX file")
+        self.assertEqual(flat["quantityAndUnitOfMeasure"], "10 PDF Files, worth 5MB|1 XLSX file")
         self.assertEqual(flat["contentTypes"], "Digital Content|Digital Content")
         self.assertEqual(flat["carrierTypes"], "Digital Transfer|NULL")
         self.assertEqual(flat["extentNotes"], "NULL|Notes")

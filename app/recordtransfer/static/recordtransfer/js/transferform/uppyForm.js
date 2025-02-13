@@ -44,9 +44,9 @@ export async function setupUppy() {
         {
             autoProceed: true,
             restrictions: {
-                maxFileSize: settings.MAX_SINGLE_UPLOAD_SIZE * 1024 * 1024,
+                maxFileSize: settings.MAX_SINGLE_UPLOAD_SIZE_MB * 1000 * 1000,
                 minFileSize: 0,
-                maxTotalFileSize: settings.MAX_TOTAL_UPLOAD_SIZE * 1024 * 1024,
+                maxTotalFileSize: settings.MAX_TOTAL_UPLOAD_SIZE_MB * 1000 * 1000,
                 minNumberOfFiles: 1,
                 maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
                 allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,

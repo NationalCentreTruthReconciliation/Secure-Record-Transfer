@@ -533,8 +533,8 @@ class TransferFormWizard(SessionWizardView):
         elif self.current_step == TransferStep.UPLOAD_FILES:
             context.update(
                 {
-                    "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
-                    "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                    "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
+                    "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
                 }
             )
@@ -610,8 +610,8 @@ class TransferFormWizard(SessionWizardView):
         elif step == TransferStep.UPLOAD_FILES:
             js_context.update(
                 {
-                    "MAX_TOTAL_UPLOAD_SIZE": settings.MAX_TOTAL_UPLOAD_SIZE,
-                    "MAX_SINGLE_UPLOAD_SIZE": settings.MAX_SINGLE_UPLOAD_SIZE,
+                    "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
+                    "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
                     "ACCEPTED_FILE_FORMATS": [
                         f".{format}"
@@ -651,7 +651,7 @@ class TransferFormWizard(SessionWizardView):
             )
             return
 
-        size = get_human_readable_size(session.upload_size, base=1024, precision=2)
+        size = get_human_readable_size(session.upload_size, base=1000, precision=2)
 
         count = get_human_readable_file_count(
             [f.name for f in session.get_temporary_uploads()],
