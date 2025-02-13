@@ -569,7 +569,7 @@ class TransferFormWizard(SessionWizardView):
                         "recordtransfer:get_user_submission_groups",
                         kwargs={"user_id": self.request.user.pk},
                     ),
-                    "default_group_id": self.submission_group_uuid,
+                    "default_group_uuid": self.submission_group_uuid,
                 },
             )
         elif step == TransferStep.UPLOAD_FILES:
