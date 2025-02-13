@@ -3,6 +3,8 @@
 from django.conf import settings
 from django.views.generic import TemplateView
 
+from caais.models import RightsType, SourceRole, SourceType
+
 
 class Index(TemplateView):
     """The homepage."""
@@ -27,4 +29,7 @@ class About(TemplateView):
         context["MAX_TOTAL_UPLOAD_SIZE_MB"] = settings.MAX_TOTAL_UPLOAD_SIZE_MB
         context["MAX_SINGLE_UPLOAD_SIZE_MB"] = settings.MAX_SINGLE_UPLOAD_SIZE_MB
         context["MAX_TOTAL_UPLOAD_COUNT"] = settings.MAX_TOTAL_UPLOAD_COUNT
+        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
+        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
+        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
         return context
