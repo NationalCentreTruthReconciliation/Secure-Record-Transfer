@@ -177,8 +177,8 @@ ARCHIVIST_EMAIL = config("ARCHIVIST_EMAIL", default="archivist@example.com")
 BAG_CHECKSUMS = config("BAG_CHECKSUMS", default="sha512", cast=Csv())
 
 # Maximum upload thresholds
-MAX_TOTAL_UPLOAD_SIZE = config("MAX_TOTAL_UPLOAD_SIZE", default=256, cast=int)
-MAX_SINGLE_UPLOAD_SIZE = config("MAX_SINGLE_UPLOAD_SIZE", default=64, cast=int)
+MAX_TOTAL_UPLOAD_SIZE_MB = config("MAX_TOTAL_UPLOAD_SIZE_MB", default=256, cast=int)
+MAX_SINGLE_UPLOAD_SIZE_MB = config("MAX_SINGLE_UPLOAD_SIZE_MB", default=64, cast=int)
 MAX_TOTAL_UPLOAD_COUNT = config("MAX_TOTAL_UPLOAD_COUNT", default=40, cast=int)
 
 # Use Date widgets for record dates or use free text fields.

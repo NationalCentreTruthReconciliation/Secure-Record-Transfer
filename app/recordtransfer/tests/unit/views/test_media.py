@@ -66,8 +66,8 @@ class TestCreateUploadSessionView(TestCase):
     "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
 )
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
-@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE_MB", 3)
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE_MB", 1)
 @patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 @override_storage(storage=LocMemStorage())
 class TestUploadFilesView(TestCase):

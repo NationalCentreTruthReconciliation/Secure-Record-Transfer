@@ -247,8 +247,8 @@ class FileCountingUtilityTests(TestCase):
     "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
 )
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
-@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE_MB", 3)
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE_MB", 1)
 @patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 class TestAcceptFile(TestCase):
     """Tests for accept_file method."""
@@ -313,13 +313,13 @@ class TestAcceptFile(TestCase):
 
     def test_file_too_large(self) -> None:
         """Test that files that are too large are rejected."""
-        # Max size is patched to 1 MiB
+        # Max size is patched to 1 MB
         param_list = [
-            (1024**2) + 1,  # 1 MiB plus one byte
-            (1024**2) * 8,  # 8 MiB
-            (1024**2) * 32,  # 32 MiB
-            (1024**3),  # 1 GiB
-            (1024**4),  # 1 TiB
+            (1000**2) + 1,  # 1 MB plus one byte
+            (1000**2) * 8,  # 8 MB
+            (1000**2) * 32,  # 32 MB
+            (1000**3),  # 1 GB
+            (1000**4),  # 1 TB
         ]
         for size in param_list:
             with self.subTest():
@@ -329,8 +329,8 @@ class TestAcceptFile(TestCase):
 
     def test_file_exactly_max_size(self) -> None:
         """Test that files that are exactly the max size are accepted."""
-        # Max size is patched to 1 MiB
-        result = accept_file("My File.pdf", ((1024**2) * 1))  # 1 MiB
+        # Max size is patched to 1 MB
+        result = accept_file("My File.pdf", ((1000**2) * 1))  # 1 MB
         self.assertTrue(result["accepted"])
 
 
@@ -338,8 +338,8 @@ class TestAcceptFile(TestCase):
     "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
 )
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE", 3)  # MiB
-@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE", 1)  # MiB
+@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE_MB", 3)
+@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE_MB", 1)
 @patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 class TestAcceptSession(TestCase):
     """Tests for accept_session method."""
@@ -356,8 +356,8 @@ class TestAcceptSession(TestCase):
             token="test_session_1",
             started_at=timezone.now(),
         )
-        cls.one_mib = bytearray([1] * (1024**2))
-        cls.half_mib = bytearray([1] * int((1024**2) / 2))
+        cls.one_mb = bytearray([1] * (1000**2))
+        cls.half_mb = bytearray([1] * int((1000**2) / 2))
 
     def tearDown(self) -> None:
         """Remove all uploaded files after each test."""
@@ -365,41 +365,41 @@ class TestAcceptSession(TestCase):
 
     def test_session_has_room(self) -> None:
         """Test that a session with room for more files is accepted."""
-        # 2 MiB of files (one MiB x 2)
+        # 2 MB of files (one MB x 2)
         for name in ("File 1.docx", "File 2.docx"):
             TempUploadedFile.objects.create(
                 session=self.session_1,
-                file_upload=SimpleUploadedFile(name, self.one_mib),
+                file_upload=SimpleUploadedFile(name, self.one_mb),
                 name=name,
             )
         self.session_1.status = UploadSession.SessionStatus.UPLOADING
-        for size in ("1024", len(self.one_mib)):
+        for size in ("1000", len(self.one_mb)):
             with self.subTest():
                 result = accept_session("My File.pdf", size, self.session_1)
                 self.assertTrue(result["accepted"])
 
     def test_session_file_count_full(self) -> None:
         """Test that a session with the maximum number of files is rejected."""
-        # 2 MiB of files (half MiB x 4)
+        # 2 MB of files (half MB x 4)
         # Max file count is 4
         for name in ("File 1.docx", "File 2.pdf", "File 3.pdf", "File 4.pdf"):
             TempUploadedFile.objects.create(
                 session=self.session_1,
                 name=name,
-                file_upload=SimpleUploadedFile(name, self.half_mib),
+                file_upload=SimpleUploadedFile(name, self.half_mb),
             )
         self.session_1.status = UploadSession.SessionStatus.UPLOADING
-        result = accept_session("My File.pdf", "1024", self.session_1)
+        result = accept_session("My File.pdf", "1000", self.session_1)
         self.assertFalse(result["accepted"])
         self.assertIn("You can not upload anymore files", result["error"])
 
     def test_file_too_large_for_session(self) -> None:
         """Test that a file that is too large for the session is rejected."""
-        # 2.5 MiB of files (1 Mib x 2, 0.5 MiB x 1)
+        # 2.5 MB of files (1 MB x 2, 0.5 MB x 1)
         for name, content in (
-            ("File 1.docx", self.one_mib),
-            ("File 2.pdf", self.one_mib),
-            ("File 3.pdf", self.half_mib),
+            ("File 1.docx", self.one_mb),
+            ("File 2.pdf", self.one_mb),
+            ("File 3.pdf", self.half_mb),
         ):
             TempUploadedFile.objects.create(
                 session=self.session_1,
@@ -407,9 +407,9 @@ class TestAcceptSession(TestCase):
                 file_upload=SimpleUploadedFile(name, content),
             )
         self.session_1.status = UploadSession.SessionStatus.UPLOADING
-        result = accept_session("My File.pdf", len(self.one_mib), self.session_1)
+        result = accept_session("My File.pdf", len(self.one_mb), self.session_1)
         self.assertFalse(result["accepted"])
-        self.assertIn("Maximum total upload size (3 MiB) exceeded", result["error"])
+        self.assertIn("Maximum total upload size (3 MB) exceeded", result["error"])
 
     def test_duplicate_file_name(self) -> None:
         """Test that a file with the same name as an existing file is rejected."""
@@ -418,12 +418,12 @@ class TestAcceptSession(TestCase):
             TempUploadedFile.objects.create(
                 session=self.session_1,
                 name=name,
-                file_upload=SimpleUploadedFile(name, self.half_mib),
+                file_upload=SimpleUploadedFile(name, self.half_mb),
             )
         self.session_1.status = UploadSession.SessionStatus.UPLOADING
         for name in names:
             with self.subTest():
-                result = accept_session(name, "1024", self.session_1)
+                result = accept_session(name, "1000", self.session_1)
                 self.assertFalse(result["accepted"])
                 self.assertIn(
                     "A file with the same name has already been uploaded",
