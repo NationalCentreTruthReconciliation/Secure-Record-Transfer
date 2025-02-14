@@ -1,4 +1,3 @@
-# pylint: disable=consider-using-f-string
 import logging
 import os
 import re
@@ -11,13 +10,14 @@ from django.core.exceptions import ImproperlyConfigured
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def verify_email_settings():
-    """Verify the settings:
+def verify_email_settings() -> None:
+    """Verify these settings.
 
     - DO_NOT_REPLY_USERNAME
     - ARCHIVIST_EMAIL
 
-    Throws an ImproperlyConfigured exception if either of these are empty.
+    Raises:
+        ImproperlyConfigured: If either DO_NOT_REPLY_USERNAME or ARCHIVIST_EMAIL is empty.
     """
     if not settings.DO_NOT_REPLY_USERNAME:
         raise ImproperlyConfigured("The DO_NOT_REPLY_USERNAME setting is empty")
@@ -25,28 +25,29 @@ def verify_email_settings():
         raise ImproperlyConfigured("The ARCHIVIST_EMAIL setting is empty")
 
 
-def verify_date_format():
-    """Verify the setting:
+def verify_date_format() -> None:
+    """Verify the setting.
 
     - APPROXIMATE_DATE_FORMAT
 
-    Throws an ImproperlyConfigured exception if the setting does not contain
-    "{date}"
+    Raises:
+        ImproperlyConfigured: If the setting does not contain "{date}".
     """
     if r"{date}" not in settings.APPROXIMATE_DATE_FORMAT:
         raise ImproperlyConfigured(
-            ("The APPROXIMATE_DATE_FORMAT (currently: {0}) does not contain " "{{date}}").format(
+            ("The APPROXIMATE_DATE_FORMAT (currently: {0}) does not contain {{date}}").format(
                 settings.APPROXIMATE_DATE_FORMAT
             )
         )
 
 
-def verify_checksum_settings():
-    """Verify the setting:
+def verify_checksum_settings() -> None:
+    """Verify the setting.
 
     - BAG_CHECKSUMS
 
-    Throws an ImproperlyConfigured exception if the setting is not valid.
+    Raises:
+        ImproperlyConfigured: If the setting is empty or contains unsupported checksum algorithms.
     """
     if not settings.BAG_CHECKSUMS:
         raise ImproperlyConfigured(
@@ -66,15 +67,17 @@ def verify_checksum_settings():
         )
 
 
-def verify_storage_folder_settings():
-    """Verify the settings:
+def verify_storage_folder_settings() -> None:
+    """Verify the settings.
 
     - BAG_STORAGE_FOLDER
     - UPLOAD_STORAGE_FOLDER
 
-    Creates the directories if they do not exist. Raises an ImproperlyConfigured
-    exception if the directories could not be created, or if they already exist
-    but as file.
+    Creates the directories if they do not exist.
+
+    Raises:
+        ImproperlyConfigured: If the directories could not be created, or if they already exist
+        exception if the directories could not be created, or if they already exist but as file.
     """
     for setting_name in [
         "BAG_STORAGE_FOLDER",
@@ -104,15 +107,16 @@ def verify_storage_folder_settings():
                 ) from exc
 
 
-def verify_max_upload_size():
-    """Verify the settings:
+def verify_max_upload_size() -> None:
+    """Verify the settings.
 
     - MAX_TOTAL_UPLOAD_SIZE_MB
     - MAX_SINGLE_UPLOAD_SIZE_MB
     - MAX_TOTAL_UPLOAD_COUNT
 
-    Throws an ImproperlyConfigured exception if any are less than or equal to
-    zero, or if the single upload size is greater than the total upload size.
+    Raises:
+        ImproperlyConfigured: If any are less than or equal to zero, or if the single upload size
+        is greater than the total upload size.
     """
     for setting_name in [
         "MAX_TOTAL_UPLOAD_SIZE_MB",
@@ -123,7 +127,7 @@ def verify_max_upload_size():
 
         if not isinstance(value, int):
             raise ImproperlyConfigured(
-                ("The {0} setting is the wrong type (currently: {1}), should be " "int").format(
+                ("The {0} setting is the wrong type (currently: {1}), should be int").format(
                     setting_name, type(value)
                 )
             )
@@ -135,9 +139,9 @@ def verify_max_upload_size():
 
         if value < 0:
             raise ImproperlyConfigured(
-                (
-                    "The {0} setting is negative (currently: {1}), it cannot be " "less than 1"
-                ).format(setting_name, value)
+                ("The {0} setting is negative (currently: {1}), it cannot be less than 1").format(
+                    setting_name, value
+                )
             )
 
     max_total_size = settings.MAX_TOTAL_UPLOAD_SIZE_MB
@@ -152,10 +156,13 @@ def verify_max_upload_size():
 
 
 def verify_accepted_file_formats() -> None:
-    """Verify the ACCEPTED_FILE_FORMATS setting.
+    """Verify the setting.
 
-    Throws an ImproperlyConfigured exception if there are any issues with the
-    formatting of the setting or the file extensions in the setting.
+    - ACCEPTED_FILE_FORMATS
+
+    Raises:
+        ImproperlyConfigured exception if there are any issues with the formatting of the setting
+        or the file extensions in the setting.
     """
     formats = settings.ACCEPTED_FILE_FORMATS
 
@@ -238,14 +245,14 @@ def verify_accepted_file_formats() -> None:
             inverted_formats[extension] = group_name
 
 
-def verify_caais_defaults():
-    """Verifies the setting:
+def verify_caais_defaults() -> None:
+    """Verify the settings.
 
     - CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
     - CAAIS_DEFAULT_CREATION_TYPE
 
-    Ensures that all required defaults exist, raises an ImproperlyConfigured
-    exception if a default does not exist.
+    Raises:
+        ImproperlyConfigured: If either setting is empty.
     """
     if not settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set")
@@ -254,11 +261,12 @@ def verify_caais_defaults():
 
 
 class RecordTransferConfig(AppConfig):
-    """Top-level application config for the recordtransfer app"""
+    """Top-level application config for the recordtransfer app."""
 
     name = "recordtransfer"
 
-    def ready(self):
+    def ready(self) -> None:
+        """Verify the settings in the settings module."""
         try:
             LOGGER.info("Verifying settings in %s", settings.SETTINGS_MODULE)
             verify_email_settings()
