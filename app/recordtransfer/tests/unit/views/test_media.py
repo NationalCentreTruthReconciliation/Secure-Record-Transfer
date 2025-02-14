@@ -7,8 +7,6 @@ from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
-from override_storage import override_storage
-from override_storage.storage import LocMemStorage
 
 from recordtransfer.models import TempUploadedFile, UploadSession, User
 
@@ -69,7 +67,6 @@ class TestCreateUploadSessionView(TestCase):
 @patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE_MB", 3)
 @patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE_MB", 1)
 @patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
-@override_storage(storage=LocMemStorage())
 class TestUploadFilesView(TestCase):
     """Tests for recordtransfer:upload_files view."""
 
@@ -279,19 +276,6 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(session.file_count, 0)
-
-    @skipIf(True, "File content scanning is not implemented yet")
-    def test_content_issue_flagged(self) -> None:
-        """
-        self.patch__accept_contents.return_value = {
-            "accepted": False,
-            "error": "ISSUE",
-            "clamav": {
-                "reason": "Virus",
-                "status": "FOUND",
-            },
-        }
-        """
 
 
 class TestMediaRequestView(TestCase):

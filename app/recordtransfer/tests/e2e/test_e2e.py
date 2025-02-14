@@ -1,8 +1,8 @@
-import os
 import tempfile
 from typing import ClassVar
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import tag
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -20,6 +20,7 @@ def get_section_title(step: TransferStep) -> str:
     return TransferFormWizard._TEMPLATES[step][FORMTITLE]
 
 
+@tag("e2e")
 class TransferFormWizardTest(StaticLiveServerTestCase):
     """End-to-end tests for the transfer form wizard."""
 
