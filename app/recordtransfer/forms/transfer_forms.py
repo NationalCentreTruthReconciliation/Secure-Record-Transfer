@@ -11,7 +11,7 @@ from caais.models import RightsType, SourceRole, SourceType
 from django import forms
 from django.conf import settings
 from django.db.models import Case, CharField, Value, When
-from django.forms import BaseForm, BaseFormSet, ValidationError
+from django.forms import BaseForm, BaseFormSet
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
