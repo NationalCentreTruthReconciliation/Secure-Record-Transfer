@@ -28,3 +28,7 @@ td.delete {
     font-size: 14px;
     padding: 6px 0 0 0;
 }
+
+.country-select-flag {
+    object-fit: contain;
+  }
