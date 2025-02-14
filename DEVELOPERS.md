@@ -27,7 +27,7 @@ The debugging configuration has already been set up in the `.vscode/launch.json`
 A GitHub Actions workflow is set up to run Django tests on every pull request to the master branch. All tests must pass before a merge is allowed. The workflow configuration can be found in `.github/workflows/django-tests.yml`.
 
 
-### Re-build JS as Changes are Made
+## Re-build JS as Changes are Made
 
 After you run the dev container (`compose.dev.yml`), you can automatically re-build the JS files any time they change with this command:
 
@@ -41,7 +41,7 @@ podman-compose -f compose.dev.yml exec app npm run watch
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
-# Virtual Environment and Poetry Setup
+## Virtual Environment and Poetry Setup
 
 Python dependencies are managed with [Poetry](https://python-poetry.org/). To install Poetry and create a virtual environment with the minimally necessary packages, follow these instructions:
 
@@ -71,33 +71,51 @@ Finally, install the dependencies with `poetry`:
 poetry install
 ```
 
-## Testing Setup
+## Running Tests
 
 Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
 
 Install the `dev` dependencies with Poetry:
 
 ```shell
-poetry install --extras "dev"
+poetry install -E dev
 ```
 
-The tests can be run with [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (using [pytest-django](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml)):
-To run tests, use:
+The tests can be run in a few different ways:
+
+1. Using [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (this uses [settings in the `pyproject.toml` file](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml))
+2. The [Django test runner](https://docs.djangoproject.com/en/4.2/ref/django-admin/#test)
+3. The [VS Code test runner](https://code.visualstudio.com/docs/python/testing#_run-tests)
+
+This document focuses only on the first two options. For information on [running and debugging tests with VS Code, click here](https://code.visualstudio.com/docs/python/testing#_run-tests).
+
+The `pytest` commands can be run from the root of the repository. The Django admin tests must be run from the `app` directory.
+
+To run all tests:
+
 ```shell
 pytest
+
+# Or, from the app/ directory:
+python manage.py test
 ```
 
-For unit tests only:
+To run only the unit tests:
+
 ```shell
 pytest -k "unit"
+
+# Or, from the app/ directory:
+python manage.py test --exclude-tag=e2e
 ```
 
-For E2E tests only:
+To run only the end-to-end tests:
+
 ```shell
 pytest -k "e2e"
-```
 
-The tests should also be discoverable and runnable from the VSCode test explorer.
+# There is currently no way to do this with python manage.py test (yet)
+```
 
 ## Building the Documentation
 
@@ -105,9 +123,10 @@ The documentation for this repository is built with [Sphinx](https://sphinx-doc.
 
 Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
 
-Install the `docs` dependencies with Poetry:
+Install the `dev` dependencies with Poetry:
+
 ```shell
-poetry install --extras "docs"
+poetry install -E dev
 ```
 
 To build the docs, run:
