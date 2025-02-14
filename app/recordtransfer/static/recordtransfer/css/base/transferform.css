@@ -94,6 +94,11 @@
     margin-left: 10px;
 }
 
+.fa-info-circle {
+    color: #2d30d4;
+    font-size: 14pt;
+}
+
 .imminent-removal {
     label {
         color: red;
