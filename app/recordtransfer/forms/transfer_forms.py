@@ -897,11 +897,11 @@ class GroupTransferForm(TransferForm):
         cleaned_data = super().clean()
         group_uuid = cleaned_data.get("group_uuid")
 
-        group = SubmissionGroup.objects.filter(created_by=self.user, uuid=group_uuid).first()
-        if not group:
-            raise ValidationError({"group_uuid": "Invalid group selected."})
-
-        cleaned_data["submission_group"] = group
+        if group_uuid:
+            group = SubmissionGroup.objects.filter(created_by=self.user, uuid=group_uuid).first()
+            cleaned_data["submission_group"] = group
+            if not group:
+                cleaned_data["group_uuid"] = None
 
         return cleaned_data
 
