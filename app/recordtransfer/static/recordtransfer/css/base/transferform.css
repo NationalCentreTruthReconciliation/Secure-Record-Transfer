@@ -97,6 +97,11 @@
 .fa-info-circle {
     color: #6c757d;
     font-size: 14pt;
+    transition: color 0.1s ease-in-out;
+}
+
+.fa-info-circle:hover {
+    color: #545b62;
 }
 
 .imminent-removal {
