@@ -3,6 +3,7 @@ import os
 import re
 
 from bagit import CHECKSUM_ALGOS
+from crontab import CronTab
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -258,6 +259,50 @@ def verify_caais_defaults() -> None:
         raise ImproperlyConfigured("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set")
     if not settings.CAAIS_DEFAULT_CREATION_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
+
+
+def verify_upload_session_expiry_settings() -> None:
+    """Verify the settings.
+
+    - UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+    - UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+    - UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+
+    Raises:
+        ImproperlyConfigured: If the expiry schedule is not a valid cron string, or if the
+        expiry settings are invalid.
+    """
+    try:
+        CronTab(settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE)
+    except Exception as exc:
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE is not a valid cron string"
+        ) from exc
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES <= 0
+        and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES must be greater than zero or -1"
+        )
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES <= 0
+        and settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES != -1
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be greater than zero or -1"
+        )
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+        >= settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be less than "
+            "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES"
+        )
 
 
 class RecordTransferConfig(AppConfig):
