@@ -3,10 +3,12 @@
 .inline-textarea {
     width: 97%;
 }
+
 .enable-vertical-resize {
     resize: vertical;
     min-height: 1.25em;
 }
+
 .disable-resize {
     resize: none;
 }
@@ -15,6 +17,7 @@
 th.required {
     width: 92%;
 }
+
 td.delete {
     text-align: center;
     display: flex;
@@ -32,4 +35,4 @@ td.delete {
 /* For the country select flag */
 .country-select-flag {
     object-fit: contain;
-  }
+}
