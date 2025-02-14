@@ -87,7 +87,7 @@ export async function setupSubmissionGroupForm() {
     };
 
     // Select the default group at first
-    selectGroup(context?.default_group_id);
+    selectGroup(context?.default_group_uuid);
 
     selectField.addEventListener("change", updateGroupDescription);
 
