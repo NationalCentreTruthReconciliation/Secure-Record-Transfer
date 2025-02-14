@@ -215,17 +215,16 @@ class TransferFormWizard(SessionWizardView):
         if not title:
             title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
-        submission = self.in_progress_submission
-        if submission:
-            submission.last_updated = timezone.now()
+        if self.in_progress_submission:
+            self.in_progress_submission.last_updated = timezone.now()
         else:
-            submission = InProgressSubmission()
+            self.in_progress_submission = InProgressSubmission()
 
-        submission.current_step = self.current_step.value
-        submission.user = cast(User, self.request.user)
-        submission.step_data = pickle.dumps(form_data)
-        submission.title = title
-        submission.save()
+        self.in_progress_submission.current_step = self.current_step.value
+        self.in_progress_submission.user = cast(User, self.request.user)
+        self.in_progress_submission.step_data = pickle.dumps(form_data)
+        self.in_progress_submission.title = title
+        self.in_progress_submission.save()
 
     def save_current_step(
         self, form: Union[BaseInlineFormSet, BaseModelFormSet, ModelForm]
