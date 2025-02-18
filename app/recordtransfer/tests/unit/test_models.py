@@ -894,5 +894,11 @@ class TestInProgressSubmission(TestCase):
 
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
-        expected_str = f"Transfer of {self.submission.last_updated} by {self.user}"
+        session_token = (
+            self.submission.upload_session.token if self.submission.upload_session else "None"
+        )
+        expected_str = (
+            f"In-Progress Submission by {self.user} "
+            f"(Title: {self.submission.title} | Session: {session_token})"
+        )
         self.assertEqual(str(self.submission), expected_str)
