@@ -215,10 +215,16 @@ class TransferFormWizard(SessionWizardView):
         if not title:
             title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
 
+        session_token = self.get_form_value(TransferStep.UPLOAD_FILES, "session_token")
+        session = UploadSession.objects.filter(token=session_token, user=self.request.user).first()
+
         if self.in_progress_submission:
             self.in_progress_submission.last_updated = timezone.now()
         else:
             self.in_progress_submission = InProgressSubmission()
+
+        if session:
+            self.in_progress_submission.upload_session = session
 
         self.in_progress_submission.current_step = self.current_step.value
         self.in_progress_submission.user = cast(User, self.request.user)
