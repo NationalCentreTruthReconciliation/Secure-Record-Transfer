@@ -150,6 +150,24 @@ class UploadSession(models.Model):
             for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all())
         )
 
+    @property
+    def expires_at(self) -> Optional[timezone.datetime]:
+        """Get the time at which this session will expire. Only sessions in the CREATED or
+        UPLOADING state can have an expiration time. Returns None for sessions in other states.
+        """
+        if self.status in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+            return self.last_upload_interaction_time + timezone.timedelta(
+                minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+            )
+        return None
+
+    @property
+    def expired(self) -> bool:
+        """Determine if this session has expired. Will only return True for an expired session
+        in the CREATED or UPLOADING state. Returns False for sessions in other states.
+        """
+        return self.expires_at is not None and self.expires_at < timezone.now()
+
     def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
