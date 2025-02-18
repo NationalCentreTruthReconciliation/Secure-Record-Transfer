@@ -112,8 +112,8 @@ class TestUploadSession(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     def test_expires_at(self) -> None:
-        """Test expires_at returns the correct expiration time for sessions in CREATED and UPLOADING
-        states, and None for other states.
+        """Test expires_at returns the correct expiration time for sessions in CREATED and
+        UPLOADING states, and None for other states.
         """
         fixed_now = datetime(2025, 2, 18, 12, 0, 0)
 
