@@ -1,6 +1,7 @@
 import logging
 import shutil
 import tempfile
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, Mock, patch
@@ -9,6 +10,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
 from django.test import TestCase
+from django.utils import timezone
 
 from recordtransfer.models import PermUploadedFile, TempUploadedFile, UploadSession
 
@@ -98,6 +100,72 @@ class TestUploadSession(TestCase):
         self.assertIsInstance(self.session, UploadSession)
         self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
         self.assertEqual(len(self.session.token), 32)
+        self.assertIsNotNone(self.session.last_upload_interaction_time)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_expires_at(self) -> None:
+        """Test expires_at returns the correct expiration time for sessions in CREATED and UPLOADING
+        states, and None for other states.
+        """
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+
+        # Test CREATED state
+        self.session.status = UploadSession.SessionStatus.CREATED
+        self.session.last_upload_interaction_time = fixed_now
+        expected_expires_at = self.session.last_upload_interaction_time + timezone.timedelta(
+            minutes=30
+        )
+        self.assertEqual(self.session.expires_at, expected_expires_at)
+
+        # Test UPLOADING state
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.last_upload_interaction_time = fixed_now
+        expected_expires_at = self.session.last_upload_interaction_time + timezone.timedelta(
+            minutes=30
+        )
+        self.assertEqual(self.session.expires_at, expected_expires_at)
+
+        # Test other states
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for state in invalid_states:
+            self.session.status = state
+            self.assertIsNone(self.session.expires_at)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    @patch("django.utils.timezone.now")
+    def test_expired(self, mock_now: MagicMock) -> None:
+        """Test expired property for different session states."""
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
+
+        # Test expired returns True for a session that has expired
+        self.session.status = UploadSession.SessionStatus.CREATED
+        self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
+        self.assertTrue(self.session.expired)
+
+        # Test expired returns False for a session that has not expired
+        self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=29)
+        self.assertFalse(self.session.expired)
+
+        # Test expired returns False for sessions in states other than CREATED or UPLOADING
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+        for state in invalid_states:
+            self.session.status = state
+            self.assertFalse(self.session.expired)
 
     def test_upload_size_created_session(self) -> None:
         """Test upload size should be zero for a newly created session."""
@@ -181,9 +249,14 @@ class TestUploadSession(TestCase):
     def test_add_temp_file(self) -> None:
         """Test adding a temp file to the session."""
         self.assertEqual(len(self.session.tempuploadedfile_set.all()), 0)
-        self.session.add_temp_file(self.test_file_1)
+        temp_file = self.session.add_temp_file(self.test_file_1)
+
         self.assertEqual(len(self.session.tempuploadedfile_set.all()), 1)
         self.assertEqual(self.session.status, UploadSession.SessionStatus.UPLOADING)
+
+        self.assertEqual(temp_file.name, self.test_file_1.name)
+        self.assertEqual(temp_file.session, self.session)
+        self.assertTrue(temp_file.exists)
 
     def test_add_temp_file_invalid_status(self) -> None:
         """Test adding a temp file to the session raises an exception when the session is in an
