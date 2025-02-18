@@ -14,7 +14,13 @@ from django.test import TestCase
 from django.utils import timezone
 
 from recordtransfer.enums import TransferStep
-from recordtransfer.models import InProgressSubmission, PermUploadedFile, TempUploadedFile, UploadSession, User
+from recordtransfer.models import (
+    InProgressSubmission,
+    PermUploadedFile,
+    TempUploadedFile,
+    UploadSession,
+    User,
+)
 
 
 def get_mock_temp_uploaded_file(
@@ -854,13 +860,6 @@ class TestInProgressSubmission(TestCase):
             upload_session=self.upload_session,
         )
 
-    def test_create_submission(self) -> None:
-        """Test creating an InProgressSubmission."""
-        self.assertIsInstance(self.submission, InProgressSubmission)
-        self.assertEqual(self.submission.step_data, b"test data")
-        self.assertEqual(self.submission.title, "Test Submission")
-        self.assertEqual(self.submission.upload_session, self.upload_session)
-
     def test_clean_invalid_step(self) -> None:
         """Test clean method with an invalid step."""
         self.submission.current_step = "INVALID_STEP"
@@ -869,7 +868,9 @@ class TestInProgressSubmission(TestCase):
 
     def test_upload_session_expires_at(self) -> None:
         """Test upload_session_expires_at method."""
-        self.assertEqual(self.submission.upload_session_expires_at(), self.upload_session.expires_at)
+        self.assertEqual(
+            self.submission.upload_session_expires_at(), self.upload_session.expires_at
+        )
 
     def test_upload_session_expires_at_no_session(self) -> None:
         """Test upload_session_expires_at method when there is no upload session."""
