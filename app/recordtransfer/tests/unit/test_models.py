@@ -9,10 +9,12 @@ from unittest.mock import MagicMock, Mock, patch
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
+from django.forms import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
-from recordtransfer.models import PermUploadedFile, TempUploadedFile, UploadSession
+from recordtransfer.enums import TransferStep
+from recordtransfer.models import InProgressSubmission, PermUploadedFile, TempUploadedFile, UploadSession, User
 
 
 def get_mock_temp_uploaded_file(
@@ -835,3 +837,46 @@ class TestTempUploadedFile(TestPermUploadedFile):
         self.assertFalse(self.uploaded_file.exists)
         perm_uploaded_file = PermUploadedFile.objects.get(session=self.session, name="test.pdf")
         self.assertTrue(perm_uploaded_file.exists)
+
+
+class TestInProgressSubmission(TestCase):
+    """Tests for the InProgressSubmission model."""
+
+    def setUp(self) -> None:
+        """Set up test."""
+        self.user = User.objects.create(username="testuser", password="password")
+        self.upload_session = UploadSession.new_session()
+        self.submission = InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=TransferStep.ACCEPT_LEGAL.value,
+            step_data=b"test data",
+            title="Test Submission",
+            upload_session=self.upload_session,
+        )
+
+    def test_create_submission(self) -> None:
+        """Test creating an InProgressSubmission."""
+        self.assertIsInstance(self.submission, InProgressSubmission)
+        self.assertEqual(self.submission.step_data, b"test data")
+        self.assertEqual(self.submission.title, "Test Submission")
+        self.assertEqual(self.submission.upload_session, self.upload_session)
+
+    def test_clean_invalid_step(self) -> None:
+        """Test clean method with an invalid step."""
+        self.submission.current_step = "INVALID_STEP"
+        with self.assertRaises(ValidationError):
+            self.submission.clean()
+
+    def test_upload_session_expires_at(self) -> None:
+        """Test upload_session_expires_at method."""
+        self.assertEqual(self.submission.upload_session_expires_at(), self.upload_session.expires_at)
+
+    def test_upload_session_expires_at_no_session(self) -> None:
+        """Test upload_session_expires_at method when there is no upload session."""
+        self.submission.upload_session = None
+        self.assertIsNone(self.submission.upload_session_expires_at())
+
+    def test_str(self) -> None:
+        """Test the string representation of the InProgressSubmission."""
+        expected_str = f"Transfer of {self.submission.last_updated} by {self.user}"
+        self.assertEqual(str(self.submission), expected_str)
