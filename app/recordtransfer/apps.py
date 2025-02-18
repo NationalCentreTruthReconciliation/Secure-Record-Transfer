@@ -3,7 +3,6 @@ import os
 import re
 
 from bagit import CHECKSUM_ALGOS
-from crontab import CronTab
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -261,6 +260,38 @@ def verify_caais_defaults() -> None:
         raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
 
 
+def _validate_cron(cron_str: str) -> None:
+    """Validate a cron expression.
+
+    Args:
+        cron_str: The cron expression to validate.
+
+    Raises:
+        ValueError: If the cron expression is invalid.
+    """
+    # Check number of fields
+    fields = cron_str.strip().split()
+    if len(fields) != 5:
+        raise ValueError("Cron expression must have 5 fields")
+
+    # Regex for each cron field
+    cron_patterns = {
+        "minute": r"^(?:\*|[0-5]?\d(?:-[0-5]?\d)?(?:/[1-9]\d*)?(?:,[0-5]?\d)*)$",
+        "hour": r"^(?:\*|[01]?\d|2[0-3](?:-[01]?\d|2[0-3])?(?:/[1-9]\d*)?(?:,[01]?\d|2[0-3])*)$",
+        "day_of_month": r"^(?:\*|[1-9]|[12]\d|3[01](?:-[1-9]|[12]\d|3[01])?(?:/[1-9]\d*)?(?:,[1-9]|[12]\d|3[01])*)$",
+        "month": r"^(?:\*|[1-9]|1[0-2](?:-[1-9]|1[0-2])?(?:/[1-9]\d*)?(?:,[1-9]|1[0-2])*)$",
+        "day_of_week": r"^(?:\*|[0-6](?:-[0-6])?(?:/[1-9]\d*)?(?:,[0-6])*)$"
+    }
+
+    field_names = ["minute", "hour", "day_of_month", "month", "day_of_week"]
+
+    # Validate each field
+    for value, field in zip(fields, field_names):
+        pattern = cron_patterns[field]
+        if not re.match(pattern, value):
+            raise ValueError(f"Invalid value '{value}' for field '{field}'")
+
+
 def verify_upload_session_expiry_settings() -> None:
     """Verify the settings.
 
@@ -273,7 +304,7 @@ def verify_upload_session_expiry_settings() -> None:
         expiry settings are invalid.
     """
     try:
-        CronTab(settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE)
+        _validate_cron(settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE)
     except Exception as exc:
         raise ImproperlyConfigured(
             "UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE is not a valid cron string"
