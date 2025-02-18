@@ -889,23 +889,23 @@ class GroupTransferForm(TransferForm):
         choices = [(None, "Select a group")] + [
             (group.uuid, group.name) for group in user_submission_groups
         ]
-        self.fields["group_id"].choices = choices
-        self.fields["group_id"].initial = None
+        self.fields["group_uuid"].choices = choices
+        self.fields["group_uuid"].initial = None
 
     def clean(self) -> dict:
         """Check that chosen group exists and is owned by the user."""
         cleaned_data = super().clean()
-        group_id = cleaned_data.get("group_id")
+        group_uuid = cleaned_data.get("group_uuid")
 
-        if (
-            group_id
-            and not SubmissionGroup.objects.filter(created_by=self.user, uuid=group_id).exists()
-        ):
-            self.add_error("group_id", "Invalid group selected.")
+        if group_uuid:
+            group = SubmissionGroup.objects.filter(created_by=self.user, uuid=group_uuid).first()
+            cleaned_data["submission_group"] = group
+            if not group:
+                cleaned_data["group_uuid"] = None
 
         return cleaned_data
 
-    group_id = forms.TypedChoiceField(
+    group_uuid = forms.TypedChoiceField(
         required=False,
         coerce=UUID,
         widget=forms.Select(
@@ -1049,19 +1049,19 @@ class ReviewForm(TransferForm):
     def _get_group_transfer_fields_data(form: GroupTransferForm, user: User) -> dict[str, Any]:
         """Handle group transfer specific field processing."""
         fields_data = ReviewForm._get_base_fields_data(form)
-        group_id = form.cleaned_data.get("group_id")
+        group_uuid = form.cleaned_data.get("group_uuid")
 
-        if not (group_id and user):
+        if not (group_uuid and user):
             return fields_data
 
-        group = SubmissionGroup.objects.filter(created_by=user, uuid=group_id).first()
+        group = SubmissionGroup.objects.filter(created_by=user, uuid=group_uuid).first()
         if not group:
             return fields_data
 
         # Replaces group UUID with group name
-        group_id_label = form.fields["group_id"].label
-        if group_id_label:
-            fields_data[group_id_label] = group.name
+        group_uuid_label = form.fields["group_uuid"].label
+        if group_uuid_label:
+            fields_data[group_uuid_label] = group.name
 
         return fields_data
 
