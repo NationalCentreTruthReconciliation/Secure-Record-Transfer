@@ -111,29 +111,26 @@ class TestUploadSession(TestCase):
         self.assertIsNotNone(self.session.last_upload_interaction_time)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
-    def test_expires_at(self) -> None:
+    def test_expires_at_valid_states(self) -> None:
         """Test expires_at returns the correct expiration time for sessions in CREATED and
-        UPLOADING states, and None for other states.
+        UPLOADING states.
         """
         fixed_now = datetime(2025, 2, 18, 12, 0, 0)
-
-        # Test CREATED state
-        self.session.status = UploadSession.SessionStatus.CREATED
         self.session.last_upload_interaction_time = fixed_now
-        expected_expires_at = self.session.last_upload_interaction_time + timezone.timedelta(
-            minutes=30
-        )
-        self.assertEqual(self.session.expires_at, expected_expires_at)
+        expected_expires_at = fixed_now + timezone.timedelta(minutes=30)
+        valid_states = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+        ]
 
-        # Test UPLOADING state
-        self.session.status = UploadSession.SessionStatus.UPLOADING
-        self.session.last_upload_interaction_time = fixed_now
-        expected_expires_at = self.session.last_upload_interaction_time + timezone.timedelta(
-            minutes=30
-        )
-        self.assertEqual(self.session.expires_at, expected_expires_at)
+        for state in valid_states:
+            self.session.status = state
+            self.assertEqual(self.session.expires_at, expected_expires_at)
 
-        # Test other states
+    def test_expires_at_invalid_states(self) -> None:
+        """Test expires_at raises an exception for sessions in states other than CREATED or
+        UPLOADING.
+        """
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.DELETED,
@@ -148,20 +145,38 @@ class TestUploadSession(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
-    def test_expired(self, mock_now: MagicMock) -> None:
-        """Test expired property for different session states."""
+    def test_expired_is_true(self, mock_now: MagicMock) -> None:
+        """Test expired property is True for a session that has expired."""
         fixed_now = datetime(2025, 2, 18, 12, 0, 0)
         mock_now.return_value = fixed_now
-
-        # Test expired returns True for a session that has expired
-        self.session.status = UploadSession.SessionStatus.CREATED
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
-        self.assertTrue(self.session.expired)
 
-        # Test expired returns False for a session that has not expired
+        valid_states = [UploadSession.SessionStatus.CREATED, UploadSession.SessionStatus.UPLOADING]
+
+        for state in valid_states:
+            # Test expired returns True for a session that has expired
+            self.session.status = state
+            self.assertTrue(self.session.expired)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    @patch("django.utils.timezone.now")
+    def test_expired_is_false(self, mock_now: MagicMock) -> None:
+        """Test expired property is False for a session that has not expired."""
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=29)
-        self.assertFalse(self.session.expired)
 
+        valid_states = [UploadSession.SessionStatus.CREATED, UploadSession.SessionStatus.UPLOADING]
+
+        for state in valid_states:
+            # Test expired returns False for a session that has not expired
+            self.session.status = state
+            self.assertFalse(self.session.expired)
+
+    def test_expired_invalid_states(self) -> None:
+        """Test expired property is False for sessions in states other than CREATED or
+        UPLOADING.
+        """
         # Test expired returns False for sessions in states other than CREATED or UPLOADING
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
