@@ -276,11 +276,11 @@ def _validate_cron(cron_str: str) -> None:
 
     # Regex for each cron field
     cron_patterns = {
-        "minute": r"^(?:\*|[0-5]?\d(?:-[0-5]?\d)?(?:/[1-9]\d*)?(?:,[0-5]?\d)*)$",
-        "hour": r"^(?:\*|[01]?\d|2[0-3](?:-[01]?\d|2[0-3])?(?:/[1-9]\d*)?(?:,[01]?\d|2[0-3])*)$",
-        "day_of_month": r"^(?:\*|[1-9]|[12]\d|3[01](?:-[1-9]|[12]\d|3[01])?(?:/[1-9]\d*)?(?:,[1-9]|[12]\d|3[01])*)$",
-        "month": r"^(?:\*|[1-9]|1[0-2](?:-[1-9]|1[0-2])?(?:/[1-9]\d*)?(?:,[1-9]|1[0-2])*)$",
-        "day_of_week": r"^(?:\*|[0-6](?:-[0-6])?(?:/[1-9]\d*)?(?:,[0-6])*)$"
+        "minute": r"^(?:\*(?:/[1-9]\d*)?|[0-5]?\d(?:-[0-5]?\d)?(?:/[1-9]\d*)?(?:,[0-5]?\d)*)$",
+        "hour": r"^(?:\*(?:/[1-9]\d*)?|[01]?\d|2[0-3](?:-[01]?\d|2[0-3])?(?:/[1-9]\d*)?(?:,[01]?\d|2[0-3])*)$",
+        "day_of_month": r"^(?:\*(?:/[1-9]\d*)?|[1-9]|[12]\d|3[01](?:-[1-9]|[12]\d|3[01])?(?:/[1-9]\d*)?(?:,[1-9]|[12]\d|3[01])*)$",
+        "month": r"^(?:\*(?:/[1-9]\d*)?|[1-9]|1[0-2](?:-[1-9]|1[0-2])?(?:/[1-9]\d*)?(?:,[1-9]|1[0-2])*)$",
+        "day_of_week": r"^(?:\*(?:/[1-9]\d*)?|[0-6](?:-[0-6])?(?:/[1-9]\d*)?(?:,[0-6])*)$",
     }
 
     field_names = ["minute", "hour", "day_of_month", "month", "day_of_week"]
@@ -333,6 +333,14 @@ def verify_upload_session_expiry_settings() -> None:
         raise ImproperlyConfigured(
             "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be less than "
             "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES"
+        )
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES <= 0
+        and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be greater than zero or -1"
         )
 
 
