@@ -955,7 +955,9 @@ class InProgressSubmission(models.Model):
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
-        """Validate the current step value."""
+        """Validate the current step value. This gets called when the model instance is
+        modified through a form.
+        """
         try:
             TransferStep(self.current_step)
         except ValueError:
