@@ -971,4 +971,6 @@ class InProgressSubmission(models.Model):
 
     def __str__(self):
         """Return a string representation of this object."""
-        return f"Transfer of {self.last_updated} by {self.user}"
+        title = self.title or "None"
+        session = self.upload_session.token if self.upload_session else "None"
+        return f"In-Progress Submission by {self.user} (Title: {title} | Session: {session})"
