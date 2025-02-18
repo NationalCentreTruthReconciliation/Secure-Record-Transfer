@@ -90,6 +90,7 @@ class UploadSession(models.Model):
         max_length=2, choices=SessionStatus.choices, default=SessionStatus.CREATED
     )
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    last_upload_interaction_time = models.DateTimeField(auto_now=True)
 
     @classmethod
     def new_session(cls, user: Optional[User] = None) -> UploadSession:
@@ -161,9 +162,12 @@ class UploadSession(models.Model):
         temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
         temp_file.save()
 
+        self.last_upload_interaction_time = timezone.now()
+
         if self.status == self.SessionStatus.CREATED:
             self.status = self.SessionStatus.UPLOADING
-            self.save()
+
+        self.save()
 
         return temp_file
 
