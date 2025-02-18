@@ -12,39 +12,28 @@ jobs:
       - name: Checkout this repository
         uses: actions/checkout@v4
 
-      - name: Update or create sync branch
-        run: |
-          git fetch origin master
-          if git ls-remote --exit-code --heads origin sync-ruff-config; then
-            git checkout sync-ruff-config
-            git reset --hard origin/master
-          else
-            git checkout -b sync-ruff-config
-            git push -u origin sync-ruff-config
-          fi
-
       - name: Fetch ruff.toml from NCTR's Python Development Guide
         run: |
           curl -o ./ruff_new.toml https://raw.githubusercontent.com/NationalCentreTruthReconciliation/Python-Development-Guide/main/ruff.toml
 
-      - name: Set up Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Update ruff.toml if different
+      - name: Check for changes
+        id: check_changes
         run: |
           if ! cmp -s ./ruff_new.toml ./ruff.toml; then
-            cp ./ruff_new.toml ./ruff.toml
-            git add ./ruff.toml
-            git commit -m "Sync ruff.toml from NationalCentreTruthReconciliation/Python-Development-Guide"
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+            mv ./ruff_new.toml ./ruff.toml
+          else
+            rm ./ruff_new.toml
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create Pull Request
+        if: steps.check_changes.outputs.changes_detected == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "Sync ruff.toml from NationalCentreTruthReconciliation/Python-Development-Guide"
           branch: sync-ruff-config
+          delete-branch: true
           title: "Sync ruff.toml from NationalCentreTruthReconciliation/Python-Development-Guide"
           body: "This PR syncs the ruff.toml file from NationalCentreTruthReconciliation/Python-Development-Guide."
           base: master
