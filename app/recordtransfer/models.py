@@ -952,6 +952,7 @@ class InProgressSubmission(models.Model):
     )
     step_data = models.BinaryField(default=b"")
     title = models.CharField(max_length=256, null=True)
+    upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
         """Validate the current step value."""
@@ -960,5 +961,12 @@ class InProgressSubmission(models.Model):
         except ValueError:
             raise ValidationError({"current_step": ["Invalid step value"]}) from None
 
+    def upload_session_expires_at(self) -> Optional[timezone.datetime]:
+        """Get the expiration time of the upload session associated with this submission."""
+        if self.upload_session:
+            return self.upload_session.expires_at
+        return None
+
     def __str__(self):
+        """Return a string representation of this object."""
         return f"Transfer of {self.last_updated} by {self.user}"
