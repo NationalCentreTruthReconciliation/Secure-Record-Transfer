@@ -202,9 +202,29 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     def upload_size(self, obj):
         return get_human_readable_size(obj.upload_size, 1000, 2)
 
-    fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    fields = [
+        "token",
+        linkify("user"),
+        "started_at",
+        "file_count",
+        "upload_size",
+        "status",
+        "last_upload_interaction_time",
+        "expired",
+        "expires_at",
+    ]
     search_fields = ["token", "user__username"]
-    list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    list_display = [
+        "token",
+        linkify("user"),
+        "started_at",
+        "file_count",
+        "upload_size",
+        "status",
+        "last_upload_interaction_time",
+        "expired",
+        "expires_at",
+    ]
 
     inlines = [
         TempUploadedFileInline,
