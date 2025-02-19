@@ -63,6 +63,28 @@ services:
       - static-volume:/opt/secure-record-transfer/app/static/
       - media-volume:/opt/secure-record-transfer/app/media/
 
+  rq-scheduler:
+    build:
+      context: .
+      target: prod
+      dockerfile: Containerfile
+      args:
+          WEBPACK_MODE: production
+    command: python manage.py schedule_jobs
+    restart: unless-stopped
+    env_file:
+      - .prod.env
+    environment:
+      - ENV=prod
+      - IS_RQ=no
+      - WEBPACK_MODE=production
+      - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./app/:/opt/secure-record-transfer/app/:z
+
   app:
     build:
       context: .
