@@ -1,12 +1,13 @@
 import logging
 
 import django_rq
+from django.conf import settings
 from django_rq.management.commands import rqscheduler
 
 from recordtransfer.jobs import cleanup_expired_sessions
 
 scheduler = django_rq.get_scheduler()
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("rq.scheduler")
 
 
 def clear_scheduled_jobs() -> None:
@@ -18,7 +19,7 @@ def clear_scheduled_jobs() -> None:
 
 def register_scheduled_jobs() -> None:
     """Register jobs to be run on a schedule."""
-    schedule = "*/2 * * * *"
+    schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
     LOGGER.info(
         "Scheduling cleanup job (schedule: %s)",
         schedule,
