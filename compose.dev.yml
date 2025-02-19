@@ -83,7 +83,7 @@ services:
     # See manage.py for debugger setup
     environment:
       - ENV=dev
-      - IS_RQ=no
+      - IS_RQ=yes
       - WEBPACK_MODE=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
