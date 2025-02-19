@@ -143,6 +143,14 @@ class TestUploadSession(TestCase):
             self.session.status = state
             self.assertIsNone(self.session.expires_at)
 
+    def test_expires_when_expiry_disabled(self) -> None:
+        """Test expires_at returns None when the upload session expiry is disabled."""
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        self.session.last_upload_interaction_time = fixed_now
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        with patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1):
+            self.assertIsNone(self.session.expires_at)
+
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
     def test_expired_is_true(self, mock_now: MagicMock) -> None:
@@ -189,6 +197,16 @@ class TestUploadSession(TestCase):
         for state in invalid_states:
             self.session.status = state
             self.assertFalse(self.session.expired)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
+    @patch("django.utils.timezone.now")
+    def test_expired_when_expiry_disabled(self, mock_now: MagicMock) -> None:
+        """Test expired property is False when the upload session expiry is disabled."""
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
+        self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
+
+        self.assertFalse(self.session.expired)
 
     def test_upload_size_created_session(self) -> None:
         """Test upload size should be zero for a newly created session."""

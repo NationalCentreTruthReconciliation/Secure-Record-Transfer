@@ -153,8 +153,12 @@ class UploadSession(models.Model):
     @property
     def expires_at(self) -> Optional[timezone.datetime]:
         """Get the time at which this session will expire. Only sessions in the CREATED or
-        UPLOADING state can have an expiration time. Returns None for sessions in other states.
+        UPLOADING state can have an expiration time. Returns None for sessions in other states, or
+        if the upload session expiry feature is disabled.
         """
+        if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
+            return None
+
         if self.status in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
             return self.last_upload_interaction_time + timezone.timedelta(
                 minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
@@ -164,7 +168,8 @@ class UploadSession(models.Model):
     @property
     def expired(self) -> bool:
         """Determine if this session has expired. Will only return True for an expired session
-        in the CREATED or UPLOADING state. Returns False for sessions in other states.
+        in the CREATED or UPLOADING state. Returns False for sessions in other states, or if the
+        upload session expiry feature is disabled.
         """
         return self.expires_at is not None and self.expires_at < timezone.now()
 
