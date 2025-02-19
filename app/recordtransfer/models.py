@@ -26,7 +26,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import TransferStep
-from recordtransfer.managers import SubmissionQuerySet
+from recordtransfer.managers import SubmissionQuerySet, UploadSessionManager
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
@@ -91,6 +91,8 @@ class UploadSession(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     last_upload_interaction_time = models.DateTimeField(auto_now=True)
+
+    objects = UploadSessionManager()
 
     @classmethod
     def new_session(cls, user: Optional[User] = None) -> UploadSession:
