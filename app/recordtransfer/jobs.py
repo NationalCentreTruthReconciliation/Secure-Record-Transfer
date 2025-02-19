@@ -90,23 +90,11 @@ def cleanup_expired_sessions() -> None:
     """Delete all UploadSession objects that have expired."""
     LOGGER.info("Deleting expired upload sessions ...")
     try:
-        # Calculate the cutoff time
-        cutoff_time = timezone.now() - timezone.timedelta(
-            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
-        )
+        expired_sessions = UploadSession.objects.get_expired().all()
 
-        # Find sessions that have been inactive longer than the cutoff
-        expired_sessions = UploadSession.objects.filter(
-            status__in=[
-                UploadSession.SessionStatus.CREATED,
-                UploadSession.SessionStatus.UPLOADING,
-            ],
-            last_upload_interaction_time__lt=cutoff_time,
-        )
+        expired_sessions.delete()
 
-        count, _ = expired_sessions.delete()
-
-        LOGGER.info("Deleted %d expired upload sessions", count)
+        LOGGER.info("Deleted %d expired upload sessions", expired_sessions.count())
 
     except Exception as e:
         LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
