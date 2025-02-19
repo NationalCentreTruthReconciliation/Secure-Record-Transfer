@@ -12,8 +12,6 @@ fi
 if [ "$IS_RQ" = 'yes' ]; then
   echo ">> Running database migrations."
   python manage.py migrate --no-input
-  echo ">> Scheduling cleanup jobs."
-  python manage.py schedule_cleanup
   echo ">> Starting RQ worker(s)"
 
 else
