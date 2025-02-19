@@ -90,6 +90,7 @@ class UploadSession(models.Model):
         max_length=2, choices=SessionStatus.choices, default=SessionStatus.CREATED
     )
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    last_upload_interaction_time = models.DateTimeField(auto_now=True)
 
     @classmethod
     def new_session(cls, user: Optional[User] = None) -> UploadSession:
@@ -149,6 +150,29 @@ class UploadSession(models.Model):
             for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all())
         )
 
+    @property
+    def expires_at(self) -> Optional[timezone.datetime]:
+        """Get the time at which this session will expire. Only sessions in the CREATED or
+        UPLOADING state can have an expiration time. Returns None for sessions in other states, or
+        if the upload session expiry feature is disabled.
+        """
+        if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
+            return None
+
+        if self.status in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+            return self.last_upload_interaction_time + timezone.timedelta(
+                minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+            )
+        return None
+
+    @property
+    def expired(self) -> bool:
+        """Determine if this session has expired. Will only return True for an expired session
+        in the CREATED or UPLOADING state. Returns False for sessions in other states, or if the
+        upload session expiry feature is disabled.
+        """
+        return self.expires_at is not None and self.expires_at < timezone.now()
+
     def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
@@ -161,9 +185,12 @@ class UploadSession(models.Model):
         temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
         temp_file.save()
 
+        self.last_upload_interaction_time = timezone.now()
+
         if self.status == self.SessionStatus.CREATED:
             self.status = self.SessionStatus.UPLOADING
-            self.save()
+
+        self.save()
 
         return temp_file
 
@@ -930,13 +957,25 @@ class InProgressSubmission(models.Model):
     )
     step_data = models.BinaryField(default=b"")
     title = models.CharField(max_length=256, null=True)
+    upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
 
     def clean(self) -> None:
-        """Validate the current step value."""
+        """Validate the current step value. This gets called when the model instance is
+        modified through a form.
+        """
         try:
             TransferStep(self.current_step)
         except ValueError:
             raise ValidationError({"current_step": ["Invalid step value"]}) from None
 
+    def upload_session_expires_at(self) -> Optional[timezone.datetime]:
+        """Get the expiration time of the upload session associated with this submission."""
+        if self.upload_session:
+            return self.upload_session.expires_at
+        return None
+
     def __str__(self):
-        return f"Transfer of {self.last_updated} by {self.user}"
+        """Return a string representation of this object."""
+        title = self.title or "None"
+        session = self.upload_session.token if self.upload_session else "None"
+        return f"In-Progress Submission by {self.user} (Title: {title} | Session: {session})"
