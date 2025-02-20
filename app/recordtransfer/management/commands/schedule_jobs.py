@@ -19,15 +19,15 @@ def clear_scheduled_jobs() -> None:
 
 def register_scheduled_jobs() -> None:
     """Register jobs to be run on a schedule."""
-    schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
-    LOGGER.info(
-        "Scheduling cleanup job (schedule: %s)",
-        schedule,
-    )
     if (
         settings.FILE_UPLOAD_ENABLED
         and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
     ):
+        schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+        LOGGER.info(
+            "Scheduling cleanup job (schedule: %s)",
+            schedule,
+        )
         scheduler.cron(schedule, func=cleanup_expired_sessions, queue_name="default")
 
 
