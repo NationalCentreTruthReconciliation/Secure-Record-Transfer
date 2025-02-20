@@ -207,7 +207,14 @@ class TransferFormWizard(SessionWizardView):
 
         try:
             self.save_form_data(request)
-            messages.success(request, gettext("Transfer saved successfully."))
+            message = "Transfer saved successfully."
+            if self.in_progress_submission and self.in_progress_submission.upload_session:
+                message += (
+                    " Submission will expire at "
+                    f"{self.in_progress_submission.upload_session.expires_at}"
+                )
+
+            messages.success(request, gettext(message))
         except Exception:
             messages.error(request, gettext("There was an error saving the transfer."))
         return redirect("recordtransfer:userprofile")
@@ -218,30 +225,40 @@ class TransferFormWizard(SessionWizardView):
         Args:
             request: The HTTP request object.
         """
+        ### Gather information to save ###
+
         current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
         form_data = {"past": self.storage.data, "current": current_data}
 
         title = None
+        session_token = None
+        # See if the title and session token are in the current data
         if isinstance(current_data, dict):
             title = current_data.get("accession_title")
+            session_token = current_data.get("session_token")
+
+        # Look in past data if not found in current data
         if not title:
             title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
+        if not session_token:
+            session_token = self.get_form_value(TransferStep.UPLOAD_FILES, "session_token")
 
-        session_token = self.get_form_value(TransferStep.UPLOAD_FILES, "session_token")
-        session = UploadSession.objects.filter(token=session_token, user=self.request.user).first()
+        ### Save the information ###
 
         if self.in_progress_submission:
             self.in_progress_submission.last_updated = timezone.now()
         else:
             self.in_progress_submission = InProgressSubmission()
 
+        self.in_progress_submission.title = title
+        session = UploadSession.objects.filter(token=session_token, user=self.request.user).first()
         if session:
             self.in_progress_submission.upload_session = session
 
         self.in_progress_submission.current_step = self.current_step.value
         self.in_progress_submission.user = cast(User, self.request.user)
         self.in_progress_submission.step_data = pickle.dumps(form_data)
-        self.in_progress_submission.title = title
+
         self.in_progress_submission.save()
 
     def save_current_step(
