@@ -206,10 +206,10 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "token",
         linkify("user"),
         "started_at",
+        "last_upload_at",
         "file_count",
         "upload_size",
         "status",
-        "last_upload_interaction_time",
         "expired",
         "expires_at",
     ]
@@ -218,10 +218,10 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "token",
         linkify("user"),
         "started_at",
+        "last_upload_at",
         "file_count",
         "upload_size",
         "status",
-        "last_upload_interaction_time",
         "expired",
         "expires_at",
     ]
@@ -234,6 +234,11 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ordering = [
         "-started_at",
     ]
+
+    @admin.display(description="Last upload at")
+    def last_upload_at(self, obj: UploadSession):
+        """Display the last time a file was uploaded to the session."""
+        return obj.last_upload_interaction_time
 
 
 class SubmissionInline(ReadOnlyInline):
