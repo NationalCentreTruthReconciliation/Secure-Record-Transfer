@@ -9,7 +9,10 @@ from recordtransfer.views.transfer import TransferFormWizard
 
 
 class TransferFormWizardTests(TestCase):
-    def setUp(self):
+    """Tests for the TransferFormWizard view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user and an in-progress submission."""
         self.factory = RequestFactory()
         self.user = User.objects.create_user(
             username="testuser", email="test@example.com", password="testpassword"
