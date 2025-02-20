@@ -10,7 +10,14 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
-from django.forms import BaseForm, BaseFormSet, BaseInlineFormSet, BaseModelFormSet, ModelForm
+from django.forms import (
+    BaseForm,
+    BaseFormSet,
+    BaseInlineFormSet,
+    BaseModelFormSet,
+    ModelForm,
+    formset_factory,
+)
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -19,8 +26,10 @@ from django.utils.translation import gettext
 from django.views.generic import TemplateView
 from formtools.wizard.views import SessionWizardView
 
+from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
+    FORM,
     FORMTITLE,
     ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
     ID_CONTACT_INFO_PROVINCE_OR_STATE,
@@ -73,14 +82,16 @@ class TransferFormWizard(SessionWizardView):
     more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
     """
 
-    _TEMPLATES: ClassVar[dict[TransferStep, dict[str, str]]] = {
+    _TEMPLATES: ClassVar[dict] = {
         TransferStep.ACCEPT_LEGAL: {
             TEMPLATEREF: "recordtransfer/transferform_legal.html",
             FORMTITLE: gettext("Legal Agreement"),
+            FORM: forms.AcceptLegal,
         },
         TransferStep.CONTACT_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Contact Information"),
+            FORM: forms.ContactInfoForm,
             INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your transfer"
@@ -89,6 +100,7 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.SOURCE_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
             FORMTITLE: gettext("Source Information (Optional)"),
+            FORM: forms.SourceInfoForm,
             INFOMESSAGE: gettext(
                 "Select Yes if you would like to manually enter source information"
             ),
@@ -96,11 +108,15 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.RECORD_DESCRIPTION: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Record Description"),
+            FORM: forms.RecordDescriptionForm
+            if settings.FILE_UPLOAD_ENABLED
+            else forms.ExtendedRecordDescriptionForm,
             INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
         TransferStep.RIGHTS: {
             TEMPLATEREF: "recordtransfer/transferform_rights.html",
             FORMTITLE: gettext("Record Rights"),
+            FORM: formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             INFOMESSAGE: gettext(
                 "Enter any associated rights that apply to the records. Add as many rights "
                 "sections as you like using the + More button. You may enter another type of "
@@ -110,6 +126,11 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.OTHER_IDENTIFIERS: {
             TEMPLATEREF: "recordtransfer/transferform_formset.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
+            FORM: formset_factory(
+                forms.OtherIdentifiersForm,
+                formset=forms.OtherIdentifiersFormSet,
+                extra=1,
+            ),
             INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
@@ -118,29 +139,46 @@ class TransferFormWizard(SessionWizardView):
         TransferStep.GROUP_TRANSFER: {
             TEMPLATEREF: "recordtransfer/transferform_group.html",
             FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
+            FORM: forms.GroupTransferForm,
             INFOMESSAGE: gettext(
                 "If this transfer belongs in a group with other transfers you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
         },
-        TransferStep.UPLOAD_FILES: {
-            TEMPLATEREF: "recordtransfer/transferform_uploadfiles.html",
-            FORMTITLE: gettext("Upload Files"),
-            INFOMESSAGE: gettext(
-                "Add any final notes you would like to add, and upload your files"
-            ),
-        },
-        TransferStep.FINAL_NOTES: {
-            TEMPLATEREF: "recordtransfer/transferform_standard.html",
-            FORMTITLE: gettext("Final Notes"),
-            INFOMESSAGE: gettext("Add any final notes that may not have fit in previous steps"),
-        },
+        **(
+            {
+                TransferStep.UPLOAD_FILES: {
+                    TEMPLATEREF: "recordtransfer/transferform_uploadfiles.html",
+                    FORMTITLE: gettext("Upload Files"),
+                    FORM: forms.UploadFilesForm,
+                    INFOMESSAGE: gettext(
+                        "Add any final notes you would like to add, and upload your files"
+                    ),
+                }
+            }
+            if settings.FILE_UPLOAD_ENABLED
+            else {
+                TransferStep.FINAL_NOTES: {
+                    TEMPLATEREF: "recordtransfer/transferform_standard.html",
+                    FORMTITLE: gettext("Final Notes"),
+                    FORM: forms.FinalStepFormNoUpload,
+                    INFOMESSAGE: gettext(
+                        "Add any final notes that may not have fit in previous steps"
+                    ),
+                }
+            }
+        ),
         TransferStep.REVIEW: {
             TEMPLATEREF: "recordtransfer/transferform_review.html",
             FORMTITLE: gettext("Review"),
+            FORM: forms.ReviewForm,
             INFOMESSAGE: gettext("Review the information you've entered before submitting"),
         },
     }
+
+    form_list: ClassVar[list[tuple]] = [
+        (step.value, template[FORM]) for step, template in _TEMPLATES.items()
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

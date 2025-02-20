@@ -1,53 +1,16 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
-from django.forms import formset_factory
 from django.urls import path, re_path
 
-from . import forms, views
-
-# Set up transfer forms depending on whether file uploads are enabled or disabled
-if settings.FILE_UPLOAD_ENABLED:
-    _transfer_forms = [
-        ("acceptlegal", forms.AcceptLegal),
-        ("contactinfo", forms.ContactInfoForm),
-        ("sourceinfo", forms.SourceInfoForm),
-        ("recorddescription", forms.RecordDescriptionForm),
-        ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
-        (
-            "otheridentifiers",
-            formset_factory(
-                forms.OtherIdentifiersForm, formset=forms.OtherIdentifiersFormSet, extra=1
-            ),
-        ),
-        ("grouptransfer", forms.GroupTransferForm),
-        ("uploadfiles", forms.UploadFilesForm),
-        ("review", forms.ReviewForm),
-    ]
-else:
-    _transfer_forms = [
-        ("acceptlegal", forms.AcceptLegal),
-        ("contactinfo", forms.ContactInfoForm),
-        ("sourceinfo", forms.SourceInfoForm),
-        ("recorddescription", forms.ExtendedRecordDescriptionForm),  # Different
-        ("rights", formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1)),
-        (
-            "otheridentifiers",
-            formset_factory(
-                forms.OtherIdentifiersForm, formset=forms.OtherIdentifiersFormSet, extra=1
-            ),
-        ),
-        ("grouptransfer", forms.GroupTransferForm),
-        ("finalnotes", forms.FinalStepFormNoUpload),  # Different
-        ("review", forms.ReviewForm),
-    ]
+from . import views
 
 app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     path(
         "transfer/",
-        login_required(views.transfer.TransferFormWizard.as_view(_transfer_forms)),
+        login_required(views.transfer.TransferFormWizard.as_view()),
         name="transfer",
     ),
     path(
