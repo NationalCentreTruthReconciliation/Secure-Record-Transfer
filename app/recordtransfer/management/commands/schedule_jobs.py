@@ -24,7 +24,11 @@ def register_scheduled_jobs() -> None:
         "Scheduling cleanup job (schedule: %s)",
         schedule,
     )
-    scheduler.cron(schedule, func=cleanup_expired_sessions, queue_name="default")
+    if (
+        settings.FILE_UPLOAD_ENABLED
+        and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+    ):
+        scheduler.cron(schedule, func=cleanup_expired_sessions, queue_name="default")
 
 
 class Command(rqscheduler.Command):
