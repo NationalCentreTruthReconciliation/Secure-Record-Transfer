@@ -3,6 +3,7 @@
     <table class="full-width-table standard-table" cellspacing="0">
         <tr>
             <th>{% trans "Last Updated" %}</th>
+            <th>{% trans "Expires At" %}</th>
             <th>{% trans "Transfer Title" %}</th>
             <th>{% trans "Resume Transfer" %}</th>
             <th>{% trans "Delete" %}</th>
@@ -10,6 +11,15 @@
         {% for submission in in_progress_page_obj %}
             <tr>
                 <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ submission.last_updated|time:"H:i" }}</td>
+                <td>
+                    {% if submission.upload_session.expires_at %}
+                        <span class="{% if submission.expiring_soon %}red-text{% endif %} {% if submission.upload_session.expired %}strikethrough{% endif %}">
+                            {{ submission.upload_session.expires_at|date:"D M j, Y" }} @ {{ submission.upload_session.expires_at|time:"H:i" }}
+                        </span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td>{{ submission.title }}</td>
                 <td>
                     <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ submission.uuid }}">Resume</a>
