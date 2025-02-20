@@ -12,7 +12,7 @@ from django.utils import timezone
 from recordtransfer.models import Job, Submission, UploadSession, User
 from recordtransfer.utils import zip_directory
 
-LOGGER = logging.getLogger("rq.worker")
+LOGGER = logging.getLogger(__name__)
 
 
 @django_rq.job

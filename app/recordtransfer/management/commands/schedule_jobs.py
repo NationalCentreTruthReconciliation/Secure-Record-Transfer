@@ -7,7 +7,7 @@ from django_rq.management.commands import rqscheduler
 from recordtransfer.jobs import cleanup_expired_sessions
 
 scheduler = django_rq.get_scheduler()
-LOGGER = logging.getLogger("rq.scheduler")
+LOGGER = logging.getLogger(__name__)
 
 
 def clear_scheduled_jobs() -> None:

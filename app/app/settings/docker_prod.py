@@ -78,10 +78,15 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
-        "rq.scheduler": {
+        "rq_scheduler": {
             "handlers": ["console"],
             "level": "INFO",
-            "propagate": True,
+            "propagate": False,
+        },
+        "rq_scheduler.scheduler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
         "clamav": {
             "handlers": ["console"],
