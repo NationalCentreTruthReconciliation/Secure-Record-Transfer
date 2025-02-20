@@ -79,11 +79,11 @@ services:
     # See manage.py for debugger setup
     environment:
       - ENV=dev
-      - IS_RQ=yes
+      - IS_RQ=no
       - WEBPACK_MODE=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
-      - redis
+      - rq
 
   app:
     image: secure-record-transfer-dev
