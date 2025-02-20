@@ -57,6 +57,9 @@ urlpatterns = [
     ),
     path("transfer/sent/", views.transfer.TransferSent.as_view(), name="transfersent"),
     path(
+        "transfer/expired/", views.transfer.SubmissionExpired.as_view(), name="submission_expired"
+    ),
+    path(
         "inprogress/<uuid:uuid>/delete/",
         login_required(views.transfer.DeleteTransfer.as_view()),
         name="transferdelete",
@@ -133,7 +136,11 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
                 views.account.CreateAccount.as_view(),
                 name="createaccount",
             ),
-            path("createaccount/sent/", views.account.ActivationSent.as_view(), name="activationsent"),
+            path(
+                "createaccount/sent/",
+                views.account.ActivationSent.as_view(),
+                name="activationsent",
+            ),
             path(
                 "createaccount/complete/",
                 views.account.ActivationComplete.as_view(),

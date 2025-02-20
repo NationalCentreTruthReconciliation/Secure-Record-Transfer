@@ -49,7 +49,6 @@ from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
-    SubmissionGroup,
     UploadSession,
     User,
 )
@@ -61,6 +60,12 @@ class TransferSent(TemplateView):
     """The page a user sees when they finish a transfer."""
 
     template_name = "recordtransfer/transfersent.html"
+
+
+class SubmissionExpired(TemplateView):
+    """The page a user sees when they try to access an expired submission."""
+
+    template_name = "recordtransfer/submission_expired.html"
 
 
 class TransferFormWizard(SessionWizardView):
@@ -168,6 +173,13 @@ class TransferFormWizard(SessionWizardView):
         # Redirect user to a fresh submission form if the in-progress submission is not found
         if not self.in_progress_submission:
             return redirect("recordtransfer:transfer")
+
+        # Check if associated upload session is expired or not
+        if (
+            self.in_progress_submission.upload_session
+            and self.in_progress_submission.upload_session.expired
+        ):
+            return redirect("recordtransfer:submission_expired")
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -615,7 +627,7 @@ class TransferFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.make_uploads_permanent() # type: ignore
+                submission.upload_session.make_uploads_permanent()  # type: ignore
             else:
                 LOGGER.info(
                     (
@@ -644,6 +656,7 @@ class TransferFormWizard(SessionWizardView):
             send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
+
 
 class DeleteTransfer(TemplateView):
     """View to handle the deletion of an in-progress submission."""
