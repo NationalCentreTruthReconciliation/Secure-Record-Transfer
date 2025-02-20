@@ -311,6 +311,16 @@ files = [
 ]
 
 [[package]]
+name = "crontab"
+version = "1.0.1"
+description = "Parse and use crontab schedules in Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "crontab-1.0.1.tar.gz", hash = "sha256:89477e3f93c81365e738d5ee2659509e6373bb2846de13922663e79aa74c6b91"},
+]
+
+[[package]]
 name = "dateparser"
 version = "1.2.1"
 description = "Date parsing library designed to parse dates from HTML pages"
@@ -479,6 +489,20 @@ files = [
 
 [package.extras]
 test = ["pytest (>=6)"]
+
+[[package]]
+name = "freezegun"
+version = "1.5.1"
+description = "Let your Python tests travel through time"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "freezegun-1.5.1-py3-none-any.whl", hash = "sha256:bf111d7138a8abe55ab48a71755673dbaa4ab87f4cff5634a4442dfec34c15f1"},
+    {file = "freezegun-1.5.1.tar.gz", hash = "sha256:b29dedfcda6d5e8e083ce71b2b542753ad48cfec44037b3fc79702e2980a89e9"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.7"
 
 [[package]]
 name = "gunicorn"
@@ -1048,6 +1072,23 @@ click = ">=5"
 redis = ">=3.5"
 
 [[package]]
+name = "rq-scheduler"
+version = "0.14.0"
+description = "Provides job scheduling capabilities to RQ (Redis Queue)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "rq-scheduler-0.14.0.tar.gz", hash = "sha256:2d5a14a1ab217f8693184ebaa1fe03838edcbc70b4f76572721c0b33058cd023"},
+    {file = "rq_scheduler-0.14.0-py2.py3-none-any.whl", hash = "sha256:d4ec221a3d8c11b3ff55e041f09d9af1e17f3253db737b6b97e86ab20fc3dc0d"},
+]
+
+[package.dependencies]
+crontab = ">=0.23.0"
+freezegun = "*"
+python-dateutil = "*"
+rq = ">=2"
+
+[[package]]
 name = "selenium"
 version = "4.28.1"
 description = "Official Python bindings for Selenium WebDriver"
@@ -1520,4 +1561,4 @@ prod = ["gunicorn", "mysqlclient"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "6483eff153ff3edd248be084dde4012e811fa6824bd49c85d65d43ea4c788999"
+content-hash = "c5397c30aeb930f0dd05c8d334439e1e9651fea2d9b8bf61b1c93812e61472cf"
