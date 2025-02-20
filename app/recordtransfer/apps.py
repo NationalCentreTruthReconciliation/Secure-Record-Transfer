@@ -362,6 +362,7 @@ class RecordTransferConfig(AppConfig):
             verify_max_upload_size()
             verify_accepted_file_formats()
             verify_caais_defaults()
+            verify_upload_session_expiry_settings()
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)

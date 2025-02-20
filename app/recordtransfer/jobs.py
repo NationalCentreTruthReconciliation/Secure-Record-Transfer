@@ -9,10 +9,10 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
-from recordtransfer.models import Job, Submission, User
+from recordtransfer.models import Job, Submission, UploadSession, User
 from recordtransfer.utils import zip_directory
 
-LOGGER = logging.getLogger("rq.worker")
+LOGGER = logging.getLogger(__name__)
 
 
 @django_rq.job
@@ -26,7 +26,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
     LOGGER.info("Creating zipped bag from %s", submission.location)
 
     description = (
-        f"{str(user_triggered)} triggered this job to generate a download link " "for a submission"
+        f"{str(user_triggered)} triggered this job to generate a download link for a submission"
     )
 
     new_job = Job(
@@ -83,3 +83,23 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
         if os.path.exists(submission.location):
             LOGGER.info("Removing bag from disk after zip generation.")
             shutil.rmtree(submission.location)
+
+
+@django_rq.job
+def cleanup_expired_sessions() -> None:
+    """Delete all UploadSession objects that have expired."""
+    LOGGER.info("Deleting expired upload sessions ...")
+    try:
+        expired_sessions = UploadSession.objects.get_expired().all()
+
+        if expired_sessions.count() == 0:
+            LOGGER.info("No expired upload sessions to delete")
+            return
+
+        expired_sessions.delete()
+
+        LOGGER.info("Deleted %d expired upload sessions", expired_sessions.count())
+
+    except Exception as e:
+        LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
+        raise e
