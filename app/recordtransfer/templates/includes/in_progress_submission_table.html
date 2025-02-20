@@ -22,8 +22,10 @@
                 </td>
                 <td>{{ submission.title }}</td>
                 <td>
-                    <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ submission.uuid }}">Resume</a>
-                </td>
+                    {% if not submission.upload_session.expired %}
+                        <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ submission.uuid }}">Resume</a>
+                    {% endif %}
+                    </td>
                 <td>
                     <a href="{% url 'recordtransfer:transferdelete' submission.uuid %}">Delete</a>
                 </td>
