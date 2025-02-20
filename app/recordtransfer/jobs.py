@@ -92,6 +92,10 @@ def cleanup_expired_sessions() -> None:
     try:
         expired_sessions = UploadSession.objects.get_expired().all()
 
+        if expired_sessions.count() == 0:
+            LOGGER.info("No expired upload sessions to delete")
+            return
+
         expired_sessions.delete()
 
         LOGGER.info("Deleted %d expired upload sessions", expired_sessions.count())
