@@ -993,16 +993,19 @@ class InProgressSubmission(models.Model):
         except ValueError:
             raise ValidationError({"current_step": ["Invalid step value"]}) from None
 
+    @property
     def upload_session_expires_at(self) -> Optional[timezone.datetime]:
         """Get the expiration time of the upload session associated with this submission."""
         if self.upload_session:
             return self.upload_session.expires_at
         return None
 
+    @property
     def upload_session_expired(self) -> bool:
         """Determine if the associated upload session has expired or not."""
         return self.upload_session is not None and self.upload_session.expired
 
+    @property
     def upload_session_expires_soon(self) -> bool:
         """Determine if the associated upload session is expiring soon or not."""
         return self.upload_session is not None and self.upload_session.expires_soon

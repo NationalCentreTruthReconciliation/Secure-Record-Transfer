@@ -902,13 +902,13 @@ class TestInProgressSubmission(TestCase):
     def test_upload_session_expires_at(self) -> None:
         """Test upload_session_expires_at method."""
         self.assertEqual(
-            self.submission.upload_session_expires_at(), self.upload_session.expires_at
+            self.submission.upload_session_expires_at, self.upload_session.expires_at
         )
 
     def test_upload_session_expires_at_no_session(self) -> None:
         """Test upload_session_expires_at method when there is no upload session."""
         self.submission.upload_session = None
-        self.assertIsNone(self.submission.upload_session_expires_at())
+        self.assertIsNone(self.submission.upload_session_expires_at)
 
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
