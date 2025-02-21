@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -13,6 +14,7 @@ from recordtransfer.utils import (
     get_human_readable_size,
     html_to_text,
     snake_to_camel_case,
+    timeuntil_minutes,
 )
 
 
@@ -429,3 +431,36 @@ class TestAcceptSession(TestCase):
                     "A file with the same name has already been uploaded",
                     result["error"],
                 )
+
+class TimeUntilMinutesTests(TestCase):
+    """Tests for the timeuntil_minutes function."""
+
+    @patch("django.utils.timezone.now", return_value=datetime(2025, 2, 21, 12, 0, 0))
+    def test_timeuntil_minutes_future(self, mock_now) -> None:
+        """Test that the function returns the correct number of minutes for a future datetime."""
+        future_time = timezone.now() + timedelta(minutes=10)
+        self.assertEqual(timeuntil_minutes(future_time), 10)
+
+    @patch("django.utils.timezone.now", return_value=datetime(2025, 2, 21, 12, 0, 0))
+    def test_timeuntil_minutes_past(self, mock_now) -> None:
+        """Test that the function returns 0 for a past datetime."""
+        past_time = timezone.now() - timedelta(minutes=10)
+        self.assertEqual(timeuntil_minutes(past_time), 0)
+
+    @patch("django.utils.timezone.now", return_value=datetime(2025, 2, 21, 12, 0, 0))
+    def test_timeuntil_minutes_now(self, mock_now) -> None:
+        """Test that the function returns 0 for the current datetime."""
+        now_time = timezone.now()
+        self.assertEqual(timeuntil_minutes(now_time), 0)
+
+    @patch("django.utils.timezone.now", return_value=datetime(2025, 2, 21, 12, 0, 0))
+    def test_timeuntil_minutes_near_future(self, mock_now) -> None:
+        """Test that the function returns the correct number of minutes for a near future datetime."""
+        near_future_time = timezone.now() + timedelta(seconds=30)
+        self.assertEqual(timeuntil_minutes(near_future_time), 0)
+
+    @patch("django.utils.timezone.now", return_value=datetime(2025, 2, 21, 12, 0, 0))
+    def test_timeuntil_minutes_rounding(self, mock_now) -> None:
+        """Test that the function correctly rounds down to the nearest minute."""
+        future_time = timezone.now() + timedelta(minutes=10, seconds=59)
+        self.assertEqual(timeuntil_minutes(future_time), 10)
