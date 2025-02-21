@@ -242,18 +242,17 @@ class TransferFormWizard(SessionWizardView):
 
         try:
             self.save_form_data(request)
-            message = "Transfer saved successfully."
+            message = gettext("Transfer saved successfully.")
             if (
-                self.in_progress_submission
-                and self.in_progress_submission.upload_session
-                and self.in_progress_submission.upload_session.expires_at
+                expires_at := self.in_progress_submission.upload_session_expires_at()
+                if self.in_progress_submission.upload_session
+                else None
             ):
-                expires_at_formatted = (
-                    self.in_progress_submission.upload_session.expires_at.strftime(
-                        "%a %b %d, %Y @ %H:%M"
-                    )
-                )
-                message += f" Submission will expire on {expires_at_formatted}"
+                expiry_message = gettext(
+                    "This submission will expire on %(date)s. Please be sure to complete your "
+                    "submission before then."
+                ) % {"date": expires_at.strftime(r"%a %b %d, %Y @ %H:%M")}
+                message = message + " " + expiry_message
 
             messages.success(request, gettext(message))
         except Exception:
