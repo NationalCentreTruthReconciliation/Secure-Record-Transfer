@@ -20,7 +20,9 @@ urlpatterns = [
     ),
     path("transfer/sent/", views.transfer.TransferSent.as_view(), name="transfersent"),
     path(
-        "transfer/expired/", views.transfer.SubmissionExpired.as_view(), name="submission_expired"
+        "transfer/expired/",
+        views.transfer.InProgressSubmissionExpired.as_view(),
+        name="in_progress_submission_expired",
     ),
     path(
         "inprogress/<uuid:uuid>/delete/",

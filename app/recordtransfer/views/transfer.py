@@ -71,10 +71,10 @@ class TransferSent(TemplateView):
     template_name = "recordtransfer/transfersent.html"
 
 
-class SubmissionExpired(TemplateView):
+class InProgressSubmissionExpired(TemplateView):
     """The page a user sees when they try to access an expired submission."""
 
-    template_name = "recordtransfer/submission_expired.html"
+    template_name = "recordtransfer/in_progress_submission_expired.html"
 
 
 class TransferFormWizard(SessionWizardView):
@@ -217,7 +217,7 @@ class TransferFormWizard(SessionWizardView):
             self.in_progress_submission.upload_session
             and self.in_progress_submission.upload_session.expired
         ):
-            return redirect("recordtransfer:submission_expired")
+            return redirect("recordtransfer:in_progress_submission_expired")
 
         return super().dispatch(request, *args, **kwargs)
 

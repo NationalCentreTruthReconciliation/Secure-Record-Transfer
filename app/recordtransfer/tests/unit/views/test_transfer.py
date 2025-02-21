@@ -43,4 +43,4 @@ class TransferFormWizardTests(TestCase):
         response = TransferFormWizard.as_view()(request)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("recordtransfer:submission_expired"))
+        self.assertEqual(response.url, reverse("recordtransfer:in_progress_submission_expired"))
