@@ -4,7 +4,7 @@ import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -967,6 +967,30 @@ class TestInProgressSubmission(TestCase):
         """Test upload_session_expires_at method when there is no upload session."""
         self.submission.upload_session = None
         self.assertIsNone(self.submission.upload_session_expires_at)
+
+    @patch("recordtransfer.models.UploadSession.expired", new_callable=PropertyMock)
+    def test_upload_session_expired(self, mock_expired: PropertyMock) -> None:
+        """Test upload_session_expired property."""
+        mock_expired.return_value = True
+        self.assertTrue(self.submission.upload_session_expired)
+
+        mock_expired.return_value = False
+        self.assertFalse(self.submission.upload_session_expired)
+
+        self.submission.upload_session = None
+        self.assertFalse(self.submission.upload_session_expired)
+
+    @patch("recordtransfer.models.UploadSession.expires_soon", new_callable=PropertyMock)
+    def test_upload_session_expires_soon(self, mock_expires_soon: PropertyMock) -> None:
+        """Test upload_session_expires_soon property."""
+        mock_expires_soon.return_value = True
+        self.assertTrue(self.submission.upload_session_expires_soon)
+
+        mock_expires_soon.return_value = False
+        self.assertFalse(self.submission.upload_session_expires_soon)
+
+        self.submission.upload_session = None
+        self.assertFalse(self.submission.upload_session_expires_soon)
 
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
