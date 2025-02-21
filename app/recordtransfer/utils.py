@@ -360,20 +360,3 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
 
     # All checks succeded
     return {"accepted": True}
-
-
-def timeuntil_minutes(value: datetime) -> int:
-    """Get the number of minutes until a datetime value.
-
-    Args:
-        value (datetime): The datetime value to get the minutes until.
-
-    Returns:
-        The number of minutes until the datetime value, to the nearest minute. If the datetime
-        value is in the past, returns 0.
-    """
-    now = timezone.now()
-    if value < now:
-        return 0
-    delta = value - now
-    return int(delta.total_seconds() / 60)
