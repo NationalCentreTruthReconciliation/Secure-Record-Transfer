@@ -22,10 +22,11 @@
                 </td>
                 <td>{{ in_progress.title }}</td>
                 <td>
-                    {% if not in_progress.upload_session_expired %}
+                    {% if in_progress.upload_session_expired %}
+                        -
+                    {% else %}
                         <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ in_progress.uuid }}">Resume</a>
                     {% endif %}
-                    </td>
                 <td>
                     <a href="{% url 'recordtransfer:transferdelete' in_progress.uuid %}">Delete</a>
                 </td>
