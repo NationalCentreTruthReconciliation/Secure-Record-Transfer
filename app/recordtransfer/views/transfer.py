@@ -213,10 +213,7 @@ class TransferFormWizard(SessionWizardView):
             return redirect("recordtransfer:transfer")
 
         # Check if associated upload session is expired or not
-        if (
-            self.in_progress_submission.upload_session
-            and self.in_progress_submission.upload_session.expired
-        ):
+        if self.in_progress_submission.upload_session_expired:
             return redirect("recordtransfer:in_progress_submission_expired")
 
         return super().dispatch(request, *args, **kwargs)

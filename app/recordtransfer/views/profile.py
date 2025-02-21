@@ -2,7 +2,6 @@
 
 from typing import Any, cast
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
@@ -26,7 +25,6 @@ from recordtransfer.constants import (
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup
-from recordtransfer.utils import timeuntil_minutes
 
 
 class UserProfile(UpdateView):
@@ -54,16 +52,6 @@ class UserProfile(UpdateView):
         in_progress_submissions = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
-
-        for submission in in_progress_submissions:
-            if submission.upload_session and submission.upload_session.expires_at:
-                minutes_until_expiry = timeuntil_minutes(submission.upload_session.expires_at)
-                # Dynamically add expiring_soon attribute to object as context for template
-                submission.expiring_soon = (  # type: ignore
-                    minutes_until_expiry <= settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
-                )
-            else:
-                submission.expiring_soon = False  # type: ignore
 
         in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
         in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)

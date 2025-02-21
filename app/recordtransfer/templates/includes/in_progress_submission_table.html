@@ -8,26 +8,26 @@
             <th>{% trans "Resume Transfer" %}</th>
             <th>{% trans "Delete" %}</th>
         </tr>
-        {% for submission in in_progress_page_obj %}
+        {% for in_progress in in_progress_page_obj %}
             <tr>
-                <td>{{ submission.last_updated|date:"D M j, Y" }} @ {{ submission.last_updated|time:"H:i" }}</td>
+                <td>{{ in_progress.last_updated|date:"D M j, Y" }} @ {{ in_progress.last_updated|time:"H:i" }}</td>
                 <td>
-                    {% if submission.upload_session.expires_at %}
-                        <span class="{% if submission.expiring_soon %}red-text{% endif %} {% if submission.upload_session.expired %}strikethrough{% endif %}">
-                            {{ submission.upload_session.expires_at|date:"D M j, Y" }} @ {{ submission.upload_session.expires_at|time:"H:i" }}
+                    {% if in_progress.upload_session_expires_at %}
+                        <span class="{% if in_progress.upload_session_expires_soon %}red-text{% endif %} {% if in_progress.upload_session_expired %}strikethrough{% endif %}">
+                            {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @ {{ in_progress.upload_session_expires_at|time:"H:i" }}
                         </span>
                     {% else %}
                         -
                     {% endif %}
                 </td>
-                <td>{{ submission.title }}</td>
+                <td>{{ in_progress.title }}</td>
                 <td>
-                    {% if not submission.upload_session.expired %}
-                        <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ submission.uuid }}">Resume</a>
+                    {% if not in_progress.upload_session_expired %}
+                        <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ in_progress.uuid }}">Resume</a>
                     {% endif %}
                     </td>
                 <td>
-                    <a href="{% url 'recordtransfer:transferdelete' submission.uuid %}">Delete</a>
+                    <a href="{% url 'recordtransfer:transferdelete' in_progress.uuid %}">Delete</a>
                 </td>
             </tr>
         {% endfor %}

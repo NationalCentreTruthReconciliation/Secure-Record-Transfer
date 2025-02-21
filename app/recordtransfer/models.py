@@ -175,6 +175,29 @@ class UploadSession(models.Model):
         """
         return self.expires_at is not None and self.expires_at < timezone.now()
 
+    @property
+    def expires_soon(self) -> bool:
+        """Determine if this session will expire within the set expiration reminder time."""
+        threshold = settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+        if threshold == -1:
+            return False
+        return self.expires_within(minutes=threshold)
+
+    def expires_within(self, minutes: int) -> bool:
+        """Determine if this session will expire within the given number of minutes.
+
+        Args:
+            minutes: The number of minutes in the future to check for expiration.
+
+        Returns:
+            True if the session will expire before the given number of minutes from now, False
+            otherwise.
+        """
+        expiry_time = self.expires_at
+        if expiry_time is None:
+            return False
+        return expiry_time < timezone.now() + timezone.timedelta(minutes=minutes)
+
     def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
@@ -975,6 +998,14 @@ class InProgressSubmission(models.Model):
         if self.upload_session:
             return self.upload_session.expires_at
         return None
+
+    def upload_session_expired(self) -> bool:
+        """Determine if the associated upload session has expired or not."""
+        return self.upload_session is not None and self.upload_session.expired
+
+    def upload_session_expires_soon(self) -> bool:
+        """Determine if the associated upload session is expiring soon or not."""
+        return self.upload_session is not None and self.upload_session.expires_soon
 
     def __str__(self):
         """Return a string representation of this object."""
