@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -14,7 +13,6 @@ from recordtransfer.utils import (
     get_human_readable_size,
     html_to_text,
     snake_to_camel_case,
-    timeuntil_minutes,
 )
 
 
