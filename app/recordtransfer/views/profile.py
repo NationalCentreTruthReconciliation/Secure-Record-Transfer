@@ -1,6 +1,5 @@
 """Views to manage user profile information and view their submission history."""
 
-from datetime import timezone
 from typing import Any, cast
 
 from django.conf import settings
