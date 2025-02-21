@@ -296,14 +296,10 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
-    @patch("recordtransfer.views.profile.timeuntil_minutes", new_callable=MagicMock)
-    def test_in_progress_submission_expiring_soon_shown_in_red(
-        self, mock_timeuntil_minutes: MagicMock
-    ) -> None:
+    def test_in_progress_submission_expiring_soon_shown_in_red(self) -> None:
         """Test that the expiry date is shown in red if the in-progress submission is expiring
         soon.
         """
-        mock_timeuntil_minutes.return_value = 25
         self.upload_session.last_upload_interaction_time = (
             self.upload_session.last_upload_interaction_time - timedelta(minutes=35)
         )
@@ -316,12 +312,10 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
-    @patch("recordtransfer.views.profile.timeuntil_minutes", new_callable=MagicMock)
-    def test_in_progress_submission_expired(self, mock_timeuntil_minutes: MagicMock) -> None:
+    def test_in_progress_submission_expired(self) -> None:
         """Test that the expiry date is shown in red and strikethrough if the in-progress submission
         has expired.
         """
-        mock_timeuntil_minutes.return_value = 0
         self.upload_session.last_upload_interaction_time = (
             self.upload_session.last_upload_interaction_time - timedelta(minutes=65)
         )
