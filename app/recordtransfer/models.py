@@ -173,8 +173,7 @@ class UploadSession(models.Model):
         in the CREATED or UPLOADING state. Returns False for sessions in other states, or if the
         upload session expiry feature is disabled.
         """
-        current_time = timezone.now()
-        return self.expires_at is not None and self.expires_at < current_time
+        return self.expires_at is not None and self.expires_at < timezone.now()
 
     def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
         """Add a temporary uploaded file to this session."""
