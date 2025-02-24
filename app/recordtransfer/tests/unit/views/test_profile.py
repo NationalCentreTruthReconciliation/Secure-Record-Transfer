@@ -1,4 +1,5 @@
 from datetime import timedelta
+import re
 from typing import cast
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
@@ -290,6 +291,7 @@ class TestUserProfileView(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
+        content = re.sub(r'\s+', ' ', content).strip()
         self.assertIn(expiry_date, content)
         self.assertNotIn("red-text", content)
         self.assertNotIn("strikethrough", content)
