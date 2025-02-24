@@ -15,9 +15,11 @@ def schedule_in_progress_submission_expiring_email(in_progress: InProgressSubmis
     Args:
         in_progress: The in-progress submission to remind the user about
     """
+    # Skip scheduling if the upload session is not set or if the expiration settings are disabled
     if (
-        settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1
-        or settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES == -1
+        not in_progress.upload_session or
+        settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1 or
+        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES == -1
     ):
         return
     scheduler.enqueue_in(
