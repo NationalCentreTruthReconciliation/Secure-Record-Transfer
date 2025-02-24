@@ -19,13 +19,13 @@
                 {% blocktrans %}Dear {{ first_name }} {{ last_name }} ({{ username }}),{% endblocktrans %}
             </p>
             <p>
-                {% blocktrans %}You have an in-progress submission titled "{{ ip_submission_title }}" that is set to expire on {{ ip_submission_expiration_date }}.{% endblocktrans %}
+                {% blocktrans %}You have an in-progress submission titled "{{ in_progress_title }}" that is set to expire on {{ in_progress_expiration_date }}.{% endblocktrans %}
             </p>
             <p>
                 {% blocktrans %}Please make sure to complete your submission before the expiration date. You can resume your submission by clicking the link below:{% endblocktrans %}
             </p>
             <p>
-                <a href="http://{{ site_domain }}{{ ip_submission_url }}">{{ ip_submission_url }}</a>
+                <a href="http://{{ site_domain }}{{ in_progress_url }}">{{ in_progress_url }}</a>
             </p>
             <p>
                 {% blocktrans %}If you have any questions or need assistance, please contact our support team.{% endblocktrans %}
