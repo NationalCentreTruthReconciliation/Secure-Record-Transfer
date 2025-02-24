@@ -976,6 +976,10 @@ class InProgressSubmission(models.Model):
             return self.upload_session.expires_at
         return None
 
+    def get_resume_url(self) -> str:
+        """Get the URL to access and resume the in-progress submission."""
+        return reverse("recordtransfer:transfer", kwargs={"transfer_uuid": self.uuid})
+
     def __str__(self):
         """Return a string representation of this object."""
         title = self.title or "None"
