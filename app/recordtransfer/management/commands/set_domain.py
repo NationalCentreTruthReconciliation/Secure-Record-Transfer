@@ -30,13 +30,6 @@ class Command(BaseCommand):
         # Get the current site
         current_site = Site.objects.get_current()
 
-        # Check if domain is already set
-        if current_site.domain == domain:
-            self.stdout.write(
-                self.style.WARNING(f'Domain is already set to "{domain}"')
-            )
-            return
-
         current_site.domain = domain
 
         if display_name:
