@@ -13,8 +13,12 @@
                 <td>{{ in_progress.last_updated|date:"D M j, Y" }} @ {{ in_progress.last_updated|time:"H:i" }}</td>
                 <td>
                     {% if in_progress.upload_session_expires_at %}
-                        <span class="{% if in_progress.upload_session_expires_soon %}red-text{% endif %} {% if in_progress.upload_session_expired %}strikethrough{% endif %}">
-                            {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @ {{ in_progress.upload_session_expires_at|time:"H:i" }}
+                        <span class="
+                            {% if in_progress.upload_session_expires_soon %}red-text{% endif %}
+                            {% if in_progress.upload_session_expired %}strikethrough{% endif %}
+                        ">
+                            {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @ 
+                            {{ in_progress.upload_session_expires_at|time:"H:i" }}
                         </span>
                     {% else %}
                         -
