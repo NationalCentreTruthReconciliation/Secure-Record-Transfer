@@ -245,7 +245,7 @@ class TransferFormWizard(SessionWizardView):
             message = gettext("Transfer saved successfully.")
             if (
                 expires_at := self.in_progress_submission.upload_session_expires_at
-                if self.in_progress_submission.upload_session
+                if self.in_progress_submission
                 else None
             ):
                 expiry_message = gettext(
