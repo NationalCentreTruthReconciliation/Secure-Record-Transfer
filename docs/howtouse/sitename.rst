@@ -5,7 +5,7 @@ If you are running the record transfer app somewhere other than your localhost, 
 your site's domain to the database. If you do not set the domain, your emails will not send
 correctly, and will have the wrong link to your site.
 
-To set the domain of your site, run the following command from the `app` directory:
+To set the domain of your site, run the following command from the `app` directory **within the container**:
 
 .. code-block:: shell
 
