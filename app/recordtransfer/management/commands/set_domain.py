@@ -16,7 +16,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "domain",
             type=str,
-            help='The domain to set for the current site (e.g., "https://my.domain.com")',
+            help='The domain to set for the current site (e.g., "my.domain.com")',
         )
         parser.add_argument(
             "--display-name",
