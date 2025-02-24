@@ -8,8 +8,8 @@ from . import views
 app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
-    path(
-        "transfer/",
+    re_path(
+        r"^transfer(?:/(?P<transfer_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
         login_required(views.transfer.TransferFormWizard.as_view()),
         name="transfer",
     ),
