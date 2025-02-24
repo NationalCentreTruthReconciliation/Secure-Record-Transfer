@@ -1,10 +1,15 @@
+import re
+from datetime import timedelta
+from typing import cast
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
 
-from recordtransfer.models import User
+from recordtransfer.models import InProgressSubmission, UploadSession, User
 
 
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
@@ -30,6 +35,14 @@ class TestUserProfileView(TestCase):
         self.error_message = "There was an error updating your preferences. Please try again."
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
+
+        # Submission history related
+        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self.in_progress_submission = InProgressSubmission.objects.create(
+            user=self.user,
+            uuid="550e8400-e29b-41d4-a716-446655440000",
+            upload_session=self.upload_session,
+        )
 
     def test_access_authenticated_user(self):
         response = self.client.get(self.url)
@@ -255,3 +268,62 @@ class TestUserProfileView(TestCase):
             str(messages[0]),
             self.error_message,
         )
+
+    # Testing submission expiry
+    def test_in_progress_submission_expires_at_no_expiry(self) -> None:
+        """Test that the "Expires at" cell contains just a dash when the in-progress submission
+        has no upload session, hence no expiry date.
+        """
+        self.in_progress_submission.upload_session = None
+        self.in_progress_submission.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertRegex(response.content.decode(), r"<td>\s*-+\s*</td>")
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    def test_in_progress_submission_expires_at(self) -> None:
+        """Test that expiry date is shown for an in-progress submission with an upload session."""
+        response = self.client.get(self.url)
+        local_tz = ZoneInfo(settings.TIME_ZONE)
+        expiry_date = self.upload_session.expires_at.astimezone(local_tz).strftime(
+            "%a %b %d, %Y @ %H:%M"
+        )
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        content = re.sub(r'\s+', ' ', content).strip()
+        self.assertIn(expiry_date, content)
+        self.assertNotIn("red-text", content)
+        self.assertNotIn("strikethrough", content)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    def test_in_progress_submission_expiring_soon_shown_in_red(self) -> None:
+        """Test that the expiry date is shown in red if the in-progress submission is expiring
+        soon.
+        """
+        self.upload_session.last_upload_interaction_time = (
+            self.upload_session.last_upload_interaction_time - timedelta(minutes=35)
+        )
+        self.upload_session.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn("red-text", content)
+        self.assertNotIn("strikethrough", content)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    def test_in_progress_submission_expired(self) -> None:
+        """Test that the expiry date is shown in red and strikethrough if the in-progress submission
+        has expired.
+        """
+        self.upload_session.last_upload_interaction_time = (
+            self.upload_session.last_upload_interaction_time - timedelta(minutes=65)
+        )
+        self.upload_session.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn("red-text", content)
+        self.assertIn("strikethrough", content)
