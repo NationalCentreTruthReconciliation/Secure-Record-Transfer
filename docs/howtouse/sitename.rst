@@ -9,14 +9,14 @@ To set the domain of your site, run the following command from the `app` directo
 
 .. code-block:: shell
 
-    python manage.py set_domain "https://my.domain.com"
+    python manage.py set_domain "my.domain.com"
 
-replacing `https://my.domain.com` with your site's domain.
+replacing code:`my.domain.com` with your site's fully qualified domain name.
 
 If you also want to set an optional display name for your site, you can use the `--display-name` flag:
 
 .. code-block:: shell
 
-    python manage.py set_domain "https://my.domain.com" --display-name "My Site Name"
+    python manage.py set_domain "my.domain.com" --display-name "My Site Name"
 
-replacing `"My Site Name"` with your desired display name.
+replacing "My Site Name" with your desired display name.
