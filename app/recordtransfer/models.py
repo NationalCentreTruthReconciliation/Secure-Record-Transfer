@@ -1010,6 +1010,10 @@ class InProgressSubmission(models.Model):
         """Determine if the associated upload session is expiring soon or not."""
         return self.upload_session is not None and self.upload_session.expires_soon
 
+    def get_resume_url(self) -> str:
+        """Get the URL to access and resume the in-progress submission."""
+        return reverse("recordtransfer:transfer", kwargs={"transfer_uuid": self.uuid})
+
     def __str__(self):
         """Return a string representation of this object."""
         title = self.title or "None"
