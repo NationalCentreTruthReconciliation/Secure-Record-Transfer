@@ -47,6 +47,7 @@ services:
       dockerfile: Containerfile
       args:
           WEBPACK_MODE: production
+    image: secure-record-transfer-prod
     command: python manage.py rqworker default
     restart: unless-stopped
     env_file:
@@ -54,7 +55,6 @@ services:
     environment:
       - ENV=prod
       - IS_RQ=yes
-      - WEBPACK_MODE=production
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
       - db
@@ -64,34 +64,20 @@ services:
       - media-volume:/opt/secure-record-transfer/app/media/
 
   rq-scheduler:
-    build:
-      context: .
-      target: prod
-      dockerfile: Containerfile
-      args:
-          WEBPACK_MODE: production
+    image: secure-record-transfer-prod
     command: python manage.py schedule_jobs
     restart: unless-stopped
     env_file:
       - .prod.env
     environment:
       - ENV=prod
-      - IS_RQ=yes
-      - WEBPACK_MODE=production
+      - IS_RQ=no
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
-      - db
-      - redis
-    volumes:
-      - ./app/:/opt/secure-record-transfer/app/:z
+      - rq
 
   app:
-    build:
-      context: .
-      target: prod
-      dockerfile: Containerfile
-      args:
-        WEBPACK_MODE: production
+    image: secure-record-transfer-prod
     command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
     expose:
@@ -101,11 +87,10 @@ services:
     environment:
       - ENV=prod
       - IS_RQ=no
-      - WEBPACK_MODE=production
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
-      - db
       - rq
+      - rq-scheduler
       - clamav
     volumes:
       - static-volume:/opt/secure-record-transfer/app/static/
