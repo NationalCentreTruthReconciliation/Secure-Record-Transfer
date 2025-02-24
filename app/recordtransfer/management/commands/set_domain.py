@@ -39,7 +39,12 @@ class Command(BaseCommand):
             )
             return
 
-        # Get the current site
+        if any(c.isspace() for c in domain):
+            self.stdout.write(
+                self.style.WARNING("Domain should not contain whitespace")
+            )
+            return
+
         current_site = Site.objects.get_current()
 
         current_site.domain = domain
