@@ -16,7 +16,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -198,6 +198,15 @@ class UploadSession(models.Model):
             return False
         return expiry_time < timezone.now() + timezone.timedelta(minutes=minutes)
 
+    def touch(self, save: bool = True) -> None:
+        """Reset the last upload interaction time to the current time."""
+        if self.status not in (self.SessionStatus.UPLOADING, self.SessionStatus.CREATED):
+            return
+
+        self.last_upload_interaction_time = timezone.now()
+        if save:
+            self.save()
+
     def add_temp_file(self, file: UploadedFile) -> TempUploadedFile:
         """Add a temporary uploaded file to this session."""
         if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
@@ -210,7 +219,7 @@ class UploadSession(models.Model):
         temp_file = TempUploadedFile(session=self, file_upload=file, name=file.name)
         temp_file.save()
 
-        self.last_upload_interaction_time = timezone.now()
+        self.touch(save=False)
 
         if self.status == self.SessionStatus.CREATED:
             self.status = self.SessionStatus.UPLOADING
@@ -618,6 +627,8 @@ def delete_file_on_model_delete(
     """
     if instance.exists:
         instance.file_upload.delete()
+        if isinstance(instance, TempUploadedFile):
+            instance.session.touch()
 
 
 class SubmissionGroup(models.Model):
@@ -1019,3 +1030,14 @@ class InProgressSubmission(models.Model):
         title = self.title or "None"
         session = self.upload_session.token if self.upload_session else "None"
         return f"In-Progress Submission by {self.user} (Title: {title} | Session: {session})"
+
+
+@receiver(pre_save, sender=InProgressSubmission)
+def touch_upload_session(
+    sender: InProgressSubmission, instance: InProgressSubmission, **kwargs
+) -> None:
+    """Update the last upload interaction time of the associated upload session when the
+    InProgressSubmission is saved, if it has an upload session.
+    """
+    if instance.upload_session:
+        instance.upload_session.touch()
