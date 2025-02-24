@@ -30,5 +30,5 @@ def schedule_in_progress_submission_expiring_email(in_progress: InProgressSubmis
             )
         ),
         send_user_in_progress_submission_expiring,
-        in_progress,
+        in_progress.pk,
     )
