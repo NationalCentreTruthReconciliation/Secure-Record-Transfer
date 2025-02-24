@@ -1029,7 +1029,11 @@ class InProgressSubmission(models.Model):
 
 
 @receiver(pre_save, sender=InProgressSubmission)
-def touch_upload_session(sender: InProgressSubmission, instance: InProgressSubmission, **kwargs):
-    """Call the touch method on the related UploadSession if it exists."""
+def touch_upload_session(
+    sender: InProgressSubmission, instance: InProgressSubmission, **kwargs
+) -> None:
+    """Update the last upload interaction time of the associated upload session when the
+    InProgressSubmission is saved, if it has an upload session.
+    """
     if instance.upload_session:
         instance.upload_session.touch()
