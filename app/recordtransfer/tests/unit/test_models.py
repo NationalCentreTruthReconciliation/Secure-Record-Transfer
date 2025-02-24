@@ -1,10 +1,10 @@
 import logging
 import shutil
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -207,6 +207,66 @@ class TestUploadSession(TestCase):
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
 
         self.assertFalse(self.session.expired)
+
+    @patch("django.utils.timezone.now")
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    def test_expires_within_true(self, mock_now: MagicMock) -> None:
+        """Test expires_within returns True when the session will expire within the given
+        minutes.
+        """
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
+        self.session.last_upload_interaction_time = fixed_now - timedelta(minutes=31)
+
+        self.assertTrue(self.session.expires_within(30))
+
+    @patch("django.utils.timezone.now")
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    def test_expires_within_false(self, mock_now: MagicMock) -> None:
+        """Test expires_within returns False when the session will not expire within the given
+        minutes.
+        """
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
+        self.session.last_upload_interaction_time = fixed_now - timedelta(minutes=10)
+
+        self.assertFalse(self.session.expires_within(10))
+
+    def test_expires_within_no_expiry_time(self) -> None:
+        """Test expires_within returns False when the session is not in a valid state to check
+        expiry.
+        """
+        self.session.status = UploadSession.SessionStatus.STORED
+        self.assertFalse(self.session.expires_within(10))
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @patch("django.utils.timezone.now")
+    def test_expires_soon_true(self, mock_now: MagicMock) -> None:
+        """Test expires_soon returns True when the session will expire within the reminder time."""
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
+        self.session.last_upload_interaction_time = fixed_now - timedelta(minutes=31)
+
+        self.assertTrue(self.session.expires_soon)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @patch("django.utils.timezone.now")
+    def test_expires_soon_false(self, mock_now: MagicMock) -> None:
+        """Test expires_soon returns False when the session will not expire within the reminder
+        time.
+        """
+        fixed_now = datetime(2025, 2, 18, 12, 0, 0)
+        mock_now.return_value = fixed_now
+        self.session.last_upload_interaction_time = fixed_now - timedelta(minutes=15)
+
+        self.assertFalse(self.session.expires_soon)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", -1)
+    def test_expires_soon_disabled(self) -> None:
+        """Test expires_soon returns False when the reminder feature is disabled."""
+        self.assertFalse(self.session.expires_soon)
 
     def test_upload_size_created_session(self) -> None:
         """Test upload size should be zero for a newly created session."""
@@ -901,14 +961,36 @@ class TestInProgressSubmission(TestCase):
 
     def test_upload_session_expires_at(self) -> None:
         """Test upload_session_expires_at method."""
-        self.assertEqual(
-            self.submission.upload_session_expires_at(), self.upload_session.expires_at
-        )
+        self.assertEqual(self.submission.upload_session_expires_at, self.upload_session.expires_at)
 
     def test_upload_session_expires_at_no_session(self) -> None:
         """Test upload_session_expires_at method when there is no upload session."""
         self.submission.upload_session = None
-        self.assertIsNone(self.submission.upload_session_expires_at())
+        self.assertIsNone(self.submission.upload_session_expires_at)
+
+    @patch("recordtransfer.models.UploadSession.expired", new_callable=PropertyMock)
+    def test_upload_session_expired(self, mock_expired: PropertyMock) -> None:
+        """Test upload_session_expired property."""
+        mock_expired.return_value = True
+        self.assertTrue(self.submission.upload_session_expired)
+
+        mock_expired.return_value = False
+        self.assertFalse(self.submission.upload_session_expired)
+
+        self.submission.upload_session = None
+        self.assertFalse(self.submission.upload_session_expired)
+
+    @patch("recordtransfer.models.UploadSession.expires_soon", new_callable=PropertyMock)
+    def test_upload_session_expires_soon(self, mock_expires_soon: PropertyMock) -> None:
+        """Test upload_session_expires_soon property."""
+        mock_expires_soon.return_value = True
+        self.assertTrue(self.submission.upload_session_expires_soon)
+
+        mock_expires_soon.return_value = False
+        self.assertFalse(self.submission.upload_session_expires_soon)
+
+        self.submission.upload_session = None
+        self.assertFalse(self.submission.upload_session_expires_soon)
 
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
