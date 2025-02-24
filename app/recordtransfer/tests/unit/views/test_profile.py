@@ -1,7 +1,7 @@
-from datetime import timedelta
 import re
+from datetime import timedelta
 from typing import cast
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
