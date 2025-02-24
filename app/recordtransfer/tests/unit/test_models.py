@@ -272,6 +272,66 @@ class TestUploadSession(TestCase):
         """Test upload size should be zero for a newly created session."""
         self.assertEqual(self.session.upload_size, 0)
 
+    @patch("django.utils.timezone.now")
+    def test_touch_valid_states(self, mock_now: MagicMock) -> None:
+        """Test that touch() updates last_upload_interaction_time with current time."""
+        # Setup fixed time
+        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = fixed_now
+
+        valid_states = [UploadSession.SessionStatus.CREATED, UploadSession.SessionStatus.UPLOADING]
+
+        for state in valid_states:
+            self.session.status = state
+            self.session.touch()
+            self.assertEqual(self.session.last_upload_interaction_time, fixed_now)
+
+    def test_touch_invalid_states(self) -> None:
+        """Test that touch() does nothing when session is in invalid state."""
+        original_time = self.session.last_upload_interaction_time
+
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.DELETED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+
+        for state in invalid_states:
+            self.session.status = state
+            self.session.touch()
+            self.assertEqual(self.session.last_upload_interaction_time, original_time)
+
+    @patch("django.utils.timezone.now")
+    def test_touch_with_save_flag_false(self, mock_now: MagicMock) -> None:
+        """Test that touch() respects the save flag when save=False."""
+        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = fixed_now
+
+        # Test with save=False
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.touch(save=False)
+
+        # Refresh from db to verify it wasn't saved
+        original_session = UploadSession.objects.get(pk=self.session.pk)
+        self.assertNotEqual(original_session.last_upload_interaction_time, fixed_now)
+
+    @patch("django.utils.timezone.now")
+    def test_touch_with_save_flag_true(self, mock_now: MagicMock) -> None:
+        """Test that touch() respects the save flag when save=True."""
+        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = fixed_now
+
+        # Test with save=True
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.touch(save=True)
+
+        # Refresh from db to verify it was saved
+        original_session = UploadSession.objects.get(pk=self.session.pk)
+        self.assertEqual(original_session.last_upload_interaction_time, fixed_now)
+
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_upload_size_one_file(self, tempuploadedfile_set_mock: BaseManager) -> None:
         """Test upload size should be the size of the uploaded file."""
