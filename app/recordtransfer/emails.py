@@ -181,12 +181,27 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
 
 
 @django_rq.job
-def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission) -> None:
+def send_user_in_progress_submission_expiring(in_progress_id: int) -> None:
     """Send an email to a user that their in-progress submission is expiring soon.
 
     Args:
-        in_progress: The in-progress submission that is expiring
+         in_progress_id: The ID of the in-progress submission that is expiring
     """
+    in_progress = None
+    try:
+        in_progress = InProgressSubmission.objects.get(pk=in_progress_id)
+    except InProgressSubmission.DoesNotExist:
+        LOGGER.warning("Could not find in-progress submission with ID %d", in_progress_id)
+        return
+
+    # Check if the in-progress submission is still expiring soon
+    if not in_progress.upload_session_expires_soon:
+        LOGGER.warning(
+            "The in-progress submission %s is no longer expiring soon",
+            in_progress,
+        )
+        return
+
     if in_progress.upload_session_expires_at is None:
         LOGGER.warning(
             "The in-progress submission %s does not have an expiration date",
