@@ -12,3 +12,11 @@ To set the domain of your site, run the following command from the `app` directo
     python manage.py set_domain "https://my.domain.com"
 
 replacing `https://my.domain.com` with your site's domain.
+
+If you also want to set an optional display name for your site, you can use the `--display-name` flag:
+
+.. code-block:: shell
+
+    python manage.py set_domain "https://my.domain.com" --display-name "My Site Name"
+
+replacing `"My Site Name"` with your desired display name.
