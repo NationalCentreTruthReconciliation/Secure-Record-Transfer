@@ -75,3 +75,39 @@ class UploadSessionManager(models.Manager):
                 UploadSession.SessionStatus.UPLOADING,
             ],
         )
+
+
+class InProgressSubmissionManager(models.Manager):
+    """Custom manager for InProgressSubmission model."""
+
+    def get_expiring(self) -> query.QuerySet:
+        """Return all in-progress submissions with upload sessions that are about to expire."""
+        if (
+            settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1
+            or settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES == -1
+        ):
+            return self.none()
+
+        cutoff_time = timezone.now() - timezone.timedelta(
+            minutes=(
+                settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+                - settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+            )
+        )
+
+        # Avoiding circular import
+        UploadSession = apps.get_model(
+            app_label="recordtransfer",
+            model_name="UploadSession",
+        )
+
+        # Get submissions with active upload sessions that will expire soon
+        return self.filter(
+            reminder_email_sent=False,
+            upload_session__isnull=False,
+            upload_session__last_upload_interaction_time__lt=cutoff_time,
+            upload_session__status__in=[
+                UploadSession.SessionStatus.CREATED,
+                UploadSession.SessionStatus.UPLOADING,
+            ],
+        )

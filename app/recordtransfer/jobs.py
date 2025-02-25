@@ -9,7 +9,8 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
-from recordtransfer.models import Job, Submission, UploadSession, User
+from recordtransfer.emails import send_user_in_progress_submission_expiring
+from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
 from recordtransfer.utils import zip_directory
 
 LOGGER = logging.getLogger(__name__)
@@ -102,4 +103,32 @@ def cleanup_expired_sessions() -> None:
 
     except Exception as e:
         LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
+        raise e
+
+
+@django_rq.job
+def check_expiring_in_progress_submissions() -> None:
+    """Check for in-progress submissions that are about to expire and send email reminders."""
+    LOGGER.info("Checking for in-progress submissions that are about to expire ...")
+    try:
+        expiring = InProgressSubmission.objects.get_expiring().all()
+
+        if expiring.count() == 0:
+            LOGGER.info("No in-progress submissions are about to expire")
+            return
+
+        for in_progress in expiring:
+            send_user_in_progress_submission_expiring.delay(in_progress)
+            in_progress.reminder_email_sent = True
+            in_progress.save()
+
+        LOGGER.info(
+            "Sent reminders for %d in-progress submissions that are about to expire",
+            expiring.count(),
+        )
+
+    except Exception as e:
+        LOGGER.exception(
+            "Error checking for in-progress submissions that are about to expire: %s", str(e)
+        )
         raise e
