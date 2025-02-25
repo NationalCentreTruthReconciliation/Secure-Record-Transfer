@@ -495,7 +495,7 @@ IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
         "0 \* \* \* \*"   string
         ===============  =========
 
-    Sets the cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions. Defaults to "0 * * * *" (runs every hour).
+    Sets the cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions. Defaults to "0 \* \* \* \*" (runs every hour at minute zero).
 
     See the `crontab manual page <https://man7.org/linux/man-pages/man5/crontab.5.html>`_ for a guide on the syntax.
 
