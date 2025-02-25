@@ -2,9 +2,8 @@
 viewing and listing uploaded files.
 """
 
-import functools
 import logging
-from typing import Callable, cast
+from typing import cast
 
 from clamav.scan import check_for_malware
 from django.conf import settings
@@ -20,35 +19,11 @@ from django.http import (
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.decorators import require_upload_step
 from recordtransfer.models import UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
 LOGGER = logging.getLogger(__name__)
-
-
-def require_upload_step(view_func: Callable) -> Callable:
-    """Restricts access to views based on the current wizard step. Only allows access if the
-    request originates from the UPLOAD_FILES step of TransferFormWizard.
-    """
-
-    @functools.wraps(view_func)
-    def _wrapped_view(request: HttpRequest, *args, **kwargs):
-        # Check if request comes from the upload step
-        wizard_data = request.session.get("wizard_transfer_form_wizard", {})
-        current_step = wizard_data.get("step")
-
-        # Allow access only if we're on the upload_files step
-        if not current_step or current_step != TransferStep.UPLOAD_FILES.value:
-            return JsonResponse(
-                {"error": gettext("Uploads are only permitted during the file upload step")},
-                status=403,
-            )
-
-        # Continue to the original view
-        return view_func(request, *args, **kwargs)
-
-    return _wrapped_view
 
 
 def media_request(request: HttpRequest, path: str) -> HttpResponse:
@@ -75,6 +50,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
 
     return response
 
+
 @require_upload_step
 @require_http_methods(["POST"])
 def create_upload_session(request: HttpRequest) -> JsonResponse:
@@ -96,6 +72,7 @@ def create_upload_session(request: HttpRequest) -> JsonResponse:
             {"error": gettext("There was an internal server error. Please try again.")},
             status=500,
         )
+
 
 @require_upload_step
 @require_http_methods(["GET", "POST"])
