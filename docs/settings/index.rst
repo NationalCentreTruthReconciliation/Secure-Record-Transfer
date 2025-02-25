@@ -489,11 +489,11 @@ IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
 
     .. table::
 
-        ============  =========
-        Default       Type
-        ============  =========
-        "0 2 * * *"   string
-        ============  =========
+        ===============  =========
+        Default          Type
+        ===============  =========
+        "0 \* \* \* \*"   string
+        ===============  =========
 
     Sets the cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions. Defaults to "0 * * * *" (runs every hour).
 
