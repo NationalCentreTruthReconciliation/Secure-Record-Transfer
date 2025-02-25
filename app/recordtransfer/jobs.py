@@ -108,10 +108,15 @@ def cleanup_expired_sessions() -> None:
 
 @django_rq.job
 def check_expiring_in_progress_submissions() -> None:
-    """Check for in-progress submissions that are about to expire and send email reminders."""
-    LOGGER.info("Checking for in-progress submissions that are about to expire ...")
+    """Check for in-progress submissions that are about to expire for which reminder emails have
+    not been sent yet, and send email reminders.
+    """
+    LOGGER.info(
+        "Checking for in-progress submissions that are about to expire without reminder emails "
+        "sent yet ..."
+    )
     try:
-        expiring = InProgressSubmission.objects.get_expiring().all()
+        expiring = InProgressSubmission.objects.get_expiring_without_reminder().all()
 
         if expiring.count() == 0:
             LOGGER.info("No in-progress submissions are about to expire")

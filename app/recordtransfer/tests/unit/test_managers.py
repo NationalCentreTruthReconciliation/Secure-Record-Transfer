@@ -70,6 +70,7 @@ class TestUploadSessionManager(TestCase):
         expired_sessions = UploadSession.objects.get_expired()
         self.assertFalse(expired_sessions.exists())
 
+
 class TestInProgressSubmissionManager(TestCase):
     """Tests for the InProgressSubmission manager."""
 
@@ -84,7 +85,7 @@ class TestInProgressSubmissionManager(TestCase):
         )
 
     @patch("django.utils.timezone.now")
-    def test_get_expiring(self, mock_now: MagicMock) -> None:
+    def test_one_expiring(self, mock_now: MagicMock) -> None:
         """Test when there is an expiring submission."""
         # Setup mock settings
         settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES = 30
@@ -105,12 +106,11 @@ class TestInProgressSubmissionManager(TestCase):
         )
         self.upload_session.save()
 
-        # Test get_expiring method
-        expiring_submissions = InProgressSubmission.objects.get_expiring()
+        expiring_submissions = InProgressSubmission.objects.get_expiring_without_reminder()
         self.assertIn(self.in_progress_submission, expiring_submissions)
 
     @patch("django.utils.timezone.now")
-    def test_get_expiring_none_expiring(self, mock_now: MagicMock) -> None:
+    def test_none_expiring(self, mock_now: MagicMock) -> None:
         """Test when there are no expiring submissions."""
         # Setup mock settings
         settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES = 30
@@ -131,28 +131,27 @@ class TestInProgressSubmissionManager(TestCase):
         )
         self.upload_session.save()
 
-        # Test get_expiring method
-        expiring_submissions = InProgressSubmission.objects.get_expiring()
+        expiring_submissions = InProgressSubmission.objects.get_expiring_without_reminder()
         self.assertFalse(expiring_submissions.exists())
 
     @patch("django.utils.timezone.now")
-    def test_get_expiring_no_reminder(self, mock_now: MagicMock) -> None:
+    def test_upload_session_expiry_disabled(self, mock_now: MagicMock) -> None:
         """Test when the upload session expiry feature is disabled."""
         # Setup mock settings
         settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES = -1
         settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES = 10
 
         # Test get_expiring method
-        expiring_submissions = InProgressSubmission.objects.get_expiring()
+        expiring_submissions = InProgressSubmission.objects.get_expiring_without_reminder()
         self.assertFalse(expiring_submissions.exists())
 
     @patch("django.utils.timezone.now")
-    def test_get_expiring_no_expire(self, mock_now: MagicMock) -> None:
+    def test_upload_session_expiry_reminder_disabled(self, mock_now: MagicMock) -> None:
         """Test when the upload session expiry reminder feature is disabled."""
         # Setup mock settings
         settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES = 30
         settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES = -1
 
         # Test get_expiring method
-        expiring_submissions = InProgressSubmission.objects.get_expiring()
+        expiring_submissions = InProgressSubmission.objects.get_expiring_without_reminder()
         self.assertFalse(expiring_submissions.exists())

@@ -80,8 +80,10 @@ class UploadSessionManager(models.Manager):
 class InProgressSubmissionManager(models.Manager):
     """Custom manager for InProgressSubmission model."""
 
-    def get_expiring(self) -> query.QuerySet:
-        """Return all in-progress submissions with upload sessions that are about to expire."""
+    def get_expiring_without_reminder(self) -> query.QuerySet:
+        """Return all in-progress submissions with upload sessions that are about to expire and
+        have not had a reminder email sent.
+        """
         if (
             settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1
             or settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES == -1
