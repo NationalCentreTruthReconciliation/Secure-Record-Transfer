@@ -61,7 +61,6 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
-from recordtransfer.scheduler import schedule_in_progress_submission_expiring_email
 
 LOGGER = logging.getLogger(__name__)
 
@@ -301,7 +300,6 @@ class TransferFormWizard(SessionWizardView):
         self.in_progress_submission.step_data = pickle.dumps(form_data)
 
         self.in_progress_submission.save()
-        schedule_in_progress_submission_expiring_email(self.in_progress_submission)
 
     def save_current_step(
         self, form: Union[BaseInlineFormSet, BaseModelFormSet, ModelForm]
