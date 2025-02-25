@@ -1,5 +1,4 @@
 import logging
-from unittest import skipIf
 from unittest.mock import MagicMock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -30,6 +29,11 @@ class TestCreateUploadSessionView(TestCase):
         """Set up test environment."""
         self.client.login(username="testuser", password="1X<ISRUkw+tuK")
         self.url = reverse("recordtransfer:create_upload_session")
+
+        # Set up client session data
+        session = self.client.session
+        session['wizard_transfer_form_wizard'] = {'step': TransferStep.UPLOAD_FILES.value}
+        session.save()
 
     def tearDown(self) -> None:
         """Tear down test environment."""

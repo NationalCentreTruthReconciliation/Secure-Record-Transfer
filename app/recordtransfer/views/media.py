@@ -79,7 +79,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
 
     return response
 
-
+@require_upload_step
 @require_http_methods(["POST"])
 def create_upload_session(request: HttpRequest) -> JsonResponse:
     """Create a new upload session and return the session token.
