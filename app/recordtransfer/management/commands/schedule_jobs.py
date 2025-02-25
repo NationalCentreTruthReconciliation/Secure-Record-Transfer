@@ -4,7 +4,7 @@ import django_rq
 from django.conf import settings
 from django_rq.management.commands import rqscheduler
 
-from recordtransfer.jobs import cleanup_expired_sessions
+from recordtransfer.jobs import check_expiring_in_progress_submissions, cleanup_expired_sessions
 
 scheduler = django_rq.get_scheduler()
 LOGGER = logging.getLogger(__name__)
@@ -23,12 +23,21 @@ def register_scheduled_jobs() -> None:
         settings.FILE_UPLOAD_ENABLED
         and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
     ):
-        schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+        cleanup_schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
         LOGGER.info(
             "Scheduling cleanup job (schedule: %s)",
-            schedule,
+            cleanup_schedule,
         )
-        scheduler.cron(schedule, func=cleanup_expired_sessions, queue_name="default")
+        scheduler.cron(cleanup_schedule, func=cleanup_expired_sessions, queue_name="default")
+
+        email_schedule = settings.IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+        LOGGER.info(
+            "Scheduling expiring email job (schedule: %s)",
+            email_schedule,
+        )
+        scheduler.cron(
+            email_schedule, func=check_expiring_in_progress_submissions, queue_name="default"
+        )
 
 
 class Command(rqscheduler.Command):
