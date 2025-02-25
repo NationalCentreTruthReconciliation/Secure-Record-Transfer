@@ -88,6 +88,8 @@ class InProgressSubmissionManager(models.Manager):
         ):
             return self.none()
 
+        # Upload sessions with a last interaction time that is less than this cutoff time will
+        # expire soon
         cutoff_time = timezone.now() - timezone.timedelta(
             minutes=(
                 settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
