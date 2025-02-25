@@ -26,7 +26,11 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import TransferStep
-from recordtransfer.managers import InProgressSubmissionManager, SubmissionQuerySet, UploadSessionManager
+from recordtransfer.managers import (
+    InProgressSubmissionManager,
+    SubmissionQuerySet,
+    UploadSessionManager,
+)
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
@@ -1028,6 +1032,12 @@ class InProgressSubmission(models.Model):
         """Get the URL to access and resume the in-progress submission."""
         return reverse("recordtransfer:transfer", kwargs={"transfer_uuid": self.uuid})
 
+    def reset_reminder_email_sent(self) -> None:
+        """Reset the reminder email flag to False, if it isn't already False."""
+        if self.reminder_email_sent:
+            self.reminder_email_sent = False
+            self.save()
+
     def __str__(self):
         """Return a string representation of this object."""
         title = self.title or "None"
@@ -1044,4 +1054,4 @@ def update_upon_save(
     """
     if instance.upload_session:
         instance.upload_session.touch()
-        instance.reminder_email_sent = False
+        instance.reset_reminder_email_sent()

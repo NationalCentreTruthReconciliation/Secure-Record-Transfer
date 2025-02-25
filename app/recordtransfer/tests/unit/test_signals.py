@@ -106,7 +106,8 @@ class TestInProgressSubmissionSignal(TestCase):
         in_progress_submission.save()
         mock_touch.assert_called_once()
 
-    def test_reminder_email_sent_flag_updated(self) -> None:
+    @patch.object(InProgressSubmission, "reset_reminder_email_sent")
+    def test_reminder_email_sent_flag_updated(self, mock_reset: MagicMock) -> None:
         """Test that the reminder email sent flag is updated when the InProgressSubmission instance
         is saved.
         """
@@ -117,4 +118,4 @@ class TestInProgressSubmissionSignal(TestCase):
             reminder_email_sent=True,
         )
         in_progress_submission.save()
-        self.assertFalse(in_progress_submission.reminder_email_sent)
+        mock_reset.assert_called_once()

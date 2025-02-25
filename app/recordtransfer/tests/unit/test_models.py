@@ -1060,6 +1060,18 @@ class TestInProgressSubmission(TestCase):
         )
         self.assertEqual(self.submission.get_resume_url(), expected_url)
 
+    def test_reset_reminder_email_sent_flag_true(self) -> None:
+        """Test reset_reminder_email_sent method when the flag is True."""
+        self.submission.reminder_email_sent = True
+        self.submission.reset_reminder_email_sent()
+        self.assertFalse(self.submission.reminder_email_sent)
+
+    def test_reset_reminder_email_sent_flag_false(self) -> None:
+        """Test reset_reminder_email_sent method when the flag is already False."""
+        self.submission.reminder_email_sent = False
+        self.submission.reset_reminder_email_sent()
+        self.assertFalse(self.submission.reminder_email_sent)
+
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
         session_token = (
