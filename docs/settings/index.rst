@@ -459,13 +459,13 @@ UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
 
     .. table::
 
-        ============  =========
-        Default       Type
-        ============  =========
-        "0 2 * * *"   string
-        ============  =========
+        ==============  =========
+        Default         Type
+        ==============  =========
+        "0 2 \* \* \*"  string
+        ==============  =========
 
-    Sets the cron schedule expression for cleaning up expired upload sessions. Defaults to "0 2 * * *" (runs at 2 AM daily).
+    Sets the cron schedule expression for cleaning up expired upload sessions. Defaults to "0 2 \* \* \*" (runs at 2 AM daily).
 
     See the `crontab manual page <https://man7.org/linux/man-pages/man5/crontab.5.html>`_ for a guide on the syntax.
 
@@ -478,6 +478,36 @@ UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
 
         #file: .env
         UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE="0 2 * * *"
+
+In-Progress Submission Controls
+-------------------------------
+
+IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    *Cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions*
+
+    .. table::
+
+        ===============  =========
+        Default          Type
+        ===============  =========
+        "0 \* \* \* \*"   string
+        ===============  =========
+
+    Sets the cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions. Defaults to "0 \* \* \* \*" (runs every hour at minute zero).
+
+    See the `crontab manual page <https://man7.org/linux/man-pages/man5/crontab.5.html>`_ for a guide on the syntax.
+
+    This feature can be deactivated by setting the value to an empty string ("").
+    If :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` is set to -1, this feature will be deactivated.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE="0 * * * *"
 
 
 Storage Locations

@@ -304,12 +304,21 @@ def verify_upload_session_expiry_settings() -> None:
         expiry settings are invalid.
     """
     try:
-        cron_str = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
-        if cron_str:
-            _validate_cron(cron_str)
-    except Exception as exc:
+        cleanup_schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+        if cleanup_schedule:
+            _validate_cron(cleanup_schedule)
+    except ValueError as exc:
         raise ImproperlyConfigured(
             "UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE is not a valid cron string"
+        ) from exc
+
+    try:
+        email_schedule = settings.IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+        if email_schedule:
+            _validate_cron(email_schedule)
+    except ValueError as exc:
+        raise ImproperlyConfigured(
+            "IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE is not a valid cron string"
         ) from exc
 
     if (

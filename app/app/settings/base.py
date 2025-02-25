@@ -278,3 +278,9 @@ UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE = config(
     default="0 2 * * *",
     cast=str,
 )
+
+IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE = config(
+    "IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE",
+    default="0 * * * *",
+    cast=str,
+)

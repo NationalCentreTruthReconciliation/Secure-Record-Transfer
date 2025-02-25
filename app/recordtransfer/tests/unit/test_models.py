@@ -11,6 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
 from django.forms import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from recordtransfer.enums import TransferStep
@@ -1051,6 +1052,25 @@ class TestInProgressSubmission(TestCase):
 
         self.submission.upload_session = None
         self.assertFalse(self.submission.upload_session_expires_soon)
+
+    def test_get_resume_url(self) -> None:
+        """Test the get_resume_url method."""
+        expected_url = reverse(
+            "recordtransfer:transfer", kwargs={"transfer_uuid": self.submission.uuid}
+        )
+        self.assertEqual(self.submission.get_resume_url(), expected_url)
+
+    def test_reset_reminder_email_sent_flag_true(self) -> None:
+        """Test reset_reminder_email_sent method when the flag is True."""
+        self.submission.reminder_email_sent = True
+        self.submission.reset_reminder_email_sent()
+        self.assertFalse(self.submission.reminder_email_sent)
+
+    def test_reset_reminder_email_sent_flag_false(self) -> None:
+        """Test reset_reminder_email_sent method when the flag is already False."""
+        self.submission.reminder_email_sent = False
+        self.submission.reset_reminder_email_sent()
+        self.assertFalse(self.submission.reminder_email_sent)
 
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
