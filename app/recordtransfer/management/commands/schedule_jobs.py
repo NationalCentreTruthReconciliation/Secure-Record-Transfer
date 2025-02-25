@@ -20,23 +20,41 @@ def clear_scheduled_jobs() -> None:
 def register_scheduled_jobs() -> None:
     """Register jobs to be run on a schedule."""
     if (
-        settings.FILE_UPLOAD_ENABLED
-        and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+        not settings.FILE_UPLOAD_ENABLED
+        or settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1
     ):
-        cleanup_schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+        LOGGER.info(
+            "Upload session expiry is disabled; not scheduling cleanup job and email reminders for "
+            "expiring upload sessions"
+        )
+        return
+
+    cleanup_schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+    if cleanup_schedule:
         LOGGER.info(
             "Scheduling cleanup job (schedule: %s)",
             cleanup_schedule,
         )
         scheduler.cron(cleanup_schedule, func=cleanup_expired_sessions, queue_name="default")
-
-        email_schedule = settings.IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+    else:
         LOGGER.info(
-            "Scheduling expiring email job (schedule: %s)",
+            "UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE is not set; not scheduling cleanup job for "
+            "expired upload sessions"
+        )
+
+    email_schedule = settings.IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+    if email_schedule:
+        LOGGER.info(
+            "Scheduling periodic job to email reminders about expiring upload sessions (schedule: %s)",
             email_schedule,
         )
         scheduler.cron(
             email_schedule, func=check_expiring_in_progress_submissions, queue_name="default"
+        )
+    else:
+        LOGGER.info(
+            "IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE is not set; not scheduling email "
+            "reminders for expiring upload sessions"
         )
 
 
