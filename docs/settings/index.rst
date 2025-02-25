@@ -459,13 +459,13 @@ UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
 
     .. table::
 
-        ============  =========
-        Default       Type
-        ============  =========
-        "0 2 * * *"   string
-        ============  =========
+        ==============  =========
+        Default         Type
+        ==============  =========
+        "0 2 \* \* \*"  string
+        ==============  =========
 
-    Sets the cron schedule expression for cleaning up expired upload sessions. Defaults to "0 2 * * *" (runs at 2 AM daily).
+    Sets the cron schedule expression for cleaning up expired upload sessions. Defaults to "0 2 \* \* \*" (runs at 2 AM daily).
 
     See the `crontab manual page <https://man7.org/linux/man-pages/man5/crontab.5.html>`_ for a guide on the syntax.
 
