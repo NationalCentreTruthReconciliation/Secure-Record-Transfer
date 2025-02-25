@@ -26,7 +26,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import TransferStep
-from recordtransfer.managers import SubmissionQuerySet, UploadSessionManager
+from recordtransfer.managers import InProgressSubmissionManager, SubmissionQuerySet, UploadSessionManager
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
@@ -995,6 +995,8 @@ class InProgressSubmission(models.Model):
     title = models.CharField(max_length=256, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     reminder_email_sent = models.BooleanField(default=False)
+
+    objects = InProgressSubmissionManager()
 
     def clean(self) -> None:
         """Validate the current step value. This gets called when the model instance is
