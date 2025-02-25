@@ -994,6 +994,7 @@ class InProgressSubmission(models.Model):
     step_data = models.BinaryField(default=b"")
     title = models.CharField(max_length=256, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
+    reminder_email_sent = models.BooleanField(default=False)
 
     def clean(self) -> None:
         """Validate the current step value. This gets called when the model instance is
@@ -1033,11 +1034,12 @@ class InProgressSubmission(models.Model):
 
 
 @receiver(pre_save, sender=InProgressSubmission)
-def touch_upload_session(
+def update_upon_save(
     sender: InProgressSubmission, instance: InProgressSubmission, **kwargs
 ) -> None:
     """Update the last upload interaction time of the associated upload session when the
-    InProgressSubmission is saved, if it has an upload session.
+    InProgressSubmission is saved, and reset the reminder email flag, if an upload session exists.
     """
     if instance.upload_session:
         instance.upload_session.touch()
+        instance.reminder_email_sent = False
