@@ -34,10 +34,6 @@ def require_upload_step(view_func: Callable) -> Callable:
 
     @functools.wraps(view_func)
     def _wrapped_view(request: HttpRequest, *args, **kwargs):
-        # Skip check for GET requests (listing files)
-        if request.method != "POST":
-            return view_func(request, *args, **kwargs)
-
         # Check if request comes from the upload step
         wizard_data = request.session.get("wizard_transfer_form_wizard", {})
         current_step = wizard_data.get("step")
@@ -214,6 +210,7 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
         )
 
 
+@require_upload_step
 @require_http_methods(["DELETE", "GET"])
 def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
     """Get or delete a file that has been uploaded in a given upload session.

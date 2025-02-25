@@ -1,14 +1,18 @@
+import json
 import logging
 from unittest.mock import MagicMock, patch
 
+from django.contrib.sessions.backends.db import SessionStore
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
-from django.test import TestCase
+from django.http import HttpRequest, JsonResponse
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
 
 from recordtransfer.enums import TransferStep
 from recordtransfer.models import TempUploadedFile, UploadSession, User
+from recordtransfer.views.media import require_upload_step
 
 
 class TestCreateUploadSessionView(TestCase):
@@ -32,7 +36,7 @@ class TestCreateUploadSessionView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session['wizard_transfer_form_wizard'] = {'step': TransferStep.UPLOAD_FILES.value}
+        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
         session.save()
 
     def tearDown(self) -> None:
@@ -100,7 +104,7 @@ class TestUploadFilesView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session['wizard_transfer_form_wizard'] = {'step': TransferStep.UPLOAD_FILES.value}
+        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
         session.save()
 
         # Create a new upload session token
@@ -358,6 +362,12 @@ class TestUploadedFileView(TestCase):
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
+
+        # Set up client session data
+        session = self.client.session
+        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session.save()
+
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
         self.temp_file = self.session.add_temp_file(
             SimpleUploadedFile("testfile.txt", self.one_kib)
@@ -440,3 +450,64 @@ class TestUploadedFileView(TestCase):
         """Tear down test environment."""
         TempUploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
+
+
+class TestRequireUploadStepDecorator(TestCase):
+    """Tests for the require_upload_step decorator."""
+
+    def setUp(self) -> None:
+        """Set up the test case."""
+        self.factory = RequestFactory()
+
+    def test_request_without_wizard_data(self) -> None:
+        """Requests without wizard data should be forbidden."""
+
+        @require_upload_step
+        def dummy_view(request: HttpRequest, *args, **kwargs):
+            return JsonResponse({"success": True})
+
+        for method in ["get", "post", "put", "delete"]:
+            request = getattr(self.factory, method)("/dummy-url/")
+            request.session = SessionStore()
+            response = dummy_view(request)
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(
+                json.loads(response.content),
+                {"error": gettext("Uploads are only permitted during the file upload step")},
+            )
+
+    def test_request_with_wrong_step(self) -> None:
+        """Requests with the wrong wizard step should be forbidden."""
+
+        @require_upload_step
+        def dummy_view(request: HttpRequest, *args, **kwargs):
+            return JsonResponse({"success": True})
+
+        for method in ["get", "post", "put", "delete"]:
+            request = getattr(self.factory, method)("/dummy-url/")
+            request.session = SessionStore()
+            request.session["wizard_transfer_form_wizard"] = {"step": "some_other_step"}
+            response = dummy_view(request)
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(
+                json.loads(response.content),
+                {"error": gettext("Uploads are only permitted during the file upload step")},
+            )
+
+    def test_request_with_correct_step(self) -> None:
+        """Requests with the correct wizard step should pass through."""
+
+        @require_upload_step
+        def dummy_view(request: HttpRequest, *args, **kwargs):
+            return JsonResponse({"success": True})
+
+        for method in ["get", "post", "put", "delete"]:
+            request = getattr(self.factory, method)("/dummy-url/")
+            request.session = SessionStore()
+            request.session["wizard_transfer_form_wizard"] = {
+                "step": TransferStep.UPLOAD_FILES.value
+            }
+            request.session.save()
+            response = dummy_view(request)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(json.loads(response.content), {"success": True})
