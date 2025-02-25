@@ -251,7 +251,7 @@ class TransferFormWizard(SessionWizardView):
                 expiry_message = gettext(
                     "This submission will expire on %(date)s. Please be sure to complete your "
                     "submission before then."
-                ) % {"date": expires_at.strftime(r"%a %b %d, %Y @ %H:%M")}
+                ) % {"date": timezone.localtime(expires_at).strftime(r"%a %b %d, %Y @ %H:%M")}
                 message = message + " " + expiry_message
 
             messages.success(request, gettext(message))
