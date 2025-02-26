@@ -2,6 +2,7 @@ import logging
 import shutil
 import tempfile
 from datetime import datetime, timedelta
+from datetime import timezone as dttimezone
 from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
@@ -277,7 +278,7 @@ class TestUploadSession(TestCase):
     def test_touch_valid_states(self, mock_now: MagicMock) -> None:
         """Test that touch() updates last_upload_interaction_time with current time."""
         # Setup fixed time
-        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=timezone.utc)
+        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=dttimezone.utc)
         mock_now.return_value = fixed_now
 
         valid_states = [UploadSession.SessionStatus.CREATED, UploadSession.SessionStatus.UPLOADING]
@@ -308,7 +309,7 @@ class TestUploadSession(TestCase):
     @patch("django.utils.timezone.now")
     def test_touch_with_save_flag_false(self, mock_now: MagicMock) -> None:
         """Test that touch() respects the save flag when save=False."""
-        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=timezone.utc)
+        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=dttimezone.utc)
         mock_now.return_value = fixed_now
 
         # Test with save=False
@@ -322,7 +323,7 @@ class TestUploadSession(TestCase):
     @patch("django.utils.timezone.now")
     def test_touch_with_save_flag_true(self, mock_now: MagicMock) -> None:
         """Test that touch() respects the save flag when save=True."""
-        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=timezone.utc)
+        fixed_now = timezone.datetime(2025, 2, 18, 12, 0, 0, tzinfo=dttimezone.utc)
         mock_now.return_value = fixed_now
 
         # Test with save=True

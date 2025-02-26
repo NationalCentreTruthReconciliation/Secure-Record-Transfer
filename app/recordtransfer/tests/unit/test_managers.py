@@ -1,3 +1,4 @@
+from datetime import timezone as dttimezone
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
@@ -21,7 +22,7 @@ class TestUploadSessionManager(TestCase):
     def test_get_expired(self, mock_now: MagicMock) -> None:
         """Test when there are expired upload sessions."""
         # Setup mock time
-        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
         cutoff_time = mock_now() - timezone.timedelta(
             minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
         )
@@ -41,7 +42,7 @@ class TestUploadSessionManager(TestCase):
     def test_get_expired_none_expired(self, mock_now: MagicMock) -> None:
         """Test when there are no expired upload sessions."""
         # Setup mock time
-        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
         cutoff_time = mock_now() - timezone.timedelta(
             minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
         )
@@ -84,7 +85,7 @@ class TestInProgressSubmissionManager(TestCase):
     def test_one_expiring(self, mock_now: MagicMock) -> None:
         """Test when there is an expiring submission."""
         # Setup mock time
-        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
         cutoff_time = mock_now() - timezone.timedelta(
             minutes=(
                 settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
@@ -107,7 +108,7 @@ class TestInProgressSubmissionManager(TestCase):
     def test_none_expiring(self, mock_now: MagicMock) -> None:
         """Test when there are no expiring submissions."""
         # Setup mock time
-        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=timezone.utc)
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
         cutoff_time = mock_now() - timezone.timedelta(
             minutes=(
                 settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
