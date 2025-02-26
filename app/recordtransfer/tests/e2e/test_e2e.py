@@ -1,6 +1,7 @@
 import tempfile
 from typing import ClassVar
 
+from caais.models import RightsType, SourceRole, SourceType
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
 from selenium import webdriver
@@ -49,7 +50,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         TransferStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(TransferStep.RECORD_DESCRIPTION),
             "accession_title": "Test Accession Title",
-            "date_of_materials": "2021-01-01 - 2021-12-31",
+            "date_of_materials": "[ca. 2021-01-01 - 2021-01-31]",
             "language": "English",
             "description": "Test Description",
             "condition": "Test Condition",
@@ -93,7 +94,52 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.driver = webdriver.Chrome(options=chrome_options)
 
         # Create a test user
-        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        self.setUpTestData()
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
+        cls.user = User.objects.create_user(username="testuser", password="testpassword")
+
+        ### This section restores the database to the state after migrations ###
+
+        # Create rights types
+        for name, description in (
+            ("Other", "A type of rights not listed elsewhere"),
+            ("Unknown", "Use when it is not known what type of rights pertain to the material"),
+            ("Cultural Rights", "Accss to material is limited according to cultural protocols"),
+            ("Statute", "Access to material is limited according to law or legislation"),
+            ("License", "Access to material is limited by a licensing agreement"),
+            (
+                "Access",
+                "Access to material is restricted to a certain entity or group of entities",
+            ),
+            (
+                "Copyright",
+                "Access to material is based on fair dealing OR material is in the public domain",
+            ),
+        ):
+            rights_type, created = RightsType.objects.get_or_create(
+                name=name,
+                description=description,
+            )
+            if created:
+                rights_type.save()
+
+        # Create Source Information types
+        other_type, created = SourceType.objects.get_or_create(
+            name="Other",
+            description="Placeholder right to allow user to specify unique source type",
+        )
+        if created:
+            other_type.save()
+
+        other_role, created = SourceRole.objects.get_or_create(
+            name="Other",
+            description="Placeholder right to allow user to specify unique source role",
+        )
+        if created:
+            other_role.save()
 
     def tearDown(self) -> None:
         """Close the web driver."""
@@ -220,10 +266,42 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         )
 
         accession_title_input.send_keys(data["accession_title"])
-        date_input.send_keys(data["date_of_materials"])
 
-        # Need to click away after date input
-        accession_title_input.click()
+        # Click on date input field
+        date_input.click()
+
+        # Click on the datepicker title to open year/month selection view
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CLASS_NAME, "air-datepicker-nav--title"))
+        ).click()
+
+        # Click on year selection title
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, "air-datepicker-nav--title"))
+        ).click()
+
+        # Click on the year 2021
+        driver.find_element(
+            By.XPATH, "//div[@data-year='2021' and @data-month='0' and @data-date='1']"
+        ).click()
+
+        # Click on the month January
+        driver.find_element(
+            By.XPATH,
+            "//div[@data-year='2021' and @data-month='0' and @data-date='1' and contains(@class, 'air-datepicker-cell -month-')]",
+        ).click()
+
+        # Click on the date 1
+        driver.find_element(
+            By.XPATH,
+            "//div[@data-year='2021' and @data-month='0' and @data-date='1' and contains(@class, 'air-datepicker-cell -day-')]",
+        ).click()
+
+        # Click on the date 31
+        driver.find_element(
+            By.XPATH,
+            "//div[@data-year='2021' and @data-month='0' and @data-date='31' and contains(@class, 'air-datepicker-cell -day-')]",
+        ).click()
 
         # Click checkbox to mark date as approximate
         approx_date_input.click()
@@ -411,6 +489,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 fields = {
                     "Title": data["accession_title"],
                     "Language(s)": data["language"],
+                    "Date of materials": data["date_of_materials"],
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
                 }
