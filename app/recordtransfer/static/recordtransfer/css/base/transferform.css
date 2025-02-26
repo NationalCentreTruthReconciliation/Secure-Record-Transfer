@@ -30,19 +30,19 @@
     margin-bottom: 15px;
 }
 
-.flex-item > label {
+.flex-item>label {
     font-style: italic;
 }
 
-.flex-error > label,
-.flex-item > label {
+.flex-error>label,
+.flex-item>label {
     flex: 0 1 180px;
     text-align: right;
     padding-right: 10px;
 }
 
-.flex-item > input:not([type='checkbox']),
-.flex-item > textarea {
+.flex-item>input:not([type='checkbox']),
+.flex-item>textarea {
     flex: 1 1 auto;
     max-width: 600px;
     border-radius: 3px;
@@ -51,13 +51,13 @@
     background-color: #f9f9f9;
 }
 
-.flex-item > input[type='checkbox'] {
+.flex-item>input[type='checkbox'] {
     flex: 0 0 auto;
     max-width: 600px;
     padding: 2px 2px 2px 2px;
 }
 
-.flex-item > select {
+.flex-item>select {
     margin-right: 10px;
 }
 
@@ -71,12 +71,12 @@
     max-width: 200px !important;
 }
 
-.flex-item > textarea {
+.flex-item>textarea {
     resize: none;
     font-size: 10.5pt;
 }
 
-.flex-error > div {
+.flex-error>div {
     flex: 1 1 0;
     max-width: 600px;
 }
@@ -94,6 +94,16 @@
     margin-left: 10px;
 }
 
+.fa-info-circle {
+    color: #6c757d;
+    font-size: 14pt;
+    transition: color 0.1s ease-in-out;
+}
+
+.fa-info-circle:hover {
+    color: #545b62;
+}
+
 .imminent-removal {
     label {
         color: red;
@@ -101,7 +111,9 @@
         transition: 120ms ease-in-out;
     }
 
-    select, input, textarea {
+    select,
+    input,
+    textarea {
         background-color: #fff1f1 !important;
         border: 1px solid red !important;
         border-radius: 3px;
@@ -122,15 +134,16 @@
 }
 
 @media (max-width: 600px) {
-    .flex-item > label,
-    .flex-error > label {
+
+    .flex-item>label,
+    .flex-error>label {
         flex: 1 1 100%;
         text-align: left;
         margin-bottom: 5px;
     }
 
-    .flex-item > input,
-    .flex-error > div {
+    .flex-item>input,
+    .flex-error>div {
         flex: 1 1 100%;
     }
 }
