@@ -34,40 +34,52 @@ export function setupDatePickers() {
  */
 export function setupInputMasks() {
     document.querySelectorAll(".date-range-text").forEach((el) => {
-        const dateMask = IMask(el, {
-            mask: Date,
-            pattern: "Y-`m-`d",
-            blocks: {
-                Y: {
-                    mask: IMask.MaskedRange,
-                    from: 1000,
-                    to: 9999
+        IMask(el, {
+            mask: [
+                {
+                    // Single date
+                    mask: Date,
+                    pattern: "Y-`m-`d",
+                    blocks: {
+                        Y: {
+                            mask: IMask.MaskedRange,
+                            from: 1000,
+                            to: 9999
+                        },
+                        m: {
+                            mask: IMask.MaskedRange,
+                            from: 1,
+                            to: 12
+                        },
+                        d: {
+                            mask: IMask.MaskedRange,
+                            from: 1,
+                            to: 31
+                        }
+                    }
                 },
-                m: {
-                    mask: IMask.MaskedRange,
-                    from: 1,
-                    to: 12
-                },
-                d: {
-                    mask: IMask.MaskedRange,
-                    from: 1,
-                    to: 31
+                {
+                    // Date range
+                    mask: "Y-`m-`d - Y-`m-`d",
+                    blocks: {
+                        Y: {
+                            mask: IMask.MaskedRange,
+                            from: 1000,
+                            to: 9999
+                        },
+                        m: {
+                            mask: IMask.MaskedRange,
+                            from: 1,
+                            to: 12
+                        },
+                        d: {
+                            mask: IMask.MaskedRange,
+                            from: 1,
+                            to: 31
+                        }
+                    }
                 }
-            },
-            format: function (date) {
-                return date.getFullYear() + "-" +
-                       String(date.getMonth() + 1).padStart(2, "0") + "-" +
-                       String(date.getDate()).padStart(2, "0");
-            },
-            parse: function (str) {
-                const [year, month, day] = str.split("-");
-                return new Date(year, month - 1, day);
-            },
-            lazy: false
-        });
-
-        el.addEventListener("change", () => {
-            dateMask.updateValue();
+            ],
         });
     });
 
