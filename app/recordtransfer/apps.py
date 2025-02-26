@@ -346,14 +346,6 @@ def verify_upload_session_expiry_settings() -> None:
             "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES"
         )
 
-    if (
-        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES <= 0
-        and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
-    ):
-        raise ImproperlyConfigured(
-            "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be greater than zero or -1"
-        )
-
 
 class RecordTransferConfig(AppConfig):
     """Top-level application config for the recordtransfer app."""
