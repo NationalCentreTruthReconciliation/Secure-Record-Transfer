@@ -50,7 +50,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         TransferStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(TransferStep.RECORD_DESCRIPTION),
             "accession_title": "Test Accession Title",
-            "date_of_materials": "2021-01-01 - 2021-12-31",
+            "date_of_materials": "[ca. 2021-01-01 - 2021-01-31]",
             "language": "English",
             "description": "Test Description",
             "condition": "Test Condition",
@@ -489,6 +489,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 fields = {
                     "Title": data["accession_title"],
                     "Language(s)": data["language"],
+                    "Date of materials": data["date_of_materials"],
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
                 }
