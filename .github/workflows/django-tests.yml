@@ -4,11 +4,9 @@ on:
   pull_request:
     branches:
       - master
-      - 298-upload-session-expiry
   push:
     branches:
       - master
-      - 298-upload-session-expiry
 
 jobs:
   test:
