@@ -1,3 +1,5 @@
+"""Custom decorators for the recordtransfer app."""
+
 import functools
 from typing import Callable
 
