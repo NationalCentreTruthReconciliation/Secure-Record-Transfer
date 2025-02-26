@@ -92,14 +92,14 @@ def cleanup_expired_sessions() -> None:
     LOGGER.info("Deleting expired upload sessions ...")
     try:
         expired_sessions = UploadSession.objects.get_expired().all()
-
-        if expired_sessions.count() == 0:
+        count = expired_sessions.count()
+        if count == 0:
             LOGGER.info("No expired upload sessions to delete")
             return
 
         expired_sessions.delete()
 
-        LOGGER.info("Deleted %d expired upload sessions", expired_sessions.count())
+        LOGGER.info("Deleted %d expired upload sessions", count)
 
     except Exception as e:
         LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
@@ -118,7 +118,8 @@ def check_expiring_in_progress_submissions() -> None:
     try:
         expiring = InProgressSubmission.objects.get_expiring_without_reminder().all()
 
-        if expiring.count() == 0:
+        count = expiring.count()
+        if count:
             LOGGER.info("No in-progress submissions are about to expire")
             return
 
@@ -129,7 +130,7 @@ def check_expiring_in_progress_submissions() -> None:
 
         LOGGER.info(
             "Sent reminders for %d in-progress submissions that are about to expire",
-            expiring.count(),
+            count,
         )
 
     except Exception as e:
