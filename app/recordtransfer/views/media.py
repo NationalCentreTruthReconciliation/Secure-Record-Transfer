@@ -19,6 +19,7 @@ from django.http import (
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 
+from recordtransfer.decorators import require_upload_step
 from recordtransfer.models import UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
@@ -50,6 +51,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
     return response
 
 
+@require_upload_step
 @require_http_methods(["POST"])
 def create_upload_session(request: HttpRequest) -> JsonResponse:
     """Create a new upload session and return the session token.
@@ -72,6 +74,7 @@ def create_upload_session(request: HttpRequest) -> JsonResponse:
         )
 
 
+@require_upload_step
 @require_http_methods(["GET", "POST"])
 def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
     """Upload a single file to the server list the files uploaded in a given upload session. The
@@ -184,6 +187,7 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
         )
 
 
+@require_upload_step
 @require_http_methods(["DELETE", "GET"])
 def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
     """Get or delete a file that has been uploaded in a given upload session.

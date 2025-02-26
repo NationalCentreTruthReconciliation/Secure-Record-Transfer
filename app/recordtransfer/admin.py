@@ -202,9 +202,29 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     def upload_size(self, obj):
         return get_human_readable_size(obj.upload_size, 1000, 2)
 
-    fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    fields = [
+        "token",
+        linkify("user"),
+        "started_at",
+        "last_upload_at",
+        "file_count",
+        "upload_size",
+        "status",
+        "expired",
+        "expires_at",
+    ]
     search_fields = ["token", "user__username"]
-    list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    list_display = [
+        "token",
+        linkify("user"),
+        "started_at",
+        "last_upload_at",
+        "file_count",
+        "upload_size",
+        "status",
+        "expired",
+        "expires_at",
+    ]
 
     inlines = [
         TempUploadedFileInline,
@@ -214,6 +234,11 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ordering = [
         "-started_at",
     ]
+
+    @admin.display(description="Last upload at")
+    def last_upload_at(self, obj: UploadSession):
+        """Display the last time a file was uploaded to the session."""
+        return obj.last_upload_interaction_time
 
 
 class SubmissionInline(ReadOnlyInline):

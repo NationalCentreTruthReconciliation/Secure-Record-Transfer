@@ -1,6 +1,7 @@
+from configuration import AcceptedFileTypes
 from django.test import TestCase
 
-from configuration import AcceptedFileTypes
+from recordtransfer.apps import _validate_cron
 
 
 class TestAcceptedFileTypeParser(TestCase):
@@ -75,3 +76,43 @@ class TestAcceptedFileTypeParser(TestCase):
         parser = AcceptedFileTypes()
         parsed = parser("Image:jpg,.JPG,jpg")
         self.assertEqual(parsed, {"Image": {"jpg"}})
+
+
+class TestCronValidation(TestCase):
+    """Tests for the _validate_cron function."""
+
+    def test_valid_cron_expressions(self) -> None:
+        """Test that valid cron expressions pass validation."""
+        valid_crons = [
+            "* * * * *",  # Every minute
+            "0 0 * * *",  # Midnight every day
+            "*/5 * * * *",  # Every 5 minutes
+            "0 12 * * 1-5",  # Noon every weekday
+            "0 0 1 1 *",  # Midnight on New Year's Day
+            "0 0 * * 0",  # Midnight every Sunday
+            "5-10/2 * * * *",  # Every even minute between minute 5 and 10
+        ]
+        for cron in valid_crons:
+            with self.subTest(cron=cron):
+                try:
+                    _validate_cron(cron)
+                except ValueError:
+                    self.fail(f"Valid cron expression '{cron}' raised ValueError")
+
+    def test_invalid_cron_expressions(self) -> None:
+        """Test that invalid cron expressions raise ValueError."""
+        invalid_crons = [
+            "0 0",  # Too few fields
+            "0 0 * * * *",  # Too many fields
+            "60 0 * * *",  # Invalid minute
+            "0 24 * * *",  # Invalid hour
+            "0 0 32 * *",  # Invalid day of month
+            "0 0 * 13 *",  # Invalid month
+            "0 0 * * 7",  # Invalid day of week
+            "0 0 1 * a",  # Invalid character (should be a number)
+            "0 0 @ 1 *",  # Invalid symbol
+            "0 0 1 / *",  # Invalid cron expression (should use numbers, stars, or valid ranges)
+        ]
+        for cron in invalid_crons:
+            with self.subTest(cron=cron), self.assertRaises(ValueError):
+                _validate_cron(cron)

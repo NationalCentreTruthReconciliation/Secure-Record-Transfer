@@ -9,10 +9,11 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
-from recordtransfer.models import Job, Submission, User
+from recordtransfer.emails import send_user_in_progress_submission_expiring
+from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
 from recordtransfer.utils import zip_directory
 
-LOGGER = logging.getLogger("rq.worker")
+LOGGER = logging.getLogger(__name__)
 
 
 @django_rq.job
@@ -26,7 +27,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
     LOGGER.info("Creating zipped bag from %s", submission.location)
 
     description = (
-        f"{str(user_triggered)} triggered this job to generate a download link " "for a submission"
+        f"{str(user_triggered)} triggered this job to generate a download link for a submission"
     )
 
     new_job = Job(
@@ -83,3 +84,56 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
         if os.path.exists(submission.location):
             LOGGER.info("Removing bag from disk after zip generation.")
             shutil.rmtree(submission.location)
+
+
+@django_rq.job
+def cleanup_expired_sessions() -> None:
+    """Delete all UploadSession objects that have expired."""
+    LOGGER.info("Deleting expired upload sessions ...")
+    try:
+        expired_sessions = UploadSession.objects.get_expired().all()
+
+        if expired_sessions.count() == 0:
+            LOGGER.info("No expired upload sessions to delete")
+            return
+
+        expired_sessions.delete()
+
+        LOGGER.info("Deleted %d expired upload sessions", expired_sessions.count())
+
+    except Exception as e:
+        LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
+        raise e
+
+
+@django_rq.job
+def check_expiring_in_progress_submissions() -> None:
+    """Check for in-progress submissions that are about to expire for which reminder emails have
+    not been sent yet, and send email reminders.
+    """
+    LOGGER.info(
+        "Checking for in-progress submissions that are about to expire without reminder emails "
+        "sent yet ..."
+    )
+    try:
+        expiring = InProgressSubmission.objects.get_expiring_without_reminder().all()
+
+        if expiring.count() == 0:
+            LOGGER.info("No in-progress submissions are about to expire")
+            return
+
+        for in_progress in expiring:
+            send_user_in_progress_submission_expiring.delay(in_progress)
+            in_progress.reminder_email_sent = True
+            in_progress.save()
+
+        LOGGER.info(
+            "Sent reminders for %d in-progress submissions that are about to expire",
+            expiring.count(),
+        )
+
+    except Exception as e:
+        LOGGER.exception(
+            "Error checking for in-progress submissions that are about to expire: %s", str(e)
+        )
+        raise e

@@ -83,5 +83,15 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
+        "rq_scheduler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "rq_scheduler.scheduler": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
