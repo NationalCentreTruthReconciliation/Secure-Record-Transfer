@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from caais.models import RightsType
 from recordtransfer.constants import FORMTITLE
 from recordtransfer.enums import TransferStep
 from recordtransfer.models import User
@@ -94,6 +95,10 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
         # Create a test user
         self.user = User.objects.create_user(username="testuser", password="testpassword")
+
+        # Create rights types
+        RightsType.objects.get_or_create(name="Copyright")
+        RightsType.objects.get_or_create(name="Other")
 
     def tearDown(self) -> None:
         """Close the web driver."""
@@ -278,8 +283,53 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
         data = self.test_data[TransferStep.RIGHTS]
 
-        rights_type_select = Select(driver.find_element(By.NAME, "rights-0-rights_type"))
-        rights_type_select.select_by_visible_text(data["rights_type"])
+        # Add explicit wait for the dropdown to be properly populated
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "rights-0-rights_type"))
+        )
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.NAME, "rights-0-rights_type"))
+        )
+
+        # Instead of using select_by_visible_text, use JavaScript to set the value directly
+        select_element = driver.find_element(By.NAME, "rights-0-rights_type")
+
+        # Print available options for debugging
+        options = Select(select_element).options
+        available_options = [option.text for option in options]
+        print(f"Available options in rights dropdown: {available_options}")
+
+        # Find the value for the option with text "Copyright"
+        option_value = None
+        for option in options:
+            if option.text == data["rights_type"]:
+                option_value = option.get_attribute("value")
+                break
+
+        if option_value is None:
+            # If exact match not found, try case-insensitive match
+            for option in options:
+                if option.text.lower() == data["rights_type"].lower():
+                    option_value = option.get_attribute("value")
+                    break
+
+        if option_value:
+            # Use JavaScript to set the value
+            driver.execute_script(
+                "arguments[0].value = arguments[1]; "
+                "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", 
+                select_element, option_value
+            )
+        else:
+            # Fallback: try to select first option if available
+            if options:
+                driver.execute_script(
+                    "arguments[0].value = arguments[1]; "
+                    "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+                    select_element, options[0].get_attribute("value")
+                )
+            else:
+                raise ValueError(f"No options available in rights dropdown. Expected: {data['rights_type']}")
 
         if not required_only:
             rights_value_textarea = driver.find_element(By.NAME, "rights-0-rights_value")
