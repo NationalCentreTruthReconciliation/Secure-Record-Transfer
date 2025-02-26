@@ -338,7 +338,9 @@ def verify_upload_session_expiry_settings() -> None:
         )
 
     if (
-        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+        settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+        and settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES != -1
+        and settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
         >= settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
     ):
         raise ImproperlyConfigured(
