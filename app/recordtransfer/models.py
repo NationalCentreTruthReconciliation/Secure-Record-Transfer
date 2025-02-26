@@ -999,6 +999,7 @@ class InProgressSubmission(models.Model):
     title = models.CharField(max_length=256, null=True)
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     reminder_email_sent = models.BooleanField(default=False)
+    expired = models.BooleanField(default=False)
 
     objects = InProgressSubmissionManager()
 
