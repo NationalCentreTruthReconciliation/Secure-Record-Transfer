@@ -98,6 +98,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
     def tearDown(self) -> None:
         """Close the web driver."""
         self.driver.quit()
+        User.objects.all().delete()
 
     def login(self) -> None:
         """Log in the test user."""
@@ -220,10 +221,42 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         )
 
         accession_title_input.send_keys(data["accession_title"])
-        date_input.send_keys(data["date_of_materials"])
 
-        # Need to click away after date input
-        accession_title_input.click()
+        # Click on date input field
+        date_input.click()
+
+        # Click on the datepicker title to open year/month selection view
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CLASS_NAME, "air-datepicker-nav--title"))
+        ).click()
+
+        # Click on year selection title
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, "air-datepicker-nav--title"))
+        ).click()
+
+        # Click on the year 2021
+        driver.find_element(
+            By.XPATH, "//div[@data-year='2021' and @data-month='0' and @data-date='1']"
+        ).click()
+
+        # Click on the month January
+        driver.find_element(
+            By.XPATH,
+            "//div[@data-year='2021' and @data-month='0' and @data-date='1' and contains(@class, 'air-datepicker-cell -month-')]",
+        ).click()
+
+        # Click on the date 1
+        driver.find_element(
+            By.XPATH,
+            "//div[@data-year='2021' and @data-month='0' and @data-date='1' and contains(@class, 'air-datepicker-cell -day-')]",
+        ).click()
+
+        # Click on the date 31
+        driver.find_element(
+            By.XPATH,
+            "//div[@data-year='2021' and @data-month='0' and @data-date='31' and contains(@class, 'air-datepicker-cell -day-')]",
+        ).click()
 
         # Click checkbox to mark date as approximate
         approx_date_input.click()
