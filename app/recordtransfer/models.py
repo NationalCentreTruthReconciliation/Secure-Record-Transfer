@@ -110,10 +110,7 @@ class UploadSession(models.Model):
         of both temporary and permanent files.
         """
         if self.status == self.SessionStatus.EXPIRED:
-            raise ValueError(
-                f"Cannot get upload size from session {self.token} because the session has "
-                "expired."
-            )
+            return 0
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
@@ -131,10 +128,8 @@ class UploadSession(models.Model):
     @property
     def file_count(self) -> int:
         """Get the total count of temporary + permanent uploaded files."""
-        if self.status in self.SessionStatus.EXPIRED:
-            raise ValueError(
-                f"Cannot get file count from session {self.token} because the session has expired."
-            )
+        if self.status == self.SessionStatus.EXPIRED:
+            return 0
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
