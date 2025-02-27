@@ -188,7 +188,6 @@ class TestUploadSession(TestCase):
         """
         # Test expired returns False for sessions in states other than CREATED or UPLOADING
         invalid_states = [
-            UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,

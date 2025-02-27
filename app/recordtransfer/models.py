@@ -165,11 +165,12 @@ class UploadSession(models.Model):
 
     @property
     def is_expired(self) -> bool:
-        """Determine if this session has expired. Will only return True for an expired session
-        in the CREATED or UPLOADING state. Returns False for sessions in other states, or if the
-        upload session expiry feature is disabled.
+        """Determine if this session has expired. A session is considered expired if it is in the
+        EXPIRED state, or if it has gone past its expiration time.
         """
-        return self.expires_at is not None and self.expires_at < timezone.now()
+        return self.status == self.SessionStatus.EXPIRED or (
+            self.expires_at is not None and self.expires_at < timezone.now()
+        )
 
     @property
     def expires_soon(self) -> bool:
