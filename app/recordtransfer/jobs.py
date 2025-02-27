@@ -89,24 +89,35 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
 
 @django_rq.job
 def cleanup_expired_sessions() -> None:
-    """Delete all UploadSession objects that have expired."""
-    LOGGER.info("Deleting expired upload sessions ...")
+    """Clean up UploadSession objects that are expirable. Upload sessions that are not associated
+    with any InProgressSubmission objects are deleted, while those that are associated with
+    InProgressSubmission objects have their uploads removed and are expired.
+    """
+    LOGGER.info("Cleaning up upload sessions ...")
     try:
         expirable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_expirable().all()
-        count = expirable_sessions.count()
-        if count == 0:
-            LOGGER.info("No expired upload sessions to delete")
+        if expirable_sessions.count() == 0:
+            LOGGER.info("No expired upload sessions to clean up")
             return
 
+        deleted = 0
+        expired = 0
         for session in expirable_sessions:
             # Check if there are any InProgressSubmission objects associated with this session.
             if InProgressSubmission.objects.filter(upload_session=session).exists():
                 session.remove_uploads()
                 session.expire()
+                expired += 1
             else:
                 session.delete()
+                deleted += 1
 
-        LOGGER.info("Deleted %d expired upload sessions", count)
+        LOGGER.info(
+            "Cleaned up %d expirable upload sessions; deleted %d and expired %d",
+            expirable_sessions.count(),
+            deleted,
+            expired,
+        )
 
     except Exception as e:
         LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
