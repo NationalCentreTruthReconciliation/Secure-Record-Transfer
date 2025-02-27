@@ -54,7 +54,7 @@ class UploadSessionManager(models.Manager):
     """Custom manager for UploadSession model."""
 
     def get_expirable(self) -> query.QuerySet:
-        """Return all upload sessions that are expirable."""
+        """Return all expired upload sessions that can be set to EXPIRED."""
         if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
             return self.none()
 
@@ -74,6 +74,26 @@ class UploadSessionManager(models.Manager):
                 UploadSession.SessionStatus.CREATED,
                 UploadSession.SessionStatus.UPLOADING,
             ],
+        )
+
+    def get_deletable(self) -> query.QuerySet:
+        """Return all upload sessions that can be deleted. A session is deletable if it is expired
+        and not associated with any in-progress submissions.
+        """
+        if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
+            return self.none()
+
+        # Avoiding circular import
+        UploadSession = apps.get_model(
+            app_label="recordtransfer",
+            model_name="UploadSession",
+        )
+
+        return self.filter(
+            status__in=[
+            UploadSession.SessionStatus.EXPIRED,
+            ],
+            inprogresssubmission__isnull=True,
         )
 
 

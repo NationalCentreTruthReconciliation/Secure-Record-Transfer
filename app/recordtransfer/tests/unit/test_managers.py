@@ -62,6 +62,54 @@ class TestUploadSessionManager(TestCase):
         expired_sessions = UploadSession.objects.get_expirable()
         self.assertFalse(expired_sessions.exists())
 
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_deletable(self) -> None:
+        """Test when there are upload sessions that can be deleted."""
+        # Set the upload session status to EXPIRED
+        self.upload_session.status = UploadSession.SessionStatus.EXPIRED
+        self.upload_session.save()
+
+        # Verify the session is returned by get_deletable
+        deletable_sessions = UploadSession.objects.get_deletable()
+        self.assertIn(self.upload_session, deletable_sessions)
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_deletable_with_in_progress_submission(self) -> None:
+        """Test when an expired upload session has an associated in-progress submission."""
+        # Set the upload session status to EXPIRED
+        self.upload_session.status = UploadSession.SessionStatus.EXPIRED
+        self.upload_session.save()
+
+        # Create an in-progress submission associated with the upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=TransferStep.UPLOAD_FILES.value,
+        )
+
+        # Verify the session is not returned by get_deletable
+        deletable_sessions = UploadSession.objects.get_deletable()
+        self.assertNotIn(self.upload_session, deletable_sessions)
+        self.assertFalse(deletable_sessions.exists())
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_deletable_non_expired_status(self) -> None:
+        """Test when no upload sessions with an EXPIRED status exist."""
+        # The default status from setUp is not EXPIRED
+        deletable_sessions = UploadSession.objects.get_deletable()
+        self.assertNotIn(self.upload_session, deletable_sessions)
+        self.assertFalse(deletable_sessions.exists())
+
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
+    def test_get_deletable_expiry_disabled(self) -> None:
+        """Test when the upload session expiry feature is disabled."""
+        # Set the upload session status to EXPIRED
+        self.upload_session.status = UploadSession.SessionStatus.EXPIRED
+        self.upload_session.save()
+
+        deletable_sessions = UploadSession.objects.get_deletable()
+        self.assertFalse(deletable_sessions.exists())
+
 
 class TestInProgressSubmissionManager(TestCase):
     """Tests for the InProgressSubmission manager."""
