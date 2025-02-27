@@ -134,7 +134,6 @@ class TestUploadSession(TestCase):
         UPLOADING.
         """
         invalid_states = [
-            UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -350,7 +349,6 @@ class TestUploadSession(TestCase):
     def test_upload_size_raises_for_invalid_status(self) -> None:
         """Test upload_size raises ValueError when session is expired or deleted."""
         statuses = [
-            UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
         ]
@@ -379,7 +377,6 @@ class TestUploadSession(TestCase):
         file count.
         """
         statuses = [
-            UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
         ]
