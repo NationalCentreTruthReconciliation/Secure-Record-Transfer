@@ -154,8 +154,10 @@ class TestUploadSession(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
-    def test_expired_is_true(self, mock_now: MagicMock) -> None:
-        """Test expired property is True for a session that has expired."""
+    def test_expired_is_true_active_session(self, mock_now: MagicMock) -> None:
+        """Test expired property is True for an active session that has gone past its expiration
+        time.
+        """
         fixed_now = datetime(2025, 2, 18, 12, 0, 0)
         mock_now.return_value = fixed_now
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
@@ -166,6 +168,11 @@ class TestUploadSession(TestCase):
             # Test expired returns True for a session that has expired
             self.session.status = state
             self.assertTrue(self.session.is_expired)
+
+    def test_expired_is_true_expired_session(self) -> None:
+        """Test expired property is True for an expired session."""
+        self.session.status = UploadSession.SessionStatus.EXPIRED
+        self.assertTrue(self.session.is_expired)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
@@ -183,10 +190,9 @@ class TestUploadSession(TestCase):
             self.assertFalse(self.session.is_expired)
 
     def test_expired_invalid_states(self) -> None:
-        """Test expired property is False for sessions in states other than CREATED or
-        UPLOADING.
+        """Test expired property is False for sessions in states other than CREATED, UPLOADING or
+        EXPIRED.
         """
-        # Test expired returns False for sessions in states other than CREATED or UPLOADING
         invalid_states = [
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
