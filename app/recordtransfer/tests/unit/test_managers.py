@@ -19,7 +19,7 @@ class TestUploadSessionManager(TestCase):
 
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
-    def test_get_expired(self, mock_now: MagicMock) -> None:
+    def test_get_expirable(self, mock_now: MagicMock) -> None:
         """Test when there are expired upload sessions."""
         # Setup mock time
         mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
@@ -33,13 +33,12 @@ class TestUploadSessionManager(TestCase):
         )
         self.upload_session.save()
 
-        # Test get_expired method
-        expired_sessions = UploadSession.objects.get_expired()
+        expired_sessions = UploadSession.objects.get_expirable()
         self.assertIn(self.upload_session, expired_sessions)
 
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
-    def test_get_expired_none_expired(self, mock_now: MagicMock) -> None:
+    def test_get_expirable_none_expired(self, mock_now: MagicMock) -> None:
         """Test when there are no expired upload sessions."""
         # Setup mock time
         mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
@@ -53,16 +52,14 @@ class TestUploadSessionManager(TestCase):
         )
         self.upload_session.save()
 
-        # Test get_expired method
-        expired_sessions = UploadSession.objects.get_expired()
+        expired_sessions = UploadSession.objects.get_expirable()
         self.assertFalse(expired_sessions.exists())
 
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
-    def test_get_expired_no_expire(self, mock_now: MagicMock) -> None:
+    def test_get_expirable_expiry_disabled(self, mock_now: MagicMock) -> None:
         """Test when the upload session expiry feature is disabled."""
-        # Test get_expired method
-        expired_sessions = UploadSession.objects.get_expired()
+        expired_sessions = UploadSession.objects.get_expirable()
         self.assertFalse(expired_sessions.exists())
 
 

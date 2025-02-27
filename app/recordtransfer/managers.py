@@ -53,8 +53,8 @@ class SubmissionQuerySet(query.QuerySet):
 class UploadSessionManager(models.Manager):
     """Custom manager for UploadSession model."""
 
-    def get_expired(self) -> query.QuerySet:
-        """Return all upload sessions that have expired."""
+    def get_expirable(self) -> query.QuerySet:
+        """Return all upload sessions that are expirable."""
         if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
             return self.none()
 
