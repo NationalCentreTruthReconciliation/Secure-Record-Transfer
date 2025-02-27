@@ -96,7 +96,8 @@ def cleanup_expired_sessions() -> None:
     LOGGER.info("Cleaning up upload sessions ...")
     try:
         expirable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_expirable().all()
-        if expirable_sessions.count() == 0:
+        deletable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_deletable().all()
+        if expirable_sessions.count() == 0 and deletable_sessions.count() == 0:
             LOGGER.info("No expired upload sessions to clean up")
             return
 
@@ -105,16 +106,20 @@ def cleanup_expired_sessions() -> None:
         for session in expirable_sessions:
             # Check if there are any InProgressSubmission objects associated with this session.
             if InProgressSubmission.objects.filter(upload_session=session).exists():
-                session.remove_uploads()
+                session.remove_temp_uploads()
                 session.expire()
                 expired += 1
             else:
+                # Session is in limbo, delete it.
                 session.delete()
                 deleted += 1
+        for session in deletable_sessions:
+            session.delete()
+            deleted += 1
 
         LOGGER.info(
-            "Cleaned up %d expirable upload sessions; deleted %d and expired %d",
-            expirable_sessions.count(),
+            "Cleaned up %d upload sessions; deleted %d and expired %d",
+            deleted + expired,
             deleted,
             expired,
         )

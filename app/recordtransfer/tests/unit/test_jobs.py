@@ -44,30 +44,44 @@ class TestCleanupExpiredSessions(unittest.TestCase):
     """Tests for the cleanup_expired_sessions job."""
 
     @patch("recordtransfer.models.UploadSession.objects.get_expirable")
-    def test_no_expired_sessions(self, mock_get_expirable: MagicMock) -> None:
-        """Test when there are no expired sessions."""
-        mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 0
-        mock_get_expirable.return_value.all.return_value = mock_queryset
+    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
+    def test_no_sessions_to_clean_up(
+        self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock
+    ) -> None:
+        """Test when there are no sessions to clean up."""
+        # Set up mocks for empty querysets
+        mock_expirable_queryset = MagicMock()
+        mock_expirable_queryset.count.return_value = 0
+        mock_get_expirable.return_value.all.return_value = mock_expirable_queryset
 
+        mock_deletable_queryset = MagicMock()
+        mock_deletable_queryset.count.return_value = 0
+        mock_get_deletable.return_value.all.return_value = mock_deletable_queryset
+
+        # Run the job
         cleanup_expired_sessions()
 
-        # Verify we queried for expirable sessions but didn't act on any
+        # Verify the correct methods were called
         mock_get_expirable.assert_called_once()
-        self.assertEqual(0, mock_queryset.count.return_value)
+        mock_get_deletable.assert_called_once()
+        # Check that none of the sessions were iterated over, indicating the early return worked
+        mock_expirable_queryset.__iter__.assert_not_called()
+        mock_deletable_queryset.__iter__.assert_not_called()
 
     @patch("recordtransfer.models.InProgressSubmission.objects.filter")
+    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
     @patch("recordtransfer.models.UploadSession.objects.get_expirable")
     def test_expired_session_without_in_progress_submission(
-        self, mock_get_expirable: MagicMock, mock_filter: MagicMock
+        self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock, mock_filter: MagicMock
     ) -> None:
         """Test when there's an expired session without an associated in-progress submission."""
         # Setup mocks
         mock_session = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.__iter__.return_value = [mock_session]
-        mock_queryset.count.return_value = 1
-        mock_get_expirable.return_value.all.return_value = mock_queryset
+
+        mock_expirable_queryset = MagicMock()
+        mock_expirable_queryset.__iter__.return_value = [mock_session]
+        mock_expirable_queryset.count.return_value = 1
+        mock_get_expirable.return_value.all.return_value = mock_expirable_queryset
 
         # Mock that no InProgressSubmission exists for this session
         mock_filter.return_value.exists.return_value = False
@@ -80,17 +94,19 @@ class TestCleanupExpiredSessions(unittest.TestCase):
         mock_session.expire.assert_not_called()
 
     @patch("recordtransfer.models.InProgressSubmission.objects.filter")
+    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
     @patch("recordtransfer.models.UploadSession.objects.get_expirable")
     def test_expired_session_with_in_progress_submission(
-        self, mock_get_expirable: MagicMock, mock_filter: MagicMock
+        self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock, mock_filter: MagicMock
     ) -> None:
         """Test when there's an expired session with an associated in-progress submission."""
         # Setup mocks
         mock_session = MagicMock()
-        mock_queryset = MagicMock()
-        mock_queryset.__iter__.return_value = [mock_session]
-        mock_queryset.count.return_value = 1
-        mock_get_expirable.return_value.all.return_value = mock_queryset
+
+        mock_expirable_queryset = MagicMock()
+        mock_expirable_queryset.__iter__.return_value = [mock_session]
+        mock_expirable_queryset.count.return_value = 1
+        mock_get_expirable.return_value.all.return_value = mock_expirable_queryset
 
         # Mock that an InProgressSubmission exists for this session
         mock_filter.return_value.exists.return_value = True
@@ -99,8 +115,32 @@ class TestCleanupExpiredSessions(unittest.TestCase):
 
         # Verify uploads are removed and session is expired but not deleted
         mock_session.delete.assert_not_called()
-        mock_session.remove_uploads.assert_called_once()
+        mock_session.remove_temp_uploads.assert_called_once()
         mock_session.expire.assert_called_once()
+
+    @patch("recordtransfer.models.InProgressSubmission.objects.filter")
+    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
+    @patch("recordtransfer.models.UploadSession.objects.get_expirable")
+    def test_expired_session_for_deletion(
+        self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock, mock_filter: MagicMock
+    ) -> None:
+        """Test when there's an expired session that has been marked for deletion. No files need
+        to be removed, since it already has a status of EXPIRED.
+        """
+        # Setup mocks
+        mock_session = MagicMock()
+
+        mock_deletable_queryset = MagicMock()
+        mock_deletable_queryset.__iter__.return_value = [mock_session]
+        mock_deletable_queryset.count.return_value = 1
+        mock_get_deletable.return_value.all.return_value = mock_deletable_queryset
+
+        cleanup_expired_sessions()
+
+        # Verify session is deleted
+        mock_session.delete.assert_called_once()
+        mock_session.remove_uploads.assert_not_called()
+        mock_session.expire.assert_not_called()
 
     @patch("recordtransfer.models.UploadSession.objects.get_expirable")
     def test_exception_handling(self, mock_get_expirable: MagicMock) -> None:
