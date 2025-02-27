@@ -119,7 +119,7 @@ def check_expiring_in_progress_submissions() -> None:
         expiring = InProgressSubmission.objects.get_expiring_without_reminder().all()
 
         count = expiring.count()
-        if count:
+        if count == 0:
             LOGGER.info("No in-progress submissions are about to expire")
             return
 

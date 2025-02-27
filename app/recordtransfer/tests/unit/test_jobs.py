@@ -23,7 +23,9 @@ class TestCheckExpiringInProgressSubmissions(unittest.TestCase):
 
     @patch("recordtransfer.jobs.send_user_in_progress_submission_expiring")
     @patch("recordtransfer.models.InProgressSubmission.objects.get_expiring_without_reminder")
-    def test_expiring_in_progress_submissions(self, mock_get_expiring: MagicMock, mock_send_email: MagicMock) -> None:
+    def test_expiring_in_progress_submissions(
+        self, mock_get_expiring: MagicMock, mock_send_email: MagicMock
+    ) -> None:
         """Test when there is an expiring submission."""
         mock_in_progress = MagicMock()
         mock_queryset = MagicMock()
