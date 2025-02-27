@@ -77,7 +77,7 @@ class UploadSessionManager(models.Manager):
         )
 
     def get_deletable(self) -> query.QuerySet:
-        """Return all upload sessions that can be deleted. A session is deletable if it is expired
+        """Return all upload sessions that can be deleted. A session is deletable if it is EXPIRED
         and not associated with any in-progress submissions.
         """
         if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
