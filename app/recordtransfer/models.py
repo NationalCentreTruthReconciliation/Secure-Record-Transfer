@@ -172,7 +172,7 @@ class UploadSession(models.Model):
         return None
 
     @property
-    def expired(self) -> bool:
+    def is_expired(self) -> bool:
         """Determine if this session has expired. Will only return True for an expired session
         in the CREATED or UPLOADING state. Returns False for sessions in other states, or if the
         upload session expiry feature is disabled.
@@ -186,6 +186,23 @@ class UploadSession(models.Model):
         if threshold == -1:
             return False
         return self.expires_within(minutes=threshold)
+
+    def expire(self) -> None:
+        """Set the status of this session to EXPIRED, but only if the current status is
+        CREATED or UPLOADING.
+
+        Raises:
+            ValueError: If the current status is not CREATED or UPLOADING.
+        """
+        if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+            raise ValueError(
+                f"Cannot mark session {self.token} as expired because the session status "
+                f"is {self.status} and not {self.SessionStatus.CREATED} or "
+                f"{self.SessionStatus.UPLOADING}"
+            )
+
+        self.status = self.SessionStatus.EXPIRED
+        self.save()
 
     def expires_within(self, minutes: int) -> bool:
         """Determine if this session will expire within the given number of minutes.
@@ -1022,7 +1039,7 @@ class InProgressSubmission(models.Model):
     @property
     def upload_session_expired(self) -> bool:
         """Determine if the associated upload session has expired or not."""
-        return self.upload_session is not None and self.upload_session.expired
+        return self.upload_session is not None and self.upload_session.is_expired
 
     @property
     def upload_session_expires_soon(self) -> bool:

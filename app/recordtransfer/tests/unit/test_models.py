@@ -166,7 +166,7 @@ class TestUploadSession(TestCase):
         for state in valid_states:
             # Test expired returns True for a session that has expired
             self.session.status = state
-            self.assertTrue(self.session.expired)
+            self.assertTrue(self.session.is_expired)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
@@ -181,7 +181,7 @@ class TestUploadSession(TestCase):
         for state in valid_states:
             # Test expired returns False for a session that has not expired
             self.session.status = state
-            self.assertFalse(self.session.expired)
+            self.assertFalse(self.session.is_expired)
 
     def test_expired_invalid_states(self) -> None:
         """Test expired property is False for sessions in states other than CREATED or
@@ -198,7 +198,7 @@ class TestUploadSession(TestCase):
         ]
         for state in invalid_states:
             self.session.status = state
-            self.assertFalse(self.session.expired)
+            self.assertFalse(self.session.is_expired)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
     @patch("django.utils.timezone.now")
@@ -208,7 +208,7 @@ class TestUploadSession(TestCase):
         mock_now.return_value = fixed_now
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
 
-        self.assertFalse(self.session.expired)
+        self.assertFalse(self.session.is_expired)
 
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
@@ -1030,7 +1030,7 @@ class TestInProgressSubmission(TestCase):
         self.submission.upload_session = None
         self.assertIsNone(self.submission.upload_session_expires_at)
 
-    @patch("recordtransfer.models.UploadSession.expired", new_callable=PropertyMock)
+    @patch("recordtransfer.models.UploadSession.is_expired", new_callable=PropertyMock)
     def test_upload_session_expired(self, mock_expired: PropertyMock) -> None:
         """Test upload_session_expired property."""
         mock_expired.return_value = True

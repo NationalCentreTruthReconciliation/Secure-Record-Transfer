@@ -210,7 +210,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "file_count",
         "upload_size",
         "status",
-        "expired",
+        "is_expired",
         "expires_at",
     ]
     search_fields = ["token", "user__username"]
@@ -222,7 +222,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "file_count",
         "upload_size",
         "status",
-        "expired",
+        "is_expired",
         "expires_at",
     ]
 
