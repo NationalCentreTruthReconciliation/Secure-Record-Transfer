@@ -7,7 +7,6 @@ from bagit import CHECKSUM_ALGOS
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.signals import post_migrate
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -253,6 +252,12 @@ def verify_caais_defaults():
     if not settings.CAAIS_DEFAULT_CREATION_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
 
+def verify_site_id():
+    """Verify that the SITE_ID setting is valid."""
+    from django.contrib.sites.models import Site  # Import here to avoid circular import
+    site_id = settings.SITE_ID
+    if not Site.objects.filter(pk=site_id).exists():
+        raise ImproperlyConfigured(f"Site with ID {site_id} does not exist.")
 
 class RecordTransferConfig(AppConfig):
     """Top-level application config for the recordtransfer app"""
@@ -269,9 +274,7 @@ class RecordTransferConfig(AppConfig):
             verify_max_upload_size()
             verify_accepted_file_formats()
             verify_caais_defaults()
-
-            from .signals import verify_site_id  # Import here to avoid circular import
-            post_migrate.connect(verify_site_id, sender=self)
+            verify_site_id()
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)
