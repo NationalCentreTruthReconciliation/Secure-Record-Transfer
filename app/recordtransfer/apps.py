@@ -7,6 +7,7 @@ from bagit import CHECKSUM_ALGOS
 from django.apps import AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.signals import post_migrate
 
 LOGGER = logging.getLogger("recordtransfer")
 
@@ -268,6 +269,9 @@ class RecordTransferConfig(AppConfig):
             verify_max_upload_size()
             verify_accepted_file_formats()
             verify_caais_defaults()
+
+            from .signals import verify_site_id  # Import here to avoid circular import
+            post_migrate.connect(verify_site_id, sender=self)
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)
