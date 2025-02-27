@@ -7,6 +7,7 @@ from io import BytesIO
 import django_rq
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db.models.query import QuerySet
 from django.utils import timezone
 
 from recordtransfer.emails import send_user_in_progress_submission_expiring
@@ -91,13 +92,19 @@ def cleanup_expired_sessions() -> None:
     """Delete all UploadSession objects that have expired."""
     LOGGER.info("Deleting expired upload sessions ...")
     try:
-        expired_sessions = UploadSession.objects.get_expired().all()
-        count = expired_sessions.count()
+        expirable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_expirable().all()
+        count = expirable_sessions.count()
         if count == 0:
             LOGGER.info("No expired upload sessions to delete")
             return
 
-        expired_sessions.delete()
+        for session in expirable_sessions:
+            # Check if there are any InProgressSubmission objects associated with this session.
+            if InProgressSubmission.objects.filter(upload_session=session).exists():
+                session.remove_uploads()
+                session.expire()
+            else:
+                session.delete()
 
         LOGGER.info("Deleted %d expired upload sessions", count)
 
