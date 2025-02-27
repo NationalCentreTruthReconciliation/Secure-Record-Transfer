@@ -69,7 +69,7 @@ class UploadSession(models.Model):
        COPYING_IN_PROGRESS --> STORED
        STORED --> COPYING_IN_PROGRESS
        STORED --> REMOVING_IN_PROGRESS
-       REMOVING_IN_PROGRESS --> DELETED
+       REMOVING_IN_PROGRESS --> CREATED
     """
 
     class SessionStatus(models.TextChoices):
@@ -346,8 +346,8 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.STORED}"
             )
 
-    def remove_uploads(self) -> None:
-        """Remove all uploaded files associated with this session."""
+    def remove_temp_uploads(self) -> None:
+        """Remove all temp uploaded files associated with this session."""
         if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
             LOGGER.warning("File removal is already in progress for session %s", self.token)
             return
@@ -364,15 +364,22 @@ class UploadSession(models.Model):
                 f"Cannot remove uploaded files from session {self.token} while copying files is "
                 "in progress"
             )
+        elif self.status == self.SessionStatus.STORED:
+            raise ValueError(
+                f"Cannot remove uploaded files from session {self.token} because the files are "
+                "already in permanent storage"
+            )
 
+        initial_status = self.status
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
-        for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all()):
+        for f in self.tempuploadedfile_set.all():
             f.remove()
 
-        self.status = self.SessionStatus.CREATED
-        self.save()
+        if initial_status == self.SessionStatus.UPLOADING:
+            self.status = self.SessionStatus.CREATED
+            self.save()
 
     def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
         """Make all temporary uploaded files associated with this session permanent.

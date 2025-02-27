@@ -661,34 +661,25 @@ class TestUploadSession(TestCase):
 
     @patch("recordtransfer.models.UploadSession.permuploadedfile_set")
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set")
-    def test_remove_uploads(
+    def test_remove_temp_uploads(
         self, mock_temp_files: BaseManager, mock_perm_files: BaseManager
     ) -> None:
-        """Test the remove_uploads method of UploadSession."""
+        """Test the remove_temp_uploads method of UploadSession."""
         # Setup mock files
         mock_file1 = Mock()
         mock_file2 = Mock()
-        mock_temp_files.all = MagicMock(return_value=[mock_file1])
-        mock_perm_files.all = MagicMock(return_value=[mock_file2])
+        mock_temp_files.all = MagicMock(return_value=[mock_file1, mock_file2])
 
-        # Valid statuses for upload removal
-        valid_statuses = [
-            UploadSession.SessionStatus.UPLOADING,
-            UploadSession.SessionStatus.STORED,
-        ]
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.remove_temp_uploads()
 
-        # Test successful removal
-        for status in valid_statuses:
-            self.session.status = status
-            self.session.remove_uploads()
+        mock_file1.remove.assert_called_once()
+        mock_file2.remove.assert_called_once()
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
 
-            mock_file1.remove.assert_called_once()
-            mock_file2.remove.assert_called_once()
-            self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
-
-            # Reset mock files
-            mock_file1.reset_mock()
-            mock_file2.reset_mock()
+        # Reset mock files
+        mock_file1.reset_mock()
+        mock_file2.reset_mock()
 
         valid_unchanged_statuses = [
             UploadSession.SessionStatus.CREATED,
@@ -696,7 +687,7 @@ class TestUploadSession(TestCase):
         ]
         for status in valid_unchanged_statuses:
             self.session.status = status
-            self.session.remove_uploads()
+            self.session.remove_temp_uploads()
             mock_file1.remove.assert_not_called()
             mock_file2.remove.assert_not_called()
             self.assertEqual(self.session.status, status)
@@ -705,11 +696,12 @@ class TestUploadSession(TestCase):
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
         ]
         for status in invalid_states:
             self.session.status = status
             with self.assertRaises(ValueError):
-                self.session.remove_uploads()
+                self.session.remove_temp_uploads()
 
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_make_uploads_permanent(self, tempuploadedfile_set_mock: BaseManager) -> None:
