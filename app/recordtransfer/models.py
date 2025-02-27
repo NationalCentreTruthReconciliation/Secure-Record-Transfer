@@ -82,7 +82,6 @@ class UploadSession(models.Model):
         STORED = "SD", _("All Files in Permanent Storage")
         COPYING_FAILED = "FD", _("Copying Failed")
         REMOVING_IN_PROGRESS = "RP", _("File Removal in Progress")
-        DELETED = "DL", _("All Files Removed")
 
         def __str__(self) -> str:
             """Return the string representation of the session status."""
@@ -110,13 +109,10 @@ class UploadSession(models.Model):
         """Get total size (in bytes) of all uploaded files in this session. This includes the size
         of both temporary and permanent files.
         """
-        if self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
+        if self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot get upload size from session {self.token} because the session has "
-                "expired or has been deleted"
+                "expired."
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
@@ -135,13 +131,9 @@ class UploadSession(models.Model):
     @property
     def file_count(self) -> int:
         """Get the total count of temporary + permanent uploaded files."""
-        if self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
+        if self.status in self.SessionStatus.EXPIRED:
             raise ValueError(
-                f"Cannot get file count from session {self.token} because the session has "
-                "expired or has been deleted"
+                f"Cannot get file count from session {self.token} because the session has expired."
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
@@ -187,6 +179,21 @@ class UploadSession(models.Model):
             return False
         return self.expires_within(minutes=threshold)
 
+    def expires_within(self, minutes: int) -> bool:
+        """Determine if this session will expire within the given number of minutes.
+
+        Args:
+            minutes: The number of minutes in the future to check for expiration.
+
+        Returns:
+            True if the session will expire before the given number of minutes from now, False
+            otherwise.
+        """
+        expiry_time = self.expires_at
+        if expiry_time is None:
+            return False
+        return expiry_time < timezone.now() + timezone.timedelta(minutes=minutes)
+
     def expire(self) -> None:
         """Set the status of this session to EXPIRED, but only if the current status is
         CREATED or UPLOADING.
@@ -203,21 +210,6 @@ class UploadSession(models.Model):
 
         self.status = self.SessionStatus.EXPIRED
         self.save()
-
-    def expires_within(self, minutes: int) -> bool:
-        """Determine if this session will expire within the given number of minutes.
-
-        Args:
-            minutes: The number of minutes in the future to check for expiration.
-
-        Returns:
-            True if the session will expire before the given number of minutes from now, False
-            otherwise.
-        """
-        expiry_time = self.expires_at
-        if expiry_time is None:
-            return False
-        return expiry_time < timezone.now() + timezone.timedelta(minutes=minutes)
 
     def touch(self, save: bool = True) -> None:
         """Reset the last upload interaction time to the current time."""
@@ -295,13 +287,10 @@ class UploadSession(models.Model):
         """
         if self.status in (self.SessionStatus.CREATED, self.SessionStatus.STORED):
             return []
-        elif self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
+        elif self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot get temporary uploaded files from session {self.token} because the "
-                "session has expired or has been deleted"
+                "session has expired."
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
@@ -323,13 +312,10 @@ class UploadSession(models.Model):
             self.SessionStatus.UPLOADING,
         ):
             return []
-        elif self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
+        elif self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot get permanent uploaded files from session {self.token} because the "
-                "session has expired or has been deleted"
+                "session has expired."
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
@@ -367,10 +353,10 @@ class UploadSession(models.Model):
         elif self.status == self.SessionStatus.CREATED:
             LOGGER.warning("There are no uploaded files in the session %s to remove", self.token)
             return
-        elif self.status in (self.SessionStatus.EXPIRED, self.SessionStatus.DELETED):
+        elif self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot remove uploaded files from session {self.token} because the session has "
-                "expired or has been deleted"
+                "expired."
             )
         elif self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
@@ -384,7 +370,7 @@ class UploadSession(models.Model):
         for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all()):
             f.remove()
 
-        self.status = self.SessionStatus.DELETED
+        self.status = self.SessionStatus.CREATED
         self.save()
 
     def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:

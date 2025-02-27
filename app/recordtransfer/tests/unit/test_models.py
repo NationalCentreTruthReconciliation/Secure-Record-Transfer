@@ -135,7 +135,6 @@ class TestUploadSession(TestCase):
         """
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -190,7 +189,6 @@ class TestUploadSession(TestCase):
         # Test expired returns False for sessions in states other than CREATED or UPLOADING
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -294,7 +292,6 @@ class TestUploadSession(TestCase):
 
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -348,7 +345,6 @@ class TestUploadSession(TestCase):
     def test_upload_size_raises_for_invalid_status(self) -> None:
         """Test upload_size raises ValueError when session is expired or deleted."""
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -378,7 +374,6 @@ class TestUploadSession(TestCase):
         file count.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -426,7 +421,6 @@ class TestUploadSession(TestCase):
         invalid state.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -487,7 +481,6 @@ class TestUploadSession(TestCase):
         """
         statuses = [
             UploadSession.SessionStatus.CREATED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -523,7 +516,6 @@ class TestUploadSession(TestCase):
         self.session.add_temp_file(self.test_file_1)
         statuses = [
             UploadSession.SessionStatus.CREATED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -572,7 +564,6 @@ class TestUploadSession(TestCase):
         state.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -610,7 +601,6 @@ class TestUploadSession(TestCase):
         state.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -653,7 +643,6 @@ class TestUploadSession(TestCase):
 
         # Test invalid states
         invalid_states = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -693,7 +682,7 @@ class TestUploadSession(TestCase):
 
             mock_file1.remove.assert_called_once()
             mock_file2.remove.assert_called_once()
-            self.assertEqual(self.session.status, UploadSession.SessionStatus.DELETED)
+            self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
 
             # Reset mock files
             mock_file1.reset_mock()
@@ -713,7 +702,6 @@ class TestUploadSession(TestCase):
         # Test invalid states
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
         ]
         for status in invalid_states:
@@ -753,7 +741,6 @@ class TestUploadSession(TestCase):
         # Test invalid states
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.COPYING_FAILED,
         ]
@@ -800,7 +787,6 @@ class TestUploadSession(TestCase):
             UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.UPLOADING,
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
         ]
@@ -865,7 +851,6 @@ class TestUploadSession(TestCase):
 
         # Test invalid states
         invalid_states = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
