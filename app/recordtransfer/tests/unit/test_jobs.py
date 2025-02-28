@@ -89,7 +89,7 @@ class TestCleanupExpiredSessions(unittest.TestCase):
 
     @patch("recordtransfer.models.UploadSession.objects.get_deletable")
     @patch("recordtransfer.models.UploadSession.objects.get_expirable")
-    def test_expired_session_for_deletion(
+    def test_deletable_session(
         self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock) -> None:
         """Test when there is a deletable session."""
         # Setup mocks
