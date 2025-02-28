@@ -43,7 +43,6 @@ class TestUploadSessionManager(TestCase):
 
         # Create an in-progress submission associated with the upload session
 
-
         expirable_statuses = [
             UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.UPLOADING,
@@ -138,9 +137,13 @@ class TestUploadSessionManager(TestCase):
             expired_sessions = UploadSession.objects.get_expirable()
             self.assertFalse(expired_sessions.exists())
 
+    # Tests for get_deletable method
+
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
-    def test_get_deletable(self) -> None:
-        """Test when there are upload sessions that can be deleted."""
+    def test_get_deletable_expired_status_session(self) -> None:
+        """Test when there are is an upload session with the EXPIRED status, without an
+        associated InProgressSubmission.
+        """
         # Set the upload session status to EXPIRED
         self.upload_session.status = UploadSession.SessionStatus.EXPIRED
         self.upload_session.save()
@@ -148,6 +151,36 @@ class TestUploadSessionManager(TestCase):
         # Verify the session is returned by get_deletable
         deletable_sessions = UploadSession.objects.get_deletable()
         self.assertIn(self.upload_session, deletable_sessions)
+
+    @patch("django.utils.timezone.now")
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_deletable_session_has_expired(self, mock_now: MagicMock) -> None:
+        """Test when there are is an upload session of either the CREATED or UPLOADING status that
+        has expired, without an associated InProgressSubmission.
+        """
+        # Setup mock time
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
+        cutoff_time = mock_now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        # Set last upload interaction time to be less than cutoff time
+        self.upload_session.last_upload_interaction_time = cutoff_time - timezone.timedelta(
+            minutes=1
+        )
+        self.upload_session.save()
+
+        deletable_statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+        ]
+
+        for status in deletable_statuses:
+            self.upload_session.status = status
+            self.upload_session.save()
+
+            deletable_sessions = UploadSession.objects.get_deletable()
+            self.assertIn(self.upload_session, deletable_sessions)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     def test_get_deletable_with_in_progress_submission(self) -> None:
@@ -168,13 +201,83 @@ class TestUploadSessionManager(TestCase):
         self.assertNotIn(self.upload_session, deletable_sessions)
         self.assertFalse(deletable_sessions.exists())
 
+    @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
-    def test_get_deletable_non_expired_status(self) -> None:
-        """Test when no upload sessions with an EXPIRED status exist."""
-        # The default status from setUp is not EXPIRED
-        deletable_sessions = UploadSession.objects.get_deletable()
-        self.assertNotIn(self.upload_session, deletable_sessions)
-        self.assertFalse(deletable_sessions.exists())
+    def test_get_deletable_session_has_expired_with_in_progress_submission(
+        self, mock_now: MagicMock
+    ) -> None:
+        """Test when an upload session of either the CREATED or UPLOADING status has expired and
+        has an associated in-progress submission.
+        """
+        # Setup mock time
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
+        cutoff_time = mock_now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        # Create an in-progress submission associated with the upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=TransferStep.UPLOAD_FILES.value,
+        )
+
+        # Set last upload interaction time to be less than cutoff time
+        self.upload_session.last_upload_interaction_time = cutoff_time - timezone.timedelta(
+            minutes=1
+        )
+        self.upload_session.save()
+
+        deletable_statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+        ]
+
+        for status in deletable_statuses:
+            self.upload_session.status = status
+            self.upload_session.save()
+
+            deletable_sessions = UploadSession.objects.get_deletable()
+            self.assertFalse(deletable_sessions.exists())
+
+    @patch("django.utils.timezone.now")
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_deletable_session_has_not_expired_with_in_progress_submission(
+        self, mock_now: MagicMock
+    ) -> None:
+        """Test when an upload session of either the CREATED or UPLOADING status has not expired
+        yet and has an associated in-progress submission.
+        """
+        # Setup mock time
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
+        cutoff_time = mock_now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        # Create an in-progress submission associated with the upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=TransferStep.UPLOAD_FILES.value,
+        )
+
+        # Set last upload interaction time to be greater than cutoff time
+        self.upload_session.last_upload_interaction_time = cutoff_time + timezone.timedelta(
+            minutes=1
+        )
+        self.upload_session.save()
+
+        deletable_statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+        ]
+
+        for status in deletable_statuses:
+            self.upload_session.status = status
+            self.upload_session.save()
+
+            deletable_sessions = UploadSession.objects.get_deletable()
+            self.assertFalse(deletable_sessions.exists())
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
     def test_get_deletable_expiry_disabled(self) -> None:
