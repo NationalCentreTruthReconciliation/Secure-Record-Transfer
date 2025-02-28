@@ -209,6 +209,8 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.UPLOADING}"
             )
 
+        self.remove_temp_uploads(save=False)
+
         self.status = self.SessionStatus.EXPIRED
         self.save()
 
@@ -346,7 +348,7 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.STORED}"
             )
 
-    def remove_temp_uploads(self) -> None:
+    def remove_temp_uploads(self, save: bool = True) -> None:
         """Remove all temp uploaded files associated with this session."""
         if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
             LOGGER.warning("File removal is already in progress for session %s", self.token)
@@ -379,7 +381,8 @@ class UploadSession(models.Model):
 
         if initial_status == self.SessionStatus.UPLOADING:
             self.status = self.SessionStatus.CREATED
-            self.save()
+            if save:
+                self.save()
 
     def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
         """Make all temporary uploaded files associated with this session permanent.
