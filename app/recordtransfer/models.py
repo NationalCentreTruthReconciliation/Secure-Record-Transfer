@@ -1008,7 +1008,9 @@ class InProgressSubmission(models.Model):
     )
     step_data = models.BinaryField(default=b"")
     title = models.CharField(max_length=256, null=True)
-    upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
+    upload_session = models.OneToOneField(
+        UploadSession, null=True, on_delete=models.SET_NULL, related_name="in_progress_submission"
+    )
     reminder_email_sent = models.BooleanField(default=False)
 
     objects = InProgressSubmissionManager()

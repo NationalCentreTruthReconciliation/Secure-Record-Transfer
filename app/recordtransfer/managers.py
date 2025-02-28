@@ -90,10 +90,8 @@ class UploadSessionManager(models.Manager):
         )
 
         return self.filter(
-            status__in=[
-            UploadSession.SessionStatus.EXPIRED,
-            ],
-            inprogresssubmission__isnull=True,
+            status=UploadSession.SessionStatus.EXPIRED,
+            in_progress_submission__isnull=True,
         )
 
 
