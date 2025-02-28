@@ -7,6 +7,7 @@ from io import BytesIO
 import django_rq
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db.models.query import QuerySet
 from django.utils import timezone
 
 from recordtransfer.emails import send_user_in_progress_submission_expiring
@@ -88,21 +89,34 @@ def create_downloadable_bag(submission: Submission, user_triggered: User):
 
 @django_rq.job
 def cleanup_expired_sessions() -> None:
-    """Delete all UploadSession objects that have expired."""
-    LOGGER.info("Deleting expired upload sessions ...")
+    """Clean up UploadSession objects that are expirable. Upload sessions that are not associated
+    with any InProgressSubmission objects are deleted, while those that are associated with
+    InProgressSubmission objects have their uploads removed and are expired.
+    """
+    LOGGER.info("Cleaning up upload sessions ...")
     try:
-        expired_sessions = UploadSession.objects.get_expired().all()
-
-        if expired_sessions.count() == 0:
-            LOGGER.info("No expired upload sessions to delete")
+        expirable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_expirable().all()
+        deletable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_deletable().all()
+        expirable_count = expirable_sessions.count()
+        deletable_count = deletable_sessions.count()
+        if expirable_count == 0 and deletable_count == 0:
+            LOGGER.info("No expired upload sessions to clean up")
             return
 
-        expired_sessions.delete()
+        for session in expirable_sessions:
+            session.expire()
+        for session in deletable_sessions:
+            session.delete()
 
-        LOGGER.info("Deleted %d expired upload sessions", expired_sessions.count())
+        LOGGER.info(
+            "Cleaned up %d upload sessions; expired %d and deleted %d",
+            expirable_count + deletable_count,
+            expirable_count,
+            deletable_count,
+        )
 
     except Exception as e:
-        LOGGER.exception("Error deleting expired upload sessions: %s", str(e))
+        LOGGER.exception("Error cleaning up expired upload sessions: %s", str(e))
         raise e
 
 
@@ -118,7 +132,8 @@ def check_expiring_in_progress_submissions() -> None:
     try:
         expiring = InProgressSubmission.objects.get_expiring_without_reminder().all()
 
-        if expiring.count() == 0:
+        count = expiring.count()
+        if count == 0:
             LOGGER.info("No in-progress submissions are about to expire")
             return
 
@@ -129,7 +144,7 @@ def check_expiring_in_progress_submissions() -> None:
 
         LOGGER.info(
             "Sent reminders for %d in-progress submissions that are about to expire",
-            expiring.count(),
+            count,
         )
 
     except Exception as e:

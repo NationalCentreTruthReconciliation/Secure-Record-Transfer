@@ -24,7 +24,7 @@ class TransferFormWizardTests(TestCase):
             upload_session=self.upload_session,
         )
 
-    @patch("recordtransfer.models.UploadSession.expired", new_callable=MagicMock)
+    @patch("recordtransfer.models.UploadSession.is_expired", new_callable=MagicMock)
     @patch("recordtransfer.views.transfer.TransferFormWizard.get")
     def test_resume_in_progress_submission_redirects_to_submission_expired(
         self, mock_get: MagicMock, mock_expired: MagicMock

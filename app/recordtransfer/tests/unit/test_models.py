@@ -134,8 +134,6 @@ class TestUploadSession(TestCase):
         UPLOADING.
         """
         invalid_states = [
-            UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -155,8 +153,10 @@ class TestUploadSession(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
-    def test_expired_is_true(self, mock_now: MagicMock) -> None:
-        """Test expired property is True for a session that has expired."""
+    def test_expired_is_true_active_session(self, mock_now: MagicMock) -> None:
+        """Test expired property is True for an active session that has gone past its expiration
+        time.
+        """
         fixed_now = datetime(2025, 2, 18, 12, 0, 0)
         mock_now.return_value = fixed_now
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
@@ -166,7 +166,12 @@ class TestUploadSession(TestCase):
         for state in valid_states:
             # Test expired returns True for a session that has expired
             self.session.status = state
-            self.assertTrue(self.session.expired)
+            self.assertTrue(self.session.is_expired)
+
+    def test_expired_is_true_expired_session(self) -> None:
+        """Test expired property is True for an expired session."""
+        self.session.status = UploadSession.SessionStatus.EXPIRED
+        self.assertTrue(self.session.is_expired)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     @patch("django.utils.timezone.now")
@@ -181,16 +186,13 @@ class TestUploadSession(TestCase):
         for state in valid_states:
             # Test expired returns False for a session that has not expired
             self.session.status = state
-            self.assertFalse(self.session.expired)
+            self.assertFalse(self.session.is_expired)
 
     def test_expired_invalid_states(self) -> None:
-        """Test expired property is False for sessions in states other than CREATED or
-        UPLOADING.
+        """Test expired property is False for sessions in states other than CREATED, UPLOADING or
+        EXPIRED.
         """
-        # Test expired returns False for sessions in states other than CREATED or UPLOADING
         invalid_states = [
-            UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -198,7 +200,7 @@ class TestUploadSession(TestCase):
         ]
         for state in invalid_states:
             self.session.status = state
-            self.assertFalse(self.session.expired)
+            self.assertFalse(self.session.is_expired)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
     @patch("django.utils.timezone.now")
@@ -208,7 +210,7 @@ class TestUploadSession(TestCase):
         mock_now.return_value = fixed_now
         self.session.last_upload_interaction_time = fixed_now - timezone.timedelta(minutes=31)
 
-        self.assertFalse(self.session.expired)
+        self.assertFalse(self.session.is_expired)
 
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
@@ -270,6 +272,32 @@ class TestUploadSession(TestCase):
         """Test expires_soon returns False when the reminder feature is disabled."""
         self.assertFalse(self.session.expires_soon)
 
+    def test_expire_valid_states(self) -> None:
+        """Test expire method sets the status to EXPIRED for valid states."""
+        valid_states = [UploadSession.SessionStatus.CREATED, UploadSession.SessionStatus.UPLOADING]
+
+        for state in valid_states:
+            self.session.status = state
+            with patch.object(self.session, 'remove_temp_uploads') as mock_remove_temp_uploads:
+                self.session.expire()
+                mock_remove_temp_uploads.assert_called_once_with(save=False)
+                self.assertEqual(self.session.status, UploadSession.SessionStatus.EXPIRED)
+
+    def test_expire_invalid_states(self) -> None:
+        """Test expire method raises ValueError for invalid states."""
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+
+        for state in invalid_states:
+            self.session.status = state
+            with self.assertRaises(ValueError):
+                self.session.expire()
+
     def test_upload_size_created_session(self) -> None:
         """Test upload size should be zero for a newly created session."""
         self.assertEqual(self.session.upload_size, 0)
@@ -294,7 +322,6 @@ class TestUploadSession(TestCase):
 
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
             UploadSession.SessionStatus.STORED,
@@ -348,8 +375,6 @@ class TestUploadSession(TestCase):
     def test_upload_size_raises_for_invalid_status(self) -> None:
         """Test upload_size raises ValueError when session is expired or deleted."""
         statuses = [
-            UploadSession.SessionStatus.DELETED,
-            UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
         ]
@@ -378,8 +403,6 @@ class TestUploadSession(TestCase):
         file count.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
-            UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
         ]
@@ -426,7 +449,6 @@ class TestUploadSession(TestCase):
         invalid state.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -487,7 +509,6 @@ class TestUploadSession(TestCase):
         """
         statuses = [
             UploadSession.SessionStatus.CREATED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -523,7 +544,6 @@ class TestUploadSession(TestCase):
         self.session.add_temp_file(self.test_file_1)
         statuses = [
             UploadSession.SessionStatus.CREATED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -572,7 +592,6 @@ class TestUploadSession(TestCase):
         state.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -610,7 +629,6 @@ class TestUploadSession(TestCase):
         state.
         """
         statuses = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -653,7 +671,6 @@ class TestUploadSession(TestCase):
 
         # Test invalid states
         invalid_states = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -670,34 +687,25 @@ class TestUploadSession(TestCase):
 
     @patch("recordtransfer.models.UploadSession.permuploadedfile_set")
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set")
-    def test_remove_uploads(
+    def test_remove_temp_uploads(
         self, mock_temp_files: BaseManager, mock_perm_files: BaseManager
     ) -> None:
-        """Test the remove_uploads method of UploadSession."""
+        """Test the remove_temp_uploads method of UploadSession."""
         # Setup mock files
         mock_file1 = Mock()
         mock_file2 = Mock()
-        mock_temp_files.all = MagicMock(return_value=[mock_file1])
-        mock_perm_files.all = MagicMock(return_value=[mock_file2])
+        mock_temp_files.all = MagicMock(return_value=[mock_file1, mock_file2])
 
-        # Valid statuses for upload removal
-        valid_statuses = [
-            UploadSession.SessionStatus.UPLOADING,
-            UploadSession.SessionStatus.STORED,
-        ]
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.remove_temp_uploads()
 
-        # Test successful removal
-        for status in valid_statuses:
-            self.session.status = status
-            self.session.remove_uploads()
+        mock_file1.remove.assert_called_once()
+        mock_file2.remove.assert_called_once()
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
 
-            mock_file1.remove.assert_called_once()
-            mock_file2.remove.assert_called_once()
-            self.assertEqual(self.session.status, UploadSession.SessionStatus.DELETED)
-
-            # Reset mock files
-            mock_file1.reset_mock()
-            mock_file2.reset_mock()
+        # Reset mock files
+        mock_file1.reset_mock()
+        mock_file2.reset_mock()
 
         valid_unchanged_statuses = [
             UploadSession.SessionStatus.CREATED,
@@ -705,7 +713,7 @@ class TestUploadSession(TestCase):
         ]
         for status in valid_unchanged_statuses:
             self.session.status = status
-            self.session.remove_uploads()
+            self.session.remove_temp_uploads()
             mock_file1.remove.assert_not_called()
             mock_file2.remove.assert_not_called()
             self.assertEqual(self.session.status, status)
@@ -713,13 +721,13 @@ class TestUploadSession(TestCase):
         # Test invalid states
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
         ]
         for status in invalid_states:
             self.session.status = status
             with self.assertRaises(ValueError):
-                self.session.remove_uploads()
+                self.session.remove_temp_uploads()
 
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_make_uploads_permanent(self, tempuploadedfile_set_mock: BaseManager) -> None:
@@ -753,7 +761,6 @@ class TestUploadSession(TestCase):
         # Test invalid states
         invalid_states = [
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.COPYING_FAILED,
         ]
@@ -800,7 +807,6 @@ class TestUploadSession(TestCase):
             UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.UPLOADING,
             UploadSession.SessionStatus.EXPIRED,
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
         ]
@@ -865,7 +871,6 @@ class TestUploadSession(TestCase):
 
         # Test invalid states
         invalid_states = [
-            UploadSession.SessionStatus.DELETED,
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
@@ -1030,7 +1035,7 @@ class TestInProgressSubmission(TestCase):
         self.submission.upload_session = None
         self.assertIsNone(self.submission.upload_session_expires_at)
 
-    @patch("recordtransfer.models.UploadSession.expired", new_callable=PropertyMock)
+    @patch("recordtransfer.models.UploadSession.is_expired", new_callable=PropertyMock)
     def test_upload_session_expired(self, mock_expired: PropertyMock) -> None:
         """Test upload_session_expired property."""
         mock_expired.return_value = True
