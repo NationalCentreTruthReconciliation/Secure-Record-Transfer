@@ -41,7 +41,7 @@ export function setupSourceInfoForm() {
     const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
 
     if (!enterManualInfoInputElement) {
-        console.warn(`No element exists with the id: ${enterManualInfoInputId}`);
+        console.error(`No element exists with the id: ${enterManualInfoInputId}`);
         return;
     }
 

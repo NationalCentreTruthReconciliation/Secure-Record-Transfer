@@ -1,3 +1,5 @@
+/* global currentFormStep */
+
 /**
  * Sets up a modal form that is displayed if a user tries to leave the page with unsaved changes.
  */

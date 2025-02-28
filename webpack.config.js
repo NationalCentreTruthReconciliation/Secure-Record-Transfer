@@ -4,7 +4,7 @@ const glob = require("glob");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const sharp = require("sharp");
 
-console.log("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE);
+console.info("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE);
 
 class WebPConverterPlugin {
     constructor(options = {}) {

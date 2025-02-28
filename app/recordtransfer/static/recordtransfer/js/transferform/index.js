@@ -1,3 +1,4 @@
+/* global singleCaptchaFn */
 import "../../css/transferform/review_step.css";
 import "../../css/transferform/uppy.css";
 
