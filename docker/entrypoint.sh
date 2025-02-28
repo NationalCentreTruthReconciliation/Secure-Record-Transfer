@@ -8,7 +8,6 @@ if [ "$ENV" != 'dev' ]; then
   done
 fi
 
-
 # Run database migrations in RQ container
 if [ "$IS_RQ" = 'yes' ]; then
   echo ">> Running database migrations."
