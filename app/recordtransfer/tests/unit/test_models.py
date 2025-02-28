@@ -272,6 +272,32 @@ class TestUploadSession(TestCase):
         """Test expires_soon returns False when the reminder feature is disabled."""
         self.assertFalse(self.session.expires_soon)
 
+    def test_expire_valid_states(self) -> None:
+        """Test expire method sets the status to EXPIRED for valid states."""
+        valid_states = [UploadSession.SessionStatus.CREATED, UploadSession.SessionStatus.UPLOADING]
+
+        for state in valid_states:
+            self.session.status = state
+            with patch.object(self.session, 'remove_temp_uploads') as mock_remove_temp_uploads:
+                self.session.expire()
+                mock_remove_temp_uploads.assert_called_once_with(save=False)
+                self.assertEqual(self.session.status, UploadSession.SessionStatus.EXPIRED)
+
+    def test_expire_invalid_states(self) -> None:
+        """Test expire method raises ValueError for invalid states."""
+        invalid_states = [
+            UploadSession.SessionStatus.EXPIRED,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
+            UploadSession.SessionStatus.STORED,
+            UploadSession.SessionStatus.COPYING_FAILED,
+        ]
+
+        for state in invalid_states:
+            self.session.status = state
+            with self.assertRaises(ValueError):
+                self.session.expire()
+
     def test_upload_size_created_session(self) -> None:
         """Test upload size should be zero for a newly created session."""
         self.assertEqual(self.session.upload_size, 0)
