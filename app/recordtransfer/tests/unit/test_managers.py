@@ -17,10 +17,77 @@ class TestUploadSessionManager(TestCase):
         self.user = User.objects.create(username="testuser", password="password")
         self.upload_session = UploadSession.new_session(user=self.user)
 
+    # Tests for get_expirable method
+
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     def test_get_expirable(self, mock_now: MagicMock) -> None:
-        """Test when there are expired upload sessions."""
+        """Test when there are is an expirable upload session."""
+        # Setup mock time
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
+        cutoff_time = mock_now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=TransferStep.UPLOAD_FILES.value,
+        )
+
+        # Set last upload interaction time to be less than cutoff time
+        self.upload_session.last_upload_interaction_time = cutoff_time - timezone.timedelta(
+            minutes=1
+        )
+        self.upload_session.save()
+
+        # Create an in-progress submission associated with the upload session
+
+
+        expirable_statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+        ]
+
+        for status in expirable_statuses:
+            self.upload_session.status = status
+            self.upload_session.save()
+
+        expirable_sessions = UploadSession.objects.get_expirable()
+        self.assertIn(self.upload_session, expirable_sessions)
+
+    @patch("django.utils.timezone.now")
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_expirable_none_expired(self, mock_now: MagicMock) -> None:
+        """Test that session which has not expired yet is not returned."""
+        # Setup mock time
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
+        cutoff_time = mock_now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        # Set last upload interaction time to be greater than cutoff time
+        self.upload_session.last_upload_interaction_time = cutoff_time + timezone.timedelta(
+            minutes=1
+        )
+        self.upload_session.save()
+
+        # Create an in-progress submission associated with the upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=TransferStep.UPLOAD_FILES.value,
+        )
+
+        expired_sessions = UploadSession.objects.get_expirable()
+        self.assertFalse(expired_sessions.exists())
+
+    @patch("django.utils.timezone.now")
+    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
+    def test_get_expirable_no_in_progress_submission(self, mock_now: MagicMock) -> None:
+        """Test that an expired upload session with no associated in-progress submission is not
+        returned.
+        """
         # Setup mock time
         mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
         cutoff_time = mock_now() - timezone.timedelta(
@@ -34,33 +101,42 @@ class TestUploadSessionManager(TestCase):
         self.upload_session.save()
 
         expired_sessions = UploadSession.objects.get_expirable()
-        self.assertIn(self.upload_session, expired_sessions)
-
-    @patch("django.utils.timezone.now")
-    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
-    def test_get_expirable_none_expired(self, mock_now: MagicMock) -> None:
-        """Test when there are no expired upload sessions."""
-        # Setup mock time
-        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
-        cutoff_time = mock_now() - timezone.timedelta(
-            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
-        )
-
-        # Set last upload interaction time to be greater than cutoff time
-        self.upload_session.last_upload_interaction_time = cutoff_time + timezone.timedelta(
-            minutes=1
-        )
-        self.upload_session.save()
-
-        expired_sessions = UploadSession.objects.get_expirable()
         self.assertFalse(expired_sessions.exists())
 
     @patch("django.utils.timezone.now")
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1)
     def test_get_expirable_expiry_disabled(self, mock_now: MagicMock) -> None:
         """Test when the upload session expiry feature is disabled."""
-        expired_sessions = UploadSession.objects.get_expirable()
-        self.assertFalse(expired_sessions.exists())
+        # Setup mock time
+        mock_now.return_value = timezone.datetime(2023, 10, 10, 12, 0, 0, tzinfo=dttimezone.utc)
+        cutoff_time = mock_now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        # Create an in-progress submission associated with the upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=TransferStep.UPLOAD_FILES.value,
+        )
+
+        # Set last upload interaction time to be less than cutoff time
+        self.upload_session.last_upload_interaction_time = cutoff_time - timezone.timedelta(
+            minutes=1
+        )
+        self.upload_session.save()
+
+        expirable_statuses = [
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+        ]
+
+        for status in expirable_statuses:
+            self.upload_session.status = status
+            self.upload_session.save()
+
+            expired_sessions = UploadSession.objects.get_expirable()
+            self.assertFalse(expired_sessions.exists())
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 30)
     def test_get_deletable(self) -> None:
