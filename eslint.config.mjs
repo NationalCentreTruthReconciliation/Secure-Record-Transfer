@@ -13,6 +13,7 @@ export default [
             "dist/",
             "node_modules/",
             "app/static/",
+            "docs/",
         ],
     },
     {
