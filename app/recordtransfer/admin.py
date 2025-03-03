@@ -487,6 +487,15 @@ class JobAdmin(ReadOnlyAdmin):
         "job_status",
     ]
 
+    search_fields = [
+        "name",
+        "description",
+        "user_triggered__username",
+        "user_triggered__email",
+        "user_triggered__first_name",
+        "user_triggered__last_name",
+    ]
+
     ordering = ["-start_time"]
 
     def has_delete_permission(self, request, obj=None):
