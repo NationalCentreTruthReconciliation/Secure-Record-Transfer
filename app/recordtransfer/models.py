@@ -884,6 +884,7 @@ class Job(models.Model):
     submission = models.ForeignKey(
         Submission, on_delete=models.CASCADE, null=True, related_name="job"
     )
+    message_log = models.TextField(null=True)
 
     def get_admin_change_url(self):
         """Get the URL to change this object in the admin"""
