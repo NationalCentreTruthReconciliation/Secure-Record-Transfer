@@ -881,9 +881,6 @@ class Job(models.Model):
     attached_file = models.FileField(
         upload_to="jobs/zipped_bags", storage=OverwriteStorage, blank=True, null=True
     )
-    submission = models.ForeignKey(
-        Submission, on_delete=models.CASCADE, null=True, related_name="job"
-    )
 
     def get_admin_change_url(self):
         """Get the URL to change this object in the admin"""
