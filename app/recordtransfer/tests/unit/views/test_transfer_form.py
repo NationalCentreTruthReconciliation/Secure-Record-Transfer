@@ -1,9 +1,10 @@
 from caais.models import RightsType, SourceRole, SourceType
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from recordtransfer.enums import TransferStep
-from recordtransfer.models import User
+from recordtransfer.models import SubmissionGroup, User
 
 
 class TransferFormWizardTests(TestCase):
@@ -67,9 +68,50 @@ class TransferFormWizardTests(TestCase):
                     },
                 ],
             ),
+            (
+                TransferStep.OTHER_IDENTIFIERS.value,
+                [
+                    {
+                        "other_identifier_type": "Test Identifier Type",
+                        "other_identifier_value": "Test Identifier Value",
+                        "other_identifier_note": "Test Identifier Note",
+                    },
+                ],
+            ),
+            (
+                TransferStep.GROUP_TRANSFER.value,
+                {
+                    "group_uuid": SubmissionGroup.objects.create(
+                        name="Test Group", created_by=self.user
+                    ).uuid,
+                },
+            ),
+            (
+                TransferStep.UPLOAD_FILES.value,
+                {
+                    "general_note": "Test General Note",
+                },
+            )
         ]
 
         self._test_wizard(self.url, "transfer_form_wizard", data)
+
+    def _get_upload_session_token(self) -> str:
+        """Get an upload session token."""
+        response = self.client.post(reverse("recordtransfer:create_upload_session"))
+        self.assertEqual(201, response.status_code)
+        return response.json()["uploadSessionToken"]
+
+    def _upload_test_file(self, session_token: str) -> None:
+        """Upload a test file to the server."""
+        test_file = SimpleUploadedFile(
+            "test_file.txt", b"file_content", content_type="text/plain"
+        )
+        response = self.client.post(
+            reverse("recordtransfer:upload_files", kwargs={"session_token": session_token}),
+            {"file": test_file},
+        )
+        self.assertEqual(200, response.status_code)
 
     def _test_wizard(self, url: str, name: str, data: list[tuple[str, dict[str, str]]]) -> None:
         """Execute the wizard view installed at the "url", having the given name, with each item
@@ -78,6 +120,12 @@ class TransferFormWizardTests(TestCase):
         self.assertEqual(200, self.client.get(url).status_code)
         for step, step_data in data:
             post_data = {f"{name}-current_step": step}
+
+            if step == TransferStep.UPLOAD_FILES.value:
+                session_token = self._get_upload_session_token()
+                post_data[f"{step}-session_token"] = session_token
+                self._upload_test_file(session_token)
+
             if type(step_data) is dict:
                 post_data.update(
                     {"{}-{}".format(step, key): value for key, value in step_data.items()}
