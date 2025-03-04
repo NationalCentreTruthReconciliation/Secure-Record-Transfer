@@ -1,0 +1,20 @@
+{% extends 'recordtransfer/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "In-Progress Submission Expired" %}{% endblock %}
+
+{% block content %}
+    <div class="title-text">{% trans "In-progress submission has expired" %}</div>
+    <p>
+        {% blocktrans %}
+        This in-progress submission has expired and can no longer be accessed. If you would like to submit your files again,
+        please start a new submission.
+        {% endblocktrans %}
+    </p>
+    <div class="medium-text">{% trans "Links:" %}</div>
+    <ul>
+        <li><a href="{% url 'recordtransfer:transfer' %}">{% trans "Start another Transfer" %}</a></li>
+        <li><a href="{% url 'recordtransfer:index' %}">{% trans "Go to Homepage" %}</a></li>
+        <li><a href="{% url 'recordtransfer:userprofile' %}">{% trans "View your Profile" %}</a></li>
+    </ul>
+{% endblock content %}

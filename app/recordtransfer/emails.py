@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from recordtransfer.models import Submission, User
+from recordtransfer.models import InProgressSubmission, Submission, User
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text
 
@@ -177,6 +177,29 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
         subject=context_vars["subject"],
         template_name="recordtransfer/email/account_updated.html",
         context=context_vars,
+    )
+
+@django_rq.job
+def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission) -> None:
+    """Send an email to a user that their in-progress submission is expiring soon.
+
+    Args:
+         in_progress: The in-progress submission to remind the user about
+    """
+    _send_mail_with_logs(
+        recipients=[in_progress.user.email],
+        from_email=_get_do_not_reply_email_address(),
+        subject="Your In-Progress Submission is Expiring Soon",
+        template_name="recordtransfer/email/in_progress_submission_expiring.html",
+        context={
+            "username": in_progress.user.username,
+            "full_name": in_progress.user.get_full_name(),
+            "in_progress_title": in_progress.title,
+            "in_progress_expiration_date": timezone.localtime(
+                in_progress.upload_session_expires_at
+            ).strftime("%Y-%m-%d %H:%M:%S"),
+            "in_progress_url": in_progress.get_resume_url(),
+        },
     )
 
 

@@ -67,7 +67,7 @@ class AcceptLegal(TransferForm):
     def clean(self) -> dict:
         """Clean form data and validate the session token."""
         cleaned_data = super().clean()
-        if not cleaned_data["agreement_accepted"]:
+        if not cleaned_data.get("agreement_accepted"):
             self.add_error("agreement_accepted", "You must accept before continuing")
         return cleaned_data
 

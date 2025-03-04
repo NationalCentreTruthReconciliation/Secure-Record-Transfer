@@ -52,6 +52,7 @@ class UserProfile(UpdateView):
         in_progress_submissions = InProgressSubmission.objects.filter(
             user=self.request.user
         ).order_by("-last_updated")
+
         in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
         in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
         context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
