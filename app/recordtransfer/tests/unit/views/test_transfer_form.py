@@ -91,6 +91,10 @@ class TransferFormWizardTests(TestCase):
                 {
                     "general_note": "Test General Note",
                 },
+            ),
+            (
+                TransferStep.REVIEW.value,
+                {},
             )
         ]
 
@@ -140,5 +144,6 @@ class TransferFormWizardTests(TestCase):
 
             response = self.client.post(url, post_data, follow=True)
             self.assertEqual(200, response.status_code)
-            if "form" in response.context:
+
+            if step != TransferStep.REVIEW.value and "form" in response.context:
                 self.assertFalse(response.context["form"].errors)
