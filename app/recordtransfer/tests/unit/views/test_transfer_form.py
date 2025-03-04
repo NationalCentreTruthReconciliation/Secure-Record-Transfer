@@ -1,3 +1,4 @@
+from caais.models import RightsType, SourceRole, SourceType
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
@@ -36,19 +37,60 @@ class TransferFormWizardTests(TestCase):
                     "organization": "Test Organization",
                 },
             ),
+            (
+                TransferStep.SOURCE_INFO.value,
+                {
+                    "enter_manual_source_info": "yes",
+                    "source_name": "Test Source Name",
+                    "source_type": SourceType.objects.filter(name="Individual").first().pk,
+                    "source_role": SourceRole.objects.filter(name="Donor").first().pk,
+                    "source_note": "Test Source Note",
+                    "preliminary_custodial_history": "Test Custodial History",
+                },
+            ),
+            (
+                TransferStep.RECORD_DESCRIPTION.value,
+                {
+                    "accession_title": "Test Accession Title",
+                    "date_of_materials": "2021-01-01 - 2021-12-31",
+                    "language_of_material": "English",
+                    "preliminary_scope_and_content": "Test Description",
+                    "condition": "Test Condition",
+                },
+            ),
+            (
+                TransferStep.RIGHTS.value,
+                [
+                    {
+                        "rights_type": RightsType.objects.filter(name="Copyright").first().pk,
+                        "rights_value": "Test Note for Rights",
+                    },
+                ],
+            ),
         ]
 
-        self.test_wizard(self.url, "transfer_form_wizard", data)
+        self._test_wizard(self.url, "transfer_form_wizard", data)
 
-    def test_wizard(self, url: str, name: str, data: list[tuple[str, dict[str, str]]]) -> None:
-        """Using the supplied TestCase, execute the wizard view installed at
-        the "url", having the given name, with each item of data.
+    def _test_wizard(self, url: str, name: str, data: list[tuple[str, dict[str, str]]]) -> None:
+        """Execute the wizard view installed at the "url", having the given name, with each item
+        of data.
         """
         self.assertEqual(200, self.client.get(url).status_code)
         for step, step_data in data:
-            step_data = {"{}-{}".format(step, key): value for key, value in step_data.items()}
-            step_data["{}-current_step".format(name)] = step
-            response = self.client.post(url, step_data, follow=True)
+            post_data = {f"{name}-current_step": step}
+            if type(step_data) is dict:
+                post_data.update(
+                    {"{}-{}".format(step, key): value for key, value in step_data.items()}
+                )
+            elif type(step_data) is list:
+                post_data["{}-TOTAL_FORMS".format(step)] = str(len(step_data))
+                post_data["{}-INITIAL_FORMS".format(step)] = str(len(step_data))
+                for i, item in enumerate(step_data):
+                    post_data.update(
+                        {"{}-{}-{}".format(step, i, key): value for key, value in item.items()}
+                    )
+
+            response = self.client.post(url, post_data, follow=True)
             self.assertEqual(200, response.status_code)
             if "form" in response.context:
                 self.assertFalse(response.context["form"].errors)
