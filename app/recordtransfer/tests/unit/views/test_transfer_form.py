@@ -1,13 +1,8 @@
-from importlib import import_module
-
-from django.conf import settings
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from recordtransfer.enums import TransferStep
 from recordtransfer.models import User
-
-engine = import_module(settings.SESSION_ENGINE)
 
 
 class TransferFormWizardTests(TestCase):
@@ -51,12 +46,9 @@ class TransferFormWizardTests(TestCase):
         """
         self.assertEqual(200, self.client.get(url).status_code)
         for step, step_data in data:
-            step_data = {
-                '{}-{}'.format(step, key): value
-                for key, value in step_data.items()
-            }
-            step_data['{}-current_step'.format(name)] = step
+            step_data = {"{}-{}".format(step, key): value for key, value in step_data.items()}
+            step_data["{}-current_step".format(name)] = step
             response = self.client.post(url, step_data, follow=True)
             self.assertEqual(200, response.status_code)
-            if 'form' in response.context:
-                self.assertFalse(response.context['form'].errors)
+            if "form" in response.context:
+                self.assertFalse(response.context["form"].errors)
