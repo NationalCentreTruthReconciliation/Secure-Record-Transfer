@@ -35,5 +35,12 @@
                 },
             ]
         },
+        {
+            "name": "Python: Debug Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "purpose": ["debug-test"],
+            "justMyCode": false
+        },
     ]
 }
