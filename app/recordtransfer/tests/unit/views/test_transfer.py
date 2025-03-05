@@ -138,6 +138,7 @@ class TransferFormWizardTests(TestCase):
 
         return submit_data
 
+    @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
     @patch("django_recaptcha.fields.ReCaptchaField.clean")
     def test_wizard(self, mock_clean: MagicMock) -> None:
         """Test the TransferFormWizard view from start to finish. This test will fill out the form
@@ -157,6 +158,7 @@ class TransferFormWizardTests(TestCase):
         self.assertTrue(self.user.submission_set.exists())
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
     def test_saving_expirable_in_progress_submission(self) -> None:
         """Test that saving an expirable in-progress submission. Saves the form on the
         Upload Files step after uploading a file.
