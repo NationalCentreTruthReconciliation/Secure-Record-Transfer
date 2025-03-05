@@ -20,11 +20,6 @@
     <div class="submit-row">
         <a href="{% url "recordtransfer:submissiondetail" uuid=original.uuid %}">{% trans "Click to view submission report" %}</a> |
         <a href="{% url "recordtransfer:submissioncsv" uuid=original.uuid %}">{% trans "Click to download CSV export" %}</a> |
-        {% if has_generated_bag %}
-        <a href="{{ original.get_admin_zip_url }}">{% trans "Click to re-generate a downloadable bag" %}</a> |
-        <a href="{{ generated_bag_url }}">{% trans "Click to download the bag" %}</a>
-        {% else %}
         <a href="{{ original.get_admin_zip_url }}">{% trans "Click to create a downloadable bag" %}</a>
-        {% endif %}
     </div>
 {% endblock %}
