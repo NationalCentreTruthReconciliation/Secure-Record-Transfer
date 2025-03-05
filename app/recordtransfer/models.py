@@ -69,7 +69,7 @@ class UploadSession(models.Model):
        COPYING_IN_PROGRESS --> STORED
        STORED --> COPYING_IN_PROGRESS
        STORED --> REMOVING_IN_PROGRESS
-       REMOVING_IN_PROGRESS --> DELETED
+       REMOVING_IN_PROGRESS --> CREATED
     """
 
     class SessionStatus(models.TextChoices):
@@ -82,7 +82,6 @@ class UploadSession(models.Model):
         STORED = "SD", _("All Files in Permanent Storage")
         COPYING_FAILED = "FD", _("Copying Failed")
         REMOVING_IN_PROGRESS = "RP", _("File Removal in Progress")
-        DELETED = "DL", _("All Files Removed")
 
         def __str__(self) -> str:
             """Return the string representation of the session status."""
@@ -110,14 +109,8 @@ class UploadSession(models.Model):
         """Get total size (in bytes) of all uploaded files in this session. This includes the size
         of both temporary and permanent files.
         """
-        if self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
-            raise ValueError(
-                f"Cannot get upload size from session {self.token} because the session has "
-                "expired or has been deleted"
-            )
+        if self.status == self.SessionStatus.EXPIRED:
+            return 0
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
@@ -135,14 +128,8 @@ class UploadSession(models.Model):
     @property
     def file_count(self) -> int:
         """Get the total count of temporary + permanent uploaded files."""
-        if self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
-            raise ValueError(
-                f"Cannot get file count from session {self.token} because the session has "
-                "expired or has been deleted"
-            )
+        if self.status == self.SessionStatus.EXPIRED:
+            return 0
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
             self.SessionStatus.REMOVING_IN_PROGRESS,
@@ -158,26 +145,32 @@ class UploadSession(models.Model):
 
     @property
     def expires_at(self) -> Optional[timezone.datetime]:
-        """Get the time at which this session will expire. Only sessions in the CREATED or
-        UPLOADING state can have an expiration time. Returns None for sessions in other states, or
+        """Calculate this session's expiration time. Only sessions in the CREATED, UPLOADING, or
+        EXPIRED state can have an expiration time. Returns None for sessions in other states, or
         if the upload session expiry feature is disabled.
         """
         if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
             return None
 
-        if self.status in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+        if self.status in (
+            self.SessionStatus.CREATED,
+            self.SessionStatus.UPLOADING,
+            self.SessionStatus.EXPIRED,
+        ):
             return self.last_upload_interaction_time + timezone.timedelta(
                 minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
             )
         return None
 
     @property
-    def expired(self) -> bool:
-        """Determine if this session has expired. Will only return True for an expired session
-        in the CREATED or UPLOADING state. Returns False for sessions in other states, or if the
-        upload session expiry feature is disabled.
+    def is_expired(self) -> bool:
+        """Determine if this session has expired. A session is considered expired if it is in the
+        EXPIRED state, or if it has gone past its expiration time.
         """
-        return self.expires_at is not None and self.expires_at < timezone.now()
+        expires_at = self.expires_at
+        return self.status == self.SessionStatus.EXPIRED or (
+            expires_at is not None and expires_at < timezone.now()
+        )
 
     @property
     def expires_soon(self) -> bool:
@@ -201,6 +194,25 @@ class UploadSession(models.Model):
         if expiry_time is None:
             return False
         return expiry_time < timezone.now() + timezone.timedelta(minutes=minutes)
+
+    def expire(self) -> None:
+        """Set the status of this session to EXPIRED, but only if the current status is
+        CREATED or UPLOADING.
+
+        Raises:
+            ValueError: If the current status is not CREATED or UPLOADING.
+        """
+        if self.status not in (self.SessionStatus.CREATED, self.SessionStatus.UPLOADING):
+            raise ValueError(
+                f"Cannot mark session {self.token} as expired because the session status "
+                f"is {self.status} and not {self.SessionStatus.CREATED} or "
+                f"{self.SessionStatus.UPLOADING}"
+            )
+
+        self.remove_temp_uploads(save=False)
+
+        self.status = self.SessionStatus.EXPIRED
+        self.save()
 
     def touch(self, save: bool = True) -> None:
         """Reset the last upload interaction time to the current time."""
@@ -278,13 +290,10 @@ class UploadSession(models.Model):
         """
         if self.status in (self.SessionStatus.CREATED, self.SessionStatus.STORED):
             return []
-        elif self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
+        elif self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot get temporary uploaded files from session {self.token} because the "
-                "session has expired or has been deleted"
+                "session has expired."
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
@@ -306,13 +315,10 @@ class UploadSession(models.Model):
             self.SessionStatus.UPLOADING,
         ):
             return []
-        elif self.status in (
-            self.SessionStatus.EXPIRED,
-            self.SessionStatus.DELETED,
-        ):
+        elif self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot get permanent uploaded files from session {self.token} because the "
-                "session has expired or has been deleted"
+                "session has expired."
             )
         elif self.status in (
             self.SessionStatus.COPYING_IN_PROGRESS,
@@ -342,33 +348,41 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.STORED}"
             )
 
-    def remove_uploads(self) -> None:
-        """Remove all uploaded files associated with this session."""
+    def remove_temp_uploads(self, save: bool = True) -> None:
+        """Remove all temp uploaded files associated with this session."""
         if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
             LOGGER.warning("File removal is already in progress for session %s", self.token)
             return
         elif self.status == self.SessionStatus.CREATED:
             LOGGER.warning("There are no uploaded files in the session %s to remove", self.token)
             return
-        elif self.status in (self.SessionStatus.EXPIRED, self.SessionStatus.DELETED):
+        elif self.status == self.SessionStatus.EXPIRED:
             raise ValueError(
                 f"Cannot remove uploaded files from session {self.token} because the session has "
-                "expired or has been deleted"
+                "expired."
             )
         elif self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
                 f"Cannot remove uploaded files from session {self.token} while copying files is "
                 "in progress"
             )
+        elif self.status == self.SessionStatus.STORED:
+            raise ValueError(
+                f"Cannot remove uploaded files from session {self.token} because the files are "
+                "already in permanent storage"
+            )
 
+        initial_status = self.status
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
-        for f in chain(self.permuploadedfile_set.all(), self.tempuploadedfile_set.all()):
+        for f in self.tempuploadedfile_set.all():
             f.remove()
 
-        self.status = self.SessionStatus.DELETED
-        self.save()
+        if initial_status == self.SessionStatus.UPLOADING:
+            self.status = self.SessionStatus.CREATED
+            if save:
+                self.save()
 
     def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
         """Make all temporary uploaded files associated with this session permanent.
@@ -997,7 +1011,9 @@ class InProgressSubmission(models.Model):
     )
     step_data = models.BinaryField(default=b"")
     title = models.CharField(max_length=256, null=True)
-    upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
+    upload_session = models.OneToOneField(
+        UploadSession, null=True, on_delete=models.SET_NULL, related_name="in_progress_submission"
+    )
     reminder_email_sent = models.BooleanField(default=False)
 
     objects = InProgressSubmissionManager()
@@ -1021,7 +1037,7 @@ class InProgressSubmission(models.Model):
     @property
     def upload_session_expired(self) -> bool:
         """Determine if the associated upload session has expired or not."""
-        return self.upload_session is not None and self.upload_session.expired
+        return self.upload_session is not None and self.upload_session.is_expired
 
     @property
     def upload_session_expires_soon(self) -> bool:
