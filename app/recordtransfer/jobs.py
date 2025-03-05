@@ -65,19 +65,18 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         try:
             os.makedirs(settings.TEMP_STORAGE_FOLDER, exist_ok=True)
             temp_fd, temp_zip_path = tempfile.mkstemp(
-                suffix='.zip',
-                dir=settings.TEMP_STORAGE_FOLDER
+                suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
             )
             os.close(temp_fd)
 
             LOGGER.info("Creating zip file on disk at %s ...", temp_zip_path)
-            with zipfile.ZipFile(temp_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipped_bag:
+            with zipfile.ZipFile(temp_zip_path, "w", zipfile.ZIP_DEFLATED, False) as zipped_bag:
                 zip_directory(submission.location, zipped_bag)
             LOGGER.info("Zipped directory successfully")
 
             file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
             LOGGER.info("Saving zip file as %s ...", file_name)
-            with open(temp_zip_path, 'rb') as f:
+            with open(temp_zip_path, "rb") as f:
                 new_job.attached_file.save(file_name, ContentFile(f.read()), save=True)
             LOGGER.info("Saved file successfully")
 
