@@ -13,6 +13,7 @@ export default [
             "dist/",
             "node_modules/",
             "app/static/",
+            "docs/"
         ],
     },
     {
@@ -32,7 +33,7 @@ export default [
                 "alphabetize": { "order": "asc", "caseInsensitive": true }
             }],
             // ESLint extra rules
-            "no-console": "warn",
+            "no-console": ["warn", { "allow": ["error", "warn", "info"] }],
             "eqeqeq": "error",
             "curly": "error",
             "prefer-const": "error",

@@ -7,22 +7,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const context = JSON.parse(contextElement.textContent);
 
-    const submissionGroupName = document.getElementById(context["id_submission_group_name"]);
-    const submissionGroupDescription = document.getElementById(context["id_submission_group_description"]);
+    const groupName = document.getElementById(context["id_submission_group_name"]);
+    const groupDescription = document.getElementById(
+        context["id_submission_group_description"]
+    );
 
-    const inputFields = [submissionGroupName, submissionGroupDescription];
+    const inputFields = [groupName, groupDescription];
     const saveButton = document.getElementById("id_create_group_button");
 
     const initialValues = {
-        submissionGroupName: submissionGroupName.value,
-        submissionGroupDescription: submissionGroupDescription.value
+        submissionGroupName: groupName.value,
+        submissionGroupDescription: groupDescription.value
     };
 
+    /**
+     * Checks if either the submission group name or description has changed. Enables the save
+     * button if a change is detected, disables it otherwise.
+     */
     function checkForChanges() {
-        const submissionGroupNameChanged = submissionGroupName.value !== initialValues.submissionGroupName;
-        const submissionGroupDescriptionChanged = submissionGroupDescription.value !== initialValues.submissionGroupDescription;
-
-        const hasChanged = submissionGroupNameChanged || submissionGroupDescriptionChanged;
+        const nameChanged = groupName.value !== initialValues.submissionGroupName;
+        const descriptionChanged =
+            groupDescription.value !== initialValues.submissionGroupDescription;
+        const hasChanged = nameChanged || descriptionChanged;
         saveButton.disabled = !hasChanged;
     }
 
