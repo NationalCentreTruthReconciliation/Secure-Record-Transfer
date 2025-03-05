@@ -147,6 +147,7 @@ class TransferFormWizardTests(TestCase):
         mock_clean.return_value = "PASSED"
         self.assertEqual(200, self.client.get(self.url).status_code)
         self.assertFalse(self.user.submission_set.exists())
+        response = None
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
 
@@ -156,6 +157,8 @@ class TransferFormWizardTests(TestCase):
             if "form" in response.context:
                 self.assertFalse(response.context["form"].errors)
         self.assertTrue(self.user.submission_set.exists())
+        if response:
+            self.assertRedirects(response, reverse("recordtransfer:transfersent"))
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
