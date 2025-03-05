@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Union
 
 from caais.export import ExportVersion
 from django.conf import settings
@@ -198,13 +198,29 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    @display(description=gettext("Upload Size"))
-    def upload_size(self, obj):
-        return get_human_readable_size(obj.upload_size, 1000, 2)
-
-    fields = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    fields = [
+        "token",
+        linkify("user"),
+        "started_at",
+        "last_upload_at",
+        "file_count",
+        "upload_size",
+        "status",
+        "is_expired",
+        "expires_at",
+    ]
     search_fields = ["token", "user__username"]
-    list_display = ["token", linkify("user"), "started_at", "file_count", "upload_size", "status"]
+    list_display = [
+        "token",
+        linkify("user"),
+        "started_at",
+        "last_upload_at",
+        "file_count",
+        "upload_size",
+        "status",
+        "is_expired",
+        "expires_at",
+    ]
 
     inlines = [
         TempUploadedFileInline,
@@ -214,6 +230,30 @@ class UploadSessionAdmin(ReadOnlyAdmin):
     ordering = [
         "-started_at",
     ]
+
+    def file_count(self, obj: UploadSession) -> Union[int, str]:
+        """Display the number of files uploaded to the session."""
+        file_count = None
+        try:
+            file_count = obj.file_count
+        except ValueError:
+            file_count = "n/a"
+        return file_count
+
+    @display(description=gettext("Upload Size"))
+    def upload_size(self, obj: UploadSession) -> Union[str, None]:
+        """Display the total upload size for the session."""
+        upload_size = None
+        try:
+            upload_size = get_human_readable_size(obj.upload_size, 1000, 2)
+        except ValueError:
+            upload_size = "n/a"
+        return upload_size
+
+    @admin.display(description="Last upload at")
+    def last_upload_at(self, obj: UploadSession):
+        """Display the last time a file was uploaded to the session."""
+        return obj.last_upload_interaction_time
 
 
 class SubmissionInline(ReadOnlyInline):
@@ -362,10 +402,16 @@ class SubmissionAdmin(admin.ModelAdmin):
         "uuid",
     ]
 
-    def file_count(self, obj):
+    def file_count(self, obj: Submission) -> Union[int, str]:
+        """Display the number of files uploaded to the submission."""
         if not obj.upload_session:
             return 0
-        return obj.upload_session.file_count
+        file_count = None
+        try:
+            file_count = obj.upload_session.file_count
+        except ValueError:
+            file_count = "n/a"
+        return file_count
 
     def has_add_permission(self, request):
         return False

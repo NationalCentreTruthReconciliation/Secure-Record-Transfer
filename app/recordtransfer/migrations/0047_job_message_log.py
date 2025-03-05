@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recordtransfer', '0044_uploadsession_user'),
+        ("recordtransfer", "0046_uploadsession_state"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='message_log',
+            model_name="job",
+            name="message_log",
             field=models.TextField(null=True),
         ),
     ]

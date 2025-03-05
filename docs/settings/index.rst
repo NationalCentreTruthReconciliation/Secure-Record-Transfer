@@ -398,6 +398,117 @@ MAX_TOTAL_UPLOAD_COUNT
         #file: .env
         MAX_TOTAL_UPLOAD_COUNT=10
 
+Upload Session Controls
+-----------------------
+
+These settings have no effect if :ref:`FILE_UPLOAD_ENABLED` is False.
+
+UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    *Number of minutes of inactivity after which an upload session expires*
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        1440          int
+        ============  =========
+
+    Sets the number of minutes of inactivity after which an upload session expires. Defaults to 1440 minutes (24 hours).
+    This feature can be deactivated by setting the value to -1.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=1440
+
+UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    *Number of minutes before upload session expiration when a reminder should be sent*
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        480           int
+        ============  =========
+
+    Sets the number of minutes before upload session expiration when a reminder should be sent. Defaults to 480 minutes (8 hours).
+    This feature can be deactivated by setting the value to -1.
+    If :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` is set to -1, this feature will be deactivated.
+
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES=480
+
+
+UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    *Cron schedule expression for cleaning up expired upload sessions*
+
+    .. table::
+
+        ==============  =========
+        Default         Type
+        ==============  =========
+        "0 2 \* \* \*"  string
+        ==============  =========
+
+    Sets the cron schedule expression for cleaning up expired upload sessions. Defaults to "0 2 \* \* \*" (runs at 2 AM daily).
+
+    See the `crontab manual page <https://man7.org/linux/man-pages/man5/crontab.5.html>`_ for a guide on the syntax.
+
+    This feature can be deactivated by setting the value to an empty string ("").
+    If :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` is set to -1, this feature will be deactivated.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE="0 2 * * *"
+
+In-Progress Submission Controls
+-------------------------------
+
+IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    *Cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions*
+
+    .. table::
+
+        ===============  =========
+        Default          Type
+        ===============  =========
+        "0 \* \* \* \*"   string
+        ===============  =========
+
+    Sets the cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions. Defaults to "0 \* \* \* \*" (runs every hour at minute zero).
+
+    See the `crontab manual page <https://man7.org/linux/man-pages/man5/crontab.5.html>`_ for a guide on the syntax.
+
+    This feature can be deactivated by setting the value to an empty string ("").
+    If :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` is set to -1, this feature will be deactivated.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE="0 * * * *"
+
 
 Storage Locations
 -----------------

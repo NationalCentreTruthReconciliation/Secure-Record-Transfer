@@ -38,6 +38,7 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
   rq:
+    image: secure-record-transfer-dev
     build:
       context: .
       target: dev
@@ -66,13 +67,26 @@ services:
     depends_on:
       - redis
 
+  rq-scheduler:
+    image: secure-record-transfer-dev
+    container_name: recordtransfer_rq_scheduler
+    command: python manage.py schedule_jobs
+    volumes:
+      - ./app/:/opt/secure-record-transfer/app/:z
+    env_file:
+      - path: .dev.env
+        required: false
+    # See manage.py for debugger setup
+    environment:
+      - ENV=dev
+      - IS_RQ=no
+      - WEBPACK_MODE=development
+      - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
+    depends_on:
+      - rq
+
   app:
-    build:
-      context: .
-      target: dev
-      dockerfile: Containerfile
-      args:
-          WEBPACK_MODE: development
+    image: secure-record-transfer-dev
     container_name: recordtransfer_django_app
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -95,6 +109,7 @@ services:
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
       - rq
+      - rq-scheduler
       - email
       - clamav
 
