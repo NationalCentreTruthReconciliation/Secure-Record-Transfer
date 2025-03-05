@@ -960,7 +960,7 @@ class Job(models.Model):
         max_length=2, choices=JobStatus.choices, default=JobStatus.NOT_STARTED
     )
     attached_file = models.FileField(
-        upload_to="jobs/zipped_bags", storage=OverwriteStorage, blank=True, null=True
+        upload_to="jobs/attachments", storage=OverwriteStorage, blank=True, null=True
     )
     submission = models.ForeignKey(
         Submission, on_delete=models.CASCADE, null=True, related_name="job"
