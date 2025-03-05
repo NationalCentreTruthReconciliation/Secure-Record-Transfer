@@ -30,6 +30,7 @@ ID_SOURCE_INFO_OTHER_SOURCE_ROLE = "id_sourceinfo-other_source_role"
 TEMPLATEREF = "templateref"
 FORMTITLE = "formtitle"
 INFOMESSAGE = "infomessage"
+FORM = "form"
 
 # Pagination query names
 IN_PROGRESS_PAGE = "in_progress_page"

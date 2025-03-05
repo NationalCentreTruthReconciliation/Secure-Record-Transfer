@@ -16,3 +16,4 @@ part of this application.
     caais
     models
     utils
+    decorators
