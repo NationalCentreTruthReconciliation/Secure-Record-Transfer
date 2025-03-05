@@ -1,3 +1,5 @@
+/* global django */
+
 window.addEventListener("load", function() {
     (function($) {
         $("input[id$=\"-phone_number\"").each(function() {
