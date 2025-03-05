@@ -432,19 +432,6 @@ class SubmissionAdmin(admin.ModelAdmin):
             ),
         ] + super().get_urls()
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
-        job = (
-            Job.objects.get_queryset()
-            .filter(Q(user_triggered=request.user) & Q(submission_id=object_id))
-            .first()
-        )
-        if extra_context is None:
-            extra_context = {}
-        extra_context["has_generated_bag"] = job is not None
-        if job is not None:
-            extra_context["generated_bag_url"] = job.get_admin_download_url()
-        return super().changeform_view(request, object_id, form_url, extra_context)
-
     def create_zipped_bag(self, request, object_id) -> HttpResponseRedirect:
         """Start a background job to create a downloadable bag.
 

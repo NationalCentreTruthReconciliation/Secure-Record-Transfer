@@ -962,9 +962,6 @@ class Job(models.Model):
     attached_file = models.FileField(
         upload_to="jobs/attachments", storage=OverwriteStorage, blank=True, null=True
     )
-    submission = models.ForeignKey(
-        Submission, on_delete=models.CASCADE, null=True, related_name="job"
-    )
     message_log = models.TextField(null=True)
 
     def get_admin_change_url(self) -> str:
