@@ -10,13 +10,9 @@ from django.core.files.base import ContentFile
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
-<<<<<<< HEAD
-from recordtransfer.handlers import JobLogHandler
-from recordtransfer.models import Job, Submission, User
-=======
 from recordtransfer.emails import send_user_in_progress_submission_expiring
+from recordtransfer.handlers import JobLogHandler
 from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
->>>>>>> origin/master
 from recordtransfer.utils import zip_directory
 
 LOGGER = logging.getLogger(__name__)
