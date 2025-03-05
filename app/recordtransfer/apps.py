@@ -257,7 +257,7 @@ def verify_site_id():
     from django.contrib.sites.models import Site  # Import here to avoid circular import
     site_id = settings.SITE_ID
     if not Site.objects.filter(pk=site_id).exists():
-        raise ImproperlyConfigured(f"Site with ID {site_id} does not exist.")
+        raise ImproperlyConfigured(f"Site with ID {site_id} does not exist. Check the configured SITE_ID")
 
 class RecordTransferConfig(AppConfig):
     """Top-level application config for the recordtransfer app"""
