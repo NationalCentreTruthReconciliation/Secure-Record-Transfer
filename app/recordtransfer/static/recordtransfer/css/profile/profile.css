@@ -3,3 +3,11 @@
         display: none;
     }
 }
+
+.red-text {
+    color: red;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+}

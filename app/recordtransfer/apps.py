@@ -1,4 +1,3 @@
-# pylint: disable=consider-using-f-string
 import logging
 import os
 import re
@@ -11,13 +10,14 @@ from django.core.exceptions import ImproperlyConfigured
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def verify_email_settings():
-    """Verify the settings:
+def verify_email_settings() -> None:
+    """Verify these settings.
 
     - DO_NOT_REPLY_USERNAME
     - ARCHIVIST_EMAIL
 
-    Throws an ImproperlyConfigured exception if either of these are empty.
+    Raises:
+        ImproperlyConfigured: If either DO_NOT_REPLY_USERNAME or ARCHIVIST_EMAIL is empty.
     """
     if not settings.DO_NOT_REPLY_USERNAME:
         raise ImproperlyConfigured("The DO_NOT_REPLY_USERNAME setting is empty")
@@ -25,28 +25,29 @@ def verify_email_settings():
         raise ImproperlyConfigured("The ARCHIVIST_EMAIL setting is empty")
 
 
-def verify_date_format():
-    """Verify the setting:
+def verify_date_format() -> None:
+    """Verify the setting.
 
     - APPROXIMATE_DATE_FORMAT
 
-    Throws an ImproperlyConfigured exception if the setting does not contain
-    "{date}"
+    Raises:
+        ImproperlyConfigured: If the setting does not contain "{date}".
     """
     if r"{date}" not in settings.APPROXIMATE_DATE_FORMAT:
         raise ImproperlyConfigured(
-            ("The APPROXIMATE_DATE_FORMAT (currently: {0}) does not contain " "{{date}}").format(
+            ("The APPROXIMATE_DATE_FORMAT (currently: {0}) does not contain {{date}}").format(
                 settings.APPROXIMATE_DATE_FORMAT
             )
         )
 
 
-def verify_checksum_settings():
-    """Verify the setting:
+def verify_checksum_settings() -> None:
+    """Verify the setting.
 
     - BAG_CHECKSUMS
 
-    Throws an ImproperlyConfigured exception if the setting is not valid.
+    Raises:
+        ImproperlyConfigured: If the setting is empty or contains unsupported checksum algorithms.
     """
     if not settings.BAG_CHECKSUMS:
         raise ImproperlyConfigured(
@@ -66,15 +67,17 @@ def verify_checksum_settings():
         )
 
 
-def verify_storage_folder_settings():
-    """Verify the settings:
+def verify_storage_folder_settings() -> None:
+    """Verify the settings.
 
     - BAG_STORAGE_FOLDER
     - UPLOAD_STORAGE_FOLDER
 
-    Creates the directories if they do not exist. Raises an ImproperlyConfigured
-    exception if the directories could not be created, or if they already exist
-    but as file.
+    Creates the directories if they do not exist.
+
+    Raises:
+        ImproperlyConfigured: If the directories could not be created, or if they already exist
+        exception if the directories could not be created, or if they already exist but as file.
     """
     for setting_name in [
         "BAG_STORAGE_FOLDER",
@@ -104,15 +107,16 @@ def verify_storage_folder_settings():
                 ) from exc
 
 
-def verify_max_upload_size():
-    """Verify the settings:
+def verify_max_upload_size() -> None:
+    """Verify the settings.
 
     - MAX_TOTAL_UPLOAD_SIZE_MB
     - MAX_SINGLE_UPLOAD_SIZE_MB
     - MAX_TOTAL_UPLOAD_COUNT
 
-    Throws an ImproperlyConfigured exception if any are less than or equal to
-    zero, or if the single upload size is greater than the total upload size.
+    Raises:
+        ImproperlyConfigured: If any are less than or equal to zero, or if the single upload size
+        is greater than the total upload size.
     """
     for setting_name in [
         "MAX_TOTAL_UPLOAD_SIZE_MB",
@@ -123,7 +127,7 @@ def verify_max_upload_size():
 
         if not isinstance(value, int):
             raise ImproperlyConfigured(
-                ("The {0} setting is the wrong type (currently: {1}), should be " "int").format(
+                ("The {0} setting is the wrong type (currently: {1}), should be int").format(
                     setting_name, type(value)
                 )
             )
@@ -135,9 +139,9 @@ def verify_max_upload_size():
 
         if value < 0:
             raise ImproperlyConfigured(
-                (
-                    "The {0} setting is negative (currently: {1}), it cannot be " "less than 1"
-                ).format(setting_name, value)
+                ("The {0} setting is negative (currently: {1}), it cannot be less than 1").format(
+                    setting_name, value
+                )
             )
 
     max_total_size = settings.MAX_TOTAL_UPLOAD_SIZE_MB
@@ -152,10 +156,13 @@ def verify_max_upload_size():
 
 
 def verify_accepted_file_formats() -> None:
-    """Verify the ACCEPTED_FILE_FORMATS setting.
+    """Verify the setting.
 
-    Throws an ImproperlyConfigured exception if there are any issues with the
-    formatting of the setting or the file extensions in the setting.
+    - ACCEPTED_FILE_FORMATS
+
+    Raises:
+        ImproperlyConfigured exception if there are any issues with the formatting of the setting
+        or the file extensions in the setting.
     """
     formats = settings.ACCEPTED_FILE_FORMATS
 
@@ -238,14 +245,14 @@ def verify_accepted_file_formats() -> None:
             inverted_formats[extension] = group_name
 
 
-def verify_caais_defaults():
-    """Verifies the setting:
+def verify_caais_defaults() -> None:
+    """Verify the settings.
 
     - CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
     - CAAIS_DEFAULT_CREATION_TYPE
 
-    Ensures that all required defaults exist, raises an ImproperlyConfigured
-    exception if a default does not exist.
+    Raises:
+        ImproperlyConfigured: If either setting is empty.
     """
     if not settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set")
@@ -259,12 +266,102 @@ def verify_site_id():
     if not Site.objects.filter(pk=site_id).exists():
         raise ImproperlyConfigured(f"Site with ID {site_id} does not exist. Check the configured SITE_ID")
 
+def _validate_cron(cron_str: str) -> None:
+    """Validate a cron expression.
+
+    Args:
+        cron_str: The cron expression to validate.
+
+    Raises:
+        ValueError: If the cron expression is invalid.
+    """
+    # Check number of fields
+    fields = cron_str.strip().split()
+    if len(fields) != 5:
+        raise ValueError("Cron expression must have 5 fields")
+
+    # Regex for each cron field
+    cron_patterns = {
+        "minute": r"^(?:\*(?:/[1-9]\d*)?|[0-5]?\d(?:-[0-5]?\d)?(?:/[1-9]\d*)?(?:,[0-5]?\d)*)$",
+        "hour": r"^(?:\*(?:/[1-9]\d*)?|[01]?\d|2[0-3](?:-[01]?\d|2[0-3])?(?:/[1-9]\d*)?(?:,[01]?\d|2[0-3])*)$",
+        "day_of_month": r"^(?:\*(?:/[1-9]\d*)?|[1-9]|[12]\d|3[01](?:-[1-9]|[12]\d|3[01])?(?:/[1-9]\d*)?(?:,[1-9]|[12]\d|3[01])*)$",
+        "month": r"^(?:\*(?:/[1-9]\d*)?|[1-9]|1[0-2](?:-[1-9]|1[0-2])?(?:/[1-9]\d*)?(?:,[1-9]|1[0-2])*)$",
+        "day_of_week": r"^(?:\*(?:/[1-9]\d*)?|[0-6](?:-[0-6])?(?:/[1-9]\d*)?(?:,[0-6])*)$",
+    }
+
+    field_names = ["minute", "hour", "day_of_month", "month", "day_of_week"]
+
+    # Validate each field
+    for value, field in zip(fields, field_names):
+        pattern = cron_patterns[field]
+        if not re.match(pattern, value):
+            raise ValueError(f"Invalid value '{value}' for field '{field}'")
+
+
+def verify_upload_session_expiry_settings() -> None:
+    """Verify the settings.
+
+    - UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+    - UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+    - UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+
+    Raises:
+        ImproperlyConfigured: If the expiry schedule is not a valid cron string, or if the
+        expiry settings are invalid.
+    """
+    try:
+        cleanup_schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
+        if cleanup_schedule:
+            _validate_cron(cleanup_schedule)
+    except ValueError as exc:
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE is not a valid cron string"
+        ) from exc
+
+    try:
+        email_schedule = settings.IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
+        if email_schedule:
+            _validate_cron(email_schedule)
+    except ValueError as exc:
+        raise ImproperlyConfigured(
+            "IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE is not a valid cron string"
+        ) from exc
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES <= 0
+        and settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES must be greater than zero or -1"
+        )
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES <= 0
+        and settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES != -1
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be greater than zero or -1"
+        )
+
+    if (
+        settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES != -1
+        and settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES != -1
+        and settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+        >= settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES must be less than "
+            "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES"
+        )
+
+
 class RecordTransferConfig(AppConfig):
-    """Top-level application config for the recordtransfer app"""
+    """Top-level application config for the recordtransfer app."""
 
     name = "recordtransfer"
 
-    def ready(self):
+    def ready(self) -> None:
+        """Verify the settings in the settings module."""
         try:
             LOGGER.info("Verifying settings in %s", settings.SETTINGS_MODULE)
             verify_email_settings()
@@ -274,6 +371,7 @@ class RecordTransferConfig(AppConfig):
             verify_max_upload_size()
             verify_accepted_file_formats()
             verify_caais_defaults()
+            verify_upload_session_expiry_settings()
             if not settings.TESTING:
                 verify_site_id()
 
