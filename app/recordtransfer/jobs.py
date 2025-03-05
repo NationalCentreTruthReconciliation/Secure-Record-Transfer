@@ -1,6 +1,7 @@
 import logging
 import os.path
 import shutil
+import tempfile
 import zipfile
 from io import BytesIO
 
@@ -36,7 +37,6 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         start_time=timezone.now(),
         user_triggered=user_triggered,
         job_status=Job.JobStatus.IN_PROGRESS,
-        submission=submission,
     )
     new_job.save()
 
@@ -61,18 +61,24 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 new_job.save()
                 return
 
-        zipf = None
+        temp_zip_path = None
         try:
-            LOGGER.info("Zipping directory to an in-memory file ...")
-            zipf = BytesIO()
-            zipped_bag = zipfile.ZipFile(zipf, "w", zipfile.ZIP_DEFLATED, False)
-            zip_directory(submission.location, zipped_bag)
-            zipped_bag.close()
+            os.makedirs(settings.TEMP_STORAGE_FOLDER, exist_ok=True)
+            temp_fd, temp_zip_path = tempfile.mkstemp(
+                suffix='.zip',
+                dir=settings.TEMP_STORAGE_FOLDER
+            )
+            os.close(temp_fd)
+
+            LOGGER.info("Creating zip file on disk at %s ...", temp_zip_path)
+            with zipfile.ZipFile(temp_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipped_bag:
+                zip_directory(submission.location, zipped_bag)
             LOGGER.info("Zipped directory successfully")
 
             file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
             LOGGER.info("Saving zip file as %s ...", file_name)
-            new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
+            with open(temp_zip_path, 'rb') as f:
+                new_job.attached_file.save(file_name, ContentFile(f.read()), save=True)
             LOGGER.info("Saved file successfully")
 
             new_job.job_status = Job.JobStatus.COMPLETE
@@ -89,8 +95,10 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 str(exc),
             )
         finally:
-            if zipf is not None:
-                zipf.close()
+            if temp_zip_path and os.path.exists(temp_zip_path):
+                os.unlink(temp_zip_path)
+                LOGGER.info("Removed temporary zip file from disk")
+
             if os.path.exists(submission.location):
                 LOGGER.info("Removing bag from disk after zip generation.")
                 shutil.rmtree(submission.location)
