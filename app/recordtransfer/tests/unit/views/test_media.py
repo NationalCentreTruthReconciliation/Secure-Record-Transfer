@@ -1,5 +1,4 @@
 import logging
-from unittest import skipIf
 from unittest.mock import MagicMock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -8,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
 
+from recordtransfer.enums import TransferStep
 from recordtransfer.models import TempUploadedFile, UploadSession, User
 
 
@@ -29,6 +29,11 @@ class TestCreateUploadSessionView(TestCase):
         """Set up test environment."""
         self.client.login(username="testuser", password="1X<ISRUkw+tuK")
         self.url = reverse("recordtransfer:create_upload_session")
+
+        # Set up client session data
+        session = self.client.session
+        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session.save()
 
     def tearDown(self) -> None:
         """Tear down test environment."""
@@ -92,6 +97,11 @@ class TestUploadFilesView(TestCase):
         ).start()
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
+
+        # Set up client session data
+        session = self.client.session
+        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session.save()
 
         # Create a new upload session token
         self.session = UploadSession.new_session(user=self.test_user_1)
@@ -348,6 +358,12 @@ class TestUploadedFileView(TestCase):
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
+
+        # Set up client session data
+        session = self.client.session
+        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session.save()
+
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
         self.temp_file = self.session.add_temp_file(
             SimpleUploadedFile("testfile.txt", self.one_kib)
