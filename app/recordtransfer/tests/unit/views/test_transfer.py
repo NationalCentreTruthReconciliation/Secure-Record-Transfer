@@ -1,5 +1,5 @@
 from typing import cast
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -138,19 +138,23 @@ class TransferFormWizardTests(TestCase):
 
         return submit_data
 
-    def test_wizard(self) -> None:
+    @patch("django_recaptcha.fields.ReCaptchaField.clean")
+    def test_wizard(self, mock_clean: MagicMock) -> None:
         """Test the TransferFormWizard view from start to finish. This test will fill out the form
         with the test data and submit it, making sure no errors are raised.
         """
+        mock_clean.return_value = "PASSED"
         self.assertEqual(200, self.client.get(self.url).status_code)
+        self.assertFalse(self.user.submission_set.exists())
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
 
             response = self.client.post(self.url, submit_data, follow=True)
             self.assertEqual(200, response.status_code)
 
-            if step != TransferStep.REVIEW.value and "form" in response.context:
+            if "form" in response.context:
                 self.assertFalse(response.context["form"].errors)
+        self.assertTrue(self.user.submission_set.exists())
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     def test_saving_expirable_in_progress_submission(self) -> None:
