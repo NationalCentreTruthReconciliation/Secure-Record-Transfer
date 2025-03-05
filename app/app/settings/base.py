@@ -258,12 +258,29 @@ ACCEPTED_FILE_FORMATS = config(
 )
 
 # Media file storage locations
-BAG_STORAGE_FOLDER = config(
-    "BAG_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "bags")
-)
+BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "bags"))
 UPLOAD_STORAGE_FOLDER = config(
     "UPLOAD_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "uploaded_files")
 )
-TEMP_STORAGE_FOLDER = config(
-    "TEMP_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "temp")
+TEMP_STORAGE_FOLDER = config("TEMP_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "temp"))
+
+# Upload session settings
+UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES = config(
+    "UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", default=1440, cast=int
+)
+
+UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES = config(
+    "UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", default=480, cast=int
+)
+
+UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE = config(
+    "UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE",
+    default="0 2 * * *",
+    cast=str,
+)
+
+IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE = config(
+    "IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE",
+    default="0 * * * *",
+    cast=str,
 )
