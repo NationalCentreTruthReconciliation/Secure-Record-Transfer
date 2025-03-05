@@ -2,7 +2,7 @@ name: PR Lint Check
 
 on:
   pull_request:
-    branches: [ 425-enforce-eslint-rules-in-pull-requests ]
+    branches: [ master ]
     types: [ opened, synchronize, reopened ]
 
 permissions:
