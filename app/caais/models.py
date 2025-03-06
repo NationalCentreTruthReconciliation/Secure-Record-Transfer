@@ -19,7 +19,7 @@ field in the standard is defined in a model.
 
 import re
 from collections import OrderedDict
-from datetime import datetime
+from datetime import date, datetime
 
 from django.conf import settings
 from django.db import models
@@ -210,6 +210,10 @@ class Metadata(models.Model):
             **Date of Materials** [CAAIS, Section 3.1]. Definition: *A date or
             date range indicating when the materials were known or thought to
             have been created.*
+        date_is_approximate (BooleanField):
+            **Date is Approximate**: To indicate if the date of materials is
+            approximate or not. This is not a field in CAAIS, but is used to
+            determine whether to format the event_date for AtoM.
         rules_or_conventions (CharField):
             **Rules or Conventions** [CAAIS, Section 7.1]. Definition: *The
             rules, conventions or templates that were used in creating or
@@ -313,7 +317,7 @@ class Metadata(models.Model):
 
     DATE_PATTERN = r"(\d{4}-\d{2}-\d{2})(?:\s*-\s*(\d{4}-\d{2}-\d{2}))?"
 
-    def parse_event_date_for_atom(self) -> tuple[str, datetime.date, datetime.date]:
+    def parse_event_date_for_atom(self) -> tuple[str, date, date]:
         """Parse this metadata's date of materials into a three-tuple containing an event date for AtoM.
 
         If the date cannot be parsed, returns a three tuple containing:
@@ -328,8 +332,8 @@ class Metadata(models.Model):
         """
         default_dates = (
             settings.CAAIS_UNKNOWN_DATE_TEXT,
-            settings.CAAIS_UNKNOWN_START_DATE,
-            settings.CAAIS_UNKNOWN_END_DATE,
+            datetime.strptime(settings.CAAIS_UNKNOWN_START_DATE, "%Y-%m-%d").date(),
+            datetime.strptime(settings.CAAIS_UNKNOWN_END_DATE, "%Y-%m-%d").date(),
         )
 
         if not self.date_of_materials:
@@ -348,11 +352,16 @@ class Metadata(models.Model):
             end_date_str = match.group(2) if match.group(2) else start_date_str
             end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
-            # Return the parsed dates
+            formatted_date = None
             if start_date == end_date:
-                return start_date_str, start_date, end_date
+                formatted_date = start_date_str
             else:
-                return f"{start_date_str} - {end_date_str}", start_date, end_date
+                formatted_date = f"{start_date_str} - {end_date_str}"
+
+            if self.date_is_approximate:
+                formatted_date = settings.APPROXIMATE_DATE_FORMAT.format(date=formatted_date)
+
+            return formatted_date, start_date, end_date
 
         except (ValueError, TypeError):
             return default_dates
