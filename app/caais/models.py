@@ -27,7 +27,7 @@ from django.utils.translation import gettext
 from django_countries.fields import CountryField
 
 from caais.citation import cite_caais
-from caais.dates import EventDateParser, UnknownDateFormat
+from caais.dates import UnknownDateFormat
 from caais.export import ExportVersion
 from caais.managers import (
     AppraisalManager,
@@ -404,41 +404,18 @@ class Metadata(models.Model):
         row["culture"] = "en"
 
         if self.date_of_materials and not version == ExportVersion.ATOM_2_1:
-            try:
-                parser = EventDateParser(
-                    unknown_date=settings.CAAIS_UNKNOWN_DATE_TEXT,
-                    unknown_start_date=settings.CAAIS_UNKNOWN_START_DATE,
-                    unknown_end_date=settings.CAAIS_UNKNOWN_END_DATE,
-                    timid=False,
-                )
-                parsed_date, date_range = parser.parse_date(self.date_of_materials)
-                if len(date_range) == 1:
-                    start_date, end_date = date_range[0], date_range[0]
-                else:
-                    start_date, end_date = date_range[0], date_range[1]
+            parsed_date, start_date, end_date = self.parse_event_date_for_atom()
 
-                if version == ExportVersion.ATOM_2_2:
-                    row["creationDatesType"] = "Creation"
-                    row["creationDates"] = parsed_date
-                    row["creationDatesStart"] = str(start_date)
-                    row["creationDatesEnd"] = str(end_date)
-                else:
-                    row["eventTypes"] = "Creation"
-                    row["eventDates"] = parsed_date
-                    row["eventStartDates"] = str(start_date)
-                    row["eventEndDates"] = str(end_date)
-
-            except UnknownDateFormat:
-                if version == ExportVersion.ATOM_2_2:
-                    row["creationDatesType"] = "Creation"
-                    row["creationDates"] = settings.CAAIS_UNKNOWN_DATE_TEXT
-                    row["creationDatesStart"] = settings.CAAIS_UNKNOWN_START_DATE
-                    row["creationDatesEnd"] = settings.CAAIS_UNKNOWN_END_DATE
-                else:
-                    row["eventTypes"] = "Creation"
-                    row["eventDates"] = settings.CAAIS_UNKNOWN_DATE_TEXT
-                    row["eventStartDates"] = settings.CAAIS_UNKNOWN_START_DATE
-                    row["eventEndDates"] = settings.CAAIS_UNKNOWN_END_DATE
+            if version == ExportVersion.ATOM_2_2:
+                row["creationDatesType"] = "Creation"
+                row["creationDates"] = parsed_date
+                row["creationDatesStart"] = str(start_date)
+                row["creationDatesEnd"] = str(end_date)
+            else:
+                row["eventTypes"] = "Creation"
+                row["eventDates"] = parsed_date
+                row["eventStartDates"] = str(start_date)
+                row["eventEndDates"] = str(end_date)
 
     def _create_flat_caais_representation(self, row: dict, version: ExportVersion):
         # Section 1
