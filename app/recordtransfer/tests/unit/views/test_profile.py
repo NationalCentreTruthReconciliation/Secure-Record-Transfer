@@ -287,8 +287,10 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.url)
         local_tz = ZoneInfo(settings.TIME_ZONE)
         expiry_date = self.upload_session.expires_at.astimezone(local_tz).strftime(
-            "%a %b %-d, %Y @ %-H:%M"
+            "%a %b %d, %Y @ %H:%M"
         )
+        # Strip leading zeroes from start of day and month
+        expiry_date = re.sub(r"\s0+([^0]\d*)", r" \1", expiry_date)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         content = re.sub(r"\s+", " ", content).strip()
