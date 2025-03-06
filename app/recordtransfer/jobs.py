@@ -1,12 +1,12 @@
 import logging
 import os.path
 import shutil
+import tempfile
 import zipfile
-from io import BytesIO
 
 import django_rq
 from django.conf import settings
-from django.core.files.base import ContentFile
+from django.core.files.base import File
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
@@ -36,7 +36,6 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         start_time=timezone.now(),
         user_triggered=user_triggered,
         job_status=Job.JobStatus.IN_PROGRESS,
-        submission=submission,
     )
     new_job.save()
 
@@ -61,25 +60,31 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 new_job.save()
                 return
 
-        zipf = None
         try:
-            LOGGER.info("Zipping directory to an in-memory file ...")
-            zipf = BytesIO()
-            zipped_bag = zipfile.ZipFile(zipf, "w", zipfile.ZIP_DEFLATED, False)
-            zip_directory(submission.location, zipped_bag)
-            zipped_bag.close()
-            LOGGER.info("Zipped directory successfully")
+            os.makedirs(settings.TEMP_STORAGE_FOLDER, exist_ok=True)
+            with tempfile.TemporaryFile(
+                suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
+            ) as temp_zip_file:
+                LOGGER.info(
+                    "Creating temporary zip file on disk at %s ...",
+                    f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
+                )
+                zip_directory(
+                    submission.location,
+                    zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
+                )
+                LOGGER.info("Zipped directory successfully")
 
-            file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
-            LOGGER.info("Saving zip file as %s ...", file_name)
-            new_job.attached_file.save(file_name, ContentFile(zipf.getvalue()), save=True)
-            LOGGER.info("Saved file successfully")
+                file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
+                LOGGER.info("Saving zip file as %s ...", file_name)
+                new_job.attached_file.save(file_name, File(temp_zip_file), save=True)
+                LOGGER.info("Saved file successfully")
 
-            new_job.job_status = Job.JobStatus.COMPLETE
-            new_job.end_time = timezone.now()
-            new_job.save()
+                new_job.job_status = Job.JobStatus.COMPLETE
+                new_job.end_time = timezone.now()
+                new_job.save()
 
-            LOGGER.info("Downloadable bag created successfully")
+                LOGGER.info("Downloadable bag created successfully")
         except Exception as exc:
             new_job.job_status = Job.JobStatus.FAILED
             new_job.save()
@@ -89,8 +94,6 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 str(exc),
             )
         finally:
-            if zipf is not None:
-                zipf.close()
             if os.path.exists(submission.location):
                 LOGGER.info("Removing bag from disk after zip generation.")
                 shutil.rmtree(submission.location)
