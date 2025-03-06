@@ -17,7 +17,10 @@ The models here are not in the exact *order* as in the CAAIS document, but each
 field in the standard is defined in a model.
 '''
 from collections import OrderedDict
+from datetime import datetime
+import re
 
+from django import forms
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext
@@ -259,6 +262,12 @@ class Metadata(models.Model):
         )
     )
 
+    date_is_approximate = models.BooleanField(
+        null=False,
+        default=False,
+        help_text=gettext("Date is approximated")
+    )
+
     rules_or_conventions = models.CharField(
         null=False, max_length=256, blank=True, default='', help_text=cite_caais(
             gettext(
@@ -276,6 +285,53 @@ class Metadata(models.Model):
             ), section=(7, 3)
         )
     )
+
+    DATE_PATTERN = r"(\d{4}-\d{2}-\d{2})(?:\s*-\s*(\d{4}-\d{2}-\d{2}))?"
+
+    def parse_event_date_for_atom(self) -> tuple[str, datetime.date, datetime.date]:
+        """Parse this metadata's date of materials into a three-tuple containing an event date for AtoM.
+
+        If the date cannot be parsed, returns a three tuple containing:
+
+        - CAAIS_UNKNOWN_DATE_TEXT
+        - A date object representing CAAIS_UNKNOWN_START_DATE
+        - A date object representing CAAIS_UNKNOWN_END_DATE
+
+        Returns:
+            A three-tuple containing the text representation of the date, the earliest date in the
+            range, and the latest date in the range.
+        """
+        default_dates = (
+            settings.CAAIS_UNKNOWN_DATE_TEXT,
+            settings.CAAIS_UNKNOWN_START_DATE,
+            settings.CAAIS_UNKNOWN_END_DATE
+        )
+
+        if not self.date_of_materials:
+            return default_dates
+
+        match = re.search(Metadata.DATE_PATTERN, self.date_of_materials)
+
+        if not match:
+            return default_dates
+
+        try:
+            start_date_str = match.group(1)
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+
+            # Check if an end date was found
+            end_date_str = match.group(2) if match.group(2) else start_date_str
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+            # Return the parsed dates
+            if start_date == end_date:
+                return start_date_str, start_date, end_date
+            else:
+                return f"{start_date_str} - {end_date_str}", start_date, end_date
+
+        except (ValueError, TypeError):
+            return default_dates
+
 
     def _create_flat_atom_representation(self, row: dict, version: ExportVersion):
         row.update(self.identifiers.flatten(version))
