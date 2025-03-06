@@ -27,11 +27,11 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         user_triggered (User): The user who triggered this new Job creation
     """
     description = (
-        f"{str(user_triggered)} triggered this job to generate a download link for a submission"
+        f"{user_triggered!s} triggered this job to generate a download link for a submission"
     )
 
     new_job = Job(
-        name=f"Generate Downloadable Bag for {str(submission)}",
+        name=f"Generate Downloadable Bag for {submission!s}",
         description=description,
         start_time=timezone.now(),
         user_triggered=user_triggered,
