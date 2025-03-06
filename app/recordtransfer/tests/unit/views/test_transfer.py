@@ -140,10 +140,16 @@ class TransferFormWizardTests(TestCase):
 
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
     @patch("django_recaptcha.fields.ReCaptchaField.clean")
-    def test_wizard(self, mock_clean: MagicMock) -> None:
+    @patch("recordtransfer.views.transfer.send_submission_creation_success.delay")
+    @patch("recordtransfer.views.transfer.send_thank_you_for_your_transfer.delay")
+    def test_wizard(
+        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock, mock_clean: MagicMock
+    ) -> None:
         """Test the TransferFormWizard view from start to finish. This test will fill out the form
         with the test data and submit it, making sure no errors are raised.
         """
+        mock_thank_you.return_value = None
+        mock_creation_success.return_value = None
         mock_clean.return_value = "PASSED"
         self.assertEqual(200, self.client.get(self.url).status_code)
         self.assertFalse(self.user.submission_set.exists())
