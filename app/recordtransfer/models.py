@@ -941,10 +941,10 @@ class Submission(models.Model):
 
 
 class Job(models.Model):
-    """A background job executed by an admin user"""
+    """A background job executed by an admin user."""
 
     class JobStatus(models.TextChoices):
-        """The status of the bag's review"""
+        """The status of the bag's review."""
 
         NOT_STARTED = "NS", _("Not Started")
         IN_PROGRESS = "IP", _("In Progress")
@@ -960,23 +960,22 @@ class Job(models.Model):
         max_length=2, choices=JobStatus.choices, default=JobStatus.NOT_STARTED
     )
     attached_file = models.FileField(
-        upload_to="jobs/zipped_bags", storage=OverwriteStorage, blank=True, null=True
+        upload_to="jobs/attachments", storage=OverwriteStorage, blank=True, null=True
     )
-    submission = models.ForeignKey(
-        Submission, on_delete=models.CASCADE, null=True, related_name="job"
-    )
+    message_log = models.TextField(null=True)
 
-    def get_admin_change_url(self):
-        """Get the URL to change this object in the admin"""
+    def get_admin_change_url(self) -> str:
+        """Get the URL to change this object in the admin."""
         view_name = "admin:{0}_{1}_change".format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-    def get_admin_download_url(self):
-        """Get the URL to download the attached file from the admin"""
+    def get_admin_download_url(self) -> str:
+        """Get the URL to download the attached file from the admin."""
         view_name = "admin:{0}_{1}_download".format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a string representation of this object."""
         return f"{self.name} (Created by {self.user_triggered})"
 
 
