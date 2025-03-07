@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Verify application settings defined in settings/docker_dev.py."""
+    """Verify application settings defined in the DJANGO_SETTINGS_MODULE."""
 
     help = "Verify application settings."
 
