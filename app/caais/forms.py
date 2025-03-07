@@ -91,6 +91,7 @@ class MetadataForm(CaaisModelForm):
             self.fields["accession_identifier"].initial = accession_id
 
         original_dom_render = self.fields["date_of_materials"].widget.render
+        original_dia_render = self.fields["date_is_approximate"].widget.render
 
         def custom_dom_render(name, value, attrs=None, renderer=None):
             original_html = original_dom_render(name, value, attrs, renderer)
@@ -100,7 +101,14 @@ class MetadataForm(CaaisModelForm):
                 '<span class="approx-date-wrapper">]</span></div>'
             )
 
+        def custom_dia_render(name, value, attrs=None, renderer=None):
+            original_html = original_dia_render(name, value, attrs, renderer)
+            return (
+                f'<div class="date-is-approximate-wrapper help">{original_html}</div>'
+            )
+
         self.fields["date_of_materials"].widget.render = custom_dom_render
+        self.fields["date_is_approximate"].widget.render = custom_dia_render
 
     class Meta:
         model = Metadata

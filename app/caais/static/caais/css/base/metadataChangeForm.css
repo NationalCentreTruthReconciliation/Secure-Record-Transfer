@@ -42,3 +42,20 @@ td.delete {
     align-items: center;
     gap: 5px;
 }
+
+.flex-container.checkbox-row {
+    display: flex;
+    align-items: center;
+}
+
+.aligned .vCheckboxLabel {
+    padding: 0 0 0 5px;
+}
+
+.field-date_of_materials {
+    border-bottom: 0;
+}
+
+.field-date_is_approximate {
+    padding-top: 0;
+}
