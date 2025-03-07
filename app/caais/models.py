@@ -201,6 +201,10 @@ class Metadata(models.Model):
             **Date of Materials** [CAAIS, Section 3.1]. Definition: *A date or
             date range indicating when the materials were known or thought to
             have been created.*
+        date_is_approximate (BooleanField):
+            **Date is Approximate**: To indicate if the date of materials is
+            approximate or not. This is not a field in CAAIS, but is used to
+            determine whether to format the event_date for AtoM.
         rules_or_conventions (CharField):
             **Rules or Conventions** [CAAIS, Section 7.1]. Definition: *The
             rules, conventions or templates that were used in creating or
@@ -257,6 +261,11 @@ class Metadata(models.Model):
                 "indicate if not it has yet been determined"
             ), section=(3, 1)
         )
+    )
+
+    date_is_approximate = models.BooleanField(
+        null=False,
+        default=False,
     )
 
     rules_or_conventions = models.CharField(
@@ -319,6 +328,9 @@ class Metadata(models.Model):
                     timid=False
                 )
                 parsed_date, date_range = parser.parse_date(self.date_of_materials)
+                if self.date_is_approximate:
+                    parsed_date = settings.APPROXIMATE_DATE_FORMAT.format(date=parsed_date)
+
                 if len(date_range) == 1:
                     start_date, end_date = date_range[0], date_range[0]
                 else:
