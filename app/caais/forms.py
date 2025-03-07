@@ -87,6 +87,14 @@ class MetadataForm(CaaisModelForm):
             accession_id = self.instance.accession_identifier
             self.fields["accession_identifier"].initial = accession_id
 
+        # Custom render method for date_of_materials field
+        original_render = self.fields['date_of_materials'].widget.render
+        def wrapped_render(name, value, attrs=None, renderer=None):
+            original_html = original_render(name, value, attrs, renderer)
+            return f'<div class="date-materials-wrapper">' \
+                   f'<span>[ca.</span>{original_html}<span>]</span></div>'
+        self.fields['date_of_materials'].widget.render = wrapped_render
+
     class Meta:
         model = Metadata
         fields = (
