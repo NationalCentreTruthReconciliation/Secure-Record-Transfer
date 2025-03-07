@@ -36,3 +36,9 @@ td.delete {
 .country-select-flag {
     object-fit: contain;
 }
+
+.date-materials-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
