@@ -5,7 +5,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
 
-LOGGER = logging.getLogger("recordtransfer")
+LOGGER = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
