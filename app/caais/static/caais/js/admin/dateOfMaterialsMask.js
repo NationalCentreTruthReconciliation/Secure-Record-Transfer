@@ -12,17 +12,23 @@ $(document).ready(function() {
   
     const masks = {
         singleDate: {
-            pattern: "0000-00-00",
+            pattern: "Y000-00-00",
             options: {
                 clearIfNotMatch: false,
-                placeholder: "YYYY-MM-DD"
+                placeholder: "YYYY-MM-DD",
+                translation: {
+                    Y: {pattern: /[1-9]/},
+                }
             }
         },
         dateRange: {
-            pattern: "0000-00-00 - 0000-00-00",
+            pattern: "Y000-00-00 - Y000-00-00",
             options: {
                 clearIfNotMatch: false,
-                placeholder: "YYYY-MM-DD - YYYY-MM-DD"
+                placeholder: "YYYY-MM-DD - YYYY-MM-DD",
+                translation: {
+                    Y: {pattern: /[1-9]/},
+                }
             }
         }
     };
