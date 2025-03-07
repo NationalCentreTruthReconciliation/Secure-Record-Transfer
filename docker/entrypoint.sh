@@ -12,6 +12,8 @@ fi
 if [ "$IS_RQ" = 'yes' ]; then
   echo ">> Running database migrations."
   python manage.py migrate --no-input
+  echo ">> Verifying settings that require database migrations first."
+  python manage.py verify_settings
   echo ">> Starting RQ worker(s)"
 
 else

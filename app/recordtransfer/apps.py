@@ -259,12 +259,6 @@ def verify_caais_defaults() -> None:
     if not settings.CAAIS_DEFAULT_CREATION_TYPE:
         raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
 
-def verify_site_id():
-    """Verify that the SITE_ID setting is valid."""
-    from django.contrib.sites.models import Site  # Import here to avoid circular import
-    site_id = settings.SITE_ID
-    if not Site.objects.filter(pk=site_id).exists():
-        raise ImproperlyConfigured(f"Site with ID {site_id} does not exist. Check the configured SITE_ID")
 
 def _validate_cron(cron_str: str) -> None:
     """Validate a cron expression.
@@ -372,8 +366,6 @@ class RecordTransferConfig(AppConfig):
             verify_accepted_file_formats()
             verify_caais_defaults()
             verify_upload_session_expiry_settings()
-            if not settings.TESTING:
-                verify_site_id()
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)
