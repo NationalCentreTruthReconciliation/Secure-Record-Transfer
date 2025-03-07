@@ -9,7 +9,7 @@ LOGGER = logging.getLogger("recordtransfer")
 
 
 class Command(BaseCommand):
-    """Verify application settings that require database access. Requires migrations to be " \
+    """Verify application settings that require database access. Requires migrations to be
     run first.
     """
 
