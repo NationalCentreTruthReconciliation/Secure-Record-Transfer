@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 
@@ -94,11 +95,18 @@ class MetadataForm(CaaisModelForm):
         original_dia_render = self.fields["date_is_approximate"].widget.render
 
         def custom_dom_render(name, value, attrs=None, renderer=None):
+
             original_html = original_dom_render(name, value, attrs, renderer)
+
+            # Split the format at {date} to get prefix and suffix
+            parts = settings.APPROXIMATE_DATE_FORMAT.split("{date}")
+            prefix = parts[0] if len(parts) > 0 else ""
+            suffix = parts[1] if len(parts) > 1 else ""
+
             return (
                 f'<div class="date-materials-wrapper">' \
-                f'<span class="approx-date-wrapper">[ca.</span>{original_html}' \
-                '<span class="approx-date-wrapper">]</span></div>'
+                f'<span class="approx-date-wrapper">{prefix}</span>{original_html}' \
+                f'<span class="approx-date-wrapper">{suffix}</span></div>'
             )
 
         def custom_dia_render(name, value, attrs=None, renderer=None):
