@@ -2,13 +2,11 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
-
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
 from caais.models import (
     AbstractTerm,
-    Metadata,
     Appraisal,
     ArchivalUnit,
     AssociatedDocumentation,
@@ -17,6 +15,7 @@ from caais.models import (
     GeneralNote,
     Identifier,
     LanguageOfMaterial,
+    Metadata,
     PreliminaryCustodialHistory,
     PreliminaryScopeAndContent,
     PreservationRequirements,
@@ -24,7 +23,6 @@ from caais.models import (
     SourceOfMaterial,
     StorageLocation,
 )
-
 
 SelectTermWidget = forms.widgets.Select(
     attrs={
@@ -98,7 +96,6 @@ class MetadataForm(CaaisModelForm):
 
             original_html = original_dom_render(name, value, attrs, renderer)
 
-            # Split the format at {date} to get prefix and suffix
             parts = settings.APPROXIMATE_DATE_FORMAT.split("{date}")
             prefix = parts[0] if len(parts) > 0 else ""
             suffix = parts[1] if len(parts) > 1 else ""
