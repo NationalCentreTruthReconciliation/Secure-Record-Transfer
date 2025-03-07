@@ -9,6 +9,9 @@ const $ = django.jQuery;
 
 $(document).ready(function() {
     const dateField = $("#id_date_of_materials");
+
+    // Get the placeholder elements used to indicate that the date is approximate
+    const approxDatePlaceholders = $(".approx-date-wrapper");
   
     const masks = {
         singleDate: {
@@ -34,6 +37,18 @@ $(document).ready(function() {
     };
 
     /**
+     * Toggle display of approximate date placeholders based on checkbox state
+     */
+    function toggleApproxDatePlaceholders() {
+        const isApproximate = $("#id_date_is_approximate").is(":checked");
+        if (isApproximate) {
+            approxDatePlaceholders.show();
+        } else {
+            approxDatePlaceholders.hide();
+        }
+    }
+
+    /**
      * Apply the appropriate date mask based on the current value of the date field.
      */
     function applyAppropriateRangeMask() {
@@ -47,20 +62,20 @@ $(document).ready(function() {
         }
     }
   
-    // Initial mask application based on any existing value
     applyAppropriateRangeMask();
+    toggleApproxDatePlaceholders();
   
     // Apply appropriate mask when user types
     dateField.on("keyup", function(e) {
         const value = $(this).val();
     
-        // Check if user has entered a complete date (10 chars) and is trying to add a space
+        // Check if user has entered a complete single date and is trying to add a space
         if (value.length === 10 && e.key === " ") {
             // Remove the current mask to allow space entry
             $(this).unmask();
             // Auto-add date separator
             $(this).val(value + " - ");
-            // Apply range mask
+            // Apply ranged date mask
             $(this).mask(masks.dateRange.pattern, masks.dateRange.options);
         } else if (value.includes(" - ")) {
             // If it already contains the range separator, use range mask
@@ -71,4 +86,5 @@ $(document).ready(function() {
         }
     });
 
+    $("#id_date_is_approximate").on("change", toggleApproxDatePlaceholders);
 });
