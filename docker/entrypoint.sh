@@ -16,6 +16,9 @@ if [ "$SERVICE_NAME" = 'rq' ]; then
   python manage.py verify_settings
   echo ">> Starting RQ worker(s)"
 
+elif [ "$SERVICE_NAME" = 'rq-scheduler' ]; then
+  echo ">> Starting RQ scheduler"
+
 elif [ "$SERVICE_NAME" = 'app' ]; then
   if [ "$ENV" != 'dev' ]; then
     echo ">> Collecting static files."
