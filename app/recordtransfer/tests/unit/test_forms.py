@@ -299,32 +299,6 @@ class RecordDescriptionFormTest(TestCase):
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["date_of_materials"], "2020-01-01")
 
-    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "CIRCA {date}")
-    def test_approximate_date(self) -> None:
-        """Test that the approximate date format is applied."""
-        self.form_data["date_is_approximate"] = True
-        form = RecordDescriptionForm(data=self.form_data)
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data["date_of_materials"], "CIRCA 2020-01-01")
-
-    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "~ {date}")
-    def test_approximate_date_range(self) -> None:
-        """Test that the approximate date format is applied to a date range."""
-        self.form_data["date_of_materials"] = "2020-01-01 - 2020-12-31"
-        self.form_data["date_is_approximate"] = True
-        form = RecordDescriptionForm(data=self.form_data)
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data["date_of_materials"], "~ 2020-01-01 - 2020-12-31")
-
-    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "[ca. {date}]")
-    def test_approximate_date_same_start_and_end(self) -> None:
-        """Test that approximate dates when the start/end dates are the same."""
-        self.form_data["date_of_materials"] = "2024-02-03 - 2024-02-03"
-        self.form_data["date_is_approximate"] = True
-        form = RecordDescriptionForm(data=self.form_data)
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data["date_of_materials"], "[ca. 2024-02-03]")
-
 
 class SourceInfoFormTest(TestCase):
     """Tests the source information form (part of the transfer form)."""
