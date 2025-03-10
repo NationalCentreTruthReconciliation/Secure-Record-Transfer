@@ -27,5 +27,5 @@ class DateIsApproximateWidget(CheckboxInput):
         """Render the widget with additional HTML elements."""
         original_html = super().render(name, value, attrs, renderer)
         return mark_safe(
-            f'<div class="date-is-approximate-wrapper help">{original_html}</div>'
+            f'<div class="date-is-approximate-wrapper">{original_html}</div>'
         )

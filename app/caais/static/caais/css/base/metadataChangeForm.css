@@ -63,3 +63,16 @@ input#id_date_of_materials {
 .field-date_is_approximate {
     padding-top: 0;
 }
+
+.date-is-approximate-wrapper {
+    margin-top: 0;
+    margin-left: 160px;
+    padding-left: 10px;
+}
+
+@media screen and (max-width: 767px) {
+    .date-is-approximate-wrapper {
+        margin-left: 0;
+        padding-left: 0;
+    }
+}
