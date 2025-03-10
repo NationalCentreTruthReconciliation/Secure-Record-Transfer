@@ -9,14 +9,14 @@ if [ "$ENV" != 'dev' ]; then
 fi
 
 # Run database migrations in RQ container
-if [ "$IS_RQ" = 'yes' ]; then
+if [ "$SERVICE_NAME" = 'rq' ]; then
   echo ">> Running database migrations."
   python manage.py migrate --no-input
   echo ">> Verifying settings."
   python manage.py verify_settings
   echo ">> Starting RQ worker(s)"
 
-else
+elif [ "$SERVICE_NAME" = 'app' ]; then
   if [ "$ENV" != 'dev' ]; then
     echo ">> Collecting static files."
     python manage.py collectstatic --no-input --clear \
