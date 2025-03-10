@@ -1,7 +1,8 @@
-from datetime import datetime
 import re
+from datetime import datetime
+from typing import ClassVar
+
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
@@ -25,6 +26,7 @@ from caais.models import (
     SourceOfMaterial,
     StorageLocation,
 )
+from caais.widgets import DateIsApproximateWidget, DateOfMaterialsWidget
 
 SelectTermWidget = forms.widgets.Select(
     attrs={
@@ -85,39 +87,17 @@ class CaaisModelForm(forms.ModelForm):
 
 
 class MetadataForm(CaaisModelForm):
+    """Form for Metadata model."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
             accession_id = self.instance.accession_identifier
             self.fields["accession_identifier"].initial = accession_id
 
-        original_dom_render = self.fields["date_of_materials"].widget.render
-        original_dia_render = self.fields["date_is_approximate"].widget.render
-
-        def custom_dom_render(name, value, attrs=None, renderer=None):
-
-            original_html = original_dom_render(name, value, attrs, renderer)
-
-            parts = settings.APPROXIMATE_DATE_FORMAT.split("{date}")
-            prefix = parts[0] if len(parts) > 0 else ""
-            suffix = parts[1] if len(parts) > 1 else ""
-
-            return (
-                f'<div class="date-materials-wrapper">' \
-                f'<span class="approx-date-wrapper">{prefix}</span>{original_html}' \
-                f'<span class="approx-date-wrapper">{suffix}</span></div>'
-            )
-
-        def custom_dia_render(name, value, attrs=None, renderer=None):
-            original_html = original_dia_render(name, value, attrs, renderer)
-            return (
-                f'<div class="date-is-approximate-wrapper help">{original_html}</div>'
-            )
-
-        self.fields["date_of_materials"].widget.render = custom_dom_render
-        self.fields["date_is_approximate"].widget.render = custom_dia_render
-
     class Meta:
+        """MetadataForm Meta class."""
+
         model = Metadata
         fields = (
             "accession_title",
@@ -143,9 +123,11 @@ class MetadataForm(CaaisModelForm):
             "status",
         )
 
-        widgets = {
+        widgets: ClassVar = {
             "acquisition_method": SelectTermWidget,
             "status": SelectTermWidget,
+            "date_of_materials": DateOfMaterialsWidget,
+            "date_is_approximate": DateIsApproximateWidget,
         }
 
     accession_identifier = forms.CharField(
