@@ -464,7 +464,7 @@ class Metadata(models.Model):
             self._create_flat_caais_representation(row, version)
         return row
 
-    def update_accession_id(self, accession_id: str, commit: bool = True):
+    def update_accession_id(self, accession_id: str):
         """Update the accession identifier value, if an accession identifier
         exists.
 
@@ -475,8 +475,7 @@ class Metadata(models.Model):
         a_id = self.identifiers.accession_identifier()
         if a_id is not None:
             a_id.identifier_value = accession_id
-            if commit:
-                a_id.save()
+            a_id.save()
 
     def __str__(self):
         return self.accession_title or "No title"

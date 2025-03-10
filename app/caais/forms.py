@@ -263,11 +263,10 @@ class MetadataForm(CaaisModelForm):
                 identifier_value=accession_id,
             )
 
-            if commit:
-                new_id.save()
+            new_id.save()
 
         else:
-            metadata.update_accession_id(accession_id, commit)
+            metadata.update_accession_id(accession_id)
 
         return metadata
 
