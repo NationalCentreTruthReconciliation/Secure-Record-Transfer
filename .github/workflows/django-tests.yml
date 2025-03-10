@@ -2,11 +2,9 @@ name: Run Django Tests with pytest
 
 on:
   pull_request:
-    branches:
-      - master
+    branches: [master, 353-remove-caais-dates-module]
   push:
-    branches:
-      - master
+    branches: [master, 353-remove-caais-dates-module]
 
 jobs:
   test:

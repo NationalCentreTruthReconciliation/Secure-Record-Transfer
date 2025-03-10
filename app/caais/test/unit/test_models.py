@@ -320,6 +320,70 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.delete()
 
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_full_section_3_related_caais_1_0_approximate_date(self):
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate.
+        """
+        metadata = Metadata(
+            date_of_materials="2018",
+            date_is_approximate=True,
+        )
+        extent_type = ExtentType(name="Extent Received")
+        content_type = ContentType(name="Digital Content")
+        carrier_type = CarrierType(name="Digital Transfer")
+        extent_1 = ExtentStatement(
+            metadata=metadata,
+            extent_type=extent_type,
+            quantity_and_unit_of_measure="10 PDF Files, worth 5MB",
+            content_type=content_type,
+            carrier_type=carrier_type,
+        )
+        extent_2 = ExtentStatement(
+            metadata=metadata,
+            quantity_and_unit_of_measure="1 XLSX file",
+            content_type=content_type,
+            extent_note="Notes",
+        )
+        language_1 = LanguageOfMaterial(
+            metadata=metadata,
+            language_of_material="English",
+        )
+        language_2 = LanguageOfMaterial(
+            metadata=metadata,
+            language_of_material="French",
+        )
+        objects = (
+            metadata,
+            extent_type,
+            content_type,
+            carrier_type,
+            extent_1,
+            extent_2,
+            language_1,
+            language_2,
+        )
+        for obj in objects:
+            obj.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+
+        self.assertEqual(flat["dateOfMaterials"], "Circa 2018")
+        self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
+        self.assertEqual(flat["quantityAndUnitOfMeasure"], "10 PDF Files, worth 5MB|1 XLSX file")
+        self.assertEqual(flat["contentTypes"], "Digital Content|Digital Content")
+        self.assertEqual(flat["carrierTypes"], "Digital Transfer|NULL")
+        self.assertEqual(flat["extentNotes"], "NULL|Notes")
+        self.assertEqual(flat["preliminaryScopeAndContent"], "")
+        self.assertEqual(flat["languageOfMaterials"], "English|French")
+
+        for obj in objects:
+            obj.delete()
+
     def test_flatten_metadata_full_section_4_related_caais_1_0(self):
         metadata = Metadata()
         location_1 = StorageLocation(
