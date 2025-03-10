@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Union
-from unittest.mock import patch
 
 from caais.models import SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
