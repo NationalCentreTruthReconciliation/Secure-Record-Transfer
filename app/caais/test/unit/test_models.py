@@ -607,7 +607,7 @@ class TestMetadata(TestCase):
         metadata = Metadata(
             repository="Repository",
             accession_title="Title",
-            date_of_materials="September 2023",
+            date_of_materials="2023-09-01 - 2023-09-30",
             rules_or_conventions="CAAIS v1.0",
             language_of_accession_record="en",
         )
@@ -622,7 +622,7 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["eventTypes"], "Creation")
-        self.assertEqual(flat["eventDates"], "September 2023")
+        self.assertEqual(flat["eventDates"], "2023-09-01 - 2023-09-30")
         self.assertEqual(flat["eventStartDates"], "2023-09-01")
         self.assertEqual(flat["eventEndDates"], "2023-09-30")
 
@@ -632,7 +632,7 @@ class TestMetadata(TestCase):
         metadata = Metadata(
             repository="Repository",
             accession_title="Title",
-            date_of_materials="June 2023",
+            date_of_materials="2023-06-01 - 2023-06-30",
             rules_or_conventions="CAAIS v1.0",
             language_of_accession_record="en",
         )
@@ -647,7 +647,7 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["eventTypes"], "Creation")
-        self.assertEqual(flat["eventDates"], "June 2023")
+        self.assertEqual(flat["eventDates"], "2023-06-01 - 2023-06-30")
         self.assertEqual(flat["eventStartDates"], "2023-06-01")
         self.assertEqual(flat["eventEndDates"], "2023-06-30")
 
@@ -657,7 +657,7 @@ class TestMetadata(TestCase):
         metadata = Metadata(
             repository="Repository",
             accession_title="Title",
-            date_of_materials="[ca. 2018]",
+            date_of_materials="2018-01-01 - 2018-12-31",
             rules_or_conventions="CAAIS v1.0",
             language_of_accession_record="en",
         )
@@ -672,7 +672,7 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["creationDatesType"], "Creation")
-        self.assertEqual(flat["creationDates"], "2018")
+        self.assertEqual(flat["creationDates"], "2018-01-01 - 2018-12-31")
         self.assertEqual(flat["creationDatesStart"], "2018-01-01")
         self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
 
