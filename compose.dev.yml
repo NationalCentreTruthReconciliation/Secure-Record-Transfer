@@ -58,7 +58,7 @@ services:
     # See manage.py for debugger setup
     environment:
       - ENV=dev
-      - IS_RQ=yes
+      - SERVICE_NAME=rq
       - ENABLE_DEBUGPY=1
       - ENABLE_DEBUGPY_ON_COMMAND=rqworker
       - DEBUGPY_PORT=8010
@@ -79,7 +79,7 @@ services:
     # See manage.py for debugger setup
     environment:
       - ENV=dev
-      - IS_RQ=no
+      - SERVICE_NAME=rq-scheduler
       - WEBPACK_MODE=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
@@ -101,7 +101,7 @@ services:
     # See manage.py for debugger setup
     environment:
       - ENV=dev
-      - IS_RQ=no
+      - SERVICE_NAME=app
       - ENABLE_DEBUGPY=1
       - ENABLE_DEBUGPY_ON_COMMAND=runserver
       - DEBUGPY_PORT=8009
