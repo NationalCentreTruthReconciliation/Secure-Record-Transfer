@@ -43,6 +43,10 @@ td.delete {
     gap: 5px;
 }
 
+input#id_date_of_materials {
+    width: 23ch;
+}
+
 .flex-container.checkbox-row {
     display: flex;
     align-items: center;
