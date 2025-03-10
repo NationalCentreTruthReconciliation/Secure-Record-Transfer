@@ -135,7 +135,6 @@ class MetadataForm(CaaisModelForm):
         required = (
             "accession_title",
             "date_of_materials",
-            "date_is_approximate",
             "accession_identifier",
         )
 
