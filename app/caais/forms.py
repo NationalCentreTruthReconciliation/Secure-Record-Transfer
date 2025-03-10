@@ -99,8 +99,8 @@ class MetadataForm(CaaisModelForm):
         original_help_text = self.fields["date_of_materials"].help_text
         self.fields["date_of_materials"].help_text = (
             original_help_text
-            + ". Use the date format YYYY-MM-DD for a single date or YYYY-MM-DD - YYYY-MM-DD for a "
-            "date range"
+            + gettext(". Use the date format YYYY-MM-DD for a single date or YYYY-MM-DD - YYYY-MM-DD for a "
+            "date range")
         )
 
     class Meta:
