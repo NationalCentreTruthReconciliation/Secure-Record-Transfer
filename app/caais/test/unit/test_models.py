@@ -260,10 +260,12 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.delete()
 
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
     def test_flatten_metadata_full_section_3_related_caais_1_0(self):
         """Test flattening of only section 3 of CAAIS metadata"""
         metadata = Metadata(
-            date_of_materials="Circa 2018",
+            date_of_materials="March 2018",
+            date_is_approximate=False,
         )
         extent_type = ExtentType(name="Extent Received")
         content_type = ContentType(name="Digital Content")
@@ -308,7 +310,7 @@ class TestMetadata(TestCase):
         for key in flat.keys():
             self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
 
-        self.assertEqual(flat["dateOfMaterials"], "Circa 2018")
+        self.assertEqual(flat["dateOfMaterials"], "March 2018")
         self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
         self.assertEqual(flat["quantityAndUnitOfMeasure"], "10 PDF Files, worth 5MB|1 XLSX file")
         self.assertEqual(flat["contentTypes"], "Digital Content|Digital Content")
