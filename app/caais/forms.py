@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 
 from django_countries.fields import CountryField
-from django_countries.widgets import CountrySelectWidget
 
 from caais.models import (
     AbstractTerm,
@@ -23,6 +22,7 @@ from caais.models import (
     SourceOfMaterial,
     StorageLocation,
 )
+from caais.widgets import CustomCountrySelectWidget
 
 
 SelectTermWidget = forms.widgets.Select(attrs={
@@ -263,7 +263,7 @@ class InlineSourceOfMaterialForm(CaaisModelForm):
 
     country = CountryField(blank_label=gettext('Select a Country')).formfield(
         required=False,
-        widget=CountrySelectWidget(
+        widget=CustomCountrySelectWidget(
             attrs={
                 'class': 'vTextField',
             }
