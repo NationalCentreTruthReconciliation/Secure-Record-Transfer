@@ -54,7 +54,7 @@ services:
       - .prod.env
     environment:
       - ENV=prod
-      - IS_RQ=yes
+      - SERVICE_NAME=rq
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
       - db
@@ -71,7 +71,7 @@ services:
       - .prod.env
     environment:
       - ENV=prod
-      - IS_RQ=no
+      - SERVICE_NAME=rq-scheduler
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
       - rq
@@ -86,7 +86,7 @@ services:
       - .prod.env
     environment:
       - ENV=prod
-      - IS_RQ=no
+      - SERVICE_NAME=app
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
       - rq
