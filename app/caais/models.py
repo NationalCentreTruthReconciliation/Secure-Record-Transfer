@@ -17,7 +17,9 @@ The models here are not in the exact *order* as in the CAAIS document, but each
 field in the standard is defined in a model.
 """
 
+import re
 from collections import OrderedDict
+from datetime import date, datetime
 
 from django.conf import settings
 from django.db import models
@@ -25,7 +27,7 @@ from django.utils.translation import gettext
 from django_countries.fields import CountryField
 
 from caais.citation import cite_caais
-from caais.dates import EventDateParser, UnknownDateFormat
+from caais.dates import UnknownDateFormat
 from caais.export import ExportVersion
 from caais.managers import (
     AppraisalManager,
@@ -314,6 +316,53 @@ class Metadata(models.Model):
         ),
     )
 
+    DATE_PATTERN = r"(\d{4}-\d{2}-\d{2})(?:\s*-\s*(\d{4}-\d{2}-\d{2}))?"
+
+    def parse_event_date_for_atom(self) -> tuple[str, date, date]:
+        """Parse this metadata's date of materials into a three-tuple containing an event date for
+        AtoM.
+
+        If the date cannot be parsed, returns a three tuple containing:
+        - CAAIS_UNKNOWN_DATE_TEXT
+        - A date object representing CAAIS_UNKNOWN_START_DATE
+        - A date object representing CAAIS_UNKNOWN_END_DATE
+        Returns:
+            A three-tuple containing the text representation of the date, the earliest date in the
+            range, and the latest date in the range.
+        """
+        default_dates = (
+            settings.CAAIS_UNKNOWN_DATE_TEXT,
+            datetime.strptime(settings.CAAIS_UNKNOWN_START_DATE, "%Y-%m-%d").date(),
+            datetime.strptime(settings.CAAIS_UNKNOWN_END_DATE, "%Y-%m-%d").date(),
+        )
+
+        if not self.date_of_materials:
+            return default_dates
+
+        match = re.search(Metadata.DATE_PATTERN, self.date_of_materials)
+
+        if not match:
+            return default_dates
+
+        try:
+            start_date_str = match.group(1)
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+
+            # Check if an end date was found
+            end_date_str = match.group(2) if match.group(2) else start_date_str
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+            formatted_date = None
+            if start_date == end_date:
+                formatted_date = start_date_str
+            else:
+                formatted_date = f"{start_date_str} - {end_date_str}"
+
+            return formatted_date, start_date, end_date
+
+        except (ValueError, TypeError):
+            return default_dates
+
     def _create_flat_atom_representation(self, row: dict, version: ExportVersion):
         row.update(self.identifiers.flatten(version))
         row.update(self.archival_units.flatten(version))
@@ -353,20 +402,9 @@ class Metadata(models.Model):
 
         if self.date_of_materials and not version == ExportVersion.ATOM_2_1:
             try:
-                parser = EventDateParser(
-                    unknown_date=settings.CAAIS_UNKNOWN_DATE_TEXT,
-                    unknown_start_date=settings.CAAIS_UNKNOWN_START_DATE,
-                    unknown_end_date=settings.CAAIS_UNKNOWN_END_DATE,
-                    timid=False,
-                )
-                parsed_date, date_range = parser.parse_date(self.date_of_materials)
+                parsed_date, start_date, end_date = self.parse_event_date_for_atom()
                 if self.date_is_approximate:
                     parsed_date = settings.APPROXIMATE_DATE_FORMAT.format(date=parsed_date)
-
-                if len(date_range) == 1:
-                    start_date, end_date = date_range[0], date_range[0]
-                else:
-                    start_date, end_date = date_range[0], date_range[1]
 
                 if version == ExportVersion.ATOM_2_2:
                     row["creationDatesType"] = "Creation"
