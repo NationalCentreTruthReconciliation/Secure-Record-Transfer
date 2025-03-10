@@ -375,7 +375,14 @@ class Metadata(models.Model):
         row.update(self.preliminary_custodial_histories.flatten(version))
 
         # Section 3
-        row['dateOfMaterials'] = self.date_of_materials or ''
+        if self.date_of_materials:
+            row["dateOfMaterials"] = (
+                settings.APPROXIMATE_DATE_FORMAT.format(date=self.date_of_materials)
+                if self.date_is_approximate
+                else self.date_of_materials
+            )
+        else:
+            row["dateOfMaterials"] = ""
         row.update(self.extent_statements.flatten(version))
         row.update(self.preliminary_scope_and_contents.flatten(version))
         row.update(self.language_of_materials.flatten(version))
