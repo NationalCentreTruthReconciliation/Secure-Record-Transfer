@@ -95,6 +95,14 @@ class MetadataForm(CaaisModelForm):
             accession_id = self.instance.accession_identifier
             self.fields["accession_identifier"].initial = accession_id
 
+        # Append to the help_text for date_of_materials provided by the Metadata model
+        original_help_text = self.fields["date_of_materials"].help_text
+        self.fields["date_of_materials"].help_text = (
+            original_help_text
+            + ". Use the date format YYYY-MM-DD for a single date or YYYY-MM-DD - YYYY-MM-DD for a "
+            "date range"
+        )
+
     class Meta:
         """MetadataForm Meta class."""
 
