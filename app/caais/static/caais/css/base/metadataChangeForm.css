@@ -32,11 +32,6 @@ td.delete {
     padding: 6px 0 0 0;
 }
 
-/* For the country select flag */
-.country-select-flag {
-    object-fit: contain;
-}
-
 .date-materials-wrapper {
     display: flex;
     align-items: center;
