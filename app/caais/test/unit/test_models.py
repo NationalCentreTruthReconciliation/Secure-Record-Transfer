@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import patch
 
 from django.db.utils import IntegrityError
@@ -792,8 +792,8 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "Unknown")
-        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
-        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
     @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
@@ -806,8 +806,8 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "Unknown")
-        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
-        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
     @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
@@ -820,7 +820,7 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "2023-05-15")
-        self.assertEqual(start_date, datetime.strptime("2023-05-15", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(2023, 5, 15))
         self.assertEqual(end_date, start_date)
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
@@ -834,8 +834,8 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "Unknown")
-        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
-        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
     @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
@@ -848,8 +848,8 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "2023-01-01 - 2023-12-31")
-        self.assertEqual(start_date, datetime.strptime("2023-01-01", "%Y-%m-%d").date())
-        self.assertEqual(end_date, datetime.strptime("2023-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(2023, 1, 1))
+        self.assertEqual(end_date, date(2023, 12, 31))
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
     @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
@@ -862,7 +862,7 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "2023-01-01")  # Parsed date is only the valid date
-        self.assertEqual(start_date, datetime.strptime("2023-01-01", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(2023, 1, 1))
         self.assertEqual(end_date, start_date)
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
@@ -876,7 +876,7 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "2023-12-31")  # Parsed date is only the valid date
-        self.assertEqual(start_date, datetime.strptime("2023-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(2023, 12, 31))
         self.assertEqual(end_date, start_date)
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
@@ -890,8 +890,8 @@ class TestMetadata(TestCase):
         date_text, start_date, end_date = metadata.parse_event_date_for_atom()
 
         self.assertEqual(date_text, "Unknown")
-        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
-        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
     @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
@@ -905,5 +905,5 @@ class TestMetadata(TestCase):
 
         # Should use the first two dates found
         self.assertEqual(date_text, "2023-01-01 - 2023-12-31")
-        self.assertEqual(start_date, datetime.strptime("2023-01-01", "%Y-%m-%d").date())
-        self.assertEqual(end_date, datetime.strptime("2023-12-31", "%Y-%m-%d").date())
+        self.assertEqual(start_date, date(2023, 1, 1))
+        self.assertEqual(end_date, date(2023, 12, 31))
