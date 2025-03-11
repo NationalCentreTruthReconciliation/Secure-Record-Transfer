@@ -1,9 +1,9 @@
 from datetime import datetime
+from unittest.mock import patch
 
 from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
-from unittest.mock import patch
 
 from caais.export import ExportVersion
 from caais.models import (
@@ -17,8 +17,8 @@ from caais.models import (
     CreationOrRevisionType,
     DateOfCreationOrRevision,
     DispositionAuthority,
-    EventType,
     Event,
+    EventType,
     ExtentStatement,
     ExtentType,
     GeneralNote,
@@ -57,12 +57,6 @@ class TestIdentifier(TestCase):
             language_of_accession_record="en",
         )
         cls.metadata.save()
-
-    def tearDown(self) -> None:
-        """Delete all objects created during the test."""
-        Metadata.objects.all().delete()
-        AcquisitionMethod.objects.all().delete()
-        Status.objects.all().delete()
 
     def test_new_identifier(self):
         identifier = Identifier(
@@ -107,6 +101,14 @@ class TestIdentifier(TestCase):
 
 
 class TestMetadata(TestCase):
+    """Test the Metadata model."""
+
+    def tearDown(self) -> None:
+        """Delete all objects created during the test."""
+        Metadata.objects.all().delete()
+        AcquisitionMethod.objects.all().delete()
+        Status.objects.all().delete()
+
     def test_new_metadata(self):
         metadata = Metadata(
             repository="Repository",
@@ -146,8 +148,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["dateOfMaterials"], "2023-09-30")
         self.assertEqual(flat["rulesOrConventions"], "CAAIS v1.0")
         self.assertEqual(flat["languageOfAccessionRecord"], "en")
-
-        metadata.delete()
 
     def test_flatten_metadata_full_section_1_related_caais_1_0(self):
         """Test flattening of only section 1 of CAAIS metadata"""
@@ -556,7 +556,6 @@ class TestMetadata(TestCase):
         note_1.delete()
         note_2.delete()
         note_3.delete()
-        metadata.delete()
 
     @patch.object(
         timezone,
@@ -609,7 +608,6 @@ class TestMetadata(TestCase):
             creation_type.delete()
         if rt_created:
             revision_type.delete()
-        metadata.delete()
 
     def test_flatten_metadata_no_related_atom_2_6(self):
         metadata = Metadata(
@@ -633,8 +631,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["eventDates"], "2023-09-01 - 2023-09-30")
         self.assertEqual(flat["eventStartDates"], "2023-09-01")
         self.assertEqual(flat["eventEndDates"], "2023-09-30")
-
-        metadata.delete()
 
     @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
     def test_flatten_metadata_no_related_atom_2_6_approximate_date(self) -> None:
@@ -664,8 +660,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["eventStartDates"], "2023-09-01")
         self.assertEqual(flat["eventEndDates"], "2023-09-30")
 
-        metadata.delete()
-
     def test_flatten_metadata_no_related_atom_2_3(self):
         metadata = Metadata(
             repository="Repository",
@@ -688,8 +682,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["eventDates"], "2023-06-01 - 2023-06-30")
         self.assertEqual(flat["eventStartDates"], "2023-06-01")
         self.assertEqual(flat["eventEndDates"], "2023-06-30")
-
-        metadata.delete()
 
     @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
     def test_flatten_metadata_no_related_atom_2_3_approximate_date(self) -> None:
@@ -719,8 +711,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["eventStartDates"], "2023-06-01")
         self.assertEqual(flat["eventEndDates"], "2023-06-30")
 
-        metadata.delete()
-
     def test_flatten_metadata_no_related_atom_2_2(self):
         metadata = Metadata(
             repository="Repository",
@@ -743,8 +733,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["creationDates"], "2018-01-01 - 2018-12-31")
         self.assertEqual(flat["creationDatesStart"], "2018-01-01")
         self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
-
-        metadata.delete()
 
     @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
     def test_flatten_metadata_no_related_atom_2_2_approximate_date(self) -> None:
@@ -774,8 +762,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["creationDatesStart"], "2018-01-01")
         self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
 
-        metadata.delete()
-
     def test_flatten_metadata_no_related_atom_2_1(self):
         metadata = Metadata(
             repository="Repository",
@@ -794,8 +780,6 @@ class TestMetadata(TestCase):
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
-
-        metadata.delete()
 
     @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
     @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
