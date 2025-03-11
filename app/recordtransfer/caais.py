@@ -52,6 +52,7 @@ def map_form_to_metadata(form_data: dict) -> Metadata:
         acquisition_method=term_or_default(form_data, "acquisition_method", AcquisitionMethod),
         status=term_or_default(form_data, "status", Status),
         date_of_materials=str_or_default(form_data, "date_of_materials"),
+        date_is_approximate=form_data.get("date_is_approximate", False),
         rules_or_conventions=str_or_default(form_data, "rules_or_conventions"),
         language_of_accession_record=str_or_default(form_data, "language_of_accession_record"),
     )

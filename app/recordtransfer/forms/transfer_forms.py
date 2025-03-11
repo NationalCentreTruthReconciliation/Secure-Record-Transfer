@@ -597,11 +597,6 @@ class RecordDescriptionForm(TransferForm):
                 if end_date == start_date:
                     cleaned_data["date_of_materials"] = raw_start_date
 
-        if cleaned_data.get("date_is_approximate", False) and (
-            date := cleaned_data.get("date_of_materials")
-        ):
-            cleaned_data["date_of_materials"] = settings.APPROXIMATE_DATE_FORMAT.format(date=date)
-
         return cleaned_data
 
     accession_title = forms.CharField(
