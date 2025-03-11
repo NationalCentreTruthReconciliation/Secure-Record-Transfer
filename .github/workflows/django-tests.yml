@@ -2,9 +2,9 @@ name: Run Django Tests with pytest
 
 on:
   pull_request:
-    branches: [master, 353-remove-caais-dates-module]
+    branches: [master]
   push:
-    branches: [master, 353-remove-caais-dates-module]
+    branches: [master]
 
 jobs:
   test:
@@ -15,20 +15,20 @@ jobs:
         python-version: ["3.9", "3.10"]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install pipx
-      run: python -m pip install --upgrade pip && pip install pipx
+      - name: Install pipx
+        run: python -m pip install --upgrade pip && pip install pipx
 
-    - name: Install Poetry
-      run: pipx install poetry
+      - name: Install Poetry
+        run: pipx install poetry
 
-    - name: Install dependencies
-      run: poetry install --extras "dev"
+      - name: Install dependencies
+        run: poetry install --extras "dev"
 
-    - name: Run unit tests
-      run: poetry run pytest -k "unit"
+      - name: Run unit tests
+        run: poetry run pytest -k "unit"
