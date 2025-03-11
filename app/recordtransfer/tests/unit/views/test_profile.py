@@ -289,8 +289,8 @@ class TestUserProfileView(TestCase):
         expiry_date = self.upload_session.expires_at.astimezone(local_tz).strftime(
             "%a %b %d, %Y @ %H:%M"
         )
-        # Strip leading zeroes from start of day and month but keep for hours
-        expiry_date = re.sub(r"\s0+([^0]\d*,)", r" \1", expiry_date)
+        # Strip leading zeroes from start of day and month
+        expiry_date = re.sub(r"\s0+([^0]\d*)", r" \1", expiry_date)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         content = re.sub(r"\s+", " ", content).strip()
