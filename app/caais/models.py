@@ -331,6 +331,7 @@ class Metadata(models.Model):
         - CAAIS_UNKNOWN_DATE_TEXT
         - A date object representing CAAIS_UNKNOWN_START_DATE
         - A date object representing CAAIS_UNKNOWN_END_DATE
+
         Returns:
             A three-tuple containing the text representation of the date, the earliest date in the
             range, and the latest date in the range.
