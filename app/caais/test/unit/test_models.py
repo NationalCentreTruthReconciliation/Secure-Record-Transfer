@@ -58,6 +58,12 @@ class TestIdentifier(TestCase):
         )
         cls.metadata.save()
 
+    def tearDown(self) -> None:
+        """Delete all objects created during the test."""
+        Metadata.objects.all().delete()
+        AcquisitionMethod.objects.all().delete()
+        Status.objects.all().delete()
+
     def test_new_identifier(self):
         identifier = Identifier(
             metadata=self.metadata,
@@ -790,3 +796,130 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["acquisitionType"], "")
 
         metadata.delete()
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_empty_date(self) -> None:
+        """Test parsing an empty date."""
+        metadata = Metadata(date_of_materials="")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_invalid_date_format(self) -> None:
+        """Test parsing a date that doesn't match the expected pattern."""
+        metadata = Metadata(date_of_materials="January 2023")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_single_date(self) -> None:
+        """Test parsing a single valid date."""
+        metadata = Metadata(date_of_materials="2023-05-15")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-05-15")
+        self.assertEqual(start_date, datetime.strptime("2023-05-15", "%Y-%m-%d").date())
+        self.assertEqual(end_date, start_date)
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_single_invalid_date(self) -> None:
+        """Test parsing a single date with invalid format."""
+        metadata = Metadata(date_of_materials="2023-13-45")  # Invalid month and day
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_date_range(self) -> None:
+        """Test parsing a valid date range."""
+        metadata = Metadata(date_of_materials="2023-01-01 - 2023-12-31")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-01-01 - 2023-12-31")
+        self.assertEqual(start_date, datetime.strptime("2023-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, datetime.strptime("2023-12-31", "%Y-%m-%d").date())
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_partial_date_range_start_valid(self) -> None:
+        """Test parsing a date range with only start date valid."""
+        metadata = Metadata(date_of_materials="2023-01-01 - 2023-13-45")  # End date invalid
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-01-01")  # Parsed date is only the valid date
+        self.assertEqual(start_date, datetime.strptime("2023-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, start_date)
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_partial_date_range_end_valid(self) -> None:
+        """Test parsing a date range with only end date valid."""
+        metadata = Metadata(date_of_materials="2023-13-45 - 2023-12-31")  # Start date invalid
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-12-31")  # Parsed date is only the valid date
+        self.assertEqual(start_date, datetime.strptime("2023-12-31", "%Y-%m-%d").date())
+        self.assertEqual(end_date, start_date)
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_both_dates_invalid(self) -> None:
+        """Test parsing a date range where both dates are invalid."""
+        metadata = Metadata(date_of_materials="2023-13-45 - 2023-14-45")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, datetime.strptime("1900-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, datetime.strptime("1900-12-31", "%Y-%m-%d").date())
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_multiple_dates(self) -> None:
+        """Test parsing a string with multiple dates."""
+        metadata = Metadata(date_of_materials="2023-01-01 2023-12-31 2024-06-15")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        # Should use the first two dates found
+        self.assertEqual(date_text, "2023-01-01 - 2023-12-31")
+        self.assertEqual(start_date, datetime.strptime("2023-01-01", "%Y-%m-%d").date())
+        self.assertEqual(end_date, datetime.strptime("2023-12-31", "%Y-%m-%d").date())

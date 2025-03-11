@@ -48,6 +48,7 @@ from caais.managers import (
     SourceOfMaterialManager,
     StorageLocationManager,
 )
+import contextlib
 
 
 class AbstractTerm(models.Model):
@@ -316,11 +317,15 @@ class Metadata(models.Model):
         ),
     )
 
-    DATE_PATTERN = r"(\d{4}-\d{2}-\d{2})(?:\s*-\s*(\d{4}-\d{2}-\d{2}))?"
+    DATE_PATTERN = r"\d{4}-\d{2}-\d{2}"
 
     def parse_event_date_for_atom(self) -> tuple[str, date, date]:
         """Parse this metadata's date of materials into a three-tuple containing an event date for
         AtoM.
+
+        Uses the same start date and end date if only one date is provided. For an invalid date
+        range with at least either a valid start or end date, the valid date is used for both
+        start and end date.
 
         If the date cannot be parsed, returns a three tuple containing:
         - CAAIS_UNKNOWN_DATE_TEXT
@@ -339,29 +344,41 @@ class Metadata(models.Model):
         if not self.date_of_materials:
             return default_dates
 
-        match = re.search(Metadata.DATE_PATTERN, self.date_of_materials)
+        dates = re.findall(Metadata.DATE_PATTERN, self.date_of_materials)
 
-        if not match:
+        if not dates:
             return default_dates
 
-        try:
-            start_date_str = match.group(1)
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        start_date = None
+        end_date = None
 
-            # Check if an end date was found
-            end_date_str = match.group(2) if match.group(2) else start_date_str
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        if len(dates) == 1:
+            try:
+                start_date = datetime.strptime(dates[0], "%Y-%m-%d").date()
+                end_date = start_date
+            except ValueError:
+                return default_dates
+        else:
+            start_date = None
+            with contextlib.suppress(ValueError):
+                start_date = datetime.strptime(dates[0], "%Y-%m-%d").date()
 
-            formatted_date = None
-            if start_date == end_date:
-                formatted_date = start_date_str
-            else:
-                formatted_date = f"{start_date_str} - {end_date_str}"
+            end_date = None
+            with contextlib.suppress(ValueError):
+                end_date = datetime.strptime(dates[1], "%Y-%m-%d").date()
 
-            return formatted_date, start_date, end_date
-
-        except (ValueError, TypeError):
+        if start_date is None and end_date is None:
             return default_dates
+        elif start_date is None:
+            start_date = end_date
+        elif end_date is None:
+            end_date = start_date
+
+        formatted_date = f"{start_date} - {end_date}"
+        if start_date == end_date:
+            formatted_date = str(start_date)
+
+        return formatted_date, start_date, end_date # type: ignore
 
     def _create_flat_atom_representation(self, row: dict, version: ExportVersion):
         row.update(self.identifiers.flatten(version))
