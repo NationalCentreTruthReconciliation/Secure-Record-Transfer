@@ -325,7 +325,8 @@ class Metadata(models.Model):
 
         Uses the same start date and end date if only one date is provided. For an invalid date
         range with at least either a valid start or end date, the valid date is used for both
-        start and end date.
+        start and end date. The returned text representation of the date in this case is the single
+        valid date.
 
         If the date cannot be parsed, returns a three tuple containing:
         - CAAIS_UNKNOWN_DATE_TEXT
