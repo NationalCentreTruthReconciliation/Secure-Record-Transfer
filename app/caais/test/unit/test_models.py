@@ -630,6 +630,36 @@ class TestMetadata(TestCase):
 
         metadata.delete()
 
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_no_related_atom_2_6_approximate_date(self) -> None:
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate, using ATOM 2.6.
+        """
+        metadata = Metadata(
+            repository="Repository",
+            accession_title="Title",
+            date_of_materials="2023-09-01 - 2023-09-30",
+            date_is_approximate=True,
+            rules_or_conventions="CAAIS v1.0",
+            language_of_accession_record="en",
+        )
+        metadata.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_6)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+
+        self.assertEqual(flat["title"], "Title")
+        self.assertEqual(flat["acquisitionType"], "")
+        self.assertEqual(flat["eventTypes"], "Creation")
+        self.assertEqual(flat["eventDates"], "Circa 2023-09-01 - 2023-09-30")
+        self.assertEqual(flat["eventStartDates"], "2023-09-01")
+        self.assertEqual(flat["eventEndDates"], "2023-09-30")
+
+        metadata.delete()
+
     def test_flatten_metadata_no_related_atom_2_3(self):
         metadata = Metadata(
             repository="Repository",
@@ -655,6 +685,36 @@ class TestMetadata(TestCase):
 
         metadata.delete()
 
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_no_related_atom_2_3_approximate_date(self) -> None:
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate, using ATOM 2.3.
+        """
+        metadata = Metadata(
+            repository="Repository",
+            accession_title="Title",
+            date_of_materials="2023-06-01 - 2023-06-30",
+            date_is_approximate=True,
+            rules_or_conventions="CAAIS v1.0",
+            language_of_accession_record="en",
+        )
+        metadata.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_3)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+
+        self.assertEqual(flat["title"], "Title")
+        self.assertEqual(flat["acquisitionType"], "")
+        self.assertEqual(flat["eventTypes"], "Creation")
+        self.assertEqual(flat["eventDates"], "Circa 2023-06-01 - 2023-06-30")
+        self.assertEqual(flat["eventStartDates"], "2023-06-01")
+        self.assertEqual(flat["eventEndDates"], "2023-06-30")
+
+        metadata.delete()
+
     def test_flatten_metadata_no_related_atom_2_2(self):
         metadata = Metadata(
             repository="Repository",
@@ -675,6 +735,36 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["creationDatesType"], "Creation")
         self.assertEqual(flat["creationDates"], "2018-01-01 - 2018-12-31")
+        self.assertEqual(flat["creationDatesStart"], "2018-01-01")
+        self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
+
+        metadata.delete()
+
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_no_related_atom_2_2_approximate_date(self) -> None:
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate, using ATOM 2.2.".
+        """
+        metadata = Metadata(
+            repository="Repository",
+            accession_title="Title",
+            date_of_materials="2018-01-01 - 2018-12-31",
+            date_is_approximate=True,
+            rules_or_conventions="CAAIS v1.0",
+            language_of_accession_record="en",
+        )
+        metadata.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_2)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+
+        self.assertEqual(flat["title"], "Title")
+        self.assertEqual(flat["acquisitionType"], "")
+        self.assertEqual(flat["creationDatesType"], "Creation")
+        self.assertEqual(flat["creationDates"], "Circa 2018-01-01 - 2018-12-31")
         self.assertEqual(flat["creationDatesStart"], "2018-01-01")
         self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
 
