@@ -875,7 +875,7 @@ class GroupTransferForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = SubmissionStep.GROUP_TRANSFER
+        transfer_step = SubmissionStep.GROUP_SUBMISSION
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)

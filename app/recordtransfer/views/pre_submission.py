@@ -136,7 +136,7 @@ class TransferFormWizard(SessionWizardView):
                 "records, go to the next step"
             ),
         },
-        SubmissionStep.GROUP_TRANSFER: {
+        SubmissionStep.GROUP_SUBMISSION: {
             TEMPLATEREF: "recordtransfer/transferform_group.html",
             FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
             FORM: forms.GroupTransferForm,
@@ -477,7 +477,7 @@ class TransferFormWizard(SessionWizardView):
         """Add data to inject when initializing the form."""
         kwargs = super().get_form_kwargs(step)
 
-        if step == SubmissionStep.GROUP_TRANSFER.value:
+        if step == SubmissionStep.GROUP_SUBMISSION.value:
             kwargs["user"] = self.request.user
 
         elif step == SubmissionStep.SOURCE_INFO.value:
@@ -560,7 +560,7 @@ class TransferFormWizard(SessionWizardView):
         """
         context = {}
 
-        if self.current_step == SubmissionStep.GROUP_TRANSFER:
+        if self.current_step == SubmissionStep.GROUP_SUBMISSION:
             context.update(
                 {
                     "IS_NEW": True,
@@ -632,7 +632,7 @@ class TransferFormWizard(SessionWizardView):
                     "other_type_id": other_type.pk if other_type else 0,
                 }
             )
-        elif step == SubmissionStep.GROUP_TRANSFER:
+        elif step == SubmissionStep.GROUP_SUBMISSION:
             js_context.update(
                 {
                     "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,

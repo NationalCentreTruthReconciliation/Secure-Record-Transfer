@@ -13,7 +13,7 @@ class SubmissionStep(Enum):
     RECORD_DESCRIPTION = "recorddescription"
     RIGHTS = "rights"
     OTHER_IDENTIFIERS = "otheridentifiers"
-    GROUP_TRANSFER = "grouptransfer"
+    GROUP_SUBMISSION = "groupsubmission"
     UPLOAD_FILES = "uploadfiles"
     FINAL_NOTES = "finalnotes"
     REVIEW = "review"

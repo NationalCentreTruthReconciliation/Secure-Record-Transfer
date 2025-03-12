@@ -66,8 +66,8 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             "value": "123456",
             "note": "Test note for identifier",
         },
-        SubmissionStep.GROUP_TRANSFER: {
-            "section_title": get_section_title(SubmissionStep.GROUP_TRANSFER),
+        SubmissionStep.GROUP_SUBMISSION: {
+            "section_title": get_section_title(SubmissionStep.GROUP_SUBMISSION),
             "name": "Test Group",
             "description": "Test description for group",
         },
@@ -365,7 +365,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             return
 
         driver = self.driver
-        data = self.test_data[SubmissionStep.GROUP_TRANSFER]
+        data = self.test_data[SubmissionStep.GROUP_SUBMISSION]
 
         # Click the button to show the add new group dialog
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
@@ -513,7 +513,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 }
                 self._verify_field_values("otheridentifiers", identifier_fields)
 
-            elif step == SubmissionStep.GROUP_TRANSFER:
+            elif step == SubmissionStep.GROUP_SUBMISSION:
                 group_name = driver.find_element(
                     By.XPATH, "//dt[text()='Assigned group']/following-sibling::dd[1]"
                 )

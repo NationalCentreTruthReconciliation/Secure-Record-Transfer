@@ -80,7 +80,7 @@ class TransferFormWizardTests(TestCase):
                 ],
             ),
             (
-                SubmissionStep.GROUP_TRANSFER.value,
+                SubmissionStep.GROUP_SUBMISSION.value,
                 {
                     "group_uuid": SubmissionGroup.objects.create(
                         name="Test Group", created_by=self.user
