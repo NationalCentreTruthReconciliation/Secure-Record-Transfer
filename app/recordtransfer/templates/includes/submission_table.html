@@ -16,7 +16,7 @@
                 <td>{{ submission.metadata.accession_title }}</td>
                 <td>{{ submission.extent_statements }}</td>
                 <td>
-                    <a href="{% url "recordtransfer:submissiondetail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a>
+                    <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a>
                 </td>
                 <td>
                     <a href="{% url "recordtransfer:submissioncsv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
