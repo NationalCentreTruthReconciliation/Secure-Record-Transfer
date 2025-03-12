@@ -1,5 +1,5 @@
-"""Views for the transfer form and submission process, responsible for creating, saving, and
-deleting in-progress submissions, as well as handling the final submission of a transfer.
+"""Views for the submission form and submission process, responsible for creating, saving, and
+deleting in-progress submissions, as well as handling the final submission.
 """
 
 import logging
@@ -89,7 +89,7 @@ class SubmissionFormWizard(SessionWizardView):
             FORM: forms.AcceptLegal,
         },
         SubmissionStep.CONTACT_INFO: {
-            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            TEMPLATEREF: "recordtransfer/submission_form_standard.html",
             FORMTITLE: gettext("Contact Information"),
             FORM: forms.ContactInfoForm,
             INFOMESSAGE: gettext(
@@ -106,7 +106,7 @@ class SubmissionFormWizard(SessionWizardView):
             ),
         },
         SubmissionStep.RECORD_DESCRIPTION: {
-            TEMPLATEREF: "recordtransfer/transferform_standard.html",
+            TEMPLATEREF: "recordtransfer/submission_form_standard.html",
             FORMTITLE: gettext("Record Description"),
             FORM: forms.RecordDescriptionForm
             if settings.FILE_UPLOAD_ENABLED
@@ -124,7 +124,7 @@ class SubmissionFormWizard(SessionWizardView):
             ),
         },
         SubmissionStep.OTHER_IDENTIFIERS: {
-            TEMPLATEREF: "recordtransfer/transferform_formset.html",
+            TEMPLATEREF: "recordtransfer/submission_form_formset.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
             FORM: formset_factory(
                 forms.OtherIdentifiersForm,
@@ -159,7 +159,7 @@ class SubmissionFormWizard(SessionWizardView):
             if settings.FILE_UPLOAD_ENABLED
             else {
                 SubmissionStep.FINAL_NOTES: {
-                    TEMPLATEREF: "recordtransfer/transferform_standard.html",
+                    TEMPLATEREF: "recordtransfer/submission_form_standard.html",
                     FORMTITLE: gettext("Final Notes"),
                     FORM: forms.FinalStepFormNoUpload,
                     INFOMESSAGE: gettext(
