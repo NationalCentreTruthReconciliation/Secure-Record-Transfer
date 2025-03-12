@@ -16,6 +16,7 @@ with `AtoM <https://accesstomemory.org/en/>`_.
    howtouse/index
    customization/index
    settings/index
+   admin/index
    code/index
 
 
