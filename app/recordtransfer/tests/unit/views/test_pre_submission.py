@@ -10,8 +10,8 @@ from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
 
 
-class TransferFormWizardTests(TestCase):
-    """Tests for the TransferFormWizard view."""
+class SubmissionFormWizardTests(TestCase):
+    """Tests for the SubmissionFormWizard view."""
 
     def setUp(self) -> None:
         """Set up the test case with a user and an in-progress submission."""
@@ -145,7 +145,7 @@ class TransferFormWizardTests(TestCase):
     def test_wizard(
         self, mock_thank_you: MagicMock, mock_creation_success: MagicMock, mock_clean: MagicMock
     ) -> None:
-        """Test the TransferFormWizard view from start to finish. This test will fill out the form
+        """Test the SubmissionFormWizard view from start to finish. This test will fill out the form
         with the test data and submit it, making sure no errors are raised.
         """
         mock_thank_you.return_value = None

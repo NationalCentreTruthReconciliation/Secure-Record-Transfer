@@ -11,7 +11,7 @@ from recordtransfer.enums import SubmissionStep
 
 def require_upload_step(view_func: Callable) -> Callable:
     """Restricts access to views based on the current wizard step. Only allows access if the
-    request originates from the UPLOAD_FILES step of TransferFormWizard.
+    request originates from the UPLOAD_FILES step of SubmissionFormWizard.
     """
 
     @functools.wraps(view_func)

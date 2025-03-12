@@ -77,7 +77,7 @@ class InProgressSubmissionExpired(TemplateView):
     template_name = "recordtransfer/in_progress_submission_expired.html"
 
 
-class TransferFormWizard(SessionWizardView):
+class SubmissionFormWizard(SessionWizardView):
     """A multi-page form for collecting user metadata and uploading files. Uses a form wizard. For
     more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
     """
@@ -267,7 +267,7 @@ class TransferFormWizard(SessionWizardView):
         """
         ### Gather information to save ###
 
-        current_data = TransferFormWizard.format_step_data(self.current_step, request.POST)
+        current_data = SubmissionFormWizard.format_step_data(self.current_step, request.POST)
         form_data = {"past": self.storage.data, "current": current_data}
 
         title = None
@@ -507,7 +507,7 @@ class TransferFormWizard(SessionWizardView):
                 files=self.storage.get_step_files(form_step),
             )
             form_obj.is_valid()  # This populates the cleaned_data attribute of the form
-            final_forms[TransferFormWizard._TEMPLATES[SubmissionStep(form_step)][FORMTITLE]] = (
+            final_forms[SubmissionFormWizard._TEMPLATES[SubmissionStep(form_step)][FORMTITLE]] = (
                 form_obj
             )
         return final_forms

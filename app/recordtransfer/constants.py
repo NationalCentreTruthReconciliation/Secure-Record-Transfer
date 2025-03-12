@@ -26,7 +26,7 @@ ID_SOURCE_INFO_OTHER_SOURCE_TYPE = "id_sourceinfo-other_source_type"
 ID_SOURCE_INFO_SOURCE_ROLE = "id_sourceinfo-source_role"
 ID_SOURCE_INFO_OTHER_SOURCE_ROLE = "id_sourceinfo-other_source_role"
 
-# Define constants for dictionary keys in TransferFormWizard
+# Define constants for dictionary keys in SubmissionFormWizard
 TEMPLATEREF = "templateref"
 FORMTITLE = "formtitle"
 INFOMESSAGE = "infomessage"

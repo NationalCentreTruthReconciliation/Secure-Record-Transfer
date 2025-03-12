@@ -10,7 +10,7 @@ urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     re_path(
         r"^transfer(?:/(?P<transfer_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
-        login_required(views.pre_submission.TransferFormWizard.as_view()),
+        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
         name="transfer",
     ),
     path(

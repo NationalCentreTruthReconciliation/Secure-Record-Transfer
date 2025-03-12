@@ -13,16 +13,16 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from recordtransfer.constants import FORMTITLE
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
-from recordtransfer.views.pre_submission import TransferFormWizard
+from recordtransfer.views.pre_submission import SubmissionFormWizard
 
 
 def get_section_title(step: SubmissionStep) -> str:
     """Get section title for a given step."""
-    return TransferFormWizard._TEMPLATES[step][FORMTITLE]
+    return SubmissionFormWizard._TEMPLATES[step][FORMTITLE]
 
 
 @tag("e2e")
-class TransferFormWizardTest(StaticLiveServerTestCase):
+class SubmissionFormWizardTest(StaticLiveServerTestCase):
     """End-to-end tests for the transfer form wizard."""
 
     test_data: ClassVar[dict] = {
