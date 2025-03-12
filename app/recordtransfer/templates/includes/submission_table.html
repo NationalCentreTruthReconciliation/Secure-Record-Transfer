@@ -19,7 +19,7 @@
                     <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}">{% trans "Click to view report" %}</a>
                 </td>
                 <td>
-                    <a href="{% url "recordtransfer:submissioncsv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
+                    <a href="{% url "recordtransfer:submission_csv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
                 </td>
             </tr>
         {% endfor %}

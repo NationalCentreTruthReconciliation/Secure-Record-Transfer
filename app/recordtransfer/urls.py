@@ -43,7 +43,7 @@ urlpatterns = [
     path(
         "submission/<uuid:uuid>/csv",
         login_required(views.post_submission.SubmissionCsv.as_view()),
-        name="submissioncsv",
+        name="submission_csv",
     ),
     path(
         "submission_group/new",

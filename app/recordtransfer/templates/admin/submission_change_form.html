@@ -19,7 +19,7 @@
     {{ block.super }}
     <div class="submit-row">
         <a href="{% url "recordtransfer:submission_detail" uuid=original.uuid %}">{% trans "Click to view submission report" %}</a> |
-        <a href="{% url "recordtransfer:submissioncsv" uuid=original.uuid %}">{% trans "Click to download CSV export" %}</a> |
+        <a href="{% url "recordtransfer:submission_csv" uuid=original.uuid %}">{% trans "Click to download CSV export" %}</a> |
         <a href="{{ original.get_admin_zip_url }}">{% trans "Click to create a downloadable bag" %}</a>
     </div>
 {% endblock %}
