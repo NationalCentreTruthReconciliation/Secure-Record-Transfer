@@ -53,8 +53,8 @@ from recordtransfer.emails import (
     send_your_transfer_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
+from recordtransfer.forms.submission_forms import ReviewForm, clear_form_errors
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
