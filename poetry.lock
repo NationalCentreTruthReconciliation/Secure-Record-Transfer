@@ -1554,11 +1554,11 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 type = ["pytest-mypy"]
 
 [extras]
-dev = ["Sphinx", "pytest-django", "selenium", "sphinx-rtd-theme", "sphinxcontrib-mermaid"]
+dev = ["Sphinx", "freezegun", "pytest-django", "selenium", "sphinx-rtd-theme", "sphinxcontrib-mermaid"]
 docs = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-mermaid"]
 prod = ["gunicorn", "mysqlclient"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "c5397c30aeb930f0dd05c8d334439e1e9651fea2d9b8bf61b1c93812e61472cf"
+content-hash = "8139d6dcefcd82904e5cb856870cd5e2d54cebb859a4aa3b48004871c9105b36"
