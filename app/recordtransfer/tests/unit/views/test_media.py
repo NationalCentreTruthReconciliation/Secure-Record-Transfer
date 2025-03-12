@@ -32,7 +32,7 @@ class TestCreateUploadSessionView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session["wizard_transfer_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
+        session["wizard_submission_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
         session.save()
 
     def tearDown(self) -> None:
@@ -100,7 +100,7 @@ class TestUploadFilesView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session["wizard_transfer_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
+        session["wizard_submission_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
         session.save()
 
         # Create a new upload session token
@@ -361,7 +361,7 @@ class TestUploadedFileView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session["wizard_transfer_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
+        session["wizard_submission_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
         session.save()
 
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)

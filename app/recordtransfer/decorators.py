@@ -17,7 +17,7 @@ def require_upload_step(view_func: Callable) -> Callable:
     @functools.wraps(view_func)
     def _wrapped_view(request: HttpRequest, *args, **kwargs):
         # Check if request comes from the upload step
-        wizard_data = request.session.get("wizard_transfer_form_wizard", {})
+        wizard_data = request.session.get("wizard_submission_form_wizard", {})
         current_step = wizard_data.get("step")
 
         # Allow access only if we're on the upload_files step

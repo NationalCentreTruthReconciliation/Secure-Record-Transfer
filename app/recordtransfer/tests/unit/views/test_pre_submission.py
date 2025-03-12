@@ -118,7 +118,7 @@ class SubmissionFormWizardTests(TestCase):
 
     def _process_test_data(self, step: str, step_data: dict) -> dict:
         """Process the test data for the given step for form submission."""
-        submit_data = {"transfer_form_wizard-current_step": step}
+        submit_data = {"submission_form_wizard-current_step": step}
 
         if step == SubmissionStep.UPLOAD_FILES.value:
             session_token = self._upload_test_file()
