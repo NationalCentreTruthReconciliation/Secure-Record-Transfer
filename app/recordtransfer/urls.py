@@ -26,12 +26,12 @@ urlpatterns = [
     ),
     path(
         "inprogress/<uuid:uuid>/delete/",
-        login_required(views.pre_submission.DeleteTransfer.as_view()),
+        login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
         name="transferdelete",
     ),
     path(
         "inprogress/<uuid:uuid>/delete/confirm/",
-        login_required(views.pre_submission.DeleteTransfer.as_view()),
+        login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
         name="confirmtransferdelete",
     ),
     path("about/", views.home.About.as_view(), name="about"),

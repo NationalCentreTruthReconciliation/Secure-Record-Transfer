@@ -715,10 +715,10 @@ class SubmissionFormWizard(SessionWizardView):
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
 
 
-class DeleteTransfer(TemplateView):
+class DeleteInProgressSubmission(TemplateView):
     """View to handle the deletion of an in-progress submission."""
 
-    template_name = "recordtransfer/transfer_delete.html"
+    template_name = "recordtransfer/in_progress_submission_delete.html"
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")
     model = InProgressSubmission
