@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from recordtransfer.constants import FORMTITLE
 from recordtransfer.enums import TransferStep
 from recordtransfer.models import User
-from recordtransfer.views.transfer import TransferFormWizard
+from recordtransfer.views.pre_submission import TransferFormWizard
 
 
 def get_section_title(step: TransferStep) -> str:

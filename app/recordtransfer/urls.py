@@ -10,7 +10,7 @@ urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     re_path(
         r"^transfer(?:/(?P<transfer_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
-        login_required(views.transfer.TransferFormWizard.as_view()),
+        login_required(views.pre_submission.TransferFormWizard.as_view()),
         name="transfer",
     ),
     path(
@@ -18,47 +18,47 @@ urlpatterns = [
         login_required(views.home.SystemErrorPage.as_view()),
         name="systemerror",
     ),
-    path("transfer/sent/", views.transfer.TransferSent.as_view(), name="transfersent"),
+    path("transfer/sent/", views.pre_submission.TransferSent.as_view(), name="transfersent"),
     path(
         "transfer/expired/",
-        views.transfer.InProgressSubmissionExpired.as_view(),
+        views.pre_submission.InProgressSubmissionExpired.as_view(),
         name="in_progress_submission_expired",
     ),
     path(
         "inprogress/<uuid:uuid>/delete/",
-        login_required(views.transfer.DeleteTransfer.as_view()),
+        login_required(views.pre_submission.DeleteTransfer.as_view()),
         name="transferdelete",
     ),
     path(
         "inprogress/<uuid:uuid>/delete/confirm/",
-        login_required(views.transfer.DeleteTransfer.as_view()),
+        login_required(views.pre_submission.DeleteTransfer.as_view()),
         name="confirmtransferdelete",
     ),
     path("about/", views.home.About.as_view(), name="about"),
     path("profile/", login_required(views.profile.UserProfile.as_view()), name="userprofile"),
     path(
         "submission/<uuid:uuid>/",
-        login_required(views.submission.SubmissionDetail.as_view()),
+        login_required(views.post_submission.SubmissionDetail.as_view()),
         name="submissiondetail",
     ),
     path(
         "submission/<uuid:uuid>/csv",
-        login_required(views.submission.SubmissionCsv.as_view()),
+        login_required(views.post_submission.SubmissionCsv.as_view()),
         name="submissioncsv",
     ),
     path(
         "submission_group/new",
-        login_required(views.submission.SubmissionGroupCreateView.as_view()),
+        login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
         name="submissiongroupnew",
     ),
     path(
         "submission_group/<uuid:uuid>/",
-        login_required(views.submission.SubmissionGroupDetailView.as_view()),
+        login_required(views.post_submission.SubmissionGroupDetailView.as_view()),
         name="submissiongroupdetail",
     ),
     path(
         "user/<int:user_id>/submission_groups/",
-        login_required(views.submission.get_user_submission_groups),
+        login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
     ),
 ]
