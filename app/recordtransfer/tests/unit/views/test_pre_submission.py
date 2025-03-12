@@ -141,7 +141,7 @@ class TransferFormWizardTests(TestCase):
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
     @patch("django_recaptcha.fields.ReCaptchaField.clean")
     @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
-    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_transfer.delay")
+    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
     def test_wizard(
         self, mock_thank_you: MagicMock, mock_creation_success: MagicMock, mock_clean: MagicMock
     ) -> None:

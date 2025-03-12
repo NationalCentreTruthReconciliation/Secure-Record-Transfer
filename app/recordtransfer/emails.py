@@ -23,7 +23,7 @@ LOGGER = logging.getLogger("rq.worker")
 __all__ = [
     "send_submission_creation_success",
     "send_submission_creation_failure",
-    "send_thank_you_for_your_transfer",
+    "send_thank_you_for_your_submission",
     "send_your_transfer_did_not_go_through",
     "send_user_activation_email",
     "send_user_account_updated",
@@ -94,11 +94,11 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
 
 
 @django_rq.job
-def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
-    """Send a transfer success email to the user who submitted the transfer.
+def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
+    """Send a submission success email to the user who submitted the submission.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
+        form_data (dict): A dictionary of the cleaned form data from the submission form. This is NOT
             the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
     """
@@ -106,7 +106,7 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
         _send_mail_with_logs(
             recipients=[submission.user.email],
             from_email=_get_do_not_reply_email_address(),
-            subject="Thank You For Your Transfer",
+            subject="Thank You For Your Submission",
             template_name="recordtransfer/email/transfer_success.html",
             context={
                 "archivist_email": settings.ARCHIVIST_EMAIL,
@@ -178,6 +178,7 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
         template_name="recordtransfer/email/account_updated.html",
         context=context_vars,
     )
+
 
 @django_rq.job
 def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission) -> None:
