@@ -9,7 +9,7 @@ app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     re_path(
-        r"^submit(?:/(?P<in_progress_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
+        r"^submission/new(?:/(?P<in_progress_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
         login_required(views.pre_submission.SubmissionFormWizard.as_view()),
         name="submit",
     ),
@@ -20,21 +20,17 @@ urlpatterns = [
     ),
     path("submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"),
     path(
-        "in-progress/expired/",
+        "submission/in-progress/expired/",
         views.pre_submission.InProgressSubmissionExpired.as_view(),
         name="in_progress_submission_expired",
     ),
     path(
-        "in-progress/<uuid:uuid>/delete/",
+        "submission/in-progress/<uuid:uuid>/",
         login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
         name="delete_in_progress",
     ),
-    path(
-        "in-progress/<uuid:uuid>/delete/confirm/",
-        login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
-    ),
     path("about/", views.home.About.as_view(), name="about"),
-    path("profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"),
+    path("user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"),
     path(
         "submission/<uuid:uuid>/",
         login_required(views.post_submission.SubmissionDetail.as_view()),
@@ -46,17 +42,17 @@ urlpatterns = [
         name="submission_csv",
     ),
     path(
-        "submission_group/new",
+        "submission-group/",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
         name="submission_group_new",
     ),
     path(
-        "submission_group/<uuid:uuid>/",
+        "submission-group/<uuid:uuid>/",
         login_required(views.post_submission.SubmissionGroupDetailView.as_view()),
         name="submission_group_detail",
     ),
     path(
-        "user/<int:user_id>/submission_groups/",
+        "user/<int:user_id>/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
     ),
@@ -96,29 +92,28 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "createaccount/",
+                "account/",
                 views.account.CreateAccount.as_view(),
                 name="createaccount",
             ),
             path(
-                "createaccount/sent/",
+                "account/activation/sent/",
                 views.account.ActivationSent.as_view(),
                 name="activationsent",
             ),
             path(
-                "createaccount/complete/",
+                "account/activation/complete/",
                 views.account.ActivationComplete.as_view(),
                 name="accountcreated",
             ),
             path(
-                "createaccount/invalid/",
+                 "account/activation/invalid/",
                 views.account.ActivationInvalid.as_view(),
                 name="activationinvalid",
             ),
             re_path(
                 (
-                    "createaccount/"
-                    "activate/"
+                    "account/activation/"
                     r"(?P<uidb64>[0-9A-Za-z_\-]+)/"
                     r"(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$"
                 ),
