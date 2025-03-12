@@ -50,7 +50,7 @@ from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
     send_thank_you_for_your_submission,
-    send_your_transfer_did_not_go_through,
+    send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.forms.submission_forms import ReviewForm, clear_form_errors
@@ -709,7 +709,7 @@ class SubmissionFormWizard(SessionWizardView):
         except Exception as exc:
             LOGGER.error("Encountered error creating Submission object", exc_info=exc)
 
-            send_your_transfer_did_not_go_through.delay(form_data, cast(User, self.request.user))
+            send_your_submission_did_not_go_through.delay(form_data, cast(User, self.request.user))
             send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
             return HttpResponseRedirect(reverse("recordtransfer:systemerror"))

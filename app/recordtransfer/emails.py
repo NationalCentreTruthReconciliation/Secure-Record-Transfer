@@ -24,7 +24,7 @@ __all__ = [
     "send_submission_creation_success",
     "send_submission_creation_failure",
     "send_thank_you_for_your_submission",
-    "send_your_transfer_did_not_go_through",
+    "send_your_submission_did_not_go_through",
     "send_user_activation_email",
     "send_user_account_updated",
 ]
@@ -115,7 +115,7 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
 
 
 @django_rq.job
-def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User):
+def send_your_submission_did_not_go_through(form_data: dict, user_submitted: User):
     """Send a transfer failure email to the user who submitted the transfer.
 
     Args:
