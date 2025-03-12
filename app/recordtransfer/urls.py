@@ -53,7 +53,7 @@ urlpatterns = [
     path(
         "submission_group/<uuid:uuid>/",
         login_required(views.post_submission.SubmissionGroupDetailView.as_view()),
-        name="submissiongroupdetail",
+        name="submission_group_detail",
     ),
     path(
         "user/<int:user_id>/submission_groups/",

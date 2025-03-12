@@ -674,7 +674,7 @@ class SubmissionGroup(models.Model):
 
     def get_absolute_url(self) -> str:
         """Return the URL to access a detail view of this submission group."""
-        return reverse("recordtransfer:submissiongroupdetail", kwargs={"uuid": self.uuid})
+        return reverse("recordtransfer:submission_group_detail", kwargs={"uuid": self.uuid})
 
     def __str__(self):
         return f"{self.name} ({self.created_by})"

@@ -116,7 +116,7 @@ class TestSubmissionGroupDetailView(TestCase):
         cls.group = SubmissionGroup.objects.create(
             name="Test Group", description="Test Description", created_by=cls.user
         )
-        cls.url = reverse("recordtransfer:submissiongroupdetail", kwargs={"uuid": cls.group.uuid})
+        cls.url = reverse("recordtransfer:submission_group_detail", kwargs={"uuid": cls.group.uuid})
 
     def setUp(self) -> None:
         """Set up test environment."""
