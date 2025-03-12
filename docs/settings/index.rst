@@ -547,7 +547,7 @@ UPLOAD_STORAGE_FOLDER
         ======================================================  ======================================================  ======
         Default in Dev                                          Default in Prod                                         Type
         ======================================================  ======================================================  ======
-        /opt/secure-record-transfer/app/media/uploaded_files/  /opt/secure-record-transfer/app/media/uploaded_files/  string
+        /opt/secure-record-transfer/app/media/uploaded_files/   /opt/secure-record-transfer/app/media/uploaded_files/   string
         ======================================================  ======================================================  ======
 
     The files users upload will be copied here after being uploaded with either of the Django
