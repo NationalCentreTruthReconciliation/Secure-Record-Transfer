@@ -94,7 +94,7 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             path(
                 "account/",
                 views.account.CreateAccount.as_view(),
-                name="createaccount",
+                name="create_account",
             ),
             path(
                 "account/activation/sent/",

@@ -16,7 +16,7 @@
             </div>
         {% endif %}
 
-        <form method="post" action="{% url 'recordtransfer:createaccount' %}">
+        <form method="post" action="{% url 'recordtransfer:create_account' %}">
             {% csrf_token %}
             {% for field in form %}
                 {% if field.errors %}

@@ -54,7 +54,7 @@
                     </a>
                 {% elif not user.is_authenticated %}
                     {% if SIGN_UP_ENABLED %}
-                        <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:createaccount' %}">
+                        <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:create_account' %}">
                             <div class="nav-link">
                                 {% trans "Sign Up" %}
                             </div>

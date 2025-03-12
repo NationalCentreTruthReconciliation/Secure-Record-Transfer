@@ -21,7 +21,7 @@
             {% if not user.is_authenticated %}
                 {% if SIGN_UP_ENABLED %}
                 <div class="hero-button">
-                    <a href="{% url 'recordtransfer:createaccount' %}">
+                    <a href="{% url 'recordtransfer:create_account' %}">
                         {% trans "Sign up Now" %}
                     </a>
                 </div>
@@ -93,7 +93,7 @@
                 {% trans "Submit Your Records" %}
             </a>
         {% elif SIGN_UP_ENABLED %}
-            <a href="{% url 'recordtransfer:createaccount' %}" class="primary-button">
+            <a href="{% url 'recordtransfer:create_account' %}" class="primary-button">
                 {% trans "Sign Up Now" %}
             </a>
         {% endif %}
