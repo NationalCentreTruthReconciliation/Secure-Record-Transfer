@@ -1,7 +1,7 @@
 {% load i18n %}
 {% include "includes/messages.html" %}
 <form method="post"
-      action="{% if not IS_NEW %}{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submissiongroupnew' %}{% endif %}"
+      action="{% if not IS_NEW %}{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submission_group_new' %}{% endif %}"
       id="submission-group-form"
       class="margin-top-25px">
     {% csrf_token %}

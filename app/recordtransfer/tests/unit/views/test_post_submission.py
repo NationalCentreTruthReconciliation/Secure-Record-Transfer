@@ -16,7 +16,7 @@ class TestSubmissionGroupCreateView(TestCase):
     def setUpTestData(cls) -> None:
         """Set up test data."""
         cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.url = reverse("recordtransfer:submissiongroupnew")
+        cls.url = reverse("recordtransfer:submission_group_new")
 
     def setUp(self) -> None:
         """Set up test environment."""

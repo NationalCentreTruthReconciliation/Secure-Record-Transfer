@@ -48,7 +48,7 @@ urlpatterns = [
     path(
         "submission_group/new",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
-        name="submissiongroupnew",
+        name="submission_group_new",
     ),
     path(
         "submission_group/<uuid:uuid>/",
