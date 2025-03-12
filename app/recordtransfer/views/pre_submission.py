@@ -188,7 +188,7 @@ class SubmissionFormWizard(SessionWizardView):
 
     @property
     def current_step(self) -> SubmissionStep:
-        """Returns the current step as a submissionStep enum value."""
+        """Returns the current step as a SubmissionStep enum value."""
         current = self.steps.current
         try:
             return SubmissionStep(current)  # Converts string to enum
@@ -722,7 +722,7 @@ class DeleteInProgressSubmission(TemplateView):
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")
     model = InProgressSubmission
-    context_object_name = "transfer"
+    context_object_name = "in_progress"
 
     def get_object(self, queryset=None) -> InProgressSubmission:
         """Retrieve the InProgressSubmission object based on the UUID in the URL."""

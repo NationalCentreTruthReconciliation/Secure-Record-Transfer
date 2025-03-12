@@ -1,17 +1,16 @@
 {% extends "recordtransfer/base.html" %}
 {% load i18n %}
 {% block title %}
-    {% trans "Delete Transfer?" %}
+    {% trans "Delete In-Progress Submission?" %}
 {% endblock title %}
 {% block content %}
-    <div class="title-text">{% trans "Confirm In Progress Transfer Deletion" %}</div>
+    <div class="title-text">{% trans "Confirm In Progress Submission Deletion" %}</div>
     <div class="flex-med-width-item margin-top-25px">
-        {% trans "Do you wish to delete the in-progress transfer from" %} {{ transfer.last_updated|date:"F j, Y g:ia" }}
-        {% if transfer.title %}titled "{{ transfer.title }}"{% endif %}
+        {% trans "Do you wish to delete the in-progress submission from" %} {{ in_progress.last_updated|date:"F j, Y g:ia" }}
+        {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
         ?
     </div>
-    <form id="delete-transfer-form"
-          action="{% url 'recordtransfer:transferdelete' uuid=transfer.uuid %}"
+    <form action="{% url 'recordtransfer:transferdelete' uuid=in_progress.uuid %}"
           method="post">
         {% csrf_token %}
         <p>
