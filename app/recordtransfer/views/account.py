@@ -20,7 +20,7 @@ class CreateAccount(FormView):
 
     template_name = "recordtransfer/signupform.html"
     form_class = SignUpForm
-    success_url = reverse_lazy("recordtransfer:activationsent")
+    success_url = reverse_lazy("recordtransfer:activation_sent")
 
     def form_valid(self, form):
         new_user = form.save(commit=False)

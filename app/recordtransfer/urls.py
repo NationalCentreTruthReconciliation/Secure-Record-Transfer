@@ -99,7 +99,7 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             path(
                 "account/activation/sent/",
                 views.account.ActivationSent.as_view(),
-                name="activationsent",
+                name="activation_sent",
             ),
             path(
                 "account/activation/complete/",
