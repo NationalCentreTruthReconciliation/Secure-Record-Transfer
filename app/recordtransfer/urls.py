@@ -20,17 +20,17 @@ urlpatterns = [
     ),
     path("submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"),
     path(
-        "inprogress/expired/",
+        "in-progress/expired/",
         views.pre_submission.InProgressSubmissionExpired.as_view(),
         name="in_progress_submission_expired",
     ),
     path(
-        "inprogress/<uuid:uuid>/delete/",
+        "in-progress/<uuid:uuid>/delete/",
         login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
         name="delete_in_progress",
     ),
     path(
-        "inprogress/<uuid:uuid>/delete/confirm/",
+        "in-progress/<uuid:uuid>/delete/confirm/",
         login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
     ),
     path("about/", views.home.About.as_view(), name="about"),
