@@ -164,7 +164,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertFalse(response.context["form"].errors)
         self.assertTrue(self.user.submission_set.exists())
         if response:
-            self.assertRedirects(response, reverse("recordtransfer:transfersent"))
+            self.assertRedirects(response, reverse("recordtransfer:submission_sent"))
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
