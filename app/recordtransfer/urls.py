@@ -34,7 +34,7 @@ urlpatterns = [
         login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
     ),
     path("about/", views.home.About.as_view(), name="about"),
-    path("profile/", login_required(views.profile.UserProfile.as_view()), name="userprofile"),
+    path("profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"),
     path(
         "submission/<uuid:uuid>/",
         login_required(views.post_submission.SubmissionDetail.as_view()),

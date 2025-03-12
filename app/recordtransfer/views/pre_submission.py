@@ -257,7 +257,7 @@ class SubmissionFormWizard(SessionWizardView):
             messages.success(request, gettext(message))
         except Exception:
             messages.error(request, gettext("There was an error saving the submission."))
-        return redirect("recordtransfer:userprofile")
+        return redirect("recordtransfer:user_profile")
 
     def save_form_data(self, request: HttpRequest) -> None:
         """Save the current state of the form to the database.
@@ -747,4 +747,4 @@ class DeleteInProgressSubmission(TemplateView):
                 messages.error(request, self.error_message)
         except KeyError:
             LOGGER.error("No UUID provided for deletion")
-        return redirect("recordtransfer:userprofile")
+        return redirect("recordtransfer:user_profile")

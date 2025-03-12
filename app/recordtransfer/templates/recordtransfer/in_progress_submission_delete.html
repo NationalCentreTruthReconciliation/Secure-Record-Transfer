@@ -15,7 +15,7 @@
         {% csrf_token %}
         <p>
             <button type="button"
-                    onclick="window.location.href='{% url 'recordtransfer:userprofile' %}'"
+                    onclick="window.location.href='{% url 'recordtransfer:user_profile' %}'"
                     class="red-button margin-right-20px">{% trans "Cancel" %}</button>
             <button type="submit" class="blue-button">{% trans "OK" %}</button>
         </p>
