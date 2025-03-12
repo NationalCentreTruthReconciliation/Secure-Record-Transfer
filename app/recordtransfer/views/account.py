@@ -43,9 +43,9 @@ def activate_account(request, uidb64, token):
         user.confirmed_email = True
         user.save()
         login(request, user)
-        return HttpResponseRedirect(reverse("recordtransfer:accountcreated"))
+        return HttpResponseRedirect(reverse("recordtransfer:account_created"))
 
-    return HttpResponseRedirect(reverse("recordtransfer:activationinvalid"))
+    return HttpResponseRedirect(reverse("recordtransfer:activation_invalid"))
 
 
 class ActivationSent(TemplateView):

@@ -104,12 +104,11 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             path(
                 "account/activation/complete/",
                 views.account.ActivationComplete.as_view(),
-                name="accountcreated",
+                name="account_created",
             ),
             path(
-                 "account/activation/invalid/",
+                "account/activation/invalid/",
                 views.account.ActivationInvalid.as_view(),
-                name="activationinvalid",
             ),
             re_path(
                 (
@@ -118,7 +117,7 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
                     r"(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$"
                 ),
                 views.account.activate_account,
-                name="activateaccount",
+                name="activate_account",
             ),
         ]
     )
