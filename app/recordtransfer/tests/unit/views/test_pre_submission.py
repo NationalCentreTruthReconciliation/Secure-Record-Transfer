@@ -184,7 +184,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertEqual(200, response.status_code)
                 self.assertRedirects(response, reverse("recordtransfer:userprofile"))
                 self.assertContains(
-                    response, "Transfer saved successfully. This submission will expire on"
+                    response, "Submission saved successfully. This submission will expire on"
                 )
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
                 self.assertFalse(self.user.inprogresssubmission_set.first().upload_session_expired)
@@ -209,7 +209,7 @@ class SubmissionFormWizardTests(TestCase):
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)
                 self.assertRedirects(response, reverse("recordtransfer:userprofile"))
-                self.assertContains(response, "Transfer saved successfully.")
+                self.assertContains(response, "Submission saved successfully.")
                 self.assertNotContains(response, "This submission will expire on")
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
                 self.assertFalse(self.user.inprogresssubmission_set.first().upload_session_expired)
