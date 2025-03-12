@@ -20,7 +20,7 @@ class SubmissionFormWizardTests(TestCase):
             username="testuser1", email="test@example.com", password="testpassword"
         )
         self.client.force_login(self.user)
-        self.url = reverse("recordtransfer:transfer")
+        self.url = reverse("recordtransfer:submit")
 
         self.test_data = [
             (SubmissionStep.ACCEPT_LEGAL.value, {"agreement_accepted": "on"}),

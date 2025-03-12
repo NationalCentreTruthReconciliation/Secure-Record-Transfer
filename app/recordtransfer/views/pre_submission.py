@@ -210,7 +210,7 @@ class SubmissionFormWizard(SessionWizardView):
 
         # Redirect user to a fresh submission form if the in-progress submission is not found
         if not self.in_progress_submission:
-            return redirect("recordtransfer:transfer")
+            return redirect("recordtransfer:submit")
 
         # Check if associated upload session is expired or not
         if self.in_progress_submission.upload_session_expired:

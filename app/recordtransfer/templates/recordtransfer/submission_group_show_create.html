@@ -38,7 +38,7 @@
                 </div>
             {% endif %}
             <div class="margin-top-25px">
-                <a href="{% url 'recordtransfer:transfer' %}?group_uuid={{ group.uuid }} ">{% trans "Click to add new transfer" %}</a>
+                <a href="{% url 'recordtransfer:submit' %}?group_uuid={{ group.uuid }} ">{% trans "Click to make a new submission" %}</a>
             </div>
         {% endif %}
     {% endif %}

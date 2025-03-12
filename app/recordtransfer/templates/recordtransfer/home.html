@@ -14,7 +14,7 @@
         </div>
         <div class="hero-button-container">
             <div class="hero-button">
-                <a href="{% url 'recordtransfer:transfer' %}">
+                <a href="{% url 'recordtransfer:submit' %}">
                     {% trans "Submit Your Records" %}
                 </a>
             </div>
@@ -89,7 +89,7 @@
     </p>
     <div class="cta-buttons">
         {% if user.is_authenticated %}
-            <a href="{% url 'recordtransfer:transfer' %}" class="primary-button">
+            <a href="{% url 'recordtransfer:submit' %}" class="primary-button">
                 {% trans "Submit Your Records" %}
             </a>
         {% elif SIGN_UP_ENABLED %}
