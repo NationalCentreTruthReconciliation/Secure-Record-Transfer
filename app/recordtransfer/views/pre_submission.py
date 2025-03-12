@@ -139,7 +139,7 @@ class TransferFormWizard(SessionWizardView):
         SubmissionStep.GROUP_SUBMISSION: {
             TEMPLATEREF: "recordtransfer/transferform_group.html",
             FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
-            FORM: forms.GroupTransferForm,
+            FORM: forms.GroupSubmissionForm,
             INFOMESSAGE: gettext(
                 "If this transfer belongs in a group with other transfers you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
