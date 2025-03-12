@@ -94,7 +94,7 @@ class SubmissionFormWizard(SessionWizardView):
             FORM: forms.ContactInfoForm,
             INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
-                "archivists regarding your transfer"
+                "archivists regarding your submission"
             ),
         },
         SubmissionStep.SOURCE_INFO: {
@@ -138,10 +138,10 @@ class SubmissionFormWizard(SessionWizardView):
         },
         SubmissionStep.GROUP_SUBMISSION: {
             TEMPLATEREF: "recordtransfer/submission_form_groupsubmission.html",
-            FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
+            FORMTITLE: gettext("Assign Submission to Group (Optional)"),
             FORM: forms.GroupSubmissionForm,
             INFOMESSAGE: gettext(
-                "If this transfer belongs in a group with other transfers you have made or will "
+                "If this submission belongs in a group with other submissions you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
         },
@@ -188,7 +188,7 @@ class SubmissionFormWizard(SessionWizardView):
 
     @property
     def current_step(self) -> SubmissionStep:
-        """Returns the current step as a TransferStep enum value."""
+        """Returns the current step as a submissionStep enum value."""
         current = self.steps.current
         try:
             return SubmissionStep(current)  # Converts string to enum
@@ -219,7 +219,7 @@ class SubmissionFormWizard(SessionWizardView):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle GET request to load a transfer."""
+        """Handle GET request to load a submission."""
         if self.in_progress_submission:
             self.load_form_data()
             return self.render(self.get_form())
@@ -235,14 +235,14 @@ class SubmissionFormWizard(SessionWizardView):
         self.storage.current_step = self.in_progress_submission.current_step
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle POST request to save a transfer."""
+        """Handle POST request to save a submission."""
         # User is not saving the form, so continue with the normal form submission
         if not request.POST.get("save_form_step", None):
             return super().post(request, *args, **kwargs)
 
         try:
             self.save_form_data(request)
-            message = gettext("Transfer saved successfully.")
+            message = gettext("Submission saved successfully.")
             if (
                 expires_at := self.in_progress_submission.upload_session_expires_at
                 if self.in_progress_submission
@@ -256,7 +256,7 @@ class SubmissionFormWizard(SessionWizardView):
 
             messages.success(request, gettext(message))
         except Exception:
-            messages.error(request, gettext("There was an error saving the transfer."))
+            messages.error(request, gettext("There was an error saving the submission."))
         return redirect("recordtransfer:userprofile")
 
     def save_form_data(self, request: HttpRequest) -> None:
@@ -458,8 +458,8 @@ class SubmissionFormWizard(SessionWizardView):
     def get_form_initial(self, step: str) -> dict:
         """Populate the initial state of the form.
 
-        Populate form with saved transfer data if a "resume" request was received. Fills in the
-        user's name and email automatically where possible.
+        Populate form with saved in-progress submission data if a "resume" request was received.
+        Fills in the user's name and email automatically where possible.
         """
         initial = (self.initial_dict or {}).get(step, {})
 
@@ -498,8 +498,8 @@ class SubmissionFormWizard(SessionWizardView):
         final_forms = OrderedDict()
         form_list = self.get_form_list() or []
         for form_step in form_list:
-            transfer_step = SubmissionStep(form_step)
-            if transfer_step in (SubmissionStep.ACCEPT_LEGAL, SubmissionStep.REVIEW):
+            submission_step = SubmissionStep(form_step)
+            if submission_step in (SubmissionStep.ACCEPT_LEGAL, SubmissionStep.REVIEW):
                 continue
             form_obj = self.get_form(
                 step=form_step,
@@ -515,7 +515,7 @@ class SubmissionFormWizard(SessionWizardView):
     @property
     def review_step_reached(self) -> bool:
         """Check if the user has reached the review step at some point throughout this form. This
-        check is valid for a resumed in-progress transfer as well.
+        check is valid for a resumed in-progress submission as well.
         """
         # If there are entries for every step of the form, then the review step has been reached
         return len(self.storage.data.get("step_data", [])) == self.steps.count
