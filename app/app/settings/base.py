@@ -148,6 +148,13 @@ STATICFILES_DIRS = [
     os.path.join(os.path.dirname(BASE_DIR), "dist"),
 ]
 
+# Storage settings
+# Default STORAGES from Django documentation
+# See: https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-STORAGES
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 
 # CAAIS dates
 
