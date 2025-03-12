@@ -84,7 +84,7 @@ class SubmissionFormWizard(SessionWizardView):
 
     _TEMPLATES: ClassVar[dict] = {
         SubmissionStep.ACCEPT_LEGAL: {
-            TEMPLATEREF: "recordtransfer/transferform_legal.html",
+            TEMPLATEREF: "recordtransfer/submission_form_legal.html",
             FORMTITLE: gettext("Legal Agreement"),
             FORM: forms.AcceptLegal,
         },
@@ -98,7 +98,7 @@ class SubmissionFormWizard(SessionWizardView):
             ),
         },
         SubmissionStep.SOURCE_INFO: {
-            TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
+            TEMPLATEREF: "recordtransfer/submission_form_sourceinfo.html",
             FORMTITLE: gettext("Source Information (Optional)"),
             FORM: forms.SourceInfoForm,
             INFOMESSAGE: gettext(
@@ -114,7 +114,7 @@ class SubmissionFormWizard(SessionWizardView):
             INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
         SubmissionStep.RIGHTS: {
-            TEMPLATEREF: "recordtransfer/transferform_rights.html",
+            TEMPLATEREF: "recordtransfer/submission_form_rights.html",
             FORMTITLE: gettext("Record Rights"),
             FORM: formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             INFOMESSAGE: gettext(
@@ -137,7 +137,7 @@ class SubmissionFormWizard(SessionWizardView):
             ),
         },
         SubmissionStep.GROUP_SUBMISSION: {
-            TEMPLATEREF: "recordtransfer/transferform_group.html",
+            TEMPLATEREF: "recordtransfer/submission_form_groupsubmission.html",
             FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
             FORM: forms.GroupSubmissionForm,
             INFOMESSAGE: gettext(
@@ -148,7 +148,7 @@ class SubmissionFormWizard(SessionWizardView):
         **(
             {
                 SubmissionStep.UPLOAD_FILES: {
-                    TEMPLATEREF: "recordtransfer/transferform_uploadfiles.html",
+                    TEMPLATEREF: "recordtransfer/submission_form_uploadfiles.html",
                     FORMTITLE: gettext("Upload Files"),
                     FORM: forms.UploadFilesForm,
                     INFOMESSAGE: gettext(
@@ -169,7 +169,7 @@ class SubmissionFormWizard(SessionWizardView):
             }
         ),
         SubmissionStep.REVIEW: {
-            TEMPLATEREF: "recordtransfer/transferform_review.html",
+            TEMPLATEREF: "recordtransfer/submission_form_review.html",
             FORMTITLE: gettext("Review"),
             FORM: forms.ReviewForm,
             INFOMESSAGE: gettext("Review the information you've entered before submitting"),
