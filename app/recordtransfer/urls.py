@@ -14,7 +14,7 @@ urlpatterns = [
         name="submit",
     ),
     path(
-        "transfer/error/",
+        "error/",
         login_required(views.home.SystemErrorPage.as_view()),
         name="systemerror",
     ),
