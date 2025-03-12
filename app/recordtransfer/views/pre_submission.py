@@ -65,10 +65,10 @@ from recordtransfer.models import (
 LOGGER = logging.getLogger(__name__)
 
 
-class TransferSent(TemplateView):
-    """The page a user sees when they finish a transfer."""
+class SubmissionSent(TemplateView):
+    """The page a user sees when they finish a submission."""
 
-    template_name = "recordtransfer/transfersent.html"
+    template_name = "recordtransfer/submission_sent.html"
 
 
 class InProgressSubmissionExpired(TemplateView):

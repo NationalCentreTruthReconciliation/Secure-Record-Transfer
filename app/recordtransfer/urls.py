@@ -18,7 +18,7 @@ urlpatterns = [
         login_required(views.home.SystemErrorPage.as_view()),
         name="systemerror",
     ),
-    path("transfer/sent/", views.pre_submission.TransferSent.as_view(), name="transfersent"),
+    path("transfer/sent/", views.pre_submission.SubmissionSent.as_view(), name="transfersent"),
     path(
         "transfer/expired/",
         views.pre_submission.InProgressSubmissionExpired.as_view(),
