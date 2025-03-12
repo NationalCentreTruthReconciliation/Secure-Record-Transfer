@@ -32,7 +32,6 @@ urlpatterns = [
     path(
         "inprogress/<uuid:uuid>/delete/confirm/",
         login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
-        name="confirmtransferdelete",
     ),
     path("about/", views.home.About.as_view(), name="about"),
     path("profile/", login_required(views.profile.UserProfile.as_view()), name="userprofile"),
