@@ -20,7 +20,7 @@ urlpatterns = [
     ),
     path("submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"),
     path(
-        "transfer/expired/",
+        "inprogress/expired/",
         views.pre_submission.InProgressSubmissionExpired.as_view(),
         name="in_progress_submission_expired",
     ),
