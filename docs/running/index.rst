@@ -7,7 +7,7 @@ if you are using Docker, substitute the relevant Docker commands.
 
 Before running the application, make sure you have these tools installed:
 
-- `Podman <https://podman.io>`_
+- `Podman <https://podman.io/>`_
 - `Podman Desktop <https://podman-desktop.io/>`_ (Optional, but recommended)
 - `Python 3 <https://python.org>`_
 - `Podman Compose <https://github.com/containers/podman-compose>`_
