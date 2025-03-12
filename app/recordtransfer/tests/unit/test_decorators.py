@@ -6,7 +6,7 @@ from django.test import RequestFactory, TestCase
 from django.utils.translation import gettext
 
 from recordtransfer.decorators import require_upload_step
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 
 
 class TestRequireUploadStepDecorator(TestCase):
@@ -62,7 +62,7 @@ class TestRequireUploadStepDecorator(TestCase):
             request = getattr(self.factory, method)("/dummy-url/")
             request.session = SessionStore()
             request.session["wizard_transfer_form_wizard"] = {
-                "step": TransferStep.UPLOAD_FILES.value
+                "step": SubmissionStep.UPLOAD_FILES.value
             }
             request.session.save()
             response = dummy_view(request)

@@ -6,7 +6,7 @@ from typing import Callable
 from django.http import HttpRequest, JsonResponse
 from django.utils.translation import gettext
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 
 
 def require_upload_step(view_func: Callable) -> Callable:
@@ -21,7 +21,7 @@ def require_upload_step(view_func: Callable) -> Callable:
         current_step = wizard_data.get("step")
 
         # Allow access only if we're on the upload_files step
-        if not current_step or current_step != TransferStep.UPLOAD_FILES.value:
+        if not current_step or current_step != SubmissionStep.UPLOAD_FILES.value:
             return JsonResponse(
                 {"error": gettext("Uploads are only permitted during the file upload step")},
                 status=403,

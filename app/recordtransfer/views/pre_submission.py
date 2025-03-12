@@ -52,7 +52,7 @@ from recordtransfer.emails import (
     send_thank_you_for_your_transfer,
     send_your_transfer_did_not_go_through,
 )
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.transfer_forms import ReviewForm, clear_form_errors
 from recordtransfer.models import (
@@ -83,12 +83,12 @@ class TransferFormWizard(SessionWizardView):
     """
 
     _TEMPLATES: ClassVar[dict] = {
-        TransferStep.ACCEPT_LEGAL: {
+        SubmissionStep.ACCEPT_LEGAL: {
             TEMPLATEREF: "recordtransfer/transferform_legal.html",
             FORMTITLE: gettext("Legal Agreement"),
             FORM: forms.AcceptLegal,
         },
-        TransferStep.CONTACT_INFO: {
+        SubmissionStep.CONTACT_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Contact Information"),
             FORM: forms.ContactInfoForm,
@@ -97,7 +97,7 @@ class TransferFormWizard(SessionWizardView):
                 "archivists regarding your transfer"
             ),
         },
-        TransferStep.SOURCE_INFO: {
+        SubmissionStep.SOURCE_INFO: {
             TEMPLATEREF: "recordtransfer/transferform_sourceinfo.html",
             FORMTITLE: gettext("Source Information (Optional)"),
             FORM: forms.SourceInfoForm,
@@ -105,7 +105,7 @@ class TransferFormWizard(SessionWizardView):
                 "Select Yes if you would like to manually enter source information"
             ),
         },
-        TransferStep.RECORD_DESCRIPTION: {
+        SubmissionStep.RECORD_DESCRIPTION: {
             TEMPLATEREF: "recordtransfer/transferform_standard.html",
             FORMTITLE: gettext("Record Description"),
             FORM: forms.RecordDescriptionForm
@@ -113,7 +113,7 @@ class TransferFormWizard(SessionWizardView):
             else forms.ExtendedRecordDescriptionForm,
             INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
         },
-        TransferStep.RIGHTS: {
+        SubmissionStep.RIGHTS: {
             TEMPLATEREF: "recordtransfer/transferform_rights.html",
             FORMTITLE: gettext("Record Rights"),
             FORM: formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
@@ -123,7 +123,7 @@ class TransferFormWizard(SessionWizardView):
                 "rights if the dropdown does not contain the type of rights you're looking for."
             ),
         },
-        TransferStep.OTHER_IDENTIFIERS: {
+        SubmissionStep.OTHER_IDENTIFIERS: {
             TEMPLATEREF: "recordtransfer/transferform_formset.html",
             FORMTITLE: gettext("Other Identifiers (Optional)"),
             FORM: formset_factory(
@@ -136,7 +136,7 @@ class TransferFormWizard(SessionWizardView):
                 "records, go to the next step"
             ),
         },
-        TransferStep.GROUP_TRANSFER: {
+        SubmissionStep.GROUP_TRANSFER: {
             TEMPLATEREF: "recordtransfer/transferform_group.html",
             FORMTITLE: gettext("Assign Transfer to Group (Optional)"),
             FORM: forms.GroupTransferForm,
@@ -147,7 +147,7 @@ class TransferFormWizard(SessionWizardView):
         },
         **(
             {
-                TransferStep.UPLOAD_FILES: {
+                SubmissionStep.UPLOAD_FILES: {
                     TEMPLATEREF: "recordtransfer/transferform_uploadfiles.html",
                     FORMTITLE: gettext("Upload Files"),
                     FORM: forms.UploadFilesForm,
@@ -158,7 +158,7 @@ class TransferFormWizard(SessionWizardView):
             }
             if settings.FILE_UPLOAD_ENABLED
             else {
-                TransferStep.FINAL_NOTES: {
+                SubmissionStep.FINAL_NOTES: {
                     TEMPLATEREF: "recordtransfer/transferform_standard.html",
                     FORMTITLE: gettext("Final Notes"),
                     FORM: forms.FinalStepFormNoUpload,
@@ -168,7 +168,7 @@ class TransferFormWizard(SessionWizardView):
                 }
             }
         ),
-        TransferStep.REVIEW: {
+        SubmissionStep.REVIEW: {
             TEMPLATEREF: "recordtransfer/transferform_review.html",
             FORMTITLE: gettext("Review"),
             FORM: forms.ReviewForm,
@@ -187,11 +187,11 @@ class TransferFormWizard(SessionWizardView):
         self.in_progress_uuid = None
 
     @property
-    def current_step(self) -> TransferStep:
+    def current_step(self) -> SubmissionStep:
         """Returns the current step as a TransferStep enum value."""
         current = self.steps.current
         try:
-            return TransferStep(current)  # Converts string to enum
+            return SubmissionStep(current)  # Converts string to enum
         except ValueError as exc:
             LOGGER.error("Invalid step name: %s", current)
             raise Http404("Invalid step name") from exc
@@ -279,9 +279,9 @@ class TransferFormWizard(SessionWizardView):
 
         # Look in past data if not found in current data
         if not title:
-            title = self.get_form_value(TransferStep.RECORD_DESCRIPTION, "accession_title")
+            title = self.get_form_value(SubmissionStep.RECORD_DESCRIPTION, "accession_title")
         if not session_token:
-            session_token = self.get_form_value(TransferStep.UPLOAD_FILES, "session_token")
+            session_token = self.get_form_value(SubmissionStep.UPLOAD_FILES, "session_token")
 
         ### Save the information ###
 
@@ -367,7 +367,7 @@ class TransferFormWizard(SessionWizardView):
         return self.render(new_form, **kwargs)
 
     @classmethod
-    def format_step_data(cls, step: TransferStep, data: QueryDict) -> Union[dict, list[dict]]:
+    def format_step_data(cls, step: SubmissionStep, data: QueryDict) -> Union[dict, list[dict]]:
         """Format form data for the current step to be saved for later.
 
         Args:
@@ -421,7 +421,7 @@ class TransferFormWizard(SessionWizardView):
 
         return formatted_data[0]
 
-    def get_form_value(self, step: TransferStep, field: str) -> Optional[str]:
+    def get_form_value(self, step: SubmissionStep, field: str) -> Optional[str]:
         """Get the value of a field in a form step.
 
         Args:
@@ -453,7 +453,7 @@ class TransferFormWizard(SessionWizardView):
                 return user.first_name
             elif user.last_name:
                 return user.last_name
-        return self.get_form_value(TransferStep.CONTACT_INFO, "contact_name") or ""
+        return self.get_form_value(SubmissionStep.CONTACT_INFO, "contact_name") or ""
 
     def get_form_initial(self, step: str) -> dict:
         """Populate the initial state of the form.
@@ -466,7 +466,7 @@ class TransferFormWizard(SessionWizardView):
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
             initial = pickle.loads(self.in_progress_submission.step_data)["current"]
 
-        if not self.in_progress_submission and step == TransferStep.CONTACT_INFO.value:
+        if not self.in_progress_submission and step == SubmissionStep.CONTACT_INFO.value:
             user = cast(User, self.request.user)
             initial["contact_name"] = self.get_name_of_user(user)
             initial["email"] = str(user.email)
@@ -477,10 +477,10 @@ class TransferFormWizard(SessionWizardView):
         """Add data to inject when initializing the form."""
         kwargs = super().get_form_kwargs(step)
 
-        if step == TransferStep.GROUP_TRANSFER.value:
+        if step == SubmissionStep.GROUP_TRANSFER.value:
             kwargs["user"] = self.request.user
 
-        elif step == TransferStep.SOURCE_INFO.value:
+        elif step == SubmissionStep.SOURCE_INFO.value:
             source_type, _ = SourceType.objects.get_or_create(name="Individual")
             source_role, _ = SourceRole.objects.get_or_create(name="Donor")
             kwargs["defaults"] = {
@@ -498,8 +498,8 @@ class TransferFormWizard(SessionWizardView):
         final_forms = OrderedDict()
         form_list = self.get_form_list() or []
         for form_step in form_list:
-            transfer_step = TransferStep(form_step)
-            if transfer_step in (TransferStep.ACCEPT_LEGAL, TransferStep.REVIEW):
+            transfer_step = SubmissionStep(form_step)
+            if transfer_step in (SubmissionStep.ACCEPT_LEGAL, SubmissionStep.REVIEW):
                 continue
             form_obj = self.get_form(
                 step=form_step,
@@ -507,7 +507,7 @@ class TransferFormWizard(SessionWizardView):
                 files=self.storage.get_step_files(form_step),
             )
             form_obj.is_valid()  # This populates the cleaned_data attribute of the form
-            final_forms[TransferFormWizard._TEMPLATES[TransferStep(form_step)][FORMTITLE]] = (
+            final_forms[TransferFormWizard._TEMPLATES[SubmissionStep(form_step)][FORMTITLE]] = (
                 form_obj
             )
         return final_forms
@@ -560,7 +560,7 @@ class TransferFormWizard(SessionWizardView):
         """
         context = {}
 
-        if self.current_step == TransferStep.GROUP_TRANSFER:
+        if self.current_step == SubmissionStep.GROUP_TRANSFER:
             context.update(
                 {
                     "IS_NEW": True,
@@ -569,7 +569,7 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif self.current_step == TransferStep.UPLOAD_FILES:
+        elif self.current_step == SubmissionStep.UPLOAD_FILES:
             context.update(
                 {
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
@@ -578,7 +578,7 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif self.current_step == TransferStep.REVIEW:
+        elif self.current_step == SubmissionStep.REVIEW:
             context["form_list"] = ReviewForm.format_form_data(
                 self.get_forms_for_review(), user=cast(User, self.request.user)
             )
@@ -593,7 +593,7 @@ class TransferFormWizard(SessionWizardView):
         js_context = {}
 
         step = self.current_step
-        if step == TransferStep.CONTACT_INFO:
+        if step == SubmissionStep.CONTACT_INFO:
             js_context.update(
                 {
                     "id_province_or_state": ID_CONTACT_INFO_PROVINCE_OR_STATE,
@@ -602,22 +602,22 @@ class TransferFormWizard(SessionWizardView):
                 }
             )
 
-        elif step == TransferStep.RIGHTS:
+        elif step == SubmissionStep.RIGHTS:
             other_rights = RightsType.objects.filter(name="Other").first()
 
             js_context.update(
                 {
-                    "formset_prefix": TransferStep.RIGHTS.value,
+                    "formset_prefix": SubmissionStep.RIGHTS.value,
                     "other_rights_type_id": other_rights.pk if other_rights else 0,
                 }
             )
-        elif step == TransferStep.OTHER_IDENTIFIERS:
+        elif step == SubmissionStep.OTHER_IDENTIFIERS:
             js_context.update(
                 {
-                    "formset_prefix": TransferStep.OTHER_IDENTIFIERS.value,
+                    "formset_prefix": SubmissionStep.OTHER_IDENTIFIERS.value,
                 },
             )
-        elif step == TransferStep.SOURCE_INFO:
+        elif step == SubmissionStep.SOURCE_INFO:
             other_role = SourceRole.objects.filter(name="Other").first()
             other_type = SourceType.objects.filter(name="Other").first()
 
@@ -632,7 +632,7 @@ class TransferFormWizard(SessionWizardView):
                     "other_type_id": other_type.pk if other_type else 0,
                 }
             )
-        elif step == TransferStep.GROUP_TRANSFER:
+        elif step == SubmissionStep.GROUP_TRANSFER:
             js_context.update(
                 {
                     "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
@@ -646,7 +646,7 @@ class TransferFormWizard(SessionWizardView):
                     "default_group_uuid": self.submission_group_uuid,
                 },
             )
-        elif step == TransferStep.UPLOAD_FILES:
+        elif step == SubmissionStep.UPLOAD_FILES:
             js_context.update(
                 {
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,

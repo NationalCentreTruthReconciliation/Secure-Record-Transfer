@@ -25,7 +25,7 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.managers import (
     InProgressSubmissionManager,
     SubmissionQuerySet,
@@ -997,7 +997,7 @@ class InProgressSubmission(models.Model):
             The accession title of the submission
     """
 
-    STEP_CHOICES: ClassVar = [(step.value, step.name) for step in TransferStep]
+    STEP_CHOICES: ClassVar = [(step.value, step.name) for step in SubmissionStep]
 
     uuid = models.UUIDField(default=uuid.uuid4)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1022,7 +1022,7 @@ class InProgressSubmission(models.Model):
         modified through a form.
         """
         try:
-            TransferStep(self.current_step)
+            SubmissionStep(self.current_step)
         except ValueError:
             raise ValidationError({"current_step": ["Invalid step value"]}) from None
 

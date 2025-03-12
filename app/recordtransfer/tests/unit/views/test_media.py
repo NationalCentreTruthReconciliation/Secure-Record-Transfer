@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import TempUploadedFile, UploadSession, User
 
 
@@ -32,7 +32,7 @@ class TestCreateUploadSessionView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session["wizard_transfer_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
         session.save()
 
     def tearDown(self) -> None:
@@ -100,7 +100,7 @@ class TestUploadFilesView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session["wizard_transfer_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
         session.save()
 
         # Create a new upload session token
@@ -361,7 +361,7 @@ class TestUploadedFileView(TestCase):
 
         # Set up client session data
         session = self.client.session
-        session["wizard_transfer_form_wizard"] = {"step": TransferStep.UPLOAD_FILES.value}
+        session["wizard_transfer_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
         session.save()
 
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)

@@ -29,7 +29,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_SELECTION,
     OTHER_PROVINCE_OR_STATE_VALUE,
 )
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 
@@ -62,7 +62,7 @@ class AcceptLegal(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.ACCEPT_LEGAL
+        transfer_step = SubmissionStep.ACCEPT_LEGAL
 
     def clean(self) -> dict:
         """Clean form data and validate the session token."""
@@ -84,7 +84,7 @@ class ContactInfoForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.CONTACT_INFO
+        transfer_step = SubmissionStep.CONTACT_INFO
 
     def clean(self) -> dict:
         """Clean form data and ensure that the province_or_state field is filled out if 'Other'
@@ -303,7 +303,7 @@ class SourceInfoForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.SOURCE_INFO
+        transfer_step = SubmissionStep.SOURCE_INFO
 
     def __init__(self, *args, **kwargs):
         if "defaults" not in kwargs:
@@ -525,7 +525,7 @@ class RecordDescriptionForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.RECORD_DESCRIPTION
+        transfer_step = SubmissionStep.RECORD_DESCRIPTION
 
     def clean(self) -> dict:
         """Form date as approximate if user chose to mark the date as approximate."""
@@ -705,7 +705,7 @@ class RightsFormSet(BaseFormSet):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.RIGHTS
+        transfer_step = SubmissionStep.RIGHTS
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
@@ -718,7 +718,7 @@ class RightsForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.RIGHTS
+        transfer_step = SubmissionStep.RIGHTS
 
     def clean(self):
         """Check that the rights type is set if the other rights type is not."""
@@ -800,7 +800,7 @@ class OtherIdentifiersForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.OTHER_IDENTIFIERS
+        transfer_step = SubmissionStep.OTHER_IDENTIFIERS
 
     def clean(self):
         """Check that the other identifier type and value are set if the note is set."""
@@ -866,7 +866,7 @@ class OtherIdentifiersFormSet(BaseFormSet):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.OTHER_IDENTIFIERS
+        transfer_step = SubmissionStep.OTHER_IDENTIFIERS
 
 
 class GroupTransferForm(TransferForm):
@@ -875,7 +875,7 @@ class GroupTransferForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.GROUP_TRANSFER
+        transfer_step = SubmissionStep.GROUP_TRANSFER
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
@@ -919,7 +919,7 @@ class UploadFilesForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.UPLOAD_FILES
+        transfer_step = SubmissionStep.UPLOAD_FILES
 
     general_note = forms.CharField(
         required=False,
@@ -978,7 +978,7 @@ class FinalStepFormNoUpload(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.FINAL_NOTES
+        transfer_step = SubmissionStep.FINAL_NOTES
 
     general_note = forms.CharField(
         required=False,
@@ -1006,7 +1006,7 @@ class ReviewForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.REVIEW
+        transfer_step = SubmissionStep.REVIEW
 
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
 

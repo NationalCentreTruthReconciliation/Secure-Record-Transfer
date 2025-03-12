@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
 
 
@@ -23,9 +23,9 @@ class TransferFormWizardTests(TestCase):
         self.url = reverse("recordtransfer:transfer")
 
         self.test_data = [
-            (TransferStep.ACCEPT_LEGAL.value, {"agreement_accepted": "on"}),
+            (SubmissionStep.ACCEPT_LEGAL.value, {"agreement_accepted": "on"}),
             (
-                TransferStep.CONTACT_INFO.value,
+                SubmissionStep.CONTACT_INFO.value,
                 {
                     "contact_name": "John Doe",
                     "phone_number": "+1 (999) 999-9999",
@@ -40,7 +40,7 @@ class TransferFormWizardTests(TestCase):
                 },
             ),
             (
-                TransferStep.SOURCE_INFO.value,
+                SubmissionStep.SOURCE_INFO.value,
                 {
                     "enter_manual_source_info": "yes",
                     "source_name": "Test Source Name",
@@ -51,7 +51,7 @@ class TransferFormWizardTests(TestCase):
                 },
             ),
             (
-                TransferStep.RECORD_DESCRIPTION.value,
+                SubmissionStep.RECORD_DESCRIPTION.value,
                 {
                     "accession_title": "Test Accession Title",
                     "date_of_materials": "2021-01-01 - 2021-12-31",
@@ -61,7 +61,7 @@ class TransferFormWizardTests(TestCase):
                 },
             ),
             (
-                TransferStep.RIGHTS.value,
+                SubmissionStep.RIGHTS.value,
                 [
                     {
                         "rights_type": RightsType.objects.filter(name="Copyright").first().pk,
@@ -70,7 +70,7 @@ class TransferFormWizardTests(TestCase):
                 ],
             ),
             (
-                TransferStep.OTHER_IDENTIFIERS.value,
+                SubmissionStep.OTHER_IDENTIFIERS.value,
                 [
                     {
                         "other_identifier_type": "Test Identifier Type",
@@ -80,7 +80,7 @@ class TransferFormWizardTests(TestCase):
                 ],
             ),
             (
-                TransferStep.GROUP_TRANSFER.value,
+                SubmissionStep.GROUP_TRANSFER.value,
                 {
                     "group_uuid": SubmissionGroup.objects.create(
                         name="Test Group", created_by=self.user
@@ -88,13 +88,13 @@ class TransferFormWizardTests(TestCase):
                 },
             ),
             (
-                TransferStep.UPLOAD_FILES.value,
+                SubmissionStep.UPLOAD_FILES.value,
                 {
                     "general_note": "Test General Note",
                 },
             ),
             (
-                TransferStep.REVIEW.value,
+                SubmissionStep.REVIEW.value,
                 {},
             ),
         ]
@@ -120,7 +120,7 @@ class TransferFormWizardTests(TestCase):
         """Process the test data for the given step for form submission."""
         submit_data = {"transfer_form_wizard-current_step": step}
 
-        if step == TransferStep.UPLOAD_FILES.value:
+        if step == SubmissionStep.UPLOAD_FILES.value:
             session_token = self._upload_test_file()
             submit_data[f"{step}-session_token"] = session_token
 
@@ -178,7 +178,7 @@ class TransferFormWizardTests(TestCase):
 
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
-            if step == TransferStep.UPLOAD_FILES.value:
+            if step == SubmissionStep.UPLOAD_FILES.value:
                 submit_data["save_form_step"] = step
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)
@@ -204,7 +204,7 @@ class TransferFormWizardTests(TestCase):
 
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
-            if step == TransferStep.RIGHTS.value:
+            if step == SubmissionStep.RIGHTS.value:
                 submit_data["save_form_step"] = step
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)
@@ -230,7 +230,7 @@ class TransferFormWizardTests(TestCase):
         in_progress = InProgressSubmission.objects.create(
             user=self.user,
             upload_session=upload_session,
-            current_step=TransferStep.CONTACT_INFO.value,
+            current_step=SubmissionStep.CONTACT_INFO.value,
         )
         mock_expired.return_value = True
         response = self.client.get(self.url, {"transfer_uuid": in_progress.uuid}, follow=True)

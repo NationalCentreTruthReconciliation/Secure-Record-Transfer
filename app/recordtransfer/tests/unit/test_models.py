@@ -15,7 +15,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
@@ -278,7 +278,7 @@ class TestUploadSession(TestCase):
 
         for state in valid_states:
             self.session.status = state
-            with patch.object(self.session, 'remove_temp_uploads') as mock_remove_temp_uploads:
+            with patch.object(self.session, "remove_temp_uploads") as mock_remove_temp_uploads:
                 self.session.expire()
                 mock_remove_temp_uploads.assert_called_once_with(save=False)
                 self.assertEqual(self.session.status, UploadSession.SessionStatus.EXPIRED)
@@ -1014,7 +1014,7 @@ class TestInProgressSubmission(TestCase):
         self.upload_session = UploadSession.new_session()
         self.submission = InProgressSubmission.objects.create(
             user=self.user,
-            current_step=TransferStep.ACCEPT_LEGAL.value,
+            current_step=SubmissionStep.ACCEPT_LEGAL.value,
             step_data=b"test data",
             title="Test Submission",
             upload_session=self.upload_session,
