@@ -10,7 +10,7 @@
         {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
         ?
     </div>
-    <form action="{% url 'recordtransfer:transferdelete' uuid=in_progress.uuid %}"
+    <form action="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
           method="post">
         {% csrf_token %}
         <p>

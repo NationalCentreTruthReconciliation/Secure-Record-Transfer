@@ -27,7 +27,7 @@ urlpatterns = [
     path(
         "inprogress/<uuid:uuid>/delete/",
         login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
-        name="transferdelete",
+        name="delete_in_progress",
     ),
     path(
         "inprogress/<uuid:uuid>/delete/confirm/",
