@@ -51,16 +51,16 @@ def activate_account(request, uidb64, token):
 class ActivationSent(TemplateView):
     """The page a user sees after creating an account."""
 
-    template_name = "recordtransfer/activationsent.html"
+    template_name = "recordtransfer/activation_sent.html"
 
 
 class ActivationComplete(TemplateView):
     """The page a user sees when their account has been activated."""
 
-    template_name = "recordtransfer/activationcomplete.html"
+    template_name = "recordtransfer/activation_complete.html"
 
 
 class ActivationInvalid(TemplateView):
     """The page a user sees if their account could not be activated."""
 
-    template_name = "recordtransfer/activationinvalid.html"
+    template_name = "recordtransfer/activation_invalid.html"
