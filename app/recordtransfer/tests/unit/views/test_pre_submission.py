@@ -233,5 +233,5 @@ class SubmissionFormWizardTests(TestCase):
             current_step=SubmissionStep.CONTACT_INFO.value,
         )
         mock_expired.return_value = True
-        response = self.client.get(self.url, {"transfer_uuid": in_progress.uuid}, follow=True)
+        response = self.client.get(self.url, {"in_progress_uuid": in_progress.uuid}, follow=True)
         self.assertRedirects(response, reverse("recordtransfer:in_progress_submission_expired"))

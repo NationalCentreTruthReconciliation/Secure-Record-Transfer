@@ -111,7 +111,7 @@ class SubmissionFormWizard(SessionWizardView):
             FORM: forms.RecordDescriptionForm
             if settings.FILE_UPLOAD_ENABLED
             else forms.ExtendedRecordDescriptionForm,
-            INFOMESSAGE: gettext("Provide a brief description of the records you're transferring"),
+            INFOMESSAGE: gettext("Provide a brief description of the records you're submitting"),
         },
         SubmissionStep.RIGHTS: {
             TEMPLATEREF: "recordtransfer/submission_form_rights.html",
@@ -198,7 +198,7 @@ class SubmissionFormWizard(SessionWizardView):
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Dispatch the request to the appropriate handler method."""
-        self.in_progress_uuid = request.GET.get("transfer_uuid")
+        self.in_progress_uuid = request.GET.get("in_progress_uuid")
 
         if not self.in_progress_uuid:
             self.submission_group_uuid = request.GET.get("group_uuid")
