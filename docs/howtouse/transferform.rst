@@ -114,7 +114,7 @@ dropping files into it. If they add a file that isn't accepted by your accepted 
 transfer will not be allowed to submit until they remove the offending files.
 
 To see more about how to change what files are accepted, go to the section on
-:ref:`Accepted File Types`.
+:ref:`ACCEPTED_FILE_FORMATS`.
 
 .. image:: images/transfer_step_8.png
     :alt: Step 8 of the transfer form

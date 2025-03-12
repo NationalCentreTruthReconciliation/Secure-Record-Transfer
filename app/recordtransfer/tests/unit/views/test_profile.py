@@ -1,5 +1,5 @@
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import cast
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
@@ -8,11 +8,13 @@ from django.conf import settings
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
+from freezegun import freeze_time
 
 from recordtransfer.models import InProgressSubmission, UploadSession, User
 
 
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
+@freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
 class TestUserProfileView(TestCase):
     def setUp(self):
         self.test_username = "testuser"

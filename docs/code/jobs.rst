@@ -6,4 +6,3 @@ meant to run asynchronously with a Redis server.
 
 .. automodule:: recordtransfer.jobs
    :members:
-   :undoc-members:
