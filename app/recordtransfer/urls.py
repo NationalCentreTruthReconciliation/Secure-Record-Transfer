@@ -16,7 +16,7 @@ urlpatterns = [
     path(
         "error/",
         login_required(views.home.SystemErrorPage.as_view()),
-        name="systemerror",
+        name="system_error",
     ),
     path("submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"),
     path(

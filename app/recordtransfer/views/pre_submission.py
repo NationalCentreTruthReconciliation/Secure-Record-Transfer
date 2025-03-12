@@ -712,7 +712,7 @@ class SubmissionFormWizard(SessionWizardView):
             send_your_submission_did_not_go_through.delay(form_data, cast(User, self.request.user))
             send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
-            return HttpResponseRedirect(reverse("recordtransfer:systemerror"))
+            return HttpResponseRedirect(reverse("recordtransfer:system_error"))
 
 
 class DeleteInProgressSubmission(TemplateView):
