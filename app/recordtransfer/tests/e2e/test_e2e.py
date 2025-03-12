@@ -389,7 +389,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         )
 
         # Check that the new group is selected
-        group_select = Select(driver.find_element(By.NAME, "grouptransfer-group_uuid"))
+        group_select = Select(driver.find_element(By.NAME, "groupsubmission-group_uuid"))
         selected_option = group_select.first_selected_option
         self.assertEqual(selected_option.text, data["name"])
 
