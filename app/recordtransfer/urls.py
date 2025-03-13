@@ -37,12 +37,12 @@ urlpatterns = [
         name="submission_detail",
     ),
     path(
-        "submission/<uuid:uuid>/csv",
+        "submission/<uuid:uuid>/csv/",
         login_required(views.post_submission.SubmissionCsv.as_view()),
         name="submission_csv",
     ),
     path(
-        "submission-group/new",
+        "submission-group/new/",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
         name="submission_group_new",
     ),
@@ -71,7 +71,7 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "upload-session/",
+                "upload-session/new/",
                 login_required(views.media.create_upload_session),
                 name="create_upload_session",
             ),
