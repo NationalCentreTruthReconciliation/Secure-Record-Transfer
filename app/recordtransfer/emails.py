@@ -107,7 +107,7 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
             recipients=[submission.user.email],
             from_email=_get_do_not_reply_email_address(),
             subject="Thank You For Your Submission",
-            template_name="recordtransfer/email/transfer_success.html",
+            template_name="recordtransfer/email/submission_success.html",
             context={
                 "archivist_email": settings.ARCHIVIST_EMAIL,
             },
