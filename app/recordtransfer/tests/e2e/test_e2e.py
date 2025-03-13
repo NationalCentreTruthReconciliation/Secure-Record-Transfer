@@ -50,7 +50,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         SubmissionStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(SubmissionStep.RECORD_DESCRIPTION),
             "accession_title": "Test Accession Title",
-            "date_of_materials": "[ca. 2021-01-01 - 2021-01-31]",
+            "date_of_materials": "2021-01-01 - 2021-01-31",
+            "date_is_approximated": "✓ Yes",
             "language": "English",
             "description": "Test Description",
             "condition": "Test Condition",
@@ -181,6 +182,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         """Complete the Legal Agreement step."""
         driver = self.driver
 
+        # Wait for the Legal Agreement step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "acceptlegal-agreement_accepted"))
+        )
+
         # Complete the Legal Agreement step
         accept_agreement_checkbox = driver.find_element(By.NAME, "acceptlegal-agreement_accepted")
         accept_agreement_checkbox.click()
@@ -190,6 +196,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         """Complete the Contact Information step."""
         driver = self.driver
         data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for the Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
 
         # Complete the Contact Information step
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
@@ -226,6 +237,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
         data = self.test_data[SubmissionStep.SOURCE_INFO]
 
+        # Wait for the Source Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
         # Complete the Source Information step
         enter_manual_source_info_radio_0 = driver.find_element(
             By.NAME, "sourceinfo-enter_manual_source_info"
@@ -256,6 +272,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         """Complete the Record Description step."""
         driver = self.driver
         data = self.test_data[SubmissionStep.RECORD_DESCRIPTION]
+
+        # Wait for the Record Description step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "recorddescription-accession_title"))
+        )
 
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
         date_input = driver.find_element(By.NAME, "recorddescription-date_of_materials")
@@ -323,6 +344,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
         data = self.test_data[SubmissionStep.RIGHTS]
 
+        # Wait for the Record Rights step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "rights-0-rights_type"))
+        )
+
         rights_type_select = Select(driver.find_element(By.NAME, "rights-0-rights_type"))
         rights_type_select.select_by_visible_text(data["rights_type"])
 
@@ -340,6 +366,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
         driver = self.driver
         data = self.test_data[SubmissionStep.OTHER_IDENTIFIERS]
+
+        # Wait for the Other Identifiers step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "otheridentifiers-0-other_identifier_type"))
+        )
 
         # Complete the Other Identifiers step
         identifier_type_input = driver.find_element(
@@ -366,6 +397,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
         driver = self.driver
         data = self.test_data[SubmissionStep.GROUP_SUBMISSION]
+
+        # Wait for the Assign to Group step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "groupsubmission-group_uuid"))
+        )
 
         # Click the button to show the add new group dialog
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
@@ -398,6 +434,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
     def upload_files_step(self, required_only: bool = False) -> None:
         """Complete the Upload Files step."""
         data = self.test_data[SubmissionStep.UPLOAD_FILES]
+
+        # Wait for the Upload Files step to load
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "uploadfiles-general_note"))
+        )
 
         # Create temp file with specified name
         with tempfile.NamedTemporaryFile(suffix=data["filename"]) as temp_file:
@@ -490,6 +531,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
                     "Title": data["accession_title"],
                     "Language(s)": data["language"],
                     "Date of materials": data["date_of_materials"],
+                    "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
                 }
