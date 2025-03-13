@@ -1,4 +1,4 @@
-"""Forms specific to submitting files with a new submission."""
+"""Forms specific to creating new submissions."""
 
 from __future__ import annotations
 

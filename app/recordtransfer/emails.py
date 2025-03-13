@@ -95,7 +95,7 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
 
 @django_rq.job
 def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
-    """Send a submission success email to the user who submitted the submission.
+    """Send a submission success email to the user who made the submission.
 
     Args:
         form_data (dict): A dictionary of the cleaned form data from the submission form. This is NOT
