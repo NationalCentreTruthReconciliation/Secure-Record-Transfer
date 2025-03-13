@@ -164,7 +164,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         """Handle valid form submission."""
         response = super().form_valid(form)
         referer = self.request.headers.get("referer", "")
-        if "transfer" in referer:
+        if "submission/" in referer:
             return JsonResponse(
                 {
                     "message": self.success_message,
@@ -184,7 +184,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         """Handle invalid form submission."""
         referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
-        if "transfer" in referer:
+        if "submission/" in referer:
             return JsonResponse({"message": error_message, "status": "error"}, status=400)
         messages.error(
             self.request,

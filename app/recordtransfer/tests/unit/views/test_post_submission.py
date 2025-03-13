@@ -1,7 +1,4 @@
-from unittest.mock import MagicMock, patch
-
 from django.contrib.messages import get_messages
-from django.http import JsonResponse
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
@@ -16,7 +13,7 @@ class TestSubmissionGroupCreateView(TestCase):
     def setUpTestData(cls) -> None:
         """Set up test data."""
         cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.url = reverse("recordtransfer:submissiongroupnew")
+        cls.url = reverse("recordtransfer:submission_group_new")
 
     def setUp(self) -> None:
         """Set up test environment."""
@@ -57,46 +54,29 @@ class TestSubmissionGroupCreateView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("There was an error creating the group"))
 
-    @patch("recordtransfer.views.submission.SubmissionGroupCreateView.form_valid")
-    def test_form_valid_json_response(self, mock_form_valid: MagicMock) -> None:
+    def test_form_valid_json_response(self) -> None:
         """Test that a JsonResponse is returned when the form is valid and submitted from the
-        transfer page.
+        submission form page.
         """
-        mock_form_valid.return_value = JsonResponse(
-            {
-                "message": gettext("Group created"),
-                "status": "success",
-                "group": {
-                    "uuid": "test-uuid",
-                    "name": "Test Group",
-                    "description": "Test Description",
-                },
-            },
-            status=200,
-        )
         form_data = {
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="transfer")
+        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["message"], gettext("Group created"))
         self.assertEqual(response_json["status"], "success")
 
-    @patch("recordtransfer.views.submission.SubmissionGroupCreateView.form_invalid")
-    def test_form_invalid_json_response(self, mock_form_invalid: MagicMock) -> None:
+    def test_form_invalid_json_response(self) -> None:
         """Test that a JsonResponse is returned when the form is invalid and submitted from the
-        transfer page.
+        submission form page.
         """
-        mock_form_invalid.return_value = JsonResponse(
-            {"message": "This field is required.", "status": "error"}, status=400
-        )
         form_data = {
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="transfer")
+        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
         self.assertEqual(response.status_code, 400)
         response_json = response.json()
         self.assertEqual(response_json["message"], "This field is required.")
@@ -116,7 +96,7 @@ class TestSubmissionGroupDetailView(TestCase):
         cls.group = SubmissionGroup.objects.create(
             name="Test Group", description="Test Description", created_by=cls.user
         )
-        cls.url = reverse("recordtransfer:submissiongroupdetail", kwargs={"uuid": cls.group.uuid})
+        cls.url = reverse("recordtransfer:submission_group_detail", kwargs={"uuid": cls.group.uuid})
 
     def setUp(self) -> None:
         """Set up test environment."""

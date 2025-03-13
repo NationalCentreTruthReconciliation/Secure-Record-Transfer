@@ -1,11 +1,11 @@
-{% extends "recordtransfer/transferform_standard.html" %}
+{% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
 
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
-    <script src="{% static 'submissiongroup.bundle.js' %}"></script>
+    <script src="{% static 'submission_group.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}

@@ -20,7 +20,7 @@ class CreateAccount(FormView):
 
     template_name = "recordtransfer/signupform.html"
     form_class = SignUpForm
-    success_url = reverse_lazy("recordtransfer:activationsent")
+    success_url = reverse_lazy("recordtransfer:activation_sent")
 
     def form_valid(self, form):
         new_user = form.save(commit=False)
@@ -43,24 +43,24 @@ def activate_account(request, uidb64, token):
         user.confirmed_email = True
         user.save()
         login(request, user)
-        return HttpResponseRedirect(reverse("recordtransfer:accountcreated"))
+        return HttpResponseRedirect(reverse("recordtransfer:account_created"))
 
-    return HttpResponseRedirect(reverse("recordtransfer:activationinvalid"))
+    return HttpResponseRedirect(reverse("recordtransfer:activation_invalid"))
 
 
 class ActivationSent(TemplateView):
     """The page a user sees after creating an account."""
 
-    template_name = "recordtransfer/activationsent.html"
+    template_name = "recordtransfer/activation_sent.html"
 
 
 class ActivationComplete(TemplateView):
     """The page a user sees when their account has been activated."""
 
-    template_name = "recordtransfer/activationcomplete.html"
+    template_name = "recordtransfer/activation_complete.html"
 
 
 class ActivationInvalid(TemplateView):
     """The page a user sees if their account could not be activated."""
 
-    template_name = "recordtransfer/activationinvalid.html"
+    template_name = "recordtransfer/activation_invalid.html"

@@ -21,7 +21,7 @@ from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
-    SubmissionForm,
+    SubmissionModelForm,
 )
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
@@ -365,7 +365,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/submission_change_form.html"
 
-    form = SubmissionForm
+    form = SubmissionModelForm
 
     actions = [
         "export_caais_csv",

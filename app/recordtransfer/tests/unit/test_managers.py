@@ -5,7 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, UploadSession, User
 
 
@@ -32,7 +32,7 @@ class TestUploadSessionManager(TestCase):
         InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
         # Set last upload interaction time to be less than cutoff time
@@ -75,7 +75,7 @@ class TestUploadSessionManager(TestCase):
         InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
         expired_sessions = UploadSession.objects.get_expirable()
@@ -116,7 +116,7 @@ class TestUploadSessionManager(TestCase):
         InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
         # Set last upload interaction time to be less than cutoff time
@@ -193,7 +193,7 @@ class TestUploadSessionManager(TestCase):
         InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
         # Verify the session is not returned by get_deletable
@@ -219,7 +219,7 @@ class TestUploadSessionManager(TestCase):
         InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
         # Set last upload interaction time to be less than cutoff time
@@ -258,7 +258,7 @@ class TestUploadSessionManager(TestCase):
         InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
         # Set last upload interaction time to be greater than cutoff time
@@ -300,7 +300,7 @@ class TestInProgressSubmissionManager(TestCase):
         self.in_progress_submission = InProgressSubmission.objects.create(
             user=self.user,
             upload_session=self.upload_session,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
 
     @patch("django.utils.timezone.now")

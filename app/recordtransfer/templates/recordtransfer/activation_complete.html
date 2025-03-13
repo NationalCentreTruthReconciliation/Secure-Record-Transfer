@@ -7,11 +7,11 @@
     <div class="title-text">{% trans "Account Activated" %}</div>
     <p>
     {% blocktrans %}
-        Your account has been activated, and you should now be logged in. You may now transfer
+        Your account has been activated, and you should now be logged in. You may now submit
         records to the NCTR!
     {% endblocktrans %}
     </p>
-    <a href="{% url 'recordtransfer:transfer' %}">{% trans "Start a Transfer" %}</a>
+    <a href="{% url 'recordtransfer:submit' %}">{% trans "Start a Submission" %}</a>
     <br>
     <a href="{% url 'recordtransfer:index' %}">{% trans "Home" %}</a>
 {% endblock %}

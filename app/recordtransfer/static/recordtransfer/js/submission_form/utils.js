@@ -22,7 +22,7 @@ export const getCookie = (name) => {
 /**
  * Retrieves the upload session token from the DOM.
  * Looks for an input element with an ID ending in "session_token", which should exist on the
- * upload step of the transfer form.
+ * upload step of the submission form.
  * @returns {?string} The value of the session token if found, null otherwise
  */
 export const getSessionToken = () => {
@@ -62,7 +62,7 @@ export const fetchNewSessionToken = async () => {
 /**
  * Sets the upload session token in the DOM.
  * Looks for an input element with an ID ending in "session_token", which should exist on the
- * upload step of the transfer form.
+ * upload step of the submission form.
  * @param {string} token - The session token to set
  */
 export const setSessionToken = (token) => {

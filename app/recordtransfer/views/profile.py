@@ -30,13 +30,13 @@ from recordtransfer.models import InProgressSubmission, Submission, SubmissionGr
 class UserProfile(UpdateView):
     """View to show two things:
     - The user's profile information
-    - A list of the Submissions a user has created via transfer.
+    - A list of the Submissions a user has made.
     """
 
     template_name = "recordtransfer/profile.html"
     paginate_by = 10
     form_class = UserProfileForm
-    success_url = reverse_lazy("recordtransfer:userprofile")
+    success_url = reverse_lazy("recordtransfer:user_profile")
     success_message = gettext("Preferences updated")
     password_change_success_message = gettext("Password updated")
     error_message = gettext("There was an error updating your preferences. Please try again.")

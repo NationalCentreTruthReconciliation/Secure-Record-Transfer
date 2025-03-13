@@ -24,7 +24,7 @@ class RecordTransferModelForm(forms.ModelForm):
                     self.fields[field].disabled = True
 
 
-class SubmissionForm(RecordTransferModelForm):
+class SubmissionModelForm(RecordTransferModelForm):
     """Form for editing Submissions."""
 
     class Meta:

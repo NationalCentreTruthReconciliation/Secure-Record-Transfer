@@ -25,7 +25,7 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.managers import (
     InProgressSubmissionManager,
     SubmissionQuerySet,
@@ -674,7 +674,7 @@ class SubmissionGroup(models.Model):
 
     def get_absolute_url(self) -> str:
         """Return the URL to access a detail view of this submission group."""
-        return reverse("recordtransfer:submissiongroupdetail", kwargs={"uuid": self.uuid})
+        return reverse("recordtransfer:submission_group_detail", kwargs={"uuid": self.uuid})
 
     def __str__(self):
         return f"{self.name} ({self.created_by})"
@@ -997,7 +997,7 @@ class InProgressSubmission(models.Model):
             The accession title of the submission
     """
 
-    STEP_CHOICES: ClassVar = [(step.value, step.name) for step in TransferStep]
+    STEP_CHOICES: ClassVar = [(step.value, step.name) for step in SubmissionStep]
 
     uuid = models.UUIDField(default=uuid.uuid4)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1022,7 +1022,7 @@ class InProgressSubmission(models.Model):
         modified through a form.
         """
         try:
-            TransferStep(self.current_step)
+            SubmissionStep(self.current_step)
         except ValueError:
             raise ValidationError({"current_step": ["Invalid step value"]}) from None
 
@@ -1045,7 +1045,7 @@ class InProgressSubmission(models.Model):
 
     def get_resume_url(self) -> str:
         """Get the URL to access and resume the in-progress submission."""
-        return reverse("recordtransfer:transfer", kwargs={"transfer_uuid": self.uuid})
+        return f'{reverse("recordtransfer:submit")}?resume={self.uuid}'
 
     def reset_reminder_email_sent(self) -> None:
         """Reset the reminder email flag to False, if it isn't already False."""

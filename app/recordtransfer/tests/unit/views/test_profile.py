@@ -33,7 +33,7 @@ class TestUserProfileView(TestCase):
             gets_notification_emails=self.test_gets_notification_emails,
         )
         self.client.login(username="testuser", password="old_password")
-        self.url = reverse("recordtransfer:userprofile")
+        self.url = reverse("recordtransfer:user_profile")
         self.error_message = "There was an error updating your preferences. Please try again."
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
