@@ -9,16 +9,6 @@ app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     path(
-        "submission/<uuid:resume>/",
-        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
-        name="resume_submit",
-    ),
-    path(
-        "submission/<uuid:group>/",
-        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
-        name="submit_with_group",
-    ),
-    path(
         "submission/<uuid:uuid>/csv/",
         login_required(views.post_submission.SubmissionCsv.as_view()),
         name="submission_csv",
