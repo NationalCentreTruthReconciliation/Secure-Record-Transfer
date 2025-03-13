@@ -1028,7 +1028,9 @@ class TestInProgressSubmission(TestCase):
 
     def test_upload_session_expires_at(self) -> None:
         """Test upload_session_expires_at method."""
-        self.assertEqual(self.in_progress.upload_session_expires_at, self.upload_session.expires_at)
+        self.assertEqual(
+            self.in_progress.upload_session_expires_at, self.upload_session.expires_at
+        )
 
     def test_upload_session_expires_at_no_session(self) -> None:
         """Test upload_session_expires_at method when there is no upload session."""
@@ -1061,9 +1063,7 @@ class TestInProgressSubmission(TestCase):
 
     def test_get_resume_url(self) -> None:
         """Test the get_resume_url method."""
-        expected_url = reverse(
-            "recordtransfer:resume_submit", kwargs={"resume": self.in_progress.uuid}
-        )
+        expected_url = f'{reverse("recordtransfer:submit")}?resume={self.in_progress.uuid}'
         self.assertEqual(self.in_progress.get_resume_url(), expected_url)
 
     def test_reset_reminder_email_sent_flag_true(self) -> None:
