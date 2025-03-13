@@ -4,10 +4,10 @@
  * Sets up a modal form that is displayed if a user tries to leave the page with unsaved changes.
  */
 export function setupUnsavedChangesProtection() {
-    const transferUuid = new URLSearchParams(window.location.search).get("in_progress_uuid");
+    const inProgressUuid = new URLSearchParams(window.location.search).get("in_progress_uuid");
 
     // Skip click-away protection if on the first step of a fresh form
-    if (currentFormStep <= 1 && !transferUuid) {
+    if (currentFormStep <= 1 && !inProgressUuid) {
         return;
     }
 
@@ -17,11 +17,11 @@ export function setupUnsavedChangesProtection() {
     };
 
     const elements = {
-        modal: document.getElementById("unsaved-transferform-modal"),
+        modal: document.getElementById("unsaved-submission-form-modal"),
         saveButton: document.getElementById("modal-save-button"),
         closeButton: document.getElementById("close-modal-button"),
-        cancelButton: document.getElementById("unsaved-transferform-modal-cancel"),
-        leaveButton: document.getElementById("unsaved-transferform-modal-leave"),
+        cancelButton: document.getElementById("unsaved-submission-form-modal-cancel"),
+        leaveButton: document.getElementById("unsaved-submission-form-modal-leave"),
         formSaveButton: document.getElementById("form-save-button")
     };
 

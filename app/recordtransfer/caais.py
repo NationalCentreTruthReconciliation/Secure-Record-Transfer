@@ -1,4 +1,4 @@
-"""Converts the transfer form to a :py:class:`caais.models.Metadata` object.
+"""Converts the submission form to a :py:class:`caais.models.Metadata` object.
 
 To set default values, refer to :ref:`Data Formatting and Defaults`.
 """

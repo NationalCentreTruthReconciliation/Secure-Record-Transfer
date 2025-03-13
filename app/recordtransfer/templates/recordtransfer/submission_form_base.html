@@ -34,7 +34,7 @@
     {% endblock messages %}
     {% block form_explanation %}
     {% endblock form_explanation %}
-    <form id="transfer-form" action="" method="post">
+    <form id="submission-form" action="" method="post">
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ wizard.form.management_form }}
