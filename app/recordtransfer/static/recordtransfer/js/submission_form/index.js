@@ -1,6 +1,6 @@
 /* global singleCaptchaFn */
-import "../../css/transferform/review_step.css";
-import "../../css/transferform/uppy.css";
+import "../../css/submission_form/review_step.css";
+import "../../css/submission_form/uppy.css";
 
 import { setupContactInfoForm } from "./contactInfo";
 import { setupOtherIdentifiersForm } from "./otherIdentifiers";
