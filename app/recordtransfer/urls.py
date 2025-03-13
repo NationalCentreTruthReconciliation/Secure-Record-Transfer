@@ -92,7 +92,7 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "account/",
+                "account/new/",
                 views.account.CreateAccount.as_view(),
                 name="create_account",
             ),
