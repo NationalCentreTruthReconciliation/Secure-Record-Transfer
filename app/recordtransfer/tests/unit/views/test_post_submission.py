@@ -65,7 +65,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission")
+        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["message"], gettext("Group created"))
@@ -79,7 +79,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission")
+        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
         self.assertEqual(response.status_code, 400)
         response_json = response.json()
         self.assertEqual(response_json["message"], "This field is required.")
