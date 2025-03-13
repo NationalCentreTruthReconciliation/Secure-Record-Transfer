@@ -80,7 +80,7 @@ module.exports = {
                 "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        submissiondetail: [
+        submission_detail: [
             ...glob.sync(
                 "./app/recordtransfer/static/" +
                 "recordtransfer/css/submission_detail/*.css")
