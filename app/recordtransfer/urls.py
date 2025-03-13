@@ -42,7 +42,7 @@ urlpatterns = [
         name="submission_csv",
     ),
     path(
-        "submission-group/",
+        "submission-group/new",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
         name="submission_group_new",
     ),
