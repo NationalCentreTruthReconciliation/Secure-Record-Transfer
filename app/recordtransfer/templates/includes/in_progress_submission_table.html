@@ -4,8 +4,8 @@
         <tr>
             <th>{% trans "Last Updated" %}</th>
             <th>{% trans "Expires At" %}</th>
-            <th>{% trans "Transfer Title" %}</th>
-            <th>{% trans "Resume Transfer" %}</th>
+            <th>{% trans "Submission Title" %}</th>
+            <th>{% trans "Resume Submission" %}</th>
             <th>{% trans "Delete" %}</th>
         </tr>
         {% for in_progress in in_progress_page_obj %}
@@ -29,10 +29,10 @@
                     {% if in_progress.upload_session_expired %}
                         -
                     {% else %}
-                        <a href="{% url 'recordtransfer:transfer' %}?transfer_uuid={{ in_progress.uuid }}">Resume</a>
+                        <a href="{{ in_progress.get_resume_url }}">Resume</a>
                     {% endif %}
                 <td>
-                    <a href="{% url 'recordtransfer:transferdelete' in_progress.uuid %}">Delete</a>
+                    <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}">Delete</a>
                 </td>
             </tr>
         {% endfor %}

@@ -15,16 +15,16 @@
         </div>
         <div style="
             padding: 0px 20px;">
-            {% url 'recordtransfer:activateaccount' uidb64=uid token=token as activateaccount %}
+            {% url 'recordtransfer:activate_account' uidb64=uid token=token as activate_account %}
             <div>
                 {% blocktrans %}
                 An account was created for the NCTR Record Transfer Portal using this email.
-                To activate your account, <a href="http://{{ base_url }}{{ activateaccount }}">click here</a>,
+                To activate your account, <a href="http://{{ base_url }}{{ activate_account }}">click here</a>,
                 or copy and paste the following link into your favourite browser:
                 {% endblocktrans %}
             </div>
             <p>
-                http://{{ base_url }}{{ activateaccount }}
+                http://{{ base_url }}{{ activate_account }}
             </p>
 
             {% block postscript %}
@@ -39,7 +39,7 @@
             <div style="
                 font-size: 10pt;">
                 <i>
-                {% url 'recordtransfer:userprofile' as profile_url %}
+                {% url 'recordtransfer:user_profile' as profile_url %}
                 {% blocktrans %}
                 If you do not want to receive these emails anymore, you can change the
                 "Receive notification emails?" setting in

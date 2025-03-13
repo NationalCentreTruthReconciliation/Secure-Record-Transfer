@@ -71,7 +71,7 @@ module.exports = {
             ...glob.sync("./app/recordtransfer/static/" +
                 "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
         ],
-        transferform: "./app/recordtransfer/static/recordtransfer/js/transferform/index.js", // eslint-disable-line
+        submission_form: "./app/recordtransfer/static/recordtransfer/js/submission_form/index.js", // eslint-disable-line
         profile: [
             ...glob.sync(
                 "./app/recordtransfer/static/recordtransfer/js/profile/*.js")
@@ -80,13 +80,13 @@ module.exports = {
                 "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        submissiondetail: [
+        submission_detail: [
             ...glob.sync(
                 "./app/recordtransfer/static/" +
                 "recordtransfer/css/submission_detail/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        submissiongroup: [
+        submission_group: [
             ...glob.sync("./app/recordtransfer/static/" +
                 "recordtransfer/js/submission_group/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),

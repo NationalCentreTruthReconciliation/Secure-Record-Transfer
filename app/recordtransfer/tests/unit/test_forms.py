@@ -6,12 +6,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from recordtransfer.forms import UserProfileForm
-from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.transfer_forms import (
+from recordtransfer.forms.submission_forms import (
     RecordDescriptionForm,
     SourceInfoForm,
     UploadFilesForm,
 )
+from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import SubmissionGroup, TempUploadedFile, UploadSession, User
 
 
@@ -201,7 +201,7 @@ class UserProfileFormTest(TestCase):
 
 
 class RecordDescriptionFormTest(TestCase):
-    """Tests the record description form (part of the transfer form)."""
+    """Tests the RecordDescriptionForm (part of the submission form)."""
 
     def setUp(self) -> None:
         """Set up the test data."""
@@ -300,7 +300,7 @@ class RecordDescriptionFormTest(TestCase):
 
 
 class SourceInfoFormTest(TestCase):
-    """Tests the source information form (part of the transfer form)."""
+    """Tests the SourceInformationForm (part of the submission form)."""
 
     def setUp(self) -> None:
         """Create initial test data."""

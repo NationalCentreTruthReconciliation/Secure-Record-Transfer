@@ -26,7 +26,7 @@ export async function setupUppy() {
     if (!settings) {return;}
 
     const reviewButton = document.getElementById("form-review-button");
-    const transferForm = document.getElementById("transfer-form");
+    const submissionForm = document.getElementById("submission-form");
     const issueFileIds = [];
 
     /**
@@ -157,7 +157,7 @@ export async function setupUppy() {
             );
             return;
         }
-        transferForm.submit();
+        submissionForm.submit();
     });
 
     // Set the endpoint for file upload dynamically, based on the current upload session token

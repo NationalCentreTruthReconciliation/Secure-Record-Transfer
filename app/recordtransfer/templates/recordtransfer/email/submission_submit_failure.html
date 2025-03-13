@@ -11,13 +11,13 @@
             padding: 6px 20px;
             background-color: #eeeeee;
             margin-bottom: 15px;">
-            {% blocktrans %}Transfer Submitted by {{ username }} Failed{% endblocktrans %}
+            {% blocktrans %}Submission Made by {{ username }} Failed{% endblocktrans %}
         </div>
         <div style="
             padding: 0px 20px;">
             <p>
                 {{ first_name }} {{ last_name }} ({{ username }}) attempted to
-                submit a new transfer at {{ action_date }} using the NCTR Record Transfer
+                make a submission at {{ action_date }} using the NCTR Record Transfer
                 Portal, but an error occurred.
             </p>
             {% block postscript %}
@@ -32,7 +32,7 @@
             <div style="
                 font-size: 10pt;">
                 <i>
-                {% url 'recordtransfer:userprofile' as profile_url %}
+                {% url 'recordtransfer:user_profile' as profile_url %}
                 {% blocktrans %}
                 If you do not want to receive these emails anymore, you can change the
                 "Receive notification emails?" setting in

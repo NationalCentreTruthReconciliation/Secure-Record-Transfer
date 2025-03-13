@@ -11,23 +11,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from recordtransfer.constants import FORMTITLE
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
-from recordtransfer.views.transfer import TransferFormWizard
+from recordtransfer.views.pre_submission import SubmissionFormWizard
 
 
-def get_section_title(step: TransferStep) -> str:
+def get_section_title(step: SubmissionStep) -> str:
     """Get section title for a given step."""
-    return TransferFormWizard._TEMPLATES[step][FORMTITLE]
+    return SubmissionFormWizard._TEMPLATES[step][FORMTITLE]
 
 
 @tag("e2e")
-class TransferFormWizardTest(StaticLiveServerTestCase):
-    """End-to-end tests for the transfer form wizard."""
+class SubmissionFormWizardTest(StaticLiveServerTestCase):
+    """End-to-end tests for the submission form wizard."""
 
     test_data: ClassVar[dict] = {
-        TransferStep.CONTACT_INFO: {
-            "section_title": get_section_title(TransferStep.CONTACT_INFO),
+        SubmissionStep.CONTACT_INFO: {
+            "section_title": get_section_title(SubmissionStep.CONTACT_INFO),
             "contact_name": "John Doe",
             "phone_number": "+1 (999) 999-9999",
             "email": "john.doe@example.com",
@@ -39,40 +39,41 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             "job_title": "Archivist",
             "organization": "Test Organization",
         },
-        TransferStep.SOURCE_INFO: {
-            "section_title": get_section_title(TransferStep.SOURCE_INFO),
+        SubmissionStep.SOURCE_INFO: {
+            "section_title": get_section_title(SubmissionStep.SOURCE_INFO),
             "source_name": "Test Source Name",
             "source_type": "Individual",
             "source_role": "Donor",
             "source_note": "Test Source Note",
             "preliminary_custodial_history": "Test Custodial History",
         },
-        TransferStep.RECORD_DESCRIPTION: {
-            "section_title": get_section_title(TransferStep.RECORD_DESCRIPTION),
+        SubmissionStep.RECORD_DESCRIPTION: {
+            "section_title": get_section_title(SubmissionStep.RECORD_DESCRIPTION),
             "accession_title": "Test Accession Title",
-            "date_of_materials": "[ca. 2021-01-01 - 2021-01-31]",
+            "date_of_materials": "2021-01-01 - 2021-01-31",
+            "date_is_approximated": "✓ Yes",
             "language": "English",
             "description": "Test Description",
             "condition": "Test Condition",
         },
-        TransferStep.RIGHTS: {
-            "section_title": get_section_title(TransferStep.RIGHTS),
+        SubmissionStep.RIGHTS: {
+            "section_title": get_section_title(SubmissionStep.RIGHTS),
             "rights_type": "Copyright",
             "rights_value": "Copyright until 2050, applies to all files",
         },
-        TransferStep.OTHER_IDENTIFIERS: {
-            "section_title": get_section_title(TransferStep.OTHER_IDENTIFIERS),
+        SubmissionStep.OTHER_IDENTIFIERS: {
+            "section_title": get_section_title(SubmissionStep.OTHER_IDENTIFIERS),
             "type": "Receipt number",
             "value": "123456",
             "note": "Test note for identifier",
         },
-        TransferStep.GROUP_TRANSFER: {
-            "section_title": get_section_title(TransferStep.GROUP_TRANSFER),
+        SubmissionStep.GROUP_SUBMISSION: {
+            "section_title": get_section_title(SubmissionStep.GROUP_SUBMISSION),
             "name": "Test Group",
             "description": "Test description for group",
         },
-        TransferStep.UPLOAD_FILES: {
-            "section_title": get_section_title(TransferStep.UPLOAD_FILES),
+        SubmissionStep.UPLOAD_FILES: {
+            "section_title": get_section_title(SubmissionStep.UPLOAD_FILES),
             "general_note": "Test general note",
             "filename": "test_upload.txt",
             "content": b"Test content" * 512,  # 5 KB
@@ -181,6 +182,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         """Complete the Legal Agreement step."""
         driver = self.driver
 
+        # Wait for the Legal Agreement step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "acceptlegal-agreement_accepted"))
+        )
+
         # Complete the Legal Agreement step
         accept_agreement_checkbox = driver.find_element(By.NAME, "acceptlegal-agreement_accepted")
         accept_agreement_checkbox.click()
@@ -189,7 +195,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
     def complete_contact_information_step(self, required_only: bool = False) -> None:
         """Complete the Contact Information step."""
         driver = self.driver
-        data = self.test_data[TransferStep.CONTACT_INFO]
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for the Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
 
         # Complete the Contact Information step
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
@@ -224,7 +235,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         organization/another person.
         """
         driver = self.driver
-        data = self.test_data[TransferStep.SOURCE_INFO]
+        data = self.test_data[SubmissionStep.SOURCE_INFO]
+
+        # Wait for the Source Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
 
         # Complete the Source Information step
         enter_manual_source_info_radio_0 = driver.find_element(
@@ -255,7 +271,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
     def complete_record_description_step(self, required_only: bool = False) -> None:
         """Complete the Record Description step."""
         driver = self.driver
-        data = self.test_data[TransferStep.RECORD_DESCRIPTION]
+        data = self.test_data[SubmissionStep.RECORD_DESCRIPTION]
+
+        # Wait for the Record Description step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "recorddescription-accession_title"))
+        )
 
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
         date_input = driver.find_element(By.NAME, "recorddescription-date_of_materials")
@@ -321,7 +342,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
     def complete_record_rights_step(self, required_only: bool = False) -> None:
         """Complete the Record Rights step."""
         driver = self.driver
-        data = self.test_data[TransferStep.RIGHTS]
+        data = self.test_data[SubmissionStep.RIGHTS]
+
+        # Wait for the Record Rights step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "rights-0-rights_type"))
+        )
 
         rights_type_select = Select(driver.find_element(By.NAME, "rights-0-rights_type"))
         rights_type_select.select_by_visible_text(data["rights_type"])
@@ -339,7 +365,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             return
 
         driver = self.driver
-        data = self.test_data[TransferStep.OTHER_IDENTIFIERS]
+        data = self.test_data[SubmissionStep.OTHER_IDENTIFIERS]
+
+        # Wait for the Other Identifiers step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "otheridentifiers-0-other_identifier_type"))
+        )
 
         # Complete the Other Identifiers step
         identifier_type_input = driver.find_element(
@@ -365,7 +396,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             return
 
         driver = self.driver
-        data = self.test_data[TransferStep.GROUP_TRANSFER]
+        data = self.test_data[SubmissionStep.GROUP_SUBMISSION]
+
+        # Wait for the Assign to Group step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "groupsubmission-group_uuid"))
+        )
 
         # Click the button to show the add new group dialog
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
@@ -389,7 +425,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         )
 
         # Check that the new group is selected
-        group_select = Select(driver.find_element(By.NAME, "grouptransfer-group_uuid"))
+        group_select = Select(driver.find_element(By.NAME, "groupsubmission-group_uuid"))
         selected_option = group_select.first_selected_option
         self.assertEqual(selected_option.text, data["name"])
 
@@ -397,7 +433,12 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
     def upload_files_step(self, required_only: bool = False) -> None:
         """Complete the Upload Files step."""
-        data = self.test_data[TransferStep.UPLOAD_FILES]
+        data = self.test_data[SubmissionStep.UPLOAD_FILES]
+
+        # Wait for the Upload Files step to load
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "uploadfiles-general_note"))
+        )
 
         # Create temp file with specified name
         with tempfile.NamedTemporaryFile(suffix=data["filename"]) as temp_file:
@@ -423,8 +464,8 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.login()
         driver = self.driver
 
-        # Navigate to the transfer form wizard
-        driver.get(f"{self.live_server_url}/transfer/")
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/")
 
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
@@ -460,7 +501,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
             self.assertTrue(section_title.is_displayed())
 
             # Check specific fields based on step
-            if step == TransferStep.CONTACT_INFO:
+            if step == SubmissionStep.CONTACT_INFO:
                 fields = {
                     "Contact name": data["contact_name"],
                     "Phone number": data["phone_number"],
@@ -475,7 +516,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 }
                 self._verify_field_values("contactinfo", fields)
 
-            elif step == TransferStep.SOURCE_INFO:
+            elif step == SubmissionStep.SOURCE_INFO:
                 fields = {
                     "Name of source": data["source_name"],
                     "Source type": "Individual",
@@ -485,17 +526,18 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 }
                 self._verify_field_values("sourceinfo", fields)
 
-            elif step == TransferStep.RECORD_DESCRIPTION:
+            elif step == SubmissionStep.RECORD_DESCRIPTION:
                 fields = {
                     "Title": data["accession_title"],
                     "Language(s)": data["language"],
                     "Date of materials": data["date_of_materials"],
+                    "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
                 }
                 self._verify_field_values("recorddescription", fields)
 
-            elif step == TransferStep.RIGHTS:
+            elif step == SubmissionStep.RIGHTS:
                 rights_type = driver.find_element(
                     By.XPATH, "//dt[text()='Type of rights']/following-sibling::dd[1]"
                 )
@@ -505,7 +547,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 self.assertEqual(rights_type.text, "Copyright")
                 self.assertEqual(rights_value.text, data["rights_value"])
 
-            elif step == TransferStep.OTHER_IDENTIFIERS:
+            elif step == SubmissionStep.OTHER_IDENTIFIERS:
                 identifier_fields = {
                     "Type of identifier": data["type"],
                     "Identifier value": data["value"],
@@ -513,13 +555,13 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
                 }
                 self._verify_field_values("otheridentifiers", identifier_fields)
 
-            elif step == TransferStep.GROUP_TRANSFER:
+            elif step == SubmissionStep.GROUP_SUBMISSION:
                 group_name = driver.find_element(
                     By.XPATH, "//dt[text()='Assigned group']/following-sibling::dd[1]"
                 )
                 self.assertEqual(group_name.text, data["name"])
 
-            elif step == TransferStep.UPLOAD_FILES:
+            elif step == SubmissionStep.UPLOAD_FILES:
                 # Verify file upload
                 file_element = driver.find_element(By.CLASS_NAME, "file-entry")
                 self.assertTrue(file_element.is_displayed())
@@ -546,14 +588,20 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         self.login()
         driver = self.driver
 
-        # Navigate to the transfer form wizard
-        driver.get(f"{self.live_server_url}/transfer/")
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/")
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
 
         # Fill out some required fields in the Contact Information step
-        data = self.test_data[TransferStep.CONTACT_INFO]
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
         phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
         email_input = driver.find_element(By.NAME, "contactinfo-email")
@@ -606,6 +654,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         # Go to Source Information step
         self.go_next_step()
 
+        # Wait for the next step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
         # Optional step so go to next step
         self.go_next_step()
 
@@ -615,7 +668,7 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
         )
 
         # Fill out some fields in the Record Description step
-        data = self.test_data[TransferStep.RECORD_DESCRIPTION]
+        data = self.test_data[SubmissionStep.RECORD_DESCRIPTION]
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
         description_input = driver.find_element(
             By.NAME, "recorddescription-preliminary_scope_and_content"
@@ -634,6 +687,11 @@ class TransferFormWizardTest(StaticLiveServerTestCase):
 
         # Go back to the Record Description step
         self.go_next_step()
+
+        # Wait for the next step to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "recorddescription-accession_title"))
+        )
 
         # Refind the elements after navigating back to the Record Description step
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")

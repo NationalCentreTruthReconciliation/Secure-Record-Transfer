@@ -1,8 +1,8 @@
 from enum import Enum
 
 
-class TransferStep(Enum):
-    """Steps in the multi-stage transfer form, listed in the order they should be completed.
+class SubmissionStep(Enum):
+    """Steps in the multi-stage submission form, listed in the order they should be completed.
     Note that the final step is either "uploadfiles" or "finalnotes" depending on the
     configuration.
     """
@@ -13,7 +13,7 @@ class TransferStep(Enum):
     RECORD_DESCRIPTION = "recorddescription"
     RIGHTS = "rights"
     OTHER_IDENTIFIERS = "otheridentifiers"
-    GROUP_TRANSFER = "grouptransfer"
+    GROUP_SUBMISSION = "groupsubmission"
     UPLOAD_FILES = "uploadfiles"
     FINAL_NOTES = "finalnotes"
     REVIEW = "review"

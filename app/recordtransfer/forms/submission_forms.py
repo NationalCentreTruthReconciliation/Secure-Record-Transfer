@@ -1,4 +1,4 @@
-"""Forms specific to transferring files with a new submission."""
+"""Forms specific to creating new submissions."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_SELECTION,
     OTHER_PROVINCE_OR_STATE_VALUE,
 )
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 
@@ -50,19 +50,19 @@ class ReviewFormItem(TypedDict):
     note: Optional[str]
 
 
-class TransferForm(forms.Form):
-    """Base form for all transfer forms."""
+class SubmissionForm(forms.Form):
+    """Base form for all submission forms."""
 
     required_css_class = "required-field"
 
 
-class AcceptLegal(TransferForm):
+class AcceptLegal(SubmissionForm):
     """Form for accepting legal terms."""
 
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.ACCEPT_LEGAL
+        submission_step = SubmissionStep.ACCEPT_LEGAL
 
     def clean(self) -> dict:
         """Clean form data and validate the session token."""
@@ -78,13 +78,13 @@ class AcceptLegal(TransferForm):
     )
 
 
-class ContactInfoForm(TransferForm):
+class ContactInfoForm(SubmissionForm):
     """The Contact Information portion of the form. Contains fields from Section 2 of CAAIS."""
 
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.CONTACT_INFO
+        submission_step = SubmissionStep.CONTACT_INFO
 
     def clean(self) -> dict:
         """Clean form data and ensure that the province_or_state field is filled out if 'Other'
@@ -292,7 +292,7 @@ class ContactInfoForm(TransferForm):
     )
 
 
-class SourceInfoForm(TransferForm):
+class SourceInfoForm(SubmissionForm):
     """The Source Information portion of the form. Contains fields from Section 2 of CAAIS.
 
     This form is nominally "optional," but a user can fill in the fields if they want to. The
@@ -303,7 +303,7 @@ class SourceInfoForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.SOURCE_INFO
+        submission_step = SubmissionStep.SOURCE_INFO
 
     def __init__(self, *args, **kwargs):
         if "defaults" not in kwargs:
@@ -512,7 +512,7 @@ class SourceInfoForm(TransferForm):
     )
 
 
-class RecordDescriptionForm(TransferForm):
+class RecordDescriptionForm(SubmissionForm):
     """The Description Information portion of the form. Contains fields from Section 3 of CAAIS."""
 
     DATE_REGEX = (
@@ -525,7 +525,7 @@ class RecordDescriptionForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.RECORD_DESCRIPTION
+        submission_step = SubmissionStep.RECORD_DESCRIPTION
 
     def clean(self) -> dict:
         """Form date as approximate if user chose to mark the date as approximate."""
@@ -657,7 +657,7 @@ class RecordDescriptionForm(TransferForm):
         ),
         label=gettext("Description of contents"),
         help_text=gettext(
-            "Briefly describe the content of the files you are transferring. "
+            "Briefly describe the content of the files you are submitting. "
             "What do the files contain?"
         ),
     )
@@ -673,7 +673,7 @@ class RecordDescriptionForm(TransferForm):
             }
         ),
         label=gettext("Condition of files"),
-        help_text=gettext("Briefly describe the condition of the files you are transferring."),
+        help_text=gettext("Briefly describe the condition of the files you are submitting."),
     )
 
 
@@ -690,7 +690,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
                 "rows": "2",
                 "placeholder": gettext(
                     "Record how many files and of what type they are that you "
-                    "are planning on transferring (optional)"
+                    "are planning on submitting (optional)"
                 ),
             }
         ),
@@ -705,20 +705,20 @@ class RightsFormSet(BaseFormSet):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.RIGHTS
+        submission_step = SubmissionStep.RIGHTS
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
         self.forms[0].empty_permitted = False
 
 
-class RightsForm(TransferForm):
+class RightsForm(SubmissionForm):
     """The Rights portion of the form. Contains fields from Section 4 of CAAIS."""
 
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.RIGHTS
+        submission_step = SubmissionStep.RIGHTS
 
     def clean(self):
         """Check that the rights type is set if the other rights type is not."""
@@ -794,13 +794,13 @@ class RightsForm(TransferForm):
     """
 
 
-class OtherIdentifiersForm(TransferForm):
+class OtherIdentifiersForm(SubmissionForm):
     """The Other Identifiers portion of the form. Contains fields from Section 1 of CAAIS."""
 
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.OTHER_IDENTIFIERS
+        submission_step = SubmissionStep.OTHER_IDENTIFIERS
 
     def clean(self):
         """Check that the other identifier type and value are set if the note is set."""
@@ -866,16 +866,16 @@ class OtherIdentifiersFormSet(BaseFormSet):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.OTHER_IDENTIFIERS
+        submission_step = SubmissionStep.OTHER_IDENTIFIERS
 
 
-class GroupTransferForm(TransferForm):
-    """Form for assigning a transfer to a specific group."""
+class GroupSubmissionForm(SubmissionForm):
+    """Form for assigning a submission to a specific group."""
 
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.GROUP_TRANSFER
+        submission_step = SubmissionStep.GROUP_SUBMISSION
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
@@ -913,13 +913,13 @@ class GroupTransferForm(TransferForm):
     )
 
 
-class UploadFilesForm(TransferForm):
+class UploadFilesForm(SubmissionForm):
     """The form where users upload their files and write any final notes."""
 
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.UPLOAD_FILES
+        submission_step = SubmissionStep.UPLOAD_FILES
 
     general_note = forms.CharField(
         required=False,
@@ -970,7 +970,7 @@ class UploadFilesForm(TransferForm):
         return cleaned_data
 
 
-class FinalStepFormNoUpload(TransferForm):
+class FinalStepFormNoUpload(SubmissionForm):
     """The form where users write any final notes. Intended to be used in place of UploadFilesForm
     when file uploads are disabled.
     """
@@ -978,7 +978,7 @@ class FinalStepFormNoUpload(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.FINAL_NOTES
+        submission_step = SubmissionStep.FINAL_NOTES
 
     general_note = forms.CharField(
         required=False,
@@ -998,7 +998,7 @@ class FinalStepFormNoUpload(TransferForm):
     )
 
 
-class ReviewForm(TransferForm):
+class ReviewForm(SubmissionForm):
     """The final step of the form where the user can review their submission before sending
     it.
     """
@@ -1006,7 +1006,7 @@ class ReviewForm(TransferForm):
     class Meta:
         """Meta information for the form."""
 
-        transfer_step = TransferStep.REVIEW
+        submission_step = SubmissionStep.REVIEW
 
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
 
@@ -1041,8 +1041,8 @@ class ReviewForm(TransferForm):
         return fields_data
 
     @staticmethod
-    def _get_group_transfer_fields_data(form: GroupTransferForm, user: User) -> dict[str, Any]:
-        """Handle group transfer specific field processing."""
+    def _get_group_submission_fields_data(form: GroupSubmissionForm, user: User) -> dict[str, Any]:
+        """Handle group submission specific field processing."""
         fields_data = ReviewForm._get_base_fields_data(form)
         group_uuid = form.cleaned_data.get("group_uuid")
 
@@ -1091,24 +1091,24 @@ class ReviewForm(TransferForm):
         preview_data: list[ReviewFormItem] = []
 
         for step_title, form in form_dict.items():
-            # Each form has metadata that links it to a step in the transfer form
+            # Each form has metadata that links it to a step in the submission form
             meta = getattr(form.__class__, "Meta", None)
-            transfer_step = meta.transfer_step if meta else None
+            submission_step = meta.submission_step if meta else None
 
             if isinstance(form, BaseFormSet):  # Handle formsets
                 formset_data, note = ReviewForm._get_formset_fields_data(form)
                 preview_data.append(
                     {
                         "step_title": step_title,
-                        "step_name": transfer_step.value if transfer_step else "",
+                        "step_name": submission_step.value if submission_step else "",
                         "fields": formset_data,
                         "note": note,  # A note is included if the formset is empty
                     }
                 )
 
             elif isinstance(form, BaseForm):  # Handle regular forms
-                if isinstance(form, GroupTransferForm):
-                    fields_data = ReviewForm._get_group_transfer_fields_data(form, user)
+                if isinstance(form, GroupSubmissionForm):
+                    fields_data = ReviewForm._get_group_submission_fields_data(form, user)
                 elif isinstance(form, UploadFilesForm):
                     fields_data = ReviewForm._get_file_upload_fields_data(form, user)
                 else:
@@ -1117,7 +1117,7 @@ class ReviewForm(TransferForm):
                 preview_data.append(
                     {
                         "step_title": step_title,
-                        "step_name": transfer_step.value if transfer_step else "",
+                        "step_name": submission_step.value if submission_step else "",
                         "fields": fields_data,
                         "note": None,
                     }

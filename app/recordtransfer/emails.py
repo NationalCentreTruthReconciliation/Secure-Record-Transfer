@@ -23,8 +23,8 @@ LOGGER = logging.getLogger("rq.worker")
 __all__ = [
     "send_submission_creation_success",
     "send_submission_creation_failure",
-    "send_thank_you_for_your_transfer",
-    "send_your_transfer_did_not_go_through",
+    "send_thank_you_for_your_submission",
+    "send_your_submission_did_not_go_through",
     "send_user_activation_email",
     "send_user_account_updated",
 ]
@@ -36,8 +36,8 @@ def send_submission_creation_success(form_data: dict, submission: Submission):
     submission and there were no errors.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
-            the CAAIS tree version of the form.
+        form_data (dict): A dictionary of the cleaned form data from the submission form. This is
+            NOT the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
     """
     subject = "New Submission Ready for Review"
@@ -72,8 +72,8 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
     submission and there WERE errors.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
-            the CAAIS tree version of the form.
+        form_data (dict): A dictionary of the cleaned form data from the submission form. This is
+            NOT the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
     """
     subject = "Submission Failed"
@@ -94,11 +94,11 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
 
 
 @django_rq.job
-def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
-    """Send a transfer success email to the user who submitted the transfer.
+def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
+    """Send a submission success email to the user who made the submission.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
+        form_data (dict): A dictionary of the cleaned form data from the submission form. This is NOT
             the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
     """
@@ -106,8 +106,8 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
         _send_mail_with_logs(
             recipients=[submission.user.email],
             from_email=_get_do_not_reply_email_address(),
-            subject="Thank You For Your Transfer",
-            template_name="recordtransfer/email/transfer_success.html",
+            subject="Thank You For Your Submission",
+            template_name="recordtransfer/email/submission_success.html",
             context={
                 "archivist_email": settings.ARCHIVIST_EMAIL,
             },
@@ -115,20 +115,20 @@ def send_thank_you_for_your_transfer(form_data: dict, submission: Submission):
 
 
 @django_rq.job
-def send_your_transfer_did_not_go_through(form_data: dict, user_submitted: User):
-    """Send a transfer failure email to the user who submitted the transfer.
+def send_your_submission_did_not_go_through(form_data: dict, user_submitted: User):
+    """Send a submission failure email to the user who made the submission.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the transfer form. This is NOT
-            the CAAIS tree version of the form.
+        form_data (dict): A dictionary of the cleaned form data from the submission form. This is
+            NOT the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
     """
     if user_submitted.gets_notification_emails:
         _send_mail_with_logs(
             recipients=[user_submitted.email],
             from_email=_get_do_not_reply_email_address(),
-            subject="Issue With Your Transfer",
-            template_name="recordtransfer/email/transfer_failure.html",
+            subject="Issue With Your Submission",
+            template_name="recordtransfer/email/submission_failure.html",
             context={
                 "username": user_submitted.username,
                 "first_name": user_submitted.first_name,
@@ -179,6 +179,7 @@ def send_user_account_updated(user_updated: User, context_vars: dict):
         context=context_vars,
     )
 
+
 @django_rq.job
 def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission) -> None:
     """Send an email to a user that their in-progress submission is expiring soon.
@@ -215,7 +216,7 @@ def _get_admin_recipient_list(subject: str) -> List[str]:
     LOGGER.info('Finding Users to send "%s" email to', subject)
     recipients = User.objects.filter(gets_submission_email_updates=True)
     if not recipients:
-        LOGGER.warning("There are no users configured to receive transfer update emails.")
+        LOGGER.warning("There are no users configured to receive submission update emails.")
         return
     user_list = list(recipients)
     LOGGER.info("Found %d Users(s) to send email to: %s", len(user_list), str(user_list))

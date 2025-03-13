@@ -35,15 +35,15 @@
                     </a>
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:userprofile' %}">
+                    <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:user_profile' %}">
                         <div class="nav-link">
                             {% trans "Profile" %}
                         </div>
                         <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                     </a>
-                    <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:transfer' %}">
+                    <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:submit' %}">
                         <div class="nav-link">
-                            {% trans "Transfer" %}
+                            {% trans "Submit" %}
                         </div>
                         <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                     </a>
@@ -54,7 +54,7 @@
                     </a>
                 {% elif not user.is_authenticated %}
                     {% if SIGN_UP_ENABLED %}
-                        <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:createaccount' %}">
+                        <a class="nav-item nav-item-flex" href="{% url 'recordtransfer:create_account' %}">
                             <div class="nav-link">
                                 {% trans "Sign Up" %}
                             </div>

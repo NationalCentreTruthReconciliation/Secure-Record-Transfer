@@ -1,0 +1,23 @@
+{% extends "recordtransfer/base.html" %}
+{% load i18n %}
+{% block title %}
+    {% trans "Delete In-Progress Submission?" %}
+{% endblock title %}
+{% block content %}
+    <div class="title-text">{% trans "Confirm In-Progress Submission Deletion" %}</div>
+    <div class="flex-med-width-item margin-top-25px">
+        {% trans "Do you wish to delete the in-progress submission from" %} {{ in_progress.last_updated|date:"F j, Y g:ia" }}
+        {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
+        ?
+    </div>
+    <form action="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
+          method="post">
+        {% csrf_token %}
+        <p>
+            <button type="button"
+                    onclick="window.location.href='{% url 'recordtransfer:user_profile' %}'"
+                    class="red-button margin-right-20px">{% trans "Cancel" %}</button>
+            <button type="submit" class="blue-button">{% trans "OK" %}</button>
+        </p>
+    </form>
+{% endblock content %}
