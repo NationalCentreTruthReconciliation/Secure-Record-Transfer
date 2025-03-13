@@ -1,9 +1,8 @@
 """Views for the homepage and static pages navigable from the home page."""
 
+from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.views.generic import TemplateView
-
-from caais.models import RightsType, SourceRole, SourceType
 
 
 class Index(TemplateView):
