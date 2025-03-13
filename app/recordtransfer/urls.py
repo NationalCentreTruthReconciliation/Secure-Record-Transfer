@@ -42,7 +42,7 @@ urlpatterns = [
         name="submission_csv",
     ),
     path(
-        "submission-group/new/",
+        "submission-group/",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
         name="submission_group_new",
     ),
@@ -92,7 +92,7 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "account/new/",
+                "account/",
                 views.account.CreateAccount.as_view(),
                 name="create_account",
             ),
