@@ -1062,7 +1062,7 @@ class TestInProgressSubmission(TestCase):
     def test_get_resume_url(self) -> None:
         """Test the get_resume_url method."""
         expected_url = reverse(
-            "recordtransfer:submit", kwargs={"resume": self.in_progress.uuid}
+            "recordtransfer:resume_submit", kwargs={"resume": self.in_progress.uuid}
         )
         self.assertEqual(self.in_progress.get_resume_url(), expected_url)
 

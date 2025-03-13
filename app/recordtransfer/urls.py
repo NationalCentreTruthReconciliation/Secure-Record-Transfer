@@ -9,14 +9,34 @@ app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     path(
+        "submission/<uuid:resume>/<uuid:group>/",
+        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
+        name="resume_submit_with_group",
+    ),
+    path(
+        "submission/<uuid:resume>/",
+        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
+        name="resume_submit",
+    ),
+    path(
+        "submission/<uuid:group>/",
+        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
+        name="submit_with_group",
+    ),
+    path(
+        "submission/<uuid:uuid>/csv/",
+        login_required(views.post_submission.SubmissionCsv.as_view()),
+        name="submission_csv",
+    ),
+    path(
+        "submission/<uuid:uuid>/",
+        login_required(views.post_submission.SubmissionDetail.as_view()),
+        name="submission_detail",
+    ),
+    path(
         "submission/",
         login_required(views.pre_submission.SubmissionFormWizard.as_view()),
         name="submit",
-    ),
-    path(
-        "submission/<uuid:resume>/<uuid:group>/",
-        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
-        name="submit_with_ids",
     ),
     path(
         "error/",
@@ -36,16 +56,6 @@ urlpatterns = [
     ),
     path("about/", views.home.About.as_view(), name="about"),
     path("user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"),
-    path(
-        "submission/<uuid:uuid>/",
-        login_required(views.post_submission.SubmissionDetail.as_view()),
-        name="submission_detail",
-    ),
-    path(
-        "submission/<uuid:uuid>/csv/",
-        login_required(views.post_submission.SubmissionCsv.as_view()),
-        name="submission_csv",
-    ),
     path(
         "submission-group/",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
