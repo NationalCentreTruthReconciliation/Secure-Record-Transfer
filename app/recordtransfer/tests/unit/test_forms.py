@@ -201,7 +201,7 @@ class UserProfileFormTest(TestCase):
 
 
 class RecordDescriptionFormTest(TestCase):
-    """Tests the record description form (part of the transfer form)."""
+    """Tests the RecordDescriptionForm (part of the submission form)."""
 
     def setUp(self) -> None:
         """Set up the test data."""
@@ -300,7 +300,7 @@ class RecordDescriptionFormTest(TestCase):
 
 
 class SourceInfoFormTest(TestCase):
-    """Tests the source information form (part of the transfer form)."""
+    """Tests the SourceInformationForm (part of the submission form)."""
 
     def setUp(self) -> None:
         """Create initial test data."""
