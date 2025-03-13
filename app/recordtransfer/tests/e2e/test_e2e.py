@@ -465,7 +465,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(f"{self.live_server_url}/submission/new/")
+        driver.get(f"{self.live_server_url}/submission/")
 
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
@@ -589,7 +589,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(f"{self.live_server_url}/submission/new")
+        driver.get(f"{self.live_server_url}/submission/")
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
