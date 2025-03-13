@@ -1,7 +1,4 @@
-from unittest.mock import MagicMock, patch
-
 from django.contrib.messages import get_messages
-from django.http import JsonResponse
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
