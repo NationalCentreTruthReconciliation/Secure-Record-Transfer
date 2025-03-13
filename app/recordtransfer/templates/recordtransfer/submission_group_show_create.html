@@ -26,9 +26,8 @@
         </div>
         {% include "includes/submission_group_form.html" %}
         {% if not IS_NEW %}
-            <div class="flex-med-width-item margin-top-25px"
-                 id="past-transfers-in-group">
-                <label class="medium-text">{% trans "Past Transfers in this Group" %}</label>
+            <div class="flex-med-width-item margin-top-25px">
+                <label class="medium-text">{% trans "Past Submissions in this Group" %}</label>
             </div>
             {% if submissions %}
                 {% include "includes/submission_table.html" with submissions=submissions %}
