@@ -30,7 +30,7 @@ from recordtransfer.models import InProgressSubmission, Submission, SubmissionGr
 class UserProfile(UpdateView):
     """View to show two things:
     - The user's profile information
-    - A list of the Submissions a user has created via transfer.
+    - A list of the Submissions a user has made.
     """
 
     template_name = "recordtransfer/profile.html"
