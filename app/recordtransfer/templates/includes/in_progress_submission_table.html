@@ -29,7 +29,7 @@
                     {% if in_progress.upload_session_expired %}
                         -
                     {% else %}
-                        <a href="{% url 'recordtransfer:submit' %}?in_progress_uuid={{ in_progress.uuid }}">Resume</a>
+                        <a href="{% url 'recordtransfer:submit' %}?resume={{ in_progress.uuid }}">Resume</a>
                     {% endif %}
                 <td>
                     <a href="{% url 'recordtransfer:delete_in_progress' in_progress.uuid %}">Delete</a>

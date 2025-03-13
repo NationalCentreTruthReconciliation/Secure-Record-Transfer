@@ -4,7 +4,7 @@
  * Sets up a modal form that is displayed if a user tries to leave the page with unsaved changes.
  */
 export function setupUnsavedChangesProtection() {
-    const inProgressUuid = new URLSearchParams(window.location.search).get("in_progress_uuid");
+    const inProgressUuid = new URLSearchParams(window.location.search).get("resume");
 
     // Skip click-away protection if on the first step of a fresh form
     if (currentFormStep <= 1 && !inProgressUuid) {

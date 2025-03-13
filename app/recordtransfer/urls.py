@@ -8,10 +8,15 @@ from . import views
 app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
-    re_path(
-        r"^submission(?:/(?P<in_progress_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
+    path(
+        "submission/",
         login_required(views.pre_submission.SubmissionFormWizard.as_view()),
         name="submit",
+    ),
+    path(
+        "submission/<uuid:resume>/<uuid:group>/",
+        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
+        name="submit_with_ids",
     ),
     path(
         "error/",

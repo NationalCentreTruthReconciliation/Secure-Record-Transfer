@@ -198,10 +198,10 @@ class SubmissionFormWizard(SessionWizardView):
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Dispatch the request to the appropriate handler method."""
-        self.in_progress_uuid = request.GET.get("in_progress_uuid")
+        self.in_progress_uuid = request.GET.get("resume")
 
         if not self.in_progress_uuid:
-            self.submission_group_uuid = request.GET.get("group_uuid")
+            self.submission_group_uuid = request.GET.get("group")
             return super().dispatch(request, *args, **kwargs)
 
         self.in_progress_submission = InProgressSubmission.objects.filter(
