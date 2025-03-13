@@ -334,6 +334,37 @@ h2 {
     cursor: not-allowed;
 }
 
+.step-link,
+.back-to-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+
+.step-link:hover,
+.back-to-btn:hover {
+    color: #0056b3;
+}
+
+.step-link i,
+.back-to-btn i {
+    font-size: 0.8rem;
+}
+
+.step-link {
+    padding: 0.5rem 1rem;
+}
+
+.back-to-btn {
+    margin-bottom: 1rem;
+}
+
 @media (max-width: 1199px) {
 
     .main-header-content,
