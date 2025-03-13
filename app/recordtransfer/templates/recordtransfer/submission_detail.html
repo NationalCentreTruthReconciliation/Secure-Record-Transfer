@@ -3,25 +3,25 @@
 
 <html lang="en">
 <head>
-    <title>Transfer Report for "{{ metadata.accession_title }}"</title>
-    <meta name="description" content="Automatically generated report for the transfer submission.">
-    <meta name="keywords" content="transfer, report, submission, metadata">
+    <title>Submission Report for "{{ metadata.accession_title }}"</title>
+    <meta name="description" content="Automatically generated report for the submission.">
+    <meta name="keywords" content="report, submission, metadata">
     <link rel="stylesheet" href="{% static 'submissiondetail.css' %}">
 </head>
 <body>
-    <div class="main-title">Transfer Report for "{{ metadata.accession_title }}"</div>
+    <div class="main-title">Submission Report for "{{ metadata.accession_title }}"</div>
     <div class="main-container">
         <p>
-            The following is an automatically generated report for the transfer submitted by
+            The following is an automatically generated report for the submission made by
             {{ submission.user.username }} ({{ submission.user.email }}) at {{ submission.submission_date }}, titled
             "{{ metadata.accession_title }}".
         </p>
         <table border="1" cellspacing="0">
             <tr>
-                <th colspan="2"><div class="title">Transfer Context</div></th>
+                <th colspan="2"><div class="title">Submission Context</div></th>
             </tr>
             <tr>
-                <td><b>Transfer Date</b></td>
+                <td><b>Submission Date</b></td>
                 <td>{{ submission.submission_date }}</td>
             </tr>
             <tr>
