@@ -71,7 +71,7 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "upload-session/new/",
+                "upload-session/",
                 login_required(views.media.create_upload_session),
                 name="create_upload_session",
             ),

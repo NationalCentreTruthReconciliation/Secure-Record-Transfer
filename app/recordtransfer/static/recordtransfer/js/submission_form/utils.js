@@ -39,7 +39,7 @@ export const getSessionToken = () => {
  */
 export const fetchNewSessionToken = async () => {
     try {
-        const response = await fetch("/upload-session/new", {
+        const response = await fetch("/upload-session/", {
             method: "POST",
             headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
