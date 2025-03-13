@@ -23,7 +23,7 @@ def get_section_title(step: SubmissionStep) -> str:
 
 @tag("e2e")
 class SubmissionFormWizardTest(StaticLiveServerTestCase):
-    """End-to-end tests for the transfer form wizard."""
+    """End-to-end tests for the submission form wizard."""
 
     test_data: ClassVar[dict] = {
         SubmissionStep.CONTACT_INFO: {
@@ -423,8 +423,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         self.login()
         driver = self.driver
 
-        # Navigate to the transfer form wizard
-        driver.get(f"{self.live_server_url}/transfer/")
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/new/")
 
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
@@ -546,14 +546,20 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         self.login()
         driver = self.driver
 
-        # Navigate to the transfer form wizard
-        driver.get(f"{self.live_server_url}/transfer/")
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/new")
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
 
         # Fill out some required fields in the Contact Information step
         data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
         contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
         phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
         email_input = driver.find_element(By.NAME, "contactinfo-email")
@@ -606,6 +612,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Go to Source Information step
         self.go_next_step()
 
+        # Wait for the next step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
         # Optional step so go to next step
         self.go_next_step()
 
@@ -634,6 +645,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
         # Go back to the Record Description step
         self.go_next_step()
+
+        # Wait for the next step to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "recorddescription-accession_title"))
+        )
 
         # Refind the elements after navigating back to the Record Description step
         accession_title_input = driver.find_element(By.NAME, "recorddescription-accession_title")
