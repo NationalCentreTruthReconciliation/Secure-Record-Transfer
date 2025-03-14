@@ -22,7 +22,7 @@ return to the form at a later time.
 .. image:: images/form_navigation.png
     :alt: Navigation buttons on the transfer form
 
-Throughout the form, grey question mark icons (i) exist next to many fields. Helpful tooltips with
+Throughout the form, grey information icons (i) exist next to many fields. Helpful tooltips with
 additional guidance on how to complete each field are displayed when the mouse hovers over these
 icons.
 
@@ -68,8 +68,8 @@ organization/another person" field and simply click **Next Step**.
 .. image:: images/transfer_step_3_not_on_behalf.png
     :alt: Step 3 of the transfer form, not submitting on behalf of another person or organization
 
-If they are submitting the records on behalf of another person or an institution, they can select
-"Yes" for that field instead. This will reveal additional fields where they can provide 
+If the donor is submitting the records on behalf of another person or an institution, they can
+select "Yes" for that field instead. This will reveal additional fields where they can provide 
 information about the organization or person they are submitting the records for. CAAIS includes
 fields for adding notes about the source, as well as custodial history. If the donor feels inclined
 to include this information, they can do so in the relevant optional fields.
