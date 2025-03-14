@@ -69,3 +69,6 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = []
 
 master_doc = 'index'
+
+# Force removing the build directory before building
+build_dir_removal_warn = False
