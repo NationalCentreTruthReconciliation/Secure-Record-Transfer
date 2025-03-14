@@ -130,8 +130,11 @@ that, refer to the section of the docs on :ref:`Updating the Domain of Your Site
 Nginx Configuration
 ^^^^^^^^^^^^^^^^^^^
 
-The Nginx configuration file can be found in :code:`docker/nginx/nginx.conf`. The Dockerfile that
-builds Nginx can also be found in that folder.
+The Nginx configuration file can be found in :code:`docker/nginx/templates/nginx.conf.template`.
+This is a configuration *template* that syncs the NGINX configuration with the :ref:`File Upload Controls`
+settings and both the `STATIC_ROOT <https://docs.djangoproject.com/en/4.2/ref/settings/#static-root>`_
+and `MEDIA_ROOT <https://docs.djangoproject.com/en/4.2/ref/settings/#media-root>`_. The values for
+these environment variables are set in the compose file and the :code:`.prod.env` file.
 
 
 MySQL Configuration
@@ -149,5 +152,4 @@ The Redis configuration file can be found in :code:`docker/redis/redis.conf`.
 ClamAV Configuration
 ^^^^^^^^^^^^^^^^^^^^
 
-The ClamAV configuration files can be found in the folder :code:`docker/clamav`
-
+The ClamAV configuration files can be found in the folder :code:`docker/clamav`.
