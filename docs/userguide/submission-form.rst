@@ -14,7 +14,14 @@ on the homepage.
 Form Navigation
 ##############
 
-The submission form is divided into multiple steps to simplify the submission process.
+The submission form is divided into multiple steps to simplify the submission process. At the
+bottom of each step, you'll find navigation buttons to help you move through the form. Click on
+**Next Step** to move to the next step, or **Previous Step** to go back to the previous step. You
+can also click on "Click to save form and resume later" to save your progress and return
+to the form at a later time.
+
+.. image:: images/transfer_form_navigation.png
+    :alt: Navigation buttons on the transfer form
 
 Throughout the form, you'll notice grey question mark icons (i) next to many fields. Hover your
 mouse over these icons to display helpful tooltips with additional guidance on how to complete each
@@ -23,13 +30,15 @@ field.
 .. image:: images/mouse_over_help_icon.png
     :alt: Help icons on the transfer form
 
+Fields marked with a red asterisk (*) are required. You must complete these fields before you can
+proceed to the next step.
+
 
 Step 1: Legal Agreement
 #######################
 
-In the first step of the form, the user must accept an agreement. This agreement will depend
-entirely on what you are doing with the collected metadata and files. To proceed, someone must check
-the agreement box before clicking **Next**.
+In the first step of the form, the user must accept a legal agreement before proceeding. An
+explanation of the agreement is provided in the form.
 
 .. image:: images/transfer_step_1.png
     :alt: Step 1 of the transfer form
@@ -38,7 +47,7 @@ the agreement box before clicking **Next**.
 Step 2: Contact information
 ###########################
 
-This form is self explanatory. A person will enter their contact information here before clicking
+This form is self explanatory. You can enter your contact information here before clicking
 **Next**.
 
 .. image:: images/transfer_step_2.png
