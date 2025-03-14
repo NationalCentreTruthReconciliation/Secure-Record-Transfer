@@ -116,20 +116,20 @@ found at the top of the form, which will open up a description for each type of 
 More information about the rights in this step can be found on :ref:`Adding Rights Taxonomies`.
 
 .. image:: images/transfer_step_5.png
-    :alt: Step 5 of the transfer form
+    :alt: Step 5 of the submission form
 
 
 Step 6: Other Identifiers
 #########################
 
-If the user has other identifiers that apply to their records, like an ISBN, or a barcode number,
-they can put those here. They are not required to enter any here, so can skip to the next step if
-needed.
+If the donor has other identifiers that apply to their records, such as an ISBN, or a barcode
+number, they can put those here. They are not required to enter any here, so can skip to the next
+step if needed.
 
-Similar to the Rights form, users can add or remove sections of this form.
+Similar to the Rights form, donors can add or remove identifiers as needed.
 
 .. image:: images/transfer_step_6.png
-    :alt: Step 6 of the transfer form
+    :alt: Step 6 of the submission form
 
 
 Step 7: Assign Transfer to Group
