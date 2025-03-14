@@ -19,20 +19,14 @@ Development Application
 The simplest way to run the application is in "development" mode. **If you just want to try the
 application out, follow these steps**.
 
-From the root of the repository, run the following commands before running the application for the
-first time.
-
-.. code-block:: bash
-
-    cp example.dev.env .dev.env
-
-
-To start up the application, run this command:
+To start the application, run this command:
 
 .. code-block:: bash
 
     podman-compose -f compose.dev.yml up -d
 
+
+Visit http://localhost:8000 to see the application running.
 
 To stop the application, run the :code:`down` command:
 
@@ -40,8 +34,6 @@ To stop the application, run the :code:`down` command:
 
     podman-compose -f compose.dev.yml down
 
-
-Visit http://localhost:8000 to see the application running.
 
 If you are using `Podman Desktop <https://podman-desktop.io/>`_, you should now see the application
 and all of its services running there, too.
