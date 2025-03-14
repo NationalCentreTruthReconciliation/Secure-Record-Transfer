@@ -8,4 +8,4 @@ provide a step-by-step guide to the various features and functions of the applic
 .. toctree::
     :maxdepth: 1
 
-    transferform
+    submission-form
