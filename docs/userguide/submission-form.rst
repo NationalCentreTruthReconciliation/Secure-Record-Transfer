@@ -1,11 +1,11 @@
 The Submission Form
 ===================
 
-The Submission Form is the heart of the public-facing application, allowing the donor to provide
-metadata about their records and upload files for transfer to your institution.
+The Submission Form serves as the heart of the public-facing application, where metadata about
+records can be provided by donors and files can be uploaded for transfer to the institution.
 
-To start a submission, click on either "Submit" on the navigation bar or the "Submit Your Records"
-on the homepage.
+To start a submission, "Submit" on the navigation bar or the "Submit Your Records" on the homepage
+can be clicked.
 
 .. image:: images/access_submission_form.png
     :alt: How to access the submission form
@@ -15,27 +15,26 @@ Form Guide
 ###############
 
 The submission form is divided into multiple steps to simplify the submission process. At the
-bottom of each step, you'll find navigation buttons to help you move through the form. Click on
-**Next Step** to move to the next step, or **Previous Step** to go back to the previous step. You
-can also click on "Click to save form and resume later" to save your progress and return
-to the form at a later time.
+bottom of each step, navigation buttons, **Next Step** and **Previous Step** can be found to move
+through the form. "Click to save form and resume later" can also be clicked to save progress and
+return to the form at a later time.
 
 .. image:: images/form_navigation.png
     :alt: Navigation buttons on the transfer form
 
-Throughout the form, you'll notice grey question mark icons (i) next to many fields. Hover your
-mouse over these icons to display helpful tooltips with additional guidance on how to complete each
-field.
+Throughout the form, grey question mark icons (i) exist next to many fields. Helpful tooltips with
+additional guidance on how to complete each field are displayed when the mouse hovers over these
+icons.
 
 .. image:: images/mouse_over_help_icon.png
     :alt: Help icons on the transfer form
 
-Fields marked with a red asterisk (*) are required. You must complete these fields before you can
-proceed to the next step.
+Fields marked with a red asterisk (*) are required. These fields must be completed before
+proceeding to the next step of the form. The rest of the fields are optional.
 
-Certain fields are validated after you click on the **Next Step** button. If you've missed any
-required fields or entered invalid data, you'll see an error message on top of each relevant field.
-You must correct these errors before you can proceed.
+Certain fields are validated after the **Next Step** button is clicked. If any required fields have
+been missed or invalid data has been entered, error messages will be shown on top of each relevant
+field. These errors prevent the donor from proceeding to the next step until they are corrected.
 
 .. image:: images/form_error.png
     :alt: Error message on the transfer form
@@ -44,7 +43,7 @@ Step 1: Legal Agreement
 #######################
 
 To fill out the form, the legal agreement must first be accepted. This agreement outlines the legal
-terms and conditions the donor must agree to before continuing with the rest of the form.
+terms and conditions that the donor must agree to before continuing with the rest of the form.
 
 .. image:: images/transfer_step_1.png
     :alt: Step 1 of the transfer form
@@ -53,8 +52,7 @@ terms and conditions the donor must agree to before continuing with the rest of 
 Step 2: Contact information
 ###########################
 
-This form is self explanatory. Enter your contact information here before clicking
-**Next**.
+This step gathers contact information from the donor.
 
 .. image:: images/transfer_step_2.png
     :alt: Step 2 of the transfer form
