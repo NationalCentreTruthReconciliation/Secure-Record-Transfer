@@ -92,6 +92,7 @@ enter four pieces of information:
 
 - A title
 - The start and end date of the records
+
     * If the records span only a single date, the donor can select just one date
     * They can select "Date is approximated" if the date is not exact, or if they are not sure of
     the exact date
