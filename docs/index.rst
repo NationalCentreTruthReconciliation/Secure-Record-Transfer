@@ -17,6 +17,7 @@ with `AtoM <https://accesstomemory.org/en/>`_.
    customization/index
    settings/index
    code/index
+   userguide/index
 
 
 Indices and tables
