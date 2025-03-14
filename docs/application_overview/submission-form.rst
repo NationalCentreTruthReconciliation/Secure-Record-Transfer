@@ -84,7 +84,11 @@ In this step, the donor is asked for a very brief description of their transfer/
 enter four pieces of information:
 
 - A title
-- The start and end date of the records. They can select "Estimated date" if the date is not exact
+- The start and end date of the records
+
+    * If the records span only a single date, the donor can select just one date
+    * They can select "Date is approximated" if the date is not exact, or if they are not sure of
+    the exact date
 - The languages of the records
 - A brief description of what the records contain
 
