@@ -1,4 +1,4 @@
-{   
+{
     // Python linting and formatting
     "[python]": {
         "editor.formatOnSave": true,
@@ -25,4 +25,9 @@
             99
         ]
     },
+    "[restructuredtext]": {
+        "editor.rulers": [
+            99
+        ]
+    }
 }
