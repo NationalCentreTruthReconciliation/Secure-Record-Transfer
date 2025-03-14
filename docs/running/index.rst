@@ -54,13 +54,8 @@ the app.
 If you would like to create new users via the sign-up page, you can find the account activation
 emails in Mailpit.
 
-
-Finding Logs in the Development Application
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The logging configuration for the application can be found in the file
-:code:`app/settings/docker_dev.py`. The logs are all written to stdout, which is
-captured by Podman (or Docker).
+The logging configuration for the application can be found in the file :code:`app/settings/docker_dev.py`.
+The logs are all written to stdout, which is captured by Podman (or Docker).
 
 To view logs for a given container (the *app* container, in this case), you may run a command like
 this:
