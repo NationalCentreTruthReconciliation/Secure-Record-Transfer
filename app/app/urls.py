@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import PasswordResetView
 from django.urls import include, path
 
@@ -30,6 +31,13 @@ urlpatterns = [
             email_template_name="registration/password_reset_email.txt",
             html_email_template_name="registration/password_reset_email.html",
         ),
+    ),
+    # Override the login view with redirect behavior
+    path(
+        "accounts/login/",
+        auth_views.LoginView.as_view(
+            redirect_authenticated_user=True  # This is the key parameter
+        )
     ),
     path("accounts/", include("django.contrib.auth.urls")),
 ]
