@@ -61,20 +61,21 @@ This step gathers contact information from the donor.
 Step 3: Source information
 ##########################
 
-Here, the user will input information about the entity submitting the records. If the user is
-submitting the transfer themselves, they will enter their own information. If they are submitting
-the transfer on behalf of another person or an institution, they will put that institution's
-information. CAAIS includes fields for adding notes about the source, as well as custodial history.
-If someone feels inclined to include this information, they can click **Add Notes & History
-(Optional)**.
+Here, the donor inputs information about who is submitting the records. If the donor is submitting
+records themselves, they can leave the default "No" selected for the "Submitting on behalf of an
+organization/another person" field and simply click **Next Step**.
 
-.. image:: images/transfer_step_3.png
-    :alt: Step 3 of the transfer form
+.. image:: images/transfer_step_3_not_on_behalf.png
+    :alt: Step 3 of the transfer form, not submitting on behalf of another person or organization
 
+If they are submitting the records on behalf of another person or an institution, they can select
+"Yes" for that field instead. This will reveal additional fields where they can provide 
+information about the organization or person they are submitting the records for. CAAIS includes
+fields for adding notes about the source, as well as custodial history. If the donor feels inclined
+to include this information, they can do so in the relevant optional fields.
 
-In the above image, the **Add Notes & History (Optional)** button has been clicked to expose the
-hidden fields.
-
+.. image:: images/transfer_step_3_on_behalf.png
+    :alt: Step 3 of the transfer form, submitting on behalf of another person or organization
 
 Step 4: Record Description
 ##########################
