@@ -4,8 +4,8 @@ The Submission Form
 The Submission Form serves as the heart of the public-facing application, where metadata about
 records can be provided by donors and files can be uploaded for transfer to the institution.
 
-To start a submission, "Submit" on the navigation bar or the "Submit Your Records" on the homepage
-can be clicked.
+A submission can be initiated by clicking on either "Submit" on the navigation bar or the "Submit
+Your Records" button on the homepage. This will take the donor to the submission form.
 
 .. image:: images/access_submission_form.png
     :alt: How to access the submission form
@@ -80,7 +80,7 @@ to include this information, they can do so in the relevant optional fields.
 Step 4: Record Description
 ##########################
 
-In this step, users are asked for a very brief description of their transfer/records. They must
+In this step, the donor is asked for a very brief description of their transfer/records. They must
 enter four pieces of information:
 
 - A title
