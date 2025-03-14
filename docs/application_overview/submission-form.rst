@@ -75,7 +75,13 @@ fields for adding notes about the source, as well as custodial history. If the d
 to include this information, they can do so in the relevant optional fields.
 
 .. image:: images/transfer_step_3_on_behalf.png
-    :alt: Step 3 of the tsubmission form, submitting on behalf of another person or organization
+    :alt: Step 3 of the submission form, submitting on behalf of another person or organization
+
+If the "Source type" or "Source role" is not included in the dropdown, the donor can select "Other"
+for either field and a text box will appear where they can enter their own source type or role.
+
+.. image:: images/transfer_step_3_other_source.png
+    :alt: Step 3 of the submission form, selecting "Other" for source type or role
 
 Step 4: Record Description
 ##########################
