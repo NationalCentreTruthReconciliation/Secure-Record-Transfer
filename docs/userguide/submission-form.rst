@@ -1,8 +1,8 @@
 The Submission Form
 ===================
 
-The Submission Form is the heart of the public-facing application, allowing you to provide
-metadata about your records and upload files for transfer to your institution.
+The Submission Form is the heart of the public-facing application, allowing the donor to provide
+metadata about their records and upload files for transfer to your institution.
 
 To start a submission, click on either "Submit" on the navigation bar or the "Submit Your Records"
 on the homepage.
@@ -43,8 +43,8 @@ You must correct these errors before you can proceed.
 Step 1: Legal Agreement
 #######################
 
-In the first step of the form, the user must accept a legal agreement before proceeding. An
-explanation of the agreement is provided in the form.
+To fill out the form, the legal agreement must first be accepted. This agreement outlines the legal
+terms and conditions the donor must agree to before continuing with the rest of the form.
 
 .. image:: images/transfer_step_1.png
     :alt: Step 1 of the transfer form
