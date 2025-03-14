@@ -20,14 +20,14 @@ through the form. "Click to save form and resume later" can also be clicked to s
 return to the form at a later time.
 
 .. image:: images/form_navigation.png
-    :alt: Navigation buttons on the transfer form
+    :alt: Navigation buttons on the submission form
 
 Throughout the form, grey information icons (i) exist next to many fields. Helpful tooltips with
 additional guidance on how to complete each field are displayed when the mouse hovers over these
 icons.
 
 .. image:: images/mouse_over_help_icon.png
-    :alt: Help icons on the transfer form
+    :alt: Help icons on the submission form
 
 Fields marked with a red asterisk (*) are required. These fields must be completed before
 proceeding to the next step of the form. The rest of the fields are optional.
@@ -37,7 +37,7 @@ been missed or invalid data has been entered, error messages will be shown on to
 field. These errors prevent the donor from proceeding to the next step until they are corrected.
 
 .. image:: images/form_error.png
-    :alt: Error message on the transfer form
+    :alt: Error message on the submission form
 
 Step 1: Legal Agreement
 #######################
@@ -46,7 +46,7 @@ To fill out the form, the legal agreement must first be accepted. This agreement
 terms and conditions that the donor must agree to before continuing with the rest of the form.
 
 .. image:: images/transfer_step_1.png
-    :alt: Step 1 of the transfer form
+    :alt: Step 1 of the submission form
 
 
 Step 2: Contact information
@@ -55,7 +55,7 @@ Step 2: Contact information
 This step gathers contact information from the donor.
 
 .. image:: images/transfer_step_2.png
-    :alt: Step 2 of the transfer form
+    :alt: Step 2 of the submission form
 
 
 Step 3: Source information
@@ -66,7 +66,7 @@ records themselves, they can leave the default "No" selected for the "Submitting
 organization/another person" field and simply click **Next Step**.
 
 .. image:: images/transfer_step_3_not_on_behalf.png
-    :alt: Step 3 of the transfer form, not submitting on behalf of another person or organization
+    :alt: Step 3 of the submission form, not submitting on behalf of another person or organization
 
 If the donor is submitting the records on behalf of another person or an institution, they can
 select "Yes" for that field instead. This will reveal additional fields where they can provide 
@@ -75,7 +75,7 @@ fields for adding notes about the source, as well as custodial history. If the d
 to include this information, they can do so in the relevant optional fields.
 
 .. image:: images/transfer_step_3_on_behalf.png
-    :alt: Step 3 of the transfer form, submitting on behalf of another person or organization
+    :alt: Step 3 of the tsubmission form, submitting on behalf of another person or organization
 
 Step 4: Record Description
 ##########################
@@ -85,7 +85,6 @@ enter four pieces of information:
 
 - A title
 - The start and end date of the records
-
     * If the records span only a single date, the donor can select just one date
     * They can select "Date is approximated" if the date is not exact, or if they are not sure of
     the exact date
@@ -93,7 +92,7 @@ enter four pieces of information:
 - A brief description of what the records contain
 
 .. image:: images/transfer_step_4.png
-    :alt: Step 4 of the transfer form
+    :alt: Step 4 of the submission form
 
 
 Step 5: Record Rights
