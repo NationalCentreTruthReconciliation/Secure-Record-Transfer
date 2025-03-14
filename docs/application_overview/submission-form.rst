@@ -106,8 +106,8 @@ enter four pieces of information:
 .. image:: images/transfer_step_4.png
     :alt: Step 4 of the submission form
 
-By default, a date widget is used to select the start and end dates. This can be changed by
-modifying :ref:`USE_DATE_WIDGETS`.
+By default, a date widget is used to select the start and end dates. To allow donors to enter dates
+manually, the date widget can be disabled by modifying :ref:`USE_DATE_WIDGETS`.
 
 
 Step 5: Record Rights
