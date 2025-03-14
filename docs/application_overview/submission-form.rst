@@ -11,8 +11,8 @@ Your Records" button on the homepage. This will take the donor to the submission
     :alt: How to access the submission form
 
 
-Form Guide
-###############
+Form Overview
+#############
 
 The submission form is divided into multiple steps to simplify the submission process. At the
 bottom of each step, navigation buttons, **Next Step** and **Previous Step** can be found to move
@@ -101,6 +101,9 @@ enter four pieces of information:
 
 .. image:: images/transfer_step_4.png
     :alt: Step 4 of the submission form
+
+By default, a date widget is used to select the start and end dates. This can be changed by
+modifying :ref:`USE_DATE_WIDGETS`.
 
 
 Step 5: Record Rights
