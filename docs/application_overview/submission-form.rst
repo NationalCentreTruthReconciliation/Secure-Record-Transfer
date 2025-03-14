@@ -106,7 +106,7 @@ enter four pieces of information:
 Step 5: Record Rights
 #####################
 
-Here, the user will enter the rights applying to their records. They must select at least one type
+Here, the donor will enter the rights applying to their records. They must select at least one type
 of rights that apply to their records. If the type is not present in the dropdown, they can select
 Other and type in their own type of right. If they want to add multiple rights if, for example,
 there are different rights for different records, they can click the **+ Add** button to add more.
@@ -133,15 +133,22 @@ Similar to the Rights form, donors can add or remove identifiers as needed.
     :alt: Step 6 of the submission form
 
 
-Step 7: Assign Transfer to Group
+Step 7: Assign Submission to Group
 ################################
 
-If a user is splitting their transfer out into multiple steps, or if they just want to associate
-their transfer with a group of other transfers they have or will make, they can do so here. They can
-select previous groups from the dropdown, or add a new one with **-- Add New Group --**.
+If the donor is splitting their submission out into multiple batches, or if they just want to
+associate their submission with a group of other submissions they have or will make, they can do so
+here. They can select previous groups from the dropdown, or create a new one by clicking on the
+**Add New Group** button.
 
 .. image:: images/transfer_step_7.png
-    :alt: Step 7 of the transfer form
+    :alt: Step 7 of the submission form
+
+Clicking on the **Add New Group** button will open a modal where the donor can enter a name and
+description for the group. 
+
+.. image:: images/transfer_step_7_add_group.png
+    :alt: Step 7 of the submission form, adding a new group
 
 
 Step 8: Upload Files
