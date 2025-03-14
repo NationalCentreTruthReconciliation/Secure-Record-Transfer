@@ -14,7 +14,6 @@ with `AtoM <https://accesstomemory.org/en/>`_.
    introduction/index
    running/index
    howtouse/index
-   customization/index
    settings/index
    code/index
    userguide/index

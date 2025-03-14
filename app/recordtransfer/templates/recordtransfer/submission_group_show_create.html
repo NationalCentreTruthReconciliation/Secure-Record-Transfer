@@ -17,6 +17,9 @@
 {% endblock title %}
 {% block content %}
     {% if user.is_authenticated %}
+        <a href="{% url 'recordtransfer:user_profile' %}" class="back-to-btn">
+            <i class="fas fa-arrow-left"></i> {% trans "Back to Profile" %}
+        </a>
         <div class="title-text">
             {% if IS_NEW %}
                 {% trans "Create New Submission Group" %}
