@@ -362,7 +362,8 @@ h2 {
 }
 
 .back-to-btn {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
 }
 
 @media (max-width: 1199px) {
