@@ -1,9 +1,8 @@
 The Submission Form
 ===================
 
-The main public application is built around the submission form. The submission form is the heart
-of the application, where users enter metadata about the records they want to submit to your
-institution, as well as upload files to send to your institution.
+The Submission Form is the heart of the public-facing application, allowing you to provide
+metadata about your records and upload files for transfer to your institution.
 
 To start a submission, click on either "Submit" on the navigation bar or the "Submit Your Records"
 on the homepage.
@@ -12,9 +11,14 @@ on the homepage.
     :alt: How to access the submission form
 
 
-The submission form is split into multiple small steps to make filling the it out easier. In many
-places, the user can mouse over the grey help icons for more information on how to fill
-the field out.
+Form Navigation
+##############
+
+The submission form is divided into multiple steps to simplify the submission process.
+
+Throughout the form, you'll notice grey question mark icons (i) next to many fields. Hover your
+mouse over these icons to display helpful tooltips with additional guidance on how to complete each
+field.
 
 .. image:: images/mouse_over_help_icon.png
     :alt: Help icons on the transfer form
