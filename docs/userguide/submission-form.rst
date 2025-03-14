@@ -11,8 +11,8 @@ on the homepage.
     :alt: How to access the submission form
 
 
-Form Navigation
-##############
+Form Guide
+###############
 
 The submission form is divided into multiple steps to simplify the submission process. At the
 bottom of each step, you'll find navigation buttons to help you move through the form. Click on
@@ -20,7 +20,7 @@ bottom of each step, you'll find navigation buttons to help you move through the
 can also click on "Click to save form and resume later" to save your progress and return
 to the form at a later time.
 
-.. image:: images/transfer_form_navigation.png
+.. image:: images/form_navigation.png
     :alt: Navigation buttons on the transfer form
 
 Throughout the form, you'll notice grey question mark icons (i) next to many fields. Hover your
@@ -33,6 +33,12 @@ field.
 Fields marked with a red asterisk (*) are required. You must complete these fields before you can
 proceed to the next step.
 
+Certain fields are validated after you click on the **Next Step** button. If you've missed any
+required fields or entered invalid data, you'll see an error message on top of each relevant field.
+You must correct these errors before you can proceed.
+
+.. image:: images/form_error.png
+    :alt: Error message on the transfer form
 
 Step 1: Legal Agreement
 #######################
@@ -47,7 +53,7 @@ explanation of the agreement is provided in the form.
 Step 2: Contact information
 ###########################
 
-This form is self explanatory. You can enter your contact information here before clicking
+This form is self explanatory. Enter your contact information here before clicking
 **Next**.
 
 .. image:: images/transfer_step_2.png
