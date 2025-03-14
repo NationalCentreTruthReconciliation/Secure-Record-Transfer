@@ -14,13 +14,17 @@ Your Records" button on the homepage. This will take the donor to the submission
 Form Overview
 #############
 
-The submission form is divided into multiple steps to simplify the submission process. At the
+The Submission Form is divided into multiple steps to simplify the submission process. At the
 bottom of each step, navigation buttons, **Next Step** and **Previous Step** can be found to move
 through the form. "Click to save form and resume later" can also be clicked to save progress and
 return to the form at a later time.
 
 .. image:: images/form_navigation.png
     :alt: Navigation buttons on the submission form
+
+For every step of the Submission Form, the data entered is saved so the donor can navigate back and
+forward in the form without losing their data. This includes file uploads in
+:ref:`Step 8: Upload Files`, which are saved on the server upon selection.
 
 Throughout the form, grey information icons (i) exist next to many fields. Helpful tooltips with
 additional guidance on how to complete each field are displayed when the mouse hovers over these
@@ -157,25 +161,21 @@ description for the group.
 Step 8: Upload Files
 ####################
 
-This is where the user can add files to their transfer. They must send at least one file for the
-transfer to submit. They can add files to the file drop zone by clicking on it or by dragging and
-dropping files into it. If they add a file that isn't accepted by your accepted file types, the
-transfer will not be allowed to submit until they remove the offending files.
+This is where the donor can add files to their submission. They must include at least one file to
+make a submission. They can add files to the file drop zone by clicking on "browse files" or by
+dragging and dropping files into it. Only accepted file formats can be uploaded.
 
 To see more about how to change what files are accepted, go to the section on
 :ref:`ACCEPTED_FILE_FORMATS`.
 
 .. image:: images/transfer_step_8.png
-    :alt: Step 8 of the transfer form
+    :alt: Step 8 of the submission form
 
+A preview of an uploaded file can be seen by clicking on its file icon. The donor can also remove
+files by clicking on the (x) icon.
 
-.. note::
-
-    For all other steps of the transfer form, the data entered is saved so users can bounce back and
-    forward in the form without losing their data. Unfortunately, if a user adds files to the upload
-    space, goes to a previous step in the form, and comes to the final step again, their files will
-    no longer be there.
-
+.. image:: images/transfer_step_8_uploaded_file.png
+    :alt: Step 8 of the submission form, an uploaded file
 
 Post-Transfer
 #############
