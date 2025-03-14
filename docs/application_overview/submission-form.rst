@@ -77,8 +77,9 @@ to include this information, they can do so in the relevant optional fields.
 .. image:: images/transfer_step_3_on_behalf.png
     :alt: Step 3 of the submission form, submitting on behalf of another person or organization
 
-If the "Source type" or "Source role" is not included in the dropdown, the donor can select "Other"
-for either field and a text box will appear where they can enter their own source type or role.
+If the relevant source role or source type is not present in the dropdown, the donor can select
+"Other" for either field and a text box will appear where they can enter their own source type or
+role.
 
 .. image:: images/transfer_step_3_other_source.png
     :alt: Step 3 of the submission form, selecting "Other" for source type or role
@@ -110,9 +111,9 @@ Other and type in their own type of right. If they want to add multiple rights i
 there are different rights for different records, they can click the **+ Add** button to add more.
 Alternately, they can remove rights with the **- Remove** button.
 
-If someone is confused about what the rights are for their records, they can open the rights
-explanation dialog for a description for each type of right. You can find more information about the
-rights in the section on :ref:`Adding Rights Taxonomies`.
+If the donor is unsure about which right/(s) apply for their records, they can click on a link
+found at the top of the form, which will open up a description for each type of right on a new tab.
+More information about the rights in this step can be found on :ref:`Adding Rights Taxonomies`.
 
 .. image:: images/transfer_step_5.png
     :alt: Step 5 of the transfer form
