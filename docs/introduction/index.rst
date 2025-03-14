@@ -25,15 +25,21 @@ understand, but the metadata and reports generated all use the fields in CAAIS v
 What Does this App Do?
 ######################
 
-Foremost, this app provides a multi-page transfer form with CAAIS-oriented fields and a file upload
-space for users. The transfer form is filled out by users who want to transfer material to the
-archive.
+For users, this app provides a multi-page transfer form with CAAIS-oriented fields and a file
+upload space to facilitate sending records to an institution. Users also have a profile page where
+they can:
 
-This application also provides an administrator website for archivists and administrators. Some of
-the functions you can do with the administrator site are:
+* See their past submissions
+* Create and view submission groups
+* Load partially completed "in-progress" submissions
+* Update their password
+* Export their submissions in HTML or CSV form
 
-* Generate HTML metadata reports for 1 or more submissions
-* Export CSV information about 1 or more submissions
-* Set the "Review Status" of a Bag
-* Make decisions about the accession
+For archivists and other administrators, there's an administrator website with a number of useful
+functions for managing the records sent to the institution by donors. Admins can:
+
+* Export submission metadata and files as BagIt-compliant Bags
+* Generate submission reports in HTML or CSV form
+* Assign accession identifiers to submission metadata
+* Control the terms users can enter in the form
 * Manage user accounts
