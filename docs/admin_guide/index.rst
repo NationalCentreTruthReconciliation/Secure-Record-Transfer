@@ -8,7 +8,7 @@ perform using the record transfer application.
     :maxdepth: 1
 
     addingusers
-    addingrights
+    adding_terms
     sitename
 
 See also: :ref:`Application Settings`.
