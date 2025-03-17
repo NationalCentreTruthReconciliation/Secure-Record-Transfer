@@ -89,6 +89,9 @@ role.
 .. image:: images/submission_step_3_other_source.webp
     :alt: Step 3 of the submission form, selecting "Other" for source type or role
 
+More information about the source types and roles in this step can be found on :ref:`Adding Source
+Types` and :ref:`Adding Source Roles` respectively.
+
 Step 4: Record Description
 ##########################
 
@@ -123,7 +126,7 @@ Alternately, they can remove rights with the **- Remove** button.
 
 If the donor is unsure about which right/(s) apply for their records, they can click on a link
 found at the top of the form, which will open up a description for each type of right on a new tab.
-More information about the rights in this step can be found on :ref:`Adding Rights Taxonomies`.
+More information about the rights in this step can be found on :ref:`Adding Rights Types`.
 
 .. image:: images/submission_step_5.webp
     :alt: Step 5 of the submission form
