@@ -97,9 +97,10 @@ enter four pieces of information:
 - A title
 - The start and end date of the records
 
-    * If the records span only a single date, the donor can select just one date
-    * They can select "Date is approximated" if the date is not exact, or if they are not sure of
-    the exact date
+    *   If the records span only a single date, the donor can select just one date
+    *   They can select "Date is approximated" if the date is not exact, or if they are not sure of
+        the exact date
+
 - The languages of the records
 - A brief description of what the records contain
 
@@ -141,7 +142,7 @@ Similar to the Rights form, donors can add or remove identifiers as needed.
 
 
 Step 7: Assign Submission to Group
-################################
+##################################
 
 If the donor is splitting their submission out into multiple batches, or if they just want to
 associate their submission with a group of other submissions they have or will make, they can do so
@@ -201,8 +202,8 @@ If the donor is satisfied with the information they have entered, they can click
 button to submit their records.
 
 
-Post-Submission
-###############
+After Submission
+################
 
 After successfully submitting the form, the donor is redirected directed to a thank you page
 confirming their submission. The system then automatically:
