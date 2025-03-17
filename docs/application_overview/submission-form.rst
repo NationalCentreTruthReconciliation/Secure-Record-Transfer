@@ -168,17 +168,41 @@ dragging and dropping files into it. Only accepted file formats can be uploaded.
 To see more about how to change what files are accepted, go to the section on
 :ref:`ACCEPTED_FILE_FORMATS`.
 
+Any additional notes that did not fit in the previous steps can be added in the "Other Notes"
+field.
+
 .. image:: images/transfer_step_8.png
     :alt: Step 8 of the submission form
 
 A preview of an uploaded file can be seen by clicking on its file icon. The donor can also remove
-files by clicking on the (x) icon.
+uploaded files by clicking on the (x) icon.
 
 .. image:: images/transfer_step_8_uploaded_file.png
     :alt: Step 8 of the submission form, an uploaded file
 
-Post-Transfer
-#############
+
+Step 9: Review
+##############
+
+On this step, the donor can review all the information they have entered in the previous steps. If
+they need to make any changes, they can click on the **Go to step** button next to the step they
+want to edit. This will take them back to that step.
+
+.. image:: images/transfer_step_9.png
+    :alt: Step 9 of the submission form
+
+After making any necessary changes, the donor can click on the **Return to Review** button to go
+back to the review step.
+
+.. image:: images/transfer_step_9_return_to_review.png
+    :alt: Step 9 of the submission form, returning to the review step
+
+If the donor is satisfied with the information they have entered, they can click on the **Submit**
+button to submit their records.
+
+
+Post-Submission
+###############
 
 If the final form submitted successfully, the user will immediately be re-routed to a thank you
 page. The submission of the transfer form sets off a chain reaction of events. At a high level,
