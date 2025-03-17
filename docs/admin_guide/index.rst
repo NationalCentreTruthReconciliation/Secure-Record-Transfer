@@ -1,5 +1,5 @@
-How to Use the Application
-==========================
+Administrator Guide
+===================
 
 This section of the documentation focuses on the basic tasks that users and administrators can
 perform using the record transfer application. There is a separate section of the documentation
