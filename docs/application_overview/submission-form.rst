@@ -49,7 +49,7 @@ Step 1: Legal Agreement
 To fill out the form, the legal agreement must first be accepted. This agreement outlines the legal
 terms and conditions that the donor must agree to before continuing with the rest of the form.
 
-.. image:: images/transfer_step_1.png
+.. image:: images/submission_step_1.png
     :alt: Step 1 of the submission form
 
 
@@ -58,7 +58,7 @@ Step 2: Contact information
 
 This step gathers contact information from the donor.
 
-.. image:: images/transfer_step_2.png
+.. image:: images/submission_step_2.png
     :alt: Step 2 of the submission form
 
 
@@ -69,7 +69,7 @@ Here, the donor inputs information about who is submitting the records. If the d
 records themselves, they can leave the default "No" selected for the "Submitting on behalf of an
 organization/another person" field and simply click **Next Step**.
 
-.. image:: images/transfer_step_3_not_on_behalf.png
+.. image:: images/submission_step_3_not_on_behalf.png
     :alt: Step 3 of the submission form, not submitting on behalf of another person or organization
 
 If the donor is submitting the records on behalf of another person or an institution, they can
@@ -78,14 +78,14 @@ information about the organization or person they are submitting the records for
 fields for adding notes about the source, as well as custodial history. If the donor feels inclined
 to include this information, they can do so in the relevant optional fields.
 
-.. image:: images/transfer_step_3_on_behalf.png
+.. image:: images/submission_step_3_on_behalf.png
     :alt: Step 3 of the submission form, submitting on behalf of another person or organization
 
 If the relevant source role or source type is not present in the dropdown, the donor can select
 "Other" for either field and a text box will appear where they can enter their own source type or
 role.
 
-.. image:: images/transfer_step_3_other_source.png
+.. image:: images/submission_step_3_other_source.png
     :alt: Step 3 of the submission form, selecting "Other" for source type or role
 
 Step 4: Record Description
@@ -104,7 +104,7 @@ enter four pieces of information:
 - The languages of the records
 - A brief description of what the records contain
 
-.. image:: images/transfer_step_4.png
+.. image:: images/submission_step_4.png
     :alt: Step 4 of the submission form
 
 By default, a date widget is used to select the start and end dates. To allow donors to enter dates
@@ -124,7 +124,7 @@ If the donor is unsure about which right/(s) apply for their records, they can c
 found at the top of the form, which will open up a description for each type of right on a new tab.
 More information about the rights in this step can be found on :ref:`Adding Rights Taxonomies`.
 
-.. image:: images/transfer_step_5.png
+.. image:: images/submission_step_5.png
     :alt: Step 5 of the submission form
 
 
@@ -137,7 +137,7 @@ step if needed.
 
 Similar to the Rights form, donors can add or remove identifiers as needed.
 
-.. image:: images/transfer_step_6.png
+.. image:: images/submission_step_6.png
     :alt: Step 6 of the submission form
 
 
@@ -149,13 +149,13 @@ associate their submission with a group of other submissions they have or will m
 here. They can select previous groups from the dropdown, or create a new one by clicking on the
 **Add New Group** button.
 
-.. image:: images/transfer_step_7.png
+.. image:: images/submission_step_7.png
     :alt: Step 7 of the submission form
 
 Clicking on the **Add New Group** button will open a modal where the donor can enter a name and
 description for the group. 
 
-.. image:: images/transfer_step_7_add_group.png
+.. image:: images/submission_step_7_add_group.png
     :alt: Step 7 of the submission form, adding a new group
 
 
@@ -172,13 +172,13 @@ To see more about how to change what files are accepted, go to the section on
 Any additional notes that did not fit in the previous steps can be added in the "Other Notes"
 field.
 
-.. image:: images/transfer_step_8.png
+.. image:: images/submission_step_8.png
     :alt: Step 8 of the submission form
 
 A preview of an uploaded file can be seen by clicking on its file icon. The donor can also remove
 uploaded files by clicking on the (x) icon.
 
-.. image:: images/transfer_step_8_uploaded_file.png
+.. image:: images/submission_step_8_uploaded_file.png
     :alt: Step 8 of the submission form, an uploaded file
 
 
@@ -189,13 +189,13 @@ On this step, the donor can review all the information they have entered in the 
 they need to make any changes, they can click on the **Go to step** button next to the step they
 want to edit. This will take them back to that step.
 
-.. image:: images/transfer_step_9.png
+.. image:: images/submission_step_9.png
     :alt: Step 9 of the submission form
 
 After making any necessary changes, the donor can click on the **Return to Review** button to go
 back to the review step.
 
-.. image:: images/transfer_step_9_return_to_review.png
+.. image:: images/submission_step_9_return_to_review.png
     :alt: Step 9 of the submission form, returning to the review step
 
 If the donor is satisfied with the information they have entered, they can click on the **Submit**
@@ -211,5 +211,5 @@ confirming their submission. The system then automatically:
 1. Sends notification emails to all staff users who have opted to receive bag updates
 2. Sends a confirmation email to the donor with details of their submission
 
-.. image:: images/transfer_thank_you.png
+.. image:: images/submission_thank_you.png
     :alt: Thank you page after submitting the form
