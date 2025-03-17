@@ -19,7 +19,7 @@ Development Application
 The simplest way to run the application is in "development" mode. **If you just want to try the
 application out, follow these steps**.
 
-To start the application, run this command:
+To start the application, run this command from the root of the repository:
 
 .. code-block:: bash
 
