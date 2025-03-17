@@ -28,13 +28,6 @@ To start the application, run this command:
 
 Visit http://localhost:8000 to see the application running.
 
-To stop the application, run the :code:`down` command:
-
-.. code-block:: bash
-
-    podman-compose -f compose.dev.yml down
-
-
 If you are using `Podman Desktop <https://podman-desktop.io/>`_, you should now see the application
 and all of its services running there, too.
 
