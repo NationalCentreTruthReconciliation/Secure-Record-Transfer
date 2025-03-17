@@ -204,13 +204,11 @@ button to submit their records.
 Post-Submission
 ###############
 
-If the final form submitted successfully, the user will immediately be re-routed to a thank you
-page. The submission of the transfer form sets off a chain reaction of events. At a high level,
-these things happen:
+After successfully submitting the form, the donor is redirected directed to a thank you page
+confirming their submission. The system then automatically:
 
-- A bagit Bag is created on the file system with the user's uploaded files and all of the form
-  metadata. The location of this bag depends on what the APP_STORAGE_FOLDER is set to.
-- A Bag object in the database is created. When the Bag is changed in the database, the bagit Bag
-  on the filesystem is updated to match (provided it hasn't been moved).
-- An email is sent to any staff user that has checked the "Gets bag email updates" box.
-- An email is sent to the user who submitted the form.
+1. Sends notification emails to all staff users who have opted to receive bag updates
+2. Sends a confirmation email to the donor with details of their submission
+
+.. image:: images/transfer_thank_you.png
+    :alt: Thank you page after submitting the form
