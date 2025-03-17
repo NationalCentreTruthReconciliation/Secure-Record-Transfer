@@ -15,9 +15,10 @@ Form Overview
 #############
 
 The Submission Form is divided into multiple steps to simplify the submission process. At the
-bottom of each step, navigation buttons, **Next Step** and **Previous Step** can be found to move
-through the form. "Click to save form and resume later" can also be clicked to save progress and
-return to the form at a later time.
+bottom of each step, the navigation buttons **Next Step** and **Previous Step** can be clicked to
+proceed to the next step or go to the previous step in the form, respectively. The link "Click to
+save form and resume later" can be clicked to save the current form and return to it at a later
+time.
 
 .. image:: images/form_navigation.webp
     :alt: Navigation buttons on the submission form
