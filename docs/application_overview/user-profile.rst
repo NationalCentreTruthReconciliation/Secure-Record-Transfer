@@ -54,12 +54,32 @@ time before the expiry date that the reminder email is sent can be configured in
 
 Resuming an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 Users can resume working on an in-progress submission by clicking on "Resume" for the relevant 
 submission in the table. This will take them back to the submission form where they left off.
 
-.. image:: images/user_profile_resume_submission.png
+.. image:: images/user_profile_resume_in_progress_submission.png
     :alt: User profile resume submission
 
 Once an in-progress submission is submitted, it will no longer appear in this table. Instead, it
-will be listed under the "Past Submissions" section.
+will be listed under the ::ref:`Past Submissions` section.
+
+Deleting an In-Progress Submission
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Users can delete an in-progress submission if they no longer wish to complete it. To delete a
+submission, click the "Delete" button in the relevant row of the table.
+
+.. image:: images/user_profile_delete_in_progress_submission.png
+    :alt: User profile delete submission
+
+This will take the user to a confirmation page where they can confirm that they want to delete the
+in-progress submission. If "OK" is clicked, the in-progress submission and any uploaded files
+associated with it will be permanently removed from the system. Clicking on "Cancel" will take the
+user back to the Profile page.
+
+.. image:: images/user_profile_delete_in_progress_submission_confirmation.png
+    :alt: User profile delete submission confirmation
+
+After deletion, the submission will no longer appear in the in-progress submissions table.
+
+Past Submissions
+----------------
