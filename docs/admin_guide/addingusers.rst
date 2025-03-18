@@ -1,4 +1,4 @@
-Adding users
+Adding Users
 ============
 
 Before people start to use the website, they need user accounts. There are three ways to create user
@@ -15,12 +15,12 @@ Creating a Superuser
 A superuser is a person who has all possible access to view, delete, and change records. You should
 assign superuser status sparingly, as these accounts are very powerful.
 
-To create a superuser, use the Django manage script. Whether you are running with Docker, or in
-production, to create a superuser, use this command and follow the prompts:
+To create a superuser, use the Django manage script to create a superuser. This script is available
+in the container running the Django application.
 
 .. code-block:: console
 
-    (env) $ python3 manage.py createsuperuser
+    podman-compose -f compose.prod.yml exec app python manage.py createsuperuser
 
 
 Creating Users from Admin Site
