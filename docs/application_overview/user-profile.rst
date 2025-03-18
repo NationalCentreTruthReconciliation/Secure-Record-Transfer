@@ -30,7 +30,7 @@ This section displays a table of all submissions that the user has started but n
     :alt: User profile in-progress submissions
 
 The "Submission Title" column displays the title provided by the user in the "Title" field of
-::ref:`Step 4: Record Description` of the Submission Form. If that field has not been filled out
+:ref:`Step 4: Record Description` of the Submission Form. If that field has not been filled out
 yet, the title will be "None".
 
 In-progress submissions with uploaded files will have an expiry date, shown under the "Expires At"
@@ -44,13 +44,13 @@ and striked through.
     :alt: User profile in-progress submission expiry
 
 The length of time before an in-progress submission expires can be configured in the settings. See
-::ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` and
-::ref:`UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE` for more information.
+:ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` and
+:ref:`UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE` for more information.
 
 A reminder email will be sent to the user before the in-progress submission expires. The amount of
 time before the expiry date that the reminder email is sent can be configured in the settings. See
-::ref:`UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES` and
-::ref:`IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE` for more information.
+:ref:`UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES` and
+:ref:`IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE` for more information.
 
 Resuming an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,12 +61,12 @@ submission in the table. This will take them back to the submission form where t
     :alt: User profile resume submission
 
 Once an in-progress submission is submitted, it will no longer appear in this table. Instead, it
-will be listed under the ::ref:`Past Submissions` section.
+will be listed under the :ref:`Past Submissions` section.
 
 Deleting an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Users can delete an in-progress submission if they no longer wish to complete it. To delete a
-submission, click the "Delete" button in the relevant row of the table.
+submission, click the "Delete" button on the relevant row of the table.
 
 .. image:: images/user_profile_delete_in_progress_submission.png
     :alt: User profile delete submission
@@ -89,19 +89,19 @@ This section displays a table of all submissions that the user has submitted in 
     :alt: User profile past submissions
 
 The user can view the details of a past submission by clicking on the "Click to view report" button
-in the relevant row of the table. This will open up a submission details page for that
+on the relevant row of the table. This will open up a submission details page for that
 submission.
 
 .. image:: images/submission_details.png
     :alt: Submission details
 
 Alternatively, the user can download a CSV file of the submission by clicking on the "Click to
-download" button in the relevant row of the table.
+download" button.
 
 Submission Groups
 -----------------
 This section displays a table of all submission groups that the user has created. Submission groups
-that are made by the user during ::ref:`Step 7: Assign Submission to Group` of the Submission Form
+that are made by the user during :ref:`Step 7: Assign Submission to Group` of the Submission Form
 will be listed here. A new submission group can also be created by clicking on "Click to add new
 group" found below the table.
 
@@ -114,9 +114,9 @@ group.
 .. image:: images/create_submission_group.png
     :alt: Create submission group
 
-The user can view and modify the details of a submission group by clicking on the "Click to view
-group" button in the relevant row of the table. On this page, the user can modify the group name
-and group description. The user can also view past submissions made under this group.
+The user can also view and modify the details of a submission group by clicking on the "Click to
+view group" button for that group on the table. This will take the user to a page where they can
+modify the group name and group description, and also view past submissions made under this group.
 
 .. image:: images/submission_group_details.png
     :alt: Submission group details
