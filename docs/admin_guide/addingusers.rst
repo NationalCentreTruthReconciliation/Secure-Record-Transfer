@@ -30,18 +30,18 @@ A staff member or superuser with access to the administrator application (access
 the ability to create new users. To start the process, go to the admin site, and click Users.
 
 .. image:: images/admin_users.png
-    :alt: Green circle around Users link in admin app
+    :alt: Users link in admin app
 
 Next, click **Add User**.
 
 .. image:: images/admin_add_user.png
-    :alt: Green circle around Add User link on User admin page
+    :alt: Add User link on User admin page
 
 You will be asked to create a username and password for the user. Fill these out and click **Save
 and continue editing**.
 
 .. image:: images/admin_save_user.png
-    :alt: Green circle around Save and continue editing link on User create page
+    :alt: Save and continue editing link on User create page
 
 Next, fill out their name and email address. If you want to make the user a staff member, check the
 Staff box, and assign them to the **archivist_user** group. If you do not assign them to the
@@ -51,6 +51,7 @@ won't have any permissions.
 .. image:: images/admin_staff_user.png
     :alt: Adding extra information to user object
 
+Finally, click **SAVE** at the bottom of the page.
 
 Creating Users with the Sign-up Form
 ####################################
