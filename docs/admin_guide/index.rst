@@ -9,6 +9,7 @@ perform using the record transfer application.
 
     addingusers
     adding_terms
+    managing_submissions
     sitename
 
 See also: :ref:`Application Settings`.
