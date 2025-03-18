@@ -97,3 +97,26 @@ submission.
 
 Alternatively, the user can download a CSV file of the submission by clicking on the "Click to
 download" button in the relevant row of the table.
+
+Submission Groups
+-----------------
+This section displays a table of all submission groups that the user has created. Submission groups
+that are made by the user during ::ref:`Step 7: Assign Submission to Group` of the Submission Form
+will be listed here. A new submission group can also be created by clicking on "Click to add new
+group" found below the table.
+
+.. image:: images/user_profile_submission_groups.png
+    :alt: User profile submission groups
+
+This takes the user to the submission group creation page where they can create a new submission
+group.
+
+.. image:: images/create_submission_group.png
+    :alt: Create submission group
+
+The user can view and modify the details of a submission group by clicking on the "Click to view
+group" button in the relevant row of the table. On this page, the user can modify the group name
+and group description. The user can also view past submissions made under this group.
+
+.. image:: images/submission_group_details.png
+    :alt: Submission group details
