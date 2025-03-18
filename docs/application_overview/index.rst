@@ -9,3 +9,4 @@ understanding the various features of the application, and the flow of the Submi
     :maxdepth: 1
 
     submission-form
+    user-profile
