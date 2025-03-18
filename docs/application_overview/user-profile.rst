@@ -83,3 +83,17 @@ After deletion, the submission will no longer appear in the in-progress submissi
 
 Past Submissions
 ----------------
+This section displays a table of all submissions that the user has submitted in the past.
+
+.. image:: images/user_profile_past_submissions.png
+    :alt: User profile past submissions
+
+The user can view the details of a past submission by clicking on the "Click to view report" button
+in the relevant row of the table. This will open up a submission details page for that
+submission.
+
+.. image:: images/submission_details.png
+    :alt: Submission details
+
+Alternatively, the user can download a CSV file of the submission by clicking on the "Click to
+download" button in the relevant row of the table.
