@@ -56,9 +56,12 @@ Finally, click **SAVE** at the bottom of the page.
 Creating Users with the Sign-up Form
 ####################################
 
-The simplest way for a new user to be created is to use the sign up form. The Sign Up link will
-appear in the header on the main site if you are not logged in. Clicking the Sign Up link will
-present the user with a sign up form.
+The simplest way for a new user to be created is to use the sign up form. The Sign Up form can be
+accessed by clicking on "Sign Up" link in the header, or the "Sign Up Now" button on the Home
+page. Both of these links are only available when the user is not logged in.
+
+.. image:: images/sign_up_link.png
+    :alt: Sign Up link
 
 .. note::
    You can disable the sign up function by setting :ref:`SIGN_UP_ENABLED` to False in
