@@ -114,9 +114,10 @@ group.
 .. image:: images/create_submission_group.png
     :alt: Create submission group
 
-The user can also view and modify the details of a submission group by clicking on the "Click to
-view group" button for that group on the table. This will take the user to a page where they can
-modify the group name and group description, and also view past submissions made under this group.
+The user can also view and modify the details of an existing submission group by clicking on the
+"Click to view group" button for that group on the table. This will take the user to a page where
+they can modify the group name and group description, and also view past submissions made under
+this group.
 
 .. image:: images/submission_group_details.png
     :alt: Submission group details
