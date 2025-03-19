@@ -7,9 +7,15 @@ page.
 .. image:: images/admin_submissions.webp
     :alt: Submissions link in admin app
 
-A list of all submissions will appear, with the most recent submissions at the top. To look for a 
-specific submission, use the search bar at the top of the page. You can search by the donor's 
-username or email, the submission's accession title, or the submission's UUID.
+Searching Submissions
+---------------------
+On the Submissions admin page, you will find a table of all existing submissions, with the most
+recent submissions at the top. To look for a specific submission, use the search bar at the top of
+the page. You can search by:
+
+* The donor's username or email
+* The submission's accession title
+* The submission's UUID
 
 .. image:: images/admin_search_submissions.webp
     :alt: Search bar in admin submissions page
