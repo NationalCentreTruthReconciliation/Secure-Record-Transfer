@@ -67,8 +67,8 @@ will be listed under the :ref:`Past Submissions` section.
 
 Deleting an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Users can delete an in-progress submission if they no longer wish to complete it. To delete a
-submission, click the "Delete" button on the relevant row of the table.
+Users can delete an in-progress submission if they no longer wish to complete it or if it has
+expired. To delete a submission, click the "Delete" button on the relevant row of the table.
 
 .. image:: images/user_profile_delete_in_progress_submission.webp
     :alt: User profile delete submission
