@@ -33,15 +33,17 @@ The "Submission Title" column displays the title provided by the user in the "Ti
 :ref:`Step 4: Record Description` of the Submission Form. If that field has not been filled out
 yet, the title will be "None".
 
-In-progress submissions with uploaded files will have an expiry date, shown under the "Expires At"
-column. This is the date when the in-progress submission will expire if it is not submitted or
-updated. Expired in-progress submissions can no longer be resumed or submitted. In-progress
-submissions close to expiring will have their expiry date highlighted in red, whereas in-progress
-submissions that have already expired will have their expiry date will be both highlighted in red
-and striked through.
+Expirable in-progress submissions will have an expiry date shown under the "Expires At" column.
+This is the date when the in-progress submission will expire if it is not submitted or updated.
+Expired in-progress submissions can no longer be resumed or submitted. In-progress submissions
+close to expiring will have their expiry date highlighted in red, whereas in-progress submissions
+that have already expired will have their expiry date both highlighted in red and striked through.
 
 .. image:: images/user_profile_in_progress_submission_expiry.webp
     :alt: User profile in-progress submission expiry
+
+.. note::
+    Only in-progress submissions with uploaded files can expire.
 
 The length of time before an in-progress submission expires can be configured in the settings. See
 :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` and
