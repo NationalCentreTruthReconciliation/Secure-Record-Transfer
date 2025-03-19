@@ -118,13 +118,12 @@ group.
     :alt: Create submission group
 
 The user can also view and modify the details of an existing submission group by clicking on the
-"Click to view group" button for that group in the table on the profile page. This will take the user to a page where
-they can modify the group name and group description, and also view past submissions made under
-this group.
+"Click to view group" button for that group in the table on the profile page. This will take the
+user to a page where they can modify the group name and group description, and also view past
+submissions made under this group.
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
-.. note::
-    Clicking on "Click to make a new submission" automatically selects this group for the new
-    submission.
+Clicking on "Click to make a new submission" takes the user to the Submission Form with the
+submission group pre-selected.
