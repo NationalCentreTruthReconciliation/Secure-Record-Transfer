@@ -123,3 +123,7 @@ this group.
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
+
+.. note::
+    Clicking on "Click to make a new submission" automatically selects this group for the new
+    submission.
