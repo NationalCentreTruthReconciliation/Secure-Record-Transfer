@@ -46,7 +46,8 @@ all submission data in a single CSV file.
 
 .. note::
     CSV exports will only include text fields and not the uploaded files. To download the files
-    associated with a submission, you will need to generate a BagIt package.
+    associated with a submission, you will need to :ref:`generate a BagIt bag
+    <Generating BagIt Bag for Submissions>`.
 
 A CSV of the submission can also be downloaded from the submission detail page by clicking on
 **Click to download CSV export**. Note that CAAIS 1.0 is the default format used for the CSV export
