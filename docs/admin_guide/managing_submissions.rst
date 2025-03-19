@@ -94,7 +94,7 @@ Attached File**.
 Viewing and Editing Submission Metadata
 ---------------------------------------
 To view and edit the metadata associated with a submission, navigate to the submission's detail
-page. From there, click on **View or change metadata**.
+page. From there, click on **View or Change Metadata**.
 
 .. image:: images/admin_view_edit_metadata.webp
     :alt: Link to view or change metadata
