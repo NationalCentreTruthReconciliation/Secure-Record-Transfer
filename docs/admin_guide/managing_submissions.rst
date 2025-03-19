@@ -7,6 +7,16 @@ page.
 .. image:: images/admin_submissions.webp
     :alt: Submissions link in admin app
 
+To view the details of a submission, click on the submission's date. This will take you to the
+submission's detail page, where you can find additional details about the submission, as well as
+additional actions that can be taken.
+
+.. image:: images/admin_access_submission_detail.png
+    :alt: Link to a submission's detail page
+
+.. image:: images/admin_submission_detail.png
+    :alt: Submission detail page
+
 Searching Submissions
 ---------------------
 On the Submissions admin page, you will find a table of all existing submissions, with the most
@@ -20,42 +30,49 @@ the page. You can search by:
 .. image:: images/admin_search_submissions.webp
     :alt: Search bar in admin submissions page
 
-To export a submission as a CSV, select the checkbox next to the submission you want to export,
-choose the format/version you want to export to, and click the **Go** button. You can select
-multiple submissions at once to export them as a single CSV. Note that the CSV export will only
-include text fields and not the uploaded files.
-
-.. image:: images/admin_export_submission.webp
-    :alt: Export submission as CSV
-
-To view additional information about a submission, click on the submission's date. This will take
-you to the submission's detail page, where you can find additional details about the submission,
-such as the submission group that the submission is a part of (if one was assigned).
-
-.. image:: images/admin_submission_detail.webp
-    :alt: Submission detail page
-
-At the bottom of the submission detail page, you can find links for additional actions.
-
 To view a report of the submission, click on **Click to view submission report**. This will open up
 a new tab with a report of the submission, formatted in accordance with CAAIS. This same report is
 available to the user who made the submission, on their Profile page.
 
-A CSV of the submission can also be downloaded from here by clicking on **Click to download CSV
-export**. CAAIS 1.0 is the default format used for the CSV export here, but you can choose to
-export for a version of AtoM from the Submissions page.
+Exporting CSVs for Submissions
+------------------------------
+From the Submissions admin page, you can export submission data as CSV files. Simply select the
+checkbox next to one or more submissions you want to export, choose your desired format/version
+from the dropdown menu, and click the **Go** button. Selecting multiple submissions will be compile
+all submission data in a single CSV file.
 
-To generate and download a BagIt package of the submission, click on **Click to download bag**.
-This will start a job that will run in the background to create the BagIt package. You should see
-a message at the top of the page indicating that the bag is being created. To check on the status
-of the bag creation, click on the **jobs page** link included within the message. 
+.. image:: images/admin_export_submission.webp
+    :alt: Export submission as CSV
+
+.. note::
+    CSV exports will only include text fields and not the uploaded files. To download the files
+    associated with a submission, you will need to generate a BagIt package.
+
+A CSV of the submission can also be downloaded from the submission detail page by clicking on
+**Click to download CSV export**. Note that CAAIS 1.0 is the default format used for the CSV export
+with this method.
+
+.. image:: images/admin_download_csv_from_submission_detail.png
+    :alt: Download CSV export from submission detail page
+
+Generating BagIt Bag for Submissions
+------------------------------------
+To generate and download a BagIt bag for a submission, firstly navigate to the submission's detail
+page. From there, click on **Click to create downloadable bag**. 
+
+.. image:: images/admin_create_bag.png
+    :alt: Link to create downloadable BagIt bag
+
+This starts a job that runs in the background to create the BagIt bag. You should see a message at
+the top of the page indicating that the bag is being created. To check on the status of the bag
+creation, click on the **jobs page** link included within the message. 
 
 .. image:: images/admin_generate_bag_message.webp
     :alt: Message indicating bag is being created
 
-The time it takes to create the bag will depend on the size of the files included in the
-submission, but most bags should be created almost instantly. Once the status of the job shows as
-**Complete**, you can click on the job name to view the job details.
+The time it takes to create the bag depends on the size of the files included in the submission,
+but most bags are created almost instantly. Once the status of the job shows as **Complete**, click
+on the job name to view the job details.
 
 .. image:: images/admin_bag_jobs.webp
     :alt: Jobs page link in bag creation message
