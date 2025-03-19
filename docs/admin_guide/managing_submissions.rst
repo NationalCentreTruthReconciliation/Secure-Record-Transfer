@@ -30,8 +30,8 @@ the page. You can search by:
 .. image:: images/admin_search_submissions.webp
     :alt: Search bar in admin submissions page
 
-View Report of a Submission
----------------------------
+Generating Submission Reports
+-----------------------------
 To view a report of the submission, firstly navigate to the submission's detail page. From there,
 click on **Click to view submission report** at the bottom of the page.
 
