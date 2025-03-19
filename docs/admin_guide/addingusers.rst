@@ -20,6 +20,10 @@ in the container running the Django application.
 
 .. code-block:: console
 
+    # If running the development version of the app:
+    podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
+
+    # If running the production version of the app:
     podman-compose -f compose.prod.yml exec app python manage.py createsuperuser
 
 
