@@ -30,9 +30,16 @@ the page. You can search by:
 .. image:: images/admin_search_submissions.webp
     :alt: Search bar in admin submissions page
 
-To view a report of the submission, click on **Click to view submission report**. This will open up
-a new tab with a report of the submission, formatted in accordance with CAAIS. This same report is
-available to the user who made the submission, on their Profile page.
+View Report of a Submission
+---------------------------
+To view a report of the submission, firstly navigate to the submission's detail page. From there,
+click on **Click to view submission report** at the bottom of the page.
+
+.. image:: images/admin_view_submission_report.webp
+    :alt: Link to view submission report
+
+This will open up a new tab with a report of the submission, formatted in accordance with CAAIS.
+This same report is available to the user who made the submission, on their :ref:`Profile page <Past Submissions>`.
 
 Exporting CSVs for Submissions
 ------------------------------
