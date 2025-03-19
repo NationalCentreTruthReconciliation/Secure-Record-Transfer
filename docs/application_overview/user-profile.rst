@@ -21,6 +21,7 @@ email notifications for new submissions. By default, this checkbox is checked.
 .. image:: images/user_profile_personal_info.webp
     :alt: User profile personal information
 
+To save changes made to personal information, click on the "Save" button.
 
 In-Progress Submissions
 -----------------------
