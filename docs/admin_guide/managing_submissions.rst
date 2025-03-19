@@ -83,3 +83,18 @@ Attached File**.
 
 .. image:: images/admin_bag_download.webp
     :alt: Download BagIt package
+
+Viewing and Editing Submission Metadata
+---------------------------------------
+To view and edit the metadata associated with a submission, navigate to the submission's detail
+page. From there, click on **View or change metadata**.
+
+.. image:: images/admin_view_edit_metadata.png
+    :alt: Link to view or change metadata
+
+This opens up a change form where you can view and modify the metadata associated with the
+submission. Once you have made your changes, click on **SAVE** at the bottom of the page to save
+your changes.
+
+.. image:: images/admin_edit_metadata.png
+    :alt: Edit metadata form
