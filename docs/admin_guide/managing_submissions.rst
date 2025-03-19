@@ -11,10 +11,10 @@ To view the details of a submission, click on the submission's date. This will t
 submission's detail page, where you can find additional details about the submission, as well as
 additional actions that can be taken.
 
-.. image:: images/admin_access_submission_detail.png
+.. image:: images/admin_access_submission_detail.webp
     :alt: Link to a submission's detail page
 
-.. image:: images/admin_submission_detail.png
+.. image:: images/admin_submission_detail.webp
     :alt: Submission detail page
 
 Searching Submissions
@@ -53,7 +53,7 @@ A CSV of the submission can also be downloaded from the submission detail page b
 **Click to download CSV export**. Note that CAAIS 1.0 is the default format used for the CSV export
 with this method.
 
-.. image:: images/admin_download_csv_from_submission_detail.png
+.. image:: images/admin_download_csv_from_submission_detail.webp
     :alt: Download CSV export from submission detail page
 
 Generating BagIt Bag for Submissions
@@ -61,7 +61,7 @@ Generating BagIt Bag for Submissions
 To generate and download a BagIt bag for a submission, firstly navigate to the submission's detail
 page. From there, click on **Click to create downloadable bag**. 
 
-.. image:: images/admin_create_bag.png
+.. image:: images/admin_create_bag.webp
     :alt: Link to create downloadable BagIt bag
 
 This starts a job that runs in the background to create the BagIt bag. You should see a message at
@@ -89,12 +89,12 @@ Viewing and Editing Submission Metadata
 To view and edit the metadata associated with a submission, navigate to the submission's detail
 page. From there, click on **View or change metadata**.
 
-.. image:: images/admin_view_edit_metadata.png
+.. image:: images/admin_view_edit_metadata.webp
     :alt: Link to view or change metadata
 
 This opens up a change form where you can view and modify the metadata associated with the
 submission. Once you have made your changes, click on **SAVE** at the bottom of the page to save
 your changes.
 
-.. image:: images/admin_edit_metadata.png
+.. image:: images/admin_edit_metadata.webp
     :alt: Edit metadata form
