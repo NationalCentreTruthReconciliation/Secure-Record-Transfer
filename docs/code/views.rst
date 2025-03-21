@@ -22,12 +22,12 @@ Media
 .. automodule:: recordtransfer.views.media
    :members:
 
-Transfer
---------
-.. automodule:: recordtransfer.views.transfer
+Pre-Submission
+--------------
+.. automodule:: recordtransfer.views.pre_submission
    :members:
 
-Submission
-----------
-.. automodule:: recordtransfer.views.submission
+Post-Submission
+---------------
+.. automodule:: recordtransfer.views.post_submission
    :members:
