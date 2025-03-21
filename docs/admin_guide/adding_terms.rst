@@ -18,7 +18,7 @@ To add new Rights Types, click on **Rights Types** in the admin interface.
 .. image:: images/admin_rights_types.webp
     :alt: Rights Types link in admin app
 
-Next, click **Add Right Type**.
+Next, click **Add Type of Rights**.
 
 .. image:: images/admin_add_rights_type.webp
     :alt: Add Rights Type link on Right Types admin page
