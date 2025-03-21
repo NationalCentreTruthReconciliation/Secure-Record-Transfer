@@ -1,9 +1,3 @@
-@media screen and (max-width: 800px) {
-    .uuid-column {
-        display: none;
-    }
-}
-
 .red-text {
     color: red;
 }

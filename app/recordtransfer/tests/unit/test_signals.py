@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
@@ -101,7 +101,7 @@ class TestInProgressSubmissionSignal(TestCase):
         in_progress_submission = InProgressSubmission(
             upload_session=self.upload_session,
             user=self.upload_session.user,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
         )
         in_progress_submission.save()
         mock_touch.assert_called_once()
@@ -114,7 +114,7 @@ class TestInProgressSubmissionSignal(TestCase):
         in_progress_submission = InProgressSubmission(
             upload_session=self.upload_session,
             user=self.upload_session.user,
-            current_step=TransferStep.UPLOAD_FILES.value,
+            current_step=SubmissionStep.UPLOAD_FILES.value,
             reminder_email_sent=True,
         )
         in_progress_submission.save()

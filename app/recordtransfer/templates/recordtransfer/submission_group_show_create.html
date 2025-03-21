@@ -6,7 +6,7 @@
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
-    <script src="{% static 'submissiongroup.bundle.js' %}"></script>
+    <script src="{% static 'submission_group.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block title %}
     {% if IS_NEW %}
@@ -17,6 +17,9 @@
 {% endblock title %}
 {% block content %}
     {% if user.is_authenticated %}
+        <a href="{% url 'recordtransfer:user_profile' %}" class="back-to-btn">
+            <i class="fas fa-arrow-left"></i> {% trans "Back to Profile" %}
+        </a>
         <div class="title-text">
             {% if IS_NEW %}
                 {% trans "Create New Submission Group" %}
@@ -26,9 +29,8 @@
         </div>
         {% include "includes/submission_group_form.html" %}
         {% if not IS_NEW %}
-            <div class="flex-med-width-item margin-top-25px"
-                 id="past-transfers-in-group">
-                <label class="medium-text">{% trans "Past Transfers in this Group" %}</label>
+            <div class="flex-med-width-item margin-top-25px">
+                <label class="medium-text">{% trans "Past Submissions in this Group" %}</label>
             </div>
             {% if submissions %}
                 {% include "includes/submission_table.html" with submissions=submissions %}
@@ -38,7 +40,7 @@
                 </div>
             {% endif %}
             <div class="margin-top-25px">
-                <a href="{% url 'recordtransfer:transfer' %}?group_uuid={{ group.uuid }} ">{% trans "Click to add new transfer" %}</a>
+                <a href="{% url 'recordtransfer:submit' %}?group={{ group.uuid }} ">{% trans "Click to make a new submission" %}</a>
             </div>
         {% endif %}
     {% endif %}

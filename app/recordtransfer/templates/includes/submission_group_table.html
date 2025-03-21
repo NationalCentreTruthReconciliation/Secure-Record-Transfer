@@ -5,7 +5,7 @@
             <th class="uuid-column">{% trans "Group ID" %}</th>
             <th>{% trans "Group Name" %}</th>
             <th>{% trans "Group Description" %}</th>
-            <th>{% trans "Transfers in Group" %}</th>
+            <th>{% trans "Submissions in Group" %}</th>
             <th>{% trans "View Group" %}</th>
         </tr>
         {% for group in groups_page_obj %}
@@ -15,7 +15,7 @@
                 <td>{{ group.description }}</td>
                 <td>{{ group.number_of_submissions_in_group }}</td>
                 <td>
-                    <a href="{% url 'recordtransfer:submissiongroupdetail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
+                    <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
                 </td>
             </tr>
         {% endfor %}

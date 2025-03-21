@@ -8,57 +8,52 @@ from . import views
 app_name = "recordtransfer"
 urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
-    re_path(
-        r"^transfer(?:/(?P<transfer_uuid>[0-9a-f-]+))?(?:/(?P<group_uuid>[0-9a-f-]+))?/$",
-        login_required(views.transfer.TransferFormWizard.as_view()),
-        name="transfer",
+    path(
+        "submission/<uuid:uuid>/csv/",
+        login_required(views.post_submission.SubmissionCsv.as_view()),
+        name="submission_csv",
     ),
     path(
-        "transfer/error/",
+        "submission/<uuid:uuid>/",
+        login_required(views.post_submission.SubmissionDetail.as_view()),
+        name="submission_detail",
+    ),
+    path(
+        "submission/",
+        login_required(views.pre_submission.SubmissionFormWizard.as_view()),
+        name="submit",
+    ),
+    path(
+        "error/",
         login_required(views.home.SystemErrorPage.as_view()),
-        name="systemerror",
+        name="system_error",
     ),
-    path("transfer/sent/", views.transfer.TransferSent.as_view(), name="transfersent"),
+    path("submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"),
     path(
-        "transfer/expired/",
-        views.transfer.InProgressSubmissionExpired.as_view(),
+        "submission/in-progress/expired/",
+        views.pre_submission.InProgressSubmissionExpired.as_view(),
         name="in_progress_submission_expired",
     ),
     path(
-        "inprogress/<uuid:uuid>/delete/",
-        login_required(views.transfer.DeleteTransfer.as_view()),
-        name="transferdelete",
-    ),
-    path(
-        "inprogress/<uuid:uuid>/delete/confirm/",
-        login_required(views.transfer.DeleteTransfer.as_view()),
-        name="confirmtransferdelete",
+        "submission/in-progress/<uuid:uuid>/",
+        login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
+        name="delete_in_progress",
     ),
     path("about/", views.home.About.as_view(), name="about"),
-    path("profile/", login_required(views.profile.UserProfile.as_view()), name="userprofile"),
+    path("user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"),
     path(
-        "submission/<uuid:uuid>/",
-        login_required(views.submission.SubmissionDetail.as_view()),
-        name="submissiondetail",
+        "submission-group/",
+        login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
+        name="submission_group_new",
     ),
     path(
-        "submission/<uuid:uuid>/csv",
-        login_required(views.submission.SubmissionCsv.as_view()),
-        name="submissioncsv",
+        "submission-group/<uuid:uuid>/",
+        login_required(views.post_submission.SubmissionGroupDetailView.as_view()),
+        name="submission_group_detail",
     ),
     path(
-        "submission_group/new",
-        login_required(views.submission.SubmissionGroupCreateView.as_view()),
-        name="submissiongroupnew",
-    ),
-    path(
-        "submission_group/<uuid:uuid>/",
-        login_required(views.submission.SubmissionGroupDetailView.as_view()),
-        name="submissiongroupdetail",
-    ),
-    path(
-        "user/<int:user_id>/submission_groups/",
-        login_required(views.submission.get_user_submission_groups),
+        "user/<int:user_id>/submission-group/",
+        login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
     ),
 ]
@@ -97,34 +92,32 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "createaccount/",
+                "account/",
                 views.account.CreateAccount.as_view(),
-                name="createaccount",
+                name="create_account",
             ),
             path(
-                "createaccount/sent/",
+                "account/activation/sent/",
                 views.account.ActivationSent.as_view(),
-                name="activationsent",
+                name="activation_sent",
             ),
             path(
-                "createaccount/complete/",
+                "account/activation/complete/",
                 views.account.ActivationComplete.as_view(),
-                name="accountcreated",
+                name="account_created",
             ),
             path(
-                "createaccount/invalid/",
+                "account/activation/invalid/",
                 views.account.ActivationInvalid.as_view(),
-                name="activationinvalid",
             ),
             re_path(
                 (
-                    "createaccount/"
-                    "activate/"
+                    "account/activation/"
                     r"(?P<uidb64>[0-9A-Za-z_\-]+)/"
                     r"(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$"
                 ),
                 views.account.activate_account,
-                name="activateaccount",
+                name="activate_account",
             ),
         ]
     )

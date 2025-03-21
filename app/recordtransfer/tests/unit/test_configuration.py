@@ -1,7 +1,7 @@
 from configuration import AcceptedFileTypes
 from django.test import TestCase
 
-from recordtransfer.apps import _validate_cron
+from recordtransfer.management.commands.verify_settings import _validate_cron
 
 
 class TestAcceptedFileTypeParser(TestCase):

@@ -1,0 +1,29 @@
+{% load i18n %}
+{% load static %}
+<dialog id="unsaved-submission-form-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Are you sure you want to leave?</h3>
+            <button class="close-modal-button" id="close-modal-button">
+                <img height="20"
+                     width="20"
+                     alt="Close"
+                     src="{% static 'close_menu_64x64px.webp' %}"
+                     draggable="false">
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>
+                <strong>You have unsaved data!</strong>
+                If you would like to save your submission for later, click this link:
+            </p>
+            <button id="modal-save-button" class="text-link margin-top-10px">{% trans "Save form and resume later" %}</button>
+        </div>
+        <div class="modal-footer">
+            <button id="unsaved-submission-form-modal-cancel"
+                    class="red-button large-button">Cancel</button>
+            <button id="unsaved-submission-form-modal-leave"
+                    class="green-button large-button">Leave</button>
+        </div>
+    </div>
+</dialog>

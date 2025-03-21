@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime
+from unittest.mock import patch
 
 from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
-from unittest.mock import patch
 
 from caais.export import ExportVersion
 from caais.models import (
@@ -17,8 +17,8 @@ from caais.models import (
     CreationOrRevisionType,
     DateOfCreationOrRevision,
     DispositionAuthority,
-    EventType,
     Event,
+    EventType,
     ExtentStatement,
     ExtentType,
     GeneralNote,
@@ -101,6 +101,14 @@ class TestIdentifier(TestCase):
 
 
 class TestMetadata(TestCase):
+    """Test the Metadata model."""
+
+    def tearDown(self) -> None:
+        """Delete all objects created during the test."""
+        Metadata.objects.all().delete()
+        AcquisitionMethod.objects.all().delete()
+        Status.objects.all().delete()
+
     def test_new_metadata(self):
         metadata = Metadata(
             repository="Repository",
@@ -140,8 +148,6 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["dateOfMaterials"], "2023-09-30")
         self.assertEqual(flat["rulesOrConventions"], "CAAIS v1.0")
         self.assertEqual(flat["languageOfAccessionRecord"], "en")
-
-        metadata.delete()
 
     def test_flatten_metadata_full_section_1_related_caais_1_0(self):
         """Test flattening of only section 1 of CAAIS metadata"""
@@ -260,10 +266,76 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.delete()
 
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
     def test_flatten_metadata_full_section_3_related_caais_1_0(self):
         """Test flattening of only section 3 of CAAIS metadata"""
         metadata = Metadata(
-            date_of_materials="Circa 2018",
+            date_of_materials="March 2018",
+            date_is_approximate=False,
+        )
+        extent_type = ExtentType(name="Extent Received")
+        content_type = ContentType(name="Digital Content")
+        carrier_type = CarrierType(name="Digital Transfer")
+        extent_1 = ExtentStatement(
+            metadata=metadata,
+            extent_type=extent_type,
+            quantity_and_unit_of_measure="10 PDF Files, worth 5MB",
+            content_type=content_type,
+            carrier_type=carrier_type,
+        )
+        extent_2 = ExtentStatement(
+            metadata=metadata,
+            quantity_and_unit_of_measure="1 XLSX file",
+            content_type=content_type,
+            extent_note="Notes",
+        )
+        language_1 = LanguageOfMaterial(
+            metadata=metadata,
+            language_of_material="English",
+        )
+        language_2 = LanguageOfMaterial(
+            metadata=metadata,
+            language_of_material="French",
+        )
+        objects = (
+            metadata,
+            extent_type,
+            content_type,
+            carrier_type,
+            extent_1,
+            extent_2,
+            language_1,
+            language_2,
+        )
+        for obj in objects:
+            obj.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+
+        self.assertEqual(flat["dateOfMaterials"], "March 2018")
+        self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
+        self.assertEqual(flat["quantityAndUnitOfMeasure"], "10 PDF Files, worth 5MB|1 XLSX file")
+        self.assertEqual(flat["contentTypes"], "Digital Content|Digital Content")
+        self.assertEqual(flat["carrierTypes"], "Digital Transfer|NULL")
+        self.assertEqual(flat["extentNotes"], "NULL|Notes")
+        self.assertEqual(flat["preliminaryScopeAndContent"], "")
+        self.assertEqual(flat["languageOfMaterials"], "English|French")
+
+        for obj in objects:
+            obj.delete()
+
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_full_section_3_related_caais_1_0_approximate_date(self):
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate.
+        """
+        metadata = Metadata(
+            date_of_materials="2018",
+            date_is_approximate=True,
         )
         extent_type = ExtentType(name="Extent Received")
         content_type = ContentType(name="Digital Content")
@@ -484,7 +556,6 @@ class TestMetadata(TestCase):
         note_1.delete()
         note_2.delete()
         note_3.delete()
-        metadata.delete()
 
     @patch.object(
         timezone,
@@ -537,13 +608,12 @@ class TestMetadata(TestCase):
             creation_type.delete()
         if rt_created:
             revision_type.delete()
-        metadata.delete()
 
     def test_flatten_metadata_no_related_atom_2_6(self):
         metadata = Metadata(
             repository="Repository",
             accession_title="Title",
-            date_of_materials="September 2023",
+            date_of_materials="2023-09-01 - 2023-09-30",
             rules_or_conventions="CAAIS v1.0",
             language_of_accession_record="en",
         )
@@ -558,17 +628,43 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["eventTypes"], "Creation")
-        self.assertEqual(flat["eventDates"], "September 2023")
+        self.assertEqual(flat["eventDates"], "2023-09-01 - 2023-09-30")
         self.assertEqual(flat["eventStartDates"], "2023-09-01")
         self.assertEqual(flat["eventEndDates"], "2023-09-30")
 
-        metadata.delete()
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_no_related_atom_2_6_approximate_date(self) -> None:
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate, using ATOM 2.6.
+        """
+        metadata = Metadata(
+            repository="Repository",
+            accession_title="Title",
+            date_of_materials="2023-09-01 - 2023-09-30",
+            date_is_approximate=True,
+            rules_or_conventions="CAAIS v1.0",
+            language_of_accession_record="en",
+        )
+        metadata.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_6)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+
+        self.assertEqual(flat["title"], "Title")
+        self.assertEqual(flat["acquisitionType"], "")
+        self.assertEqual(flat["eventTypes"], "Creation")
+        self.assertEqual(flat["eventDates"], "Circa 2023-09-01 - 2023-09-30")
+        self.assertEqual(flat["eventStartDates"], "2023-09-01")
+        self.assertEqual(flat["eventEndDates"], "2023-09-30")
 
     def test_flatten_metadata_no_related_atom_2_3(self):
         metadata = Metadata(
             repository="Repository",
             accession_title="Title",
-            date_of_materials="June 2023",
+            date_of_materials="2023-06-01 - 2023-06-30",
             rules_or_conventions="CAAIS v1.0",
             language_of_accession_record="en",
         )
@@ -583,17 +679,43 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["eventTypes"], "Creation")
-        self.assertEqual(flat["eventDates"], "June 2023")
+        self.assertEqual(flat["eventDates"], "2023-06-01 - 2023-06-30")
         self.assertEqual(flat["eventStartDates"], "2023-06-01")
         self.assertEqual(flat["eventEndDates"], "2023-06-30")
 
-        metadata.delete()
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_no_related_atom_2_3_approximate_date(self) -> None:
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate, using ATOM 2.3.
+        """
+        metadata = Metadata(
+            repository="Repository",
+            accession_title="Title",
+            date_of_materials="2023-06-01 - 2023-06-30",
+            date_is_approximate=True,
+            rules_or_conventions="CAAIS v1.0",
+            language_of_accession_record="en",
+        )
+        metadata.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_3)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+
+        self.assertEqual(flat["title"], "Title")
+        self.assertEqual(flat["acquisitionType"], "")
+        self.assertEqual(flat["eventTypes"], "Creation")
+        self.assertEqual(flat["eventDates"], "Circa 2023-06-01 - 2023-06-30")
+        self.assertEqual(flat["eventStartDates"], "2023-06-01")
+        self.assertEqual(flat["eventEndDates"], "2023-06-30")
 
     def test_flatten_metadata_no_related_atom_2_2(self):
         metadata = Metadata(
             repository="Repository",
             accession_title="Title",
-            date_of_materials="[ca. 2018]",
+            date_of_materials="2018-01-01 - 2018-12-31",
             rules_or_conventions="CAAIS v1.0",
             language_of_accession_record="en",
         )
@@ -608,11 +730,37 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
         self.assertEqual(flat["creationDatesType"], "Creation")
-        self.assertEqual(flat["creationDates"], "2018")
+        self.assertEqual(flat["creationDates"], "2018-01-01 - 2018-12-31")
         self.assertEqual(flat["creationDatesStart"], "2018-01-01")
         self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
 
-        metadata.delete()
+    @patch("django.conf.settings.APPROXIMATE_DATE_FORMAT", "Circa {date}")
+    def test_flatten_metadata_no_related_atom_2_2_approximate_date(self) -> None:
+        """Test flattening of only section 3 of CAAIS metadata, with the date of materials being
+        approximate, using ATOM 2.2.".
+        """
+        metadata = Metadata(
+            repository="Repository",
+            accession_title="Title",
+            date_of_materials="2018-01-01 - 2018-12-31",
+            date_is_approximate=True,
+            rules_or_conventions="CAAIS v1.0",
+            language_of_accession_record="en",
+        )
+        metadata.save()
+
+        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_2)
+
+        # Assure no weird keys were added
+        for key in flat.keys():
+            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+
+        self.assertEqual(flat["title"], "Title")
+        self.assertEqual(flat["acquisitionType"], "")
+        self.assertEqual(flat["creationDatesType"], "Creation")
+        self.assertEqual(flat["creationDates"], "Circa 2018-01-01 - 2018-12-31")
+        self.assertEqual(flat["creationDatesStart"], "2018-01-01")
+        self.assertEqual(flat["creationDatesEnd"], "2018-12-31")
 
     def test_flatten_metadata_no_related_atom_2_1(self):
         metadata = Metadata(
@@ -633,4 +781,129 @@ class TestMetadata(TestCase):
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
 
-        metadata.delete()
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_empty_date(self) -> None:
+        """Test parsing an empty date."""
+        metadata = Metadata(date_of_materials="")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_invalid_date_format(self) -> None:
+        """Test parsing a date that doesn't match the expected pattern."""
+        metadata = Metadata(date_of_materials="January 2023")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_single_date(self) -> None:
+        """Test parsing a single valid date."""
+        metadata = Metadata(date_of_materials="2023-05-15")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-05-15")
+        self.assertEqual(start_date, date(2023, 5, 15))
+        self.assertEqual(end_date, start_date)
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_single_invalid_date(self) -> None:
+        """Test parsing a single date with invalid format."""
+        metadata = Metadata(date_of_materials="2023-13-45")  # Invalid month and day
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_date_range(self) -> None:
+        """Test parsing a valid date range."""
+        metadata = Metadata(date_of_materials="2023-01-01 - 2023-12-31")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-01-01 - 2023-12-31")
+        self.assertEqual(start_date, date(2023, 1, 1))
+        self.assertEqual(end_date, date(2023, 12, 31))
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_partial_date_range_start_valid(self) -> None:
+        """Test parsing a date range with only start date valid."""
+        metadata = Metadata(date_of_materials="2023-01-01 - 2023-13-45")  # End date invalid
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-01-01")  # Parsed date is only the valid date
+        self.assertEqual(start_date, date(2023, 1, 1))
+        self.assertEqual(end_date, start_date)
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_partial_date_range_end_valid(self) -> None:
+        """Test parsing a date range with only end date valid."""
+        metadata = Metadata(date_of_materials="2023-13-45 - 2023-12-31")  # Start date invalid
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "2023-12-31")  # Parsed date is only the valid date
+        self.assertEqual(start_date, date(2023, 12, 31))
+        self.assertEqual(end_date, start_date)
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_both_dates_invalid(self) -> None:
+        """Test parsing a date range where both dates are invalid."""
+        metadata = Metadata(date_of_materials="2023-13-45 - 2023-14-45")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        self.assertEqual(date_text, "Unknown")
+        self.assertEqual(start_date, date(1900, 1, 1))
+        self.assertEqual(end_date, date(1900, 12, 31))
+
+    @patch("django.conf.settings.CAAIS_UNKNOWN_DATE_TEXT", "Unknown")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_START_DATE", "1900-01-01")
+    @patch("django.conf.settings.CAAIS_UNKNOWN_END_DATE", "1900-12-31")
+    def test_parse_event_date_for_atom_multiple_dates(self) -> None:
+        """Test parsing a string with multiple dates."""
+        metadata = Metadata(date_of_materials="2023-01-01 2023-12-31 2024-06-15")
+        metadata.save()
+
+        date_text, start_date, end_date = metadata.parse_event_date_for_atom()
+
+        # Should use the first two dates found
+        self.assertEqual(date_text, "2023-01-01 - 2023-12-31")
+        self.assertEqual(start_date, date(2023, 1, 1))
+        self.assertEqual(end_date, date(2023, 12, 31))

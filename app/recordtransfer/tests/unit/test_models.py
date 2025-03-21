@@ -15,7 +15,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from recordtransfer.enums import TransferStep
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
@@ -278,7 +278,7 @@ class TestUploadSession(TestCase):
 
         for state in valid_states:
             self.session.status = state
-            with patch.object(self.session, 'remove_temp_uploads') as mock_remove_temp_uploads:
+            with patch.object(self.session, "remove_temp_uploads") as mock_remove_temp_uploads:
                 self.session.expire()
                 mock_remove_temp_uploads.assert_called_once_with(save=False)
                 self.assertEqual(self.session.status, UploadSession.SessionStatus.EXPIRED)
@@ -1012,9 +1012,9 @@ class TestInProgressSubmission(TestCase):
         """Set up test."""
         self.user = User.objects.create(username="testuser", password="password")
         self.upload_session = UploadSession.new_session()
-        self.submission = InProgressSubmission.objects.create(
+        self.in_progress = InProgressSubmission.objects.create(
             user=self.user,
-            current_step=TransferStep.ACCEPT_LEGAL.value,
+            current_step=SubmissionStep.ACCEPT_LEGAL.value,
             step_data=b"test data",
             title="Test Submission",
             upload_session=self.upload_session,
@@ -1022,69 +1022,69 @@ class TestInProgressSubmission(TestCase):
 
     def test_clean_invalid_step(self) -> None:
         """Test clean method with an invalid step."""
-        self.submission.current_step = "INVALID_STEP"
+        self.in_progress.current_step = "INVALID_STEP"
         with self.assertRaises(ValidationError):
-            self.submission.clean()
+            self.in_progress.clean()
 
     def test_upload_session_expires_at(self) -> None:
         """Test upload_session_expires_at method."""
-        self.assertEqual(self.submission.upload_session_expires_at, self.upload_session.expires_at)
+        self.assertEqual(
+            self.in_progress.upload_session_expires_at, self.upload_session.expires_at
+        )
 
     def test_upload_session_expires_at_no_session(self) -> None:
         """Test upload_session_expires_at method when there is no upload session."""
-        self.submission.upload_session = None
-        self.assertIsNone(self.submission.upload_session_expires_at)
+        self.in_progress.upload_session = None
+        self.assertIsNone(self.in_progress.upload_session_expires_at)
 
     @patch("recordtransfer.models.UploadSession.is_expired", new_callable=PropertyMock)
     def test_upload_session_expired(self, mock_expired: PropertyMock) -> None:
         """Test upload_session_expired property."""
         mock_expired.return_value = True
-        self.assertTrue(self.submission.upload_session_expired)
+        self.assertTrue(self.in_progress.upload_session_expired)
 
         mock_expired.return_value = False
-        self.assertFalse(self.submission.upload_session_expired)
+        self.assertFalse(self.in_progress.upload_session_expired)
 
-        self.submission.upload_session = None
-        self.assertFalse(self.submission.upload_session_expired)
+        self.in_progress.upload_session = None
+        self.assertFalse(self.in_progress.upload_session_expired)
 
     @patch("recordtransfer.models.UploadSession.expires_soon", new_callable=PropertyMock)
     def test_upload_session_expires_soon(self, mock_expires_soon: PropertyMock) -> None:
         """Test upload_session_expires_soon property."""
         mock_expires_soon.return_value = True
-        self.assertTrue(self.submission.upload_session_expires_soon)
+        self.assertTrue(self.in_progress.upload_session_expires_soon)
 
         mock_expires_soon.return_value = False
-        self.assertFalse(self.submission.upload_session_expires_soon)
+        self.assertFalse(self.in_progress.upload_session_expires_soon)
 
-        self.submission.upload_session = None
-        self.assertFalse(self.submission.upload_session_expires_soon)
+        self.in_progress.upload_session = None
+        self.assertFalse(self.in_progress.upload_session_expires_soon)
 
     def test_get_resume_url(self) -> None:
         """Test the get_resume_url method."""
-        expected_url = reverse(
-            "recordtransfer:transfer", kwargs={"transfer_uuid": self.submission.uuid}
-        )
-        self.assertEqual(self.submission.get_resume_url(), expected_url)
+        expected_url = f'{reverse("recordtransfer:submit")}?resume={self.in_progress.uuid}'
+        self.assertEqual(self.in_progress.get_resume_url(), expected_url)
 
     def test_reset_reminder_email_sent_flag_true(self) -> None:
         """Test reset_reminder_email_sent method when the flag is True."""
-        self.submission.reminder_email_sent = True
-        self.submission.reset_reminder_email_sent()
-        self.assertFalse(self.submission.reminder_email_sent)
+        self.in_progress.reminder_email_sent = True
+        self.in_progress.reset_reminder_email_sent()
+        self.assertFalse(self.in_progress.reminder_email_sent)
 
     def test_reset_reminder_email_sent_flag_false(self) -> None:
         """Test reset_reminder_email_sent method when the flag is already False."""
-        self.submission.reminder_email_sent = False
-        self.submission.reset_reminder_email_sent()
-        self.assertFalse(self.submission.reminder_email_sent)
+        self.in_progress.reminder_email_sent = False
+        self.in_progress.reset_reminder_email_sent()
+        self.assertFalse(self.in_progress.reminder_email_sent)
 
     def test_str(self) -> None:
         """Test the string representation of the InProgressSubmission."""
         session_token = (
-            self.submission.upload_session.token if self.submission.upload_session else "None"
+            self.in_progress.upload_session.token if self.in_progress.upload_session else "None"
         )
         expected_str = (
             f"In-Progress Submission by {self.user} "
-            f"(Title: {self.submission.title} | Session: {session_token})"
+            f"(Title: {self.in_progress.title} | Session: {session_token})"
         )
-        self.assertEqual(str(self.submission), expected_str)
+        self.assertEqual(str(self.in_progress), expected_str)

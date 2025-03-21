@@ -1,9 +1,8 @@
 """Views for the homepage and static pages navigable from the home page."""
 
+from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.views.generic import TemplateView
-
-from caais.models import RightsType, SourceRole, SourceType
 
 
 class Index(TemplateView):
@@ -15,7 +14,7 @@ class Index(TemplateView):
 class SystemErrorPage(TemplateView):
     """The page a user sees when there is some system error."""
 
-    template_name = "recordtransfer/systemerror.html"
+    template_name = "recordtransfer/system_error.html"
 
 
 class About(TemplateView):

@@ -13,8 +13,8 @@ with `AtoM <https://accesstomemory.org/en/>`_.
 
    introduction/index
    running/index
-   howtouse/index
-   customization/index
+   application_overview/index
+   admin_guide/index
    settings/index
    code/index
 

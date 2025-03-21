@@ -18,21 +18,21 @@
         <div class="title-text">{% trans "Your Profile" %}</div>
         {% include "includes/profile_form.html" %}
         <br>
-        <!-- In Progress Submissions -->
-        <div class="flex-med-width-item margin-top-25px" id="ongoing-transfers">
-            <label class="medium-text">{% trans "In Progress Transfers" %}</label>
+        <!-- In-Progress Submissions -->
+        <div class="flex-med-width-item margin-top-25px">
+            <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
         </div>
         {% if in_progress_page_obj and in_progress_page_obj|length > 0 %}
             {% include "includes/in_progress_submission_table.html" %}
             {% include "includes/pagination.html" with page_obj=in_progress_page_obj pagination_name=IN_PROGRESS_PAGE %}
         {% else %}
             <div class="flex-med-width-item">
-                <p>{% trans "You have no transfers that are in progress." %}</p>
+                <p>{% trans "You have no submissions that are in progress." %}</p>
             </div>
         {% endif %}
-        <!-- Past Transfers -->
-        <div class="flex-med-width-item margin-top-25px" id="past-transfers">
-            <label class="medium-text">{% trans "Past Transfers" %}</label>
+        <!-- Past Submissions -->
+        <div class="flex-med-width-item margin-top-25px">
+            <label class="medium-text">{% trans "Past Submissions" %}</label>
         </div>
         {% if submissions_page_obj and submissions_page_obj|length > 0 %}
             {% include "includes/submission_table.html" with submissions=submissions_page_obj %}
@@ -43,7 +43,7 @@
             </div>
         {% endif %}
         <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:transfer' %}">{% trans "Click to add new transfer" %}</a>
+            <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
         </div>
         <!-- Submission Groups -->
         <div class="flex-med-width-item margin-top-25px">
@@ -58,7 +58,7 @@
             </div>
         {% endif %}
         <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:submissiongroupnew' %}">{% trans "Click to add new group" %}</a>
+            <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
         </div>
     {% else %}
         {% url 'login' as login %}

@@ -1,0 +1,39 @@
+{% extends "recordtransfer/submission_form_standard.html" %}
+{% load static %}
+{% load i18n %}
+{% block javascript %}
+    {{ block.super }}
+{% endblock javascript %}
+{% block buttonarrayclass %}
+    flex-med-width-item
+{% endblock buttonarrayclass %}
+{% block savelinkclass %}
+    flex-med-width-item
+{% endblock savelinkclass %}
+{% block formfields %}
+    {{ block.super }}
+    <p class="flex-med-width-item margin-top-25px">
+        <i>Upload your files</i>
+    </p>
+    <p class="flex-med-width-item">
+        {% blocktrans %}
+        You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
+        {{ MAX_TOTAL_UPLOAD_SIZE_MB }}MB of files</b>. Any <b>one file may not exceed
+        {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. Note that large submissions may take a few
+        minutes, so please do not reload the web page when your files are being uploaded.
+        {% endblocktrans %}
+    </p>
+    <div class="flex-med-width-item">
+        <div id="uppy-dashboard"></div>
+    </div>
+    <div class="flex-med-width-item">
+        <div>
+            {% trans "Total size of transfer:" %}
+            <span id="total-size">0</span> {% trans "MB" %}
+        </div>
+        <div>
+            {% trans "Remaining size allowed:" %}
+            <span id="remaining-size">{{ MAX_TOTAL_UPLOAD_SIZE_MB }}</span> {% trans "MB" %}
+        </div>
+    </div>
+{% endblock formfields %}

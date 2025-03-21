@@ -1,0 +1,51 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html style="
+    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;">
+    <body style="
+        margin: 0;">
+        <div style="
+            color: #333333;
+            font-size: 20pt;
+            padding: 6px 20px;
+            background-color: #eeeeee;
+            margin-bottom: 15px;">
+            {% trans "Your Submission Could not be Completed" %}
+        </div>
+        <div style="
+            padding: 0px 20px;">
+            <p>
+                {% blocktrans %}
+                The records you attempted to submit through the NCTR Record Transfer Portal
+                did not go through correctly. You may try to submit again, or contact
+                an NCTR archivist about your submission at this email address:
+                {% endblocktrans %}
+            </p>
+            <p>
+                {{ archivist_email }}
+            </p>
+            {% block postscript %}
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% blocktrans %}
+                This email address is not monitored, do not reply to this message.
+                {% endblocktrans %}
+                </i>
+            </div>
+            <div style="
+                font-size: 10pt;">
+                <i>
+                {% url 'recordtransfer:user_profile' as profile_url %}
+                {% blocktrans %}
+                If you do not want to receive these emails anymore, you can change the
+                "Receive notification emails?" setting in
+                <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
+                {% endblocktrans %}
+                </i>
+            </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>
