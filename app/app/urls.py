@@ -37,7 +37,8 @@ urlpatterns = [
         "account/login/",
         auth_views.LoginView.as_view(
             redirect_authenticated_user=True  # This is the key parameter
-        )
+        ),
+        name="login",
     ),
     path("account/", include("django.contrib.auth.urls")),
 ]

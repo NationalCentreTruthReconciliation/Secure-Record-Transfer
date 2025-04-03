@@ -151,7 +151,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
 
         # Open the login page
-        driver.get(f"{self.live_server_url}/accounts/login/")
+        driver.get(f"{self.live_server_url}/account/login/")
 
         # Log in
         username_input = driver.find_element(By.NAME, "username")
