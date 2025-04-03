@@ -10,6 +10,7 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
+from django.db.models import QuerySet
 from django.forms import (
     BaseForm,
     BaseFormSet,
@@ -20,10 +21,10 @@ from django.forms import (
 )
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext
-from django.views.generic import TemplateView
+from django.views.generic import DeleteView, TemplateView
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import forms
@@ -715,36 +716,49 @@ class SubmissionFormWizard(SessionWizardView):
             return HttpResponseRedirect(reverse("recordtransfer:system_error"))
 
 
-class DeleteInProgressSubmission(TemplateView):
+class DeleteInProgressSubmission(DeleteView):
     """View to handle the deletion of an in-progress submission."""
 
     template_name = "recordtransfer/in_progress_submission_delete.html"
-    success_message = gettext("In-progress submission deleted")
-    error_message = gettext("There was an error deleting the in-progress submission")
     model = InProgressSubmission
     context_object_name = "in_progress"
+    success_url = reverse_lazy("recordtransfer:user_profile")
+    success_message = gettext("In-progress submission deleted")
+    error_message = gettext("There was an error deleting the in-progress submission")
 
-    def get_object(self, queryset=None) -> InProgressSubmission:
+    def get_queryset(self) -> QuerySet[InProgressSubmission]:
+        """Filter submissions to only show the current user's."""
+        return super().get_queryset().filter(user=self.request.user)
+
+    def get_object(
+        self, queryset: Optional[QuerySet[InProgressSubmission]] = None
+    ) -> InProgressSubmission:
         """Retrieve the InProgressSubmission object based on the UUID in the URL."""
-        return get_object_or_404(InProgressSubmission, uuid=self.kwargs.get("uuid"))
+        if queryset is None:
+            queryset = self.get_queryset()
+        # Only retrieve an in-progress submission belonging to the current user
+        return get_object_or_404(queryset, uuid=self.kwargs.get("uuid"))
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Retrieve context data for the template."""
         context = super().get_context_data(**kwargs)
         context[self.context_object_name] = self.get_object()
+        context["js_context"] = {
+            "DELETE_URL": reverse(
+                "recordtransfer:delete_in_progress",
+                kwargs={"uuid": self.get_object().uuid},
+            ),
+            "REDIRECT_URL": reverse("recordtransfer:user_profile"),
+        }
         return context
 
-    def post(self, request, *args, **kwargs):
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Override delete to add success message, and handle any errors."""
         try:
-            uuid = self.kwargs["uuid"]
-            submission = InProgressSubmission.objects.filter(
-                user=self.request.user, uuid=uuid
-            ).first()
-            if submission:
-                submission.delete()
-                messages.success(request, self.success_message)
-            else:
-                LOGGER.error("Could not find in-progress submission with UUID %s", uuid)
-                messages.error(request, self.error_message)
-        except KeyError:
-            LOGGER.error("No UUID provided for deletion")
-        return redirect("recordtransfer:user_profile")
+            response = super().delete(request, *args, **kwargs)
+            messages.success(request, self.success_message)
+            return response
+        except Exception as e:
+            LOGGER.error("Error deleting submission: %s", str(e))
+            messages.error(request, self.error_message)
+            return redirect("recordtransfer:user_profile")

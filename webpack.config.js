@@ -91,6 +91,11 @@ module.exports = {
                 "recordtransfer/js/submission_group/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
+        in_progress_submission: [
+            ...glob.sync("./app/recordtransfer/static/" +
+                "recordtransfer/js/in_progress_submission/*.js")
+                .map(file => "./" + path.relative(__dirname, file)),
+        ],
         // Admin Site static assets
         admin_metadata: [
             ...glob.sync("./app/caais/static/caais/css/base/*.css")
