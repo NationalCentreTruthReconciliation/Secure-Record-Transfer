@@ -26,7 +26,7 @@ urlpatterns = [
     path("", include("recordtransfer.urls")),
     # HTML email is set to None by default, so we set html_email_template_name here
     path(
-        "accounts/password_reset/",
+        "account/password_reset/",
         PasswordResetView.as_view(
             email_template_name="registration/password_reset_email.txt",
             html_email_template_name="registration/password_reset_email.html",
@@ -34,10 +34,10 @@ urlpatterns = [
     ),
     # Override the login view with redirect behavior
     path(
-        "accounts/login/",
+        "account/login/",
         auth_views.LoginView.as_view(
             redirect_authenticated_user=True  # This is the key parameter
         )
     ),
-    path("accounts/", include("django.contrib.auth.urls")),
+    path("account/", include("django.contrib.auth.urls")),
 ]
