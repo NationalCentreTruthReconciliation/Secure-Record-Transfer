@@ -138,3 +138,17 @@ sphinx-build docs docs/_build
 The built documentation will be available in `docs/_build`. Open the `index.html` in your browser to view the docs.
 
 The Sphinx configuration can be found in `docs/conf.py`. The documentation is also built automatically by [Read The Docs](https://about.readthedocs.com/) based on the configuration in `.readthedocs.yaml` and is published [here](https://secure-record-transfer.readthedocs.io/en/latest/) when changes are made to the default branch.
+
+## Resetting the Database
+During development, you may need to reset the database to a clean state. You can do this with the following command:
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml exec app python manage.py reset
+
+# Using Podman:
+podman-compose -f compose.dev.yml exec app python manage.py reset
+```
+
+This will prompt you to confirm the deletion of all data in the database. Type "yes" to proceed. This command replaces
+the database with a fresh one and re-applies all migrations, so that initial data is available again.

@@ -16,7 +16,6 @@ ALLOWED_HOSTS = [
 
 # MySQL Database
 
-# Define the database file name as a setting
 DEV_DATABASE_NAME = config("DEV_DATABASE_NAME", default="development_database.sqlite3")
 DATABASES = {
     "default": {
