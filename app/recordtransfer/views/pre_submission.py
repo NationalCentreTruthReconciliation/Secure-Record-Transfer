@@ -725,6 +725,7 @@ class DeleteInProgressSubmission(DeleteView):
     success_url = reverse_lazy("recordtransfer:user_profile")
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")
+    http_method_names = ["get", "delete"]
 
     def get_queryset(self) -> QuerySet[InProgressSubmission]:
         """Filter submissions to only show the current user's."""
@@ -747,17 +748,21 @@ class DeleteInProgressSubmission(DeleteView):
             "DELETE_URL": reverse(
                 "recordtransfer:delete_in_progress",
                 kwargs={"uuid": self.get_object().uuid},
-            ),
-            "REDIRECT_URL": reverse("recordtransfer:user_profile"),
+            )
         }
         return context
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Override delete to add success message, and handle any errors."""
         try:
+            # Ensure the object belongs to the current user
+            self.get_object()
             response = super().delete(request, *args, **kwargs)
             messages.success(request, self.success_message)
             return response
+        except Http404:
+            # Return a 404 response if the object does not exist or does not belong to the user
+            raise
         except Exception as e:
             LOGGER.error("Error deleting submission: %s", str(e))
             messages.error(request, self.error_message)

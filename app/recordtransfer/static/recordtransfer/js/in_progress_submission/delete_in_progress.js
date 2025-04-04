@@ -16,14 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
             }
         })
-            .then(() => {
-                // Redirect after the DELETE request completes
-                window.location.href = context["REDIRECT_URL"];
-            })
-            .catch(error => {
-                console.error("Error during delete:", error);
-                // Redirect on error to avoid leaving user stranded
-                window.location.href = context["REDIRECT_URL"];
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
             });
     });
 });
