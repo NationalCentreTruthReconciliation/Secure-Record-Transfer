@@ -16,10 +16,12 @@ ALLOWED_HOSTS = [
 
 # MySQL Database
 
+# Define the database file name as a setting
+DEV_DATABASE_NAME = config("DEV_DATABASE_NAME", default="development_database.sqlite3")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "development_database.sqlite3"),
+        "NAME": os.path.join(BASE_DIR, str(DEV_DATABASE_NAME)),
     }
 }
 
