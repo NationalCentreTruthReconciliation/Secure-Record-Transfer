@@ -7,7 +7,7 @@
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_in_progress" }}
-    <script src="{% static 'in_progress_submission.bundle.js' %}"></script>
+    <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block content %}
     <div class="title-text">{% trans "Confirm In-Progress Submission Deletion" %}</div>
