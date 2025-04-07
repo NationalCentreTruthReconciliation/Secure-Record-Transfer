@@ -35,6 +35,14 @@ class Command(BaseCommand):
             )
             return
 
+        if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3':
+            self.stdout.write(
+                self.style.ERROR(
+                    "ERROR: 'reset' command only works with SQLite3 databases."
+                )
+            )
+            return
+
         verbosity = 1
         seed = options.get("seed", False)
 
