@@ -73,8 +73,11 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Database seeded successfully"))
 
             self.stdout.write(self.style.WARNING("Setting up uploaded files..."))
-            self.setup_uploaded_files()
-            self.stdout.write(self.style.SUCCESS("Uploaded files setup successfully"))
+            success = self.setup_uploaded_files()
+            if success:
+                self.stdout.write(self.style.SUCCESS("Uploaded files setup successfully"))
+            else:
+                self.stdout.write(self.style.ERROR("Failed to set up uploaded files"))
 
     def setup_uploaded_files(self) -> bool:
         """Copy the files specified in seed_data.json to the appropriate locations
@@ -128,7 +131,6 @@ class Command(BaseCommand):
 
         try:
             shutil.copy2(source_file, temp_target_file)
-
             shutil.copy2(source_file, perm_target_file)
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Error copying files: {e!s}"))
