@@ -82,6 +82,8 @@ class Command(BaseCommand):
     def setup_uploaded_files(self) -> bool:
         """Copy the files specified in seed_data.json to the appropriate locations
         for both temporary and permanent uploaded files.
+
+        Returns: True if successful, False otherwise.
         """
         seed_data_path = Path(settings.BASE_DIR) / "fixtures" / "seed_data.json"
 
@@ -92,48 +94,42 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Error loading seed data: {e!s}"))
             return False
 
-        temp_file_data = None
-        perm_file_data = None
+        # Find file entries
+        temp_file = next(
+            (i for i in seed_data if i.get("model") == "recordtransfer.tempuploadedfile"), None
+        )
+        perm_file = next(
+            (i for i in seed_data if i.get("model") == "recordtransfer.permuploadedfile"), None
+        )
 
-        for item in seed_data:
-            if item.get("model") == "recordtransfer.tempuploadedfile":
-                temp_file_data = item
-            elif item.get("model") == "recordtransfer.permuploadedfile":
-                perm_file_data = item
-
-        if not temp_file_data or not perm_file_data:
+        if not (temp_file and perm_file):
             self.stdout.write(self.style.ERROR("Could not find file data in seed file"))
             return False
 
-        temp_filename = temp_file_data["fields"]["name"]
-        temp_path = temp_file_data["fields"]["file_upload"]
-
-        perm_filename = perm_file_data["fields"]["name"]
-        perm_path = perm_file_data["fields"]["file_upload"]
-
-        temp_token = Path(temp_path).parts[0]
-        perm_token = Path(perm_path).parts[0]
-
-        source_file = Path(settings.BASE_DIR) / "fixtures" / temp_filename
-
+        # Extract file info
+        source_file = Path(settings.BASE_DIR) / "fixtures" / temp_file["fields"]["name"]
         if not source_file.exists():
             self.stdout.write(self.style.ERROR(f"Source file not found: {source_file}"))
             return False
 
-        temp_target_dir = Path(settings.TEMP_STORAGE_FOLDER) / temp_token
-        temp_target_file = temp_target_dir / temp_filename
+        # Setup target paths
+        temp_token = Path(temp_file["fields"]["file_upload"]).parts[0]
+        perm_token = Path(perm_file["fields"]["file_upload"]).parts[0]
 
-        perm_target_dir = Path(settings.UPLOAD_STORAGE_FOLDER) / perm_token
-        perm_target_file = perm_target_dir / perm_filename
+        temp_target = Path(settings.TEMP_STORAGE_FOLDER) / temp_token / temp_file["fields"]["name"]
+        perm_target = (
+            Path(settings.UPLOAD_STORAGE_FOLDER) / perm_token / perm_file["fields"]["name"]
+        )
 
-        os.makedirs(temp_target_dir, exist_ok=True)
-        os.makedirs(perm_target_dir, exist_ok=True)
+        # Ensure directories exist
+        os.makedirs(temp_target.parent, exist_ok=True)
+        os.makedirs(perm_target.parent, exist_ok=True)
 
+        # Copy files
         try:
-            shutil.copy2(source_file, temp_target_file)
-            shutil.copy2(source_file, perm_target_file)
+            shutil.copy2(source_file, temp_target)
+            shutil.copy2(source_file, perm_target)
+            return True
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Error copying files: {e!s}"))
             return False
-
-        return True
