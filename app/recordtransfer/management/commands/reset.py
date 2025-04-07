@@ -13,15 +13,23 @@ class Command(BaseCommand):
     help = """Resets the database by completely removing the development database file and
     recreating schema"""
 
+    def add_arguments(self, parser) -> None:
+        """Add arguments for the command."""
+        parser.add_argument(
+            "--seed", action="store_true", help="Create seed data after resetting the database"
+        )
+
     def handle(self, *args, **options) -> None:
-        # Prevent running in production environments
         if not settings.DEBUG:
             self.stdout.write(
-                self.style.ERROR("ERROR: 'reset' command not permitted in production environments.")
+                self.style.ERROR(
+                    "ERROR: 'reset' command not permitted in production environments."
+                )
             )
             return
 
-        verbosity = options.get("verbosity", 1)
+        verbosity = 1
+        create_seed = options.get("seed", False)
 
         self.stdout.write(
             self.style.WARNING("WARNING: This will delete ALL existing data in the database!")
@@ -50,3 +58,9 @@ class Command(BaseCommand):
             call_command("migrate", interactive=False, verbosity=verbosity)
 
         self.stdout.write(self.style.SUCCESS("Database has been completely reset"))
+
+        # Seed database if requested
+        if create_seed:
+            self.stdout.write(self.style.WARNING("Seeding database..."))
+            call_command("loaddata", "seed_data", verbosity=verbosity)
+            self.stdout.write(self.style.SUCCESS("Database seeded successfully"))
