@@ -150,5 +150,18 @@ docker compose -f compose.dev.yml exec app python manage.py reset
 podman-compose -f compose.dev.yml exec app python manage.py reset
 ```
 
-This will prompt you to confirm the deletion of all data in the database. Type "yes" to proceed. This command replaces
-the database with a fresh one and re-applies all migrations, so that initial data is available again.
+This will prompt you to confirm the deletion of all data in the database. Type "yes" to proceed.
+This command deletes the development, and re-applies all migrations on a fresh one.
+
+To also populate the database with test data and  populate corresponding uploaded files, add the
+`--seed` option to the command.
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml exec app python manage.py reset --seed
+
+# Using Podman:
+podman-compose -f compose.dev.yml exec app python manage.py reset --seed
+```
+
+An admin user will be created with the username `admin` and password `123`. 
