@@ -36,7 +36,7 @@ class Command(BaseCommand):
             return
 
         verbosity = 1
-        create_seed = options.get("seed", False)
+        seed = options.get("seed", False)
 
         self.stdout.write(
             self.style.WARNING("WARNING: This will delete ALL existing data in the database!")
@@ -67,7 +67,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Database has been completely reset"))
 
         # Seed database and populate data if requested
-        if create_seed:
+        if seed:
             self.stdout.write(self.style.WARNING("Seeding database..."))
             call_command("loaddata", "seed_data", verbosity=verbosity)
             self.stdout.write(self.style.SUCCESS("Database seeded successfully"))
