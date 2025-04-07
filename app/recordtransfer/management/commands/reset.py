@@ -24,6 +24,11 @@ class Command(BaseCommand):
             help="""Populate the database with seed data and required uploaded files after
             resetting it.""",
         )
+        parser.add_argument(
+            "--no-confirm",
+            action="store_true",
+            help="Skip confirmation prompt before resetting the database.",
+        )
 
     def handle(self, *args, **options) -> None:
         """Handle the command."""
@@ -45,14 +50,16 @@ class Command(BaseCommand):
 
         verbosity = 1
         seed = options.get("seed", False)
+        no_confirm = options.get("no_confirm", False)
 
-        self.stdout.write(
-            self.style.WARNING("WARNING: This will delete ALL existing data in the database!")
-        )
-        confirm = input("Are you sure you want to proceed? (y/N): ")
-        if confirm.lower() != "y":
-            self.stdout.write(self.style.NOTICE("Operation cancelled."))
-            return
+        if not no_confirm:
+            self.stdout.write(
+                self.style.WARNING("WARNING: This will delete ALL existing data in the database!")
+            )
+            confirm = input("Are you sure you want to proceed? (y/N): ")
+            if confirm.lower() != "y":
+                self.stdout.write(self.style.NOTICE("Operation cancelled."))
+                return
 
         # Remove development database file if it exists
         if hasattr(settings, "DEV_DATABASE_NAME"):
