@@ -90,6 +90,9 @@ module.exports = {
             ...glob.sync("./app/recordtransfer/static/" +
                 "recordtransfer/js/submission_group/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
+            ...glob.sync(
+                "./app/recordtransfer/static/recordtransfer/css/submission_group/*.css")
+                .map(file => "./" + path.relative(__dirname, file)),
         ],
         // Admin Site static assets
         admin_metadata: [
