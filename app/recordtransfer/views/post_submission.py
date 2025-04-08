@@ -154,7 +154,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_show_create.html"
+    template_name = "recordtransfer/submission_group_detail.html"
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
 
