@@ -1,5 +1,6 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
+import logging
 from typing import Any
 
 from caais.export import ExportVersion
@@ -7,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -16,6 +17,8 @@ from django.views.generic import CreateView, DetailView, UpdateView, View
 from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup
+
+LOGGER = logging.getLogger(__name__)
 
 
 class SubmissionDetail(UserPassesTestMixin, DetailView):
@@ -106,6 +109,20 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         }
         return context
 
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Handle DELETE request to delete the submission group."""
+        try:
+            group = self.get_object()
+            group.delete()
+            messages.success(request, gettext("Group deleted"))
+        except Exception as e:
+            messages.error(request, gettext("There was an error deleting the group"))
+            LOGGER.error(
+                "Error deleting submission group %s: %s", self.get_object().uuid, str(e)
+            )
+
+        return redirect("recordtransfer:user_profile")
+
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
         kwargs = super().get_form_kwargs()
@@ -129,6 +146,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
     def get_success_url(self) -> str:
         """Redirect back to the same page after updating the group."""
         return self.request.path
+
 
 class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     """Creates a new submission group."""
