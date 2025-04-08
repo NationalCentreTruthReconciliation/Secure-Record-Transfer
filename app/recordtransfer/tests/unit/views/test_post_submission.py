@@ -24,7 +24,7 @@ class TestSubmissionGroupCreateView(TestCase):
         """Test that an authenticated user can access the view."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_show_create.html")
+        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
@@ -51,7 +51,7 @@ class TestSubmissionGroupCreateView(TestCase):
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_show_create.html")
+        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("There was an error creating the group"))
 
@@ -109,7 +109,7 @@ class TestSubmissionGroupDetailView(TestCase):
         """Test that an authenticated user can access the view."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_show_create.html")
+        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
@@ -129,7 +129,7 @@ class TestSubmissionGroupDetailView(TestCase):
         self.client.login(username="staffuser", password="password")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_show_create.html")
+        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
 
     def test_valid_form_submission(self) -> None:
         """Test that a valid form submission updates the SubmissionGroup."""
@@ -154,7 +154,7 @@ class TestSubmissionGroupDetailView(TestCase):
         }
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_show_create.html")
+        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("There was an error updating the group"))
         self.group.refresh_from_db()

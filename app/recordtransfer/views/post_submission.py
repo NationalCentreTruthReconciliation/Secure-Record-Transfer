@@ -80,10 +80,11 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_show_create.html"
+    template_name = "recordtransfer/submission_group_detail.html"
     context_object_name = "group"
     success_message = gettext("Group updated")
     error_message = gettext("There was an error updating the group")
+    http_method_names = ["get", "post", "delete"]
 
     def get_object(self):
         return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
