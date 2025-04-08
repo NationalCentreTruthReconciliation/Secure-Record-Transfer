@@ -46,18 +46,18 @@
         "model": "recordtransfer.tempuploadedfile",
         "pk": 1,
         "fields": {
-            "name": "CAAIS_2019May15_EN.pdf",
+            "name": "nctr_logo.jpg",
             "session": 1,
-            "file_upload": "bcM3f0v891FQQER0jknL1cHzhBnGxkAP/CAAIS_2019May15_EN.pdf"
+            "file_upload": "bcM3f0v891FQQER0jknL1cHzhBnGxkAP/nctr_logo.jpg"
         }
     },
     {
         "model": "recordtransfer.permuploadedfile",
         "pk": 1,
         "fields": {
-            "name": "CAAIS_2019May15_EN.pdf",
+            "name": "nctr_logo.jpg",
             "session": 2,
-            "file_upload": "wRLsXLm9WAfZBbFXsi33cTroyrC0JXVV/CAAIS_2019May15_EN.pdf"
+            "file_upload": "wRLsXLm9WAfZBbFXsi33cTroyrC0JXVV/nctr_logo.jpg"
         }
     },
     {
