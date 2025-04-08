@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -107,6 +108,10 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         context["js_context"] = {
             "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
             "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+            "DELETE_URL": reverse(
+                "recordtransfer:submission_group_detail",
+                kwargs={"uuid": self.get_object().uuid},
+            ),
         }
         return context
 
@@ -118,9 +123,7 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
             messages.success(request, gettext("Group deleted"))
         except Exception as e:
             messages.error(request, gettext("There was an error deleting the group"))
-            LOGGER.error(
-                "Error deleting submission group %s: %s", self.get_object().uuid, str(e)
-            )
+            LOGGER.error("Error deleting submission group %s: %s", self.get_object().uuid, str(e))
 
         return redirect("recordtransfer:user_profile")
 
