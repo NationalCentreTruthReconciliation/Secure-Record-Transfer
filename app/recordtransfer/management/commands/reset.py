@@ -109,42 +109,43 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Error loading seed data: {e!s}"))
             return False
 
-        # Find file entries
-        temp_file = next(
-            (i for i in seed_data if i.get("model") == "recordtransfer.tempuploadedfile"), None
-        )
-        perm_file = next(
-            (i for i in seed_data if i.get("model") == "recordtransfer.permuploadedfile"), None
-        )
-
-        if not (temp_file and perm_file):
-            self.stdout.write(self.style.ERROR("Could not find file data in seed file"))
+        try:
+            # Find file models and create the files on the file system
+            for model in seed_data:
+                model_name = model["model"]
+                if model_name in (
+                    "recordtransfer.tempuploadedfile",
+                    "recordtransfer.permuploadedfile",
+                ):
+                    self.setup_uploaded_file(model)
+        except Exception:
             return False
+        return True
 
-        # Extract file info
-        source_file = Path(settings.BASE_DIR) / "fixtures" / temp_file["fields"]["name"]
+    def setup_uploaded_file(self, model: dict) -> None:
+        """Set up the uploaded file in the appropriate location based on the model type."""
+        source_file = Path(settings.BASE_DIR) / "fixtures" / model["fields"]["name"]
         if not source_file.exists():
             self.stdout.write(self.style.ERROR(f"Source file not found: {source_file}"))
-            return False
+            raise FileNotFoundError(
+                f"Source file not found: {source_file}"
+            )
 
-        # Setup target paths
-        temp_token = Path(temp_file["fields"]["file_upload"]).parts[0]
-        perm_token = Path(perm_file["fields"]["file_upload"]).parts[0]
-
-        temp_target = Path(settings.TEMP_STORAGE_FOLDER) / temp_token / temp_file["fields"]["name"]
-        perm_target = (
-            Path(settings.UPLOAD_STORAGE_FOLDER) / perm_token / perm_file["fields"]["name"]
+        # Setup target path
+        token = Path(model["fields"]["file_upload"]).parts[0]
+        storage_folder = (
+            settings.TEMP_STORAGE_FOLDER
+            if model["model"] == "recordtransfer.tempuploadedfile"
+            else settings.UPLOAD_STORAGE_FOLDER
         )
+        target = Path(storage_folder) / token / model["fields"]["name"]
 
         # Ensure directories exist
-        os.makedirs(temp_target.parent, exist_ok=True)
-        os.makedirs(perm_target.parent, exist_ok=True)
+        os.makedirs(target.parent, exist_ok=True)
 
-        # Copy files
+        # Copy file
         try:
-            shutil.copy2(source_file, temp_target)
-            shutil.copy2(source_file, perm_target)
-            return True
+            shutil.copy2(source_file, target)
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Error copying files: {e!s}"))
-            return False
+            self.stdout.write(self.style.ERROR(f"Error copying file: {e!s}"))
+            raise e
