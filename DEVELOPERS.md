@@ -164,4 +164,5 @@ docker compose -f compose.dev.yml exec app python manage.py reset --seed
 podman-compose -f compose.dev.yml exec app python manage.py reset --seed
 ```
 
-An admin user will be created with the username `admin` and password `123`. 
+An admin user will be created with the username `admin` and password `123`, , along with test
+submissions and a test submission group.
