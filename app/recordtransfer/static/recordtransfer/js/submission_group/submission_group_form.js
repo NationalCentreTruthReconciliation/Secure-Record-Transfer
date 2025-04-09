@@ -1,3 +1,5 @@
+import { setupConfirmModal } from "../confirm_modal/confirm_modal";
+
 document.addEventListener("DOMContentLoaded", function () {
     const contextElement = document.getElementById("py_context_submission_group");
 
@@ -35,6 +37,24 @@ document.addEventListener("DOMContentLoaded", function () {
     Array.from(inputFields).forEach(input => {
         input.addEventListener("input", checkForChanges);
     });
+
+    const deleteButton = document.getElementById("id_delete_group_button");
+    if (deleteButton) {
+        const handleDeleteConfirm = function() {
+            fetch(context["DELETE_URL"], {
+                method: "DELETE",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
+        };
+        
+        setupConfirmModal(deleteButton, handleDeleteConfirm);
+    }
 
     checkForChanges();
 });

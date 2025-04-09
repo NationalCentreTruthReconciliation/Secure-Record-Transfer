@@ -1,5 +1,6 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
+import logging
 from typing import Any
 
 from caais.export import ExportVersion
@@ -7,7 +8,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -16,6 +18,8 @@ from django.views.generic import CreateView, DetailView, UpdateView, View
 from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup
+
+LOGGER = logging.getLogger(__name__)
 
 
 class SubmissionDetail(UserPassesTestMixin, DetailView):
@@ -77,10 +81,11 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_show_create.html"
+    template_name = "recordtransfer/submission_group_detail.html"
     context_object_name = "group"
     success_message = gettext("Group updated")
     error_message = gettext("There was an error updating the group")
+    http_method_names = ["get", "post", "delete"]
 
     def get_object(self):
         return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
@@ -103,8 +108,24 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         context["js_context"] = {
             "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
             "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
+            "DELETE_URL": reverse(
+                "recordtransfer:submission_group_detail",
+                kwargs={"uuid": self.get_object().uuid},
+            ),
         }
         return context
+
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Handle DELETE request to delete the submission group."""
+        try:
+            group = self.get_object()
+            group.delete()
+            messages.success(request, gettext("Group deleted"))
+        except Exception as e:
+            messages.error(request, gettext("There was an error deleting the group"))
+            LOGGER.error("Error deleting submission group %s: %s", self.get_object().uuid, str(e))
+
+        return redirect("recordtransfer:user_profile")
 
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
@@ -130,12 +151,13 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         """Redirect back to the same page after updating the group."""
         return self.request.path
 
+
 class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     """Creates a new submission group."""
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_show_create.html"
+    template_name = "recordtransfer/submission_group_detail.html"
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
 

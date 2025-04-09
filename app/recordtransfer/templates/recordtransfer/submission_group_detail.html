@@ -8,6 +8,10 @@
     {{ js_context|json_script:"py_context_submission_group" }}
     <script src="{% static 'submission_group.bundle.js' %}"></script>
 {% endblock javascript %}
+{% block stylesheet %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'submission_group.css' %}">
+{% endblock stylesheet %}
 {% block title %}
     {% if IS_NEW %}
         {% trans "Create New Submission Group" %}
@@ -44,4 +48,5 @@
             </div>
         {% endif %}
     {% endif %}
+    {% include "includes/confirm_modal.html" with title=_("Are you sure you want to delete this submission group?") message=_("Submissions under this group will NOT be deleted. However, this group will be unassigned from all submissions and will no longer be available for use.") %}
 {% endblock content %}
