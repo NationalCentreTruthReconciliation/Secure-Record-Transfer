@@ -4,12 +4,9 @@ The developer documentation here assumes you are using [VSCode](https://code.vis
 
 ## Supported Operating Systems
 
-This application is primarily designed for UNIX-based operating systems (Linux, macOS). Some
-functionality may not work correctly on Windows.
+This application is primarily designed for UNIX-based operating systems (Linux, macOS). Some functionality may not work correctly on Windows.
 
-If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure
-compatibility. You can install Python on [WSL](https://code.visualstudio.com/docs/remote/wsl) and
-then develop within that Linux environment.
+If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure compatibility. You can install Python on [WSL](https://code.visualstudio.com/docs/remote/wsl) and then develop within that Linux environment.
 
 ## Contributions
 
