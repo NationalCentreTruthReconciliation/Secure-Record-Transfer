@@ -8,9 +8,8 @@ This application is primarily designed for UNIX-based operating systems (Linux, 
 functionality may not work correctly on Windows.
 
 If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure
-compatibility. You can
-[install Python on WSL](https://learn.microsoft.com/en-us/windows/python/web-frameworks) and then
-develop within that Linux environment.
+compatibility. You can install Python on [WSL](https://code.visualstudio.com/docs/remote/wsl) and
+then develop within that Linux environment.
 
 ## Contributions
 
