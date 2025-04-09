@@ -2,6 +2,12 @@
 
 The developer documentation here assumes you are using [VSCode](https://code.visualstudio.com/).
 
+## Supported Operating Systems
+
+This application is primarily designed for UNIX-based operating systems (Linux, macOS). Some functionality may not work correctly on Windows.
+
+If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure compatibility. You can install Python on [WSL](https://code.visualstudio.com/docs/remote/wsl) and then develop within that Linux environment.
+
 ## Contributions
 
 Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. You can skip the "Setup" section of the guide as this repository already includes the necessary VSCode settings in `.vscode/settings.json`.
