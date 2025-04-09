@@ -64,7 +64,41 @@ The logs can also be found easily in Podman Desktop by clicking on a specific co
 Debugging the Development Application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To debug the application, `view the setup in the DEVELOPERS.md file <https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer/blob/master/DEVELOPERS.md>`_.
+To debug the application, `view the setup in the DEVELOPERS.md file
+<https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer/blob/master/DEVELOPERS.md>`_.
+
+Resetting the Database
+^^^^^^^^^^^^^^^^^^^^^^
+
+During development, you may need to reset the database to a clean state. You can do this with the
+following command:
+
+.. code-block:: bash
+
+    # Using Docker:
+    docker compose -f compose.dev.yml exec app python manage.py reset
+
+    # Using Podman:
+    podman-compose -f compose.dev.yml exec app python manage.py reset
+
+
+This will prompt you to confirm the deletion of all data in the database. Type "y" to proceed.
+This command deletes the development database, and re-applies all migrations on a fresh one.
+
+To also populate the database with test data and populate corresponding uploaded files, add the
+``--seed`` option to the command.
+
+.. code-block:: bash
+
+    # Using Docker:
+    docker compose -f compose.dev.yml exec app python manage.py reset --seed
+
+    # Using Podman:
+    podman-compose -f compose.dev.yml exec app python manage.py reset --seed
+
+
+An admin user will be created with the username ``admin`` and password ``123``, along with test
+submissions and a test submission group.
 
 
 Production Application

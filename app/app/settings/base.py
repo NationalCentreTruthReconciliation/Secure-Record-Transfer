@@ -292,3 +292,7 @@ IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE = config(
     default="0 * * * *",
     cast=str,
 )
+
+FIXTURE_DIRS = [
+    os.path.join(BASE_DIR, "fixtures"),
+]

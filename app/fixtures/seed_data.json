@@ -1,0 +1,340 @@
+[
+    {
+        "model": "recordtransfer.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$600000$7uTvsF2GGr1jjOdpQXmVIn$9YLZlyuNnXE6Uw3sH5/bD8Ge69D/+Pt38k74F6CuqeY=",
+            "last_login": "2025-04-07T17:27:01.748Z",
+            "is_superuser": true,
+            "username": "admin",
+            "first_name": "",
+            "last_name": "",
+            "email": "admin@demo.com",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2025-04-07T17:26:52.748Z",
+            "gets_submission_email_updates": false,
+            "confirmed_email": false,
+            "gets_notification_emails": true,
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "recordtransfer.uploadsession",
+        "pk": 1,
+        "fields": {
+            "token": "bcM3f0v891FQQER0jknL1cHzhBnGxkAP",
+            "started_at": "2025-04-07T17:29:50.519Z",
+            "status": "UG",
+            "user": 1,
+            "last_upload_interaction_time": "2025-04-07T17:29:53.835Z"
+        }
+    },
+    {
+        "model": "recordtransfer.uploadsession",
+        "pk": 2,
+        "fields": {
+            "token": "wRLsXLm9WAfZBbFXsi33cTroyrC0JXVV",
+            "started_at": "2025-04-07T17:30:58.102Z",
+            "status": "SD",
+            "user": 1,
+            "last_upload_interaction_time": "2025-04-07T17:30:58.146Z"
+        }
+    },
+    {
+        "model": "recordtransfer.tempuploadedfile",
+        "pk": 1,
+        "fields": {
+            "name": "nctr_logo.jpg",
+            "session": 1,
+            "file_upload": "bcM3f0v891FQQER0jknL1cHzhBnGxkAP/nctr_logo.jpg"
+        }
+    },
+    {
+        "model": "recordtransfer.permuploadedfile",
+        "pk": 1,
+        "fields": {
+            "name": "nctr_logo.jpg",
+            "session": 2,
+            "file_upload": "wRLsXLm9WAfZBbFXsi33cTroyrC0JXVV/nctr_logo.jpg"
+        }
+    },
+    {
+        "model": "recordtransfer.submissiongroup",
+        "pk": 1,
+        "fields": {
+            "name": "TEST GROUP",
+            "description": "This is a test group description.",
+            "created_by": 1,
+            "uuid": "473f1d19-53fe-4cdf-9ead-a1d30fb1b5eb"
+        }
+    },
+    {
+        "model": "recordtransfer.submission",
+        "pk": 1,
+        "fields": {
+            "submission_date": "2025-04-07T17:31:04.827Z",
+            "user": 1,
+            "raw_form": "gASV0A0AAAAAAAB9lCiMEmFncmVlbWVudF9hY2NlcHRlZJSIjAxjb250YWN0X25hbWWUjAhKb2huIERvZZSMCWpvYl90aXRsZZSMAJSMDG9yZ2FuaXphdGlvbpRoBYwMcGhvbmVfbnVtYmVylIwRKzEgKDk5OSkgOTk5LTk5OTmUjAVlbWFpbJSMDmFkbWluQGRlbW8uY29tlIwOYWRkcmVzc19saW5lXzGUjAsxMjMgSG9tZSBTdJSMDmFkZHJlc3NfbGluZV8ylGgFjARjaXR5lIwIV2lubmlwZWeUjBFwcm92aW5jZV9vcl9zdGF0ZZSMAk1ClIwXb3RoZXJfcHJvdmluY2Vfb3Jfc3RhdGWUaAWMEnBvc3RhbF9vcl96aXBfY29kZZSMB1owWiAwWjCUjAdjb3VudHJ5lIwCQ0GUjBhlbnRlcl9tYW51YWxfc291cmNlX2luZm+UjAJub5SMC3NvdXJjZV9uYW1llGgDjAtzb3VyY2VfdHlwZZSMFWRqYW5nby5kYi5tb2RlbHMuYmFzZZSMDm1vZGVsX3VucGlja2xllJOUjAVjYWFpc5SMClNvdXJjZVR5cGWUhpSFlFKUfZQojAZfc3RhdGWUaBuMCk1vZGVsU3RhdGWUk5QpgZR9lCiMBmFkZGluZ5SJjAJkYpSMB2RlZmF1bHSUjAxmaWVsZHNfY2FjaGWUfZR1YowCaWSUSwKMBG5hbWWUjApJbmRpdmlkdWFslIwLZGVzY3JpcHRpb26UjBVBbiBpbmRpdmlkdWFsIHBlcnNvbi6UjA9fZGphbmdvX3ZlcnNpb26UjAY0LjIuMjCUdWKMEW90aGVyX3NvdXJjZV90eXBllGgFjAtzb3VyY2Vfcm9sZZRoHWgejApTb3VyY2VSb2xllIaUhZRSlH2UKGgkaCYpgZR9lChoKYloKmgraCx9lHViaC5LAmgvjAVEb25vcpRoMYwnVGhlIGVudGl0eSBpcyB0aGUgZG9ub3Igb2YgdGhlIHJlY29yZHMulGgzaDR1YowRb3RoZXJfc291cmNlX3JvbGWUaAWMC3NvdXJjZV9ub3RllGgFjB1wcmVsaW1pbmFyeV9jdXN0b2RpYWxfaGlzdG9yeZRoBYwPYWNjZXNzaW9uX3RpdGxllIwPVEVTVCBTVUJNSVNTSU9OlIwRZGF0ZV9vZl9tYXRlcmlhbHOUjBcyMDI1LTA0LTAxIC0gMjAyNS0wNC0wNpSME2RhdGVfaXNfYXBwcm94aW1hdGWUiYwUbGFuZ3VhZ2Vfb2ZfbWF0ZXJpYWyUjAdFbmdsaXNolIwdcHJlbGltaW5hcnlfc2NvcGVfYW5kX2NvbnRlbnSUjA5DQUFJUyBEb2N1bWVudJSMFGNvbmRpdGlvbl9hc3Nlc3NtZW50lGgFjA5mb3Jtc2V0LXJpZ2h0c5RdlH2UKIwLcmlnaHRzX3R5cGWUaB1oHowKUmlnaHRzVHlwZZSGlIWUUpR9lChoJGgmKYGUfZQoaCmJaCpoK2gsfZR1YmguSwZoL4wGQWNjZXNzlGgxjElBY2Nlc3MgdG8gbWF0ZXJpYWwgaXMgcmVzdHJpY3RlZCB0byBhIGNlcnRhaW4gZW50aXR5IG9yIGdyb3VwIG9mIGVudGl0aWVzlIwWc29ydF9vcmRlcl9vdGhlcl9maXJzdJSMBkFjY2Vzc5RoM2g0dWKMEW90aGVyX3JpZ2h0c190eXBllGgFjAxyaWdodHNfdmFsdWWUaAV1YYwYZm9ybXNldC1vdGhlcmlkZW50aWZpZXJzlF2UfZQojBVvdGhlcl9pZGVudGlmaWVyX3R5cGWUaAWMFm90aGVyX2lkZW50aWZpZXJfdmFsdWWUaAWMFW90aGVyX2lkZW50aWZpZXJfbm90ZZRoBXVhjApncm91cF91dWlklIwEdXVpZJSMBFVVSUSUk5QpgZR9lIwDaW50lIoQ67WxD9OhrZ7fTP5TGR0/R3NijBBzdWJtaXNzaW9uX2dyb3VwlGgdjA5yZWNvcmR0cmFuc2ZlcpSMD1N1Ym1pc3Npb25Hcm91cJSGlIWUUpR9lChoJGgmKYGUfZQoaCx9lGgpiWgqaCt1YmguSwFoL4wKVEVTVCBHUk9VUJRoMYwhVGhpcyBpcyBhIHRlc3QgZ3JvdXAgZGVzY3JpcHRpb24ulIwNY3JlYXRlZF9ieV9pZJRLAWhnaGkpgZR9lGhsihDrtbEP06Gtnt9M/lMZHT9Hc2JoM2g0dWKMDGdlbmVyYWxfbm90ZZRoBYwNc2Vzc2lvbl90b2tlbpSMIHdSTHNYTG05V0FmWkJiRlhzaTMzY1Ryb3lyQzBKWFZWlIwccXVhbnRpdHlfYW5kX3VuaXRfb2ZfbWVhc3VyZZSMJDEgRG9jdW1lbnQgZmlsZSwgdG90YWxsaW5nIDQ2NC44OCBLQpSMB2NhcHRjaGGUWKQGAAAwM0FGY1dlQTRNVmZSV1JiZnFVcmF5dFJLbzB2ZWpoTE9EOWE0b094VHZoRGpDdnBvMjU1SlBFbmdfa3RrQVNYejBJRDFNWHlPLVlWTGpqTUZlSzQtYUZmdXJ1RHBQelEwRXFYeEliS1kxeTB1eFRJbFRmUUNPc0NmdDgtbHp5cGRSRklmMkp4UUdoS1ZXTVBXTU4zTHIyYlh1V05uNjlZNkZOdDRNQnI5ZGt4NmtfZDFLZndyVDdvU05IM19neG1iWl9UR3lpRkdoNFRxRDRvRHVqck9Pbmd3eGxNczAyRUpZVmkwMFNhSjBrRWwxSnRhWlRGNFQyYTNLc1l2LW1QWmRqTmE4OHprSXZrdEdhRlpHLW5NSWc4Zkg5RDY5T3p6RnhzU3gyTFVaeS1HaU02bXQ1QUk4LW9lUWxjbEMwckdaWVBvaUx2OUtxNS1kVVdGeThlamJSRDNLekgyTVpGbG5NbUtWY0FDall5TFl0Q09YeDY2Tmx5eGh2QVhfa19yNl9PV1otSl9RdUpDVnpwWWlpYmM3aVNCeF9QU0FVWnoyZFVqUTlJRHhvUEpsc2ZEN284YVl5bkNsRkN3X01pX0d6VXJiZ1FBX2Y0Qzg0OTZETWhvMGZMREtleWtCUU9xZkY3VVppUkI3ZUxaU0wwS3hBOE1HYU5sNjRTSUdUdTI3TUk4cXoxb0ZSbzBsM1BrUGFoMHd4NnJFeU0xd2ZJY3FodE03SkpJb2RyMGo0d3pVM0k5cXdhTVZVV05iUmhHTHpObnplMlpPX1VUZzVGeUpRMlhGZ1k1Qm56ZTh6NkxFSndoTWlSUjdBZFlUTVZ3WmktY0RHU08yY3FxOE1XTWw5SkN5ZHlDem5faXR0Vl94S3oxd0lNTVVadWtva1d3NW16R242cC11eGprUTVQVXQ2TkVpLVNiREM0UWlZSHpxZWtuM3Izdk9md3M2Ry0wNHRCQWg4NlBmelBWSFBSMkhLdlhDNzI2UmFpdExGMExCUWJFYi1rUk42VTg0cnR4Z0NVMUd1ODlpRC1fX0p5TE04MDVwdllST05xMW11enhxX05MX1BEbkNyYjlfdUhQV3BUY19DYlB5bVJ4ajVDNTNpRElhVS00dGdmRDhQR2xSLVNGV0lnNFBfUVk0RnhFVjE1QmlMSDdCb0VWUC1MakRUYWdzWHRScklINUhBNTVyeTQ1dnlQSDZUTnREelNweWgxZmI4SFgxVzE5TzVQNUdKQjlIQWgybVM5OWhGOGdGUkxiQWw5dnZXQnVHT3l4dmVRZzU3MmF0Y01kVUo5MjlMalhLUFNtSVFXYnpLYnNGT1NSTVhXSDFlLU1oeE51UWotNTc3cE85cjhDUUhTVGpEUk1UVE5DOVJRblExY01vVEdEZjNxMkI0aGhFeFdBbWhLeS1ScWF3aUJCTVpnZElyNldqUnJELVdjbFRkaWNkQUgxTEJSUk1neWRXWFNRRy1JZ0diVmtTNzBNVGxZbTBsNTdXOXd4Zi1jVnQxMk5YaVpRZDVBbDNYVS1hQjlGUVMtV3JaaW1RTHQ5N2xLX0hzVDRCbEVzcFFwelFVQUZrb3JIcU5lU25odmNCLU1kNXRjYlA2Y3h5aDhGeDhWWFZSNkxyWW5iemtfZWZtNnhidkJuSlBDajNBRkNyMllrNkhSc0tPTE0wTTl2Rkk1eGxBZ0dtcGJRRk8tNmtydy1wamFGTkFOZnVoNlZZSmE3MEtPOENWemZMRFV4OU9Gd2tTLU5Rc3lTSmJOUEo0azhuT2t1dFRvU1AyaVk3NmhZVkszU3lZN1ExVmJYcS1fTE5Jai1iWEJ6LTFJenNJZGVXeWNwbWNqQmduM096UWdQczBnNkIxY040SUVxMUdwNkNscUFQcUo1dXBRdk1pYVlDZms0M0RpMEFKbDAzNkxWam40dzBoSWRCWEh0ZUM3NDc3U0R2bUlwb1laTTcwLVNEcGc3N002YU1CS3JfZG93TVRpN2loZW9DNjZUMHEybzF4YW9tNE44SXlRQlBxQ0ZBel84Q1AyNGxaR1hhdE53TURxUHh6NGVwaXFteDVRa2t4WGVNN2FQZFUwTlZMOXhZdllySkdLTU82SnYzWHYzczFvaXhpYlcyYnZtZGxaTThBNEpCTWxlY2FmaDhQeWpTbGEzd01GM3BiYUNkaDBlRVkxME92alY1bmlEMnE5cVh3R08tMkoxYmVOTDBjRzNmT0NXbXo1TmQxQ1BZMldoQ0dMNVRpamRTaGJzYklCelk3QZR1Lg==",
+            "metadata": 1,
+            "part_of_group": 1,
+            "upload_session": 2,
+            "uuid": "3ba5d574-9700-431a-ad21-44d561a6f0a8",
+            "bag_name": null
+        }
+    },
+    {
+        "model": "recordtransfer.inprogresssubmission",
+        "pk": 1,
+        "fields": {
+            "uuid": "c167ca93-1a40-4ab8-848f-a5061ed32491",
+            "user": 1,
+            "last_updated": "2025-04-07T17:28:37.832Z",
+            "current_step": "recorddescription",
+            "step_data": "gASVsgUAAAAAAAB9lCiMBHBhc3SUfZQojARzdGVwlIwRcmVjb3JkZGVzY3JpcHRpb26UjAlzdGVwX2RhdGGUfZQojAthY2NlcHRsZWdhbJR9lCiME2NzcmZtaWRkbGV3YXJldG9rZW6UXZSMQGZoYlVDZFBQRmRqTGoxbXhubUxQWmdKcnd2ZUxzSHBtTXJHcEdGTTF5RE8yeWhQTFJyWmlHdWpIcVFyUExMbUqUYYwjc3VibWlzc2lvbl9mb3JtX3dpemFyZC1jdXJyZW50X3N0ZXCUXZSMC2FjY2VwdGxlZ2FslGGMHmFjY2VwdGxlZ2FsLWFncmVlbWVudF9hY2NlcHRlZJRdlIwCb26UYXWMC2NvbnRhY3RpbmZvlH2UKGgJXZSMQDlReWNBbUVWVnE2RnNIUG80TkVMdXFPUUlDV0RCN2NDRzAzSEVPQjdPUUJXSFhpQ3lTU2ViRW82Q1g5SFViOVqUYWgMXZSMC2NvbnRhY3RpbmZvlGGMGGNvbnRhY3RpbmZvLWNvbnRhY3RfbmFtZZRdlIwISm9obiBEb2WUYYwVY29udGFjdGluZm8tam9iX3RpdGxllF2UjACUYYwYY29udGFjdGluZm8tb3JnYW5pemF0aW9ulF2UaB1hjBhjb250YWN0aW5mby1waG9uZV9udW1iZXKUXZSMESsxICg5OTkpIDk5OS05OTk5lGGMEWNvbnRhY3RpbmZvLWVtYWlslF2UjA5hZG1pbkBkZW1vLmNvbZRhjBpjb250YWN0aW5mby1hZGRyZXNzX2xpbmVfMZRdlIwLMTIzIEhvbWUgU3SUYYwaY29udGFjdGluZm8tYWRkcmVzc19saW5lXzKUXZRoHWGMEGNvbnRhY3RpbmZvLWNpdHmUXZSMCFdpbm5pcGVnlGGMHWNvbnRhY3RpbmZvLXByb3ZpbmNlX29yX3N0YXRllF2UjAJNQpRhjCNjb250YWN0aW5mby1vdGhlcl9wcm92aW5jZV9vcl9zdGF0ZZRdlGgdYYweY29udGFjdGluZm8tcG9zdGFsX29yX3ppcF9jb2RllF2UjAdaMFogMFowlGGME2NvbnRhY3RpbmZvLWNvdW50cnmUXZSMAkNBlGF1jApzb3VyY2VpbmZvlH2UKGgJXZSMQDh3cGZrTHJpZ0lEb2J3MkdTVDRkNTlYdFBVODkwZHZhRkdVS29kb3U5ODhGcU12VW1ZaUdNbnhKSmZsZGpoc3iUYWgMXZSMCnNvdXJjZWluZm+UYYwjc291cmNlaW5mby1lbnRlcl9tYW51YWxfc291cmNlX2luZm+UXZSMAm5vlGGMFnNvdXJjZWluZm8tc291cmNlX25hbWWUXZRoHWGMFnNvdXJjZWluZm8tc291cmNlX3R5cGWUXZRoHWGMHHNvdXJjZWluZm8tb3RoZXJfc291cmNlX3R5cGWUXZRoHWGMFnNvdXJjZWluZm8tc291cmNlX3JvbGWUXZRoHWGMHHNvdXJjZWluZm8tb3RoZXJfc291cmNlX3JvbGWUXZRoHWGMFnNvdXJjZWluZm8tc291cmNlX25vdGWUXZRoHWGMKHNvdXJjZWluZm8tcHJlbGltaW5hcnlfY3VzdG9kaWFsX2hpc3RvcnmUXZRoHWF1dYwKc3RlcF9maWxlc5R9lChoB32UaBJ9lGg5fZR1jApleHRyYV9kYXRhlH2UdYwHY3VycmVudJR9lCiMD2FjY2Vzc2lvbl90aXRsZZSMKU5PTi1FWFBJUkFCTEUgVEVTVCBJTi1QUk9HUkVTUyBTVUJNSVNTSU9OlIwRZGF0ZV9vZl9tYXRlcmlhbHOUaB2MFGxhbmd1YWdlX29mX21hdGVyaWFslGgdjB1wcmVsaW1pbmFyeV9zY29wZV9hbmRfY29udGVudJRoHYwUY29uZGl0aW9uX2Fzc2Vzc21lbnSUaB11dS4=",
+            "title": "NON-EXPIRABLE TEST IN-PROGRESS SUBMISSION",
+            "upload_session": null,
+            "reminder_email_sent": false
+        }
+    },
+    {
+        "model": "recordtransfer.inprogresssubmission",
+        "pk": 2,
+        "fields": {
+            "uuid": "9eabc6dd-03e5-44cc-9b93-d90f5f15e4a1",
+            "user": 1,
+            "last_updated": "2025-04-07T17:29:53.838Z",
+            "current_step": "uploadfiles",
+            "step_data": "gASVowoAAAAAAAB9lCiMBHBhc3SUfZQojARzdGVwlIwLdXBsb2FkZmlsZXOUjAlzdGVwX2RhdGGUfZQojAthY2NlcHRsZWdhbJR9lCiME2NzcmZtaWRkbGV3YXJldG9rZW6UXZSMQERra3ZZYUVvVDRvVTVSSWRTR01XeEExZTlRUWU2TXdaYXVQMDJDQkFNdVRiazdicm1MMHBlT0J1M2IzaXBRdG2UYYwjc3VibWlzc2lvbl9mb3JtX3dpemFyZC1jdXJyZW50X3N0ZXCUXZSMC2FjY2VwdGxlZ2FslGGMHmFjY2VwdGxlZ2FsLWFncmVlbWVudF9hY2NlcHRlZJRdlIwCb26UYXWMC2NvbnRhY3RpbmZvlH2UKGgJXZSMQHpXSE1pZ0lDc1JTWk5JV0JRMWVnaWFmV0lwRjBFalFHNjZjaG1JRk9saG5nMllwUGs2c0pab1BjQ0tTNFhuTjOUYWgMXZSMC2NvbnRhY3RpbmZvlGGMGGNvbnRhY3RpbmZvLWNvbnRhY3RfbmFtZZRdlIwISm9obiBEb2WUYYwVY29udGFjdGluZm8tam9iX3RpdGxllF2UjACUYYwYY29udGFjdGluZm8tb3JnYW5pemF0aW9ulF2UaB1hjBhjb250YWN0aW5mby1waG9uZV9udW1iZXKUXZSMESsxICg5OTkpIDk5OS05OTk5lGGMEWNvbnRhY3RpbmZvLWVtYWlslF2UjA5hZG1pbkBkZW1vLmNvbZRhjBpjb250YWN0aW5mby1hZGRyZXNzX2xpbmVfMZRdlIwLMTIzIEhvbWUgU3SUYYwaY29udGFjdGluZm8tYWRkcmVzc19saW5lXzKUXZRoHWGMEGNvbnRhY3RpbmZvLWNpdHmUXZSMCFdpbm5pcGVnlGGMHWNvbnRhY3RpbmZvLXByb3ZpbmNlX29yX3N0YXRllF2UjAJNQpRhjCNjb250YWN0aW5mby1vdGhlcl9wcm92aW5jZV9vcl9zdGF0ZZRdlGgdYYweY29udGFjdGluZm8tcG9zdGFsX29yX3ppcF9jb2RllF2UjAdaMFogMFowlGGME2NvbnRhY3RpbmZvLWNvdW50cnmUXZSMAkNBlGF1jApzb3VyY2VpbmZvlH2UKGgJXZSMQElHNnBYNWtqUEtsMldIVzREQWU1UTltVGpiNm5JejVpZlFCVTF4aHZJYVFqYlhwaTdGc3l4blc5ZHdqcjFEMkaUYWgMXZSMCnNvdXJjZWluZm+UYYwjc291cmNlaW5mby1lbnRlcl9tYW51YWxfc291cmNlX2luZm+UXZSMAm5vlGGMFnNvdXJjZWluZm8tc291cmNlX25hbWWUXZRoHWGMFnNvdXJjZWluZm8tc291cmNlX3R5cGWUXZRoHWGMHHNvdXJjZWluZm8tb3RoZXJfc291cmNlX3R5cGWUXZRoHWGMFnNvdXJjZWluZm8tc291cmNlX3JvbGWUXZRoHWGMHHNvdXJjZWluZm8tb3RoZXJfc291cmNlX3JvbGWUXZRoHWGMFnNvdXJjZWluZm8tc291cmNlX25vdGWUXZRoHWGMKHNvdXJjZWluZm8tcHJlbGltaW5hcnlfY3VzdG9kaWFsX2hpc3RvcnmUXZRoHWF1jBFyZWNvcmRkZXNjcmlwdGlvbpR9lChoCV2UjEBZMWtZU3dGRVpGUkdaMjRKZHpiWWJOTjUxTUNtdUNmUnZiUHRXWUNRUzVtWGVpeFhIRXByUzFubFY3UHFOR2NllGFoDF2UjBFyZWNvcmRkZXNjcmlwdGlvbpRhjCFyZWNvcmRkZXNjcmlwdGlvbi1hY2Nlc3Npb25fdGl0bGWUXZSMJUVYUElSQUJMRSBURVNUIElOLVBST0dSRVNTIFNVQk1JU1NJT06UYYwjcmVjb3JkZGVzY3JpcHRpb24tZGF0ZV9vZl9tYXRlcmlhbHOUXZSMFzIwMjUtMDQtMDEgLSAyMDI1LTA0LTA2lGGMJnJlY29yZGRlc2NyaXB0aW9uLWxhbmd1YWdlX29mX21hdGVyaWFslF2UjAdFbmdsaXNolGGML3JlY29yZGRlc2NyaXB0aW9uLXByZWxpbWluYXJ5X3Njb3BlX2FuZF9jb250ZW50lF2UjA5DQUFJUyBEb2N1bWVudJRhjCZyZWNvcmRkZXNjcmlwdGlvbi1jb25kaXRpb25fYXNzZXNzbWVudJRdlGgdYXWMBnJpZ2h0c5R9lChoCV2UjEBqTDNHTWlmeTduU0V6Smw2eDF1QTlTNG1yTVBndTdXRVFWeWJRS2NLME5uVk9aT2sxNkkzUTZFQ2w3MmtOYlQxlGFoDF2UjAZyaWdodHOUYYwScmlnaHRzLVRPVEFMX0ZPUk1TlF2UjAExlGGMFHJpZ2h0cy1JTklUSUFMX0ZPUk1TlF2UaGxhjBRyaWdodHMtTUlOX05VTV9GT1JNU5RdlIwBMJRhjBRyaWdodHMtTUFYX05VTV9GT1JNU5RdlIwEMTAwMJRhjBRyaWdodHMtMC1yaWdodHNfdHlwZZRdlIwBNpRhjBpyaWdodHMtMC1vdGhlcl9yaWdodHNfdHlwZZRdlGgdYYwVcmlnaHRzLTAtcmlnaHRzX3ZhbHVllF2UaB1hdYwQb3RoZXJpZGVudGlmaWVyc5R9lChoCV2UjEBMRUNuSkJyQ2V6SEhtVXhQd05hVEJZU3M3MHRRZHNyb2lPN1NOM29PN1pjWUJhMDMwU29taWNzSTFsR1V3d29MlGFoDF2UjBBvdGhlcmlkZW50aWZpZXJzlGGMHG90aGVyaWRlbnRpZmllcnMtVE9UQUxfRk9STVOUXZRobGGMHm90aGVyaWRlbnRpZmllcnMtSU5JVElBTF9GT1JNU5RdlGhsYYweb3RoZXJpZGVudGlmaWVycy1NSU5fTlVNX0ZPUk1TlF2UaHFhjB5vdGhlcmlkZW50aWZpZXJzLU1BWF9OVU1fRk9STVOUXZSMBDEwMDCUYYwob3RoZXJpZGVudGlmaWVycy0wLW90aGVyX2lkZW50aWZpZXJfdHlwZZRdlGgdYYwpb3RoZXJpZGVudGlmaWVycy0wLW90aGVyX2lkZW50aWZpZXJfdmFsdWWUXZRoHWGMKG90aGVyaWRlbnRpZmllcnMtMC1vdGhlcl9pZGVudGlmaWVyX25vdGWUXZRoHWF1jA9ncm91cHN1Ym1pc3Npb26UfZQoaAldlIxAMGQ2ZXJHN0JwNlljSGZzY0QwU1ZBT1BhV0lwdDE0OVl4bkJKdjg0Tml3dHRXdlZxNzU2b2gycHFRM0N4azg2bJRhaAxdlIwPZ3JvdXBzdWJtaXNzaW9ulGGMGmdyb3Vwc3VibWlzc2lvbi1ncm91cF91dWlklF2UjCQ0NzNmMWQxOS01M2ZlLTRjZGYtOWVhZC1hMWQzMGZiMWI1ZWKUYXV1jApzdGVwX2ZpbGVzlH2UKGgHfZRoEn2UaDl9lGhQfZRoZH2UaHx9lGiRfZR1jApleHRyYV9kYXRhlH2UdYwHY3VycmVudJR9lCiMDGdlbmVyYWxfbm90ZZRoHYwNc2Vzc2lvbl90b2tlbpSMIGJjTTNmMHY4OTFGUVFFUjBqa25MMWNIemhCbkd4a0FQlHV1Lg==",
+            "title": "EXPIRABLE TEST IN-PROGRESS SUBMISSION",
+            "upload_session": 1,
+            "reminder_email_sent": false
+        }
+    },
+    {
+        "model": "caais.metadata",
+        "pk": 1,
+        "fields": {
+            "repository": "",
+            "accession_title": "TEST SUBMISSION",
+            "acquisition_method": null,
+            "status": null,
+            "date_of_materials": "2025-04-01 - 2025-04-06",
+            "date_is_approximate": false,
+            "rules_or_conventions": "",
+            "language_of_accession_record": ""
+        }
+    },
+    {
+        "model": "caais.sourcetype",
+        "pk": 1,
+        "fields": {
+            "name": "Other",
+            "description": "Placeholder right to allow user to specify unique source type"
+        }
+    },
+    {
+        "model": "caais.sourcetype",
+        "pk": 2,
+        "fields": {
+            "name": "Individual",
+            "description": "An individual person."
+        }
+    },
+    {
+        "model": "caais.sourcerole",
+        "pk": 1,
+        "fields": {
+            "name": "Other",
+            "description": "Placeholder right to allow user to specify unique source role"
+        }
+    },
+    {
+        "model": "caais.sourcerole",
+        "pk": 2,
+        "fields": {
+            "name": "Donor",
+            "description": "The entity is the donor of the records."
+        }
+    },
+    {
+        "model": "caais.sourceofmaterial",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "source_type": 2,
+            "source_name": "John Doe",
+            "contact_name": "John Doe",
+            "job_title": "",
+            "organization": "",
+            "phone_number": "+1 (999) 999-9999",
+            "email_address": "admin@demo.com",
+            "address_line_1": "123 Home St",
+            "address_line_2": "",
+            "city": "Winnipeg",
+            "region": "MB",
+            "postal_or_zip_code": "Z0Z 0Z0",
+            "country": "CA",
+            "source_role": 2,
+            "source_note": "",
+            "source_confidentiality": null
+        }
+    },
+    {
+        "model": "caais.extenttype",
+        "pk": 1,
+        "fields": {
+            "name": "Extent received",
+            "description": "Extent of material as it was received"
+        }
+    },
+    {
+        "model": "caais.extenttype",
+        "pk": 2,
+        "fields": {
+            "name": "Extent retained",
+            "description": "Extent of retained material"
+        }
+    },
+    {
+        "model": "caais.extenttype",
+        "pk": 3,
+        "fields": {
+            "name": "Extent removed",
+            "description": "Extent of removed material"
+        }
+    },
+    {
+        "model": "caais.extentstatement",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "extent_type": null,
+            "quantity_and_unit_of_measure": "1 Document file, totalling 464.88 KB",
+            "content_type": null,
+            "carrier_type": null,
+            "extent_note": ""
+        }
+    },
+    {
+        "model": "caais.preliminaryscopeandcontent",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "preliminary_scope_and_content": "CAAIS Document"
+        }
+    },
+    {
+        "model": "caais.languageofmaterial",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "language_of_material": "English"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 1,
+        "fields": {
+            "name": "Other",
+            "description": "A type of rights not listed elsewhere"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 2,
+        "fields": {
+            "name": "Unknown",
+            "description": "Use when it is not known what type of rights pertain to the material"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 3,
+        "fields": {
+            "name": "Cultural Rights",
+            "description": "Accss to material is limited according to cultural protocols"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 4,
+        "fields": {
+            "name": "Statute",
+            "description": "Access to material is limited according to law or legislation"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 5,
+        "fields": {
+            "name": "License",
+            "description": "Access to material is limited by a licensing agreement"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 6,
+        "fields": {
+            "name": "Access",
+            "description": "Access to material is restricted to a certain entity or group of entities"
+        }
+    },
+    {
+        "model": "caais.rightstype",
+        "pk": 7,
+        "fields": {
+            "name": "Copyright",
+            "description": "Access to material is based on fair dealing OR material is in the public domain"
+        }
+    },
+    {
+        "model": "caais.rights",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "rights_type": 6,
+            "rights_value": "",
+            "rights_note": ""
+        }
+    },
+    {
+        "model": "caais.eventtype",
+        "pk": 1,
+        "fields": {
+            "name": "Transfer Submitted",
+            "description": ""
+        }
+    },
+    {
+        "model": "caais.event",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "event_type": 1,
+            "event_date": "2025-04-07T17:31:04.867Z",
+            "event_agent": "",
+            "event_note": ""
+        }
+    },
+    {
+        "model": "caais.creationorrevisiontype",
+        "pk": 1,
+        "fields": {
+            "name": "Creation",
+            "description": ""
+        }
+    },
+    {
+        "model": "caais.dateofcreationorrevision",
+        "pk": 1,
+        "fields": {
+            "metadata": 1,
+            "creation_or_revision_type": 1,
+            "creation_or_revision_date": "2025-04-07T17:31:04.873Z",
+            "creation_or_revision_agent": "",
+            "creation_or_revision_note": ""
+        }
+    }
+]
