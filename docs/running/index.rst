@@ -82,7 +82,7 @@ following command:
     podman-compose -f compose.dev.yml exec app python manage.py reset
 
 
-This will prompt you to confirm the deletion of all data in the database. Type "yes" to proceed.
+This will prompt you to confirm the deletion of all data in the database. Type "y" to proceed.
 This command deletes the development database, and re-applies all migrations on a fresh one.
 
 To also populate the database with test data and populate corresponding uploaded files, add the
