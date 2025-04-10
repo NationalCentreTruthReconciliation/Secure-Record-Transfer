@@ -47,45 +47,32 @@ podman-compose -f compose.dev.yml exec app npm run watch
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
-## Virtual Environment and Poetry Setup
+## Local Python Environment Stup
 
-Python dependencies are managed with [Poetry](https://python-poetry.org/). To install Poetry and create a virtual environment with the minimally necessary packages, follow these instructions:
-
-First, install `pipx` via the [official pipx installation instructions](https://pipx.pypa.io/stable/installation/).
-
-After installing `pipx`, install [Poetry](https://python-poetry.org/):
+Python dependencies are managed with [Poetry](https://python-poetry.org/). `poetry` can be installed on your local machine with the [offical installer](https://python-poetry.org/docs/#installing-with-the-official-installer). Install version `1.8.5` with the following command:
 
 ```shell
-pipx install poetry
+curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
 ```
 
 Next, create and activate a virtual environment from the root of the repository:
 
 ```shell
-# If on Windows:
-python -m venv env
-.\env\Scripts\Activate.ps1
-
-# If on MacOS or Linux
 python3 -m venv env
 source env/bin/activate
 ```
 
+When VSCode prompts if you want to select the new environment for this workspace folder, select **Yes**.
+
 Finally, install the dependencies with `poetry`:
-
-```shell
-poetry install
-```
-
-## Running Tests
-
-Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
-
-Install the `dev` dependencies with Poetry:
 
 ```shell
 poetry install -E dev
 ```
+
+## Running Tests
+
+Ensure you follow the instructions in the [Local Python Environment Setup](#local-python-environment-setup) section before continuing.
 
 The tests can be run in a few different ways:
 
@@ -127,13 +114,7 @@ pytest -k "e2e"
 
 The documentation for this repository is built with [Sphinx](https://sphinx-doc.org).
 
-Ensure you follow the instructions in the [Virtual Environment and Poetry Setup](#virtual-environment-and-poetry-setup) section before continuing.
-
-Install the `dev` dependencies with Poetry:
-
-```shell
-poetry install -E dev
-```
+Ensure you follow the instructions in the [Local Python Environment Setup](#local-python-environment-setup) section before continuing.
 
 To build the docs, run:
 
