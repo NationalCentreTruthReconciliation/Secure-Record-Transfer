@@ -47,7 +47,7 @@ podman-compose -f compose.dev.yml exec app npm run watch
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
-## Local Python Environment Stup
+## Local Python Environment Setup
 
 Python dependencies are managed with [Poetry](https://python-poetry.org/). `poetry` can be installed on your local machine with the [offical installer](https://python-poetry.org/docs/#installing-with-the-official-installer). Install version `1.8.5` with the following command:
 
