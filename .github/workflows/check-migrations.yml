@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Activate Poetry environment
+        run: poetry shell
+
       - name: Check for unmigrated changes
         run: |
           python app/manage.py makemigrations --check
