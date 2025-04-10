@@ -28,4 +28,4 @@ jobs:
 
       - name: Check for unmigrated changes
         run: |
-          python manage.py makemigrations --check
+          django-admin manage.py makemigrations --check
