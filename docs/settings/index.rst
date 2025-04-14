@@ -65,7 +65,7 @@ FILE_UPLOAD_ENABLED
 USE_DATE_WIDGETS
 ^^^^^^^^^^^^^^^^
 
-  *Use javascript date widgets*
+  *Use JavaScript date widgets*
 
   .. table::
 
@@ -75,8 +75,8 @@ USE_DATE_WIDGETS
       True          bool
       ============  =========
 
-  By default you must enter full dates in the format YYYY-MM-DD for records start and end dates.
-  Setting this to False allows users to enter free text for the start and end date fields.
+    If set to True, a date picker widget is used for date fields. If set to False, input text
+    fields with an input mask are used instead.
 
   **.env Example:**
 
