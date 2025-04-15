@@ -6,21 +6,42 @@ The developer documentation here assumes you are using [VSCode](https://code.vis
 
 This application is primarily designed for UNIX-based operating systems (Linux, macOS). Some functionality may not work correctly on Windows.
 
-If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure compatibility. You can install Python on [WSL](https://code.visualstudio.com/docs/remote/wsl) and then develop within that Linux environment.
+If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure compatibility.
+
+## Required Tools
+
+To work on this application, you'll need the following tools:
+
+- **Docker** ([Install Docker](https://docs.docker.com/get-docker/)) or **Podman** ([Install Podman](https://podman.io/getting-started/installation)): For containerized development environment
+- **Python 3.9+** ([Download Python](https://www.python.org/downloads/)): If developing on Windows, install Python on [WSL](https://code.visualstudio.com/docs/remote/wsl) instead
+- **Node 22+** ([Download Node.js](https://nodejs.org/en/download/)): For JavaScript dependency management and builds
+- **Poetry 1.8.5** ([Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)): For Python dependency management. Install with:
+  ```shell
+  curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
+  ```
+- **VSCode** ([Download VSCode](https://code.visualstudio.com/download)): Recommended IDE for development
+- **VSCode Extensions**:
+  - [Python](https://marketplace.visualstudio.com/items/?itemName=ms-python.python): Python language support and debugging
+  - [Ruff](https://marketplace.visualstudio.com/items/?itemName=charliermarsh.ruff): Python linting and formatting
+  - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Linting and formatting JS files
+  - [Even Better TOML](https://marketplace.visualstudio.com/items/?itemName=tamasfe.even-better-toml): Formatting TOML files
 
 ## Contributions
 
 Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. You can skip the "Setup" section of the guide as this repository already includes the necessary VSCode settings in `.vscode/settings.json`.
 
-## Linting + Formatting
+## JavaScript Development
 
-Install the [ESLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
-
-Then, install Node dependencies for development:
+For JavaScript development, you need to install Node dependencies to gain access to the source code, build tools, and linting/formatting:
 
 ```shell
 npm install --include=dev
 ```
+
+You can then use the provided npm scripts for various tasks:
+- `npm run build` - Build JavaScript files for production
+- `npm run watch` - Rebuild JavaScript files whenever they change (see [Re-build JS as Changes are Made](#re-build-js-as-changes-are-made))
+- `npm run lint` - Run ESLint to check JavaScript files
 
 ## Debugging the Application
 
@@ -49,13 +70,7 @@ This will re-build the bundled JS files any time you save a change to a `.js` fi
 
 ## Local Python Environment Setup
 
-Python dependencies are managed with [Poetry](https://python-poetry.org/). `poetry` can be installed on your local machine with the [offical installer](https://python-poetry.org/docs/#installing-with-the-official-installer). Install version `1.8.5` with the following command:
-
-```shell
-curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
-```
-
-Next, create and activate a virtual environment from the root of the repository:
+After installing Poetry as mentioned in the [Required Tools](#required-tools) section, create and activate a virtual environment from the root of the repository:
 
 ```shell
 python3 -m venv env
