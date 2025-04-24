@@ -5,10 +5,10 @@
     <div class="footer-container">
         <div class="footer-column footer-logo">
             <div class="logo-container">
-                <img src="{% static 'logo-white.webp' %}" alt="{% trans 'white NCTR logo' %}" class="footer-logo-img">
+                <img src="{% static 'logo-white.webp' %}" alt="{% trans 'white NCTR logo' %}" class="logo nctr-logo-img">
             </div>
             <div class="unesco-logo-container">
-                <img src="{% static 'unesco.webp' %}" alt="{% trans 'UNESCO and NCTR logo' %}" class="unesco-logo-img">
+                <img src="{% static 'unesco.webp' %}" alt="{% trans 'UNESCO and NCTR logo' %}" class="logo unesco-logo-img">
             </div>
         </div>
 
@@ -47,12 +47,17 @@
         </div>
 
         <div class="footer-column footer-social">
-            <h3>Connect with us</h3>
-            <div class="social-icons">
-                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+            <div class="social-content">
+                <h3 class=>Connect with us</h3>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="hidden-unesco-logo-container">
+                <img src="{% static 'unesco.webp' %}" alt="{% trans 'UNESCO and NCTR logo' %}" class="logo unesco-logo-img">
             </div>
         </div>
     </div>

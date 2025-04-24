@@ -10,7 +10,8 @@
     flex-wrap: wrap;
     max-width: 1600px;
     margin: 0 auto;
-    gap: 40px;
+    column-gap: 40px;
+    row-gap: 20px;
 }
 
 .footer-column {
@@ -19,29 +20,18 @@
     width: calc(25% - 30px);
 }
 
+/* Logo styling */
 .footer-logo {
     display: flex;
     flex-direction: column;
 }
 
-/* Logo styling */
-.footer-logo-img {
+.logo {
     max-width: 100%;
-    height: auto;
 }
 
-.logo-container {
-    margin-bottom: 20px;
-}
-
-.unesco-logo-container {
-    display: flex;
-    align-items: center;
-}
-
-.unesco-logo-img {
-    max-width: 100%;
-    height: auto;
+.hidden-unesco-logo-container {
+    display: none;
 }
 
 /* Headings */
@@ -132,7 +122,6 @@
 
     .footer-logo {
         order: 3;
-        flex-direction: row;
     }
 
     .footer-more {
@@ -144,18 +133,31 @@
     }
 
     .footer-social {
+        order: 4;
+    }
+    .unesco-logo-container,
+    .social-content {
         display: none;
     }
 
-    .hidden-social-content {
+    .hidden-social-content,
+    .hidden-unesco-logo-container {
         display: block;
+    }
+
+    .logo {
+        max-width: 70%;
     }
 }
 
 /* Media query for small screens (one column) */
-@media (max-width: 400px) {
+@media (max-width: 800px) {
     .footer-column {
         width: 100%;
+    }
+
+    .footer-container {
+        row-gap: 0;
     }
 
     .footer-logo {
