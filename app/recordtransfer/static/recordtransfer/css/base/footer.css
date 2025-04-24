@@ -24,10 +24,13 @@
 .footer-logo {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
 .logo {
     max-width: 100%;
+    user-select: none;
+    pointer-events: none;
 }
 
 .hidden-unesco-logo-container {
@@ -38,7 +41,7 @@
 .footer h3 {
     margin-top: 0;
     margin-bottom: 20px;
-    font-size: 1.4em;
+    font-size: large;
     font-weight: 600;
 }
 
@@ -93,7 +96,7 @@
 }
 
 .social-icon {
-    font-size: 35px !important;
+    font-size: 35px;
 }
 
 .hidden-social-content {
@@ -149,6 +152,10 @@
 
     .logo {
         max-width: 70%;
+    }
+
+    .social-icon {
+        font-size: 35px !important;
     }
 }
 
@@ -214,6 +221,6 @@
     }
 
     .social-icon {
-        font-size: 25px;
+        font-size: 30px !important;
     }
 }
