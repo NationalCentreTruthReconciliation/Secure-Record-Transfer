@@ -104,7 +104,7 @@
 /* Footer bottom */
 .footer-bottom {
     text-align: left;
-    font-size: 10px;
+    font-size: 12px;
     max-width: 1600px;
     margin: 0 auto;
     width: 100%;
@@ -135,6 +135,7 @@
     .footer-social {
         order: 4;
     }
+
     .unesco-logo-container,
     .social-content {
         display: none;
@@ -161,7 +162,14 @@
     }
 
     .footer-logo {
-        order: 4;
+        order: 3;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .logo {
+        max-width: 100%;
     }
 
     .footer-more {
@@ -173,7 +181,7 @@
     }
 
     .footer-social {
-        order: 3;
+        order: 4;
     }
 
     .social-icons {
@@ -183,5 +191,28 @@
     .footer,
     .footer-bottom {
         text-align: center;
+    }
+
+    .unesco-logo-container,
+    .social-content {
+        display: block;
+    }
+
+    .hidden-social-content,
+    .hidden-unesco-logo-container,
+    .social-header {
+        display: none;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        width: 46%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .social-icon {
+        font-size: 25px;
     }
 }
