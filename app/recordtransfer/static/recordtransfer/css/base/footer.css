@@ -118,6 +118,7 @@
 @media (max-width: 1200px) {
     .footer-column {
         width: calc(50% - 30px);
+        margin-bottom: 10px;
     }
 
     .footer-logo {
