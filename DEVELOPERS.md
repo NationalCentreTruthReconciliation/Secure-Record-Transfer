@@ -10,12 +10,14 @@ If you're developing on Windows, we recommend using Windows Subsystem for Linux 
 
 ## Required Tools
 
-This section outlines the tools you need to install for development. The instructions are organized for both Mac/Linux and Windows users. For all platforms, we use VSCode as the IDE.
+This section outlines the tools you need to install for development.
 
 ### All Platforms
-- **VSCode** ([Download VSCode](https://code.visualstudio.com/)): Our recommended IDE for development
 
-When opening this repository in VSCode, you'll be prompted to install recommended extensions specified in `.vscode/extensions.json`. These include:
+#### VSCode + Extensions
+First, install **VSCode** ([Download VSCode](https://code.visualstudio.com/)), our recommended IDE for development.
+
+Open this repository in VSCode. You'll be prompted to install recommended extensions specified in `.vscode/extensions.json`. Click on "Install All" to install them. These include:
 
 - [Python](https://marketplace.visualstudio.com/items/?itemName=ms-python.python): Python language support and debugging
 - [Ruff](https://marketplace.visualstudio.com/items/?itemName=charliermarsh.ruff): Python linting and formatting
@@ -27,11 +29,18 @@ If you're not automatically prompted, you can install recommended extensions man
 2. Typing "@recommended" in the search bar
 3. Installing each listed extension
 
+#### Docker Desktop / Podman Desktop
+You'll need either **Docker Desktop** ([Install Docker Desktop](https://docs.docker.com/get-docker/)) or **Podman Desktop** ([Install Podman Desktop](https://podman.io/getting-started/installation)) for your platform to run the app in a containerized development environment.
+
+If using Podman Desktop, you'll also need to install [Podman Compose](https://github.com/containers/podman-compose) to be able to run Docker Compose files with Podman. To install Podman Compose, run the following command:
+
+```shell
+pip3 install podman-compose
+```
+> **Note:** If you are developing on Windows, make sure you run this command in WSL, not directly on Windows.
+
 ### Developing on Mac/Linux
-
 If developing on Mac or Linux, you'll need the following tools:
-
-- **Docker** ([Install Docker](https://docs.docker.com/get-docker/)) or **Podman** ([Install Podman](https://podman.io/getting-started/installation)): For containerized development environment
 - **Python 3.9+** ([Download Python](https://www.python.org/downloads/))
 - **Node 22+** ([Download Node.js](https://nodejs.org/en/download/)): For JavaScript dependency management and builds
 - **Poetry 1.8.5** ([Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)): For Python dependency management. Install with:
@@ -40,12 +49,8 @@ If developing on Mac or Linux, you'll need the following tools:
   ```
 
 ### Developing on Windows
-
-For Windows development, we recommend using Windows Subsystem for Linux (WSL):
-
 1. **Install WSL** ([Microsoft WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install))
-2. **Install Docker Desktop for Windows** with WSL 2 backend ([Docker WSL Guide](https://docs.docker.com/desktop/windows/wsl/))
-3. **Install Python 3.9+, Node 22, and Poetry 1.8.5 within WSL**:
+2. **Install Python 3.9+, Node 22, and Poetry 1.8.5 within WSL**:
   ```shell
   # In your WSL terminal:
   sudo apt update
@@ -57,10 +62,10 @@ For Windows development, we recommend using Windows Subsystem for Linux (WSL):
   # Install Node
   
   # Install Poetry
-  curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
   ```
-5. **Install VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
-6. **Open the project in VSCode from WSL**: Use "Remote-WSL: Open Folder in WSL" command
+3. **Configure Docker Desktop with WSL 2**: Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker.
+4. **Install VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
+5. **Open the project in VSCode from WSL**: Use "Remote-WSL: Open Folder in WSL" command
 
 ## Contributions
 
