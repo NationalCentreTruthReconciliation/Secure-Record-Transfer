@@ -1,6 +1,6 @@
 # For Developers
 
-The developer documentation here assumes you are using [VSCode](https://code.visualstudio.com/).
+This page contains information relevant to developers working on this application.
 
 ## Supported Operating Systems
 
