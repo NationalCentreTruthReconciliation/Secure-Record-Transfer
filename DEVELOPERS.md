@@ -6,51 +6,41 @@ The developer documentation here assumes you are using [VSCode](https://code.vis
 
 This application is primarily designed for UNIX-based operating systems (Linux, macOS). Some functionality may not work correctly on Windows.
 
-If you're developing on Windows, we recommend using Windows Subsystem for Linux (WSL) to ensure compatibility.
+If you're developing on Windows, we strongly recommend using Windows Subsystem for Linux (WSL) to ensure compatibility.
 
-## Required Tools
+## Setting up Your Development Environment
 
-This section outlines the tools you need to install for development.
+This section outlines the tools you need to install and the steps you need to take to prepare your machine for development.
 
 ### All Platforms
 
-#### VSCode + Extensions
-First, install **VSCode** ([Download VSCode](https://code.visualstudio.com/)), our recommended IDE for development.
+These instructions apply to all operating systems. First, install the following tools:
 
-Open this repository in VSCode. You'll be prompted to install recommended extensions specified in `.vscode/extensions.json`. Click on "Install All" to install them. These include:
+- **VSCode** is our recommended IDE for development ([Download VSCode](https://code.visualstudio.com/)).
+- **Docker Desktop** or **Podman Desktop** is needed to run the containerized development environment ([Install Docker Desktop](https://docs.docker.com/get-docker/)) / ([Install Podman Desktop](https://podman.io/getting-started/installation)).
+  - If you have no preference over either tool, use Docker.
 
-- [Python](https://marketplace.visualstudio.com/items/?itemName=ms-python.python): Python language support and debugging
-- [Ruff](https://marketplace.visualstudio.com/items/?itemName=charliermarsh.ruff): Python linting and formatting
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): JavaScript linting and formatting
-- [Even Better TOML](https://marketplace.visualstudio.com/items/?itemName=tamasfe.even-better-toml): TOML file formatting
+### Mac/Linux-Specific Instructions
 
-If you're not automatically prompted, you can install recommended extensions manually by:
-1. Opening the Extensions view in VSCode (`Ctrl+Shift+X` or `Cmd+Shift+X`)
-2. Typing "@recommended" in the search bar
-3. Installing each listed extension
-
-#### Docker Desktop / Podman Desktop
-You'll need either **Docker Desktop** ([Install Docker Desktop](https://docs.docker.com/get-docker/)) or **Podman Desktop** ([Install Podman Desktop](https://podman.io/getting-started/installation)) for your platform to run the app in a containerized development environment.
-
-If using Podman Desktop, you'll also need to install [Podman Compose](https://github.com/containers/podman-compose) to be able to run Docker Compose files with Podman. To install Podman Compose, run the following command:
-
-```shell
-pip3 install podman-compose
-```
-> **Note:** If you are developing on Windows, make sure you run this command in WSL, not directly on Windows.
-
-### Developing on Mac/Linux
 If developing on Mac or Linux, you'll need the following tools:
-- **Python 3.9+** ([Download Python](https://www.python.org/downloads/))
-- **Node 22+** ([Download Node.js](https://nodejs.org/en/download/)): For JavaScript dependency management and builds
-- **Poetry 1.8.5** ([Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)): For Python dependency management. Install with:
+
+1. **Python 3.9+** ([Download Python](https://www.python.org/downloads/))
+2. **Node.js 22+** for Javascript dependency management and builds ([Download Node.js](https://nodejs.org/en/download/))
+3. **Poetry 1.8.5** for Python dependency management ([Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)). Use the following command to install Poetry using the official installer:
   ```shell
   curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
   ```
+4. (Optional) **Podman Compose**. If you are using Docker, you do not need this tool. If you are using Podman, install it with:
+  ```shell
+  pip3 install podman-compose
+  ```
 
-### Developing on Windows
-1. **Install WSL** ([Microsoft WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install))
-2. **Install Python 3.9+, Node 22, and Poetry 1.8.5 within WSL**:
+### Windows-Specific Instructions
+
+If developing on Windows, you'll need the following tools:
+
+1. **WSL 2** ([Microsoft WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install)). Note that WSL 2 may have already been installed when installing Docker or Podman; in that case, you can skip this step.
+2. **Python 3.9+**. Use the following commands to install Python:
   ```shell
   # In your WSL terminal:
   sudo apt update
@@ -58,14 +48,37 @@ If developing on Mac or Linux, you'll need the following tools:
   sudo apt upgrade python3
   sudo apt install python3-pip
   sudo apt install python3-venv
-   
-  # Install Node
-  
-  # Install Poetry
   ```
-3. **Configure Docker Desktop with WSL 2**: Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker.
-4. **Install VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
-5. **Open the project in VSCode from WSL**: Use "Remote-WSL: Open Folder in WSL" command
+3. **Poetry 1.8.5**. Use the following command to install Poetry using the official Poetry installer:
+  ```shell
+  # In your WSL terminal:
+  curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
+  ```
+4. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
+5. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
+6. (Optional) **Podman Compose**. If you are using Docker, you do not need this tool. If you are using Podman, install it with:
+  ```shell
+  # In your WSL terminal:
+  pip3 install podman-compose
+  ```
+7. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
+
+### Repository Setup
+
+Once all the above tools have been installed, clone this repository and open it in VSCode. If on Windows, use the "WSL: Open Folder in WSL" command to open the cloned repository in WSL.
+
+You'll be prompted to install recommended extensions specified in `.vscode/extensions.json`. Click on "Install All" to install them. These include:
+
+- [Python](https://marketplace.visualstudio.com/items/?itemName=ms-python.python): Python language support and debugging
+- [Ruff](https://marketplace.visualstudio.com/items/?itemName=charliermarsh.ruff): Python linting and formatting
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): JavaScript linting and formatting
+- [Even Better TOML](https://marketplace.visualstudio.com/items/?itemName=tamasfe.even-better-toml): TOML file formatting
+
+If you're not automatically prompted, you can install recommended extensions manually by:
+
+1. Opening the Extensions view in VSCode (`Ctrl+Shift+X` or `Cmd+Shift+X`)
+2. Typing "@recommended" in the search bar
+3. Installing each listed extension
 
 ## Contributions
 
@@ -111,7 +124,7 @@ This will re-build the bundled JS files any time you save a change to a `.js` fi
 
 ## Local Python Environment Setup
 
-After installing Poetry as mentioned in the [Required Tools](#required-tools) section, create and activate a virtual environment from the root of the repository:
+After installing Poetry as mentioned in the [Setting up Your Development Environment](#setting-up-your-development-environment) section, create and activate a virtual environment from the root of the repository:
 
 ```shell
 python3 -m venv env
