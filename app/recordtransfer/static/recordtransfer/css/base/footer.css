@@ -14,11 +14,17 @@
     row-gap: 20px;
 }
 
-.footer-column,
-.logo-footer-column {
+.footer-column {
     margin-bottom: 30px;
     /* Four column layout for large screens */
     width: calc(25% - 30px);
+}
+
+/* Logo styling */
+.footer-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .logo {
@@ -130,19 +136,19 @@
         margin-bottom: 10px;
     }
 
-    .logo-footer-column {
+    .footer-logo {
         display: flex;
         flex-direction: row;
         margin-bottom: 10px;
         width: 100%;
-        gap: 20px;
+        gap: 0;
     }
 
     .nctr-logo-container,
     .unesco-logo-container {
         flex: 1;
         display: flex;
-        justify-content: center;
+        justify-content: left;
         align-items: center;
     }
 
@@ -183,12 +189,6 @@
 
     .footer-column {
         width: 100%;
-    }
-
-    .logo-footer-column {
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
     }
 
     .nctr-logo-container,
