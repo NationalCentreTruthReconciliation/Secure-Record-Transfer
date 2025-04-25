@@ -45,7 +45,10 @@
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
         </div>
-        <!-- Submission Groups -->
+
+
+
+        {% comment %} <!-- Submission Groups -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
         </div>
@@ -59,7 +62,20 @@
         {% endif %}
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
+        </div> {% endcomment %}
+
+
+        <!-- Submission Groups -->
+        <div class="flex-med-width-item margin-top-25px">
+            <label class="medium-text">{% trans "Submission Groups" %}</label>
         </div>
+        <div hx-get="{% url 'recordtransfer:submission_group_table' %}?target_id=submission-group-table-container" hx-trigger="load" class="flex-med-width-item" id="submission-group-table-container">
+        </div>
+        <div class="margin-top-15px">
+            <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
+        </div>
+
+
     {% else %}
         {% url 'login' as login %}
         <p>

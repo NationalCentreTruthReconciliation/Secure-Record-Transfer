@@ -52,6 +52,11 @@ urlpatterns = [
         name="submission_group_detail",
     ),
     path(
+        "submission-group-table",
+        login_required(views.profile.submission_group_table),
+        name="submission_group_table",
+    ),
+    path(
         "user/<int:user_id>/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",

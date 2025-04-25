@@ -7,6 +7,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.forms import BaseModelForm
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
@@ -65,14 +66,6 @@ class UserProfile(UpdateView):
         submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
         context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
 
-        # Paginate SubmissionGroup
-        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
-            "name"
-        )
-        groups_paginator = Paginator(submission_groups, self.paginate_by)
-        groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
-        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
-
         context.update(
             {
                 # Form field element IDs
@@ -126,3 +119,19 @@ class UserProfile(UpdateView):
         profile_form = cast(UserProfileForm, form)
         profile_form.reset_form()
         return super().form_invalid(profile_form)
+
+def submission_group_table(request) -> HttpResponse:
+        submission_groups = SubmissionGroup.objects.filter(created_by=request.user).order_by(
+            "name"
+        )
+        groups_paginator = Paginator(submission_groups, 2)
+        groups_page_number = request.GET.get("p", 1)
+        target_id = request.GET.get('target_id')
+
+        data = {
+            "groups_page_obj": groups_paginator.get_page(groups_page_number),
+            "groups_page_number": groups_page_number,
+            "target_id": target_id,
+        }
+
+        return render(request, "includes/submission_group_table.html", data)
