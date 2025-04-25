@@ -191,6 +191,13 @@
         width: 100%;
     }
 
+    .footer-logo {
+        row-gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+
     .nctr-logo-container,
     .unesco-logo-container {
         flex: 1;
@@ -214,7 +221,6 @@
         text-align: center;
     }
 
-    .unesco-logo-container,
     .social-content {
         display: block;
     }
