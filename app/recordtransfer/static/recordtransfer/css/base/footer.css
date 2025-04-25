@@ -74,6 +74,24 @@
     margin-right: 10px;
 }
 
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin: 15px 0;
+}
+
+.icon-container {
+    width: 20px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 3px;
+}
+
+.contact-item a {
+    padding-left: 10px;
+    display: block;
+}
+
 .footer a:hover,
 .social-icons i:hover {
     color: #F5A81C;
@@ -232,5 +250,20 @@
 
     .social-icon {
         font-size: 30px !important;
+    }
+
+    .contact-item {
+        display: block;
+        text-align: center;
+    }
+    
+    .icon-container {
+        display: inline;
+        width: auto;
+    }
+    
+    .contact-item a {
+        display: inline;
+        padding-left: 5px;
     }
 }
