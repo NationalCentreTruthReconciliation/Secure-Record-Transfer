@@ -14,27 +14,17 @@
     row-gap: 20px;
 }
 
-.footer-column {
+.footer-column,
+.logo-footer-column {
     margin-bottom: 30px;
     /* Four column layout for large screens */
     width: calc(25% - 30px);
-}
-
-/* Logo styling */
-.footer-logo {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 }
 
 .logo {
     max-width: 100%;
     user-select: none;
     pointer-events: none;
-}
-
-.hidden-unesco-logo-container {
-    display: none;
 }
 
 /* Headings */
@@ -119,15 +109,6 @@
 
 /* Media query for medium screens (two columns) */
 @media (max-width: 1200px) {
-    .footer-column {
-        width: calc(50% - 30px);
-        margin-bottom: 10px;
-    }
-
-    .footer-logo {
-        order: 3;
-    }
-
     .footer-more {
         order: 1;
     }
@@ -136,17 +117,40 @@
         order: 2;
     }
 
+    .footer-logo {
+        order: 3;
+    }
+
     .footer-social {
         order: 4;
     }
 
-    .unesco-logo-container,
+    .footer-column {
+        width: calc(50% - 30px);
+        margin-bottom: 10px;
+    }
+
+    .logo-footer-column {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 10px;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .social-content {
         display: none;
     }
 
-    .hidden-social-content,
-    .hidden-unesco-logo-container {
+    .hidden-social-content {
         display: block;
     }
 
@@ -161,25 +165,6 @@
 
 /* Media query for small screens (one column) */
 @media (max-width: 800px) {
-    .footer-column {
-        width: 100%;
-    }
-
-    .footer-container {
-        row-gap: 0;
-    }
-
-    .footer-logo {
-        order: 3;
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .logo {
-        max-width: 100%;
-    }
-
     .footer-more {
         order: 1;
     }
@@ -188,8 +173,36 @@
         order: 2;
     }
 
+    .footer-logo {
+        order: 3;
+    }
+
     .footer-social {
         order: 4;
+    }
+
+    .footer-column {
+        width: 100%;
+    }
+
+    .logo-footer-column {
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 200px;
+        max-width: 350px;
+    }
+
+    .footer-container {
+        row-gap: 0;
     }
 
     .social-icons {
@@ -207,17 +220,8 @@
     }
 
     .hidden-social-content,
-    .hidden-unesco-logo-container,
     .social-header {
         display: none;
-    }
-
-    .nctr-logo-container,
-    .unesco-logo-container {
-        width: 46%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .social-icon {
