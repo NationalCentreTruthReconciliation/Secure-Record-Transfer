@@ -18,7 +18,7 @@
         <div class="title-text">{% trans "Your Profile" %}</div>
         {% include "includes/profile_form.html" %}
         <br>
-        <!-- In-Progress Submissions -->
+        {% comment %} <!-- In-Progress Submissions -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
         </div>
@@ -44,37 +44,21 @@
         {% endif %}
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
-        </div>
-
-
-
-        {% comment %} <!-- Submission Groups -->
-        <div class="flex-med-width-item margin-top-25px">
-            <label class="medium-text">{% trans "Submission Groups" %}</label>
-        </div>
-        {% if groups_page_obj and groups_page_obj|length > 0 %}
-            {% include "includes/submission_group_table.html" %}
-            {% include "includes/pagination.html" with page_obj=groups_page_obj pagination_name=GROUPS_PAGE %}
-        {% else %}
-            <div class="flex-med-width-item">
-                <p>{% trans "You have not made any submission groups." %}</p>
-            </div>
-        {% endif %}
-        <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
         </div> {% endcomment %}
-
 
         <!-- Submission Groups -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
         </div>
-        <div hx-get="{% url 'recordtransfer:submission_group_table' %}?target_id=submission-group-table-container" hx-trigger="load" class="flex-med-width-item" id="submission-group-table-container">
+        <div
+            hx-get="{% url 'recordtransfer:submission_group_table' %}"
+            hx-trigger="load"
+            class="flex-med-width-item"
+            id="{{ ID_SUBMISSION_GROUP_TABLE }}">
         </div>
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
         </div>
-
 
     {% else %}
         {% url 'login' as login %}

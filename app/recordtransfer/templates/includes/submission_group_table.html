@@ -1,5 +1,5 @@
 {% load i18n %}
-<table class="full-width-table standard-table" cellspacing="0">
+<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
     <tr>
         <th class="uuid-column">{% trans "Group ID" %}</th>
         <th>{% trans "Group Name" %}</th>
@@ -7,7 +7,7 @@
         <th>{% trans "Submissions in Group" %}</th>
         <th>{% trans "View Group" %}</th>
     </tr>
-    {% for group in groups_page_obj %}
+    {% for group in page %}
         <tr>
             <td class="uuid-column">{{ group.uuid }}</td>
             <td>{{ group.name }}</td>
@@ -23,4 +23,4 @@
         </tr>
     {% endfor %}
 </table>
-{% include "includes/pagination.html" with page_obj=groups_page_obj target_id=target_id %}
+{% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}

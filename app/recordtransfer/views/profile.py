@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.forms import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
 
@@ -20,7 +20,9 @@ from recordtransfer.constants import (
     ID_GETS_NOTIFICATION_EMAILS,
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
+    ID_SUBMISSION_GROUP_TABLE,
     IN_PROGRESS_PAGE,
+    PAGINATE_QUERY_NAME,
     SUBMISSIONS_PAGE,
 )
 from recordtransfer.emails import send_user_account_updated
@@ -81,6 +83,8 @@ class UserProfile(UpdateView):
                 "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
                 "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
                 "GROUPS_PAGE": GROUPS_PAGE,
+                # Table container IDs
+                "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
             }
         )
 
@@ -121,17 +125,18 @@ class UserProfile(UpdateView):
         return super().form_invalid(profile_form)
 
 def submission_group_table(request) -> HttpResponse:
-        submission_groups = SubmissionGroup.objects.filter(created_by=request.user).order_by(
-            "name"
-        )
-        groups_paginator = Paginator(submission_groups, 2)
-        groups_page_number = request.GET.get("p", 1)
-        target_id = request.GET.get('target_id')
+    submission_groups = SubmissionGroup.objects.filter(created_by=request.user).order_by(
+        "name"
+    )
+    paginator = Paginator(submission_groups, 2)
+    page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
 
-        data = {
-            "groups_page_obj": groups_paginator.get_page(groups_page_number),
-            "groups_page_number": groups_page_number,
-            "target_id": target_id,
-        }
+    data = {
+        "page": paginator.get_page(page_num),
+        "page_num": page_num,
+        "target_id": ID_SUBMISSION_GROUP_TABLE,
+        "paginate_url": reverse("recordtransfer:submission_group_table"),
+        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+    }
 
-        return render(request, "includes/submission_group_table.html", data)
+    return render(request, "includes/submission_group_table.html", data)
