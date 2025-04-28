@@ -18,7 +18,7 @@
         <div class="title-text">{% trans "Your Profile" %}</div>
         {% include "includes/profile_form.html" %}
         <br>
-        {% comment %} <!-- In-Progress Submissions -->
+        <!-- In-Progress Submissions -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
         </div>
@@ -30,7 +30,7 @@
                 <p>{% trans "You have no submissions that are in progress." %}</p>
             </div>
         {% endif %}
-        <!-- Past Submissions -->
+        {% comment %} <!-- Past Submissions -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Past Submissions" %}</label>
         </div>
