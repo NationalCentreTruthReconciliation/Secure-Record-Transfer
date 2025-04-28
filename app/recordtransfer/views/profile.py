@@ -6,14 +6,13 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.forms import BaseModelForm
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
 
 from recordtransfer.constants import (
-    GROUPS_PAGE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_FIRST_NAME,
@@ -21,9 +20,8 @@ from recordtransfer.constants import (
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_TABLE,
-    IN_PROGRESS_PAGE,
+    PAGINATE_BY,
     PAGINATE_QUERY_NAME,
-    SUBMISSIONS_PAGE,
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
@@ -37,7 +35,6 @@ class UserProfile(UpdateView):
     """
 
     template_name = "recordtransfer/profile.html"
-    paginate_by = 10
     form_class = UserProfileForm
     success_url = reverse_lazy("recordtransfer:user_profile")
     success_message = gettext("Preferences updated")
@@ -51,22 +48,22 @@ class UserProfile(UpdateView):
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
 
-        # Paginate InProgressSubmission
-        in_progress_submissions = InProgressSubmission.objects.filter(
-            user=self.request.user
-        ).order_by("-last_updated")
+        # # Paginate InProgressSubmission
+        # in_progress_submissions = InProgressSubmission.objects.filter(
+        #     user=self.request.user
+        # ).order_by("-last_updated")
 
-        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
-        in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
-        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
+        # in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
+        # in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
+        # context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
 
-        # Paginate Submission
-        user_submissions = Submission.objects.filter(user=self.request.user).order_by(
-            "-submission_date"
-        )
-        submissions_paginator = Paginator(user_submissions, self.paginate_by)
-        submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
-        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
+        # # Paginate Submission
+        # user_submissions = Submission.objects.filter(user=self.request.user).order_by(
+        #     "-submission_date"
+        # )
+        # submissions_paginator = Paginator(user_submissions, self.paginate_by)
+        # submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
+        # context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
 
         context.update(
             {
@@ -79,10 +76,6 @@ class UserProfile(UpdateView):
                     "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
                 },
-                # Pagination
-                "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
-                "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
-                "GROUPS_PAGE": GROUPS_PAGE,
                 # Table container IDs
                 "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
             }
@@ -124,11 +117,12 @@ class UserProfile(UpdateView):
         profile_form.reset_form()
         return super().form_invalid(profile_form)
 
-def submission_group_table(request) -> HttpResponse:
+def submission_group_table(request: HttpRequest) -> HttpResponse:
+    """Render the submission group table with pagination."""
     submission_groups = SubmissionGroup.objects.filter(created_by=request.user).order_by(
         "name"
     )
-    paginator = Paginator(submission_groups, 2)
+    paginator = Paginator(submission_groups, PAGINATE_BY)
     page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
 
     data = {
