@@ -23,4 +23,6 @@
         </tr>
     {% endfor %}
 </table>
-{% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
+{% if page %}
+    {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
+{% endif %}
