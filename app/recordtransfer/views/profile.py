@@ -5,6 +5,7 @@ from typing import Any, cast
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
+from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -102,64 +103,64 @@ class UserProfile(UpdateView):
         profile_form.reset_form()
         return super().form_invalid(profile_form)
 
-
-def submission_group_table(request: HttpRequest) -> HttpResponse:
-    """Render the submission group table with pagination."""
+def _paginated_table_view(
+    request: HttpRequest,
+    queryset: QuerySet,
+    template_name: str,
+    target_id: str,
+    paginate_url: str,
+) -> HttpResponse:
+    """Define a generic function to render paginated tables. Request must be made bt HTMX, or else
+    a 400 Error is returned.
+    """
     if not request.htmx:
         return HttpResponse(status=400)
 
-    submission_groups = SubmissionGroup.objects.filter(created_by=request.user).order_by("name")
-    paginator = Paginator(submission_groups, PAGINATE_BY)
+    paginator = Paginator(queryset, PAGINATE_BY)
     page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
 
     data = {
         "page": paginator.get_page(page_num),
         "page_num": page_num,
-        "target_id": ID_SUBMISSION_GROUP_TABLE,
-        "paginate_url": reverse("recordtransfer:submission_group_table"),
+        "target_id": target_id,
+        "paginate_url": paginate_url,
         "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
     }
 
-    return render(request, "includes/submission_group_table.html", data)
+    return render(request, template_name, data)
+
+
+def submission_group_table(request: HttpRequest) -> HttpResponse:
+    """Render the submission group table with pagination."""
+    queryset = SubmissionGroup.objects.filter(created_by=request.user).order_by("name")
+    return _paginated_table_view(
+        request,
+        queryset,
+        "includes/submission_group_table.html",
+        ID_SUBMISSION_GROUP_TABLE,
+        reverse("recordtransfer:submission_group_table"),
+    )
 
 
 def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     """Render the in-progress submission table with pagination."""
-    if not request.htmx:
-        return HttpResponse(status=400)
-
-    in_progress_submissions = InProgressSubmission.objects.filter(user=request.user).order_by(
-        "-last_updated"
+    queryset = InProgressSubmission.objects.filter(user=request.user).order_by("-last_updated")
+    return _paginated_table_view(
+        request,
+        queryset,
+        "includes/in_progress_submission_table.html",
+        ID_IN_PROGRESS_SUBMISSION_TABLE,
+        reverse("recordtransfer:in_progress_submission_table"),
     )
-    paginator = Paginator(in_progress_submissions, PAGINATE_BY)
-    page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
-
-    data = {
-        "page": paginator.get_page(page_num),
-        "page_num": page_num,
-        "target_id": ID_IN_PROGRESS_SUBMISSION_TABLE,
-        "paginate_url": reverse("recordtransfer:in_progress_submission_table"),
-        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-    }
-
-    return render(request, "includes/in_progress_submission_table.html", data)
 
 
 def submission_table(request: HttpRequest) -> HttpResponse:
     """Render the past submission table with pagination."""
-    if not request.htmx:
-        return HttpResponse(status=400)
-
-    submissions = Submission.objects.filter(user=request.user).order_by("-submission_date")
-    paginator = Paginator(submissions, PAGINATE_BY)
-    page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
-
-    data = {
-        "page": paginator.get_page(page_num),
-        "page_num": page_num,
-        "target_id": ID_SUBMISSION_TABLE,
-        "paginate_url": reverse("recordtransfer:submission_table"),
-        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-    }
-
-    return render(request, "includes/submission_table.html", data)
+    queryset = Submission.objects.filter(user=request.user).order_by("-submission_date")
+    return _paginated_table_view(
+        request,
+        queryset,
+        "includes/submission_table.html",
+        ID_SUBMISSION_TABLE,
+        reverse("recordtransfer:submission_table"),
+    )
