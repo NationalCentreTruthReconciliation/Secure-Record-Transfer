@@ -32,7 +32,11 @@ FORMTITLE = "formtitle"
 INFOMESSAGE = "infomessage"
 FORM = "form"
 
-# Pagination query names
-IN_PROGRESS_PAGE = "in_progress_page"
-SUBMISSIONS_PAGE = "submissions_page"
-GROUPS_PAGE = "groups_page"
+##### PAGINATION #####
+PAGINATE_BY = 10  # Number of items per page
+PAGINATE_QUERY_NAME = "p"
+
+# Pagination Table Container IDs
+ID_SUBMISSION_GROUP_TABLE = "submission-group-table-container"
+ID_IN_PROGRESS_SUBMISSION_TABLE = "in-progress-submission-table-container"
+ID_SUBMISSION_TABLE = "submission-table-container"

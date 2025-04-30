@@ -1,21 +1,23 @@
 {% load i18n %}
 {% load query_params %}
 <div class="pagination">
-    {% if page_obj.has_previous %}
-        <a href="?{% update_query_params pagination_name page_obj.previous_page_number %}"
-           class="btn-arrow btn-arrow-left">{% trans "Previous" %}</a>
+    {% if page.has_previous %}
+        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.previous_page_number }}" 
+           hx-target="#{{ target_id }}"
+           class="btn-arrow btn-arrow-left"></a>
     {% else %}
-        <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true">{% trans "Previous" %}</a>
+        <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true"></a>
     {% endif %}
     <span>
-        {% blocktrans with curr_page=page_obj.number total_pages=page_obj.paginator.num_pages %}
+        {% blocktrans with curr_page=page.number total_pages=page.paginator.num_pages %}
             Page {{ curr_page }} of {{ total_pages }}
         {% endblocktrans %}
     </span>
-    {% if page_obj.has_next %}
-        <a href="?{% update_query_params pagination_name page_obj.next_page_number %}"
-           class="btn-arrow btn-arrow-right">{% trans "Next" %}</a>
+    {% if page.has_next %}
+        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.next_page_number }}" 
+           hx-target="#{{ target_id }}"
+           class="btn-arrow btn-arrow-right"></a>
     {% else %}
-        <a class="btn-arrow btn-arrow-right disabled" aria-disabled="true">{% trans "Next" %}</a>
+        <a class="btn-arrow btn-arrow-right disabled" aria-disabled="true"></a>
     {% endif %}
 </div>

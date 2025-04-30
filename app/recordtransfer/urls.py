@@ -28,7 +28,9 @@ urlpatterns = [
         login_required(views.home.SystemErrorPage.as_view()),
         name="system_error",
     ),
-    path("submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"),
+    path(
+        "submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"
+    ),
     path(
         "submission/in-progress/expired/",
         views.pre_submission.InProgressSubmissionExpired.as_view(),
@@ -40,7 +42,9 @@ urlpatterns = [
         name="delete_in_progress",
     ),
     path("about/", views.home.About.as_view(), name="about"),
-    path("user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"),
+    path(
+        "user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"
+    ),
     path(
         "submission-group/",
         login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
@@ -55,6 +59,21 @@ urlpatterns = [
         "user/<int:user_id>/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
+    ),
+    path(
+        "submission-group-table/",
+        login_required(views.profile.submission_group_table),
+        name="submission_group_table",
+    ),
+    path(
+        "in-progress-submission-table/",
+        login_required(views.profile.in_progress_submission_table),
+        name="in_progress_submission_table",
+    ),
+    path(
+        "submission-table/",
+        login_required(views.profile.submission_table),
+        name="submission_table",
     ),
 ]
 

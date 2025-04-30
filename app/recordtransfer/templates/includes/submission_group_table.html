@@ -1,23 +1,28 @@
 {% load i18n %}
-<div class="flex-full-width-item">
-    <table class="full-width-table standard-table" cellspacing="0">
+<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
+    <tr>
+        <th class="uuid-column">{% trans "Group ID" %}</th>
+        <th>{% trans "Group Name" %}</th>
+        <th>{% trans "Group Description" %}</th>
+        <th>{% trans "Submissions in Group" %}</th>
+        <th>{% trans "View Group" %}</th>
+    </tr>
+    {% for group in page %}
         <tr>
-            <th class="uuid-column">{% trans "Group ID" %}</th>
-            <th>{% trans "Group Name" %}</th>
-            <th>{% trans "Group Description" %}</th>
-            <th>{% trans "Submissions in Group" %}</th>
-            <th>{% trans "View Group" %}</th>
+            <td class="uuid-column">{{ group.uuid }}</td>
+            <td>{{ group.name }}</td>
+            <td>{{ group.description }}</td>
+            <td>{{ group.number_of_submissions_in_group }}</td>
+            <td>
+                <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
+            </td>
         </tr>
-        {% for group in groups_page_obj %}
-            <tr>
-                <td class="uuid-column">{{ group.uuid }}</td>
-                <td>{{ group.name }}</td>
-                <td>{{ group.description }}</td>
-                <td>{{ group.number_of_submissions_in_group }}</td>
-                <td>
-                    <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-</div>
+    {% empty %}
+        <tr>
+            <td colspan="5" class="empty-table-text">{% trans "You have not made any submission groups." %}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% if page %}
+    {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
+{% endif %}

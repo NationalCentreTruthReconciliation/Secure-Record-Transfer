@@ -5,22 +5,26 @@ from typing import Any, cast
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
+from django.db.models import QuerySet
 from django.forms import BaseModelForm
-from django.http import HttpResponse
-from django.urls import reverse_lazy
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
 
 from recordtransfer.constants import (
-    GROUPS_PAGE,
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_FIRST_NAME,
     ID_GETS_NOTIFICATION_EMAILS,
+    ID_IN_PROGRESS_SUBMISSION_TABLE,
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
-    IN_PROGRESS_PAGE,
-    SUBMISSIONS_PAGE,
+    ID_SUBMISSION_GROUP_TABLE,
+    ID_SUBMISSION_TABLE,
+    PAGINATE_BY,
+    PAGINATE_QUERY_NAME,
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
@@ -34,7 +38,6 @@ class UserProfile(UpdateView):
     """
 
     template_name = "recordtransfer/profile.html"
-    paginate_by = 10
     form_class = UserProfileForm
     success_url = reverse_lazy("recordtransfer:user_profile")
     success_message = gettext("Preferences updated")
@@ -47,32 +50,6 @@ class UserProfile(UpdateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
         context = super().get_context_data(**kwargs)
-
-        # Paginate InProgressSubmission
-        in_progress_submissions = InProgressSubmission.objects.filter(
-            user=self.request.user
-        ).order_by("-last_updated")
-
-        in_progress_paginator = Paginator(in_progress_submissions, self.paginate_by)
-        in_progress_page_number = self.request.GET.get(IN_PROGRESS_PAGE, 1)
-        context["in_progress_page_obj"] = in_progress_paginator.get_page(in_progress_page_number)
-
-        # Paginate Submission
-        user_submissions = Submission.objects.filter(user=self.request.user).order_by(
-            "-submission_date"
-        )
-        submissions_paginator = Paginator(user_submissions, self.paginate_by)
-        submissions_page_number = self.request.GET.get(SUBMISSIONS_PAGE, 1)
-        context["submissions_page_obj"] = submissions_paginator.get_page(submissions_page_number)
-
-        # Paginate SubmissionGroup
-        submission_groups = SubmissionGroup.objects.filter(created_by=self.request.user).order_by(
-            "name"
-        )
-        groups_paginator = Paginator(submission_groups, self.paginate_by)
-        groups_page_number = self.request.GET.get(GROUPS_PAGE, 1)
-        context["groups_page_obj"] = groups_paginator.get_page(groups_page_number)
-
         context.update(
             {
                 # Form field element IDs
@@ -84,10 +61,10 @@ class UserProfile(UpdateView):
                     "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
                 },
-                # Pagination
-                "IN_PROGRESS_PAGE": IN_PROGRESS_PAGE,
-                "SUBMISSIONS_PAGE": SUBMISSIONS_PAGE,
-                "GROUPS_PAGE": GROUPS_PAGE,
+                # Table container IDs
+                "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
+                "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
+                "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
             }
         )
 
@@ -126,3 +103,65 @@ class UserProfile(UpdateView):
         profile_form = cast(UserProfileForm, form)
         profile_form.reset_form()
         return super().form_invalid(profile_form)
+
+def _paginated_table_view(
+    request: HttpRequest,
+    queryset: QuerySet,
+    template_name: str,
+    target_id: str,
+    paginate_url: str,
+) -> HttpResponse:
+    """Define a generic function to render paginated tables. Request must be made by HTMX, or else
+    a 400 Error is returned.
+    """
+    if not request.htmx:
+        return HttpResponse(status=400)
+
+    paginator = Paginator(queryset, PAGINATE_BY)
+    page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
+
+    data = {
+        "page": paginator.get_page(page_num),
+        "page_num": page_num,
+        "target_id": target_id,
+        "paginate_url": paginate_url,
+        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+    }
+
+    return render(request, template_name, data)
+
+
+def submission_group_table(request: HttpRequest) -> HttpResponse:
+    """Render the submission group table with pagination."""
+    queryset = SubmissionGroup.objects.filter(created_by=request.user).order_by("name")
+    return _paginated_table_view(
+        request,
+        queryset,
+        "includes/submission_group_table.html",
+        ID_SUBMISSION_GROUP_TABLE,
+        reverse("recordtransfer:submission_group_table"),
+    )
+
+
+def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
+    """Render the in-progress submission table with pagination."""
+    queryset = InProgressSubmission.objects.filter(user=request.user).order_by("-last_updated")
+    return _paginated_table_view(
+        request,
+        queryset,
+        "includes/in_progress_submission_table.html",
+        ID_IN_PROGRESS_SUBMISSION_TABLE,
+        reverse("recordtransfer:in_progress_submission_table"),
+    )
+
+
+def submission_table(request: HttpRequest) -> HttpResponse:
+    """Render the past submission table with pagination."""
+    queryset = Submission.objects.filter(user=request.user).order_by("-submission_date")
+    return _paginated_table_view(
+        request,
+        queryset,
+        "includes/submission_table.html",
+        ID_SUBMISSION_TABLE,
+        reverse("recordtransfer:submission_table"),
+    )

@@ -5,3 +5,11 @@
 .strikethrough {
     text-decoration: line-through;
 }
+
+.empty-table-text {
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+}

@@ -22,44 +22,41 @@
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
         </div>
-        {% if in_progress_page_obj and in_progress_page_obj|length > 0 %}
-            {% include "includes/in_progress_submission_table.html" %}
-            {% include "includes/pagination.html" with page_obj=in_progress_page_obj pagination_name=IN_PROGRESS_PAGE %}
-        {% else %}
-            <div class="flex-med-width-item">
-                <p>{% trans "You have no submissions that are in progress." %}</p>
-            </div>
-        {% endif %}
+        <div
+            hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
+            hx-trigger="load"
+            class="flex-med-width-item"
+            id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}">
+        </div>
+
         <!-- Past Submissions -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Past Submissions" %}</label>
         </div>
-        {% if submissions_page_obj and submissions_page_obj|length > 0 %}
-            {% include "includes/submission_table.html" with submissions=submissions_page_obj %}
-            {% include "includes/pagination.html" with page_obj=submissions_page_obj pagination_name=SUBMISSIONS_PAGE %}
-        {% else %}
-            <div class="flex-med-width-item">
-                <p>{% trans "You have not sent any records to the NCTR." %}</p>
-            </div>
-        {% endif %}
+        <div
+            hx-get="{% url 'recordtransfer:submission_table' %}"
+            hx-trigger="load"
+            class="flex-med-width-item"
+            id="{{ ID_SUBMISSION_TABLE }}">
+        </div>
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
         </div>
+
         <!-- Submission Groups -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
         </div>
-        {% if groups_page_obj and groups_page_obj|length > 0 %}
-            {% include "includes/submission_group_table.html" %}
-            {% include "includes/pagination.html" with page_obj=groups_page_obj pagination_name=GROUPS_PAGE %}
-        {% else %}
-            <div class="flex-med-width-item">
-                <p>{% trans "You have not made any submission groups." %}</p>
-            </div>
-        {% endif %}
+        <div
+            hx-get="{% url 'recordtransfer:submission_group_table' %}"
+            hx-trigger="load"
+            class="flex-med-width-item"
+            id="{{ ID_SUBMISSION_GROUP_TABLE }}">
+        </div>
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
         </div>
+
     {% else %}
         {% url 'login' as login %}
         <p>

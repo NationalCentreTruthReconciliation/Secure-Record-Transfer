@@ -1,6 +1,7 @@
 import re
+import uuid
 from datetime import datetime, timedelta
-from typing import cast
+from typing import Optional, cast
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
@@ -8,9 +9,17 @@ from django.conf import settings
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
-from recordtransfer.models import InProgressSubmission, UploadSession, User
+from recordtransfer.constants import PAGINATE_QUERY_NAME
+from recordtransfer.models import (
+    InProgressSubmission,
+    Submission,
+    SubmissionGroup,
+    UploadSession,
+    User,
+)
 
 
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
@@ -38,12 +47,55 @@ class TestUserProfileView(TestCase):
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
 
-        # Submission history related
-        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self.in_progress_submission = InProgressSubmission.objects.create(
-            user=self.user,
-            uuid="550e8400-e29b-41d4-a716-446655440000",
-            upload_session=self.upload_session,
+        # Table URLs
+        self.submission_group_table_url = reverse("recordtransfer:submission_group_table")
+        self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
+        self.submission_table_url = reverse("recordtransfer:submission_table")
+
+        # HTMX related
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        UploadSession.objects.all().delete()
+        InProgressSubmission.objects.all().delete()
+        SubmissionGroup.objects.all().delete()
+        Submission.objects.all().delete()
+        User.objects.all().delete()
+
+    def _create_in_progress_submission(
+        self,
+        title: Optional[str] = None,
+        user: Optional[User] = None,
+        upload_session: Optional[UploadSession] = None,
+    ) -> InProgressSubmission:
+        """Create an InProgressSubmission for testing.
+
+        Args:
+            title: Title for the submission. Defaults to "Test Submission".
+            user: User who owns the submission. Defaults to self.user.
+            upload_session: Associated upload session. Defaults to
+                creating a new session for the specified user.
+
+        Returns:
+            The newly created in-progress submission object.
+        """
+        if user is None:
+            user = self.user
+
+        if upload_session is None:
+            upload_session = UploadSession.new_session(user=cast(User, user))
+
+        if title is None:
+            title = "Test Submission"
+
+        return InProgressSubmission.objects.create(
+            user=user,
+            uuid=str(uuid.uuid4()),
+            upload_session=upload_session,
+            title=title,
         )
 
     def test_access_authenticated_user(self):
@@ -55,6 +107,8 @@ class TestUserProfileView(TestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    ### Tests for Profile Details ###
 
     def test_valid_name_change(self):
         form_data = {
@@ -271,14 +325,31 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    # Testing submission expiry
+    ### Tests for All Tables ###
+    def test_tables_require_htmx_request(self) -> None:
+        """Test that all table views require HTMX headers."""
+        for url in [
+            self.submission_group_table_url,
+            self.in_progress_table_url,
+            self.submission_table_url,
+        ]:
+            response = self.client.get(url)  # No HTMX headers
+            self.assertEqual(response.status_code, 400)
+
+    ### Tests for In-Progress Submission Table ###
+
     def test_in_progress_submission_expires_at_no_expiry(self) -> None:
         """Test that the "Expires at" cell contains just a dash when the in-progress submission
         has no upload session, hence no expiry date.
         """
-        self.in_progress_submission.upload_session = None
-        self.in_progress_submission.save()
-        response = self.client.get(self.url)
+        # Create an in-progress submission without an upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            uuid=str(uuid.uuid4()),
+            title="Test In-Progress Submission",
+            upload_session=None,
+        )
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r"<td>\s*-+\s*</td>")
 
@@ -286,9 +357,13 @@ class TestUserProfileView(TestCase):
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
-        response = self.client.get(self.url)
+        upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self._create_in_progress_submission(
+            upload_session=upload_session
+        )
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
-        expiry_date = self.upload_session.expires_at.astimezone(local_tz).strftime(
+        expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(
             "%a %b %d, %Y @ %H:%M"
         )
         # Strip leading zeroes from start of day and month
@@ -306,11 +381,17 @@ class TestUserProfileView(TestCase):
         """Test that the expiry date is shown in red if the in-progress submission is expiring
         soon.
         """
-        self.upload_session.last_upload_interaction_time = (
-            self.upload_session.last_upload_interaction_time - timedelta(minutes=35)
+
+        upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self._create_in_progress_submission(
+            upload_session=upload_session
         )
-        self.upload_session.save()
-        response = self.client.get(self.url)
+
+        upload_session.last_upload_interaction_time = (
+            upload_session.last_upload_interaction_time - timedelta(minutes=35)
+        )
+        upload_session.save()
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         self.assertIn("red-text", content)
@@ -319,15 +400,112 @@ class TestUserProfileView(TestCase):
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
     def test_in_progress_submission_expired(self) -> None:
-        """Test that the expiry date is shown in red and strikethrough if the in-progress submission
-        has expired.
+        """Test that the expiry date is shown in red and strikethrough if the in-progress
+        submission has expired.
         """
-        self.upload_session.last_upload_interaction_time = (
-            self.upload_session.last_upload_interaction_time - timedelta(minutes=65)
+        upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self._create_in_progress_submission(
+            upload_session=upload_session
         )
-        self.upload_session.save()
-        response = self.client.get(self.url)
+
+        upload_session.last_upload_interaction_time = (
+            upload_session.last_upload_interaction_time - timedelta(minutes=65)
+        )
+        upload_session.save()
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         self.assertIn("red-text", content)
         self.assertIn("strikethrough", content)
+
+    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    def test_in_progress_submission_table_display(self) -> None:
+        """Test that the in-progress submission table displays in-progress submissions
+        correctly.
+        """
+        # Create in-progress submissions
+        for i in range(3):
+            self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
+
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        for i in range(3):
+            self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
+
+    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    def test_in_progress_submission_table_pagination(self) -> None:
+        """Test pagination for the in-progress submission table."""
+        # Create in-progress submissions
+        for i in range(3):
+            self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
+
+        # Test first page
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertIn("Test In-Progress Submission 1", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
+
+        # Test second page
+        response = self.client.get(
+            f"{self.in_progress_table_url}?{PAGINATE_QUERY_NAME}=2",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Test In-Progress Submission 2", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 1", response.content.decode())
+
+    ### Tests for Submission Group Table ###
+
+    def test_submission_group_table_empty(self) -> None:
+        """Test that the submission group table works with no groups."""
+        response = self.client.get(self.submission_group_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "includes/submission_group_table.html")
+        content = response.content.decode()
+        self.assertIn(_("You have not made any submission groups."), content)
+
+    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    def test_submission_group_table_display(self) -> None:
+        """Test that the submission group table displays submission groups correctly."""
+        # Create submission groups
+        for i in range(3):
+            SubmissionGroup.objects.create(
+                created_by=self.user,
+                name=f"Test Group {i}",
+                uuid=uuid.uuid4(),
+            )
+
+        response = self.client.get(self.submission_group_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        for i in range(3):
+            self.assertIn(f"Test Group {i}", response.content.decode())
+
+    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    def test_submission_group_table_pagination(self) -> None:
+        """Test pagination for the submission group table."""
+        # Create submission groups
+        for i in range(3):
+            SubmissionGroup.objects.create(
+                created_by=self.user,
+                name=f"Test Group {i}",
+                uuid=uuid.uuid4(),
+            )
+
+        # Test first page
+        response = self.client.get(self.submission_group_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Test Group 0", response.content.decode())
+        self.assertIn("Test Group 1", response.content.decode())
+        self.assertNotIn("Test Group 2", response.content.decode())
+
+        # Test second page
+        response = self.client.get(
+            f"{self.submission_group_table_url}?{PAGINATE_QUERY_NAME}=2",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Test Group 2", response.content.decode())
+        self.assertNotIn("Test Group 0", response.content.decode())
+        self.assertNotIn("Test Group 1", response.content.decode())

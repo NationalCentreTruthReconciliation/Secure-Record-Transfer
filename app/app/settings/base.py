@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "formtools",
     "django_rq",
     "django_recaptcha",
+    "django_htmx",
 ]
 
 MIDDLEWARE = [
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "app.urls"

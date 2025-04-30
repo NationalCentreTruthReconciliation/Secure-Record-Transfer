@@ -274,7 +274,7 @@ h2 {
 
 .standard-table th,
 .standard-table td {
-    padding: 5px;
+    padding: 10px;
 }
 
 .standard-table tr:nth-child(odd) {

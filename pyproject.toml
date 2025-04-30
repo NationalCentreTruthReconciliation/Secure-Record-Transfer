@@ -17,6 +17,7 @@ debugpy = "^1.8.2"
 Django = "4.2.*"
 django-countries = "^7.6.1"
 django-formtools = "^2.5.1"
+django-htmx = "^1.23.0"
 django-recaptcha = "^4.0.0"
 django-rq = "^3.0.0"
 gunicorn = { version = "^23.0.0", optional = true }

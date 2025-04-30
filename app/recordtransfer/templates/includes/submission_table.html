@@ -1,27 +1,32 @@
 {% load i18n %}
-<div class="flex-full-width-item">
-    <table class="full-width-table standard-table" cellspacing="0">
+<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
+    <tr>
+        <th class="uuid-column">{% trans "Submission ID" %}</th>
+        <th>{% trans "Date Submitted" %}</th>
+        <th>{% trans "Submission Title" %}</th>
+        <th>{% trans "Files Submitted" %}</th>
+        <th>{% trans "View Report" %}</th>
+        <th>{% trans "Download CSV" %}</th>
+    </tr>
+    {% for submission in page %}
         <tr>
-            <th class="uuid-column">{% trans "Submission ID" %}</th>
-            <th>{% trans "Date Submitted" %}</th>
-            <th>{% trans "Submission Title" %}</th>
-            <th>{% trans "Files Submitted" %}</th>
-            <th>{% trans "View Report" %}</th>
-            <th>{% trans "Download CSV" %}</th>
+            <td class="uuid-column">{{ submission.uuid }}</td>
+            <td>{{ submission.submission_date }}</td>
+            <td>{{ submission.metadata.accession_title }}</td>
+            <td>{{ submission.extent_statements }}</td>
+            <td>
+                <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}" target="_blank">{% trans "Click to view report" %}</a>
+            </td>
+            <td>
+                <a href="{% url "recordtransfer:submission_csv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
+            </td>
         </tr>
-        {% for submission in submissions %}
-            <tr>
-                <td class="uuid-column">{{ submission.uuid }}</td>
-                <td>{{ submission.submission_date }}</td>
-                <td>{{ submission.metadata.accession_title }}</td>
-                <td>{{ submission.extent_statements }}</td>
-                <td>
-                    <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}" target="_blank">{% trans "Click to view report" %}</a>
-                </td>
-                <td>
-                    <a href="{% url "recordtransfer:submission_csv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-</div>
+    {% empty %}
+    <tr>
+        <td colspan="6" class="empty-table-text">{% trans "You have not sent any records to the NCTR." %}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% if page %}
+    {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
+{% endif %}
