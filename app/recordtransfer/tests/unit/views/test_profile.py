@@ -99,7 +99,7 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
-    ### Testing Profile Details Update ###
+    ### Tests for Profile Details ###
 
     def test_valid_name_change(self):
         form_data = {
