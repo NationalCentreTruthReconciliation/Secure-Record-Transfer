@@ -33,7 +33,7 @@ INFOMESSAGE = "infomessage"
 FORM = "form"
 
 ##### PAGINATION #####
-PAGINATE_BY = 2  # Number of items per page
+PAGINATE_BY = 10  # Number of items per page
 PAGINATE_QUERY_NAME = "p"
 
 # Pagination Table Container IDs
