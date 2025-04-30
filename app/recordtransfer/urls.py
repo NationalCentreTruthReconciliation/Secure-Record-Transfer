@@ -61,17 +61,17 @@ urlpatterns = [
         name="get_user_submission_groups",
     ),
     path(
-        "submission-group-table",
+        "submission-group-table/",
         login_required(views.profile.submission_group_table),
         name="submission_group_table",
     ),
     path(
-        "in-progress-submission-table",
+        "in-progress-submission-table/",
         login_required(views.profile.in_progress_submission_table),
         name="in_progress_submission_table",
     ),
     path(
-        "past-submission-table",
+        "submission-table/",
         login_required(views.profile.submission_table),
         name="submission_table",
     ),
