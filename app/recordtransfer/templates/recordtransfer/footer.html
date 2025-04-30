@@ -1,111 +1,73 @@
 {% load static %}
 {% load i18n %}
 
-<div class="footer" style="background-image: url('{% static 'footer.webp' %}')">
-    <div class="footer-column center-justify">
-        <div class="footer-item">
-            <a href="https://nctr.ca/">
-                <img id="footer-logo"
-                    width="400"
-                    alt="{% trans 'white NCTR logo' %}"
-                    src="{% static 'logo-white.webp' %}" />
-            </a>
+<div class="footer">
+    <div class="footer-container">
+        <div class="footer-column footer-logo">
+            <div class="nctr-logo-container">
+                <img src="{% static 'logo-white.webp' %}" alt="{% trans 'white NCTR logo' %}" class="logo nctr-logo-img">
+            </div>
+            <div class="unesco-logo-container">
+                <img src="{% static 'unesco.webp' %}" alt="{% trans 'UNESCO and NCTR logo' %}" class="logo unesco-logo-img">
+            </div>
         </div>
-        <div class="footer-item extra-top-margin extra-bottom-margin">
-            {% blocktrans %}
-            <br>
-            Chancellor’s Hall, 177 Dysart Road,
-            <br>
-            University of Manitoba, Winnipeg
-            <br>
-            {% endblocktrans %}
+
+        <div class="footer-column footer-more">
+            <h3>More from the NCTR</h3>
+            <ul class="footer-menu">
+                <li><a href="https://nctr.ca/records/">{% trans 'Your records' %}</a></li>
+                <li><a href="https://nctr.ca/memorial/">{% trans 'Memorial' %}</a></li>
+                <li><a href="https://nctr.ca/news-and-events/">{% trans 'News and Events' %}</a></li>
+                <li><a href="https://nctr.ca/exhibits/">{% trans 'Exhibits' %}</a></li>
+                <li><a href="https://nctr.ca/education/">{% trans 'Education' %}</a></li>
+                <li><a href="https://nctr.ca/research/">{% trans 'Research' %}</a></li>
+                <li><a href="https://nctr.ca/about/">{% trans 'About' %}</a></li>
+            </ul>
         </div>
-        <div class="footer-item">
-            <span class="contact-link-container">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    version="1.1"
-                    viewBox="0 0 32 32"
-                    class="contact-link-icon">
-                    <title>{% trans 'phone' %}</title>
-                    <path d="M22 20c-2 2-2 4-4 4s-4-2-6-4-4-4-4-6 2-2 4-4-4-8-6-8-6 6-6 6c0 4 4.109 12.109 8 16s12 8 16 8c0 0 6-4 6-6s-6-8-8-6z"/>
-                </svg>
-                <a href="tel:1-855-415-4534" class="contact-link-link non-nav-link">
-                    1-855-415-4534
-                </a>
-            </span>
+
+        <div class="footer-column footer-contact">
+
+            <div class="contact-content">
+                <h3>Contact Us</h3>
+                <div class="contact-item">
+                    <div class="icon-container"><i class="fas fa-map-marker-alt"></i></div>
+                    <a href="https://maps.app.goo.gl/S7cEoxgfSkxKrv836" class="non-nav-link">Chancellor's Hall, 177 Dysart Road,<br>
+                    University of Manitoba, Winnipeg</a>
+                </div>
+                <div class="contact-item">
+                    <div class="icon-container"><i class="fas fa-phone-alt"></i></div>
+                    <a href="tel:1-855-415-4534" class="non-nav-link">1-855-415-4534</a>
+                </div>
+                <div class="contact-item">
+                    <div class="icon-container"><i class="fas fa-envelope"></i></div>
+                    <a href="mailto:nctr@umanitoba.ca" class="non-nav-link">nctr@umanitoba.ca</a>
+                </div>
+            </div>
+
+            <div class="hidden-social-content">
+                <h3>Connect with us</h3>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/nctr.ca" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://ca.linkedin.com/company/nctr-um" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.instagram.com/nctr_um/" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation" class="social-icon"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
         </div>
-        <div class="footer-item">
-            <span class="contact-link-container">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 511.996 511.996"
-                    class="contact-link-icon">
-                    <title>{% trans 'email' %}</title>
-                    <path d="m230.9 253.371c13.369 8.913 36.827 8.914 50.199-.001.002-.001.005-.003.007-.004l227.865-151.911c-7.474-21.616-28.018-37.188-52.142-37.188h-401.663c-24.125 0-44.668 15.572-52.143 37.188l227.87 151.912c.003.002.005.002.007.004z"/>
-                    <path d="m297.746 278.328c-.003.002-.005.004-.007.005-11.702 7.801-26.724 11.702-41.741 11.702-15.02 0-30.036-3.9-41.739-11.703-.002-.001-.003-.002-.005-.003l-214.254-142.835v257.072c0 30.417 24.747 55.163 55.166 55.163h401.666c30.418 0 55.164-24.746 55.164-55.163v-257.072z"/>
-                </svg>
-                </svg>
-                <a href="mailto:nctr@umanitoba.ca" class="contact-link-link non-nav-link">
-                    nctr@umanitoba.ca
-                </a>
-            </span>
-        </div>
-        <div class="footer-item extra-top-margin">
-            <img class="footer-logo"
-                width="400"
-                alt="{% trans 'UNESCO and NCTR logo' %}"
-                src="{% static 'unesco.webp' %}" />
-        </div>
-    </div>
-    <div class="footer-column left-justify">
-        <div class="footer-item extra-top-margin extra-bottom-margin">
-            <span class="footer-link-title">
-                More from the NCTR:
-            </span>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/records/">
-                {% trans 'Your records' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/memorial/">
-                {% trans 'Memorial' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/news-and-events/">
-                {% trans 'News and events' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/exhibits/">
-                {% trans 'Exhibits' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/education/">
-                {% trans 'Education' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/research/">
-                {% trans 'Research' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/about/">
-                {% trans 'About' %}
-            </a>
-        </div>
-        <div class="footer-item">
-            <a class="footer-link" href="https://nctr.ca/contact/">
-                {% trans 'Contact' %}
-            </a>
+
+        <div class="footer-column footer-social">
+            <div class="social-content">
+                <h3 class="social-header">Connect with us</h3>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/nctr.ca" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://ca.linkedin.com/company/nctr-um" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.instagram.com/nctr_um/" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation" class="social-icon"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<div class="footer-bottom">
-    <div id="copyright">
-        &copy; 2024 National Centre for Truth and Reconciliation
+    <div class="footer-bottom">
+        <p>&copy; 2025 National Centre for Truth and Reconciliation</p>
     </div>
 </div>
