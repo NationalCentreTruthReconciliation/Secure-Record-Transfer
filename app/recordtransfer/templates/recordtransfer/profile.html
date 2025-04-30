@@ -28,21 +28,20 @@
             class="flex-med-width-item"
             id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}">
         </div>
-        {% comment %} <!-- Past Submissions -->
+
+        <!-- Past Submissions -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Past Submissions" %}</label>
         </div>
-        {% if submissions_page_obj and submissions_page_obj|length > 0 %}
-            {% include "includes/submission_table.html" with submissions=submissions_page_obj %}
-            {% include "includes/pagination.html" with page_obj=submissions_page_obj pagination_name=SUBMISSIONS_PAGE %}
-        {% else %}
-            <div class="flex-med-width-item">
-                <p>{% trans "You have not sent any records to the NCTR." %}</p>
-            </div>
-        {% endif %}
+        <div
+            hx-get="{% url 'recordtransfer:submission_table' %}"
+            hx-trigger="load"
+            class="flex-med-width-item"
+            id="{{ ID_SUBMISSION_TABLE }}">
+        </div>
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
-        </div> {% endcomment %}
+        </div>
 
         <!-- Submission Groups -->
         <div class="flex-med-width-item margin-top-25px">

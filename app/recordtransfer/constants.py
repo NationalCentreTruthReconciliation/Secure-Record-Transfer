@@ -39,3 +39,4 @@ PAGINATE_QUERY_NAME = "p"
 # Pagination Table Container IDs
 ID_SUBMISSION_GROUP_TABLE = "submission-group-table-container"
 ID_IN_PROGRESS_SUBMISSION_TABLE = "in-progress-submission-table-container"
+ID_SUBMISSION_TABLE = "submission-table-container"

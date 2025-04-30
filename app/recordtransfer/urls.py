@@ -70,6 +70,11 @@ urlpatterns = [
         login_required(views.profile.in_progress_submission_table),
         name="in_progress_submission_table",
     ),
+    path(
+        "past-submission-table",
+        login_required(views.profile.submission_table),
+        name="submission_table",
+    ),
 ]
 
 if settings.DEBUG:
