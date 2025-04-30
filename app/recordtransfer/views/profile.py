@@ -110,7 +110,7 @@ def _paginated_table_view(
     target_id: str,
     paginate_url: str,
 ) -> HttpResponse:
-    """Define a generic function to render paginated tables. Request must be made bt HTMX, or else
+    """Define a generic function to render paginated tables. Request must be made by HTMX, or else
     a 400 Error is returned.
     """
     if not request.htmx:
