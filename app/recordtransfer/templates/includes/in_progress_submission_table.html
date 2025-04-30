@@ -30,6 +30,7 @@
                 {% else %}
                     <a href="{{ in_progress.get_resume_url }}">Resume</a>
                 {% endif %}
+            </td>
             <td>
                 <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}">Delete</a>
             </td>
