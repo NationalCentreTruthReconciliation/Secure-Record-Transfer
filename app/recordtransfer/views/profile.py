@@ -62,6 +62,7 @@ class UserProfile(UpdateView):
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
                 },
                 # Table container IDs
+                "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
                 "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
                 "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
             }
