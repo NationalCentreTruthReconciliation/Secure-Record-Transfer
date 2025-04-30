@@ -11,12 +11,14 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
+from django_htmx.middleware import HtmxDetails
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
     ID_CURRENT_PASSWORD,
     ID_FIRST_NAME,
     ID_GETS_NOTIFICATION_EMAILS,
+    ID_IN_PROGRESS_SUBMISSION_TABLE,
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_TABLE,
@@ -78,6 +80,7 @@ class UserProfile(UpdateView):
                 },
                 # Table container IDs
                 "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
+                "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
             }
         )
 
@@ -119,6 +122,9 @@ class UserProfile(UpdateView):
 
 def submission_group_table(request: HttpRequest) -> HttpResponse:
     """Render the submission group table with pagination."""
+    if not request.htmx:
+        return HttpResponse(status=400)
+
     submission_groups = SubmissionGroup.objects.filter(created_by=request.user).order_by(
         "name"
     )
@@ -134,3 +140,25 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
     }
 
     return render(request, "includes/submission_group_table.html", data)
+
+def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
+    """Render the in-progress submission table with pagination."""
+    if not request.htmx:
+        return HttpResponse(status=400)
+
+    in_progress_submissions = InProgressSubmission.objects.filter(
+        user=request.user
+    ).order_by("-last_updated")
+    paginator = Paginator(in_progress_submissions, PAGINATE_BY)
+    page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
+
+    data = {
+        "page": paginator.get_page(page_num),
+        "page_num": page_num,
+        "target_id": ID_IN_PROGRESS_SUBMISSION_TABLE,
+        "paginate_url": reverse("recordtransfer:in_progress_submission_table"),
+        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+    }
+
+    return render(request, "includes/in_progress_submission_table.html", data)
+
