@@ -34,6 +34,7 @@ class TestUserProfileView(TestCase):
         )
         self.client.login(username="testuser", password="old_password")
         self.url = reverse("recordtransfer:user_profile")
+        self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
         self.error_message = "There was an error updating your preferences. Please try again."
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
@@ -45,6 +46,11 @@ class TestUserProfileView(TestCase):
             uuid="550e8400-e29b-41d4-a716-446655440000",
             upload_session=self.upload_session,
         )
+
+        # HTMX related
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
 
     def test_access_authenticated_user(self):
         response = self.client.get(self.url)
@@ -278,7 +284,7 @@ class TestUserProfileView(TestCase):
         """
         self.in_progress_submission.upload_session = None
         self.in_progress_submission.save()
-        response = self.client.get(self.url)
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r"<td>\s*-+\s*</td>")
 
@@ -286,7 +292,7 @@ class TestUserProfileView(TestCase):
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
         expiry_date = self.upload_session.expires_at.astimezone(local_tz).strftime(
             "%a %b %d, %Y @ %H:%M"
@@ -310,7 +316,7 @@ class TestUserProfileView(TestCase):
             self.upload_session.last_upload_interaction_time - timedelta(minutes=35)
         )
         self.upload_session.save()
-        response = self.client.get(self.url)
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         self.assertIn("red-text", content)
@@ -326,7 +332,7 @@ class TestUserProfileView(TestCase):
             self.upload_session.last_upload_interaction_time - timedelta(minutes=65)
         )
         self.upload_session.save()
-        response = self.client.get(self.url)
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         self.assertIn("red-text", content)
