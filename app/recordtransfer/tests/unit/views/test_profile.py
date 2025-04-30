@@ -13,7 +13,13 @@ from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
 from recordtransfer.constants import PAGINATE_QUERY_NAME
-from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
+from recordtransfer.models import (
+    InProgressSubmission,
+    Submission,
+    SubmissionGroup,
+    UploadSession,
+    User,
+)
 
 
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
@@ -41,11 +47,6 @@ class TestUserProfileView(TestCase):
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
 
-        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self.in_progress_submission = self._create_in_progress_submission(
-            upload_session=self.upload_session
-        )
-
         # Table URLs
         self.submission_group_table_url = reverse("recordtransfer:submission_group_table")
         self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
@@ -55,6 +56,14 @@ class TestUserProfileView(TestCase):
         self.htmx_headers = {
             "HX-Request": "true",
         }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        UploadSession.objects.all().delete()
+        InProgressSubmission.objects.all().delete()
+        SubmissionGroup.objects.all().delete()
+        Submission.objects.all().delete()
+        User.objects.all().delete()
 
     def _create_in_progress_submission(
         self,
@@ -333,8 +342,13 @@ class TestUserProfileView(TestCase):
         """Test that the "Expires at" cell contains just a dash when the in-progress submission
         has no upload session, hence no expiry date.
         """
-        self.in_progress_submission.upload_session = None
-        self.in_progress_submission.save()
+        # Create an in-progress submission without an upload session
+        InProgressSubmission.objects.create(
+            user=self.user,
+            uuid=str(uuid.uuid4()),
+            title="Test In-Progress Submission",
+            upload_session=None,
+        )
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r"<td>\s*-+\s*</td>")
@@ -343,9 +357,13 @@ class TestUserProfileView(TestCase):
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
+        upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self._create_in_progress_submission(
+            upload_session=upload_session
+        )
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
-        expiry_date = self.upload_session.expires_at.astimezone(local_tz).strftime(
+        expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(
             "%a %b %d, %Y @ %H:%M"
         )
         # Strip leading zeroes from start of day and month
@@ -363,10 +381,16 @@ class TestUserProfileView(TestCase):
         """Test that the expiry date is shown in red if the in-progress submission is expiring
         soon.
         """
-        self.upload_session.last_upload_interaction_time = (
-            self.upload_session.last_upload_interaction_time - timedelta(minutes=35)
+
+        upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self._create_in_progress_submission(
+            upload_session=upload_session
         )
-        self.upload_session.save()
+
+        upload_session.last_upload_interaction_time = (
+            upload_session.last_upload_interaction_time - timedelta(minutes=35)
+        )
+        upload_session.save()
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
@@ -379,10 +403,15 @@ class TestUserProfileView(TestCase):
         """Test that the expiry date is shown in red and strikethrough if the in-progress
         submission has expired.
         """
-        self.upload_session.last_upload_interaction_time = (
-            self.upload_session.last_upload_interaction_time - timedelta(minutes=65)
+        upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self._create_in_progress_submission(
+            upload_session=upload_session
         )
-        self.upload_session.save()
+
+        upload_session.last_upload_interaction_time = (
+            upload_session.last_upload_interaction_time - timedelta(minutes=65)
+        )
+        upload_session.save()
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
@@ -391,10 +420,9 @@ class TestUserProfileView(TestCase):
 
     @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
     def test_in_progress_submission_table_display(self) -> None:
-        """Test that the in-progress submission table displays in-progress submissions correctly."""
-        # Clear any existing in-progress submissions
-        InProgressSubmission.objects.filter(user=self.user).delete()
-
+        """Test that the in-progress submission table displays in-progress submissions
+        correctly.
+        """
         # Create in-progress submissions
         for i in range(3):
             self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
@@ -407,9 +435,6 @@ class TestUserProfileView(TestCase):
     @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
     def test_in_progress_submission_table_pagination(self) -> None:
         """Test pagination for the in-progress submission table."""
-        # Clear any existing in-progress submissions
-        InProgressSubmission.objects.filter(user=self.user).delete()
-
         # Create in-progress submissions
         for i in range(3):
             self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
@@ -444,9 +469,6 @@ class TestUserProfileView(TestCase):
     @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
     def test_submission_group_table_display(self) -> None:
         """Test that the submission group table displays submission groups correctly."""
-        # Clear any existing submission groups
-        SubmissionGroup.objects.filter(created_by=self.user).delete()
-
         # Create submission groups
         for i in range(3):
             SubmissionGroup.objects.create(
@@ -463,9 +485,6 @@ class TestUserProfileView(TestCase):
     @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
     def test_submission_group_table_pagination(self) -> None:
         """Test pagination for the submission group table."""
-        # Clear any existing submission groups
-        SubmissionGroup.objects.filter(created_by=self.user).delete()
-
         # Create submission groups
         for i in range(3):
             SubmissionGroup.objects.create(
