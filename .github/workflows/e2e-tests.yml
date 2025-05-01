@@ -39,4 +39,6 @@ jobs:
         uses: browser-actions/setup-chrome@latest
 
       - name: Run E2E tests
+        env:
+          SELENIUM_TESTS_HEADLESS_MODE: True
         run: poetry run pytest -m e2e

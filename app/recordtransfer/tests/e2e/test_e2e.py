@@ -2,6 +2,7 @@ import tempfile
 from typing import ClassVar
 
 from caais.models import RightsType, SourceRole, SourceType
+from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
 from selenium import webdriver
@@ -85,7 +86,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
-        chrome_options.add_argument("--headless")
+        if settings.SELENIUM_TESTS_HEADLESS_MODE:
+            chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         prefs = {"autofill.profile_enabled": False}

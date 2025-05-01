@@ -1483,3 +1483,28 @@ CAAIS_DEFAULT_CREATION_NOTE
 
         # file .env
         CAAIS_DEFAULT_CREATION_NOTE='Defaults filled automatically by application.'
+
+Testing
+-------
+
+SELENIUM_TESTS_HEADLESS_MODE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Controls whether Selenium tests run in headless mode*
+
+    .. table::
+
+        =======  =========
+        Default  Type
+        =======  =========
+        False    boolean
+        =======  =========
+
+    When set to ``True``, Selenium tests will run in headless mode (without a visible browser
+    window). This is useful for CI/CD environments or when running tests in the background. When
+    ``False``, browser windows will be visible during test execution.
+
+    ::
+
+        # file .env
+        SELENIUM_TESTS_HEADLESS_MODE=True
