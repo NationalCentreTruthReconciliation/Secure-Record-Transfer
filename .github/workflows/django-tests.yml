@@ -32,3 +32,8 @@ jobs:
 
       - name: Run unit tests
         run: poetry run pytest -k "unit"
+
+      - uses: browser-actions/setup-chrome@v1
+      - run: chrome --version
+      - name: Run E2E tests
+        run: poetry run pytest -m e2e
