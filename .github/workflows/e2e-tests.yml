@@ -39,4 +39,4 @@ jobs:
         uses: browser-actions/setup-chrome@latest
 
       - name: Run E2E tests
-        run: poetry run pytest -k "e2e"
+        run: poetry run pytest -m e2e
