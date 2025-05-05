@@ -6,14 +6,9 @@ ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 WORKDIR ${PROJ_DIR}
 
-# Install poetry
-RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
-
-# Copy poetry-related files, and install Python dependencies
-COPY pyproject.toml poetry.lock README.md ${PROJ_DIR}
-RUN poetry config virtualenvs.create true && \
-    poetry config virtualenvs.in-project true && \
-    poetry install
+# Copy uv-related files, and install Python dependencies
+COPY pyproject.toml uv.lock README.md ${PROJ_DIR}
+RUN uv sync
 
 # Install Node.js dependencies
 COPY package*.json ${PROJ_DIR}
@@ -61,12 +56,12 @@ FROM base AS builder
 # Install build tools for production dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \
-        default-libmysqlclient-dev \
-        pkg-config
+    build-essential \
+    default-libmysqlclient-dev \
+    pkg-config
 
 # Install production dependencies (e.g., mysqlclient)
-RUN poetry install -E prod
+RUN uv sync --extra prod
 
 
 FROM python:3.10-slim AS prod
