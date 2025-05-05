@@ -50,10 +50,6 @@ npm_build = "conftest"
 [tool.uv]
 package = false
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [tool.pytest.ini_options]
 pythonpath = "app"
 python_files = "test_*.py"
