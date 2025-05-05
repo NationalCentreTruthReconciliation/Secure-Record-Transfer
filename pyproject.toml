@@ -38,9 +38,7 @@ dev = [
     "sphinxcontrib-mermaid>=1.0.0,<2",
     "sphinx-rtd-theme>=2.0.0,<3",
 ]
-podman = [
-    "podman-compose>=1.3.0",
-]
+podman = ["podman-compose>=1.3.0"]
 
 [project.urls]
 Repository = "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer"
