@@ -98,7 +98,29 @@ You can then use the provided npm scripts for various tasks:
 
 ## Running the Development Container
 
-Follow [the instructions here](https://secure-record-transfer.readthedocs.io/en/latest/running/index.html#development-application) for the steps to run the development container.
+To start the development container, run:
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml up -d --build --remove-orphans
+
+# Using Podman:
+podman-compose -f compose.dev.yml up -d --build --remove-orphans
+```
+
+By passing the `--build` option, the image will be re-built whenever it's needed; otherwise, the image is cached and reused if nothing changed that requires a rebuild.
+
+The `--remove-orphans` argument is useful when you're switching between running the development image and the production image.
+
+To stop the container, run:
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml down
+
+# Using Podman:
+podman-compose -f compose.dev.yml down
+```
 
 ## Debugging the Application
 
