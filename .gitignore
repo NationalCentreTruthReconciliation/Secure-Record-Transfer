@@ -67,6 +67,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+.pytest_cache/
 
 # Translations
 *.mo
@@ -95,4 +96,6 @@ app/static/
 .dockerenv
 *.sqlite3
 env/
+venv/
+.venv/
 node_modules
