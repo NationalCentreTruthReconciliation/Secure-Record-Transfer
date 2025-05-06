@@ -7,7 +7,7 @@ ENV APP_DIR="/opt/secure-record-transfer/app/"
 WORKDIR ${PROJ_DIR}
 
 # Copy uv-related files, and install Python dependencies
-COPY pyproject.toml uv.lock README.md ${PROJ_DIR}
+COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN uv sync
 
 # Install Node.js dependencies
