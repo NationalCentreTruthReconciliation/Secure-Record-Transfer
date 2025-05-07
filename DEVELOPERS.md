@@ -2,6 +2,10 @@
 
 This page contains information relevant to developers working on this application.
 
+## Contributions
+
+Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. You can skip the "Setup" section of the guide as this repository already includes the necessary VSCode settings in `.vscode/settings.json`.
+
 ## Supported Operating Systems
 
 This application is primarily designed for UNIX-based operating systems (Linux, macOS). Some functionality may not work correctly on Windows.
@@ -24,15 +28,10 @@ These instructions apply to all operating systems. First, install the following 
 
 If developing on Mac or Linux, you'll need the following tools:
 
-1. **Python 3.9+** ([Download Python](https://www.python.org/downloads/))
-2. **Node.js 22+** for Javascript dependency management and builds ([Download Node.js](https://nodejs.org/en/download/))
-3. **Poetry 1.8.5** for Python dependency management ([Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)). Use the following command to install Poetry using the official installer:
+1. **Node.js 22+** for Javascript dependency management and builds ([Download Node.js](https://nodejs.org/en/download/))
+2. **uv 0.7.2** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
   ```shell
-  curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
-  ```
-4. (Optional) **Podman Compose**. If you are using Docker, you do not need this tool. If you are using Podman, install it with:
-  ```shell
-  pip3 install podman-compose
+  curl -LsSf https://astral.sh/uv/0.7.2/install.sh | sh
   ```
 
 ### Windows-Specific Instructions
@@ -40,28 +39,14 @@ If developing on Mac or Linux, you'll need the following tools:
 If developing on Windows, you'll need the following tools:
 
 1. **WSL 2** ([Microsoft WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install)). Note that WSL 2 may have already been installed when installing Docker or Podman; in that case, you can skip this step.
-2. **Python 3.9+**. Use the following commands to install Python:
+2. **uv 0.7.2** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
   ```shell
   # In your WSL terminal:
-  sudo apt update
-  sudo apt upgrade
-  sudo apt upgrade python3
-  sudo apt install python3-pip
-  sudo apt install python3-venv
+  curl -LsSf https://astral.sh/uv/0.7.2/install.sh | sh
   ```
-3. **Poetry 1.8.5**. Use the following command to install Poetry using the official Poetry installer:
-  ```shell
-  # In your WSL terminal:
-  curl -sSL https://install.python-poetry.org | python3 - --version 1.8.5
-  ```
-4. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
-5. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
-6. (Optional) **Podman Compose**. If you are using Docker, you do not need this tool. If you are using Podman, install it with:
-  ```shell
-  # In your WSL terminal:
-  pip3 install podman-compose
-  ```
-7. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
+3. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
+4. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
+5. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
 
 ### Repository Setup
 
@@ -80,11 +65,25 @@ If you're not automatically prompted, you can install recommended extensions man
 2. Typing "@recommended" in the search bar
 3. Installing each listed extension
 
-## Contributions
+## Local Python Environment Setup
 
-Follow [the NCTR's Python Style Guide](https://github.com/NationalCentreTruthReconciliation/Python-Development-Guide) when making contributions. You can skip the "Setup" section of the guide as this repository already includes the necessary VSCode settings in `.vscode/settings.json`.
+After installing `uv` as mentioned in the [Setting up Your Development Environment](#setting-up-your-development-environment) section, install the dependencies with:
 
-## JavaScript Development
+```shell
+# This will also install Python if you don't already have a compatible version
+# The required version is set in .python-version
+uv sync --extra dev
+```
+
+**Note:** If you're using **Podman** instead of Docker, you'll need to install the podman extras as well:
+
+```shell
+uv sync --extra dev --extra podman
+```
+
+When VSCode prompts if you want to select the new environment for this workspace folder, select **Yes**.
+
+## Local Javascript Environment Setup
 
 For JavaScript development, you need to install Node dependencies to gain access to the source code, build tools, and linting/formatting:
 
@@ -97,6 +96,32 @@ You can then use the provided npm scripts for various tasks:
 - `npm run watch` - Rebuild JavaScript files whenever they change (see [Re-build JS as Changes are Made](#re-build-js-as-changes-are-made))
 - `npm run lint` - Run ESLint to check JavaScript files
 
+## Running the Development Container
+
+To start the development container, run:
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml up -d --build --remove-orphans
+
+# Using Podman:
+podman-compose -f compose.dev.yml up -d --build --remove-orphans
+```
+
+By passing the `--build` option, the image will be re-built whenever it's needed; otherwise, the image is cached and reused if nothing changed that requires a rebuild.
+
+The `--remove-orphans` argument is useful when you're switching between running the development image and the production image.
+
+To stop the container, run:
+
+```shell
+# Using Docker:
+docker compose -f compose.dev.yml down
+
+# Using Podman:
+podman-compose -f compose.dev.yml down
+```
+
 ## Debugging the Application
 
 The ports 8009 and 8010 are exposed to allow you to debug the web application, and the asynchronous job queue, respectively. This functionality is only available when `DEBUG = True`. These ports can be attached to with `debugpy`
@@ -106,7 +131,6 @@ The debugging configuration has already been set up in the `.vscode/launch.json`
 ## Continuous Integration
 
 A GitHub Actions workflow is set up to run Django tests on every pull request to the master branch. All tests must pass before a merge is allowed. The workflow configuration can be found in `.github/workflows/django-tests.yml`.
-
 
 ## Re-build JS as Changes are Made
 
@@ -121,23 +145,6 @@ podman-compose -f compose.dev.yml exec app npm run watch
 ```
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
-
-## Local Python Environment Setup
-
-After installing Poetry as mentioned in the [Setting up Your Development Environment](#setting-up-your-development-environment) section, create and activate a virtual environment from the root of the repository:
-
-```shell
-python3 -m venv env
-source env/bin/activate
-```
-
-When VSCode prompts if you want to select the new environment for this workspace folder, select **Yes**.
-
-Finally, install the dependencies with `poetry`:
-
-```shell
-poetry install -E dev
-```
 
 ## Running Tests
 

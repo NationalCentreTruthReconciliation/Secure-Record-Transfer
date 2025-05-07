@@ -99,7 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_REDIRECT_URL = "/"
-LOGIN_URL = '/account/login/'
+LOGIN_URL = "/account/login/"
 
 AUTH_USER_MODEL = "recordtransfer.User"
 
@@ -298,3 +298,5 @@ IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE = config(
 FIXTURE_DIRS = [
     os.path.join(BASE_DIR, "fixtures"),
 ]
+
+SELENIUM_TESTS_HEADLESS_MODE = config("SELENIUM_TESTS_HEADLESS_MODE", default=False, cast=bool)

@@ -103,6 +103,9 @@ LOGGING = {
     },
 }
 
+# Disable ClamAV scanning in tests
+CLAMAV_ENABLED = False
+
 BASE_DIR = tempfile.mkdtemp()
 MEDIA_ROOT = str(Path(BASE_DIR) / "media")
 TEMP_STORAGE_FOLDER = str(Path(MEDIA_ROOT) / "temp")
