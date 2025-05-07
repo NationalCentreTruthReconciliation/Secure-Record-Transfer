@@ -1,8 +1,9 @@
 {
-    "recommendations": [
-      "ms-python.python",
-      "charliermarsh.ruff",
-      "dbaeumer.vscode-eslint",
-      "tamasfe.even-better-toml",
-    ]
-  }
+  "recommendations": [
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "dbaeumer.vscode-eslint",
+    "tamasfe.even-better-toml",
+    "batisteo.vscode-django"
+  ]
+}
