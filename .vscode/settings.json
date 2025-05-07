@@ -29,5 +29,8 @@
         "editor.rulers": [
             99
         ]
+    },
+    "files.associations": {
+        "*.html": "django-html" // Ensures Django-specific formatting
     }
 }
