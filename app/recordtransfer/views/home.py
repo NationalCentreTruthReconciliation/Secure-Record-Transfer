@@ -11,6 +11,10 @@ class Index(TemplateView):
     template_name = "recordtransfer/home.html"
 
 
+class Help(TemplateView):
+    template_name = "recordtransfer/help.html"
+
+
 class SystemErrorPage(TemplateView):
     """The page a user sees when there is some system error."""
 
