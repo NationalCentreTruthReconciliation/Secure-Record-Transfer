@@ -42,6 +42,7 @@ urlpatterns = [
         name="delete_in_progress",
     ),
     path("about/", views.home.About.as_view(), name="about"),
+    path("help/", views.home.Help.as_view(), name="help"),  # Add this line for the Help page
     path(
         "user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"
     ),

@@ -11,6 +11,17 @@ class Index(TemplateView):
     template_name = "recordtransfer/home.html"
 
 
+class Help(TemplateView):
+    template_name = "recordtransfer/help.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
+        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
+        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
+        return context
+
+
 class SystemErrorPage(TemplateView):
     """The page a user sees when there is some system error."""
 
@@ -28,7 +39,5 @@ class About(TemplateView):
         context["MAX_TOTAL_UPLOAD_SIZE_MB"] = settings.MAX_TOTAL_UPLOAD_SIZE_MB
         context["MAX_SINGLE_UPLOAD_SIZE_MB"] = settings.MAX_SINGLE_UPLOAD_SIZE_MB
         context["MAX_TOTAL_UPLOAD_COUNT"] = settings.MAX_TOTAL_UPLOAD_COUNT
-        context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
-        context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
-        context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
+
         return context
