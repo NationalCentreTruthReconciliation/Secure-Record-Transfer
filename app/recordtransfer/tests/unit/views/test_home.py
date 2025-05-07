@@ -33,15 +33,6 @@ class TestAboutPage(TestCase):
     def setUpClass(cls) -> None:
         """Create sample objects to be rendered on about page."""
         super().setUpClass()
-        cls.sample_stype, _ = SourceType.objects.get_or_create(
-            name="Sample Source Type", description="Description for sample source type."
-        )
-        cls.sample_srole, _ = SourceRole.objects.get_or_create(
-            name="Sample Source Role", description="Description for sample source role."
-        )
-        cls.sample_rtype, _ = RightsType.objects.get_or_create(
-            name="Sample Rights Type", description="Description for sample rights type."
-        )
 
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
     def test_accepted_file_types_shown(self) -> None:
@@ -84,23 +75,41 @@ class TestAboutPage(TestCase):
         self.assertNotContains(response, "144 MB")
         self.assertNotContains(response, "100 files")
 
+
+class TestHelpPage(TestCase):
+    """Test help page contents."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Create sample objects to be rendered on about page."""
+        super().setUpClass()
+        cls.sample_stype, _ = SourceType.objects.get_or_create(
+            name="Sample Source Type", description="Description for sample source type."
+        )
+        cls.sample_srole, _ = SourceRole.objects.get_or_create(
+            name="Sample Source Role", description="Description for sample source role."
+        )
+        cls.sample_rtype, _ = RightsType.objects.get_or_create(
+            name="Sample Rights Type", description="Description for sample rights type."
+        )
+
     def test_source_types_in_context(self) -> None:
         """Test that source types are passed to the template context."""
-        response = self.client.get(reverse("recordtransfer:about"))
+        response = self.client.get(reverse("recordtransfer:help"))
         self.assertIn("source_roles", response.context)
         self.assertIn(self.sample_stype, response.context["source_types"])
         self.assertContains(response, "Description for sample source type.")
 
     def test_source_roles_in_context(self) -> None:
         """Test that source roles are passed to the template context."""
-        response = self.client.get(reverse("recordtransfer:about"))
+        response = self.client.get(reverse("recordtransfer:help"))
         self.assertIn("source_roles", response.context)
         self.assertIn(self.sample_srole, response.context["source_roles"])
         self.assertContains(response, "Description for sample source role.")
 
     def test_rights_type_in_context(self) -> None:
         """Test that rights types are passed to the template context."""
-        response = self.client.get(reverse("recordtransfer:about"))
+        response = self.client.get(reverse("recordtransfer:help"))
         self.assertIn("rights_types", response.context)
         self.assertIn(self.sample_rtype, response.context["rights_types"])
         self.assertContains(response, "Description for sample rights type.")
