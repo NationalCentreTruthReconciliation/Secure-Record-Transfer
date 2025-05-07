@@ -549,7 +549,6 @@ class SubmissionFormWizard(SessionWizardView):
         # Add template and JS contexts
         context.update(self._get_template_context())
         context["js_context"] = self._get_javascript_context()
-        context["js_context_id"] = "py_context_" + self.steps.current
 
         return context
 
@@ -591,7 +590,7 @@ class SubmissionFormWizard(SessionWizardView):
         Returns:
             A dictionary of context data to be used in the JavaScript files. Can be empty.
         """
-        js_context = {}
+        js_context = {"context_id": self.steps.current}
 
         step = self.current_step
         if step == SubmissionStep.CONTACT_INFO:
