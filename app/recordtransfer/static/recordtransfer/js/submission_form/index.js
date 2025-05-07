@@ -15,22 +15,7 @@ import {
     setupHelpTooltips,
 } from "./widgets";
 
-document.addEventListener("DOMContentLoaded", function () {
-    setupDatePickers();
-    setupInputMasks();
-    setupUnsavedChangesProtection();
-
-    setupWithContext();
-
-    const submitButton = document.getElementById("submit-form-btn");
-    if (submitButton) {
-        submitButton.addEventListener("click", () => {
-            singleCaptchaFn();
-        });
-    }
-});
-
-const setupWithContext = () => {
+const _setupWithContext = () => {
     const contextElement = document.getElementById("py_context");
     if (!contextElement) {
         return;
@@ -62,16 +47,30 @@ const setupWithContext = () => {
     }
 };
 
-window.addEventListener("load", function () {
+const setup = () => {
+    setupDatePickers();
+    setupInputMasks();
+    setupUnsavedChangesProtection();
     setupHelpTooltips();
-});
+
+    _setupWithContext();
+
+    const submitButton = document.getElementById("submit-form-btn");
+    if (submitButton) {
+        submitButton.addEventListener("click", () => {
+            singleCaptchaFn();
+        });
+    }
+};
+
+document.addEventListener("DOMContentLoaded", setup);
 
 // Function to handle JS context updates after HTMX swaps
-document.addEventListener("htmx:afterSwap", function(event) {
+document.addEventListener("htmx:afterSwap", (event) => {
     // Check if our target was updated
     if (event.target.id === "py_context_div") {
         // Redo setup
         console.log("Context updated, redoing setup");
-        setupWithContext();
+        setup();
     }
 });
