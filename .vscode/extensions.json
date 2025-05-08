@@ -3,7 +3,6 @@
     "ms-python.python",
     "charliermarsh.ruff",
     "dbaeumer.vscode-eslint",
-    "tamasfe.even-better-toml",
-    "junstyle.vscode-django-support"
+    "tamasfe.even-better-toml"
   ]
 }
