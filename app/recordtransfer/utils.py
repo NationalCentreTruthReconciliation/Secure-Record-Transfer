@@ -9,7 +9,7 @@ from django.utils.translation import gettext
 
 from recordtransfer.exceptions import FolderNotFoundError
 
- # This is to avoid a circular import
+# This is to avoid a circular import
 if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
 
@@ -84,7 +84,7 @@ def get_human_readable_size(size_bytes: int, base=1024, precision=2):
     return "%.*f %s" % (precision, size_bytes, suffix)
 
 
-def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, logger=None):
+def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     """Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
     English) the number of files in each group.
 
@@ -92,14 +92,13 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, 
         file_names (list): A list of file paths or names with extension intact
         accepted_file_groups (dict): A dictionary of file group names mapping to a list of
             lowercase file extensions without periods.
-        logger (Logger): A logging instance for any messages.
 
     Returns:
         (str): A string reporting the number of files in each group.
     """
-    logger = logger or LOGGER
+    logger = LOGGER
 
-    counted_types = count_file_types(file_names, accepted_file_groups, logger=logger)
+    counted_types = count_file_types(file_names, accepted_file_groups)
     if not counted_types:
         return "No file types could be identified"
 
@@ -124,7 +123,7 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict, 
     return string_statement
 
 
-def count_file_types(file_names: list, accepted_file_groups: dict, logger=None):
+def count_file_types(file_names: list, accepted_file_groups: dict):
     """Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
@@ -135,12 +134,11 @@ def count_file_types(file_names: list, accepted_file_groups: dict, logger=None):
         file_names (list): A list of file paths or names with extension intact
         accepted_file_groups (dict): A dictionary of file group names mapping to a list of
             lowercase file extensions without periods.
-        logger (Logger): A logging instance.
 
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
     """
-    logger = logger or LOGGER
+    logger = LOGGER
 
     counted_extensions = {}
 
