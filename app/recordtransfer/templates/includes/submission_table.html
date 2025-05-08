@@ -1,5 +1,6 @@
 {% load i18n %}
-<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
+<table class="full-width-table standard-table margin-bottom-25px"
+       cellspacing="0">
     <tr>
         <th class="uuid-column">{% trans "Submission ID" %}</th>
         <th>{% trans "Date Submitted" %}</th>
@@ -15,16 +16,17 @@
             <td>{{ submission.metadata.accession_title }}</td>
             <td>{{ submission.extent_statements }}</td>
             <td>
-                <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}" target="_blank">{% trans "Click to view report" %}</a>
+                <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}"
+                   target="_blank">{% trans "Click to view report" %}</a>
             </td>
             <td>
                 <a href="{% url "recordtransfer:submission_csv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
             </td>
         </tr>
     {% empty %}
-    <tr>
-        <td colspan="6" class="empty-table-text">{% trans "You have not sent any records to the NCTR." %}</td>
-    </tr>
+        <tr>
+            <td colspan="6" class="empty-table-text">{% trans "You have not sent any records to the NCTR." %}</td>
+        </tr>
     {% endfor %}
 </table>
 {% if page %}

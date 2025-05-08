@@ -1,12 +1,12 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Could not Activate" %}{% endblock %}
-
+{% block title %}
+    {% trans "Could not Activate" %}
+{% endblock %}
 {% block content %}
     <div class="title-text">{% trans "Account Could not be Activated." %}</div>
     <p>
-    {% blocktrans %}
+        {% blocktrans %}
         This may be because your account has already been activated, or that the activation link has
         expired.
     {% endblocktrans %}

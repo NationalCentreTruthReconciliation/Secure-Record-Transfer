@@ -1,8 +1,6 @@
 {% extends "recordtransfer/base.html" %}
-
 {% load i18n %}
 {% load static %}
-
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}

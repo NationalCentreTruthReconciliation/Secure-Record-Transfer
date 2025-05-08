@@ -1,10 +1,10 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "System Error" %}{% endblock %}
-
+{% block title %}
+    {% trans "System Error" %}
+{% endblock %}
 {% block content %}
-{% blocktrans %}
+    {% blocktrans %}
 <div>
     <p>We're sorry, but this site is experiencing some issues.</p>
     <p>An administrator has been notified. Please try back later.</p>

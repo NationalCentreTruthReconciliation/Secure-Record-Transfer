@@ -1,12 +1,12 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Account Activated" %}{% endblock %}
-
+{% block title %}
+    {% trans "Account Activated" %}
+{% endblock %}
 {% block content %}
     <div class="title-text">{% trans "Account Activated" %}</div>
     <p>
-    {% blocktrans %}
+        {% blocktrans %}
         Your account has been activated, and you should now be logged in. You may now submit
         records to the NCTR!
     {% endblocktrans %}

@@ -1,20 +1,14 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Login" %}{% endblock %}
-
+{% block title %}
+    {% trans "Login" %}
+{% endblock %}
 {% block content %}
     <div class="account-form-container">
-        <div class="account-page-title title-text">
-            {% trans "Login to your Account" %}
-        </div>
-
+        <div class="account-page-title title-text">{% trans "Login to your Account" %}</div>
         {% if form.non_field_errors %}
-            <div class="account-error">
-                {% trans "Your username or password was not correct." %}
-            </div>
+            <div class="account-error">{% trans "Your username or password was not correct." %}</div>
         {% endif %}
-
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             {% for field in form %}
@@ -36,10 +30,11 @@
                 <button type="submit" class="blue-button">{% trans "Login" %}</button>
             </div>
         </form>
-
         <div id="forgot-password" class="flex-item">
             <label></label>
-            <p><a href="{% url 'password_reset' %}">{% trans "Forgot your password?" %}</a></p>
+            <p>
+                <a href="{% url 'password_reset' %}">{% trans "Forgot your password?" %}</a>
+            </p>
         </div>
     </div>
 {% endblock %}

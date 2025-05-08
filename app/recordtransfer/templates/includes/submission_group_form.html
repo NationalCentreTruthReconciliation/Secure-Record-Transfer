@@ -8,14 +8,12 @@
     {% for field in form %}
         {% if field.errors %}
             <div class="flex-error">
-                <label></label>
                 <div class="field-error">{{ field.errors.0 }}</div>
             </div>
         {% endif %}
         <div class="flex-item margin-top-25px">{{ field.label_tag }} {{ field }}</div>
     {% endfor %}
     <div class="flex-item">
-        <label></label>
         <button type="submit" class="blue-button" id="id_create_group_button">
             {% if IS_NEW %}
                 {% trans "Create" %}
@@ -24,9 +22,7 @@
             {% endif %}
         </button>
         {% if not IS_NEW %}
-            <button type="button" class="red-button" id="id_delete_group_button">
-                {% trans "Delete" %}
-            </button>
+            <button type="button" class="red-button" id="id_delete_group_button">{% trans "Delete" %}</button>
         {% endif %}
     </div>
 </form>

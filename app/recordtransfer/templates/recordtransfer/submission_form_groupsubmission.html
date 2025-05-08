@@ -1,7 +1,6 @@
 {% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
@@ -38,7 +37,6 @@
         <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}">Describe the group and its purpose.</p>
     </div>
 {% endblock formfields %}
-
 {% block dialog %}
     <dialog id="create-new-submissiongroup-modal" class="modal">
         <div class="modal-content">
@@ -46,15 +44,13 @@
                 <h3>{% trans "Create New Submission Group" %}</h3>
                 <button class="close-modal-button" id="close-new-submissiongroup-modal">
                     <img height="20"
-                            width="20"
-                            alt="Close"
-                            src="{% static 'close_menu_64x64px.webp' %}"
-                            draggable="false">
+                         width="20"
+                         alt="Close"
+                         src="{% static 'close_menu_64x64px.webp' %}"
+                         draggable="false">
                 </button>
             </div>
-            <div class="modal-body">
-                {% include "includes/submission_group_form.html" with form=new_group_form %}
-            </div>
+            <div class="modal-body">{% include "includes/submission_group_form.html" with form=new_group_form %}</div>
         </div>
     </dialog>
 {% endblock dialog %}

@@ -1,5 +1,6 @@
 {% load i18n %}
-<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
+<table class="full-width-table standard-table margin-bottom-25px"
+       cellspacing="0">
     <tr>
         <th>{% trans "Last Updated" %}</th>
         <th>{% trans "Expires At" %}</th>
@@ -12,11 +13,8 @@
             <td>{{ in_progress.last_updated|date:"D M j, Y" }} @ {{ in_progress.last_updated|time:"H:i" }}</td>
             <td>
                 {% if in_progress.upload_session_expires_at %}
-                    <span class="
-                        {% if in_progress.upload_session_expires_soon %}red-text{% endif %}
-                        {% if in_progress.upload_session_expired %}strikethrough{% endif %}
-                    ">
-                        {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @ 
+                    <span class=" {% if in_progress.upload_session_expires_soon %}red-text{% endif %} {% if in_progress.upload_session_expired %}strikethrough{% endif %} ">
+                        {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @
                         {{ in_progress.upload_session_expires_at|time:"H:i" }}
                     </span>
                 {% else %}
@@ -36,9 +34,9 @@
             </td>
         </tr>
     {% empty %}
-    <tr>
-        <td colspan="5" class="empty-table-text">{% trans "You have no submissions that are in progress." %}</td>
-    </tr>
+        <tr>
+            <td colspan="5" class="empty-table-text">{% trans "You have no submissions that are in progress." %}</td>
+        </tr>
     {% endfor %}
 </table>
 {% if page %}

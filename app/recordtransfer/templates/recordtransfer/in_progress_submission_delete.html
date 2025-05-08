@@ -21,14 +21,8 @@
         <p>
             <button type="button"
                     onclick="window.location.href='{% url 'recordtransfer:user_profile' %}'"
-                    class="red-button margin-right-20px">
-                    {% trans "Cancel" %}
-            </button>
-            <button type="button"
-                    class="blue-button"
-                    id="ok-btn">
-                    {% trans "OK" %}
-            </button>
+                    class="red-button margin-right-20px">{% trans "Cancel" %}</button>
+            <button type="button" class="blue-button" id="ok-btn">{% trans "OK" %}</button>
         </p>
     </form>
 {% endblock content %}

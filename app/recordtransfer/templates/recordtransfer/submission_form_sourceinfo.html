@@ -1,68 +1,68 @@
 {% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block javascript %}
     {{ block.super }}
 {% endblock javascript %}
-
 {% block formfields %}
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
-            <div class="flex-error initially-hidden">
-                <label for="nothing"></label>
-                <div class="field-error">{{ error }}</div>
-            </div>
+                <div class="flex-error initially-hidden">
+                    <label for="nothing"></label>
+                    <div class="field-error">{{ error }}</div>
+                </div>
             {% endfor %}
         {% endif %}
         {% if field.label != 'hidden' %}
             {% if field.name == "enter_manual_source_info" %}
-            <div class="flex-item">
+                <div class="flex-item">
+                {% else %}
+                    <div class="flex-item initially-hidden hidden-item">
+                    {% endif %}
+                    <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
+                    {{ field }}
+                    {# Help tooltip #}
+                    {% if field.help_text %}
+                        <div tooltip-content="{{ field.help_text }}"
+                             class="help-tooltip help-icon">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        </div>
+                    {% endif %}
+                </div>
             {% else %}
-            <div class="flex-item initially-hidden hidden-item">
-            {% endif %}
-                <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
+                {# Render hidden field #}
                 {{ field }}
-                {# Help tooltip #}
-                {% if field.help_text %}
-                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
-                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                    </div>
-                {% endif %}
-            </div>
-        {% else %}
-            {# Render hidden field #}
-            {{ field }}
-        {% endif %}
-        {% if field.name == "other_source_type" %}
-            <div class="flex-item initially-hidden hidden-item">
-                <label></label>
-                <div>
-                    <i>
-                        {% blocktrans %}
+            {% endif %}
+            {% if field.name == "other_source_type" %}
+                <div class="flex-item initially-hidden hidden-item">
+                    <label></label>
+                    <div>
+                        <i>
+                            {% blocktrans %}
                         <a class="non-nav-link" target="_blank" href="/about/#source-types">Click here</a>
                         for an explanation of the different types of source types.
                         {% endblocktrans %}
-                    </i>
+                        </i>
+                    </div>
+                    <br>
                 </div>
-                <br>
-            </div>
-        {% elif field.name == "other_source_role" %}
-            <div class="flex-item initially-hidden hidden-item">
-                <label></label>
-                <div>
-                    <i>
-                        {% blocktrans %}
+            {% elif field.name == "other_source_role" %}
+                <div class="flex-item initially-hidden hidden-item">
+                    <label></label>
+                    <div>
+                        <i>
+                            {% blocktrans %}
                         <a class="non-nav-link" target="_blank" href="/about/#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
                         {% endblocktrans %}
-                    </i>
+                        </i>
+                    </div>
+                    <br>
                 </div>
-                <br>
-            </div>
-        {% endif %}
-    {% endfor %}
-{% endblock formfields %}
-
-{% block buttonarrayclass %}flex-item{% endblock buttonarrayclass %}
+            {% endif %}
+        {% endfor %}
+    {% endblock formfields %}
+    {% block buttonarrayclass %}
+        flex-item
+    {% endblock buttonarrayclass %}
