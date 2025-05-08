@@ -40,7 +40,7 @@ const _setupWithContext = () => {
         setupSubmissionGroupForm(context);
         break;
     case "uploadfiles":
-        setupUppy();
+        setupUppy(context);
         break;
     default:
         break;

@@ -9,7 +9,6 @@ import {
     getCookie,
     getSessionToken,
     setSessionToken,
-    getFileUploadSettings,
     fetchUploadedFiles,
     makeMockBlob,
     sendDeleteRequestForFile,
@@ -18,17 +17,14 @@ import {
 } from "./utils";
 
 /**
- * Sets up the Uppy space for uploading files.
+ * Sets up the Uppy widget for uploading files.
+ * @param {object} context - The configuration context containing upload settings
  */
-export async function setupUppy() {
-    const settings = getFileUploadSettings();
-    // Don't render Uppy at all if settings are not available
-    if (!settings) {return;}
-
+export async function setupUppy(context) {
     const reviewButton = document.getElementById("form-review-button");
     const submissionForm = document.getElementById("submission-form");
     const issueFileIds = [];
-
+    
     /**
      * Updates the display of the file capacity information on the page
      * @param {import('@uppy/core').Uppy} uppy - The Uppy instance
@@ -37,19 +33,19 @@ export async function setupUppy() {
     const updateCapacity = (uppy) => {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
-        updateCapacityDisplay(uppyFiles.length, totalSize);
+        updateCapacityDisplay(totalSize, context["MAX_TOTAL_UPLOAD_SIZE_MB"]);
     };
 
     const uppy = new Uppy(
         {
             autoProceed: true,
             restrictions: {
-                maxFileSize: settings.MAX_SINGLE_UPLOAD_SIZE_MB * 1000 * 1000,
+                maxFileSize: context["MAX_SINGLE_UPLOAD_SIZE_MB"] * 1000 * 1000,
                 minFileSize: 0,
-                maxTotalFileSize: settings.MAX_TOTAL_UPLOAD_SIZE_MB * 1000 * 1000,
+                maxTotalFileSize: context["MAX_TOTAL_UPLOAD_SIZE_MB"] * 1000 * 1000,
                 minNumberOfFiles: 1,
-                maxNumberOfFiles: settings.MAX_TOTAL_UPLOAD_COUNT,
-                allowedFileTypes: settings.ACCEPTED_FILE_FORMATS,
+                maxNumberOfFiles: context["MAX_TOTAL_UPLOAD_COUNT"],
+                allowedFileTypes: context["ACCEPTED_FILE_FORMATS"],
             },
         }
     )
