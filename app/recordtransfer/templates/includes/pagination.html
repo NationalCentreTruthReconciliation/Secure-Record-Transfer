@@ -2,7 +2,7 @@
 {% load query_params %}
 <div class="pagination">
     {% if page.has_previous %}
-        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.previous_page_number }}" 
+        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.previous_page_number }}"
            hx-target="#{{ target_id }}"
            class="btn-arrow btn-arrow-left"></a>
     {% else %}
@@ -14,7 +14,7 @@
         {% endblocktrans %}
     </span>
     {% if page.has_next %}
-        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.next_page_number }}" 
+        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.next_page_number }}"
            hx-target="#{{ target_id }}"
            class="btn-arrow btn-arrow-right"></a>
     {% else %}
