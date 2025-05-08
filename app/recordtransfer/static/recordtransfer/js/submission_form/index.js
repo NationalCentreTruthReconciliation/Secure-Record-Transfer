@@ -16,14 +16,16 @@ import {
 } from "./widgets";
 
 const _setupWithContext = () => {
-    const contextElement = document.getElementById("py_context");
+    const contextElement = document.querySelector("[id^=\"js_context_\"]");
     if (!contextElement) {
         return;
     }
     const context = JSON.parse(contextElement.textContent);
-    const context_id = context["context_id"];
     
-    switch (context_id) {
+    const idParts = contextElement.id.split("js_context_");
+    const contextFor = idParts.length > 1 ? idParts[1] : "";
+    
+    switch (contextFor) {
     case "contactinfo":
         setupContactInfoForm(context);
         break;
