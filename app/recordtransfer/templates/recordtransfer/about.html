@@ -14,105 +14,34 @@
 </p>
 
 {% if FILE_UPLOAD_ENABLED %}
-    <div class="title-text margin-top-25px">{% trans "Maximum Submission Size" %}</div>
-    <p>
-        {% blocktrans %}
-        Submissions made through the transfer portal are subject to the maximum submission size.
-        You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
-        {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB of files</b>. Any <b>one file may not exceed
-        {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. If you would like to submit <i>more</i> than this
-        amount, please split your submission into multiple parts, and use the group form to group similar
-        submissions together so our archivists know your submissions are related.
-        {% endblocktrans %}
-    </p>
-    <div class="title-text margin-top-25px">{% trans "Accepted File Types" %}</div>
-    <p>
-        {% blocktrans %}
-        The following are the types of files that donors can submit using this application.
-        {% endblocktrans %}
-    </p>
-    {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
-        {% if extensions %}
-            <div class="medium-text">{{ group }} Files</div>
-            <ul>
-                {% for extension in extensions %}
-                    <li>{{ extension }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endfor %}
-{% endif %}
-
-<h1 class="margin-top-25px" id="form-help">{% trans "Form Help" %}</h1>
+<div class="title-text margin-top-25px">{% trans "Maximum Submission Size" %}</div>
 <p>
     {% blocktrans %}
-    Refer to the following section if you come across a part of the form that you need assistance
-    with.
+    Submissions made through the transfer portal are subject to the maximum submission size.
+    You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
+    {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB of files</b>. Any <b>one file may not exceed
+    {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. If you would like to submit <i>more</i> than this
+    amount, please split your submission into multiple parts, and use the group form to group similar
+    submissions together so our archivists know your submissions are related.
     {% endblocktrans %}
 </p>
-
-<h2 class="margin-top-25px" id="source-types">{% trans "Source Types" %}</h2>
+<div class="title-text margin-top-25px">{% trans "Accepted File Types" %}</div>
 <p>
     {% blocktrans %}
-    The <i>source type</i> describes what type of entity the source of the records is. If none of
-    the provided options properly describe the source entity, select <b>Other</b> in the
-    source types dropdown and enter your own type.
+    The following are the types of files that donors can submit using this application.
     {% endblocktrans %}
 </p>
-{% if source_types %}
-    <p>
-        {% blocktrans %}
-        The following is a description of each source type:
-        {% endblocktrans %}
-    </p>
-    <ul>
-    {% for source_type in source_types %}
-        <li><b>{{ source_type.name }}:</b> {{ source_type.description }}</li>
+{% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
+{% if extensions %}
+<div class="medium-text">{{ group }} Files</div>
+<ul>
+    {% for extension in extensions %}
+    <li>{{ extension }}</li>
     {% endfor %}
-    </ul>
+</ul>
+{% endif %}
+{% endfor %}
 {% endif %}
 
-<h2 class="margin-top-25px" id="source-roles">{% trans "Source Roles" %}</h2>
-<p>
-    {% blocktrans %}
-    The <i>source role</i> describes how the entity relates to the records. If none of the
-    provided options properly describe the source's relationship to the records, select
-    <b>Other</b> in the source roles dropdown and enter your own type.
-    {% endblocktrans %}
-</p>
-{% if source_roles %}
-    <p>
-        {% blocktrans %}
-        The following is a description of each source role:
-        {% endblocktrans %}
-    </p>
-    <ul>
-    {% for source_role in source_roles %}
-        <li><b>{{ source_role.name }}:</b> {{ source_role.description }}</li>
-    {% endfor %}
-    </ul>
-{% endif %}
-
-<h2 class="margin-top-25px" id="rights-types">{% trans "Rights Types" %}</h2>
-<p>
-    {% blocktrans %}
-    Depending on the records you are submitting, there may be specific rights that govern
-    the access of your records. The following is a brief description about the types of
-    rights that are available to be used. If none suit your needs, select <b>Other</b> in
-    the rights dropdown.
-    {% endblocktrans %}
-</p>
-{% if rights_types %}
-    <p>
-        {% blocktrans %}
-        The following is a description of each rights type:
-        {% endblocktrans %}
-    </p>
-    <ul>
-    {% for rights_type in rights_types %}
-        <li><b>{{ rights_type.name }}:</b> {{ rights_type.description }}</li>
-    {% endfor %}
-    </ul>
-{% endif %}
 
 {% endblock %}
