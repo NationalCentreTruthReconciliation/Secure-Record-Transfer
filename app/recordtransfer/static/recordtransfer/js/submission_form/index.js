@@ -21,10 +21,8 @@ const _setupWithContext = () => {
         return;
     }
     const context = JSON.parse(contextElement.textContent);
-    
-    const idParts = contextElement.id.split("js_context_");
-    const contextFor = idParts.length > 1 ? idParts[1] : "";
-    
+    const contextFor = contextElement.id.replace(/^js_context_/, "");
+
     switch (contextFor) {
     case "contactinfo":
         setupContactInfoForm(context);
