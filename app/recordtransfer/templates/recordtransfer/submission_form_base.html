@@ -37,7 +37,13 @@
         {% endblock messages %}
         {% block form_explanation %}
         {% endblock form_explanation %}
-        <form id="submission-form" action="" hx-boost="true">
+        <form
+            id="submission-form"
+            hx-post="{{ request.path }}"
+            hx-target="#submission-content"
+            hx-select="#submission-content"
+            hx-swap="outerHTML"
+        >
             {% csrf_token %}
             {{ wizard.management_form }}
             {{ wizard.form.management_form }}
@@ -49,11 +55,6 @@
                         {# Without formnovalidate, you can't go to the previous step without valid data #}
                         {# Which kind of defeats the purpose of going back to the previous step! #}
                         <button id="form-previous-button"
-                                hx-post="{{ request.path }}"
-                                hx-target="#submission-content"
-                                hx-select="#submission-content"
-                                hx-swap="outerHTML"
-                                hx-trigger="click"
                                 formnovalidate="formnovalidate"
                                 name="wizard_goto_step"
                                 value="{{ wizard.steps.prev }}"
@@ -65,11 +66,6 @@
                             {% comment %} Button is "next" by default, but the id for a "submit" button can be
                             overrided using this block {% endcomment %}
                             id="form-next-button"
-                            hx-post="{{ request.path }}"
-                            hx-target="#submission-content"
-                            hx-select="#submission-content"
-                            hx-swap="outerHTML"
-                            hx-trigger="click"
                             {% endblock submitbuttonattributes %}
                             type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
                             class="blue-button margin-right-30px">
@@ -82,11 +78,6 @@
                     {% endif %}
                     {% if SHOW_REVIEW_BUTTON %}
                         <button id="form-review-button"
-                                hx-post="{{ request.path }}"
-                                hx-target="#submission-content"
-                                hx-select="#submission-content"
-                                hx-swap="outerHTML"
-                                hx-trigger="click"
                                 name="wizard_goto_step"
                                 value="{{ wizard.steps.last }}"
                                 class="green-button">
