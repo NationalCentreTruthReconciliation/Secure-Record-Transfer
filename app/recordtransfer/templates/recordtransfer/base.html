@@ -1,6 +1,5 @@
 {% load static %}
 {% load i18n %}
-{% load django_htmx %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +8,6 @@
     <!-- JS -->
     {% block javascript %}
     <script src="{% static 'base.bundle.js' %}"></script>
-    {% htmx_script %}
     {% endblock javascript %}
     {# Fonts #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
