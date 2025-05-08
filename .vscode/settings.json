@@ -28,6 +28,7 @@
     "[restructuredtext]": {
         "editor.rulers": [
             99
-        ]
+        ],
+        "editor.wordWrap": "on"
     }
 }
