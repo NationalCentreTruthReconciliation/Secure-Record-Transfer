@@ -72,7 +72,6 @@ following command:
 
 .. code-block:: bash
 
-    # Using Podman:
     podman-compose -f compose.dev.yml exec app python manage.py reset
 
 This will prompt you to confirm the deletion of all data in the database. Type "y" to proceed.
@@ -83,7 +82,6 @@ To also populate the database with test data and populate corresponding uploaded
 
 .. code-block:: bash
 
-    # Using Podman:
     podman-compose -f compose.dev.yml exec app python manage.py reset --seed
 
 An admin user will be created with the username ``admin`` and password ``123``, along with test
