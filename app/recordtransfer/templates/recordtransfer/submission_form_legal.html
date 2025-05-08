@@ -1,11 +1,10 @@
 {% extends 'recordtransfer/submission_form_standard.html' %}
 {% load i18n %}
-
 {% block form_explanation %}
     {% url 'recordtransfer:index' as homepage %}
     <p>
         <b>
-        {% blocktrans %}
+            {% blocktrans %}
         Terms of Submission
         {% endblocktrans %}
         </b>
@@ -27,7 +26,8 @@
     </p>
     <p>
         {% blocktrans %}
-        If you do not wish to continue, you may <a href="{{ homepage }}">go back.</a>
-        {% endblocktrans %}
-    <br>
+            If you do not wish to continue, you may <a href="{{ homepage }}">go back.</a>
+            {% endblocktrans %}
+        <br>
+    </p>
 {% endblock %}

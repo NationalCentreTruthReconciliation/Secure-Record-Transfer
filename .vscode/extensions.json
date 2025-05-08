@@ -1,10 +1,10 @@
 {
-      "recommendations": [
-        "ms-python.python",
-        "charliermarsh.ruff",
-        "dbaeumer.vscode-eslint",
-        "tamasfe.even-better-toml",
-        "batisteo.vscode-django",
-        "monosans.djlint"
-      ]
+  "recommendations": [
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "dbaeumer.vscode-eslint",
+    "tamasfe.even-better-toml",
+    "monosans.djlint",
+    "atisteo.vscode-django"
+  ]
 }

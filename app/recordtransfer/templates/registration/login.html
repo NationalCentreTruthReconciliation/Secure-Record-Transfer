@@ -15,7 +15,6 @@
                 {% if field.errors %}
                     {% for error in field.errors %}
                         <div class="flex-error">
-                            <label></label>
                             <div class="field-error">{{ error }}</div>
                         </div>
                     {% endfor %}
@@ -26,12 +25,10 @@
                 </div>
             {% endfor %}
             <div class="flex-item">
-                <label></label>
                 <button type="submit" class="blue-button">{% trans "Login" %}</button>
             </div>
         </form>
         <div id="forgot-password" class="flex-item">
-            <label></label>
             <p>
                 <a href="{% url 'password_reset' %}">{% trans "Forgot your password?" %}</a>
             </p>

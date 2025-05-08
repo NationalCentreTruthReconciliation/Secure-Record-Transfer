@@ -1,20 +1,14 @@
 {% load i18n %}
 <!DOCTYPE html>
-<html style="
-    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;">
-    <body style="
-        margin: 0;">
-        <div style="
-            color: #333333;
-            font-size: 20pt;
-            padding: 6px 20px;
-            background-color: #eeeeee;
-            margin-bottom: 15px;">
-            {% trans "Thank You for Your Submission" %}
-        </div>
-        <div style="
-            padding: 0px 20px;">
+<html style="font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
+             margin: 0">
+    <body style=" margin: 0;">
+        <div style="color: #333333;
+                    font-size: 20pt;
+                    padding: 6px 20px;
+                    background-color: #eeeeee;
+                    margin-bottom: 15px">{% trans "Thank You for Your Submission" %}</div>
+        <div style=" padding: 0px 20px;">
             <p>
                 {% blocktrans %}
                 Thank you for your record submission using the NCTR Record Transfer Portal. The
@@ -28,13 +22,9 @@
                 this email address:
                 {% endblocktrans %}
             </p>
-            <p>
-                {{ archivist_email }}
-            </p>
+            <p>{{ archivist_email }}</p>
             <hr>
-            <h3>
-                {% trans "Submission Agreement" %}
-            </h3>
+            <h3>{% trans "Submission Agreement" %}</h3>
             <p>
                 {% blocktrans %}
                 Thank you for submitting records with the NCTR Record Transfer App. By completing
@@ -53,25 +43,23 @@
                 {% endblocktrans %}
             </p>
             {% block postscript %}
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% blocktrans %}
+                <div style=" font-size: 10pt;">
+                    <i>
+                        {% blocktrans %}
                 This email address is not monitored, do not reply to this message.
                 {% endblocktrans %}
-                </i>
-            </div>
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% url 'recordtransfer:user_profile' as profile_url %}
-                {% blocktrans %}
+                    </i>
+                </div>
+                <div style=" font-size: 10pt;">
+                    <i>
+                        {% url 'recordtransfer:user_profile' as profile_url %}
+                        {% blocktrans %}
                 If you do not want to receive these emails anymore, you can change the
                 "Receive notification emails?" setting in
                 <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
                 {% endblocktrans %}
-                </i>
-            </div>
+                    </i>
+                </div>
             {% endblock %}
         </div>
     </body>
