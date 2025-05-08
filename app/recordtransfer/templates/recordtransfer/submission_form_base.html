@@ -41,6 +41,7 @@
             hx-target="#main-container"
             hx-select="#main-container"
             hx-swap="outerHTML"
+            method="POST"
         >
             {% csrf_token %}
             {{ wizard.management_form }}
