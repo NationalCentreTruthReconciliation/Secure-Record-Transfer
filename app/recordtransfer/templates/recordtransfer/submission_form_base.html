@@ -10,7 +10,7 @@
     {{ block.super }}
     <script src="{% static 'submission_form.bundle.js' %}"></script>
     <script>
-        const currentFormStep = {{ wizard.steps.step1 }}
+        var currentFormStep = {{ wizard.steps.step1 }}
     </script>
 {% endblock javascript %}
 {% block stylesheet %}
@@ -37,7 +37,7 @@
         {% endblock messages %}
         {% block form_explanation %}
         {% endblock form_explanation %}
-        <form id="submission-form" action="" method="post">
+        <form id="submission-form" action="" hx-boost="true">
             {% csrf_token %}
             {{ wizard.management_form }}
             {{ wizard.form.management_form }}

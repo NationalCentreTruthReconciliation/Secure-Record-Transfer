@@ -29,7 +29,7 @@
             {% block title %}{% endblock title %}
         </title>
     </head>
-    <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+    <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' hx-ext="head-support">
         <div class="flex-wrapper">
             {% block banner %}
                 {% include "recordtransfer/banner.html" %}
