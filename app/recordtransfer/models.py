@@ -384,16 +384,11 @@ class UploadSession(models.Model):
             if save:
                 self.save()
 
-    def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
-        """Make all temporary uploaded files associated with this session permanent.
-
-        Args:
-            logger: Optional logger instance to use for logging operations
-        """
-        logger = logger or LOGGER
+    def make_uploads_permanent(self) -> None:
+        """Make all temporary uploaded files associated with this session permanent."""
 
         if self.status == self.SessionStatus.STORED:
-            logger.info(
+            LOGGER.info(
                 "All uploaded files in session %s are already in permanent storage", self.token
             )
             return
@@ -410,7 +405,7 @@ class UploadSession(models.Model):
 
         files = self.tempuploadedfile_set.all()
 
-        logger.info(
+        LOGGER.info(
             "Moving %d temporary uploaded files from the session %s to permanent storage",
             len(files),
             self.token,
@@ -419,7 +414,7 @@ class UploadSession(models.Model):
             for uploaded_file in files:
                 uploaded_file.move_to_permanent_storage()
         except Exception as e:
-            logger.error(
+            LOGGER.error(
                 "An error occurred while moving uploaded files to permanent storage: %s", e
             )
             self.status = self.SessionStatus.COPYING_FAILED
@@ -428,19 +423,15 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.STORED
         self.save()
 
-    def copy_session_uploads(
-        self, destination: str, logger: Optional[logging.Logger] = None
-    ) -> tuple[list[str], list[str]]:
+    def copy_session_uploads(self, destination: str) -> tuple[list[str], list[str]]:
         """Copy permanent uploaded files associated with this session to a destination directory.
 
         Args:
             destination: The destination directory
-            logger: A logger object
 
         Returns:
             A tuple containing lists of copied and missing files
         """
-        logger = logger or LOGGER
 
         if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
@@ -459,26 +450,26 @@ class UploadSession(models.Model):
 
         destination_path = Path(destination)
         if not destination_path.exists():
-            logger.error("The destination path %s does not exist!", destination)
+            LOGGER.error("The destination path %s does not exist!", destination)
             raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
         files = self.permuploadedfile_set.all()
 
-        logger.info("Copying %d files to %s", len(files), destination)
+        LOGGER.info("Copying %d files to %s", len(files), destination)
         copied, missing = [], []
         for f in files:
             if not f.exists:
-                logger.error('File "%s" was moved or deleted', f.file_upload.path)
+                LOGGER.error('File "%s" was moved or deleted', f.file_upload.path)
                 missing.append(f.file_upload.path)
                 continue
 
             if f.name is not None:
                 new_path = destination_path / f.name
-                logger.info("Copying %s to %s", f.file_upload.path, new_path)
+                LOGGER.info("Copying %s to %s", f.file_upload.path, new_path)
                 f.copy(str(new_path))
                 copied.append(str(new_path))
             else:
-                logger.error('File name is None for file "%s"', f.file_upload.path)
+                LOGGER.error('File name is None for file "%s"', f.file_upload.path)
                 missing.append(f.file_upload.path)
 
         # No need to set status to COPYING_FAILED even if some files are missing
@@ -516,9 +507,7 @@ class UploadSession(models.Model):
         size = get_human_readable_size(self.upload_size, base=1000, precision=2)
 
         count = get_human_readable_file_count(
-            [f.name for f in self.get_uploads()],
-            settings.ACCEPTED_FILE_FORMATS,
-            LOGGER,
+            [f.name for f in self.get_uploads()], settings.ACCEPTED_FILE_FORMATS
         )
 
         return _("{0}, totalling {1}").format(count, size)
@@ -822,12 +811,7 @@ class Submission(models.Model):
     def __str__(self):
         return f"Submission by {self.user} at {self.submission_date}"
 
-    def make_bag(
-        self,
-        algorithms: Union[str, list] = "sha512",
-        file_perms: str = "644",
-        logger: Optional[logging.Logger] = None,
-    ):
+    def make_bag(self, algorithms: Union[str, list] = "sha512", file_perms: str = "644"):
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
         is determined by self.location. Checks the validity of the Bag post-creation to ensure that
         integrity is maintained. The data payload files come from the UploadSession associated with
@@ -836,9 +820,7 @@ class Submission(models.Model):
         Args:
             algorithms (Union[str, list]): The algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
-            logger: A logger instance (optional)
         """
-        logger = logger or LOGGER
 
         if not algorithms:
             raise ValueError("algorithms cannot be empty")
@@ -898,24 +880,24 @@ class Submission(models.Model):
                 "time_created": None,
             }
 
-        logger.info('Creating BagIt bag at "%s"', self.location)
-        logger.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
+        LOGGER.info('Creating BagIt bag at "%s"', self.location)
+        LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
 
         bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
         bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
 
-        logger.info("Setting file mode for bag payload files to %s", file_perms)
+        LOGGER.info("Setting file mode for bag payload files to %s", file_perms)
         perms = int(file_perms, 8)
         for payload_file in bag.payload_files():
             payload_file_path = os.path.join(self.location, payload_file)
             os.chmod(payload_file_path, perms)
 
-        logger.info('Validating the bag created at "%s"', self.location)
+        LOGGER.info('Validating the bag created at "%s"', self.location)
         valid = bag.is_valid()
 
         if not valid:
-            logger.error("Bag is INVALID!")
-            logger.info('Removing bag at "%s" since it\'s invalid', self.location)
+            LOGGER.error("Bag is INVALID!")
+            LOGGER.info('Removing bag at "%s" since it\'s invalid', self.location)
             self.remove_bag()
             return {
                 "missing_files": [],
@@ -924,7 +906,7 @@ class Submission(models.Model):
                 "time_created": None,
             }
 
-        logger.info("Bag is VALID")
+        LOGGER.info("Bag is VALID")
         current_time = timezone.now()
 
         return {
@@ -1045,7 +1027,7 @@ class InProgressSubmission(models.Model):
 
     def get_resume_url(self) -> str:
         """Get the URL to access and resume the in-progress submission."""
-        return f'{reverse("recordtransfer:submit")}?resume={self.uuid}'
+        return f"{reverse('recordtransfer:submit')}?resume={self.uuid}"
 
     def reset_reminder_email_sent(self) -> None:
         """Reset the reminder email flag to False, if it isn't already False."""
