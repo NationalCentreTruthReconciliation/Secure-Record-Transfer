@@ -2,514 +2,528 @@
 {% load static %}
 
 <html lang="en">
-<head>
+  <head>
     <title>Submission Report for "{{ metadata.accession_title }}"</title>
-    <meta name="description" content="Automatically generated report for the submission.">
-    <meta name="keywords" content="report, submission, metadata">
-    <link rel="stylesheet" href="{% static 'submission_detail.css' %}">
-</head>
-<body>
+    <meta name="description" content="Automatically generated report for the submission." />
+    <meta name="keywords" content="report, submission, metadata" />
+    <link rel="stylesheet" href="{% static 'submission_detail.css' %}" />
+  </head>
+  <body>
     <div class="main-title">Submission Report for "{{ metadata.accession_title }}"</div>
     <div class="main-container">
-        <p>
-            The following is an automatically generated report for the submission made by
-            {{ submission.user.username }} ({{ submission.user.email }}) at {{ submission.submission_date }}, titled
-            "{{ metadata.accession_title }}".
-        </p>
-        <table border="1" cellspacing="0">
-            <tr>
-                <th colspan="2"><div class="title">Submission Context</div></th>
-            </tr>
-            <tr>
-                <td><b>Submission Date</b></td>
-                <td>{{ submission.submission_date }}</td>
-            </tr>
-            <tr>
-                <td><b>Submitted By</b></td>
-                <td>{{ submission.user.username }}</td>
-            </tr>
-            <tr>
-                <td><b>Report Generation Date</b></td>
-                <td>{{ current_date }}</td>
-            </tr>
-            <tr>
-                <td><b>Submission UUID</b></td>
-                <td>{{ submission.uuid }}</td>
-            </tr>
-        </table>
+      <p>The following is an automatically generated report for the submission made by
+        {{ submission.user.username }} ({{ submission.user.email }}) at {{ submission.submission_date }}, titled "{{ metadata.accession_title }}".</p>
+      <table border="1" cellspacing="0">
+        <tr>
+          <th colspan="2">
+            <div class="title">Submission Context</div>
+          </th>
+        </tr>
+        <tr>
+          <td>
+            <b>Submission Date</b>
+          </td>
+          <td>{{ submission.submission_date }}</td>
+        </tr>
+        <tr>
+          <td>
+            <b>Submitted By</b>
+          </td>
+          <td>{{ submission.user.username }}</td>
+        </tr>
+        <tr>
+          <td>
+            <b>Report Generation Date</b>
+          </td>
+          <td>{{ current_date }}</td>
+        </tr>
+        <tr>
+          <td>
+            <b>Submission UUID</b>
+          </td>
+          <td>{{ submission.uuid }}</td>
+        </tr>
+      </table>
 
-        <h2 class="section-heading">1. Identity Information Section</h2>
-        <section>
-            <div class="name-field">1.1 Repository</div>
-            <div class="value-field" id="repository">
-                {% if metadata.repository %}
-                    {{ metadata.repository }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
-            </div>
+      <h2 class="section-heading">1. Identity Information Section</h2>
+      <section>
+        <div class="name-field">1.1 Repository</div>
+        <div class="value-field" id="repository">
+          {% if metadata.repository %}
+            {{ metadata.repository }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
 
-            <div class="name-field">1.2 Identifiers</div>
-            {% if metadata.identifiers.all %}
-                {% for identifier in metadata.identifiers.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Identifier {{ forloop.counter }} of {{ metadata.identifiers.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>1.2.1 Identifier Type:</b>
-                            <span id="identifier-type-{{ forloop.counter }}">{{ identifier.identifier_type }}</span>
-                        </li>
-                        <li>
-                            <b>1.2.1 Identifier Value:</b>
-                            <span id="identifier-value-{{ forloop.counter }}">{{ identifier.identifier_value }}</span>
-                        </li>
-                        <li>
-                            <b>1.2.1 Identifier Note:</b>
-                            <span id="identifier-note-{{ forloop.counter }}">{{ identifier.identifier_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-
-            <div class="name-field">1.3 Accession Title</div>
-            <div class="value-field" id="accession-title">
-                {% if metadata.accession_title %}
-                    {{ metadata.accession_title }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
-            </div>
-
-            <div class="name-field">1.4 Archival Unit</div>
+        <div class="name-field">1.2 Identifiers</div>
+        {% if metadata.identifiers.all %}
+          {% for identifier in metadata.identifiers.all %}
             <div class="value-field">
-                {% if metadata.archival_units.all %}
-                    <ul class="no-ul-margin">
-                    {% for archival_unit in metadata.archival_units.all %}
-                        <li id="archival-unit-{{ forloop.counter }}">{{ archival_unit.archival_unit }}</li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+              <div class="repeatable-field-counter">
+                <i>Identifier {{ forloop.counter }} of {{ metadata.identifiers.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>1.2.1 Identifier Type:</b>
+                  <span id="identifier-type-{{ forloop.counter }}">{{ identifier.identifier_type }}</span>
+                </li>
+                <li>
+                  <b>1.2.1 Identifier Value:</b>
+                  <span id="identifier-value-{{ forloop.counter }}">{{ identifier.identifier_value }}</span>
+                </li>
+                <li>
+                  <b>1.2.1 Identifier Note:</b>
+                  <span id="identifier-note-{{ forloop.counter }}">{{ identifier.identifier_note }}</span>
+                </li>
+              </ul>
             </div>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
 
-            <div class="name-field">1.5 Acquisition Method</div>
-            <div class="value-field" id="acquisition-method">
-                {% if metadata.acquisition_method %}
-                    {{ metadata.acquisition_method.name }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
-            </div>
+        <div class="name-field">1.3 Accession Title</div>
+        <div class="value-field" id="accession-title">
+          {% if metadata.accession_title %}
+            {{ metadata.accession_title }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
 
-            <div class="name-field">1.6 Disposition Authority</div>
+        <div class="name-field">1.4 Archival Unit</div>
+        <div class="value-field">
+          {% if metadata.archival_units.all %}
+            <ul class="no-ul-margin">
+              {% for archival_unit in metadata.archival_units.all %}
+                <li id="archival-unit-{{ forloop.counter }}">{{ archival_unit.archival_unit }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
+
+        <div class="name-field">1.5 Acquisition Method</div>
+        <div class="value-field" id="acquisition-method">
+          {% if metadata.acquisition_method %}
+            {{ metadata.acquisition_method.name }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
+
+        <div class="name-field">1.6 Disposition Authority</div>
+        <div class="value-field">
+          {% if metadata.disposition_authorities.all %}
+            <ul class="no-ul-margin">
+              {% for disposition_authority in metadata.disposition_authorities.all %}
+                <li id="disposition-authority-{{ forloop.counter }}">{{ disposition_authority.disposition_authority }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
+
+        <div class="name-field">1.7 Status</div>
+        <div class="value-field" id="status">
+          {% if metadata.status %}
+            {{ metadata.status.name }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
+      </section>
+
+      <h2 class="section-heading">2. Source Information Section</h2>
+      <section>
+        <div class="name-field">2.1 Source of Materials</div>
+        {% if metadata.source_of_materials.all %}
+          {% for source_of_material in metadata.source_of_materials.all %}
             <div class="value-field">
-                {% if metadata.disposition_authorities.all %}
+              <div class="repeatable-field-counter">
+                <i>Source of Material {{ forloop.counter }} of {{ metadata.source_of_materials.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>2.1.1 Source Type:</b>
+                  <span id="source-type-{{ forloop.counter }}">{{ source_of_material.source_type.name }}</span>
+                </li>
+                <li>
+                  <b>2.1.2 Source Name:</b>
+                  <span id="source-name-{{ forloop.counter }}">{{ source_of_material.source_name }}</span>
+                </li>
+                <li>
+                  <b>2.1.3 Source Contact Information:</b>
+                  <div id="source-contact-information-{{ forloop.counter }}">
                     <ul class="no-ul-margin">
-                    {% for disposition_authority in metadata.disposition_authorities.all %}
-                        <li id="disposition-authority-{{ forloop.counter }}">{{ disposition_authority.disposition_authority }}</li>
-                    {% endfor %}
+                      <li id="contact-name-{{ forloop.counter }}">Contact Name: {{ source_of_material.contact_name }}</li>
+                      <li id="job-title-{{ forloop.counter }}">Job Title: {{ source_of_material.job_title }}</li>
+                      <li id="organization-{{ forloop.counter }}">Organization: {{ source_of_material.organization }}</li>
+                      <li id="phone-number-{{ forloop.counter }}">Phone Number: {{ source_of_material.phone_number }}</li>
+                      <li id="email-{{ forloop.counter }}">Email: {{ source_of_material.email_address }}</li>
+                      <li id="address-line-1-{{ forloop.counter }}">Address Line 1: {{ source_of_material.address_line_1 }}</li>
+                      <li id="address-line-2-{{ forloop.counter }}">Address Line 2: {{ source_of_material.address_line_2 }}</li>
+                      <li id="city-{{ forloop.counter }}">City: {{ source_of_material.city }}</li>
+                      <li id="region-{{ forloop.counter }}">Region: {{ source_of_material.region }}</li>
+                      <li id="postal-or-zip-code-{{ forloop.counter }}">Postal or Zip Code: {{ source_of_material.postal_or_zip_code }}</li>
+                      <li id="country-{{ forloop.counter }}">Country: {{ source_of_material.country }}</li>
                     </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+                  </div>
+                </li>
+                <li>
+                  <b>2.1.4 Source Role:</b>
+                  <span id="source-role-{{ forloop.counter }}">{{ source_of_material.source_role.name }}</span>
+                </li>
+                <li>
+                  <b>2.1.5 Source Note:</b>
+                  <span id="source-note-{{ forloop.counter }}">{{ source_of_material.source_note }}</span>
+                </li>
+                <li>
+                  <b>2.1.6 Source Confidentiality:</b>
+                  <span id="source-confidentiality-{{ forloop.counter }}">{{ source_of_material.source_confidentiality.name }}</span>
+                </li>
+              </ul>
             </div>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
 
-            <div class="name-field">1.7 Status</div>
-            <div class="value-field" id="status">
-                {% if metadata.status %}
-                    {{ metadata.status.name }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
-            </div>
-        </section>
+        <div class="name-field">2.2 Preliminary Custodial History</div>
+        <div class="value-field">
+          {% if metadata.preliminary_custodial_histories.all %}
+            <ul class="no-ul-margin">
+              {% for history in metadata.preliminary_custodial_histories.all %}
+                <li id="preliminary-custodial-history-{{ forloop.counter }}">{{ history.preliminary_custodial_history }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
+      </section>
 
-        <h2 class="section-heading">2. Source Information Section</h2>
-        <section>
+      <h2 class="section-heading">3. Materials Information Section</h2>
+      <section>
+        <div class="name-field">3.1 Date of Materials</div>
+        <div class="value-field" id="status">
+          {% if metadata.date_of_materials %}
+            {{ metadata.date_of_materials }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
 
-            <div class="name-field">2.1 Source of Materials</div>
-            {% if metadata.source_of_materials.all %}
-                {% for source_of_material in metadata.source_of_materials.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Source of Material {{ forloop.counter }} of {{ metadata.source_of_materials.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>2.1.1 Source Type:</b>
-                            <span id="source-type-{{ forloop.counter }}">{{ source_of_material.source_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>2.1.2 Source Name:</b>
-                            <span id="source-name-{{ forloop.counter }}">{{ source_of_material.source_name }}</span>
-                        </li>
-                        <li>
-                            <b>2.1.3 Source Contact Information:</b>
-                            <div id="source-contact-information-{{ forloop.counter }}">
-                                <ul class="no-ul-margin">
-                                    <li id="contact-name-{{ forloop.counter }}">Contact Name: {{ source_of_material.contact_name }}</li>
-                                    <li id="job-title-{{ forloop.counter }}">Job Title: {{ source_of_material.job_title }}</li>
-                                    <li id="organization-{{ forloop.counter }}">Organization: {{ source_of_material.organization }}</li>
-                                    <li id="phone-number-{{ forloop.counter }}">Phone Number: {{ source_of_material.phone_number }}</li>
-                                    <li id="email-{{ forloop.counter }}">Email: {{ source_of_material.email_address }}</li>
-                                    <li id="address-line-1-{{ forloop.counter }}">Address Line 1: {{ source_of_material.address_line_1 }}</li>
-                                    <li id="address-line-2-{{ forloop.counter }}">Address Line 2: {{ source_of_material.address_line_2 }}</li>
-                                    <li id="city-{{ forloop.counter }}">City: {{ source_of_material.city }}</li>
-                                    <li id="region-{{ forloop.counter }}">Region: {{ source_of_material.region }}</li>
-                                    <li id="postal-or-zip-code-{{ forloop.counter }}">Postal or Zip Code: {{ source_of_material.postal_or_zip_code }}</li>
-                                    <li id="country-{{ forloop.counter }}">Country: {{ source_of_material.country }}</li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li>
-                            <b>2.1.4 Source Role:</b>
-                            <span id="source-role-{{ forloop.counter }}">{{ source_of_material.source_role.name }}</span>
-                        </li>
-                        <li>
-                            <b>2.1.5 Source Note:</b>
-                            <span id="source-note-{{ forloop.counter }}">{{ source_of_material.source_note }}</span>
-                        </li>
-                        <li>
-                            <b>2.1.6 Source Confidentiality:</b>
-                            <span id="source-confidentiality-{{ forloop.counter }}">{{ source_of_material.source_confidentiality.name }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-
-            <div class="name-field">2.2 Preliminary Custodial History</div>
+        <div class="name-field">3.2 Extent Statement</div>
+        {% if metadata.extent_statements.all %}
+          {% for extent_statement in metadata.extent_statements.all %}
             <div class="value-field">
-                {% if metadata.preliminary_custodial_histories.all %}
-                    <ul class="no-ul-margin">
-                    {% for history in metadata.preliminary_custodial_histories.all %}
-                        <li id="preliminary-custodial-history-{{ forloop.counter }}">
-                            {{ history.preliminary_custodial_history }}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+              <div class="repeatable-field-counter">
+                <i>Extent Statement {{ forloop.counter }} of {{ metadata.extent_statements.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>3.2.1 Extent Type:</b>
+                  <span id="extent-type-{{ forloop.counter }}">{{ extent_statement.extent_type.name }}</span>
+                </li>
+                <li>
+                  <b>3.2.2 Quantity and Unit of Measure:</b>
+                  <span id="quantity-and-unit-of-measure-{{ forloop.counter }}">{{ extent_statement.quantity_and_unit_of_measure }}</span>
+                </li>
+                <li>
+                  <b>3.2.3 Content Type:</b>
+                  <span id="content-type-{{ forloop.counter }}">{{ extent_statement.content_type.name }}</span>
+                </li>
+                <li>
+                  <b>3.2.4 Carrier Type:</b>
+                  <span id="carrier-type-{{ forloop.counter }}">{{ extent_statement.carrier_type.name }}</span>
+                </li>
+                <li>
+                  <b>3.2.5 Extent Note:</b>
+                  <span id="extent-note-{{ forloop.counter }}">{{ extent_statement.extent_note }}</span>
+                </li>
+              </ul>
             </div>
-        </section>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
 
-        <h2 class="section-heading">3. Materials Information Section</h2>
-        <section>
-            <div class="name-field">3.1 Date of Materials</div>
-            <div class="value-field" id="status">
-                {% if metadata.date_of_materials %}
-                    {{ metadata.date_of_materials }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
-            </div>
+        <div class="name-field">3.3 Preliminary Scope and Content</div>
+        <div class="value-field">
+          {% if metadata.preliminary_scope_and_contents.all %}
+            <ul class="no-ul-margin">
+              {% for scope in metadata.preliminary_scope_and_contents.all %}
+                <li id="preliminary-scope-and-content-{{ forloop.counter }}">{{ scope.preliminary_scope_and_content }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
 
-            <div class="name-field">3.2 Extent Statement</div>
-            {% if metadata.extent_statements.all %}
-                {% for extent_statement in metadata.extent_statements.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Extent Statement {{ forloop.counter }} of {{ metadata.extent_statements.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>3.2.1 Extent Type:</b>
-                            <span id="extent-type-{{ forloop.counter }}">{{ extent_statement.extent_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>3.2.2 Quantity and Unit of Measure:</b>
-                            <span id="quantity-and-unit-of-measure-{{ forloop.counter }}">{{ extent_statement.quantity_and_unit_of_measure }}</span>
-                        </li>
-                        <li>
-                            <b>3.2.3 Content Type:</b>
-                            <span id="content-type-{{ forloop.counter }}">{{ extent_statement.content_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>3.2.4 Carrier Type:</b>
-                            <span id="carrier-type-{{ forloop.counter }}">{{ extent_statement.carrier_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>3.2.5 Extent Note:</b>
-                            <span id="extent-note-{{ forloop.counter }}">{{ extent_statement.extent_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
+        <div class="name-field">3.4 Language of Material</div>
+        <div class="value-field">
+          {% if metadata.language_of_materials.all %}
+            <ul class="no-ul-margin">
+              {% for language_of_material in metadata.language_of_materials.all %}
+                <li id="language-of-material-{{ forloop.counter }}">{{ language_of_material.language_of_material }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
+      </section>
 
-            <div class="name-field">3.3 Preliminary Scope and Content</div>
+      <h2 class="section-heading">4. Management Information Section</h2>
+      <section>
+        <div class="name-field">4.1 Storage Location</div>
+        <div class="value-field">
+          {% if metadata.storage_locations.all %}
+            <ul class="no-ul-margin">
+              {% for storage_location in metadata.storage_locations.all %}
+                <li id="storage-location-{{ forloop.counter }}">{{ storage_location.storage_location }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
+
+        <div class="name-field">4.2 Rights</div>
+        {% if metadata.rights.all %}
+          {% for rights in metadata.rights.all %}
             <div class="value-field">
-                {% if metadata.preliminary_scope_and_contents.all %}
-                    <ul class="no-ul-margin">
-                    {% for scope in metadata.preliminary_scope_and_contents.all %}
-                        <li id="preliminary-scope-and-content-{{ forloop.counter }}">
-                            {{ scope.preliminary_scope_and_content }}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+              <div class="repeatable-field-counter">
+                <i>Rights {{ forloop.counter }} of {{ metadata.rights.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>4.2.1 Rights Type:</b>
+                  <span id="rights-type-{{ forloop.counter }}">{{ rights.rights_type.name }}</span>
+                </li>
+                <li>
+                  <b>4.2.2 Rights Value:</b>
+                  <span id="rights-value-{{ forloop.counter }}">{{ rights.rights_value }}</span>
+                </li>
+                <li>
+                  <b>4.2.3 Rights Note:</b>
+                  <span id="rights-note-{{ forloop.counter }}">{{ rights.rights_note }}</span>
+                </li>
+              </ul>
             </div>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
 
-            <div class="name-field">3.4 Language of Material</div>
+        <div class="name-field">4.3 Preservation Requirements</div>
+        {% if metadata.preservation_requirements.all %}
+          {% for requirement in metadata.preservation_requirements.all %}
             <div class="value-field">
-                {% if metadata.language_of_materials.all %}
-                    <ul class="no-ul-margin">
-                    {% for language_of_material in metadata.language_of_materials.all %}
-                        <li id="language-of-material-{{ forloop.counter }}">
-                            {{ language_of_material.language_of_material }}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+              <div class="repeatable-field-counter">
+                <i>Preservation Requirements {{ forloop.counter }} of {{ metadata.preservation_requirements.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>4.2.1 Preservation Requirements Type:</b>
+                  <span id="preservation-requirements-type-{{ forloop.counter }}">{{ requirement.preservation_requirements_type.name }}</span>
+                </li>
+                <li>
+                  <b>4.2.2 Preservation Requirements Value:</b>
+                  <span id="preservation-requirements-value-{{ forloop.counter }}">{{ requirement.preservation_requirements_value }}</span>
+                </li>
+                <li>
+                  <b>4.2.3 Preservation Requirements Note:</b>
+                  <span id="preservation-requirements-note-{{ forloop.counter }}">{{ requirement.preservation_requirements_note }}</span>
+                </li>
+              </ul>
             </div>
-        </section>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
 
-        <h2 class="section-heading">4. Management Information Section</h2>
-        <section>
-            <div class="name-field">4.1 Storage Location</div>
+        <div class="name-field">4.4 Appraisal</div>
+        {% if metadata.appraisals.all %}
+          {% for appraisal in metadata.appraisals.all %}
             <div class="value-field">
-                {% if metadata.storage_locations.all %}
-                    <ul class="no-ul-margin">
-                    {% for storage_location in metadata.storage_locations.all %}
-                        <li id="storage-location-{{ forloop.counter }}">
-                            {{ storage_location.storage_location }}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+              <div class="repeatable-field-counter">
+                <i>Appraisal {{ forloop.counter }} of {{ metadata.appraisals.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>4.4.1 Appraisal Type:</b>
+                  <span id="appraisal-type-{{ forloop.counter }}">{{ appraisal.appraisal_type.name }}</span>
+                </li>
+                <li>
+                  <b>4.4.2 Appraisal Value:</b>
+                  <span id="appraisal-value-{{ forloop.counter }}">{{ appraisal.appraisal_value }}</span>
+                </li>
+                <li>
+                  <b>4.4.3 Appraisal Note:</b>
+                  <span id="appraisal-note-{{ forloop.counter }}">{{ appraisal.appraisal_note }}</span>
+                </li>
+              </ul>
             </div>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
 
-            <div class="name-field">4.2 Rights</div>
-            {% if metadata.rights.all %}
-                {% for rights in metadata.rights.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Rights {{ forloop.counter }} of {{ metadata.rights.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>4.2.1 Rights Type:</b>
-                            <span id="rights-type-{{ forloop.counter }}">{{ rights.rights_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>4.2.2 Rights Value:</b>
-                            <span id="rights-value-{{ forloop.counter }}">{{ rights.rights_value }}</span>
-                        </li>
-                        <li>
-                            <b>4.2.3 Rights Note:</b>
-                            <span id="rights-note-{{ forloop.counter }}">{{ rights.rights_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-
-            <div class="name-field">4.3 Preservation Requirements</div>
-            {% if metadata.preservation_requirements.all %}
-                {% for requirement in metadata.preservation_requirements.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Preservation Requirements {{ forloop.counter }} of {{ metadata.preservation_requirements.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>4.2.1 Preservation Requirements Type:</b>
-                            <span id="preservation-requirements-type-{{ forloop.counter }}">{{ requirement.preservation_requirements_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>4.2.2 Preservation Requirements Value:</b>
-                            <span id="preservation-requirements-value-{{ forloop.counter }}">{{ requirement.preservation_requirements_value }}</span>
-                        </li>
-                        <li>
-                            <b>4.2.3 Preservation Requirements Note:</b>
-                            <span id="preservation-requirements-note-{{ forloop.counter }}">{{ requirement.preservation_requirements_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-
-            <div class="name-field">4.4 Appraisal</div>
-            {% if metadata.appraisals.all %}
-                {% for appraisal in metadata.appraisals.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Appraisal {{ forloop.counter }} of {{ metadata.appraisals.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>4.4.1 Appraisal Type:</b>
-                            <span id="appraisal-type-{{ forloop.counter }}">{{ appraisal.appraisal_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>4.4.2 Appraisal Value:</b>
-                            <span id="appraisal-value-{{ forloop.counter }}">{{ appraisal.appraisal_value }}</span>
-                        </li>
-                        <li>
-                            <b>4.4.3 Appraisal Note:</b>
-                            <span id="appraisal-note-{{ forloop.counter }}">{{ appraisal.appraisal_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-
-            <div class="name-field">4.5 Associated Documentation</div>
-            {% if metadata.associated_documentation.all %}
-                {% for documentation in metadata.associated_documentation.all %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Associated Documentation {{ forloop.counter }} of {{ metadata.associated_documentation.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>4.5.1 Associated Documentation Type:</b>
-                            <span id="associated-documentation-type-{{ forloop.counter }}">{{ documentation.associated_documentation_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>4.5.2 Associated Documentation Title:</b>
-                            <span id="associated-documentation-title-{{ forloop.counter }}">{{ documentation.associated_documentation_title }}</span>
-                        </li>
-                        <li>
-                            <b>4.5.3 Associated Documentation Note:</b>
-                            <span id="associated-documentation-note-{{ forloop.counter }}">{{ documentation.associated_documentation_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-        </section>
-
-        <h2 class="section-heading">5. Event Information Section</h2>
-        <section>
-            <div class="name-field">5.1 Events</div>
-            {% if metadata.events.all %}
-                {# Loop from newest to oldest #}
-                {% for event in metadata.events.all reversed %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Event {{ forloop.counter }} of {{ metadata.events.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>5.1.1 Event Type:</b>
-                            <span id="event-type-{{ forloop.counter }}">{{ event.event_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>5.1.1 Event Date:</b>
-                            <span id="event-date-{{ forloop.counter }}">{{ event.event_date }}</span>
-                        </li>
-                        <li>
-                            <b>5.1.3 Event Agent:</b>
-                            <span id="event-agent-{{ forloop.counter }}">{{ event.event_agent }}</span>
-                        </li>
-                        <li>
-                            <b>5.1.4 Event Note:</b>
-                            <span id="event-note-{{ forloop.counter }}">{{ event.event_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
-        </section>
-
-        <h2 class="section-heading">6. General Information Section</h2>
-        <section>
-            <div class="name-field">6.1 General Note</div>
+        <div class="name-field">4.5 Associated Documentation</div>
+        {% if metadata.associated_documentation.all %}
+          {% for documentation in metadata.associated_documentation.all %}
             <div class="value-field">
-                {% if metadata.general_notes.all %}
-                    <ul class="no-ul-margin">
-                    {% for general_note in metadata.general_notes.all %}
-                        <li id="general-note-{{ forloop.counter }}">
-                            {{ general_note.general_note }}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <i>{% trans "(None specified)" %}</i>
-                {% endif %}
+              <div class="repeatable-field-counter">
+                <i>Associated Documentation {{ forloop.counter }} of {{ metadata.associated_documentation.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>4.5.1 Associated Documentation Type:</b>
+                  <span id="associated-documentation-type-{{ forloop.counter }}">{{ documentation.associated_documentation_type.name }}</span>
+                </li>
+                <li>
+                  <b>4.5.2 Associated Documentation Title:</b>
+                  <span id="associated-documentation-title-{{ forloop.counter }}">{{ documentation.associated_documentation_title }}</span>
+                </li>
+                <li>
+                  <b>4.5.3 Associated Documentation Note:</b>
+                  <span id="associated-documentation-note-{{ forloop.counter }}">{{ documentation.associated_documentation_note }}</span>
+                </li>
+              </ul>
             </div>
-        </section>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
+      </section>
 
-        <h2 class="section-heading">7. Control Information Section</h2>
-        <section>
-            <div class="name-field">7.1 Rules or Conventions</div>
-            <div class="value-field" id="status">
-                {% if metadata.rules_or_conventions %}
-                    {{ metadata.rules_or_conventions }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
+      <h2 class="section-heading">5. Event Information Section</h2>
+      <section>
+        <div class="name-field">5.1 Events</div>
+        {% if metadata.events.all %}
+          {# Loop from newest to oldest #}
+          {% for event in metadata.events.all reversed %}
+            <div class="value-field">
+              <div class="repeatable-field-counter">
+                <i>Event {{ forloop.counter }} of {{ metadata.events.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>5.1.1 Event Type:</b>
+                  <span id="event-type-{{ forloop.counter }}">{{ event.event_type.name }}</span>
+                </li>
+                <li>
+                  <b>5.1.1 Event Date:</b>
+                  <span id="event-date-{{ forloop.counter }}">{{ event.event_date }}</span>
+                </li>
+                <li>
+                  <b>5.1.3 Event Agent:</b>
+                  <span id="event-agent-{{ forloop.counter }}">{{ event.event_agent }}</span>
+                </li>
+                <li>
+                  <b>5.1.4 Event Note:</b>
+                  <span id="event-note-{{ forloop.counter }}">{{ event.event_note }}</span>
+                </li>
+              </ul>
             </div>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
+      </section>
 
-            <div class="name-field">7.2 Date of Creation of Revision</div>
-            {% if metadata.dates_of_creation_or_revision.all %}
-                {# Loop from newest to oldest #}
-                {% for date in metadata.dates_of_creation_or_revision.all reversed %}
-                <div class="value-field">
-                    <div class="repeatable-field-counter">
-                        <i>Date of Creation or Revision {{ forloop.counter }} of {{ metadata.events.count }}</i>
-                    </div>
-                    <ul class="no-ul-margin">
-                        <li>
-                            <b>7.2.1 Creation or Revision Type:</b>
-                            <span id="creation-or-revision-type-{{ forloop.counter }}">{{ date.creation_or_revision_type.name }}</span>
-                        </li>
-                        <li>
-                            <b>7.2.2 Creation or Revision Date:</b>
-                            <span id="creation-or-revision-date-{{ forloop.counter }}">{{ date.creation_or_revision_date }}</span>
-                        </li>
-                        <li>
-                            <b>7.2.3 Creation or Revision Agent:</b>
-                            <span id="creation-or-revision-agent-{{ forloop.counter }}">{{ date.creation_or_revision_agent }}</span>
-                        </li>
-                        <li>
-                            <b>7.2.4 Creation or Revision Date:</b>
-                            <span id="creation-or-revision-note-{{ forloop.counter }}">{{ date.creation_or_revision_note }}</span>
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="value-field"><i>{% trans "(None specified)" %}</i></div>
-            {% endif %}
+      <h2 class="section-heading">6. General Information Section</h2>
+      <section>
+        <div class="name-field">6.1 General Note</div>
+        <div class="value-field">
+          {% if metadata.general_notes.all %}
+            <ul class="no-ul-margin">
+              {% for general_note in metadata.general_notes.all %}
+                <li id="general-note-{{ forloop.counter }}">{{ general_note.general_note }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <i>{% trans '(None specified)' %}</i>
+          {% endif %}
+        </div>
+      </section>
 
-            <div class="name-field">7.3 Language of Accession Record</div>
-            <div class="value-field" id="status">
-                {% if metadata.language_of_accession_record %}
-                    {{ metadata.language_of_accession_record }}
-                {% else %}
-                    <i>{% trans "(Not specified)" %}</i>
-                {% endif %}
+      <h2 class="section-heading">7. Control Information Section</h2>
+      <section>
+        <div class="name-field">7.1 Rules or Conventions</div>
+        <div class="value-field" id="status">
+          {% if metadata.rules_or_conventions %}
+            {{ metadata.rules_or_conventions }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
+
+        <div class="name-field">7.2 Date of Creation of Revision</div>
+        {% if metadata.dates_of_creation_or_revision.all %}
+          {# Loop from newest to oldest #}
+          {% for date in metadata.dates_of_creation_or_revision.all reversed %}
+            <div class="value-field">
+              <div class="repeatable-field-counter">
+                <i>Date of Creation or Revision {{ forloop.counter }} of {{ metadata.events.count }}</i>
+              </div>
+              <ul class="no-ul-margin">
+                <li>
+                  <b>7.2.1 Creation or Revision Type:</b>
+                  <span id="creation-or-revision-type-{{ forloop.counter }}">{{ date.creation_or_revision_type.name }}</span>
+                </li>
+                <li>
+                  <b>7.2.2 Creation or Revision Date:</b>
+                  <span id="creation-or-revision-date-{{ forloop.counter }}">{{ date.creation_or_revision_date }}</span>
+                </li>
+                <li>
+                  <b>7.2.3 Creation or Revision Agent:</b>
+                  <span id="creation-or-revision-agent-{{ forloop.counter }}">{{ date.creation_or_revision_agent }}</span>
+                </li>
+                <li>
+                  <b>7.2.4 Creation or Revision Date:</b>
+                  <span id="creation-or-revision-note-{{ forloop.counter }}">{{ date.creation_or_revision_note }}</span>
+                </li>
+              </ul>
             </div>
-        </section>
+          {% endfor %}
+        {% else %}
+          <div class="value-field">
+            <i>{% trans '(None specified)' %}</i>
+          </div>
+        {% endif %}
+
+        <div class="name-field">7.3 Language of Accession Record</div>
+        <div class="value-field" id="status">
+          {% if metadata.language_of_accession_record %}
+            {{ metadata.language_of_accession_record }}
+          {% else %}
+            <i>{% trans '(Not specified)' %}</i>
+          {% endif %}
+        </div>
+      </section>
     </div>
-</body>
+  </body>
 </html>

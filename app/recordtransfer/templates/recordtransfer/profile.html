@@ -1,68 +1,58 @@
-{% extends "recordtransfer/base.html" %}
+{% extends 'recordtransfer/base.html' %}
 {% load i18n %}
 {% load static %}
 {% block title %}
-    {% trans "Your Profile" %}
-{% endblock title %}
+  {% trans 'Your Profile' %}
+{% endblock %}
 {% block javascript %}
-    {{ block.super }}
-    {{ js_context|json_script:"py_context_user_profile" }}
-    <script src="{% static 'profile.bundle.js' %}"></script>
-{% endblock javascript %}
+  {{ block.super }}
+  {{ js_context|json_script:'py_context_user_profile' }}
+  <script src="{% static 'profile.bundle.js' %}"></script>
+{% endblock %}
 {% block stylesheet %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'profile.css' %}">
-{% endblock stylesheet %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'profile.css' %}" />
+{% endblock %}
 {% block content %}
-    {% if user.is_authenticated %}
-        <div class="title-text">{% trans "Your Profile" %}</div>
-        {% include "includes/profile_form.html" %}
-        <br>
-        <!-- In-Progress Submissions -->
-        <div class="flex-med-width-item margin-top-25px">
-            <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
-        </div>
-        <div
-            hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
-            hx-trigger="load"
-            class="flex-med-width-item"
-            id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}">
-        </div>
-
-        <!-- Past Submissions -->
-        <div class="flex-med-width-item margin-top-25px">
-            <label class="medium-text">{% trans "Past Submissions" %}</label>
-        </div>
-        <div
-            hx-get="{% url 'recordtransfer:submission_table' %}"
-            hx-trigger="load"
-            class="flex-med-width-item"
-            id="{{ ID_SUBMISSION_TABLE }}">
-        </div>
-        <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
-        </div>
-
-        <!-- Submission Groups -->
-        <div class="flex-med-width-item margin-top-25px">
-            <label class="medium-text">{% trans "Submission Groups" %}</label>
-        </div>
-        <div
-            hx-get="{% url 'recordtransfer:submission_group_table' %}"
-            hx-trigger="load"
-            class="flex-med-width-item"
-            id="{{ ID_SUBMISSION_GROUP_TABLE }}">
-        </div>
-        <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
-        </div>
-
-    {% else %}
-        {% url 'login' as login %}
-        <p>
-            {% blocktrans %}
-            <a href="{{ login }}">Log in</a> to see your profile.
-            {% endblocktrans %}
-        </p>
-    {% endif %}
-{% endblock content %}
+  {% if user.is_authenticated %}
+    <div class="title-text">{% trans 'Your Profile' %}</div>
+    {% include 'includes/profile_form.html' %}
+    <br />
+    <!-- In-Progress Submissions -->
+    <div class="flex-med-width-item margin-top-25px">
+      <label class="medium-text">{% trans 'In-Progress Submissions' %}</label>
+    </div>
+    <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
+         hx-trigger="load"
+         class="flex-med-width-item"
+         id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"></div>
+    <!-- Past Submissions -->
+    <div class="flex-med-width-item margin-top-25px">
+      <label class="medium-text">{% trans 'Past Submissions' %}</label>
+    </div>
+    <div hx-get="{% url 'recordtransfer:submission_table' %}"
+         hx-trigger="load"
+         class="flex-med-width-item"
+         id="{{ ID_SUBMISSION_TABLE }}"></div>
+    <div class="margin-top-15px">
+      <a href="{% url 'recordtransfer:submit' %}">{% trans 'Click to make a new submission' %}</a>
+    </div>
+    <!-- Submission Groups -->
+    <div class="flex-med-width-item margin-top-25px">
+      <label class="medium-text">{% trans 'Submission Groups' %}</label>
+    </div>
+    <div hx-get="{% url 'recordtransfer:submission_group_table' %}"
+         hx-trigger="load"
+         class="flex-med-width-item"
+         id="{{ ID_SUBMISSION_GROUP_TABLE }}"></div>
+    <div class="margin-top-15px">
+      <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans 'Click to add new group' %}</a>
+    </div>
+  {% else %}
+    {% url 'login' as login %}
+    <p>
+      {% blocktrans %}
+      <a href="{{ login }}">Log in</a> to see your profile.{% endblocktrans %}
+    </p>
+  {% endif %}
+{% endblock %}

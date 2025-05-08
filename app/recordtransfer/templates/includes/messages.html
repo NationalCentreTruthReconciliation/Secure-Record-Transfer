@@ -1,37 +1,14 @@
 {% if messages %}
   {% load static %}
   {% for message in messages %}
-    <div class="alert alert-dismissible {% if message.tags == 'success' %}
-        
-        
-        
-        
-        
-        
-        alert-success
-
-
-
-
-
-
-      {% elif message.tags == 'error' %}
-        
-        
-        
-        
-        
-        
-        alert-error
-
-
-
-
-
-
-      {% endif %}">
+    <div class="alert alert-dismissible {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-error {% endif %}">
       <div>{{ message }}</div>
-      <button class="close alert-dismiss" data-dismiss="alert"><img height="14" width="14" alt="Close" src="{% static 'close_menu_64x64px.webp' %}" /></button>
+      <button class="close alert-dismiss" data-dismiss="alert">
+        <img height="14"
+             width="14"
+             alt="Close"
+             src="{% static 'close_menu_64x64px.webp' %}" />
+      </button>
     </div>
   {% endfor %}
 {% endif %}

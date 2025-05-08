@@ -16,6 +16,7 @@
     "air-datepicker": "^3.5.3",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
+    "djlint": "^1.36.4",
     "glob": "^11.0.0",
     "imask": "^7.6.1",
     "mini-css-extract-plugin": "^2.9.2",

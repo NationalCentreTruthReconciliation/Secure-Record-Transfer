@@ -25,17 +25,11 @@
             99
         ]
     },
-    "[restructuredtext]": {
-        "editor.rulers": [
-            99
-        ]
-    },
     "files.associations": {
         "*.html": "django-html"
     },
-
     "[django-html]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "junstyle.vscode-django-support"
-    },
+        "editor.defaultFormatter": "monosans.djlint"
+    }
 }
