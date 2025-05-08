@@ -4,6 +4,7 @@
     "charliermarsh.ruff",
     "dbaeumer.vscode-eslint",
     "tamasfe.even-better-toml",
-    "batisteo.vscode-django"
+    "batisteo.vscode-django",
+    "junstyle.vscode-django-support"
   ]
 }
