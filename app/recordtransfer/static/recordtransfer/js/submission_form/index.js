@@ -43,7 +43,7 @@ const _setupWithContext = () => {
         setupUppy();
         break;
     default:
-        console.log("Unknown context_id:", context_id);
+        break;
     }
 };
 
@@ -65,13 +65,9 @@ const setup = () => {
 
 document.addEventListener("DOMContentLoaded", setup);
 
-// Function to handle JS context updates after HTMX swaps
+// Re-setup the form when HTMX swaps the main container
 document.addEventListener("htmx:afterSwap", (event) => {
-    console.log("htmx:afterSwap", event);
-    // Check if our target was updated
     if (event.detail.target.id === "main-container") {
-        // Redo setup
-        console.log("Context updated, redoing setup");
         setup();
     }
 });

@@ -2,6 +2,7 @@ import { setupSelectOtherToggle } from "./otherField";
 
 /**
  * Sets up the expandable source info form.
+ * @param {object} context - The context object containing form field IDs
  */
 export function setupSourceInfoForm(context) {
     // Toggles Other source type field depending on value of Source type field

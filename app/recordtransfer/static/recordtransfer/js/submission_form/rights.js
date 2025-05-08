@@ -3,6 +3,7 @@ import { setupSelectOtherToggle } from "./otherField";
 
 /**
  * Sets up the rights form.
+ * @param {object} context - The context object containing form configuration
  */
 export function setupRightsForm(context) {
     const formsetPrefix = context["formset_prefix"];

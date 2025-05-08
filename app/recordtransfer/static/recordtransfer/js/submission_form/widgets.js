@@ -33,7 +33,6 @@ export function setupDatePickers() {
  * Setup input masks for phone numbers and dates.
  */
 export function setupInputMasks() {
-    console.log("Setting up input masks...");
     document.querySelectorAll(".date-range-text").forEach((el) => {
         IMask(el, {
             mask: [
@@ -85,7 +84,6 @@ export function setupInputMasks() {
     });
 
     document.querySelectorAll("input[id$=phone_number]").forEach((el) => {
-        console.log("Setting up phone number mask...");
         IMask(el, {
             mask: "+0 (000) 000-0000",
         });
