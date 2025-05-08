@@ -24,7 +24,7 @@ export async function setupUppy(context) {
     const reviewButton = document.getElementById("form-review-button");
     const submissionForm = document.getElementById("submission-form");
     const issueFileIds = [];
-    
+
     /**
      * Updates the display of the file capacity information on the page
      * @param {import('@uppy/core').Uppy} uppy - The Uppy instance
