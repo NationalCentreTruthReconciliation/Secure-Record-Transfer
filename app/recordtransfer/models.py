@@ -385,15 +385,10 @@ class UploadSession(models.Model):
                 self.save()
 
     def make_uploads_permanent(self) -> None:
-        """Make all temporary uploaded files associated with this session permanent.
-
-        Args:
-            logger: Optional logger instance to use for logging operations
-        """
-        logger = LOGGER
+        """Make all temporary uploaded files associated with this session permanent."""
 
         if self.status == self.SessionStatus.STORED:
-            logger.info(
+            LOGGER.info(
                 "All uploaded files in session %s are already in permanent storage", self.token
             )
             return
@@ -410,7 +405,7 @@ class UploadSession(models.Model):
 
         files = self.tempuploadedfile_set.all()
 
-        logger.info(
+        LOGGER.info(
             "Moving %d temporary uploaded files from the session %s to permanent storage",
             len(files),
             self.token,
@@ -419,7 +414,7 @@ class UploadSession(models.Model):
             for uploaded_file in files:
                 uploaded_file.move_to_permanent_storage()
         except Exception as e:
-            logger.error(
+            LOGGER.error(
                 "An error occurred while moving uploaded files to permanent storage: %s", e
             )
             self.status = self.SessionStatus.COPYING_FAILED
@@ -433,12 +428,10 @@ class UploadSession(models.Model):
 
         Args:
             destination: The destination directory
-            logger: A logger object
 
         Returns:
             A tuple containing lists of copied and missing files
         """
-        logger = LOGGER
 
         if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
@@ -457,26 +450,26 @@ class UploadSession(models.Model):
 
         destination_path = Path(destination)
         if not destination_path.exists():
-            logger.error("The destination path %s does not exist!", destination)
+            LOGGER.error("The destination path %s does not exist!", destination)
             raise FileNotFoundError(f"The destination path {destination} does not exist!")
 
         files = self.permuploadedfile_set.all()
 
-        logger.info("Copying %d files to %s", len(files), destination)
+        LOGGER.info("Copying %d files to %s", len(files), destination)
         copied, missing = [], []
         for f in files:
             if not f.exists:
-                logger.error('File "%s" was moved or deleted', f.file_upload.path)
+                LOGGER.error('File "%s" was moved or deleted', f.file_upload.path)
                 missing.append(f.file_upload.path)
                 continue
 
             if f.name is not None:
                 new_path = destination_path / f.name
-                logger.info("Copying %s to %s", f.file_upload.path, new_path)
+                LOGGER.info("Copying %s to %s", f.file_upload.path, new_path)
                 f.copy(str(new_path))
                 copied.append(str(new_path))
             else:
-                logger.error('File name is None for file "%s"', f.file_upload.path)
+                LOGGER.error('File name is None for file "%s"', f.file_upload.path)
                 missing.append(f.file_upload.path)
 
         # No need to set status to COPYING_FAILED even if some files are missing
@@ -828,7 +821,6 @@ class Submission(models.Model):
             algorithms (Union[str, list]): The algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
         """
-        logger = LOGGER
 
         if not algorithms:
             raise ValueError("algorithms cannot be empty")
@@ -888,24 +880,24 @@ class Submission(models.Model):
                 "time_created": None,
             }
 
-        logger.info('Creating BagIt bag at "%s"', self.location)
-        logger.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
+        LOGGER.info('Creating BagIt bag at "%s"', self.location)
+        LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
 
         bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
         bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
 
-        logger.info("Setting file mode for bag payload files to %s", file_perms)
+        LOGGER.info("Setting file mode for bag payload files to %s", file_perms)
         perms = int(file_perms, 8)
         for payload_file in bag.payload_files():
             payload_file_path = os.path.join(self.location, payload_file)
             os.chmod(payload_file_path, perms)
 
-        logger.info('Validating the bag created at "%s"', self.location)
+        LOGGER.info('Validating the bag created at "%s"', self.location)
         valid = bag.is_valid()
 
         if not valid:
-            logger.error("Bag is INVALID!")
-            logger.info('Removing bag at "%s" since it\'s invalid', self.location)
+            LOGGER.error("Bag is INVALID!")
+            LOGGER.info('Removing bag at "%s" since it\'s invalid', self.location)
             self.remove_bag()
             return {
                 "missing_files": [],
@@ -914,7 +906,7 @@ class Submission(models.Model):
                 "time_created": None,
             }
 
-        logger.info("Bag is VALID")
+        LOGGER.info("Bag is VALID")
         current_time = timezone.now()
 
         return {
