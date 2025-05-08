@@ -67,8 +67,9 @@ document.addEventListener("DOMContentLoaded", setup);
 
 // Function to handle JS context updates after HTMX swaps
 document.addEventListener("htmx:afterSwap", (event) => {
+    console.log("htmx:afterSwap", event);
     // Check if our target was updated
-    if (event.target.id === "py_context_div") {
+    if (event.detail.target.id === "main-container") {
         // Redo setup
         console.log("Context updated, redoing setup");
         setup();

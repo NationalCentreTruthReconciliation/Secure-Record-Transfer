@@ -39,9 +39,8 @@
                     {% include "recordtransfer/header.html" %}
                 {% endif %}
             {% endblock header %}
-            {% block dialog %}
-            {% endblock %}
-            <div class="main-container">
+            <div class="main-container" id="main-container">
+                {% block dialog %}{% endblock %}
                 <div class="focused-content">
                     {% block focused_content %}{% endblock focused_content %}
                 </div>

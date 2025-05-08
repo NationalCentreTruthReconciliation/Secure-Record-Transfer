@@ -12,15 +12,13 @@
     <script>
         var currentFormStep = {{ wizard.steps.step1 }}
     </script>
+    {{ js_context|json_script:"py_context" }}
 {% endblock javascript %}
 {% block stylesheet %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'submission_form.css' %}">
 {% endblock stylesheet%}
 {% block content %}
-    <div id="py_context_div" hx-swap-oob="true">
-        {{ js_context|json_script:"py_context" }}
-    </div>
     <div id="submission-content">
         <div class="form-title title-text">
             {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
@@ -40,8 +38,8 @@
         <form
             id="submission-form"
             hx-post="{{ request.path }}"
-            hx-target="#submission-content"
-            hx-select="#submission-content"
+            hx-target="#main-container"
+            hx-select="#main-container"
             hx-swap="outerHTML"
         >
             {% csrf_token %}
