@@ -384,13 +384,13 @@ class UploadSession(models.Model):
             if save:
                 self.save()
 
-    def make_uploads_permanent(self, logger: Optional[logging.Logger] = None) -> None:
+    def make_uploads_permanent(self) -> None:
         """Make all temporary uploaded files associated with this session permanent.
 
         Args:
             logger: Optional logger instance to use for logging operations
         """
-        logger = logger or LOGGER
+        logger = LOGGER
 
         if self.status == self.SessionStatus.STORED:
             logger.info(
@@ -428,9 +428,7 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.STORED
         self.save()
 
-    def copy_session_uploads(
-        self, destination: str, logger: Optional[logging.Logger] = None
-    ) -> tuple[list[str], list[str]]:
+    def copy_session_uploads(self, destination: str) -> tuple[list[str], list[str]]:
         """Copy permanent uploaded files associated with this session to a destination directory.
 
         Args:
@@ -440,7 +438,7 @@ class UploadSession(models.Model):
         Returns:
             A tuple containing lists of copied and missing files
         """
-        logger = logger or LOGGER
+        logger = LOGGER
 
         if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
@@ -822,12 +820,7 @@ class Submission(models.Model):
     def __str__(self):
         return f"Submission by {self.user} at {self.submission_date}"
 
-    def make_bag(
-        self,
-        algorithms: Union[str, list] = "sha512",
-        file_perms: str = "644",
-        logger: Optional[logging.Logger] = None,
-    ):
+    def make_bag(self, algorithms: Union[str, list] = "sha512", file_perms: str = "644"):
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
         is determined by self.location. Checks the validity of the Bag post-creation to ensure that
         integrity is maintained. The data payload files come from the UploadSession associated with
@@ -836,9 +829,8 @@ class Submission(models.Model):
         Args:
             algorithms (Union[str, list]): The algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
-            logger: A logger instance (optional)
         """
-        logger = logger or LOGGER
+        logger = LOGGER
 
         if not algorithms:
             raise ValueError("algorithms cannot be empty")
@@ -1045,7 +1037,7 @@ class InProgressSubmission(models.Model):
 
     def get_resume_url(self) -> str:
         """Get the URL to access and resume the in-progress submission."""
-        return f'{reverse("recordtransfer:submit")}?resume={self.uuid}'
+        return f"{reverse('recordtransfer:submit')}?resume={self.uuid}"
 
     def reset_reminder_email_sent(self) -> None:
         """Reset the reminder email flag to False, if it isn't already False."""
