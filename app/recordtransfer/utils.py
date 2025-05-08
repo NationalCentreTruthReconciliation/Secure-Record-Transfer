@@ -96,7 +96,6 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     Returns:
         (str): A string reporting the number of files in each group.
     """
-    logger = LOGGER
 
     counted_types = count_file_types(file_names, accepted_file_groups)
     if not counted_types:
@@ -138,7 +137,6 @@ def count_file_types(file_names: list, accepted_file_groups: dict):
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
     """
-    logger = LOGGER
 
     counted_extensions = {}
 
@@ -146,7 +144,7 @@ def count_file_types(file_names: list, accepted_file_groups: dict):
     for name in file_names:
         split_name = name.split(".")
         if len(split_name) == 1:
-            logger.warning("Could not identify file type for file name: %s", name)
+            LOGGER.warning("Could not identify file type for file name: %s", name)
         else:
             extension_name = split_name[-1].lower()
             if extension_name not in counted_extensions:
