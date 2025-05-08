@@ -31,12 +31,11 @@
         ]
     },
     "files.associations": {
-        "**/views/**/*.html": "django-html",
-        "*.tpl": "django-html"   
+        "*.html": "django-html"
     },
 
     "[django-html]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "junstyle.vscode-django-support"
-     },
+    },
 }
