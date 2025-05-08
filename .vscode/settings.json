@@ -29,5 +29,12 @@
         "editor.rulers": [
             99
         ]
+    },
+    "[django-html]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "monosans.djlint"
+    },
+    "files.associations": {
+        "*.html": "django-html"
     }
 }
