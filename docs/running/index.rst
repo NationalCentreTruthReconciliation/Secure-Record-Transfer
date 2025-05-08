@@ -1,10 +1,5 @@
 Running the App
 ===============
-
-It is recommended to run this application with  `Podman <https://podman.io/>`_ (or alternately
-`Docker <https://www.docker.com/>`_). The following documentation assumes you are using Podman, but
-if you are using Docker, substitute the relevant Docker commands.
-
 Before running the application, make sure you have these tools installed:
 
 - `Podman <https://podman.io/>`_
@@ -12,6 +7,8 @@ Before running the application, make sure you have these tools installed:
 - `Python 3 <https://python.org>`_
 - `Podman Compose <https://github.com/containers/podman-compose>`_
 
+.. note::
+    This documentation assumes you are using Podman. If you are using Docker instead, you can replace every ``podman-compose`` command with ``docker compose`` (or ``docker-compose`` for older versions).
 
 Development Application
 -----------------------
@@ -75,12 +72,7 @@ following command:
 
 .. code-block:: bash
 
-    # Using Docker:
-    docker compose -f compose.dev.yml exec app python manage.py reset
-
-    # Using Podman:
     podman-compose -f compose.dev.yml exec app python manage.py reset
-
 
 This will prompt you to confirm the deletion of all data in the database. Type "y" to proceed.
 This command deletes the development database, and re-applies all migrations on a fresh one.
@@ -90,12 +82,7 @@ To also populate the database with test data and populate corresponding uploaded
 
 .. code-block:: bash
 
-    # Using Docker:
-    docker compose -f compose.dev.yml exec app python manage.py reset --seed
-
-    # Using Podman:
     podman-compose -f compose.dev.yml exec app python manage.py reset --seed
-
 
 An admin user will be created with the username ``admin`` and password ``123``, along with test
 submissions and a test submission group.
