@@ -3,68 +3,68 @@
 <form method="post"
       action="{% url 'recordtransfer:user_profile' %}"
       class="margin-top-25px">
-  {% csrf_token %}
-  {% if form.first_name.errors %}
-    <div class="error-message">{% trans form.first_name.errors.0 %}</div>
-  {% endif %}
-  <div class="flex-item">
-    <label for="{{ form.first_name.id_for_label }}">{% trans form.first_name.label %}</label>
-    <input type="text"
-           name="{{ form.first_name.name }}"
-           id="{{ form.first_name.id_for_label }}"
-           value="{{ form.first_name.value }}" />
-  </div>
-  {% if form.last_name.errors %}
-    <div class="error-message">{% trans form.last_name.errors.0 %}</div>
-  {% endif %}
-  <div class="flex-item">
-    <label for="{{ form.last_name.id_for_label }}">{% trans form.last_name.label %}</label>
-    <input type="text"
-           name="{{ form.last_name.name }}"
-           id="{{ form.last_name.id_for_label }}"
-           value="{{ form.last_name.value }}" />
-  </div>
-  <div class="flex-item">
-    <label>{% trans 'Email' %}</label>
-    <input disabled value="{{ user.email }}" />
-  </div>
-  <div class="flex-item">
-    <label>{% trans 'Username' %}</label>
-    <input disabled value="{{ user.username }}" />
-  </div>
-  <div class="flex-item">
-    <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans 'Receive notification emails?' %}</label>
-    {{ form.gets_notification_emails }}
-  </div>
-  <div class="medium-text margin-bottom-25px margin-top-25px">{% trans 'Password Reset' %}</div>
-  {% if form.current_password.errors %}
-    <div class="error-message">{% trans form.current_password.errors.0 %}</div>
-  {% endif %}
-  <div class="flex-item">
-    <label for="{{ form.current_password.id_for_label }}">{% trans form.current_password.label %}</label>
-    <input type="password"
-           name="{{ form.current_password.name }}"
-           id="{{ form.current_password.id_for_label }}"
-           autocomplete="off" />
-  </div>
-  {% if form.new_password.errors %}<div class="error-message">{{ form.new_password.errors.0 }}</div>{% endif %}
-  <div class="flex-item">
-    <label for="{{ form.new_password.id_for_label }}">{% trans form.new_password.label %}</label>
-    <input type="password"
-           name="{{ form.new_password.name }}"
-           id="{{ form.new_password.id_for_label }}" />
-  </div>
-  {% if form.confirm_new_password.errors %}
-    <div class="error-message">{{ form.confirm_new_password.errors.0 }}</div>
-  {% endif %}
-  <div class="flex-item">
-    <label for="{{ form.confirm_new_password.id_for_label }}">{% trans form.confirm_new_password.label %}</label>
-    <input type="password"
-           name="{{ form.confirm_new_password.name }}"
-           id="{{ form.confirm_new_password.id_for_label }}" />
-  </div>
-  <div class="flex-item">
-    <label></label>
-    <button type="submit" class="blue-button" id="id_save_button">{% trans 'Save' %}</button>
-  </div>
+    {% csrf_token %}
+    {% if form.first_name.errors %}
+        <div class="error-message">{% trans form.first_name.errors.0 %}</div>
+    {% endif %}
+    <div class="flex-item">
+        <label for="{{ form.first_name.id_for_label }}">{% trans form.first_name.label %}</label>
+        <input type="text"
+               name="{{ form.first_name.name }}"
+               id="{{ form.first_name.id_for_label }}"
+               value="{{ form.first_name.value }}" />
+    </div>
+    {% if form.last_name.errors %}
+        <div class="error-message">{% trans form.last_name.errors.0 %}</div>
+    {% endif %}
+    <div class="flex-item">
+        <label for="{{ form.last_name.id_for_label }}">{% trans form.last_name.label %}</label>
+        <input type="text"
+               name="{{ form.last_name.name }}"
+               id="{{ form.last_name.id_for_label }}"
+               value="{{ form.last_name.value }}" />
+    </div>
+    <div class="flex-item">
+        <label>{% trans 'Email' %}</label>
+        <input disabled value="{{ user.email }}" />
+    </div>
+    <div class="flex-item">
+        <label>{% trans 'Username' %}</label>
+        <input disabled value="{{ user.username }}" />
+    </div>
+    <div class="flex-item">
+        <label for="{{ form.gets_notification_emails.id_for_label }}">{% trans 'Receive notification emails?' %}</label>
+        {{ form.gets_notification_emails }}
+    </div>
+    <div class="medium-text margin-bottom-25px margin-top-25px">{% trans 'Password Reset' %}</div>
+    {% if form.current_password.errors %}
+        <div class="error-message">{% trans form.current_password.errors.0 %}</div>
+    {% endif %}
+    <div class="flex-item">
+        <label for="{{ form.current_password.id_for_label }}">{% trans form.current_password.label %}</label>
+        <input type="password"
+               name="{{ form.current_password.name }}"
+               id="{{ form.current_password.id_for_label }}"
+               autocomplete="off" />
+    </div>
+    {% if form.new_password.errors %}<div class="error-message">{{ form.new_password.errors.0 }}</div>{% endif %}
+    <div class="flex-item">
+        <label for="{{ form.new_password.id_for_label }}">{% trans form.new_password.label %}</label>
+        <input type="password"
+               name="{{ form.new_password.name }}"
+               id="{{ form.new_password.id_for_label }}" />
+    </div>
+    {% if form.confirm_new_password.errors %}
+        <div class="error-message">{{ form.confirm_new_password.errors.0 }}</div>
+    {% endif %}
+    <div class="flex-item">
+        <label for="{{ form.confirm_new_password.id_for_label }}">{% trans form.confirm_new_password.label %}</label>
+        <input type="password"
+               name="{{ form.confirm_new_password.name }}"
+               id="{{ form.confirm_new_password.id_for_label }}" />
+    </div>
+    <div class="flex-item">
+        <label></label>
+        <button type="submit" class="blue-button" id="id_save_button">{% trans 'Save' %}</button>
+    </div>
 </form>
