@@ -31,6 +31,12 @@
         ]
     },
     "files.associations": {
-        "*.html": "django-html" // Ensures Django-specific formatting
-    }
+        "**/views/**/*.html": "django-html",
+        "*.tpl": "django-html"   
+    },
+
+    "[django-html]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "junstyle.vscode-django-support"
+      },
 }
