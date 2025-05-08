@@ -4,7 +4,5 @@
     "charliermarsh.ruff",
     "dbaeumer.vscode-eslint",
     "tamasfe.even-better-toml",
-    "monosans.djlint",
-    "batisteo.vscode-django"
   ]
 }
