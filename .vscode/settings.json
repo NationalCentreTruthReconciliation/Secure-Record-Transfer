@@ -25,11 +25,4 @@
             99
         ]
     },
-    "files.associations": {
-        "*.html": "django-html"
-    },
-    "[django-html]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "monosans.djlint"
-    }
 }
