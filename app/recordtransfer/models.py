@@ -514,9 +514,7 @@ class UploadSession(models.Model):
         size = get_human_readable_size(self.upload_size, base=1000, precision=2)
 
         count = get_human_readable_file_count(
-            [f.name for f in self.get_uploads()],
-            settings.ACCEPTED_FILE_FORMATS,
-            LOGGER,
+            [f.name for f in self.get_uploads()], settings.ACCEPTED_FILE_FORMATS
         )
 
         return _("{0}, totalling {1}").format(count, size)
