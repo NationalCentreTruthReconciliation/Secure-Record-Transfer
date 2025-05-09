@@ -348,7 +348,7 @@ class SubmissionFormWizard(SessionWizardView):
         clear_form_errors(next_form)
         return self.render(next_form, **kwargs)
 
-    def render_next_step(self, form, **kwargs) -> HttpResponse:
+    def render_next_step(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
         # get the form instance based on the data from the storage backend
         # (if available).
@@ -521,7 +521,7 @@ class SubmissionFormWizard(SessionWizardView):
         # If there are entries for every step of the form, then the review step has been reached
         return len(self.storage.data.get("step_data", [])) == self.steps.count
 
-    def get_context_data(self, form, **kwargs) -> dict[str, Any]:
+    def get_context_data(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> dict[str, Any]:
         """Retrieve context data for the current form template, including context for the
         JavaScript files used alongside the template.
 
@@ -662,7 +662,7 @@ class SubmissionFormWizard(SessionWizardView):
             )
         return js_context
 
-    def done(self, form_list, **kwargs) -> HttpResponseRedirect:
+    def done(self, form_list: list[BaseForm], **kwargs) -> HttpResponseRedirect:
         """Retrieve all of the form data, and creates a Submission from it.
 
         Returns:
@@ -725,7 +725,10 @@ class DeleteInProgressSubmission(DeleteView):
     success_url = reverse_lazy("recordtransfer:user_profile")
     success_message = gettext("In-progress submission deleted")
     error_message = gettext("There was an error deleting the in-progress submission")
-    http_method_names = ["get", "delete"]
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.http_method_names = ["get", "delete"]
 
     def get_queryset(self) -> QuerySet[InProgressSubmission]:
         """Filter submissions to only show the current user's."""
