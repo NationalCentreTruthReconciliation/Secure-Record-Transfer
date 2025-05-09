@@ -10,10 +10,6 @@
     "ruff.nativeServer": "on",
     "python.analysis.typeCheckingMode": "standard",
     "editor.formatOnSave": true,
-    // For indentation to be set as 4 spaces
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "editor.detectIndentation": false,
     // Python Testing
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
@@ -59,5 +55,5 @@
         "H030",
         "H031",
         "D018"
-    ],
+    ]
 }
