@@ -36,7 +36,7 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
     template_name = "recordtransfer/submission_detail.html"
     context_object_name = "submission"
 
-    def get_object(self, queryset: Any = None) -> Submission:
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Submission:
         """Retrieve the Submission object based on the UUID in the URL."""
         return get_object_or_404(Submission, uuid=self.kwargs.get("uuid"))
 
