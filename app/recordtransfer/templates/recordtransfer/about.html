@@ -1,8 +1,8 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
 {% block title %}
     {% trans "About" %}
-{% endblock %}
+{% endblock title %}
 {% block content %}
     <div class="title-text">{% trans "About" %}</div>
     <p>
@@ -39,4 +39,4 @@
             {% endif %}
         {% endfor %}
     {% endif %}
-{% endblock %}
+{% endblock content %}
