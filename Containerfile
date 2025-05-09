@@ -14,6 +14,11 @@ RUN uv sync
 COPY package*.json ${PROJ_DIR}
 RUN npm install --no-color
 
+# 🔧 Install gettext for makemessages (includes msguniq)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gettext && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy application code to image
 COPY ./app ${APP_DIR}
 
@@ -28,6 +33,8 @@ RUN npm run build
 # Copy entrypoint script to image
 COPY ./docker/entrypoint.sh ${PROJ_DIR}
 RUN chmod +x ${PROJ_DIR}/entrypoint.sh
+
+
 
 ################################################################################
 #
