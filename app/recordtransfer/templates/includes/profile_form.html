@@ -1,30 +1,28 @@
 {% load i18n %}
 {% include "includes/messages.html" %}
-<form method="post" action="{% url 'recordtransfer:user_profile' %}" class="margin-top-25px">
+<form method="post"
+      action="{% url 'recordtransfer:user_profile' %}"
+      class="margin-top-25px">
     {% csrf_token %}
     {% if form.first_name.errors %}
         <div class="error-message">{% trans form.first_name.errors.0 %}</div>
     {% endif %}
     <div class="flex-item">
         <label for="{{ form.first_name.id_for_label }}">{% trans form.first_name.label %}</label>
-        <input
-            type="text"
-            name="{{ form.first_name.name }}"
-            id="{{ form.first_name.id_for_label }}"
-            value="{{ form.first_name.value }}"
-        >
+        <input type="text"
+               name="{{ form.first_name.name }}"
+               id="{{ form.first_name.id_for_label }}"
+               value="{{ form.first_name.value }}">
     </div>
     {% if form.last_name.errors %}
         <div class="error-message">{% trans form.last_name.errors.0 %}</div>
     {% endif %}
     <div class="flex-item">
         <label for="{{ form.last_name.id_for_label }}">{% trans form.last_name.label %}</label>
-        <input
-            type="text"
-            name="{{ form.last_name.name }}"
-            id="{{ form.last_name.id_for_label }}"
-            value="{{ form.last_name.value }}"
-        >
+        <input type="text"
+               name="{{ form.last_name.name }}"
+               id="{{ form.last_name.id_for_label }}"
+               value="{{ form.last_name.value }}">
     </div>
     <div class="flex-item">
         <label>{% trans "Email" %}</label>
