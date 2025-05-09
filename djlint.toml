@@ -1,20 +1,4 @@
-[lint]
 
 # Find the rules here:
 # https://www.djlint.com/docs/linter/#rules
-ignore = [
-    "T002",
-    "T003",
-    "H005",
-    "H006",
-    "H008",
-    "H013",
-    "H016",
-    "H020",
-    "H021",
-    "H023",
-    "H025",
-    "H030",
-    "H031",
-    "D018",
-]
+ignore = "H006,H020,H021,H031,D018"
