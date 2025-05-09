@@ -18,4 +18,4 @@ jobs:
         with:
           src: "./app/recordtransfer/views"
           version-file: "./pyproject.toml"
-          args: "--config ./ruff.toml"
+          args: "--config ./ruff.toml check"
