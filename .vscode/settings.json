@@ -47,11 +47,5 @@
         "H030",
         "H031",
         "D018"
-    ],
-    "[restructuredtext]": {
-        "editor.rulers": [
-            99
-        ],
-        "editor.wordWrap": "on"
-    }
+    ]
 }
