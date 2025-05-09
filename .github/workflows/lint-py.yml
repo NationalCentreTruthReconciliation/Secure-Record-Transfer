@@ -1,0 +1,21 @@
+name: PR Python Lint Check
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-recordtransfer-views:
+    name: Lint RecordTransfer Views
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          src: "./app/recordtransfer/views"
+          version-file: "./pyproject.toml"
+          args: "--config ./ruff.toml check"

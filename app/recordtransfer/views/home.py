@@ -1,5 +1,7 @@
 """Views for the homepage and static pages navigable from the home page."""
 
+from typing import Any
+
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.views.generic import TemplateView
@@ -12,9 +14,14 @@ class Index(TemplateView):
 
 
 class Help(TemplateView):
+    """The help page."""
+
     template_name = "recordtransfer/help.html"
 
-    def get_context_data(self, **kwargs):
+    from typing import Any
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add context variables to the template context."""
         context = super().get_context_data(**kwargs)
         context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
         context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
@@ -33,7 +40,8 @@ class About(TemplateView):
 
     template_name = "recordtransfer/about.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add context variables to the template context."""
         context = super().get_context_data(**kwargs)
         context["ACCEPTED_FILE_FORMATS"] = settings.ACCEPTED_FILE_FORMATS
         context["MAX_TOTAL_UPLOAD_SIZE_MB"] = settings.MAX_TOTAL_UPLOAD_SIZE_MB

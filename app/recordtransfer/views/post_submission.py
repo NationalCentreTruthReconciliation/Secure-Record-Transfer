@@ -1,13 +1,20 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from caais.export import ExportVersion
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.db.models import QuerySet
 from django.forms import BaseModelForm
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -29,7 +36,7 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
     template_name = "recordtransfer/submission_detail.html"
     context_object_name = "submission"
 
-    def get_object(self, queryset=None) -> Submission:
+    def get_object(self, queryset: Optional[QuerySet] = None) -> Submission:
         """Retrieve the Submission object based on the UUID in the URL."""
         return get_object_or_404(Submission, uuid=self.kwargs.get("uuid"))
 
@@ -37,13 +44,14 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().user == self.request.user
 
-    def handle_no_permission(self):
+    def handle_no_permission(self) -> HttpResponseRedirect:
         """Override to return 404 instead of 403. This is to prevent users from knowing that the
         submission exists if they do not have permission to view it.
         """
         raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Pass context variables to the template."""
         context = super().get_context_data(**kwargs)
         context["current_date"] = timezone.now()
         context["metadata"] = context["submission"].metadata
@@ -53,22 +61,31 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
 class SubmissionCsv(UserPassesTestMixin, View):
     """Generates a CSV containing the submission and downloads that CSV."""
 
-    def get_object(self):
-        self.get_queryset().first()
+    def get_object(self) -> Submission:
+        """Retrieve the Submission object based on the UUID in the URL."""
+        submission = self.get_queryset().first()
+        if submission is None:
+            raise Http404("Submission not found")
+        return submission
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Submission]:
+        """Retrieve a queryset of submissions based on the UUID in the URL. There should only be
+        one submission in the queryset.
+        """
         uuid = self.kwargs["uuid"]
-        try:
-            return Submission.objects.filter(uuid=str(uuid))
-        except Submission.DoesNotExist:
-            raise Http404
+        queryset = Submission.objects.filter(uuid=str(uuid))
+        return queryset
 
-    def test_func(self):
+    def test_func(self) -> bool:
+        """Prevent users from accessing the CSV download if they do not have the correct
+        permissions.
+        """
         submission = self.get_object()
         # Check if the user is the creator of the submission or is a staff member
         return self.request.user.is_staff or submission.user == self.request.user
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Handle GET request to generate and download the CSV."""
         queryset = self.get_queryset()
         prefix = slugify(queryset.first().user.username) + "_export-"
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
@@ -85,16 +102,20 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
     context_object_name = "group"
     success_message = gettext("Group updated")
     error_message = gettext("There was an error updating the group")
-    http_method_names = ["get", "post", "delete"]
 
-    def get_object(self):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.http_method_names = ["get", "post", "delete"]
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> SubmissionGroup:
+        """Retrieve the SubmissionGroup object based on the UUID in the URL."""
         return get_object_or_404(SubmissionGroup, uuid=self.kwargs.get("uuid"))
 
-    def test_func(self):
+    def test_func(self) -> bool:
         """Check if the user is the creator of the submission group or is a staff member."""
         return self.request.user.is_staff or self.get_object().created_by == self.request.user
 
-    def handle_no_permission(self):
+    def handle_no_permission(self) -> HttpResponseRedirect:
         """Override to return 404 instead of 403. This is to prevent users from knowing that the
         group exists if they do not have permission to view it.
         """
@@ -161,14 +182,16 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
 
-    def test_func(self):
+    def test_func(self) -> bool:
         """Check if the user is authenticated."""
         return self.request.user.is_authenticated
 
-    def handle_no_permission(self) -> HttpResponseForbidden:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    def handle_no_permission(self) -> HttpResponseRedirect:
+        """Override to return 404 instead of 403."""
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Pass context variables to the template."""
         context = super().get_context_data(**kwargs)
         context["IS_NEW"] = True
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME

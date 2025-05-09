@@ -1,4 +1,4 @@
-name: PR Lint Check
+name: PR JS Lint Check
 
 on:
   pull_request:
