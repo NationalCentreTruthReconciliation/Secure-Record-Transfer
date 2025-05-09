@@ -38,6 +38,8 @@
     "files.associations": {
         "**/templates/**/*.html": "django-html"
     },
+    // Find the rules here:
+    // https://www.djlint.com/docs/linter/
     "djlint.ignore": [
         "T002",
         "T003",
