@@ -30,5 +30,28 @@
             99
         ],
         "editor.wordWrap": "on"
-    }
+    },
+    "[django-html]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "monosans.djlint"
+    },
+    "files.associations": {
+        "**/templates/**/*.html": "django-html"
+    },
+    "djlint.ignore": [
+        "T002",
+        "T003",
+        "H005",
+        "H006",
+        "H008",
+        "H013",
+        "H016",
+        "H020",
+        "H021",
+        "H023",
+        "H025",
+        "H030",
+        "H031",
+        "D018"
+    ]
 }
