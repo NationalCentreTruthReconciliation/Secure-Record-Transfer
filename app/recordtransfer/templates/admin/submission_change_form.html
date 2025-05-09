@@ -1,5 +1,6 @@
 {% extends "admin/change_form.html" %}
 {% load i18n %}
+
 {% block extrahead %}
     {{ block.super }}
     {# textarea overflow fix #}
@@ -13,6 +14,7 @@
         }
     </style>
 {% endblock %}
+
 {% block submit_buttons_bottom %}
     {{ block.super }}
     <div class="submit-row">
