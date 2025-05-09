@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
 
+      - name: Ensure pip is installed
+        run: |
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade pip
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
