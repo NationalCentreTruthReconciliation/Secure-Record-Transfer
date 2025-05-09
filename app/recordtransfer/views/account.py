@@ -1,6 +1,7 @@
 """Views for creating and activating user accounts."""
 
 from django.contrib.auth import login
+from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -26,10 +27,10 @@ class CreateAccount(FormView):
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """If the user is already authenticated, redirect them to the homepage."""
         if request.user.is_authenticated:
-            return redirect('recordtransfer:index')
+            return redirect("recordtransfer:index")
         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form) -> HttpResponse:
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Save the new user and send them an activation email."""
         new_user = form.save(commit=False)
         new_user.is_active = False
@@ -39,7 +40,8 @@ class CreateAccount(FormView):
         return super().form_valid(form)
 
 
-def activate_account(request, uidb64, token):
+def activate_account(request: HttpRequest, uidb64: str, token: str) -> HttpResponse:
+    """Activate a user's account using the uidb64 and token from the activation email."""
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
