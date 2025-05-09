@@ -2,16 +2,9 @@ import { setupFormset } from "./formset";
 
 /**
  * Sets up the other identifiers form.
+ * @param {object} context - The context object containing form configuration
  */
-export function setupOtherIdentifiersForm() {
-    const contextElement = document.getElementById("py_context_otheridentifiers");
-
-    if (!contextElement) {
-        return;
-    }
-
-    const context = JSON.parse(contextElement.textContent);
-
+export function setupOtherIdentifiersForm(context) {
     const formsetPrefix = context["formset_prefix"];
 
     setupFormset(formsetPrefix);

@@ -1,8 +1,11 @@
-document.addEventListener("DOMContentLoaded", () => {
+/**
+ * Sets up the navigation bar functionality including mobile menu toggles and responsiveness
+ * @returns {void}
+ */
+export function setupNavbar() {
     const openToggle = document.querySelector(".nav-toggle-open");
     const navItemsContainer = document.querySelector(".nav-items-container");
     const overlay = document.querySelector(".menu-overlay");
-
     const toggleButton = document.querySelector(".nav-toggle-button");
 
     toggleButton.addEventListener("click", function(e) {
@@ -35,4 +38,4 @@ document.addEventListener("DOMContentLoaded", () => {
             toggleButton.classList.remove("active");
         }
     });
-});
+}

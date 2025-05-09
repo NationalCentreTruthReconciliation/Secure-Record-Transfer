@@ -17,6 +17,8 @@
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
     "glob": "^11.0.0",
+    "htmx-ext-head-support": "^2.0.4",
+    "htmx.org": "^2.0.4",
     "imask": "^7.6.1",
     "mini-css-extract-plugin": "^2.9.2",
     "sharp": "^0.33.5",

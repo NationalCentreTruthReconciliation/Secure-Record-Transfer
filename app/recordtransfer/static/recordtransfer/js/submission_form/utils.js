@@ -73,20 +73,6 @@ export const setSessionToken = (token) => {
 };
 
 /**
- * Retrieves file upload settings from context passed from view. Note that this function
- * should only be called after the DOM has loaded, otherwise the settings element may not exist
- * yet.
- * @returns {?object} The parsed JSON settings object if element exists, null otherwise.
- */
-export const getFileUploadSettings = () => {
-    const settingsElement = document.getElementById("py_context_uploadfiles");
-    if (!settingsElement) {
-        return null;
-    }
-    return JSON.parse(settingsElement.textContent);
-};
-
-/**
  * Fetches the list of uploaded files for the current upload session.
  * This function sends a GET request to the server to retrieve the list of uploaded files.
  * Uses exponential backoff to retry a total of 3 times if getting a 500 or more status.
@@ -166,16 +152,15 @@ export const sendDeleteRequestForFile = async (filename) => {
 };
 
 /**
- * Updates the capacity display elements with the total number of files and total size in bytes.
- * Highlights the elements if the total size exceeds the maximum allowed upload size.
- * @param {number} totalNumFiles - The total number of files.
+ * Updates the capacity display elements. Highlights the elements if the total size exceeds the
+ * maximum allowed upload size.
  * @param {number} totalSizeBytes - The total size of the files in bytes.
+ * @param {number} maxUploadSize - The maximum upload size in bytes.
  */
-export const updateCapacityDisplay = (totalNumFiles, totalSizeBytes) => {
+export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize) => {
     const totalSizeElement = document.getElementById("total-size");
     const remainingSizeElement = document.getElementById("remaining-size");
-    const { MAX_TOTAL_UPLOAD_SIZE_MB } = getFileUploadSettings();
-    const maxTotalUploadSizeBytes = MAX_TOTAL_UPLOAD_SIZE_MB * 1000 * 1000;
+    const maxTotalUploadSizeBytes = maxUploadSize * 1000 * 1000;
 
     const updateElement = (element, value, isError) => {
         if (element) {

@@ -549,7 +549,7 @@ class SubmissionFormWizard(SessionWizardView):
         # Add template and JS contexts
         context.update(self._get_template_context())
         context["js_context"] = self._get_javascript_context()
-        context["js_context_id"] = "py_context_" + self.steps.current
+        context["js_context_id"] = "js_context_" + self.steps.current
 
         return context
 

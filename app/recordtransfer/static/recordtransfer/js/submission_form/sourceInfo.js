@@ -2,29 +2,21 @@ import { setupSelectOtherToggle } from "./otherField";
 
 /**
  * Sets up the expandable source info form.
+ * @param {object} context - The context object containing form field IDs
  */
-export function setupSourceInfoForm() {
-    // Context passed from template to JS
-    const sourceInfoContextElement = document.getElementById("py_context_sourceinfo");
-
-    if (!sourceInfoContextElement) {
-        return;
-    }
-
-    const sourceInfoContext = JSON.parse(sourceInfoContextElement.textContent);
-
+export function setupSourceInfoForm(context) {
     // Toggles Other source type field depending on value of Source type field
     setupSelectOtherToggle(
-        sourceInfoContext["id_source_type"],
-        sourceInfoContext["id_other_source_type"],
-        sourceInfoContext["other_type_id"]
+        context["id_source_type"],
+        context["id_other_source_type"],
+        context["other_type_id"]
     );
 
     // Toggles Other source role field depending on value of Source role field
     setupSelectOtherToggle(
-        sourceInfoContext["id_source_role"],
-        sourceInfoContext["id_other_source_role"],
-        sourceInfoContext["other_role_id"]
+        context["id_source_role"],
+        context["id_other_source_role"],
+        context["other_role_id"]
     );
 
     // Add faux-required-field to labels
@@ -35,9 +27,9 @@ export function setupSourceInfoForm() {
         }
     });
 
-    const sourceTypeSelect = document.getElementById(sourceInfoContext["id_source_type"]);
-    const sourceRoleSelect = document.getElementById(sourceInfoContext["id_source_role"]);
-    const enterManualInfoInputId = sourceInfoContext["id_enter_manual_source_info"];
+    const sourceTypeSelect = document.getElementById(context["id_source_type"]);
+    const sourceRoleSelect = document.getElementById(context["id_source_role"]);
+    const enterManualInfoInputId = context["id_enter_manual_source_info"];
     const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
 
     if (!enterManualInfoInputElement) {

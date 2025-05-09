@@ -1,15 +1,13 @@
 {% load static %}
 {% load i18n %}
-{% load django_htmx %}
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head hx-head="merge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- JS -->
     {% block javascript %}
     <script src="{% static 'base.bundle.js' %}"></script>
-    {% htmx_script %}
     {% endblock javascript %}
     {# Fonts #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +30,7 @@
     </title>
 </head>
 
-<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' hx-ext="head-support">
     <div class="flex-wrapper">
         {% block banner %}
         {% include "recordtransfer/banner.html" %}
@@ -42,9 +40,9 @@
         {% include "recordtransfer/header.html" %}
         {% endif %}
         {% endblock header %}
-        {% block dialog %}
-        {% endblock %}
-        <div class="main-container">
+        <div class="main-container" id="main-container">
+            {% block dialog %}
+            {% endblock %}
             <div class="focused-content">
                 {% block focused_content %}{% endblock focused_content %}
             </div>
