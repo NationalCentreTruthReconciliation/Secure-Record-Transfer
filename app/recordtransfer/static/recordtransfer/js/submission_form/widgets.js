@@ -7,7 +7,6 @@ import {
     shift,
     offset,
 } from "@floating-ui/dom";
-
 import AirDatepicker from "air-datepicker";
 import localeEn from "air-datepicker/locale/en";
 import IMask from "imask";
@@ -98,8 +97,6 @@ export function setupInputMasks() {
  * Should be called after window load - the DOMContentLoaded event fires too early.
  */
 export function setupHelpTooltips() {
-    console.log("setupHelpTooltips is running");
-
     document.querySelectorAll(".help-tooltip").forEach((icon) => {
         const tooltip = document.createElement("div");
         tooltip.className = "form-tooltip";

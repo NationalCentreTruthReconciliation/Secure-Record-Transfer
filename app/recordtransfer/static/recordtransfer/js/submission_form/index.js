@@ -62,7 +62,6 @@ const setup = () => {
         });
     }
 };
-console.log("Submission form JS loaded");
 document.addEventListener("DOMContentLoaded", setup);
 
 
