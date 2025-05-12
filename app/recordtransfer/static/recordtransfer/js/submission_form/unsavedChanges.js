@@ -3,8 +3,6 @@
  */
 export function setupUnsavedChangesProtection() {
     const currentFormStep = window.currentFormStep || 0; // Use 0 as a fallback
-    console.log("currentFormStep in unsavedChanges.js:");
-
     const inProgressUuid = new URLSearchParams(window.location.search).get("resume");
 
     // Skip click-away protection if on the first step of a fresh form
