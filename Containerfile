@@ -6,6 +6,11 @@ ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 WORKDIR ${PROJ_DIR}
 
+# 🔧 Install gettext for makemessages (includes msguniq)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gettext && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy uv-related files, and install Python dependencies
 COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN uv sync
@@ -13,11 +18,6 @@ RUN uv sync
 # Install Node.js dependencies
 COPY package*.json ${PROJ_DIR}
 RUN npm install --no-color
-
-# 🔧 Install gettext for makemessages (includes msguniq)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copy application code to image
 COPY ./app ${APP_DIR}
