@@ -8,6 +8,7 @@
     <!-- JS -->
     {% block javascript %}
     <script src="{% static 'base.bundle.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     {% endblock javascript %}
     {# Fonts #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +23,7 @@
     {# CSS #}
     {% block stylesheet %}
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
     {% endblock stylesheet %}
     {# Favicon #}
     <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}" />
