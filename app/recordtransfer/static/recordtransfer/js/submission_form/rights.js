@@ -3,16 +3,9 @@ import { setupSelectOtherToggle } from "./otherField";
 
 /**
  * Sets up the rights form.
+ * @param {object} context - The context object containing form configuration
  */
-export function setupRightsForm() {
-    const contextElement = document.getElementById("py_context_rights");
-
-    if (!contextElement) {
-        return;
-    }
-
-    const context = JSON.parse(contextElement.textContent);
-
+export function setupRightsForm(context) {
     const formsetPrefix = context["formset_prefix"];
 
     // Set up the formset, and setup the select other toggle when a new form is added.

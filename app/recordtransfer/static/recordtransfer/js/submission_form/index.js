@@ -15,16 +15,45 @@ import {
     setupHelpTooltips,
 } from "./widgets";
 
-document.addEventListener("DOMContentLoaded", function () {
+const _setupWithContext = () => {
+    const contextElement = document.querySelector("[id^=\"js_context_\"]");
+    if (!contextElement) {
+        return;
+    }
+    const context = JSON.parse(contextElement.textContent);
+    const contextFor = contextElement.id.replace(/^js_context_/, "");
+
+    switch (contextFor) {
+    case "contactinfo":
+        setupContactInfoForm(context);
+        break;
+    case "sourceinfo":
+        setupSourceInfoForm(context);
+        break;
+    case "rights":
+        setupRightsForm(context);
+        break;
+    case "otheridentifiers":
+        setupOtherIdentifiersForm(context);
+        break;
+    case "groupsubmission":
+        setupSubmissionGroupForm(context);
+        break;
+    case "uploadfiles":
+        setupUppy(context);
+        break;
+    default:
+        break;
+    }
+};
+
+const setup = () => {
     setupDatePickers();
     setupInputMasks();
-    setupContactInfoForm();
-    setupSourceInfoForm();
-    setupRightsForm();
-    setupOtherIdentifiersForm();
-    setupSubmissionGroupForm();
     setupUnsavedChangesProtection();
-    setupUppy();
+    setupHelpTooltips();
+
+    _setupWithContext();
 
     const submitButton = document.getElementById("submit-form-btn");
     if (submitButton) {
@@ -32,8 +61,13 @@ document.addEventListener("DOMContentLoaded", function () {
             singleCaptchaFn();
         });
     }
-});
+};
 
-window.addEventListener("load", function () {
-    setupHelpTooltips();
+document.addEventListener("DOMContentLoaded", setup);
+
+// Re-setup the form when HTMX swaps the main container
+document.addEventListener("htmx:afterSwap", (event) => {
+    if (event.detail.target.id === "main-container") {
+        setup();
+    }
 });

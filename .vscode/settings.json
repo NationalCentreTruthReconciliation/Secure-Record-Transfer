@@ -1,4 +1,5 @@
 {
+    "files.trimTrailingWhitespace": true,
     // Python linting and formatting
     "[python]": {
         "editor.formatOnSave": true,
@@ -10,6 +11,10 @@
     "ruff.nativeServer": "on",
     "python.analysis.typeCheckingMode": "standard",
     "editor.formatOnSave": true,
+    // For indentation to be set as 4 spaces
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
     // Python Testing
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
@@ -30,5 +35,12 @@
             99
         ],
         "editor.wordWrap": "on"
+    },
+    "[django-html]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "monosans.djlint"
+    },
+    "files.associations": {
+        "**/templates/**/*.html": "django-html"
     }
 }
