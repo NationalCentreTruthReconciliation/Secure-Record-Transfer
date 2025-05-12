@@ -12,7 +12,6 @@ import { setupUppy } from "./uppyForm";
 import {
     setupDatePickers,
     setupInputMasks,
-    setupHelpTooltips,
 } from "./widgets";
 
 const _setupWithContext = () => {
@@ -51,7 +50,6 @@ const setup = () => {
     setupDatePickers();
     setupInputMasks();
     setupUnsavedChangesProtection();
-    setupHelpTooltips();
 
     _setupWithContext();
 

@@ -13,8 +13,6 @@ import {
  * Should be called after window load - the DOMContentLoaded event fires too early.
  */
 export function setupHelpTooltips() {
-    console.log("setupHelpTooltips is running");
-
     document.querySelectorAll(".help-tooltip").forEach((icon) => {
         const tooltip = document.createElement("div");
         tooltip.className = "form-tooltip";
