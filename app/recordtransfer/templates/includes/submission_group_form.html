@@ -8,14 +8,14 @@
     {% for field in form %}
         {% if field.errors %}
             <div class="flex-error">
-                {{ field.label_tag }}
+                <label></label>
                 <div class="field-error">{{ field.errors.0 }}</div>
             </div>
         {% endif %}
         <div class="flex-item margin-top-25px">{{ field.label_tag }} {{ field }}</div>
     {% endfor %}
     <div class="flex-item">
-        {{ field.label_tag }}
+        <label></label>
         <button type="submit" class="blue-button" id="id_create_group_button">
             {% if IS_NEW %}
                 {% trans "Create" %}
