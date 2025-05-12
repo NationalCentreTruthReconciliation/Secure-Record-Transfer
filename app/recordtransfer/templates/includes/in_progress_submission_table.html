@@ -25,16 +25,15 @@
                 <div class="flex flex-row gap-4">
                     {% if not in_progress.upload_session_expired %}
                         <a href="{{ in_progress.get_resume_url }}"
-                           title="Resume"
                            class="link link-success tooltip"
-                           data-tip="Resume">
+                           data-tip="{% trans "Resume" %}">
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
                     <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
                        title="Delete"
                        class="link link-error tooltip"
-                       data-tip="Delete">
+                       data-tip="{% trans "Delete" %}">
                         <i class="fas fa-trash-alt"></i>
                     </a>
                 </div>

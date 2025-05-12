@@ -17,14 +17,12 @@
             <td>
                 <div class="flex flex-row gap-4">
                     <a href="{% url 'recordtransfer:submission_detail' uuid=submission.uuid %}"
-                       title="{% trans "View Report" %}"
                        class="link link-info tooltip"
                        data-tip="{% trans "View Report" %}"
                        target="_blank">
                         <i class="fas fa-file-alt"></i>
                     </a>
                     <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"
-                       title="{% trans "Download CSV" %}"
                        class="link link-success tooltip"
                        data-tip="{% trans "Download CSV" %}">
                         <i class="fas fa-download"></i>
