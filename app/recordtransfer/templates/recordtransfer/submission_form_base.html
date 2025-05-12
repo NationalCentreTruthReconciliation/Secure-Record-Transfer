@@ -42,7 +42,7 @@
         {{ wizard.form.management_form }}
         {% block formfields %}{# !!! Add the form fields here !!! #}{% endblock %}
         <div class="{% block buttonarrayclass %}{% endblock buttonarrayclass %}">
-            <label></label>
+            {{ field.label_tag }}
             <div class="button-array">
                 {% if wizard.steps.prev %}
                     {# Without formnovalidate, you can't go to the previous step without valid data #}
@@ -105,7 +105,7 @@
             </div>
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
-            <label></label>
+            {{ field.label_tag }}
             {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
                 <button id="form-save-button"
                         class="text-link margin-top-25px"
