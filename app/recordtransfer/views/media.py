@@ -34,7 +34,7 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
     if not path:
         return HttpResponseNotFound("The requested resource could not be found")
 
-    user = request.user
+    user = cast(User, request.user)
     if not user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this resource.")
 
@@ -211,50 +211,57 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
             )
 
         if request.method == "DELETE":
-            try:
-                session.remove_temp_file_by_name(file_name)
-            except FileNotFoundError:
-                return JsonResponse(
-                    {"error": gettext("File not found in upload session")},
-                    status=404,
-                )
-            except ValueError:
-                return JsonResponse(
-                    {"error": gettext("Cannot remove file from upload session")},
-                    status=400,
-                )
-            return HttpResponse(status=204)
-
-        uploaded_file = None
-        try:
-            uploaded_file = session.get_temp_file_by_name(file_name)
-        except FileNotFoundError:
-            return JsonResponse(
-                {"error": gettext("File not found in upload session")},
-                status=404,
-            )
-        except ValueError:
-            return JsonResponse(
-                {"error": gettext("Cannot access file in upload session")},
-                status=400,
-            )
-
-        file_url = uploaded_file.get_file_media_url()
-        if settings.DEBUG:
-            return HttpResponseRedirect(file_url)
+            return _handle_uploaded_file_delete(session, file_name)
         else:
-            response = HttpResponse(headers={"X-Accel-Redirect": file_url})
-            for header in [
-                "Content-Type",
-                "Content-Disposition",
-                "Accept-Ranges",
-                "Set-Cookie",
-                "Cache-Control",
-                "Expires",
-            ]:
-                del response[header]
-            return response
+            return _handle_uploaded_file_get(session, file_name)
 
     except Exception as exc:
         LOGGER.error("Error handling uploaded file: %s", str(exc), exc_info=exc)
         return JsonResponse({"error": gettext("Internal server error")}, status=500)
+
+
+def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> HttpResponse:
+    try:
+        session.remove_temp_file_by_name(file_name)
+    except FileNotFoundError:
+        return JsonResponse(
+            {"error": gettext("File not found in upload session")},
+            status=404,
+        )
+    except ValueError:
+        return JsonResponse(
+            {"error": gettext("Cannot remove file from upload session")},
+            status=400,
+        )
+    return HttpResponse(status=204)
+
+
+def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpResponse:
+    try:
+        uploaded_file = session.get_temp_file_by_name(file_name)
+    except FileNotFoundError:
+        return JsonResponse(
+            {"error": gettext("File not found in upload session")},
+            status=404,
+        )
+    except ValueError:
+        return JsonResponse(
+            {"error": gettext("Cannot access file in upload session")},
+            status=400,
+        )
+
+    file_url = uploaded_file.get_file_media_url()
+    if settings.DEBUG:
+        return HttpResponseRedirect(file_url)
+    else:
+        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
+        for header in [
+            "Content-Type",
+            "Content-Disposition",
+            "Accept-Ranges",
+            "Set-Cookie",
+            "Cache-Control",
+            "Expires",
+        ]:
+            del response[header]
+        return response

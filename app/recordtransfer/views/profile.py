@@ -1,6 +1,6 @@
 """Views to manage user profile information and view their submission history."""
 
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -28,7 +28,7 @@ from recordtransfer.constants import (
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
-from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup
+from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
 
 
 class UserProfile(UpdateView):
@@ -44,8 +44,9 @@ class UserProfile(UpdateView):
     password_change_success_message = gettext("Password updated")
     error_message = gettext("There was an error updating your preferences. Please try again.")
 
-    def get_object(self, queryset=None):
-        return self.request.user
+    def get_object(self, queryset: Optional[QuerySet] = None) -> User:
+        """Get the user object for the current request."""
+        return cast(User, self.request.user)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context data for the user profile view."""
@@ -103,6 +104,7 @@ class UserProfile(UpdateView):
         profile_form = cast(UserProfileForm, form)
         profile_form.reset_form()
         return super().form_invalid(profile_form)
+
 
 def _paginated_table_view(
     request: HttpRequest,
