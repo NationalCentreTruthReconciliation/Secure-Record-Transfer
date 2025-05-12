@@ -29,15 +29,16 @@
              hx-trigger="load"
              id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"></div>
         <!-- Past Submissions -->
-        <div class="flex-med-width-item margin-top-25px">
+        <div class="flex justify-between mb-5">
             <label class="medium-text">{% trans "Past Submissions" %}</label>
+            <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
+                {% trans "New submission" %}
+                <i class="fa fa-plus" aria-hidden="true"></i>
+            </a>
         </div>
         <div hx-get="{% url 'recordtransfer:submission_table' %}"
              hx-trigger="load"
              id="{{ ID_SUBMISSION_TABLE }}"></div>
-        <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
-        </div>
         <!-- Submission Groups -->
         <div class="flex-med-width-item margin-top-25px">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
