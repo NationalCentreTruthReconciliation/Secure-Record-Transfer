@@ -8,7 +8,6 @@
 {% endblock title %}
 {% block javascript %}
     {{ block.super }}
-    <script>window.currentFormStep = {{ wizard.steps.step1|default:0 }};</script>
     <script src="{% static 'submission_form.bundle.js' %}"></script>
     {{ js_context|json_script:js_context_id }}
 {% endblock javascript %}
