@@ -62,8 +62,9 @@ const setup = () => {
         });
     }
 };
-
+console.log("Submission form JS loaded");
 document.addEventListener("DOMContentLoaded", setup);
+
 
 // Re-setup the form when HTMX swaps the main container
 document.addEventListener("htmx:afterSwap", (event) => {
