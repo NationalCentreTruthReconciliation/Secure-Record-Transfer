@@ -34,7 +34,6 @@
         </div>
         <div hx-get="{% url 'recordtransfer:submission_table' %}"
              hx-trigger="load"
-             class="flex-med-width-item"
              id="{{ ID_SUBMISSION_TABLE }}"></div>
         <div class="margin-top-15px">
             <a href="{% url 'recordtransfer:submit' %}">{% trans "Click to make a new submission" %}</a>
