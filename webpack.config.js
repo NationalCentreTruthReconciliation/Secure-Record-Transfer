@@ -58,15 +58,19 @@ module.exports = {
     watchOptions: {
         aggregateTimeout: 500,
         poll: 1000,
+        ignored: /node_modules/,
     },
     entry: {
         images: [
             ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        base: "./app/recordtransfer/static/recordtransfer/js/base/index.js",
-
-
+        base: [
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/js/base/*.js")
+                .map(file => "./" + path.relative(__dirname, file)),
+            ...glob.sync("./app/recordtransfer/static/" +
+                "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
+        ],
         submission_form: "./app/recordtransfer/static/recordtransfer/js/submission_form/index.js", // eslint-disable-line
         profile: [
             ...glob.sync(
