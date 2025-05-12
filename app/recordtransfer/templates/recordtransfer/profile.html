@@ -22,14 +22,15 @@
         {% include "includes/profile_form.html" %}
         <br>
         <!-- In-Progress Submissions -->
-        <div class="flex-med-width-item margin-top-25px">
+        <div class="mt-5 mb-3">
             <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
         </div>
         <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
              hx-trigger="load"
-             id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"></div>
+             id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"
+             class="mb-10"></div>
         <!-- Past Submissions -->
-        <div class="flex justify-between mb-5">
+        <div class="flex justify-between mb-3">
             <label class="medium-text">{% trans "Past Submissions" %}</label>
             <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
                 {% trans "New submission" %}
@@ -38,18 +39,21 @@
         </div>
         <div hx-get="{% url 'recordtransfer:submission_table' %}"
              hx-trigger="load"
-             id="{{ ID_SUBMISSION_TABLE }}"></div>
+             id="{{ ID_SUBMISSION_TABLE }}"
+             class="mb-10"></div>
         <!-- Submission Groups -->
-        <div class="flex-med-width-item margin-top-25px">
+        <div class="flex justify-between mb-3">
             <label class="medium-text">{% trans "Submission Groups" %}</label>
+            <a href="{% url 'recordtransfer:submission_group_new' %}"
+               class="btn btn-sm">
+                {% trans "New submission group" %}
+                <i class="fa fa-plus" aria-hidden="true"></i>
+            </a>
         </div>
         <div hx-get="{% url 'recordtransfer:submission_group_table' %}"
              hx-trigger="load"
-             class="flex-med-width-item"
-             id="{{ ID_SUBMISSION_GROUP_TABLE }}"></div>
-        <div class="margin-top-15px">
-            <a href="{% url 'recordtransfer:submission_group_new' %}">{% trans "Click to add new group" %}</a>
-        </div>
+             id="{{ ID_SUBMISSION_GROUP_TABLE }}"
+             class="mb-10"></div>
     {% else %}
         {% url 'login' as login %}
         <p>
