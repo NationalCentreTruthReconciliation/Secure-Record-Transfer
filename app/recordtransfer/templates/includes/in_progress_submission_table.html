@@ -24,8 +24,9 @@
             <td>
                 <div class="flex flex-row gap-4">
                     {% if not in_progress.upload_session_expired %}
-                        <a href="{{ in_progress.get_resume_url }}" title="Resume"
-                        class="link link-success">
+                        <a href="{{ in_progress.get_resume_url }}"
+                           title="Resume"
+                           class="link link-success">
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
