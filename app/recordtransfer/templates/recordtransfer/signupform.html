@@ -1,21 +1,15 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load static %}
 {% load i18n %}
-
-{% block title %}{% trans "Create Account" %}{% endblock %}
-
+{% block title %}
+    {% trans "Create Account" %}
+{% endblock title %}
 {% block content %}
     <div class="account-form-container">
-        <div class="account-page-title title-text">
-            {% trans "Create a New Account" %}
-        </div>
-
+        <div class="account-page-title title-text">{% trans "Create a New Account" %}</div>
         {% if form.non_field_errors %}
-            <div class="account-error">
-                {% trans "The form was not valid." %}
-            </div>
+            <div class="account-error">{% trans "The form was not valid." %}</div>
         {% endif %}
-
         <form method="post" action="{% url 'recordtransfer:create_account' %}">
             {% csrf_token %}
             {% for field in form %}
@@ -31,7 +25,8 @@
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
                     {% if field.help_text %}
-                        <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
+                        <div tooltip-content="{{ field.help_text }}"
+                             class="help-tooltip help-icon">
                             <i class="fa fa-info-circle" aria-hidden="true"></i>
                         </div>
                     {% else %}
@@ -46,4 +41,4 @@
             </div>
         </form>
     </div>
-{% endblock %}
+{% endblock content %}

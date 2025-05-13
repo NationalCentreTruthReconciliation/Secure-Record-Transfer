@@ -12,7 +12,6 @@ import { setupUppy } from "./uppyForm";
 import {
     setupDatePickers,
     setupInputMasks,
-    setupHelpTooltips,
 } from "./widgets";
 
 const _setupWithContext = () => {
@@ -51,7 +50,6 @@ const setup = () => {
     setupDatePickers();
     setupInputMasks();
     setupUnsavedChangesProtection();
-    setupHelpTooltips();
 
     _setupWithContext();
 
@@ -62,8 +60,8 @@ const setup = () => {
         });
     }
 };
-
 document.addEventListener("DOMContentLoaded", setup);
+
 
 // Re-setup the form when HTMX swaps the main container
 document.addEventListener("htmx:afterSwap", (event) => {

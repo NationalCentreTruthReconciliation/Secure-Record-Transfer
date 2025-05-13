@@ -1,0 +1,44 @@
+.form-tooltip {
+    /* Float on top of the UI */
+    position: absolute;
+    display: none;
+
+    /* Avoid layout interference */
+    width: max-content;
+    top: 0;
+    left: 0;
+
+    /* Fade in/out */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+
+    padding: 6px;
+    font-size: 11pt;
+    background-color: #333333;
+    color: white;
+    border: 5px;
+    border-radius: 5px;
+}
+
+.help-tooltip.help-icon {
+    z-index: 1000;
+    margin-left: 10px;
+}
+
+.form-tooltip.visible {
+    opacity: 1;
+}
+
+.tooltip-arrow {
+    position: absolute;
+    background-color: #333333;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+}
+
+@media(max-width: 700px) {
+    .form-tooltip {
+        width: 200px;
+    }
+}
