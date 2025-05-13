@@ -34,17 +34,22 @@
                     </fieldset>
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">{% trans "Email" %}</legend>
-                        <input class="input input-bordered w-full bg-base-200" disabled value="{{ user.email }}">
+                        <input class="input input-bordered w-full bg-base-200"
+                               disabled
+                               value="{{ user.email }}">
                     </fieldset>
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">{% trans "Username" %}</legend>
-                        <input class="input input-bordered w-full bg-base-200" disabled value="{{ user.username }}">
+                        <input class="input input-bordered w-full bg-base-200"
+                               disabled
+                               value="{{ user.username }}">
                     </fieldset>
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">{% trans "Notification options" %}</legend>
-                        <label class="label pb-2 cursor-pointer">
+                        <label class="label pb-2 cursor-pointer"
+                               for="{{ form.gets_notification_emails.id_for_label }}">
                             <input type="checkbox"
-                                   class="checkbox checkbox-sm"
+                                   class="checkbox checkbox-sm checkbox-primary"
                                    name="{{ form.gets_notification_emails.name }}"
                                    id="{{ form.gets_notification_emails.id_for_label }}"
                                    {% if form.gets_notification_emails.value %}checked{% endif %} />
