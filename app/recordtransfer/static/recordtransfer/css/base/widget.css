@@ -25,6 +25,10 @@
     border-radius: 5px;
 }
 
+.help-tooltip.help-icon {
+    z-index: 1000;
+}
+
 .form-tooltip.visible {
     opacity: 1;
 }
