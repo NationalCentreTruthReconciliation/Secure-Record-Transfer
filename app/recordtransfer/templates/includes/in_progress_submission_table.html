@@ -12,9 +12,20 @@
             <td>{{ in_progress.last_updated|date:"D M j, Y" }} @ {{ in_progress.last_updated|time:"H:i" }}</td>
             <td>
                 {% if in_progress.upload_session_expires_at %}
-                    <span class=" {% if in_progress.upload_session_expires_soon %}text-error{% endif %} {% if in_progress.upload_session_expired %}line-through{% endif %} ">
-                        {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @
-                        {{ in_progress.upload_session_expires_at|time:"H:i" }}
+                    <span class="flex flex-row flex-wrap items-start gap-2">
+                        <span>
+                            {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @
+                            {{ in_progress.upload_session_expires_at|time:"H:i" }}
+                        </span>
+                        {% if in_progress.upload_session_expired %}
+                            <span class="tooltip" data-tip="{% trans "Submission has expired" %}">
+                                <i class="fas fa-exclamation-triangle text-error"></i>
+                            </span>
+                        {% elif in_progress.upload_session_expires_soon %}
+                            <span class="tooltip" data-tip="{% trans "Submission is expiring soon" %}">
+                                <i class="fas fa-exclamation-circle text-warning"></i>
+                            </span>
+                        {% endif %}
                     </span>
                 {% else %}
                     -
@@ -31,7 +42,6 @@
                         </a>
                     {% endif %}
                     <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
-                       title="Delete"
                        class="link link-error tooltip"
                        data-tip="{% trans "Delete" %}">
                         <i class="fas fa-trash-alt"></i>
