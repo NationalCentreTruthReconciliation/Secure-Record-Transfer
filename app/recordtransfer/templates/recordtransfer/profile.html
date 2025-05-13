@@ -18,7 +18,6 @@
 {% endblock theme %}
 {% block content %}
     {% if user.is_authenticated %}
-        <div class="title-text">{% trans "Your Profile" %}</div>
         {% include "includes/profile_form.html" %}
         <br>
         <!-- In-Progress Submissions -->
