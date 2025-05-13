@@ -4,7 +4,7 @@
       action="{% url 'recordtransfer:user_profile' %}"
       class="margin-top-25px">
     {% csrf_token %}
-    <div class="flex flex-col lg:flex-row w-full">
+    <div class="flex flex-col lg:flex-row w-2/3 gap-4">
         <!-- Left Column -->
         <div class="flex-1">
             <fieldset class="fieldset">
@@ -37,7 +37,7 @@
                 <legend class="fieldset-legend">{% trans "Username" %}</legend>
                 <input class="input w-full" disabled value="{{ user.username }}">
             </fieldset>
-            <fieldset class="fieldset bg-base-100 border-base-300 rounded-box border w-1/2 p-4">
+            <fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-4 w-1/2">
                 <legend class="fieldset-legend">{% trans "Notification options" %}</legend>
                 <label class="label pb-2">
                     <input type="checkbox"
@@ -84,7 +84,7 @@
             </fieldset>
         </div>
     </div>
-    <div class="flex justify-end mt-5">
+    <div class="flex justify-end mt-5 w-2/3">
         <button type="submit" class="btn btn-sm btn-primary" id="id_save_button">{% trans "Save" %}</button>
     </div>
 </form>
