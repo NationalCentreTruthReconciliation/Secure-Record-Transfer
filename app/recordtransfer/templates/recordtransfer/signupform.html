@@ -16,7 +16,7 @@
                 {% if field.errors %}
                     {% for error in field.errors %}
                         <div class="flex-error">
-                            {{ field.label_tag }}
+                            <label></label>
                             <div class="field-error">{{ error }}</div>
                         </div>
                     {% endfor %}
@@ -35,7 +35,7 @@
                 </div>
             {% endfor %}
             <div class="flex-item">
-                {{ field.label_tag }}
+                <label></label>
                 <button type="submit" class="blue-button">{% trans "Sign Up" %}</button>
             </div>
         </form>
