@@ -18,38 +18,52 @@
 {% endblock theme %}
 {% block content %}
     {% include "includes/profile_form.html" %}
-    <br>
-    <!-- In-Progress Submissions -->
-    <div class="mt-5 mb-3">
-        <label class="medium-text">{% trans "In-Progress Submissions" %}</label>
+    <!-- Tabbed Content -->
+    <div class="my-20">
+        <div class="tabs tabs-lift">
+            <!-- In-Progress Submissions Tab -->
+            <label class="tab">
+                <input type="radio" name="profile_tabs" checked="checked">
+                <i class="fa fa-clock me-2" aria-hidden="true"></i> {% trans "In-Progress" %}
+            </label>
+            <div class="tab-content bg-base-100 border-base-300 p-6">
+                <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
+                     hx-trigger="load"
+                     id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"></div>
+            </div>
+            <!-- Past Submissions Tab -->
+            <label class="tab">
+                <input type="radio" name="profile_tabs">
+                <i class="fa fa-check me-2" aria-hidden="true"></i> {% trans "Past Submissions" %}
+            </label>
+            <div class="tab-content bg-base-100 border-base-300 p-6">
+                <div hx-get="{% url 'recordtransfer:submission_table' %}"
+                     hx-trigger="load"
+                     id="{{ ID_SUBMISSION_TABLE }}"></div>
+                <div class="flex justify-end">
+                    <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
+                        <span class="hidden md:inline">{% trans "New submission" %}</span>
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Submission Groups Tab -->
+            <label class="tab">
+                <input type="radio" name="profile_tabs">
+                <i class="fa fa-folder me-2" aria-hidden="true"></i> {% trans "Submission Groups" %}
+            </label>
+            <div class="tab-content bg-base-100 border-base-300 p-6">
+                <div hx-get="{% url 'recordtransfer:submission_group_table' %}"
+                     hx-trigger="load"
+                     id="{{ ID_SUBMISSION_GROUP_TABLE }}"></div>
+                <div class="flex justify-end">
+                    <a href="{% url 'recordtransfer:submission_group_new' %}"
+                       class="btn btn-sm">
+                        <span class="hidden md:inline">{% trans "New submission group" %}</span>
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
-         hx-trigger="load"
-         id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"
-         class="mb-10"></div>
-    <!-- Past Submissions -->
-    <div class="flex justify-between mb-3">
-        <label class="medium-text">{% trans "Past Submissions" %}</label>
-        <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
-            <span class="hidden md:inline">{% trans "New submission" %}</span>
-            <i class="fa fa-plus" aria-hidden="true"></i>
-        </a>
-    </div>
-    <div hx-get="{% url 'recordtransfer:submission_table' %}"
-         hx-trigger="load"
-         id="{{ ID_SUBMISSION_TABLE }}"
-         class="mb-10"></div>
-    <!-- Submission Groups -->
-    <div class="flex justify-between mb-3">
-        <label class="medium-text">{% trans "Submission Groups" %}</label>
-        <a href="{% url 'recordtransfer:submission_group_new' %}"
-           class="btn btn-sm">
-            <span class="hidden md:inline">{% trans "New submission group" %}</span>
-            <i class="fa fa-plus" aria-hidden="true"></i>
-        </a>
-    </div>
-    <div hx-get="{% url 'recordtransfer:submission_group_table' %}"
-         hx-trigger="load"
-         id="{{ ID_SUBMISSION_GROUP_TABLE }}"
-         class="mb-10"></div>
 {% endblock content %}

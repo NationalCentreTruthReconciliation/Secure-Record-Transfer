@@ -1,5 +1,5 @@
 <div class="flex flex-col flex-initial">
-    <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100 mb-3">
+    <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100 max-h-[40vh]">
         <table class="table">
             <!-- head -->
             <thead>
@@ -15,7 +15,7 @@
         </table>
     </div>
     {% if page %}
-        <div class="flex justify-center">
+        <div class="flex justify-center mt-5">
             {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
         </div>
     {% endif %}
