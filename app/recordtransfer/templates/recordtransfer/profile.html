@@ -32,7 +32,7 @@
         <div class="flex justify-between mb-3">
             <label class="medium-text">{% trans "Past Submissions" %}</label>
             <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
-                {% trans "New submission" %}
+                <span class="hidden md:inline">{% trans "New submission" %}</span>
                 <i class="fa fa-plus" aria-hidden="true"></i>
             </a>
         </div>
@@ -45,7 +45,7 @@
             <label class="medium-text">{% trans "Submission Groups" %}</label>
             <a href="{% url 'recordtransfer:submission_group_new' %}"
                class="btn btn-sm">
-                {% trans "New submission group" %}
+                <span class="hidden md:inline">{% trans "New submission group" %}</span>
                 <i class="fa fa-plus" aria-hidden="true"></i>
             </a>
         </div>
