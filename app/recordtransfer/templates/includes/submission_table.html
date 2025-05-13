@@ -9,7 +9,7 @@
 {% endblock table_headers %}
 {% block table_content %}
     {% for submission in page %}
-        <tr>
+        <tr class="hover:bg-base-300">
             <td class="uuid-column">{{ submission.uuid }}</td>
             <td>{{ submission.submission_date }}</td>
             <td>{{ submission.metadata.accession_title }}</td>

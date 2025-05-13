@@ -9,7 +9,7 @@
 {% endblock table_headers %}
 {% block table_content %}
     {% for group in page %}
-        <tr>
+        <tr class="hover:bg-base-300">
             <td class="uuid-column">{{ group.uuid }}</td>
             <td>{{ group.name }}</td>
             <td>{{ group.description }}</td>

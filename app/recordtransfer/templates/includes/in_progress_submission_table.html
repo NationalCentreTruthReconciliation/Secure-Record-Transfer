@@ -8,7 +8,7 @@
 {% endblock table_headers %}
 {% block table_content %}
     {% for in_progress in page %}
-        <tr>
+        <tr class="hover:bg-base-300">
             <td>{{ in_progress.last_updated|date:"D M j, Y" }} @ {{ in_progress.last_updated|time:"H:i" }}</td>
             <td>
                 {% if in_progress.upload_session_expires_at %}
