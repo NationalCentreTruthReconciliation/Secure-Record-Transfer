@@ -34,7 +34,9 @@
     <form id="submission-form"
           hx-post="{{ request.path }}"
           hx-target="#main-container"
-          hx-select="#main-container"
+          hx-se
+          zz
+          lect="#main-container"
           hx-swap="outerHTML"
           method="POST">
         {% csrf_token %}
