@@ -1,99 +1,99 @@
 {% load i18n %}
-{% include "includes/messages.html" %}
-<div class="card bg-base-100 shadow-lg w-full max-w-4xl mx-auto my-10 p-5">
-    <div class="card-body">
-        <h2 class="card-title mb-2">{% trans "Profile Settings" %}</h2>
+<div class="card bg-base-100 shadow-lg w-full max-w-4xl mx-auto my-6 p-2 md:p-5">
+    {% include "includes/messages.html" %}
+    <div class="card-body p-2 md:p-6">
+        <h2 class="card-title mb-2 text-base md:text-xl">{% trans "Profile Settings" %}</h2>
         <form method="post"
               action="{% url 'recordtransfer:user_profile' %}"
-              class="margin-top-25px">
+              class="mt-4 md:mt-6">
             {% csrf_token %}
-            <div class="flex flex-col lg:flex-row w-full">
+            <div class="flex flex-col md:flex-row w-full gap-4">
                 <!-- Left Column -->
-                <div class="flex-1 space-y-4">
+                <div class="flex-1 space-y-3 md:space-y-4">
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans form.first_name.label %}</legend>
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans form.first_name.label %}</legend>
                         <input type="text"
-                               class="input input-bordered w-full"
+                               class="input input-bordered input-sm md:input-md w-full"
                                name="{{ form.first_name.name }}"
                                id="{{ form.first_name.id_for_label }}"
                                value="{{ form.first_name.value }}">
                         {% if form.first_name.errors %}
-                            <p class="label text-error">{% trans form.first_name.errors.0 %}</p>
+                            <p class="label text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans form.last_name.label %}</legend>
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans form.last_name.label %}</legend>
                         <input type="text"
-                               class="input input-bordered w-full"
+                               class="input input-bordered input-sm md:input-md w-full"
                                name="{{ form.last_name.name }}"
                                id="{{ form.last_name.id_for_label }}"
                                value="{{ form.last_name.value }}">
                         {% if form.last_name.errors %}
-                            <p class="label text-error">{% trans form.last_name.errors.0 %}</p>
+                            <p class="label text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans "Email" %}</legend>
-                        <input class="input input-bordered w-full bg-base-200"
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans "Email" %}</legend>
+                        <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
                                disabled
                                value="{{ user.email }}">
                     </fieldset>
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans "Username" %}</legend>
-                        <input class="input input-bordered w-full bg-base-200"
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans "Username" %}</legend>
+                        <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
                                disabled
                                value="{{ user.username }}">
                     </fieldset>
                     <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">{% trans "Notification options" %}</legend>
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans "Notification options" %}</legend>
                         <label class="label pb-2 cursor-pointer"
                                for="{{ form.gets_notification_emails.id_for_label }}">
                             <input type="checkbox"
-                                   class="checkbox checkbox-xs checkbox-primary"
+                                   class="checkbox checkbox-xs md:checkbox-sm checkbox-primary"
                                    name="{{ form.gets_notification_emails.name }}"
                                    id="{{ form.gets_notification_emails.id_for_label }}"
                                    {% if form.gets_notification_emails.value %}checked{% endif %} />
-                            <span class="ml-2">{% trans "Receive notification emails?" %}</span>
+                            <span class="ml-2 text-xs md:text-sm">{% trans "Receive notification emails?" %}</span>
                         </label>
                     </fieldset>
                 </div>
                 <!-- Right Column -->
-                <div class="flex-1 space-y-4">
+                <div class="flex-1 space-y-3 md:space-y-4">
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans form.current_password.label %}</legend>
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans form.current_password.label %}</legend>
                         <input type="password"
-                               class="input input-bordered w-full"
+                               class="input input-bordered input-sm md:input-md w-full"
                                name="{{ form.current_password.name }}"
                                id="{{ form.current_password.id_for_label }}"
                                autocomplete="off">
                         {% if form.current_password.errors %}
-                            <p class="label text-error">{% trans form.current_password.errors.0 %}</p>
+                            <p class="label text-error text-xs md:text-sm">{% trans form.current_password.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans form.new_password.label %}</legend>
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans form.new_password.label %}</legend>
                         <input type="password"
-                               class="input input-bordered w-full"
+                               class="input input-bordered input-sm md:input-md w-full"
                                name="{{ form.new_password.name }}"
                                id="{{ form.new_password.id_for_label }}">
                         {% if form.new_password.errors %}
-                            <p class="label text-error">{% trans form.new_password.errors.0 %}</p>
+                            <p class="label text-error text-xs md:text-sm">{% trans form.new_password.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">{% trans form.confirm_new_password.label %}</legend>
+                        <legend class="fieldset-legend text-sm md:text-md">{% trans form.confirm_new_password.label %}</legend>
                         <input type="password"
-                               class="input input-bordered w-full"
+                               class="input input-bordered input-sm md:input-md w-full"
                                name="{{ form.confirm_new_password.name }}"
                                id="{{ form.confirm_new_password.id_for_label }}">
                         {% if form.confirm_new_password.errors %}
-                            <p class="label text-error">{% trans form.confirm_new_password.errors.0 %}</p>
+                            <p class="label text-error text-xs md:text-sm">{% trans form.confirm_new_password.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                 </div>
             </div>
-            <div class="card-actions justify-end mt-8">
-                <button type="submit" class="btn btn-primary btn-wide" id="id_save_button">{% trans "Save" %}</button>
+            <div class="card-actions justify-end mt-6 md:mt-8">
+                <button type="submit" class="btn btn-primary btn-sm md:btn-md btn-wide" id="id_save_button">{% trans "Save" %}</button>
             </div>
         </form>
     </div>
