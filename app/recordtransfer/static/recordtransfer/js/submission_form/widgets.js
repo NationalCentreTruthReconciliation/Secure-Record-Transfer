@@ -3,8 +3,6 @@ import AirDatepicker from "air-datepicker";
 import localeEn from "air-datepicker/locale/en";
 import IMask from "imask";
 
-
-
 /**
  * Setup date pickers using AirDatepicker.
  */
