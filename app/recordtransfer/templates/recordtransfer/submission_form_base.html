@@ -9,12 +9,15 @@
 {% block javascript %}
     {{ block.super }}
     <script src="{% static 'submission_form.bundle.js' %}"></script>
+    <script>
+        var currentFormStep = {{ wizard.steps.step1 }}
+    </script>
     {{ js_context|json_script:js_context_id }}
 {% endblock javascript %}
 {% block stylesheet %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'submission_form.css' %}">
-{% endblock stylesheet %}
+{% endblock stylesheet%}
 {% block content %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
@@ -31,20 +34,20 @@
     {% endblock messages %}
     {% block form_explanation %}
     {% endblock form_explanation %}
-    <form id="submission-form"
-          hx-post="{{ request.path }}"
-          hx-target="#main-container"
-          hx-se
-          zz
-          lect="#main-container"
-          hx-swap="outerHTML"
-          method="POST">
+    <form
+        id="submission-form"
+        hx-post="{{ request.path }}"
+        hx-target="#main-container"
+        hx-select="#main-container"
+        hx-swap="outerHTML"
+        method="POST"
+    >
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ wizard.form.management_form }}
         {% block formfields %}{# !!! Add the form fields here !!! #}{% endblock %}
         <div class="{% block buttonarrayclass %}{% endblock buttonarrayclass %}">
-            {{ field.label_tag }}
+            <label></label>
             <div class="button-array">
                 {% if wizard.steps.prev %}
                     {# Without formnovalidate, you can't go to the previous step without valid data #}
@@ -56,35 +59,14 @@
                             class="blue-button-outline margin-right-10px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
-                    <button {% block submitbuttonattributes %}
-                            {% comment %}
-                            Button
-                            is
-                            "
-                            next
-                            "
-                            by
-                            default
-                            but
-                            the
-                            id
-                            for
-                            a
-                            "
-                            submit
-                            "
-                            button
-                            can
-                            be
-                            overrided
-                            using
-                            this
-                            block
-                            {% endcomment %}
-                            id="form-next-button"
-                            {% endblock submitbuttonattributes %}
-                            type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                            class="blue-button margin-right-30px">
+                    <button 
+                        {% block submitbuttonattributes %}
+                        {% comment %} Button is "next" by default, but the id for a "submit" button can be
+                        overrided using this block {% endcomment %}
+                        id="form-next-button"
+                        {% endblock submitbuttonattributes %}
+                        type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
+                        class="blue-button margin-right-30px">
                         {% if wizard.steps.step1 == wizard.steps.count %}
                             {% trans "Submit" %}
                         {% else %}
@@ -107,7 +89,7 @@
             </div>
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
-            {{ field.label_tag }}
+            <label></label>
             {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
                 <button id="form-save-button"
                         class="text-link margin-top-25px"
