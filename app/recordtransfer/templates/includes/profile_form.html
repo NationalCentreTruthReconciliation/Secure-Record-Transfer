@@ -13,10 +13,11 @@
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend text-sm md:text-md">{% trans form.first_name.label %}</legend>
                         <input type="text"
-                               class="input input-bordered input-sm md:input-md w-full"
+                               class="input input-bordered input-sm md:input-md validator w-full"
                                name="{{ form.first_name.name }}"
                                id="{{ form.first_name.id_for_label }}"
-                               value="{{ form.first_name.value }}">
+                               value="{{ form.first_name.value }}"
+                               required>
                         {% if form.first_name.errors %}
                             <p class="label text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
                         {% endif %}
@@ -24,10 +25,11 @@
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend text-sm md:text-md">{% trans form.last_name.label %}</legend>
                         <input type="text"
-                               class="input input-bordered input-sm md:input-md w-full"
+                               class="input input-bordered input-sm md:input-md validator w-full"
                                name="{{ form.last_name.name }}"
                                id="{{ form.last_name.id_for_label }}"
-                               value="{{ form.last_name.value }}">
+                               value="{{ form.last_name.value }}"
+                               required>
                         {% if form.last_name.errors %}
                             <p class="label text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
                         {% endif %}
