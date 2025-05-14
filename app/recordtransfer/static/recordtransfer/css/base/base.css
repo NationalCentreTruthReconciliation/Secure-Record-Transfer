@@ -3,7 +3,7 @@ input,
 button,
 select,
 html {
-    font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+    font-family: "Open Sans", sans-serif;
 }
 
 body {
@@ -311,12 +311,6 @@ h2 {
     background-color: #ffc1c1;
 }
 
-.error-message {
-    color: #d00;
-    font-size: 12pt;
-    font-style: italic;
-    padding: 10px;
-}
 
 .text-link {
     background: none;
@@ -373,11 +367,5 @@ h2 {
         width: 95%;
         margin-left: auto;
         margin-right: auto;
-    }
-}
-
-@media screen and (max-width: 800px) {
-    .uuid-column {
-        display: none;
     }
 }

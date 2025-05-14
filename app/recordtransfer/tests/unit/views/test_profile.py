@@ -377,11 +377,8 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
-    def test_in_progress_submission_expiring_soon_shown_in_red(self) -> None:
-        """Test that the expiry date is shown in red if the in-progress submission is expiring
-        soon.
-        """
-
+    def test_in_progress_submission_expiring_soon(self) -> None:
+        """Test that the expiry date is shown with a warning icon if the in-progress submission is expiring soon."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
         self._create_in_progress_submission(
             upload_session=upload_session
@@ -394,13 +391,17 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
-        self.assertIn("red-text", content)
-        self.assertNotIn("strikethrough", content)
+        # Should show the warning icon for expiring soon
+        self.assertIn('fa-exclamation-circle text-warning', content)
+        self.assertIn('Submission is expiring soon', content)
+        # Should NOT show the expired icon or text
+        self.assertNotIn('fa-exclamation-triangle text-error', content)
+        self.assertNotIn('Submission has expired', content)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
     def test_in_progress_submission_expired(self) -> None:
-        """Test that the expiry date is shown in red and strikethrough if the in-progress
+        """Test that the expiry date is shown with the expired icon and tooltip if the in-progress
         submission has expired.
         """
         upload_session = UploadSession.new_session(user=cast(User, self.user))
@@ -415,8 +416,12 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
-        self.assertIn("red-text", content)
-        self.assertIn("strikethrough", content)
+        # Should show the expired icon and tooltip
+        self.assertIn('fa-exclamation-triangle text-error', content)
+        self.assertIn('Submission has expired', content)
+        # Should NOT show the warning icon or text
+        self.assertNotIn('fa-exclamation-circle text-warning', content)
+        self.assertNotIn('Submission is expiring soon', content)
 
     @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
     def test_in_progress_submission_table_display(self) -> None:
