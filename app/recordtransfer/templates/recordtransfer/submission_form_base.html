@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 {% load json_script %}
-{% json_script wizard.steps.step1 "current-step-data" %}
+{{ wizard.steps.step1|json_script:"current-step-data" }}
 {% block title %}
     {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count %}
         Submission Step {{ currentstep }} (of {{ totalsteps }})
