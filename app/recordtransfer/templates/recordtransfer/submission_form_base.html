@@ -1,7 +1,6 @@
 {% extends "recordtransfer/base.html" %}
 {% load i18n %}
 {% load static %}
-{% load json_script %}
 {% block title %}
     {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count %}
         Submission Step {{ currentstep }} (of {{ totalsteps }})
