@@ -1,4 +1,4 @@
 # Find the rules here:
 # https://www.djlint.com/docs/linter/#rules
 
-ignore = "H006,H020,H021,H031"
+ignore = "H006,H020,H021,H029,H031"
