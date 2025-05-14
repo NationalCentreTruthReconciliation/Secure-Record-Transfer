@@ -1,11 +1,3 @@
-.red-text {
-    color: red;
-}
-
-.strikethrough {
-    text-decoration: line-through;
-}
-
 :root,
 [data-theme="nctr"] {
     color-scheme: light;
