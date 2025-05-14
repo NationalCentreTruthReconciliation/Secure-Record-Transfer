@@ -18,7 +18,7 @@
                                value="{{ form.first_name.value }}"
                                required>
                         {% if form.first_name.errors %}
-                            <p class="label text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
+                            <p class="text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
@@ -30,7 +30,7 @@
                                value="{{ form.last_name.value }}"
                                required>
                         {% if form.last_name.errors %}
-                            <p class="label text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
+                            <p class="text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
@@ -68,7 +68,7 @@
                                id="{{ form.current_password.id_for_label }}"
                                autocomplete="off">
                         {% if form.current_password.errors %}
-                            <p class="label text-error text-xs md:text-sm">{% trans form.current_password.errors.0 %}</p>
+                            <p class="text-error text-xs md:text-sm">{% trans form.current_password.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
@@ -78,7 +78,7 @@
                                name="{{ form.new_password.name }}"
                                id="{{ form.new_password.id_for_label }}">
                         {% if form.new_password.errors %}
-                            <p class="label text-error text-xs md:text-sm">{% trans form.new_password.errors.0 %}</p>
+                            <p class="text-error text-xs md:text-sm">{% trans form.new_password.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                     <fieldset class="fieldset">
@@ -88,13 +88,15 @@
                                name="{{ form.confirm_new_password.name }}"
                                id="{{ form.confirm_new_password.id_for_label }}">
                         {% if form.confirm_new_password.errors %}
-                            <p class="label text-error text-xs md:text-sm">{% trans form.confirm_new_password.errors.0 %}</p>
+                            <p class="text-error text-xs md:text-sm">{% trans form.confirm_new_password.errors.0 %}</p>
                         {% endif %}
                     </fieldset>
                 </div>
             </div>
             <div class="card-actions justify-end mt-6 md:mt-8">
-                <button type="submit" class="btn btn-primary btn-sm md:btn-md btn-wide" id="id_save_button">{% trans "Save" %}</button>
+                <button type="submit"
+                        class="btn btn-primary btn-sm md:btn-md btn-wide"
+                        id="id_save_button">{% trans "Save" %}</button>
             </div>
         </form>
     </div>
