@@ -1,7 +1,6 @@
 {% extends "includes/base_table.html" %}
 {% load i18n %}
 {% block table_headers %}
-    <th class="uuid-column">{% trans "Group ID" %}</th>
     <th>{% trans "Group Name" %}</th>
     <th>{% trans "Group Description" %}</th>
     <th>{% trans "Submissions in Group" %}</th>
@@ -10,7 +9,6 @@
 {% block table_content %}
     {% for group in page %}
         <tr class="hover:bg-base-300">
-            <td class="uuid-column">{{ group.uuid }}</td>
             <td>{{ group.name }}</td>
             <td>{{ group.description }}</td>
             <td>{{ group.number_of_submissions_in_group }}</td>

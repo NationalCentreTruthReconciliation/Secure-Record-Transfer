@@ -1,7 +1,6 @@
 {% extends "includes/base_table.html" %}
 {% load i18n %}
 {% block table_headers %}
-    <th class="uuid-column">{% trans "Submission ID" %}</th>
     <th>{% trans "Date Submitted" %}</th>
     <th>{% trans "Submission Title" %}</th>
     <th>{% trans "Files Submitted" %}</th>
@@ -10,7 +9,6 @@
 {% block table_content %}
     {% for submission in page %}
         <tr class="hover:bg-base-300">
-            <td class="uuid-column">{{ submission.uuid }}</td>
             <td>{{ submission.submission_date }}</td>
             <td>{{ submission.metadata.accession_title }}</td>
             <td>{{ submission.extent_statements }}</td>
@@ -32,7 +30,7 @@
         </tr>
     {% empty %}
         <tr>
-            <td colspan="5" class="text-center p-4">{% trans "You have not sent any records to the NCTR." %}</td>
+            <td colspan="4" class="text-center p-4">{% trans "You have not sent any records to the NCTR." %}</td>
         </tr>
     {% endfor %}
 {% endblock table_content %}

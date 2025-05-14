@@ -369,9 +369,3 @@ h2 {
         margin-right: auto;
     }
 }
-
-@media screen and (max-width: 800px) {
-    .uuid-column {
-        display: none;
-    }
-}
