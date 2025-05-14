@@ -19,3 +19,7 @@
     --font-sans: "Open Sans", sans-serif;
     --font-serif: "Merriweather", serif;
 }
+
+.page-info-btn {
+    pointer-events: none;
+}
