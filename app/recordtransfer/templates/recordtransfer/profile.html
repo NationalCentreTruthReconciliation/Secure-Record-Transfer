@@ -13,7 +13,9 @@
 {% block stylesheet %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'profile.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5"
+          rel="stylesheet"
+          type="text/css" />
 {% endblock stylesheet %}
 {% block theme %}
     nctr
@@ -31,7 +33,12 @@
             <div class="tab-content bg-base-100 border-base-300 p-6">
                 <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
                      hx-trigger="load"
-                     id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"></div>
+                     id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}">
+                    <div class="flex flex-col w-full items-center gap-4">
+                        <div class="skeleton h-32 w-full"></div>
+                        <div class="skeleton h-5 w-1/10"></div>
+                    </div>
+                </div>
             </div>
             <!-- Past Submissions Tab -->
             <label class="tab">
@@ -41,7 +48,12 @@
             <div class="tab-content bg-base-100 border-base-300 p-6">
                 <div hx-get="{% url 'recordtransfer:submission_table' %}"
                      hx-trigger="load"
-                     id="{{ ID_SUBMISSION_TABLE }}"></div>
+                     id="{{ ID_SUBMISSION_TABLE }}">
+                    <div class="flex flex-col w-full items-center gap-4">
+                        <div class="skeleton h-32 w-full"></div>
+                        <div class="skeleton h-5 w-1/10"></div>
+                    </div>
+                </div>
                 <div class="flex justify-end">
                     <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
                         <span class="hidden md:inline">{% trans "New submission" %}</span>
@@ -57,7 +69,12 @@
             <div class="tab-content bg-base-100 border-base-300 p-6">
                 <div hx-get="{% url 'recordtransfer:submission_group_table' %}"
                      hx-trigger="load"
-                     id="{{ ID_SUBMISSION_GROUP_TABLE }}"></div>
+                     id="{{ ID_SUBMISSION_GROUP_TABLE }}">
+                    <div class="flex flex-col w-full items-center gap-4">
+                        <div class="skeleton h-32 w-full"></div>
+                        <div class="skeleton h-5 w-1/10"></div>
+                    </div>
+                </div>
                 <div class="flex justify-end">
                     <a href="{% url 'recordtransfer:submission_group_new' %}"
                        class="btn btn-sm">
