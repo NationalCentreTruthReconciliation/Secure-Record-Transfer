@@ -26,24 +26,9 @@
     <!-- Tabbed Content -->
     <div class="my-20">
         <div class="tabs tabs-lift">
-            <!-- In-Progress Submissions Tab -->
-            <label class="tab">
-                <input type="radio" name="profile_tabs" checked="checked">
-                <i class="fa fa-clock me-2" aria-hidden="true"></i> {% trans "In-Progress" %}
-            </label>
-            <div class="tab-content bg-base-100 border-base-300 p-6">
-                <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
-                     hx-trigger="load"
-                     id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}">
-                    <div class="flex flex-col w-full items-center gap-4">
-                        <div class="skeleton h-32 w-full"></div>
-                        <div class="skeleton h-5 w-1/10"></div>
-                    </div>
-                </div>
-            </div>
             <!-- Past Submissions Tab -->
             <label class="tab">
-                <input type="radio" name="profile_tabs">
+                <input type="radio" name="profile_tabs" checked="checked">
                 <i class="fa fa-check me-2" aria-hidden="true"></i> {% trans "Past Submissions" %}
             </label>
             <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -60,6 +45,21 @@
                         <span class="hidden md:inline">{% trans "New submission" %}</span>
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </a>
+                </div>
+            </div>
+            <!-- In-Progress Submissions Tab -->
+            <label class="tab">
+                <input type="radio" name="profile_tabs">
+                <i class="fa fa-clock me-2" aria-hidden="true"></i> {% trans "In-Progress" %}
+            </label>
+            <div class="tab-content bg-base-100 border-base-300 p-6">
+                <div hx-get="{% url 'recordtransfer:in_progress_submission_table' %}"
+                     hx-trigger="load"
+                     id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}">
+                    <div class="flex flex-col w-full items-center gap-4">
+                        <div class="skeleton h-32 w-full"></div>
+                        <div class="skeleton h-5 w-1/10"></div>
+                    </div>
                 </div>
             </div>
             <!-- Submission Groups Tab -->
