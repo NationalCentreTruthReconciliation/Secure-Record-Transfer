@@ -55,10 +55,7 @@
                             class="blue-button-outline margin-right-10px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
-                    {#
-                    Button is "next" by default but the id for a "submit" button
-                    can be overridden using this block
-                    #}
+                    {# Button is "next" by default but the id for a "submit" button can be overridden using this block #}
                     <button {% block submitbuttonattributes %}
                             id="form-next-button"
                             {% endblock submitbuttonattributes %}
