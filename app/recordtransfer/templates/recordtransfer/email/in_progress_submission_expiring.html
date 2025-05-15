@@ -1,56 +1,35 @@
+{% extends "recordtransfer/email/email_base.html" %}
 {% load i18n %}
-<!DOCTYPE html>
-<html style="
-    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;">
-    <body style="
-        margin: 0;">
-        <div style="
-            color: #333333;
-            font-size: 20pt;
-            padding: 6px 20px;
-            background-color: #eeeeee;
-            margin-bottom: 15px;">
-            {% blocktrans %}Your In-Progress Submission is Expiring Soon{% endblocktrans %}
-        </div>
-        <div style="
-            padding: 0px 20px;">
-            <p>
-                {% blocktrans %}Dear {{ full_name }} ({{ username }}),{% endblocktrans %}
-            </p>
-            <p>
-                {% blocktrans %}You have an in-progress submission titled "{{ in_progress_title }}" that is set to expire on {{ in_progress_expiration_date }}.{% endblocktrans %}
-            </p>
-            <p>
-                {% blocktrans %}Please make sure to complete your submission before the expiration date. You can resume your submission by clicking the link below:{% endblocktrans %}
-            </p>
-            <p>
-                <a href="http://{{ site_domain }}{{ in_progress_url }}">{{ in_progress_url }}</a>
-            </p>
-            <p>
-                {% blocktrans %}If you have any questions or need assistance, please contact our support team.{% endblocktrans %}
-            </p>
-            {% block postscript %}
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% blocktrans %}
-                This email address is not monitored, do not reply to this message.
-                {% endblocktrans %}
-                </i>
-            </div>
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% url 'recordtransfer:user_profile' as profile_url %}
-                {% blocktrans %}
-                If you do not want to receive these emails anymore, you can change the
-                "Receive notification emails?" setting in
-                <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
-                {% endblocktrans %}
-                </i>
-            </div>
-            {% endblock %}
-        </div>
-    </body>
-</html>
+{% load static %}
+{% block title %}
+    {% blocktrans %}Your In-Progress Submission is Expiring Soon{% endblocktrans %}
+{% endblock title %}
+{% block content %}
+    <div>
+        <p>{% blocktrans %}Dear {{ full_name }} ({{ username }}),{% endblocktrans %}</p>
+        <p>
+            {% blocktrans %}You have an in-progress submission titled "{{ in_progress_title }}" that is set to expire on {{ in_progress_expiration_date }}.{% endblocktrans %}
+        </p>
+        <p>
+            {% blocktrans %}Please make sure to complete your submission before the expiration date. You can resume your submission by clicking the button below:{% endblocktrans %}
+        </p>
+    </div>
+    <div style="text-align: left; margin-top: 20px;">
+        <a href="http://{{ site_domain }}{{ in_progress_url }}"
+           style="display: inline-block;
+                  background-color: #EE7623;
+                  color: white;
+                  padding: 10px 20px;
+                  font-weight: bold;
+                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+            {% blocktrans %}Resume Your Submission{% endblocktrans %}
+        </a>
+        <p style="margin-top: 15px;
+                  font-size: 7pt;
+                  color: #666666;
+                  font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+                  line-height: 1.4">
+            {% blocktrans %}If you have any questions or need assistance, please contact our support team.{% endblocktrans %}
+        </p>
+    </div>
+{% endblock content %}
