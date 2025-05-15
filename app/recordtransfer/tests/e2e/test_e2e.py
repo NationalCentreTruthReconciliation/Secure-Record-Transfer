@@ -1,10 +1,12 @@
 import tempfile
 from typing import ClassVar
+from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
+from django.urls import reverse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -705,3 +707,74 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Verify that the Record Description step is still filled out
         self.assertEqual(accession_title_input.get_attribute("value"), data["accession_title"])
         self.assertEqual(description_input.get_attribute("value"), data["description"])
+
+    def test_form_save(self) -> None:
+        """Test saving the form at a given step and resuming later."""
+        self.login()
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out some required fields in the Contact Information step
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
+        phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
+        email_input = driver.find_element(By.NAME, "contactinfo-email")
+        form_save_button = driver.find_element(By.ID, "form-save-button")
+
+        contact_name_input.send_keys(data["contact_name"])
+        phone_number_input.send_keys(data["phone_number"])
+        email_input.send_keys(data["email"])
+
+        # Save the form
+        form_save_button.click()
+
+        # Check for success message
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Verify that the user has been redirected to the profile page
+        self.assertEqual(
+            driver.current_url,
+            urljoin(self.live_server_url, reverse("recordtransfer:user_profile")),
+        )
+
+        # Look for In-Progress Tab and click it
+        in_progress_tab = driver.find_element(
+            By.XPATH, "//label[contains(@class, 'tab') and contains(., 'In-Progress')]"
+        )
+        in_progress_tab.click()
+
+        # Look for resume icon and click it
+        resume_link = driver.find_element(
+            By.XPATH,
+            "//a[@data-tip='Resume']"
+        )
+        resume_link.click()
+
+
+        # Wait for the Contact Information step to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        # Re-find the elements after navigating back to the Contact Information step
+        contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
+        phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
+        email_input = driver.find_element(By.NAME, "contactinfo-email")
+
+        # Verify that the Contact Information step is still filled out
+        self.assertEqual(contact_name_input.get_attribute("value"), data["contact_name"])
+        self.assertEqual(phone_number_input.get_attribute("value"), data["phone_number"])
+        self.assertEqual(email_input.get_attribute("value"), data["email"])
