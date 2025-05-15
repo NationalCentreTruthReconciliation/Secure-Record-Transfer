@@ -705,3 +705,66 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Verify that the Record Description step is still filled out
         self.assertEqual(accession_title_input.get_attribute("value"), data["accession_title"])
         self.assertEqual(description_input.get_attribute("value"), data["description"])
+
+    def test_form_save(self) -> None:
+        """Test saving the form at a given step and resuming later."""
+        self.login()
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/")
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out some required fields in the Contact Information step
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
+        phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
+        email_input = driver.find_element(By.NAME, "contactinfo-email")
+        form_save_button = driver.find_element(By.ID, "form-save-button")
+
+        contact_name_input.send_keys(data["contact_name"])
+        phone_number_input.send_keys(data["phone_number"])
+        email_input.send_keys(data["email"])
+
+        # Save the form
+        form_save_button.click()
+
+        # Check for success message
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+        # Wait until resume link is found
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.LINK_TEXT, "Resume"))
+        )
+
+        # Verify that the user has been redirected to the profile page
+        self.assertEqual(driver.current_url, f"{self.live_server_url}/user/profile/")
+
+        # Look for Resume link and click it
+        resume_link = driver.find_element(By.LINK_TEXT, "Resume")
+        self.assertTrue(resume_link.is_displayed())
+        resume_link.click()
+
+        # Wait for the Contact Information step to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        # Re-find the elements after navigating back to the Contact Information step
+        contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
+        phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
+        email_input = driver.find_element(By.NAME, "contactinfo-email")
+
+        # Verify that the Contact Information step is still filled out
+        self.assertEqual(contact_name_input.get_attribute("value"), data["contact_name"])
+        self.assertEqual(phone_number_input.get_attribute("value"), data["phone_number"])
+        self.assertEqual(email_input.get_attribute("value"), data["email"])
