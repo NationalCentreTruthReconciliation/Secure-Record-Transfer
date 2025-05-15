@@ -120,7 +120,7 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader, "css-loader"] // Extract CSS
+                use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"] // Extract CSS
             },
             {
                 test: /\.(jpe?g|png|webp)$/i,
