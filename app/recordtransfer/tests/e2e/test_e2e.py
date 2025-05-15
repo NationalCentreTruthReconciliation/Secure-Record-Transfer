@@ -1,10 +1,12 @@
 import tempfile
 from typing import ClassVar
+from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
+from django.urls import reverse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
