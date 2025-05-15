@@ -712,7 +712,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(f"{self.live_server_url}/submission/")
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
