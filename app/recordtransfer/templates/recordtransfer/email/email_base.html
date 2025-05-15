@@ -5,7 +5,32 @@
     <head>
         <meta charset="UTF-8">
         <title>{% blocktrans %}Email from Our Company{% endblocktrans %}</title>
-        <style></style>
+        <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+        }
+        .body {
+            background-color: #ffffff;
+            margin: 40px auto;
+            padding: 30px;
+            max-width: 600px;
+            border-radius: 6px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 40px;
+        }
+        .social-icons img {
+            height: 24px;
+            margin: 0 8px;
+            vertical-align: middle;
+        }
+        </style>
     </head>
     <body>
         <div class="body">
@@ -22,18 +47,35 @@
         </div>
         <div class="footer">
             <p>
-                {% blocktrans %} National Centre for Truth and Reconcilliation ,177 Dysart Rd, Winnipeg, MB R3T 2M8 {% endblocktrans %}
+                {% blocktrans %}National Centre for Truth and Reconciliation, 177 Dysart Rd, Winnipeg, MB R3T 2M8{% endblocktrans %}
             </p>
-            <p>
-                {% blocktrans %}Follow us on social media: {% endblocktrans %}
-                <div class="social-icons">
-                    <a href="https://www.facebook.com/nctr.ca" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://ca.linkedin.com/company/nctr-um" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="https://www.instagram.com/nctr_um/" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation"
-                       class="social-icon"><i class="fab fa-youtube"></i></a>
-                </div>
-            </p>
+            <p>{% blocktrans %}Follow us on social media:{% endblocktrans %}</p>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/nctr.ca">
+                    <img width="32"
+                         height="32"
+                         src="https://img.icons8.com/material-outlined/24/facebook-new.png"
+                         alt="facebook" />
+                </a>
+                <a href="https://ca.linkedin.com/company/nctr-um">
+                    <img width="32"
+                         height="32"
+                         src="https://img.icons8.com/fluency-systems-regular/48/linkedin.png"
+                         alt="linkedin" />
+                </a>
+                <a href="https://www.instagram.com/nctr_um/">
+                    <img width="32"
+                         height="32"
+                         src="https://img.icons8.com/material-outlined/24/instagram-new--v1.png"
+                         alt="instagram-new--v1" />
+                </a>
+                <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation">
+                    <img width="32"
+                         height="32"
+                         src="https://img.icons8.com/windows/32/youtube-play.png"
+                         alt="youtube-play" />
+                </a>
+            </div>
         </div>
     </body>
 </html>
