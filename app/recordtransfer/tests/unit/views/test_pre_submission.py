@@ -182,10 +182,14 @@ class SubmissionFormWizardTests(TestCase):
                 submit_data["save_form_step"] = step
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)
-                # Check that a response tells HTMX on client side to redirect to user profile
+                # Check that response tells HTMX on client side to redirect to user profile
+                hx_redirect = response.headers.get("HX-Redirect") or ""
                 self.assertEqual(
-                    response.headers.get("HX-Redirect"), reverse("recordtransfer:user_profile")
+                    hx_redirect, reverse("recordtransfer:user_profile")
                 )
+                # Follow the redirect to user profile
+                response = self.client.get(hx_redirect, follow=True)
+                self.assertEqual(200, response.status_code)
                 self.assertContains(
                     response, "Submission saved successfully. This submission will expire on"
                 )
@@ -211,10 +215,14 @@ class SubmissionFormWizardTests(TestCase):
                 submit_data["save_form_step"] = step
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)
-                # Check that a response tells HTMX on client side to redirect to user profile
+                # Check that response tells HTMX on client side to redirect to user profile
+                hx_redirect = response.headers.get("HX-Redirect") or ""
                 self.assertEqual(
-                    response.headers.get("HX-Redirect"), reverse("recordtransfer:user_profile")
+                    hx_redirect, reverse("recordtransfer:user_profile")
                 )
+                # Follow the redirect to user profile
+                response = self.client.get(hx_redirect, follow=True)
+                self.assertEqual(200, response.status_code)
                 self.assertContains(response, "Submission saved successfully.")
                 self.assertNotContains(response, "This submission will expire on")
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
