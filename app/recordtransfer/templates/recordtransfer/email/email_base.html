@@ -57,8 +57,8 @@
             </p>
             <p>
                 {% blocktrans %}Don't like these emails?{% endblocktrans %}
-                <a href="http://{{ site_domain }}{{ profile_url }}"
-                   style="color:#9f9f9f">{% blocktrans %}Unsubscribe{% endblocktrans %}</a>
+                <a href="http://{{ site_domain }}{% url 'recordtransfer:user_profile' %}"
+                   style="color:#9f9f9f">{% blocktrans %}Unsubscribe in your profile{% endblocktrans %}</a>
             </p>
             <div style="text-align: center;">
                 <a href="https://www.facebook.com/nctr.ca"
