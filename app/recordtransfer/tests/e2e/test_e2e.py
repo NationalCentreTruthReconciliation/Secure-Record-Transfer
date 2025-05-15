@@ -741,18 +741,23 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
-        # Wait until resume link is found
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.LINK_TEXT, "Resume"))
-        )
 
         # Verify that the user has been redirected to the profile page
         self.assertEqual(driver.current_url, f"{self.live_server_url}/user/profile/")
 
-        # Look for Resume link and click it
-        resume_link = driver.find_element(By.LINK_TEXT, "Resume")
-        self.assertTrue(resume_link.is_displayed())
+        # Look for In-Progress Tab and click it
+        in_progress_tab = driver.find_element(
+            By.XPATH, "//label[contains(@class, 'tab') and contains(., 'In-Progress')]"
+        )
+        in_progress_tab.click()
+
+        # Look for resume icon and click it
+        resume_link = driver.find_element(
+            By.XPATH,
+            "//a[@data-tip='Resume']"
+        )
         resume_link.click()
+
 
         # Wait for the Contact Information step to load
         WebDriverWait(driver, 10).until(
