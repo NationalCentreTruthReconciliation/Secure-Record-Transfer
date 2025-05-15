@@ -29,8 +29,22 @@
                      style="width: 80%;
                             height: auto">
             </div>
-            {% block title %}<!-- Your dynamic title here -->{% endblock %}
-            {% block content %}<!-- Your dynamic content here -->{% endblock %}
+            <div style="text-align: center;
+                        font-weight: bold;
+                        color: #89181A;
+                        font-size: 20pt;
+                        padding: 6px 20px;
+                        background-color: #FFFFFF;
+                        margin-bottom: 15px;
+                        margin-top: 20px;
+                        font-family: 'Merriweather', Georgia, 'Times New Roman', serif">
+                {% block title %}<!-- Your dynamic title here -->{% endblock %}
+            </div>
+            <div style="font-size: 10pt;
+                        font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+                        padding: 0 20px">
+                {% block content %}<!-- Your dynamic content here -->{% endblock %}
+            </div>
         </div>
         <div style="text-align: center;
                     font-size: 10px;

@@ -2,38 +2,24 @@
 {% load i18n %}
 {% load static %}
 {% block title %}
-    <div style="text-align: center;
-                font-weight: bold;
-                color: #89181A;
-                font-size: 20pt;
-                padding: 6px 20px;
-                background-color: #FFFFFF;
-                margin-bottom: 15px;
-                margin-top: 20px;
-                font-family: 'Merriweather', Georgia, 'Times New Roman', serif">
-        {% blocktrans %}Activate Your New Account{% endblocktrans %}
-    </div>
+    {% blocktrans %}Activate Your New Account{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div style="font-size: 10pt;
-                font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
-                padding: 0 20px">
-        <div>
-            {% blocktrans %}
+    <div>
+        {% blocktrans %}
                 An account was created for the NCTR Record Transfer Portal using this email.
                 To activate your account, click the button below.
             {% endblocktrans %}
-        </div>
-        <div style="text-align: left; margin-top: 20px;">
-            <a href="http://{{ base_url }}{{ activate_account }}"
-               style="display: inline-block;
-                      background-color: #EE7623;
-                      color: white;
-                      padding: 10px 20px;
-                      font-weight: bold;
-                      font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
-                {% blocktrans %}Activate Account{% endblocktrans %}
-            </a>
-        </div>
+    </div>
+    <div style="text-align: left; margin-top: 20px;">
+        <a href="http://{{ base_url }}{{ activate_account }}"
+           style="display: inline-block;
+                  background-color: #EE7623;
+                  color: white;
+                  padding: 10px 20px;
+                  font-weight: bold;
+                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+            {% blocktrans %}Activate Account{% endblocktrans %}
+        </a>
     </div>
 {% endblock content %}
