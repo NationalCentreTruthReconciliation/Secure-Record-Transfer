@@ -39,11 +39,6 @@
     "tailwind": "^4.0.0",
     "tailwindcss": "^4.1.7"
   },
-  "postcss": {
-    "plugins": {
-      "@tailwindcss/postcss": {}
-    }
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git"
