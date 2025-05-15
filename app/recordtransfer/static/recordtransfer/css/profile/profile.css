@@ -1,3 +1,35 @@
+@import "tailwindcss";
+
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+    name: "nctr";
+    default: true;
+    prefersdark: false;
+    color-scheme: light;
+    /* NCTR Custom Theme Colors */
+
+    --color-base-100: rgb(255, 255, 255);
+    --color-base-200: rgb(250, 250, 250);
+    --color-base-300: rgb(242, 242, 242);
+    --color-base-content: rgb(54, 54, 61);
+    --color-primary: rgb(137, 24, 26);
+    /* PANTONE 7427 */
+    --color-primary-content: #fff;
+    /* Opaque White */
+    --color-secondary: rgb(102, 123, 112);
+    /* PANTONE 4198 */
+    --color-secondary-content: rgb(219, 222, 217);
+    /* PANTONE 7541 */
+    --color-accent: rgb(238, 118, 35);
+    /* PANTONE 158 */
+    --color-accent-content: #fff;
+    /* Opaque White */
+
+    --font-sans: "Open Sans", sans-serif;
+    --font-serif: "Merriweather", serif;
+}
+
 .page-info-btn {
     pointer-events: none;
 }
