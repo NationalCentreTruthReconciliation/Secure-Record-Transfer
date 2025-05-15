@@ -743,7 +743,10 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         )
 
         # Verify that the user has been redirected to the profile page
-        self.assertEqual(driver.current_url, f"{self.live_server_url}/user/profile/")
+        self.assertEqual(
+            driver.current_url,
+            urljoin(self.live_server_url, reverse("recordtransfer:user_profile")),
+        )
 
         # Look for In-Progress Tab and click it
         in_progress_tab = driver.find_element(
