@@ -25,6 +25,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.views.generic import DeleteView, TemplateView
+from django_htmx.http import HttpResponseClientRedirect
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import forms
@@ -258,7 +259,7 @@ class SubmissionFormWizard(SessionWizardView):
             messages.success(request, gettext(message))
         except Exception:
             messages.error(request, gettext("There was an error saving the submission."))
-        return redirect("recordtransfer:user_profile")
+        return HttpResponseClientRedirect(reverse("recordtransfer:user_profile"))
 
     def save_form_data(self, request: HttpRequest) -> None:
         """Save the current state of the form to the database.
