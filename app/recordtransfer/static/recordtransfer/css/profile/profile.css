@@ -1,15 +1,25 @@
-.red-text {
-    color: red;
+:root,
+[data-theme="nctr"] {
+    color-scheme: light;
+    /* NCTR Custom Theme Colors */
+
+    --color-primary: rgb(137, 24, 26);
+    /* PANTONE 7427 */
+    --color-primary-content: #fff;
+    /* Opaque White */
+    --color-secondary: rgb(102, 123, 112);
+    /* PANTONE 4198 */
+    --color-secondary-content: rgb(219, 222, 217);
+    /* PANTONE 7541 */
+    --color-accent: rgb(238, 118, 35);
+    /* PANTONE 158 */
+    --color-accent-content: #fff;
+    /* Opaque White */
+
+    --font-sans: "Open Sans", sans-serif;
+    --font-serif: "Merriweather", serif;
 }
 
-.strikethrough {
-    text-decoration: line-through;
-}
-
-.empty-table-text {
-    color: #6c757d;
-    font-style: italic;
-    text-align: center;
-    font-size: 0.9rem;
-    background-color: #f8f9fa;
+.page-info-btn {
+    pointer-events: none;
 }

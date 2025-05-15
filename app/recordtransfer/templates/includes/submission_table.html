@@ -1,32 +1,36 @@
+{% extends "includes/base_table.html" %}
 {% load i18n %}
-<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
-    <tr>
-        <th class="uuid-column">{% trans "Submission ID" %}</th>
-        <th>{% trans "Date Submitted" %}</th>
-        <th>{% trans "Submission Title" %}</th>
-        <th>{% trans "Files Submitted" %}</th>
-        <th>{% trans "View Report" %}</th>
-        <th>{% trans "Download CSV" %}</th>
-    </tr>
+{% block table_headers %}
+    <th>{% trans "Date Submitted" %}</th>
+    <th>{% trans "Submission Title" %}</th>
+    <th>{% trans "Files Submitted" %}</th>
+    <th>{% trans "Actions" %}</th>
+{% endblock table_headers %}
+{% block table_content %}
     {% for submission in page %}
-        <tr>
-            <td class="uuid-column">{{ submission.uuid }}</td>
+        <tr class="hover:bg-base-300">
             <td>{{ submission.submission_date }}</td>
             <td>{{ submission.metadata.accession_title }}</td>
             <td>{{ submission.extent_statements }}</td>
             <td>
-                <a href="{% url "recordtransfer:submission_detail" uuid=submission.uuid %}" target="_blank">{% trans "Click to view report" %}</a>
-            </td>
-            <td>
-                <a href="{% url "recordtransfer:submission_csv" uuid=submission.uuid %}">{% trans "Click to download" %}</a>
+                <div class="flex flex-row gap-4">
+                    <a href="{% url 'recordtransfer:submission_detail' uuid=submission.uuid %}"
+                       class="link link-info tooltip"
+                       data-tip="{% trans "View Report" %}"
+                       target="_blank">
+                        <i class="fas fa-file-alt"></i>
+                    </a>
+                    <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"
+                       class="link link-success tooltip"
+                       data-tip="{% trans "Download CSV" %}">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
             </td>
         </tr>
     {% empty %}
-    <tr>
-        <td colspan="6" class="empty-table-text">{% trans "You have not sent any records to the NCTR." %}</td>
-    </tr>
+        <tr>
+            <td colspan="4" class="text-center p-4">{% trans "You have not sent any records to the NCTR." %}</td>
+        </tr>
     {% endfor %}
-</table>
-{% if page %}
-    {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
-{% endif %}
+{% endblock table_content %}

@@ -1,23 +1,31 @@
+{% extends "includes/base_table.html" %}
 {% load i18n %}
-<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
-    <tr>
-        <th>{% trans "Last Updated" %}</th>
-        <th>{% trans "Expires At" %}</th>
-        <th>{% trans "Submission Title" %}</th>
-        <th>{% trans "Resume Submission" %}</th>
-        <th>{% trans "Delete" %}</th>
-    </tr>
+{% block table_headers %}
+    <th>{% trans "Last Updated" %}</th>
+    <th>{% trans "Expires At" %}</th>
+    <th>{% trans "Submission Title" %}</th>
+    <th>{% trans "Actions" %}</th>
+{% endblock table_headers %}
+{% block table_content %}
     {% for in_progress in page %}
-        <tr>
+        <tr class="hover:bg-base-300">
             <td>{{ in_progress.last_updated|date:"D M j, Y" }} @ {{ in_progress.last_updated|time:"H:i" }}</td>
             <td>
                 {% if in_progress.upload_session_expires_at %}
-                    <span class="
-                        {% if in_progress.upload_session_expires_soon %}red-text{% endif %}
-                        {% if in_progress.upload_session_expired %}strikethrough{% endif %}
-                    ">
-                        {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @ 
-                        {{ in_progress.upload_session_expires_at|time:"H:i" }}
+                    <span class="flex flex-row flex-wrap items-start gap-2">
+                        <span>
+                            {{ in_progress.upload_session_expires_at|date:"D M j, Y" }} @
+                            {{ in_progress.upload_session_expires_at|time:"H:i" }}
+                        </span>
+                        {% if in_progress.upload_session_expired %}
+                            <span class="tooltip" data-tip="{% trans "Submission has expired" %}">
+                                <i class="fas fa-exclamation-triangle text-error"></i>
+                            </span>
+                        {% elif in_progress.upload_session_expires_soon %}
+                            <span class="tooltip" data-tip="{% trans "Submission is expiring soon" %}">
+                                <i class="fas fa-exclamation-circle text-warning"></i>
+                            </span>
+                        {% endif %}
                     </span>
                 {% else %}
                     -
@@ -25,22 +33,25 @@
             </td>
             <td>{{ in_progress.title }}</td>
             <td>
-                {% if in_progress.upload_session_expired %}
-                    -
-                {% else %}
-                    <a href="{{ in_progress.get_resume_url }}">Resume</a>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}">Delete</a>
+                <div class="flex flex-row gap-4">
+                    {% if not in_progress.upload_session_expired %}
+                        <a href="{{ in_progress.get_resume_url }}"
+                           class="link link-success tooltip"
+                           data-tip="{% trans "Resume" %}">
+                            <i class="fas fa-play"></i>
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
+                       class="link link-error tooltip"
+                       data-tip="{% trans "Delete" %}">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
             </td>
         </tr>
     {% empty %}
-    <tr>
-        <td colspan="5" class="empty-table-text">{% trans "You have no submissions that are in progress." %}</td>
-    </tr>
+        <tr>
+            <td colspan="4" class="text-center p-4">{% trans "You have no submissions that are in progress." %}</td>
+        </tr>
     {% endfor %}
-</table>
-{% if page %}
-    {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
-{% endif %}
+{% endblock table_content %}

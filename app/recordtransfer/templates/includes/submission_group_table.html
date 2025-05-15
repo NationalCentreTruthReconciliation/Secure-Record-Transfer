@@ -1,28 +1,28 @@
+{% extends "includes/base_table.html" %}
 {% load i18n %}
-<table class="full-width-table standard-table margin-bottom-25px" cellspacing="0">
-    <tr>
-        <th class="uuid-column">{% trans "Group ID" %}</th>
-        <th>{% trans "Group Name" %}</th>
-        <th>{% trans "Group Description" %}</th>
-        <th>{% trans "Submissions in Group" %}</th>
-        <th>{% trans "View Group" %}</th>
-    </tr>
+{% block table_headers %}
+    <th>{% trans "Group Name" %}</th>
+    <th>{% trans "Group Description" %}</th>
+    <th>{% trans "Submissions in Group" %}</th>
+    <th>{% trans "Actions" %}</th>
+{% endblock table_headers %}
+{% block table_content %}
     {% for group in page %}
-        <tr>
-            <td class="uuid-column">{{ group.uuid }}</td>
+        <tr class="hover:bg-base-300">
             <td>{{ group.name }}</td>
             <td>{{ group.description }}</td>
             <td>{{ group.number_of_submissions_in_group }}</td>
             <td>
-                <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}">{% trans "Click to view group" %}</a>
+                <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
+                   class="link link-info tooltip"
+                   data-tip="{% trans "View group" %}">
+                    <i class="fas fa-eye"></i>
+                </a>
             </td>
         </tr>
     {% empty %}
         <tr>
-            <td colspan="5" class="empty-table-text">{% trans "You have not made any submission groups." %}</td>
+            <td colspan="4" class="text-center p-4">{% trans "You have not made any submission groups." %}</td>
         </tr>
     {% endfor %}
-</table>
-{% if page %}
-    {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
-{% endif %}
+{% endblock table_content %}

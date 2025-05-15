@@ -1,0 +1,22 @@
+<div class="flex flex-col flex-initial">
+    <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100 max-h-[40vh]">
+        <table class="table table-sm md:table-md">
+            <!-- head -->
+            <thead>
+                <tr>
+                    {% block table_headers %}
+                    {% endblock table_headers %}
+                </tr>
+            </thead>
+            <tbody>
+                {% block table_content %}
+                {% endblock table_content %}
+            </tbody>
+        </table>
+    </div>
+    {% if page %}
+        <div class="flex justify-center mt-5">
+            {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
+        </div>
+    {% endif %}
+</div>

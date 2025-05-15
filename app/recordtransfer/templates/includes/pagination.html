@@ -1,23 +1,23 @@
 {% load i18n %}
 {% load query_params %}
-<div class="pagination">
+<div class="join">
     {% if page.has_previous %}
-        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.previous_page_number }}" 
-           hx-target="#{{ target_id }}"
-           class="btn-arrow btn-arrow-left"></a>
+        <button hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.previous_page_number }}"
+                hx-target="#{{ target_id }}"
+                class="join-item btn btn-xs p-3">«</button>
     {% else %}
-        <a class="btn-arrow btn-arrow-left disabled" aria-disabled="true"></a>
+        <button class="join-item btn btn-xs btn-disabled p-3" aria-disabled="true">«</button>
     {% endif %}
-    <span>
+    <button class="join-item btn btn-xs p-3 page-info-btn">
         {% blocktrans with curr_page=page.number total_pages=page.paginator.num_pages %}
             Page {{ curr_page }} of {{ total_pages }}
         {% endblocktrans %}
-    </span>
+    </button>
     {% if page.has_next %}
-        <a hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.next_page_number }}" 
-           hx-target="#{{ target_id }}"
-           class="btn-arrow btn-arrow-right"></a>
+        <button hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.next_page_number }}"
+                hx-target="#{{ target_id }}"
+                class="join-item btn btn-xs p-3">»</button>
     {% else %}
-        <a class="btn-arrow btn-arrow-right disabled" aria-disabled="true"></a>
+        <button class="join-item btn btn-xs btn-disabled p-3" aria-disabled="true">»</button>
     {% endif %}
 </div>
