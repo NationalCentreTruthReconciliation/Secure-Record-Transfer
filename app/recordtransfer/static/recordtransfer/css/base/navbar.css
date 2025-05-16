@@ -54,8 +54,6 @@ header.homepage {
     text-align: left;
 }
 
-
-
 /* Sliding menu styles */
 .nav-items-container {
     position: absolute;
@@ -181,15 +179,10 @@ header.homepage {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
-        transition: opacity 0.3s ease-out, transform 0.3s ease;
-        position: fixed;
-        transform: translateY(-100%);
-    }
-
-    .nav-items-container.open {
-        transform: translateY(0);
+        transition: opacity 0.3s ease-out;
     }
 
     .nav-item:hover {
@@ -198,7 +191,7 @@ header.homepage {
 
     .nav-wrapper {
         position: fixed;
-        z-index: 1001;
+        z-index: 1000;
         right: 0;
         transform: translateY(-100%);
     }
