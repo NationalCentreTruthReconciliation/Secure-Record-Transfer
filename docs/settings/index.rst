@@ -405,7 +405,7 @@ These settings have no effect if :ref:`FILE_UPLOAD_ENABLED` is False.
 
 UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
+
     *Number of minutes of inactivity after which an upload session expires*
 
     .. table::
@@ -428,7 +428,7 @@ UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
 
 UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
+
     *Number of minutes before upload session expiration when a reminder should be sent*
 
     .. table::
@@ -454,7 +454,7 @@ UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
 
 UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
+
     *Cron schedule expression for cleaning up expired upload sessions*
 
     .. table::
@@ -484,7 +484,7 @@ In-Progress Submission Controls
 
 IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
+
     *Cron schedule expression for sending reminder emails for in-progress submissions with expiring upload sessions*
 
     .. table::
@@ -1508,3 +1508,27 @@ SELENIUM_TESTS_HEADLESS_MODE
 
         # file .env
         SELENIUM_TESTS_HEADLESS_MODE=True
+
+PAGINATE_BY
+^^^^^^^^^^^
+
+    *Set the number of items per page for paginated views*
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        10            int
+        ============  =========
+
+    This setting controls how many items are shown per page in list views that support pagination.
+    You can adjust it to improve usability depending on the context (e.g., fewer items for mobile
+    views or more items for data-heavy admin views).
+
+    **.env Example:**
+
+    ::
+
+        # file: .env
+        PAGINATE_BY=20
