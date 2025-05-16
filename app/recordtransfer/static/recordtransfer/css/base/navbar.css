@@ -176,12 +176,11 @@ header.homepage {
 
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
-
     .nav-items-container {
+        transition: transform 0.3s ease-in-out;
         position: fixed;
         top: 0;
         transform: translateY(-100%);
-        transition: transform 0.3s ease-in-out;
     }
 
     .nav-item:hover {
