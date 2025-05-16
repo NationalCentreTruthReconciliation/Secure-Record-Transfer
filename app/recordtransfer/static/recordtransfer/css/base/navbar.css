@@ -54,6 +54,8 @@ header.homepage {
     text-align: left;
 }
 
+
+
 /* Sliding menu styles */
 .nav-items-container {
     position: absolute;
@@ -127,6 +129,11 @@ header.homepage {
 /* Burger button */
 .nav-icon-bars {
     display: inline-block;
+
+}
+
+.nav-wrapper {
+    top: 10%;
 }
 
 .nav-icon-close {
@@ -174,18 +181,33 @@ header.homepage {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
-        transition: opacity 0.3s ease-out;
+        transition: opacity 0.3s ease-out, transform 0.3s ease;
         position: fixed;
         transform: translateY(-100%);
+    }
+
+    .nav-items-container.open {
+        transform: translateY(0);
     }
 
     .nav-item:hover {
         background-color: #f2f2f2;
     }
+
+    .nav-wrapper {
+        position: fixed;
+        z-index: 1001;
+        right: 0;
+        transform: translateY(-100%);
+    }
+
+    .nav-wrapper.open {
+        transform: translateY(0);
+    }
 }
+
 
 /* Desktop menu */
 @media all and (min-width: 800px) {
