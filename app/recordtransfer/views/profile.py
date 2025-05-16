@@ -169,7 +169,8 @@ def submission_table(request: HttpRequest) -> HttpResponse:
     )
 
 
-def delete_in_progress_modal(request, uuid):
+def delete_in_progress_modal(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Render the modal to delete an in-progress submission."""
     in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
     return render(
         request,
