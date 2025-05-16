@@ -7,6 +7,11 @@
     {% trans "Are you sure you want to delete this in-progress submission?" %}
 {% endblock modal_title %}
 {% block modal_content %}
+    <p>
+        {% trans "Do you wish to delete the in-progress submission from" %} {{ in_progress.last_updated|date:"F j, Y g:ia" }}
+        {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
+        ?
+    </p>
     <div class="modal-action">
         <button class="btn" onclick="delete_in_progress_submission_modal.close()">{% trans "Cancel" %}</button>
         <button class="btn btn-primary">{% trans "Yes" %}</button>

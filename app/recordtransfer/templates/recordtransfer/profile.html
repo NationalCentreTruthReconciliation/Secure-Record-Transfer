@@ -86,5 +86,6 @@
             </div>
         </div>
     </div>
-    {% include "includes/delete_in_progress_submission_modal.html" %}
+    <div hx-on::after-swap="delete_in_progress_submission_modal.showModal()"
+         id="modal-container"></div>
 {% endblock content %}

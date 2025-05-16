@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
@@ -166,4 +166,15 @@ def submission_table(request: HttpRequest) -> HttpResponse:
         "includes/submission_table.html",
         ID_SUBMISSION_TABLE,
         reverse("recordtransfer:submission_table"),
+    )
+
+
+def delete_in_progress_modal(request, uuid):
+    in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+    return render(
+        request,
+        "includes/delete_in_progress_submission_modal.html",
+        {
+            "in_progress": in_progress,
+        },
     )

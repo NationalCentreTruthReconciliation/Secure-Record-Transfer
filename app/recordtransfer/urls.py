@@ -76,6 +76,11 @@ urlpatterns = [
         login_required(views.profile.submission_table),
         name="submission_table",
     ),
+    path(
+        "delete-in-progress-modal/<uuid:uuid>/",
+        views.profile.delete_in_progress_modal,
+        name="delete_in_progress_modal",
+    ),
 ]
 
 if settings.DEBUG:
