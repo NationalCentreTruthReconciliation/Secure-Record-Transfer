@@ -8,14 +8,10 @@
     {{ block.super }}
     {{ js_context|json_script:"py_context_user_profile" }}
     <script src="{% static 'profile.bundle.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 {% endblock javascript %}
 {% block stylesheet %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'profile.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5"
-          rel="stylesheet"
-          type="text/css" />
 {% endblock stylesheet %}
 {% block theme %}
     nctr

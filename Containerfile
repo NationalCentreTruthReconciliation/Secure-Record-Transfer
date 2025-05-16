@@ -27,7 +27,7 @@ ARG WEBPACK_MODE
 ENV WEBPACK_MODE ${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
-COPY webpack.config.js ${PROJ_DIR}
+COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
 RUN npm run build
 
 # Copy entrypoint script to image
