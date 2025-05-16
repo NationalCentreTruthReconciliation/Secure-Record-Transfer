@@ -122,6 +122,16 @@ def _paginated_table_view(
     paginator = Paginator(queryset, PAGINATE_BY)
     page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
 
+    try:
+        page_num = int(page_num)
+    except (TypeError, ValueError):
+        page_num = 1
+
+    if page_num < 1:
+        page_num = 1
+    elif page_num > paginator.num_pages:
+        page_num = paginator.num_pages
+
     data = {
         "page": paginator.get_page(page_num),
         "page_num": page_num,
