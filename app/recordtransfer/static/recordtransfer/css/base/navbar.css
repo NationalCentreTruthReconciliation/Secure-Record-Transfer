@@ -177,9 +177,8 @@ header.homepage {
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
-        transition: transform 0.3s ease-out;
+        transition: opacity 0.3s ease-out;
         position: fixed;
-        top: 0;
         transform: translateY(-100%);
     }
 
