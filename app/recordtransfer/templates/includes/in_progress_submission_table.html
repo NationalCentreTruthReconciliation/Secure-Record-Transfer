@@ -41,7 +41,7 @@
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
-                    <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
+                    <a onclick="delete_in_progress_submission_modal.showModal()"
                        class="link link-error tooltip"
                        data-tip="{% trans "Delete" %}">
                         <i class="fas fa-trash-alt"></i>

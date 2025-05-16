@@ -1,0 +1,14 @@
+{% extends "includes/base_modal.html" %}
+{% load i18n %}
+{% block modal_id %}
+    delete_in_progress_submission_modal
+{% endblock modal_id %}
+{% block modal_title %}
+    {% trans "Are you sure you want to delete this in-progress submission?" %}
+{% endblock modal_title %}
+{% block modal_content %}
+    <div class="modal-action">
+        <button class="btn" onclick="delete_in_progress_submission_modal.close()">{% trans "Cancel" %}</button>
+        <button class="btn btn-primary">{% trans "Yes" %}</button>
+    </div>
+{% endblock modal_content %}
