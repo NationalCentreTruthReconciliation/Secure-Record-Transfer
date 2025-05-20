@@ -2,6 +2,8 @@
  * Utility to show toast notifications.
  */
 
+const TOAST_CONTAINER_ID = "toast-container";
+
 /**
  *
  * @param {string} type - The type of toast notification ('success', 'error', 'info', 'warning').
@@ -28,10 +30,11 @@ function showToast(type, message) {
     const iconHtml = typeIconMap[type] || typeIconMap.info;
 
     // Find or create the toast container
-    let toastContainer = document.querySelector(".toast.toast-top.toast-center");
+    let toastContainer = document.getElementById(TOAST_CONTAINER_ID);
     if (!toastContainer) {
         toastContainer = document.createElement("div");
         toastContainer.className = "toast toast-top toast-center";
+        toastContainer.id = TOAST_CONTAINER_ID;
         document.body.appendChild(toastContainer);
     }
 
@@ -56,7 +59,7 @@ function showToast(type, message) {
     // Remove after 5 seconds
     setTimeout(() => {
         alertDiv.remove();
-        // Optionally remove container if empty
+        // Remove container if empty
         if (toastContainer.children.length === 0) {
             toastContainer.remove();
         }
@@ -96,22 +99,18 @@ function showWarningToast(message) {
 // HTMX Event Listeners for Toast Notifications
 document.addEventListener("DOMContentLoaded", () => {
     if (window.htmx) {
-        // Success toast event
         window.htmx.on("showSuccess", (event) => {
             showSuccessToast(event.detail.value);
         });
 
-        // Error toast event
         window.htmx.on("showError", (event) => {
             showErrorToast(event.detail.value);
         });
 
-        // Info toast event
         window.htmx.on("showInfo", (event) => {
             showInfoToast(event.detail.value);
         });
 
-        // Warning toast event
         window.htmx.on("showWarning", (event) => {
             showWarningToast(event.detail.value);
         });
