@@ -8,6 +8,9 @@ below.
 
 .. contents:: List of Settings
 
+General Settings
+----------------
+
 PAGINATE_BY
 ^^^^^^^^^^^
 
