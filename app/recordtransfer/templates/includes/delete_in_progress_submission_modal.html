@@ -12,13 +12,15 @@
         {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
         ?
     </p>
-    <div class="modal-action">
-        <button class="btn">{% trans "Cancel" %}</button>
-        <button id="confirm_delete_ip_btn"
-                hx-delete="{{ in_progress.get_delete_url }}"
-                data-refresh-url="{% url 'recordtransfer:in_progress_submission_table' %}"
-                data-table-id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"
-                data-paginate-query-name="{{ PAGINATE_QUERY_NAME }}"
-                class="btn btn-primary">{% trans "Yes" %}</button>
-    </div>
+    <form method="dialog">
+        <div class="modal-action">
+            <button class="btn">{% trans "Cancel" %}</button>
+            <button id="confirm_delete_ip_btn"
+                    hx-delete="{{ in_progress.get_delete_url }}"
+                    data-refresh-url="{% url 'recordtransfer:in_progress_submission_table' %}"
+                    data-table-id="{{ ID_IN_PROGRESS_SUBMISSION_TABLE }}"
+                    data-paginate-query-name="{{ PAGINATE_QUERY_NAME }}"
+                    class="btn btn-primary">{% trans "Yes" %}</button>
+        </div>
+    </form>
 {% endblock modal_content %}
