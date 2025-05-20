@@ -127,7 +127,7 @@ header.homepage {
 /* Burger button */
 .nav-icon-bars {
     display: inline-block;
-
+    color: rgb(255, 166, 103)
 }
 
 .nav-wrapper {
