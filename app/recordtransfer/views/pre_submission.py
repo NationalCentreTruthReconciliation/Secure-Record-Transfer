@@ -10,7 +10,6 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import QuerySet
 from django.forms import (
     BaseForm,
     BaseFormSet,
@@ -20,11 +19,11 @@ from django.forms import (
     formset_factory,
 )
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse, reverse_lazy
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext
-from django.views.generic import DeleteView, TemplateView
+from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect
 from formtools.wizard.views import SessionWizardView
 
@@ -715,4 +714,3 @@ class SubmissionFormWizard(SessionWizardView):
             send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
             return HttpResponseRedirect(reverse("recordtransfer:system_error"))
-
