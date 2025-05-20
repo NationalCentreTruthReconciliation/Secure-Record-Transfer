@@ -2,6 +2,7 @@
 
 from typing import Any, Optional, cast
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
@@ -12,8 +13,6 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
-from django.conf import settings
-
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
