@@ -8,6 +8,30 @@ below.
 
 .. contents:: List of Settings
 
+PAGINATE_BY
+^^^^^^^^^^^
+
+    *Set the number of items per page for paginated views*
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        10            int
+        ============  =========
+
+    This setting controls how many items are shown per page in list views that support pagination.
+    You can adjust it to improve usability depending on the context (e.g., fewer items for mobile
+    views or more items for data-heavy admin views).
+
+    **.env Example:**
+
+    ::
+
+        # file: .env
+        PAGINATE_BY=20
+
 
 Application Features
 --------------------
@@ -1509,26 +1533,3 @@ SELENIUM_TESTS_HEADLESS_MODE
         # file .env
         SELENIUM_TESTS_HEADLESS_MODE=True
 
-PAGINATE_BY
-^^^^^^^^^^^
-
-    *Set the number of items per page for paginated views*
-
-    .. table::
-
-        ============  =========
-        Default       Type
-        ============  =========
-        10            int
-        ============  =========
-
-    This setting controls how many items are shown per page in list views that support pagination.
-    You can adjust it to improve usability depending on the context (e.g., fewer items for mobile
-    views or more items for data-heavy admin views).
-
-    **.env Example:**
-
-    ::
-
-        # file: .env
-        PAGINATE_BY=20
