@@ -12,8 +12,8 @@
         {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
         ?
     </p>
-    <div class="modal-action">
-        <button class="btn" onclick="delete_in_progress_submission_modal.close()">{% trans "Cancel" %}</button>
-        <button class="btn btn-primary">{% trans "Yes" %}</button>
-    </div>
+        <div class="modal-action">
+            <button class="btn">{% trans "Cancel" %}</button>
+            <button hx-delete="{{ in_progress.get_delete_url }}" hx-on::after-request="delete_in_progress_submission_modal.close()" class="btn btn-primary">{% trans "Yes" %}</button>
+        </div>
 {% endblock modal_content %}

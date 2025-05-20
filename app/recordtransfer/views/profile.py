@@ -11,6 +11,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
+from django.views.decorators.http import require_http_methods
 from django.views.generic import UpdateView
 
 from recordtransfer.constants import (
@@ -106,6 +107,16 @@ class UserProfile(UpdateView):
         return super().form_invalid(profile_form)
 
 
+@require_http_methods(["DELETE"])
+def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Delete an in-progress submission."""
+    if not request.htmx:
+        return HttpResponse(status=400)
+    in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+    in_progress.delete()
+    messages.success(request, gettext("In-progress submission deleted"))
+    return HttpResponse(status=204)
+
 def _paginated_table_view(
     request: HttpRequest,
     queryset: QuerySet,
@@ -182,10 +193,8 @@ def submission_table(request: HttpRequest) -> HttpResponse:
 def delete_in_progress_modal(request: HttpRequest, uuid: str) -> HttpResponse:
     """Render the modal to delete an in-progress submission."""
     in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
-    return render(
-        request,
-        "includes/delete_in_progress_submission_modal.html",
-        {
-            "in_progress": in_progress,
-        },
-    )
+    context = {
+        "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
+        "in_progress": in_progress,
+    }
+    return render(request, "includes/delete_in_progress_submission_modal.html", context)
