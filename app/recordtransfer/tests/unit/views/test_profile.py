@@ -359,9 +359,7 @@ class TestUserProfileView(TestCase):
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
         expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(
@@ -381,9 +379,7 @@ class TestUserProfileView(TestCase):
     def test_in_progress_submission_expiring_soon(self) -> None:
         """Test that the expiry date is shown with a warning icon if the in-progress submission is expiring soon."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
 
         upload_session.last_upload_interaction_time = (
             upload_session.last_upload_interaction_time - timedelta(minutes=35)
@@ -393,11 +389,11 @@ class TestUserProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         # Should show the warning icon for expiring soon
-        self.assertIn('fa-exclamation-circle text-warning', content)
-        self.assertIn('Submission is expiring soon', content)
+        self.assertIn("fa-exclamation-circle text-warning", content)
+        self.assertIn("Submission is expiring soon", content)
         # Should NOT show the expired icon or text
-        self.assertNotIn('fa-exclamation-triangle text-error', content)
-        self.assertNotIn('Submission has expired', content)
+        self.assertNotIn("fa-exclamation-triangle text-error", content)
+        self.assertNotIn("Submission has expired", content)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
@@ -406,9 +402,7 @@ class TestUserProfileView(TestCase):
         submission has expired.
         """
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
 
         upload_session.last_upload_interaction_time = (
             upload_session.last_upload_interaction_time - timedelta(minutes=65)
@@ -418,11 +412,11 @@ class TestUserProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         # Should show the expired icon and tooltip
-        self.assertIn('fa-exclamation-triangle text-error', content)
-        self.assertIn('Submission has expired', content)
+        self.assertIn("fa-exclamation-triangle text-error", content)
+        self.assertIn("Submission has expired", content)
         # Should NOT show the warning icon or text
-        self.assertNotIn('fa-exclamation-circle text-warning', content)
-        self.assertNotIn('Submission is expiring soon', content)
+        self.assertNotIn("fa-exclamation-circle text-warning", content)
+        self.assertNotIn("Submission is expiring soon", content)
 
     @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
     def test_in_progress_submission_table_display(self) -> None:
@@ -516,6 +510,7 @@ class TestUserProfileView(TestCase):
         self.assertNotIn("Test Group 0", response.content.decode())
         self.assertNotIn("Test Group 1", response.content.decode())
 
+
 class TestDeleteInProgressSubmission(TestCase):
     """Tests for the DeleteInProgressSubmission view."""
 
@@ -580,9 +575,7 @@ class TestDeleteInProgressSubmission(TestCase):
         self.assertIn("showError", response.headers["HX-Trigger"])
 
         # Check that the in-progress submission still exists
-        self.assertTrue(
-            InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists()
-        )
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
 
     def test_cannot_delete_other_users_submission(self) -> None:
         """Test that a user cannot delete another user's in-progress submission."""
@@ -615,3 +608,73 @@ class TestDeleteInProgressSubmission(TestCase):
         """Test that POST method is not allowed for this view."""
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 405)
+
+
+class TestDeleteInProgressModal(TestCase):
+    """Tests for the delete_in_progress_modal view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with users and in-progress submissions."""
+        self.user = User.objects.create_user(
+            username="testuser1", email="test@example.com", password="testpassword"
+        )
+        self.other_user = User.objects.create_user(
+            username="testuser2", email="test2@example.com", password="testpassword"
+        )
+
+        # Create upload sessions for each user
+        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self.other_upload_session = UploadSession.new_session(user=cast(User, self.other_user))
+
+        # Create in-progress submissions for each user
+        self.in_progress = InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=SubmissionStep.CONTACT_INFO.value,
+            title="Test Submission 1",
+        )
+        self.other_in_progress = InProgressSubmission.objects.create(
+            user=self.other_user,
+            upload_session=self.other_upload_session,
+            current_step=SubmissionStep.CONTACT_INFO.value,
+            title="Test Submission 2",
+        )
+
+        self.client.force_login(self.user)
+        self.url = reverse(
+            "recordtransfer:delete_in_progress_modal", kwargs={"uuid": self.in_progress.uuid}
+        )
+
+    def test_get_modal_success(self) -> None:
+        """Test successful retrieval of the delete modal for an in-progress submission."""
+        response = self.client.get(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the correct template is used
+        self.assertTemplateUsed(response, "includes/delete_in_progress_submission_modal.html")
+
+        # Check that the context contains the required variables
+        self.assertEqual(response.context["in_progress"], self.in_progress)
+
+        # Check that the in-progress submission's title is included in the response
+        self.assertContains(response, "Test Submission 1")
+
+    def test_cannot_get_other_users_submission_modal(self) -> None:
+        """Test that a user cannot get the modal for another user's in-progress submission."""
+        other_url = reverse(
+            "recordtransfer:delete_in_progress_modal", kwargs={"uuid": self.other_in_progress.uuid}
+        )
+
+        response = self.client.get(other_url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistent_submission(self) -> None:
+        """Test that requesting a modal for a nonexistent submission returns 404."""
+        nonexistent_url = reverse(
+            "recordtransfer:delete_in_progress_modal", kwargs={"uuid": str(uuid.uuid4())}
+        )
+
+        response = self.client.get(nonexistent_url)
+        self.assertEqual(response.status_code, 404)

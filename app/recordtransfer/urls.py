@@ -78,7 +78,7 @@ urlpatterns = [
     ),
     path(
         "delete-in-progress-modal/<uuid:uuid>/",
-        views.profile.delete_in_progress_modal,
+        login_required(views.profile.delete_in_progress_modal),
         name="delete_in_progress_modal",
     ),
 ]
