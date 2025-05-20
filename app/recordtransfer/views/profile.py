@@ -13,6 +13,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 from django.views.generic import UpdateView
+from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
@@ -110,9 +111,19 @@ class UserProfile(UpdateView):
 @require_http_methods(["DELETE"])
 def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
     """Delete an in-progress submission."""
-    in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
-    in_progress.delete()
-    return HttpResponse(status=204)
+    try:
+        in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+        in_progress.delete()
+        response = HttpResponse(status=204)
+        return trigger_client_event(
+            response, "showSuccess", {"value": "In-progress submission deleted."}
+        )
+    except Exception:
+        response = HttpResponse(status=500)
+        return trigger_client_event(
+            response, "showError", {"value": "Failed to delete in-progress submission."}
+        )
+
 
 def _paginated_table_view(
     request: HttpRequest,

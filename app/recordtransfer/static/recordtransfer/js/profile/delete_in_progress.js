@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const context = JSON.parse(contextElement.textContent);
-    
+
     const okButton = document.getElementById("ok-btn");
 
     okButton.addEventListener("click", () => {
