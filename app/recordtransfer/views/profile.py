@@ -12,6 +12,8 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.generic import UpdateView
+from django.conf import settings
+
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
@@ -23,7 +25,6 @@ from recordtransfer.constants import (
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_TABLE,
     ID_SUBMISSION_TABLE,
-    PAGINATE_BY,
     PAGINATE_QUERY_NAME,
 )
 from recordtransfer.emails import send_user_account_updated
@@ -119,7 +120,7 @@ def _paginated_table_view(
     if not request.htmx:
         return HttpResponse(status=400)
 
-    paginator = Paginator(queryset, PAGINATE_BY)
+    paginator = Paginator(queryset, settings.PAGINATE_BY)
     page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
 
     data = {
