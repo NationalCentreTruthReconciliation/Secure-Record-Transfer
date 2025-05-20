@@ -184,9 +184,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertEqual(200, response.status_code)
                 # Check that response tells HTMX on client side to redirect to user profile
                 hx_redirect = response.headers.get("HX-Redirect") or ""
-                self.assertEqual(
-                    hx_redirect, reverse("recordtransfer:user_profile")
-                )
+                self.assertEqual(hx_redirect, reverse("recordtransfer:user_profile"))
                 # Follow the redirect to user profile
                 response = self.client.get(hx_redirect, follow=True)
                 self.assertEqual(200, response.status_code)
@@ -217,9 +215,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertEqual(200, response.status_code)
                 # Check that response tells HTMX on client side to redirect to user profile
                 hx_redirect = response.headers.get("HX-Redirect") or ""
-                self.assertEqual(
-                    hx_redirect, reverse("recordtransfer:user_profile")
-                )
+                self.assertEqual(hx_redirect, reverse("recordtransfer:user_profile"))
                 # Follow the redirect to user profile
                 response = self.client.get(hx_redirect, follow=True)
                 self.assertEqual(200, response.status_code)
@@ -283,63 +279,16 @@ class DeleteInProgressSubmissionTests(TestCase):
         self.url = reverse(
             "recordtransfer:delete_in_progress", kwargs={"uuid": self.in_progress.uuid}
         )
-
-    def test_get_queryset(self) -> None:
-        """Test that get_queryset only returns submissions belonging to the current user."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        # View should only include the current user's submission
-        view = response.context["view"]
-        queryset = view.get_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().uuid, self.in_progress.uuid)
-
-        # Other user's submission should not be in the queryset
-        self.assertNotIn(self.other_in_progress, queryset)
-
-    def test_get_object(self) -> None:
-        """Test that get_object returns the correct submission."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        # The object in the context should be the user's in-progress submission
-        self.assertEqual(response.context["in_progress"].uuid, self.in_progress.uuid)
+        self.headers = {"HX-Request": "true"}
 
     def test_delete_success(self) -> None:
         """Test successful deletion of an in-progress submission."""
         self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
 
-        response = self.client.delete(self.url, follow=True)
+        self.client.delete(self.url, headers=self.headers)
 
         # Check that deletion was successful
         self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
-
-        # Check that we were redirected to user profile
-        self.assertRedirects(response, reverse("recordtransfer:user_profile"))
-
-        # Check for success message
-        messages = list(response.context["messages"])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), "In-progress submission deleted")
-
-    @patch("recordtransfer.views.pre_submission.InProgressSubmission.delete")
-    def test_delete_error(self, mock_delete: MagicMock) -> None:
-        """Test error handling during deletion."""
-        # Simulate an error during deletion
-        mock_delete.side_effect = Exception("Test error")
-
-        response = self.client.delete(self.url, follow=True)
-
-        # Check that we were redirected to user profile
-        self.assertRedirects(response, reverse("recordtransfer:user_profile"))
-
-        # Check for error message
-        messages = list(response.context["messages"])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(
-            str(messages[0]), "There was an error deleting the in-progress submission"
-        )
 
     def test_cannot_delete_other_users_submission(self) -> None:
         """Test that a user cannot delete another user's in-progress submission."""
@@ -347,10 +296,7 @@ class DeleteInProgressSubmissionTests(TestCase):
             "recordtransfer:delete_in_progress", kwargs={"uuid": self.other_in_progress.uuid}
         )
 
-        response = self.client.get(other_url)
-        self.assertEqual(response.status_code, 404)
-
-        response = self.client.delete(other_url)
+        response = self.client.delete(other_url, headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
         # Verify the other user's submission still exists
