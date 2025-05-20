@@ -284,10 +284,36 @@ class DeleteInProgressSubmissionTests(TestCase):
         """Test successful deletion of an in-progress submission."""
         self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
 
-        self.client.delete(self.url)
+        response = self.client.delete(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
 
         # Check that deletion was successful
         self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    @patch("recordtransfer.views.profile.InProgressSubmission.delete")
+    def test_delete_error(self, mock_delete: MagicMock) -> None:
+        """Test that an error during deletion returns a 500 status code."""
+        mock_delete.side_effect = Exception("Deletion error")
+
+        response = self.client.delete(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 500)
+
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+        # Check that the in-progress submission still exists
+        self.assertTrue(
+            InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists()
+        )
 
     def test_cannot_delete_other_users_submission(self) -> None:
         """Test that a user cannot delete another user's in-progress submission."""
