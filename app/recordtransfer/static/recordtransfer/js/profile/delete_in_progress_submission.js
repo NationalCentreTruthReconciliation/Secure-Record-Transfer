@@ -1,3 +1,26 @@
+/**
+ * Gets the current page number from the active tab
+ * @returns {string|null} - The current page number or null if not found
+ */
+function getCurrentTablePage() {
+    // Find the active tab
+    const activeTabInput = document.querySelector(
+        ".tabs input[name=\"profile_tabs\"]:checked"
+    );
+    const activeTabContent = activeTabInput
+        ? activeTabInput.closest(".tab").nextElementSibling
+        : null;
+
+    // Find the page-info-btn within the active tab content
+    if (activeTabContent) {
+        const pageInfoBtn = activeTabContent.querySelector(".page-info-btn");
+        if (pageInfoBtn) {
+            return pageInfoBtn.getAttribute("data-current-page");
+        }
+    }
+    return null;
+}
+
 document.addEventListener("htmx:afterRequest", (e) => {
     // Check if this is from the delete button
     if (e.detail.elt && e.detail.elt.id === "confirm_delete_ip_btn") {
@@ -9,37 +32,23 @@ document.addEventListener("htmx:afterRequest", (e) => {
 
         // If the request was successful, refresh the table
         if (e.detail.successful) {
-            // Find the active tab
-            const activeTabInput = document.querySelector(
-                ".tabs input[name=\"profile_tabs\"]:checked"
-            );
-            const activeTabContent = activeTabInput
-                ? activeTabInput.closest(".tab").nextElementSibling
-                : null;
-
             // Get base refresh URL
-            let refreshUrl = e.detail.elt.getAttribute("data-refresh-url");
+            const refreshUrl = e.detail.elt.getAttribute("data-refresh-url");
+            const paginateQueryName = e.detail.elt.getAttribute("data-paginate-query-name");
 
-            // Find the page-info-btn within the active tab content
-            if (activeTabContent) {
-                const pageInfoBtn = activeTabContent.querySelector(".page-info-btn");
-                if (pageInfoBtn) {
-                    const currentPage = pageInfoBtn.getAttribute("data-current-page");
-                    const queryParamName = e.detail.elt.getAttribute(
-                        "data-paginate-query-name"
-                    );
+            // Get the current page number
+            const currentPage = getCurrentTablePage();
 
-                    if (currentPage && queryParamName) {
-                        // Add query parameter separator (? or &) based on whether URL already has
-                        // parameters
-                        const separator = refreshUrl.includes("?") ? "&" : "?";
-                        refreshUrl = `${refreshUrl}${separator}${queryParamName}=${currentPage}`;
-                    }
-                }
+            // Append page query parameter if we have both the query name and current page
+            let finalUrl = refreshUrl;
+            if (paginateQueryName && currentPage) {
+                finalUrl = `${refreshUrl}${
+                    refreshUrl.includes("?") ? "&" : "?"
+                }${paginateQueryName}=${currentPage}`;
             }
 
             window.htmx.ajax("GET",
-                refreshUrl,
+                finalUrl,
                 {
                     target: "#" + e.detail.elt.getAttribute("data-table-id"),
                     swap: "innerHTML"
