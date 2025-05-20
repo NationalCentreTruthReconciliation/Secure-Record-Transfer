@@ -112,7 +112,7 @@ class UserProfile(UpdateView):
 def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
     """Delete an in-progress submission."""
     try:
-        in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+        in_progress = InProgressSubmission.objects.get(uuid=uuid, user=request.user)
         in_progress.delete()
         response = HttpResponse(status=204)
         return trigger_client_event(
