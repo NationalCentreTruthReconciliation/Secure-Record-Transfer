@@ -8,7 +8,7 @@
     {% else %}
         <button class="join-item btn btn-xs btn-disabled p-3" aria-disabled="true">«</button>
     {% endif %}
-    <button class="join-item btn btn-xs p-3 page-info-btn">
+    <button class="join-item btn btn-xs p-3 page-info-btn" data-current-page={{ page.number }}>
         {% blocktrans with curr_page=page.number total_pages=page.paginator.num_pages %}
             Page {{ curr_page }} of {{ total_pages }}
         {% endblocktrans %}
