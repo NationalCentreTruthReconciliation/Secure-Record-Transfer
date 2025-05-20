@@ -1,0 +1,116 @@
+import logging
+from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
+from datetime import timedelta
+
+from recordtransfer.models import User, Submission, InProgressSubmission, UploadSession
+from recordtransfer.emails import (
+    send_submission_creation_success,
+    send_submission_creation_failure,
+    send_thank_you_for_your_submission,
+    send_your_submission_did_not_go_through,
+    send_user_activation_email,
+    send_user_account_updated,
+    send_user_in_progress_submission_expiring,
+)
+
+logger = logging.getLogger(__name__)
+
+EMAIL_FUNCTIONS = {
+    "submission_creation_success": send_submission_creation_success,
+    "submission_creation_failure": send_submission_creation_failure,
+    "thank_you_for_your_submission": send_thank_you_for_your_submission,
+    "your_submission_did_not_go_through": send_your_submission_did_not_go_through,
+    "user_activation_email": send_user_activation_email,
+    "user_account_updated": send_user_account_updated,
+    "in_progress_submission_expiring": send_user_in_progress_submission_expiring,
+}
+
+
+class Command(BaseCommand):
+    help = "Send a test email to the specified address using the given email ID."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "to_email", type=str, help="The email address to send the test email to."
+        )
+        parser.add_argument(
+            "email_id", type=str, help="The ID of the email to send (email function name)."
+        )
+        parser.add_argument(
+            "--from",
+            dest="from_email",
+            type=str,
+            default=None,
+            help="Optional from email address (not currently used).",
+        )
+
+    def handle(self, *args, **options):
+        to_email = options["to_email"]
+        email_id = options["email_id"]
+
+        if email_id not in EMAIL_FUNCTIONS:
+            raise CommandError(
+                f"Unknown email_id '{email_id}'. Valid options: {', '.join(EMAIL_FUNCTIONS.keys())}"
+            )
+
+        user = self.get_test_user(to_email)
+        form_data = {"dummy": "data"}
+        submission = self.create_test_submission(user)
+        in_progress = self.create_test_in_progress_submission(user)
+
+        try:
+            self.send_email(email_id, user, form_data, submission, in_progress)
+            logger.info(f"✅ Sent '{email_id}' email to {to_email}")
+        except Exception as e:
+            logger.error(f"Error sending email '{email_id}' to {to_email}: {e}", exc_info=True)
+            raise CommandError(f"Error sending email: {e}")
+
+    def get_test_user(self, email):
+        user, _ = User.objects.get_or_create(
+            username="testuser",
+            defaults={
+                "email": email,
+                "first_name": "Test",
+                "last_name": "User",
+                "is_active": True,
+                "gets_notification_emails": True,
+                "gets_submission_email_updates": True,
+            },
+        )
+        return user
+
+    def create_test_submission(self, user):
+        return Submission.objects.create(
+            user=user,
+            raw_form=b"",
+            bag_name="test-bag",
+        )
+
+    def create_test_in_progress_submission(self, user):
+        upload_session = UploadSession.objects.create(
+            started_at=timezone.now(),
+            status=UploadSession.SessionStatus.CREATED,
+            last_upload_interaction_time=timezone.now() - timedelta(minutes=10),
+        )
+        return InProgressSubmission.objects.create(
+            user=user,
+            title="In-Progress Test",
+            upload_session=upload_session,
+        )
+
+    def send_email(self, email_id, user, form_data, submission, in_progress):
+        func = EMAIL_FUNCTIONS[email_id]
+
+        if email_id in ("submission_creation_success", "thank_you_for_your_submission"):
+            func(form_data, submission)
+        elif email_id in ("submission_creation_failure", "your_submission_did_not_go_through"):
+            func(form_data, user)
+        elif email_id == "user_activation_email":
+            func(user)
+        elif email_id == "user_account_updated":
+            func(user, {"subject": "Your Account Was Updated"})
+        elif email_id == "in_progress_submission_expiring":
+            func(in_progress)
+        else:
+            raise CommandError(f"No handler implemented for email_id '{email_id}'")
