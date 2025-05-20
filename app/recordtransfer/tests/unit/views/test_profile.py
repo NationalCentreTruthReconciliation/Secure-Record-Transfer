@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.messages import get_messages
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
@@ -358,9 +358,7 @@ class TestUserProfileView(TestCase):
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
         expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(
@@ -380,9 +378,7 @@ class TestUserProfileView(TestCase):
     def test_in_progress_submission_expiring_soon(self) -> None:
         """Test that the expiry date is shown with a warning icon if the in-progress submission is expiring soon."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
 
         upload_session.last_upload_interaction_time = (
             upload_session.last_upload_interaction_time - timedelta(minutes=35)
@@ -392,11 +388,11 @@ class TestUserProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         # Should show the warning icon for expiring soon
-        self.assertIn('fa-exclamation-circle text-warning', content)
-        self.assertIn('Submission is expiring soon', content)
+        self.assertIn("fa-exclamation-circle text-warning", content)
+        self.assertIn("Submission is expiring soon", content)
         # Should NOT show the expired icon or text
-        self.assertNotIn('fa-exclamation-triangle text-error', content)
-        self.assertNotIn('Submission has expired', content)
+        self.assertNotIn("fa-exclamation-triangle text-error", content)
+        self.assertNotIn("Submission has expired", content)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
@@ -405,9 +401,7 @@ class TestUserProfileView(TestCase):
         submission has expired.
         """
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
 
         upload_session.last_upload_interaction_time = (
             upload_session.last_upload_interaction_time - timedelta(minutes=65)
@@ -417,13 +411,13 @@ class TestUserProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         # Should show the expired icon and tooltip
-        self.assertIn('fa-exclamation-triangle text-error', content)
-        self.assertIn('Submission has expired', content)
+        self.assertIn("fa-exclamation-triangle text-error", content)
+        self.assertIn("Submission has expired", content)
         # Should NOT show the warning icon or text
-        self.assertNotIn('fa-exclamation-circle text-warning', content)
-        self.assertNotIn('Submission is expiring soon', content)
+        self.assertNotIn("fa-exclamation-circle text-warning", content)
+        self.assertNotIn("Submission is expiring soon", content)
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    @override_settings(PAGINATE_BY=3)
     def test_in_progress_submission_table_display(self) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
@@ -437,7 +431,7 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    @override_settings(PAGINATE_BY=2)
     def test_in_progress_submission_table_pagination(self) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
@@ -471,7 +465,7 @@ class TestUserProfileView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    @override_settings(PAGINATE_BY=3)
     def test_submission_group_table_display(self) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
@@ -487,7 +481,7 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    @override_settings(PAGINATE_BY=2)
     def test_submission_group_table_pagination(self) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups
