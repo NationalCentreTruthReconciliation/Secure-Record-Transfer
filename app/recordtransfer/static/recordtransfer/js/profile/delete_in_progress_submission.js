@@ -22,7 +22,7 @@ function getCurrentTablePage() {
 }
 
 document.addEventListener("htmx:afterRequest", (e) => {
-    // Check if this is from the delete button
+    // Check if this is from the confirm delete button
     if (e.detail.elt && e.detail.elt.id === "confirm_delete_ip_btn") {
         // Close the modal
         const modal = document.getElementById("delete_in_progress_submission_modal");

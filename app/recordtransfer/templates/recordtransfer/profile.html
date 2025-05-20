@@ -86,6 +86,6 @@
             </div>
         </div>
     </div>
-    <div hx-on::after-swap="delete_in_progress_submission_modal.showModal()"
+    <div hx-on::after-swap="document.querySelector('.modal').showModal()"
          id="modal-container"></div>
 {% endblock content %}
