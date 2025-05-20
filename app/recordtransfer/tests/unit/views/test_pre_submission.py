@@ -279,13 +279,12 @@ class DeleteInProgressSubmissionTests(TestCase):
         self.url = reverse(
             "recordtransfer:delete_in_progress", kwargs={"uuid": self.in_progress.uuid}
         )
-        self.headers = {"HX-Request": "true"}
 
     def test_delete_success(self) -> None:
         """Test successful deletion of an in-progress submission."""
         self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
 
-        self.client.delete(self.url, headers=self.headers)
+        self.client.delete(self.url)
 
         # Check that deletion was successful
         self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
@@ -296,7 +295,7 @@ class DeleteInProgressSubmissionTests(TestCase):
             "recordtransfer:delete_in_progress", kwargs={"uuid": self.other_in_progress.uuid}
         )
 
-        response = self.client.delete(other_url, headers=self.headers)
+        response = self.client.delete(other_url)
         self.assertEqual(response.status_code, 404)
 
         # Verify the other user's submission still exists

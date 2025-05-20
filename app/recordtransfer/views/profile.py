@@ -110,8 +110,6 @@ class UserProfile(UpdateView):
 @require_http_methods(["DELETE"])
 def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
     """Delete an in-progress submission."""
-    if not request.htmx:
-        return HttpResponse(status=400)
     in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
     in_progress.delete()
     return HttpResponse(status=204)
