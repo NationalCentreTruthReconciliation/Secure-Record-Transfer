@@ -114,7 +114,6 @@ def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpRespon
         return HttpResponse(status=400)
     in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
     in_progress.delete()
-    messages.success(request, gettext("In-progress submission deleted"))
     return HttpResponse(status=204)
 
 def _paginated_table_view(
