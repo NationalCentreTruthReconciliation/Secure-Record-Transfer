@@ -100,12 +100,12 @@ class Command(BaseCommand):
 
     def create_test_in_progress_submission(self, user: User) -> InProgressSubmission:
         """Create and return a test InProgressSubmission instance for the given user."""
-        upload_session = UploadSession.objects.create(
+        upload_session = UploadSession(
             started_at=timezone.now(),
             status=UploadSession.SessionStatus.CREATED,
             last_upload_interaction_time=timezone.now() - timedelta(minutes=10),
         )
-        return InProgressSubmission.objects.create(
+        return InProgressSubmission(
             user=user,
             title="In-Progress Test",
             upload_session=upload_session,
