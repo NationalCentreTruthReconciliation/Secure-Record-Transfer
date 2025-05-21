@@ -2,6 +2,7 @@
 
 from typing import Any, Optional, cast
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
@@ -25,7 +26,6 @@ from recordtransfer.constants import (
     ID_NEW_PASSWORD,
     ID_SUBMISSION_GROUP_TABLE,
     ID_SUBMISSION_TABLE,
-    PAGINATE_BY,
     PAGINATE_QUERY_NAME,
 )
 from recordtransfer.emails import send_user_account_updated
@@ -153,7 +153,7 @@ def _paginated_table_view(
     if not request.htmx:
         return HttpResponse(status=400)
 
-    paginator = Paginator(queryset, PAGINATE_BY)
+    paginator = Paginator(queryset, settings.PAGINATE_BY)
     page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
 
     try:

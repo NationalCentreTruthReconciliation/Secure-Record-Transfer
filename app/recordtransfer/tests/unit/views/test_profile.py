@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.messages import get_messages
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
@@ -418,7 +418,7 @@ class TestUserProfileView(TestCase):
         self.assertNotIn("fa-exclamation-circle text-warning", content)
         self.assertNotIn("Submission is expiring soon", content)
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    @override_settings(PAGINATE_BY=3)
     def test_in_progress_submission_table_display(self) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
@@ -432,7 +432,7 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    @override_settings(PAGINATE_BY=2)
     def test_in_progress_submission_table_pagination(self) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
@@ -466,7 +466,7 @@ class TestUserProfileView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    @override_settings(PAGINATE_BY=3)
     def test_submission_group_table_display(self) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
@@ -482,7 +482,7 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    @override_settings(PAGINATE_BY=2)
     def test_submission_group_table_pagination(self) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups

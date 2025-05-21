@@ -127,6 +127,11 @@ header.homepage {
 /* Burger button */
 .nav-icon-bars {
     display: inline-block;
+
+}
+
+.nav-wrapper {
+    top: 10%;
 }
 
 .nav-icon-close {
@@ -183,7 +188,19 @@ header.homepage {
     .nav-item:hover {
         background-color: #f2f2f2;
     }
+
+    .nav-wrapper {
+        position: fixed;
+        z-index: 1000;
+        right: 0;
+        transform: translateY(-100%);
+    }
+
+    .nav-wrapper.open {
+        transform: translateY(0);
+    }
 }
+
 
 /* Desktop menu */
 @media all and (min-width: 800px) {

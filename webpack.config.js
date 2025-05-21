@@ -58,7 +58,10 @@ module.exports = {
     watchOptions: {
         aggregateTimeout: 500,
         poll: 1000,
-        ignored: /node_modules/,
+        ignored: [
+            "**/node_modules/**",
+            "**/dist/**",
+        ],
     },
     entry: {
         images: [
@@ -120,7 +123,7 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader, "css-loader"] // Extract CSS
+                use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"] // Extract CSS
             },
             {
                 test: /\.(jpe?g|png|webp)$/i,
