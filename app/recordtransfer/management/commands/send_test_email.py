@@ -40,7 +40,10 @@ class Command(BaseCommand):
             "to_email", type=str, help="The email address to send the test email to."
         )
         parser.add_argument(
-            "email_id", type=str, help="The ID of the email to send (email function name)."
+            "email_id",
+            type=str,
+            choices=EMAIL_FUNCTIONS.keys(),
+            help="The ID of the email to send (email function name).",
         )
 
     def handle(self, *args, **options) -> None:
