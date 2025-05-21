@@ -116,7 +116,9 @@ class UserProfile(UpdateView):
 
 @require_http_methods(["GET", "DELETE"])
 def in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
-    """Handle GET (show modal) and DELETE (delete submission) for in-progress submissions."""
+    """Handle GET (show modal) and DELETE (delete submission) for in-progress submissions. Both
+    requests must be made by HTMX, or else a 400 Error is returned.
+    """
     if not request.htmx:
         return HttpResponse(status=400)
 
