@@ -90,6 +90,7 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User) -> N
             "first_name": user_submitted.first_name,
             "last_name": user_submitted.last_name,
             "action_date": timezone.now(),
+            "base_url": Site.objects.get_current().domain,
         },
     )
 
