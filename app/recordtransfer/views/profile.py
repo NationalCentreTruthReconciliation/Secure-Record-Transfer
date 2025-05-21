@@ -55,14 +55,20 @@ class UserProfile(UpdateView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                # Form field element IDs
                 "js_context": {
+                    # User profile form
                     "ID_FIRST_NAME": ID_FIRST_NAME,
                     "ID_LAST_NAME": ID_LAST_NAME,
                     "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
                     "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
                     "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                    # Tables
+                    "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+                    "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
+                    "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
+                        "recordtransfer:in_progress_submission_table"
+                    ),
                 },
                 # Table container IDs
                 "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
@@ -203,7 +209,5 @@ def delete_in_progress_modal(request: HttpRequest, uuid: str) -> HttpResponse:
     in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
     context = {
         "in_progress": in_progress,
-        "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
-        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
     }
     return render(request, "includes/delete_in_progress_submission_modal.html", context)
