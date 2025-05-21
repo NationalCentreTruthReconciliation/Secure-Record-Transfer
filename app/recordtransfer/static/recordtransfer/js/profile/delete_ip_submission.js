@@ -41,7 +41,6 @@ function addQueryParam(url, paramName, paramValue) {
  *
  * Closes the delete confirmation modal and, if the request was successful,
  * refreshes the in-progress submissions table via HTMX AJAX.
- *
  * @param {CustomEvent} e - The event object containing the request result in
  * `e.detail.successful`.
  * @param {object} context - Context object with URLs and element IDs for table refresh.
