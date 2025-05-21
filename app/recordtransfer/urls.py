@@ -38,8 +38,8 @@ urlpatterns = [
     ),
     path(
         "submission/in-progress/<uuid:uuid>/",
-        login_required(views.pre_submission.DeleteInProgressSubmission.as_view()),
-        name="delete_in_progress",
+        login_required(views.profile.in_progress_submission),
+        name="in_progress_submission",
     ),
     path("about/", views.home.About.as_view(), name="about"),
     path("help/", views.home.Help.as_view(), name="help"),  # Add this line for the Help page

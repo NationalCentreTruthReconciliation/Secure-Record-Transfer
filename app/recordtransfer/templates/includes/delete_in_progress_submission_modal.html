@@ -1,0 +1,30 @@
+{% extends "includes/base_modal.html" %}
+{% load i18n %}
+{% block modal_id %}
+    delete_in_progress_submission_modal
+{% endblock modal_id %}
+{% block modal_title %}
+    {% trans "Are you sure you want to delete this in-progress submission?" %}
+{% endblock modal_title %}
+{% block modal_content %}
+    <p>
+        {% if in_progress.title %}
+            {% blocktrans with title=in_progress.title|escape date=in_progress.last_updated|date:"F j, Y g:ia"|escape %}
+                Do you wish to delete the in-progress submission from {{ date }} titled "{{ title }}"?
+            {% endblocktrans %}
+        {% else %}
+            {% blocktrans with date=in_progress.last_updated|date:"F j, Y g:ia"|escape %}
+                Do you wish to delete the in-progress submission from {{ date }}?
+            {% endblocktrans %}
+        {% endif %}
+    </p>
+    <form method="dialog">
+        <div class="modal-action">
+            <button class="btn">{% trans "Cancel" %}</button>
+            <button id="confirm_delete_ip_btn"
+                    hx-delete="{{ in_progress.get_delete_url }}"
+                    hx-on::after-request="handleDeleteAfterRequest(event)"
+                    class="btn btn-primary">{% trans "Yes" %}</button>
+        </div>
+    </form>
+{% endblock modal_content %}

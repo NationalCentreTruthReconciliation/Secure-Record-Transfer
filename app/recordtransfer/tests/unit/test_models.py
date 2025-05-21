@@ -1066,6 +1066,13 @@ class TestInProgressSubmission(TestCase):
         expected_url = f"{reverse('recordtransfer:submit')}?resume={self.in_progress.uuid}"
         self.assertEqual(self.in_progress.get_resume_url(), expected_url)
 
+    def test_get_delete_url(self) -> None:
+        """Test the get_delete_url method."""
+        expected_url = reverse(
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.in_progress.uuid}
+        )
+        self.assertEqual(self.in_progress.get_delete_url(), expected_url)
+
     def test_reset_reminder_email_sent_flag_true(self) -> None:
         """Test reset_reminder_email_sent method when the flag is True."""
         self.in_progress.reminder_email_sent = True

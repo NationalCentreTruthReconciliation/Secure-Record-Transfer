@@ -8,11 +8,13 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.http import Http404, HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
+from django.views.decorators.http import require_http_methods
 from django.views.generic import UpdateView
+from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
@@ -53,14 +55,20 @@ class UserProfile(UpdateView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                # Form field element IDs
                 "js_context": {
+                    # User profile form
                     "ID_FIRST_NAME": ID_FIRST_NAME,
                     "ID_LAST_NAME": ID_LAST_NAME,
                     "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
                     "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
                     "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                    # Tables
+                    "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+                    "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
+                    "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
+                        "recordtransfer:in_progress_submission_table"
+                    ),
                 },
                 # Table container IDs
                 "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
@@ -106,6 +114,39 @@ class UserProfile(UpdateView):
         return super().form_invalid(profile_form)
 
 
+@require_http_methods(["GET", "DELETE"])
+def in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Handle GET (show modal) and DELETE (delete submission) for in-progress submissions. Both
+    requests must be made by HTMX, or else a 400 Error is returned.
+    """
+    if not request.htmx:
+        return HttpResponse(status=400)
+
+    try:
+        in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+
+        if request.method == "GET":
+            context = {"in_progress": in_progress}
+            return render(request, "includes/delete_in_progress_submission_modal.html", context)
+
+        # DELETE request
+        in_progress.delete()
+        response = HttpResponse(status=204)
+        return trigger_client_event(
+            response, "showSuccess", {"value": "In-progress submission deleted."}
+        )
+    except Http404:
+        response = HttpResponse(status=404)
+        return trigger_client_event(
+            response, "showError", {"value": "In-progress submission not found."}
+        )
+    except Exception:
+        response = HttpResponse(status=500)
+        return trigger_client_event(
+            response, "showError", {"value": "Failed to delete in-progress submission."}
+        )
+
+
 def _paginated_table_view(
     request: HttpRequest,
     queryset: QuerySet,
@@ -121,6 +162,16 @@ def _paginated_table_view(
 
     paginator = Paginator(queryset, settings.PAGINATE_BY)
     page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
+
+    try:
+        page_num = int(page_num)
+    except (TypeError, ValueError):
+        page_num = 1
+
+    if page_num < 1:
+        page_num = 1
+    elif page_num > paginator.num_pages:
+        page_num = paginator.num_pages
 
     data = {
         "page": paginator.get_page(page_num),
