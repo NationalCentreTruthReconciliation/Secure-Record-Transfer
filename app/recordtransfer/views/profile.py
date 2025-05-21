@@ -8,7 +8,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
@@ -122,18 +122,23 @@ def in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
     if not request.htmx:
         return HttpResponse(status=400)
 
-    if request.method == "GET":
-        in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
-        context = {"in_progress": in_progress}
-        return render(request, "includes/delete_in_progress_submission_modal.html", context)
-
-    # DELETE request
     try:
-        in_progress = InProgressSubmission.objects.get(uuid=uuid, user=request.user)
+        in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+
+        if request.method == "GET":
+            context = {"in_progress": in_progress}
+            return render(request, "includes/delete_in_progress_submission_modal.html", context)
+
+        # DELETE request
         in_progress.delete()
         response = HttpResponse(status=204)
         return trigger_client_event(
             response, "showSuccess", {"value": "In-progress submission deleted."}
+        )
+    except Http404:
+        response = HttpResponse(status=404)
+        return trigger_client_event(
+            response, "showError", {"value": "In-progress submission not found."}
         )
     except Exception:
         response = HttpResponse(status=500)

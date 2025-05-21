@@ -600,7 +600,7 @@ class TestInProgressSubmission(TestCase):
         )
 
         response = self.client.delete(other_url, headers=self.headers)
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 404)
 
         # Verify the other user's submission still exists
         self.assertTrue(
