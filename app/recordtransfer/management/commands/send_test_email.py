@@ -56,11 +56,6 @@ class Command(BaseCommand):
         to_email = options["to_email"]
         email_id = options["email_id"]
 
-        if email_id not in EMAIL_FUNCTIONS:
-            raise CommandError(
-                f"Unknown email_id '{email_id}'. Valid options: {', '.join(EMAIL_FUNCTIONS.keys())}"
-            )
-
         user = self.get_test_user(to_email)
         form_data = {"dummy": "data"}
         submission = self.create_test_submission(user)
