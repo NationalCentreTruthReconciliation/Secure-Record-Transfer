@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 class Index(TemplateView):
     """The homepage."""
 
-    template_name = "recordtransfer/home.html"
+    template_name = "recordtransfer/hom.html"
 
 
 class Help(TemplateView):
