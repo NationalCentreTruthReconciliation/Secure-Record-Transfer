@@ -31,7 +31,7 @@ __all__ = [
 
 
 @django_rq.job
-def send_submission_creation_success(form_data: dict, submission: Submission):
+def send_submission_creation_success(form_data: dict, submission: Submission) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there were no errors.
 
@@ -50,9 +50,6 @@ def send_submission_creation_success(form_data: dict, submission: Submission):
 
     recipient_emails = _get_admin_recipient_list(subject)
 
-    if recipient_emails is None:
-        recipient_emails = []
-
     user_submitted = submission.user
     _send_mail_with_logs(
         recipients=recipient_emails,
@@ -70,7 +67,7 @@ def send_submission_creation_success(form_data: dict, submission: Submission):
 
 
 @django_rq.job
-def send_submission_creation_failure(form_data: dict, user_submitted: User):
+def send_submission_creation_failure(form_data: dict, user_submitted: User) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there WERE errors.
 
@@ -81,9 +78,6 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
     """
     subject = "Submission Failed"
     recipient_emails = _get_admin_recipient_list(subject)
-
-    if recipient_emails is None:
-        recipient_emails = []
 
     _send_mail_with_logs(
         recipients=recipient_emails,
@@ -100,7 +94,7 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
 
 
 @django_rq.job
-def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
+def send_thank_you_for_your_submission(form_data: dict, submission: Submission) -> None:
     """Send a submission success email to the user who made the submission.
 
     Args:
@@ -121,7 +115,7 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission):
 
 
 @django_rq.job
-def send_your_submission_did_not_go_through(form_data: dict, user_submitted: User):
+def send_your_submission_did_not_go_through(form_data: dict, user_submitted: User) -> None:
     """Send a submission failure email to the user who made the submission.
 
     Args:
@@ -145,7 +139,7 @@ def send_your_submission_did_not_go_through(form_data: dict, user_submitted: Use
 
 
 @django_rq.job
-def send_user_activation_email(new_user: User):
+def send_user_activation_email(new_user: User) -> None:
     """Send an activation email to the new user who is attempting to create an account. The user
     must visit the link to activate their account.
 
@@ -170,7 +164,7 @@ def send_user_activation_email(new_user: User):
 
 
 @django_rq.job
-def send_user_account_updated(user_updated: User, context_vars: dict):
+def send_user_account_updated(user_updated: User, context_vars: dict) -> None:
     """Send a notice that the user's account has been updated.
 
     Args:
@@ -220,13 +214,17 @@ def _get_admin_recipient_list(subject: str) -> List[str]:
         (List[str]): A list of email addresses
     """
     LOGGER.info('Finding Users to send "%s" email to', subject)
-    recipients = User.objects.filter(gets_submission_email_updates=True)
-    if not recipients:
+    recipients_list = list(
+        User.objects.filter(gets_submission_email_updates=True).values_list("email", flat=True)
+    )
+
+    if not recipients_list:
         LOGGER.warning("There are no users configured to receive submission update emails.")
-        return
-    user_list = list(recipients)
-    LOGGER.info("Found %d Users(s) to send email to: %s", len(user_list), str(user_list))
-    return [str(e) for e in recipients.values_list("email", flat=True)]
+        return []
+    LOGGER.info(
+        "Found %d Users(s) to send email to: %s", len(recipients_list), str(recipients_list)
+    )
+    return recipients_list
 
 
 def _get_do_not_reply_email_address() -> str:
