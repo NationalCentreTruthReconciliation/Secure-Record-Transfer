@@ -140,12 +140,15 @@ class Command(BaseCommand):
         elif email_id == "user_activation_email":
             func(user)
         elif email_id == "user_account_updated":
-            func(user, {
-                "subject": "Account updated",
-                "changed_item": "account",
-                "changed_status": "updated",
-                "changed_list": "Staff privileges have been added to your account.",
-            })
+            func(
+                user,
+                {
+                    "subject": "Account updated",
+                    "changed_item": "account",
+                    "changed_status": "updated",
+                    "changed_list": ["Staff privileges have been added to your account."],
+                },
+            )
         elif email_id == "in_progress_submission_expiring":
             func(in_progress)
         else:
