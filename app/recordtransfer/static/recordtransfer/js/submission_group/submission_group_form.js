@@ -36,5 +36,19 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("input", checkForChanges);
     });
 
+    const deleteButton = document.getElementById("id_delete_group_button");
+    deleteButton.addEventListener("click", () => {
+        fetch(context["DELETE_URL"], {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            }
+        }).then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        });
+    });
+
     checkForChanges();
 });
