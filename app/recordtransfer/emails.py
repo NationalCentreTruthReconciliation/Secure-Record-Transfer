@@ -50,6 +50,9 @@ def send_submission_creation_success(form_data: dict, submission: Submission):
 
     recipient_emails = _get_admin_recipient_list(subject)
 
+    if recipient_emails is None:
+        recipient_emails = []
+
     user_submitted = submission.user
     _send_mail_with_logs(
         recipients=recipient_emails,
@@ -78,6 +81,9 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User):
     """
     subject = "Submission Failed"
     recipient_emails = _get_admin_recipient_list(subject)
+
+    if recipient_emails is None:
+        recipient_emails = []
 
     _send_mail_with_logs(
         recipients=recipient_emails,
