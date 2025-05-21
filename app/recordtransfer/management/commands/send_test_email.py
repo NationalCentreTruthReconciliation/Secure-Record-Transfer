@@ -1,18 +1,22 @@
 import logging
+from datetime import timedelta
+import argparse
+
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
-from datetime import timedelta
 
-from recordtransfer.models import User, Submission, InProgressSubmission, UploadSession
 from recordtransfer.emails import (
-    send_submission_creation_success,
     send_submission_creation_failure,
+    send_submission_creation_success,
     send_thank_you_for_your_submission,
-    send_your_submission_did_not_go_through,
-    send_user_activation_email,
     send_user_account_updated,
+    send_user_activation_email,
     send_user_in_progress_submission_expiring,
+    send_your_submission_did_not_go_through,
 )
+
+from recordtransfer.models import InProgressSubmission, Submission, UploadSession, User
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,22 +34,22 @@ EMAIL_FUNCTIONS = {
 class Command(BaseCommand):
     help = "Send a test email to the specified address using the given email ID."
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+        """Add command-line arguments to the parser."""
         parser.add_argument(
             "to_email", type=str, help="The email address to send the test email to."
         )
         parser.add_argument(
             "email_id", type=str, help="The ID of the email to send (email function name)."
         )
-        parser.add_argument(
-            "--from",
-            dest="from_email",
-            type=str,
-            default=None,
-            help="Optional from email address (not currently used).",
-        )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
+        """Handle the command to send a test email.
+
+        Args:
+            *args: Variable length argument list.
+            **options: Arbitrary keyword arguments containing 'to_email' and 'email_id'.
+        """
         to_email = options["to_email"]
         email_id = options["email_id"]
 
@@ -61,12 +65,20 @@ class Command(BaseCommand):
 
         try:
             self.send_email(email_id, user, form_data, submission, in_progress)
-            logger.info(f"✅ Sent '{email_id}' email to {to_email}")
+            logger.info("✅ Sent '%s' email to %s", email_id, to_email)
         except Exception as e:
-            logger.error(f"Error sending email '{email_id}' to {to_email}: {e}", exc_info=True)
-            raise CommandError(f"Error sending email: {e}")
+            logger.exception("Error sending email '%s' to %s: %s", email_id, to_email, e)
+            raise CommandError(f"Error sending email: {e}") from e
 
-    def get_test_user(self, email):
+    def get_test_user(self, email: str) -> User:
+        """Retrieve or create a test user with the given email address.
+
+        Args:
+            email (str): The email address of the test user.
+
+        Returns:
+            User: The retrieved or newly created User instance.
+        """
         user, _ = User.objects.get_or_create(
             username="testuser",
             defaults={
@@ -80,14 +92,23 @@ class Command(BaseCommand):
         )
         return user
 
-    def create_test_submission(self, user):
+    def create_test_submission(self, user: User) -> Submission:
+        """Create and return a test Submission instance for the given user.
+
+        Args:
+            user (User): The user for whom the submission is created.
+
+        Returns:
+            Submission: The created Submission instance.
+        """
         return Submission.objects.create(
             user=user,
             raw_form=b"",
             bag_name="test-bag",
         )
 
-    def create_test_in_progress_submission(self, user):
+    def create_test_in_progress_submission(self, user: User) -> InProgressSubmission:
+        """Create and return a test InProgressSubmission instance for the given user."""
         upload_session = UploadSession.objects.create(
             started_at=timezone.now(),
             status=UploadSession.SessionStatus.CREATED,
@@ -99,7 +120,26 @@ class Command(BaseCommand):
             upload_session=upload_session,
         )
 
-    def send_email(self, email_id, user, form_data, submission, in_progress):
+    def send_email(
+        self,
+        email_id: str,
+        user: User,
+        form_data: dict,
+        submission: Submission,
+        in_progress: InProgressSubmission,
+    ) -> None:
+        """Send a test email based on the provided email ID.
+
+        Args:
+            email_id (str): The ID of the email to send (email function name).
+            user (User): The user object to whom the email is related.
+            form_data (dict): Form data to be passed to the email function.
+            submission (Submission): A test submission instance.
+            in_progress (InProgressSubmission): A test in-progress submission instance.
+
+        Raises:
+            CommandError: If no handler is implemented for the given email ID.
+        """
         func = EMAIL_FUNCTIONS[email_id]
 
         if email_id in ("submission_creation_success", "thank_you_for_your_submission"):
