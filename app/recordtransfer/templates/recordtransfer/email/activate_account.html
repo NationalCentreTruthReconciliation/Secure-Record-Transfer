@@ -12,6 +12,7 @@
             {% endblocktrans %}
     </div>
     <div style="text-align: left; margin-top: 20px;">
+        {% url 'recordtransfer:activate_account' uidb64=uid token=token as activate_account %}
         <a href="http://{{ base_url }}{{ activate_account }}"
            style="display: inline-block;
                   background-color: #EE7623;
