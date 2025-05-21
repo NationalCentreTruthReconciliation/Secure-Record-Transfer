@@ -8,5 +8,8 @@ window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
+});
+
+window.addEventListener("load", () => {
     setupHelpTooltips();
 });
