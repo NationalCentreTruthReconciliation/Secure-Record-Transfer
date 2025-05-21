@@ -193,7 +193,7 @@ MAX_TOTAL_UPLOAD_COUNT = config("MAX_TOTAL_UPLOAD_COUNT", default=40, cast=int)
 
 
 # Pagination
-PAGINATE_BY = config("PAGINATE_BY", default=2, cast=int)
+PAGINATE_BY = config("PAGINATE_BY", default=10, cast=int)
 
 # Use Date widgets for record dates or use free text fields.
 USE_DATE_WIDGETS = config("USE_DATE_WIDGETS", default=True, cast=bool)
