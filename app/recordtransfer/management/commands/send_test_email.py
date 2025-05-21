@@ -27,7 +27,7 @@ EMAIL_FUNCTIONS = {
     "your_submission_did_not_go_through": send_your_submission_did_not_go_through,
     "user_activation_email": send_user_activation_email,
     "user_account_updated": send_user_account_updated,
-    "in_progress_submission_expiring": send_user_in_progress_submission_expiring,
+    "user_in_progress_submission_expiring": send_user_in_progress_submission_expiring,
 }
 
 
