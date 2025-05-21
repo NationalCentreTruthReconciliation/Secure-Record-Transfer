@@ -5,7 +5,7 @@
 const TOAST_CONTAINER_ID = "toast-container";
 
 /**
- *
+ * Displays a toast notification with the specified type and message.
  * @param {string} type - The type of toast notification ('success', 'error', 'info', 'warning').
  * @param {string} message - The message to display in the toast notification.
  */
@@ -56,13 +56,16 @@ function showToast(type, message) {
     // Add to DOM
     toastContainer.appendChild(alertDiv);
 
-    // Remove after 5 seconds
+    // Fade out and remove after 5 seconds
     setTimeout(() => {
-        alertDiv.remove();
-        // Remove container if empty
-        if (toastContainer.children.length === 0) {
-            toastContainer.remove();
-        }
+        alertDiv.style.transition = "opacity 0.5s";
+        alertDiv.style.opacity = "0";
+        setTimeout(() => {
+            alertDiv.remove();
+            if (toastContainer.children.length === 0) {
+                toastContainer.remove();
+            }
+        }, 500);
     }, 5000);
 }
 
@@ -96,7 +99,9 @@ function showWarningToast(message) {
     showToast("warning", message);
 }
 
-// Set up HTMX Event Listeners for Toast Notifications
+/**
+ * Registers HTMX event listeners to show toast notifications for custom events.
+ */
 export const setupToastNotifications = () => {
     if (window.htmx) {
         window.htmx.on("showSuccess", (event) => {

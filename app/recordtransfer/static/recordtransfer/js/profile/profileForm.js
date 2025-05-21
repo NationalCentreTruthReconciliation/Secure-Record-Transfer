@@ -1,3 +1,16 @@
+/**
+ * Sets up the profile form by tracking changes to input fields and enabling the save button when
+ * changes are detected.
+ * @param {object} context - An object containing DOM element IDs for the profile form fields.
+ * @param {string} context.ID_FIRST_NAME - The ID of the first name input field.
+ * @param {string} context.ID_LAST_NAME - The ID of the last name input field.
+ * @param {string} context.ID_GETS_NOTIFICATION_EMAILS - The ID of the notification emails
+ * checkbox.
+ * @param {string} context.ID_CURRENT_PASSWORD - The ID of the current password input field.
+ * @param {string} context.ID_NEW_PASSWORD - The ID of the new password input field.
+ * @param {string} context.ID_CONFIRM_NEW_PASSWORD - The ID of the confirm new password input
+ * field.
+ */
 export const setupProfileForm = (context) => {
     const firstName = document.getElementById(context["ID_FIRST_NAME"]);
     const lastName = document.getElementById(context["ID_LAST_NAME"]);

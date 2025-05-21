@@ -36,6 +36,22 @@ function addQueryParam(url, paramName, paramValue) {
     return url;
 }
 
+/**
+ * Handles the UI and table refresh after a delete request for an in-progress submission.
+ *
+ * Closes the delete confirmation modal and, if the request was successful,
+ * refreshes the in-progress submissions table via HTMX AJAX.
+ *
+ * @param {CustomEvent} e - The event object containing the request result in
+ * `e.detail.successful`.
+ * @param {object} context - Context object with URLs and element IDs for table refresh.
+ * @param {string} context.IN_PROGRESS_SUBMISSION_TABLE_URL - The URL to refresh the in-progress
+ * submissions table.
+ * @param {string} context.PAGINATE_QUERY_NAME - The query parameter name for pagination
+ * (e.g., "p").
+ * @param {string} context.ID_IN_PROGRESS_SUBMISSION_TABLE - The DOM element ID of the in-progress
+ * submissions table to update.
+ */
 export const handleDeleteAfterRequest = (e, context) => {
     // Close the modal
     const modal = document.getElementById("delete_in_progress_submission_modal");
