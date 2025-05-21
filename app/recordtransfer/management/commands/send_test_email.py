@@ -149,7 +149,7 @@ class Command(BaseCommand):
                     "changed_list": ["Staff privileges have been added to your account."],
                 },
             )
-        elif email_id == "in_progress_submission_expiring":
+        elif email_id == "user_in_progress_submission_expiring":
             func(in_progress)
         else:
             raise CommandError(f"No handler implemented for email_id '{email_id}'")
