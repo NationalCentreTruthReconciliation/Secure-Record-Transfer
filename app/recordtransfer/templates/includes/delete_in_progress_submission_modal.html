@@ -8,9 +8,15 @@
 {% endblock modal_title %}
 {% block modal_content %}
     <p>
-        {% trans "Do you wish to delete the in-progress submission from" %} {{ in_progress.last_updated|date:"F j, Y g:ia" }}
-        {% if in_progress.title %}titled "{{ in_progress.title }}"{% endif %}
-        ?
+        {% if in_progress.title %}
+            {% blocktrans with title=in_progress.title|escape date=in_progress.last_updated|date:"F j, Y g:ia"|escape %}
+                Do you wish to delete the in-progress submission from {{ date }} titled "{{ title }}"?
+            {% endblocktrans %}
+        {% else %}
+            {% blocktrans with date=in_progress.last_updated|date:"F j, Y g:ia"|escape %}
+                Do you wish to delete the in-progress submission from {{ date }}?
+            {% endblocktrans %}
+        {% endif %}
     </p>
     <form method="dialog">
         <div class="modal-action">
