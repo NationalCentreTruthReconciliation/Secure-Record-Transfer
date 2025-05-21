@@ -5,19 +5,19 @@
     {% blocktrans %}Thank You for Your Submission{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
         {% blocktrans %}
             Thank you for your record submission using the NCTR Record Transfer Portal. The
             files you sent are being stored securely on our servers until an archivist has the
             opportunity to view them.
             {% endblocktrans %}
-    </div>
-    <div>
+    </p>
+    <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
         {% blocktrans %}
         If you have any questions about your submission, please contact an NCTR archivist
         at this email address:
         {% endblocktrans %}
-    </div>
+    </p>
     <div style="text-align: left; margin-top: 20px;">
         <a href="mailto:{{ archivist_email }}"
            style="display: inline-block;
