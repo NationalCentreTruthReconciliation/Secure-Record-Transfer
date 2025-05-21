@@ -31,7 +31,7 @@ jobs:
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
           if [ $response -eq 200 ]; then
-            echo "Homepage is working in production configuration"
+            echo "Homepage is returning 200 OK in production configuration"
             exit 0
           else
             echo "Homepage returned status code $response in production configuration"
