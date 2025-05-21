@@ -62,6 +62,7 @@ def send_submission_creation_success(form_data: dict, submission: Submission) ->
             "last_name": user_submitted.last_name,
             "action_date": submission.submission_date,
             "submission_url": submission_url,
+            "base_url": Site.objects.get_current().domain,
         },
     )
 
