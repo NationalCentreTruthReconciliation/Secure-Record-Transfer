@@ -75,20 +75,17 @@ class Command(BaseCommand):
             email (str): The email address of the test user.
 
         Returns:
-            User: The retrieved or newly created User instance.
+            User: A User instance that has not been saved to the database.
         """
-        user, _ = User.objects.get_or_create(
+        return User(
             username="testuser",
-            defaults={
-                "email": email,
-                "first_name": "Test",
-                "last_name": "User",
-                "is_active": True,
-                "gets_notification_emails": True,
-                "gets_submission_email_updates": True,
-            },
+            email=email,
+            first_name="Test",
+            last_name="User",
+            is_active=True,
+            gets_notification_emails=True,
+            gets_submission_email_updates=True,
         )
-        return user
 
     def create_test_submission(self, user: User) -> Submission:
         """Create and return a test Submission instance for the given user.
