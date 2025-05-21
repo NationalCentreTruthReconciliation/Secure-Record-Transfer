@@ -90,7 +90,7 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User) -> N
             "first_name": user_submitted.first_name,
             "last_name": user_submitted.last_name,
             "action_date": timezone.now(),
-            "base_url": Site.objects.get_current().domain,
+            "base_url": Site.objects.get_current(),
         },
     )
 
@@ -197,6 +197,7 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
         context={
             "username": in_progress.user.username,
             "full_name": in_progress.user.get_full_name(),
+            "base_url": Site.objects.get_current().domain,
             "in_progress_title": in_progress.title,
             "in_progress_expiration_date": timezone.localtime(
                 in_progress.upload_session_expires_at
