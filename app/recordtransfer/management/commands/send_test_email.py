@@ -94,13 +94,9 @@ class Command(BaseCommand):
             user (User): The user for whom the submission is created.
 
         Returns:
-            Submission: The created Submission instance.
+            Submission: A Submission instance that has not been saved to the database.
         """
-        return Submission.objects.create(
-            user=user,
-            raw_form=b"",
-            bag_name="test-bag",
-        )
+        return Submission(user=user, raw_form=b"", bag_name="test-bag")
 
     def create_test_in_progress_submission(self, user: User) -> InProgressSubmission:
         """Create and return a test InProgressSubmission instance for the given user."""
