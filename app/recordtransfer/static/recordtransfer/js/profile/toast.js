@@ -96,8 +96,8 @@ function showWarningToast(message) {
     showToast("warning", message);
 }
 
-// HTMX Event Listeners for Toast Notifications
-document.addEventListener("DOMContentLoaded", () => {
+// Set up HTMX Event Listeners for Toast Notifications
+export const setupToastNotifications = () => {
     if (window.htmx) {
         window.htmx.on("showSuccess", (event) => {
             showSuccessToast(event.detail.value);
@@ -115,4 +115,4 @@ document.addEventListener("DOMContentLoaded", () => {
             showWarningToast(event.detail.value);
         });
     }
-});
+};
