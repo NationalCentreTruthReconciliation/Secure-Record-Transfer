@@ -24,18 +24,18 @@
                   font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
             {% blocktrans %}Resume Your Submission{% endblocktrans %}
         </a>
+        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+            If the button doesn’t work, copy and paste this link into your browser:
+            <br>
+            <a href="http://{{ base_url }}{{ in_progress_url }}"
+               style="color:#606060">http://{{ base_url }}{{ in_progress_url }}</a>
+        </p>
         <p style="margin-top: 15px;
                   font-size: 7pt;
                   color: #666666;
                   font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
                   line-height: 1.4">
             {% blocktrans %}If you have any questions or need assistance, please contact our support team.{% endblocktrans %}
-        </p>
-        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
-            If the button doesn’t work, copy and paste this link into your browser:
-            <br>
-            <a href="http://{{ base_url }}{{ in_progress_url }}"
-               style="color:#606060">http://{{ base_url }}{{ in_progress_url }}</a>
         </p>
     </div>
 {% endblock content %}
