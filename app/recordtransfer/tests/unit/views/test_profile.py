@@ -511,107 +511,8 @@ class TestUserProfileView(TestCase):
         self.assertNotIn("Test Group 1", response.content.decode())
 
 
-class TestDeleteInProgressSubmission(TestCase):
-    """Tests for the DeleteInProgressSubmission view."""
-
-    def setUp(self) -> None:
-        """Set up the test case with users and in-progress submissions."""
-        self.user = User.objects.create_user(
-            username="testuser1", email="test@example.com", password="testpassword"
-        )
-        self.other_user = User.objects.create_user(
-            username="testuser2", email="test2@example.com", password="testpassword"
-        )
-
-        # Create upload sessions for each user
-        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self.other_upload_session = UploadSession.new_session(user=cast(User, self.other_user))
-
-        # Create in-progress submissions for each user
-        self.in_progress = InProgressSubmission.objects.create(
-            user=self.user,
-            upload_session=self.upload_session,
-            current_step=SubmissionStep.CONTACT_INFO.value,
-        )
-        self.other_in_progress = InProgressSubmission.objects.create(
-            user=self.other_user,
-            upload_session=self.other_upload_session,
-            current_step=SubmissionStep.CONTACT_INFO.value,
-        )
-
-        self.client.force_login(self.user)
-        self.url = reverse(
-            "recordtransfer:delete_in_progress", kwargs={"uuid": self.in_progress.uuid}
-        )
-
-    def test_delete_success(self) -> None:
-        """Test successful deletion of an in-progress submission."""
-        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
-
-        response = self.client.delete(self.url)
-
-        # Check for proper status code
-        self.assertEqual(response.status_code, 204)
-
-        # Check that HTMX showSuccess event is included in the response
-        self.assertIn("HX-Trigger", response.headers)
-        self.assertIn("showSuccess", response.headers["HX-Trigger"])
-
-        # Check that deletion was successful
-        self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
-
-    @patch("recordtransfer.views.profile.InProgressSubmission.delete")
-    def test_delete_error(self, mock_delete: MagicMock) -> None:
-        """Test that an error during deletion returns a 500 status code."""
-        mock_delete.side_effect = Exception("Deletion error")
-
-        response = self.client.delete(self.url)
-
-        # Check for proper status code
-        self.assertEqual(response.status_code, 500)
-
-        # Check that HTMX showError event is included in the response
-        self.assertIn("HX-Trigger", response.headers)
-        self.assertIn("showError", response.headers["HX-Trigger"])
-
-        # Check that the in-progress submission still exists
-        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
-
-    def test_cannot_delete_other_users_submission(self) -> None:
-        """Test that a user cannot delete another user's in-progress submission."""
-        other_url = reverse(
-            "recordtransfer:delete_in_progress", kwargs={"uuid": self.other_in_progress.uuid}
-        )
-
-        response = self.client.delete(other_url)
-        self.assertEqual(response.status_code, 500)
-
-        # Verify the other user's submission still exists
-        self.assertTrue(
-            InProgressSubmission.objects.filter(uuid=self.other_in_progress.uuid).exists()
-        )
-
-    def test_login_required(self) -> None:
-        """Test that login is required to access the view."""
-        self.client.logout()
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, 302)
-
-    def test_post_method_not_allowed(self) -> None:
-        """Test that POST method is not allowed for this view."""
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 405)
-
-
-class TestDeleteInProgressModal(TestCase):
-    """Tests for the delete_in_progress_modal view."""
+class TestInProgressSubmission(TestCase):
+    """Tests for the in_progress_submission view."""
 
     def setUp(self) -> None:
         """Set up the test case with users and in-progress submissions."""
@@ -642,12 +543,92 @@ class TestDeleteInProgressModal(TestCase):
 
         self.client.force_login(self.user)
         self.url = reverse(
-            "recordtransfer:delete_in_progress_modal", kwargs={"uuid": self.in_progress.uuid}
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.in_progress.uuid}
+        )
+        self.headers = {
+            "HX-Request": "true",
+        }
+
+    # DELETE tests
+    def test_delete_success(self) -> None:
+        """Test successful deletion of an in-progress submission."""
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+        response = self.client.delete(self.url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Check that deletion was successful
+        self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    @patch("recordtransfer.views.profile.InProgressSubmission.delete")
+    def test_delete_error(self, mock_delete: MagicMock) -> None:
+        """Test that an error during deletion returns a 500 status code."""
+        mock_delete.side_effect = Exception("Deletion error")
+
+        response = self.client.delete(self.url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 500)
+
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+        # Check that the in-progress submission still exists
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    def test_non_htmx_delete_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.delete(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+        # Check that the in-progress submission still exists
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    def test_cannot_delete_other_users_submission(self) -> None:
+        """Test that a user cannot delete another user's in-progress submission."""
+        other_url = reverse(
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.other_in_progress.uuid}
         )
 
+        response = self.client.delete(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 500)
+
+        # Verify the other user's submission still exists
+        self.assertTrue(
+            InProgressSubmission.objects.filter(uuid=self.other_in_progress.uuid).exists()
+        )
+
+    def test_login_required(self) -> None:
+        """Test that login is required to access the view."""
+        self.client.logout()
+
+        response = self.client.get(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.delete(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+    def test_post_method_not_allowed(self) -> None:
+        """Test that POST method is not allowed for this view."""
+        response = self.client.post(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 405)
+
+    # GET tests (modal retrieval)
     def test_get_modal_success(self) -> None:
         """Test successful retrieval of the delete modal for an in-progress submission."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.url, headers=self.headers)
 
         # Check for proper status code
         self.assertEqual(response.status_code, 200)
@@ -661,20 +642,27 @@ class TestDeleteInProgressModal(TestCase):
         # Check that the in-progress submission's title is included in the response
         self.assertContains(response, "Test Submission 1")
 
+    def test_non_htmx_get_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.get(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
     def test_cannot_get_other_users_submission_modal(self) -> None:
         """Test that a user cannot get the modal for another user's in-progress submission."""
         other_url = reverse(
-            "recordtransfer:delete_in_progress_modal", kwargs={"uuid": self.other_in_progress.uuid}
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.other_in_progress.uuid}
         )
 
-        response = self.client.get(other_url)
+        response = self.client.get(other_url, headers=self.headers)
         self.assertEqual(response.status_code, 404)
 
     def test_nonexistent_submission(self) -> None:
         """Test that requesting a modal for a nonexistent submission returns 404."""
         nonexistent_url = reverse(
-            "recordtransfer:delete_in_progress_modal", kwargs={"uuid": str(uuid.uuid4())}
+            "recordtransfer:in_progress_submission", kwargs={"uuid": str(uuid.uuid4())}
         )
 
-        response = self.client.get(nonexistent_url)
+        response = self.client.get(nonexistent_url, headers=self.headers)
         self.assertEqual(response.status_code, 404)

@@ -1031,7 +1031,7 @@ class InProgressSubmission(models.Model):
 
     def get_delete_url(self) -> str:
         """Get the URL to delete this in-progress submission."""
-        return reverse("recordtransfer:delete_in_progress", kwargs={"uuid": self.uuid})
+        return reverse("recordtransfer:in_progress_submission", kwargs={"uuid": self.uuid})
 
     def reset_reminder_email_sent(self) -> None:
         """Reset the reminder email flag to False, if it isn't already False."""

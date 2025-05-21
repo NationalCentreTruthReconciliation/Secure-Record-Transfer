@@ -41,7 +41,7 @@
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
-                    <a hx-get="{% url "recordtransfer:delete_in_progress_modal" uuid=in_progress.uuid %}"
+                    <a hx-get="{% url "recordtransfer:in_progress_submission" uuid=in_progress.uuid %}"
                        hx-target="#modal-container"
                        hx-swap="innerHTML"
                        hx-trigger="click"

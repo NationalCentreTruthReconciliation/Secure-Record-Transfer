@@ -114,9 +114,18 @@ class UserProfile(UpdateView):
         return super().form_invalid(profile_form)
 
 
-@require_http_methods(["DELETE"])
-def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
-    """Delete an in-progress submission."""
+@require_http_methods(["GET", "DELETE"])
+def in_progress_submission(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Handle GET (show modal) and DELETE (delete submission) for in-progress submissions."""
+    if not request.htmx:
+        return HttpResponse(status=400)
+
+    if request.method == "GET":
+        in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
+        context = {"in_progress": in_progress}
+        return render(request, "includes/delete_in_progress_submission_modal.html", context)
+
+    # DELETE request
     try:
         in_progress = InProgressSubmission.objects.get(uuid=uuid, user=request.user)
         in_progress.delete()
@@ -202,12 +211,3 @@ def submission_table(request: HttpRequest) -> HttpResponse:
         ID_SUBMISSION_TABLE,
         reverse("recordtransfer:submission_table"),
     )
-
-
-def delete_in_progress_modal(request: HttpRequest, uuid: str) -> HttpResponse:
-    """Render the modal to delete an in-progress submission."""
-    in_progress = get_object_or_404(InProgressSubmission, uuid=uuid, user=request.user)
-    context = {
-        "in_progress": in_progress,
-    }
-    return render(request, "includes/delete_in_progress_submission_modal.html", context)

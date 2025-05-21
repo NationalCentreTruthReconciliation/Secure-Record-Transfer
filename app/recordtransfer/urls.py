@@ -38,8 +38,8 @@ urlpatterns = [
     ),
     path(
         "submission/in-progress/<uuid:uuid>/",
-        login_required(views.profile.delete_in_progress_submission),
-        name="delete_in_progress",
+        login_required(views.profile.in_progress_submission),
+        name="in_progress_submission",
     ),
     path("about/", views.home.About.as_view(), name="about"),
     path("help/", views.home.Help.as_view(), name="help"),  # Add this line for the Help page
@@ -75,11 +75,6 @@ urlpatterns = [
         "submission-table/",
         login_required(views.profile.submission_table),
         name="submission_table",
-    ),
-    path(
-        "delete-in-progress-modal/<uuid:uuid>/",
-        login_required(views.profile.delete_in_progress_modal),
-        name="delete_in_progress_modal",
     ),
 ]
 

@@ -1069,7 +1069,7 @@ class TestInProgressSubmission(TestCase):
     def test_get_delete_url(self) -> None:
         """Test the get_delete_url method."""
         expected_url = reverse(
-            "recordtransfer:delete_in_progress", kwargs={"uuid": self.in_progress.uuid}
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.in_progress.uuid}
         )
         self.assertEqual(self.in_progress.get_delete_url(), expected_url)
 
