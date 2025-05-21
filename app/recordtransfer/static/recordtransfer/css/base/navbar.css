@@ -179,6 +179,36 @@ header.homepage {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+
+/*Smaller resolution styles*/
+@media (max-width: 480px) {
+    .header {
+        flex-wrap: nowrap;
+    }
+
+    .header .title {
+        font-size: 14px;
+        margin-left: 8px;
+    }
+
+    .header .icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-items-container {
+        width: 80vw;
+        right: 5vw;
+        padding: 40px 15px;
+    }
+
+    .nav-item-flex {
+        height: 4vh;
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+}
+
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
