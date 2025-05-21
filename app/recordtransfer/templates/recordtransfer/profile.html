@@ -84,4 +84,5 @@
     </div>
     <div hx-on::after-swap="document.querySelector('.modal').showModal()"
          id="modal-container"></div>
+    {% include "includes/new_submission_group_modal.html" with form=submission_group_form %}
 {% endblock content %}

@@ -1,0 +1,41 @@
+{% extends "includes/base_modal.html" %}
+{% load i18n %}
+{% block modal_id %}
+    new_submission_group_modal
+{% endblock modal_id %}
+{% block modal_title %}
+    {% trans "Create a new submission group" %}
+{% endblock modal_title %}
+{% block modal_content %}
+    <form method="post"
+          action="{% url 'recordtransfer:submission_group_new' %}"
+          id="submission-group-form">
+        {% csrf_token %}
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend text-sm md:text-md">{% trans form.name.label %}</legend>
+            <input type="text"
+                   class="input input-bordered input-sm md:input-md validator w-full"
+                   name="{{ form.name.name }}"
+                   id="{{ form.name.id_for_label }}"
+                   required>
+            {% if form.name.errors %}
+                <p class="text-error text-xs md:text-sm">{% trans form.name.errors.0 %}</p>
+            {% endif %}
+        </fieldset>
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend text-sm md:text-md">{% trans form.description.label %}</legend>
+            <input type="text"
+                   class="input input-bordered input-sm md:input-md validator w-full"
+                   name="{{ form.description.name }}"
+                   id="{{ form.description.id_for_label }}"
+                   required>
+            {% if form.description.errors %}
+                <p class="text-error text-xs md:text-sm">{% trans form.description.errors.0 %}</p>
+            {% endif %}
+        </fieldset>
+        <div class="modal-action">
+            <button class="btn">{% trans "Cancel" %}</button>
+            <button type="submit" class="btn btn-primary" id="id_create_group_button">{% trans "Create" %}</button>
+        </div>
+    </form>
+{% endblock modal_content %}
