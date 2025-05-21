@@ -63,7 +63,7 @@ class Command(BaseCommand):
 
         try:
             self.send_email(email_id, user, form_data, submission, in_progress)
-            logger.info("✅ Sent '%s' email to %s", email_id, to_email)
+            logger.info("✓ Sent '%s' email to %s", email_id, to_email)
         except Exception as e:
             logger.exception("Error sending email '%s' to %s: %s", email_id, to_email, e)
             raise CommandError(f"Error sending email: {e}") from e
