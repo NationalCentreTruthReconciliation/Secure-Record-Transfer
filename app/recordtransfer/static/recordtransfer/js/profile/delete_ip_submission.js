@@ -53,7 +53,7 @@ function addQueryParam(url, paramName, paramValue) {
  */
 export const handleDeleteAfterRequest = (e, context) => {
     // Close the modal
-    const modal = document.getElementById("delete_in_progress_submission_modal");
+    const modal = document.getElementById("base_modal");
     if (modal) {
         modal.close();
     }

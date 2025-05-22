@@ -1,15 +1,15 @@
 {% load i18n %}
 {% load static %}
-<dialog id={% block modal_id %}{% endblock modal_id %} class="modal">
+<dialog id="base_modal" class="modal">
     <div class="modal-box">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <h3 class="text-lg font-bold mb-5">
-            {% block modal_title %}
-            {% endblock modal_title %}
-        </h3>
-        {% block modal_content %}
-        {% endblock modal_content %}
+        <div id="modal-content-container" hx-on::after-swap="base_modal.showModal()">
+            <div id="modal-content">
+                {% block modal_content %}
+                {% endblock modal_content %}
+            </div>
+        </div>
     </div>
 </dialog>

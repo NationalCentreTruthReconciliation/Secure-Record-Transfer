@@ -74,8 +74,9 @@
                 </div>
                 <div class="flex justify-end">
                     <a hx-get="{% url 'recordtransfer:submission_group_new' %}"
-                       hx-target="#modal-container"
+                       hx-target="#modal-content-container"
                        hx-swap="innerHTML"
+                       hx-select="#modal-content"
                        class="btn btn-sm">
                         <span class="hidden md:inline">{% trans "New submission group" %}</span>
                         <i class="fa fa-plus" aria-hidden="true"></i>
@@ -84,6 +85,5 @@
             </div>
         </div>
     </div>
-    <div hx-on::after-swap="document.querySelector('.modal').showModal()"
-         id="modal-container"></div>
+    {% include "includes/base_modal.html" %}
 {% endblock content %}
