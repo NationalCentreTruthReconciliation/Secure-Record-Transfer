@@ -94,6 +94,11 @@ export function setupNavbar() {
         const navWrapper = document.querySelector(".nav-wrapper");
         const navTitle = document.querySelector(".nav-title");
 
+        const maxResponsiveWidth = 799;
+        if (window.innerWidth > maxResponsiveWidth) {
+            return;
+        }
+
         if (!navWrapper || !navTitle) {return;}
 
         const scrollTop = window.scrollY;
