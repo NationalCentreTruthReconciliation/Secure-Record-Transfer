@@ -20,7 +20,7 @@ dependencies = [
     "django-rq>=3.0.0,<4",
     "python-decouple~=3.8",
     "rq-scheduler>=0.14.0,<0.15",
-    "setuptools>=75.1.0,<76",
+    "setuptools~=78.1.1",
 ]
 
 [project.optional-dependencies]

@@ -1029,6 +1029,10 @@ class InProgressSubmission(models.Model):
         """Get the URL to access and resume the in-progress submission."""
         return f"{reverse('recordtransfer:submit')}?resume={self.uuid}"
 
+    def get_delete_url(self) -> str:
+        """Get the URL to delete this in-progress submission."""
+        return reverse("recordtransfer:in_progress_submission", kwargs={"uuid": self.uuid})
+
     def reset_reminder_email_sent(self) -> None:
         """Reset the reminder email flag to False, if it isn't already False."""
         if self.reminder_email_sent:

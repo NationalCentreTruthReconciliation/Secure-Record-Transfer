@@ -1,7 +1,9 @@
 /* global singleCaptchaFn */
 import "../../css/submission_form/review_step.css";
 import "../../css/submission_form/uppy.css";
+import "../../css/submission_form/modal.css";
 
+import { setupHelpTooltips } from "../base/tooltip";
 import { setupContactInfoForm } from "./contactInfo";
 import { setupOtherIdentifiersForm } from "./otherIdentifiers";
 import { setupRightsForm } from "./rights";
@@ -50,6 +52,7 @@ const setup = () => {
     setupDatePickers();
     setupInputMasks();
     setupUnsavedChangesProtection();
+    setupHelpTooltips();
 
     _setupWithContext();
 

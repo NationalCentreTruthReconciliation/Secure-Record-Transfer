@@ -2,17 +2,18 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.messages import get_messages
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
 from recordtransfer.constants import PAGINATE_QUERY_NAME
+from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -358,9 +359,7 @@ class TestUserProfileView(TestCase):
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
         expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(
@@ -380,9 +379,7 @@ class TestUserProfileView(TestCase):
     def test_in_progress_submission_expiring_soon(self) -> None:
         """Test that the expiry date is shown with a warning icon if the in-progress submission is expiring soon."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
 
         upload_session.last_upload_interaction_time = (
             upload_session.last_upload_interaction_time - timedelta(minutes=35)
@@ -392,11 +389,11 @@ class TestUserProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         # Should show the warning icon for expiring soon
-        self.assertIn('fa-exclamation-circle text-warning', content)
-        self.assertIn('Submission is expiring soon', content)
+        self.assertIn("fa-exclamation-circle text-warning", content)
+        self.assertIn("Submission is expiring soon", content)
         # Should NOT show the expired icon or text
-        self.assertNotIn('fa-exclamation-triangle text-error', content)
-        self.assertNotIn('Submission has expired', content)
+        self.assertNotIn("fa-exclamation-triangle text-error", content)
+        self.assertNotIn("Submission has expired", content)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
@@ -405,9 +402,7 @@ class TestUserProfileView(TestCase):
         submission has expired.
         """
         upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self._create_in_progress_submission(
-            upload_session=upload_session
-        )
+        self._create_in_progress_submission(upload_session=upload_session)
 
         upload_session.last_upload_interaction_time = (
             upload_session.last_upload_interaction_time - timedelta(minutes=65)
@@ -417,13 +412,13 @@ class TestUserProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         # Should show the expired icon and tooltip
-        self.assertIn('fa-exclamation-triangle text-error', content)
-        self.assertIn('Submission has expired', content)
+        self.assertIn("fa-exclamation-triangle text-error", content)
+        self.assertIn("Submission has expired", content)
         # Should NOT show the warning icon or text
-        self.assertNotIn('fa-exclamation-circle text-warning', content)
-        self.assertNotIn('Submission is expiring soon', content)
+        self.assertNotIn("fa-exclamation-circle text-warning", content)
+        self.assertNotIn("Submission is expiring soon", content)
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    @override_settings(PAGINATE_BY=3)
     def test_in_progress_submission_table_display(self) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
@@ -437,7 +432,7 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    @override_settings(PAGINATE_BY=2)
     def test_in_progress_submission_table_pagination(self) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
@@ -471,7 +466,7 @@ class TestUserProfileView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 3)
+    @override_settings(PAGINATE_BY=3)
     def test_submission_group_table_display(self) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
@@ -487,7 +482,7 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.PAGINATE_BY", 2)
+    @override_settings(PAGINATE_BY=2)
     def test_submission_group_table_pagination(self) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups
@@ -514,3 +509,160 @@ class TestUserProfileView(TestCase):
         self.assertIn("Test Group 2", response.content.decode())
         self.assertNotIn("Test Group 0", response.content.decode())
         self.assertNotIn("Test Group 1", response.content.decode())
+
+
+class TestInProgressSubmission(TestCase):
+    """Tests for the in_progress_submission view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with users and in-progress submissions."""
+        self.user = User.objects.create_user(
+            username="testuser1", email="test@example.com", password="testpassword"
+        )
+        self.other_user = User.objects.create_user(
+            username="testuser2", email="test2@example.com", password="testpassword"
+        )
+
+        # Create upload sessions for each user
+        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
+        self.other_upload_session = UploadSession.new_session(user=cast(User, self.other_user))
+
+        # Create in-progress submissions for each user
+        self.in_progress = InProgressSubmission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+            current_step=SubmissionStep.CONTACT_INFO.value,
+            title="Test Submission 1",
+        )
+        self.other_in_progress = InProgressSubmission.objects.create(
+            user=self.other_user,
+            upload_session=self.other_upload_session,
+            current_step=SubmissionStep.CONTACT_INFO.value,
+            title="Test Submission 2",
+        )
+
+        self.client.force_login(self.user)
+        self.url = reverse(
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.in_progress.uuid}
+        )
+        self.headers = {
+            "HX-Request": "true",
+        }
+
+    # DELETE tests
+    def test_delete_success(self) -> None:
+        """Test successful deletion of an in-progress submission."""
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+        response = self.client.delete(self.url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Check that deletion was successful
+        self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    @patch("recordtransfer.views.profile.InProgressSubmission.delete")
+    def test_delete_error(self, mock_delete: MagicMock) -> None:
+        """Test that an error during deletion returns a 500 status code."""
+        mock_delete.side_effect = Exception("Deletion error")
+
+        response = self.client.delete(self.url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 500)
+
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+        # Check that the in-progress submission still exists
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    def test_non_htmx_delete_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.delete(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+        # Check that the in-progress submission still exists
+        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
+
+    def test_cannot_delete_other_users_submission(self) -> None:
+        """Test that a user cannot delete another user's in-progress submission."""
+        other_url = reverse(
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.other_in_progress.uuid}
+        )
+
+        response = self.client.delete(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+        # Verify the other user's submission still exists
+        self.assertTrue(
+            InProgressSubmission.objects.filter(uuid=self.other_in_progress.uuid).exists()
+        )
+
+    def test_login_required(self) -> None:
+        """Test that login is required to access the view."""
+        self.client.logout()
+
+        response = self.client.get(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.delete(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+    def test_post_method_not_allowed(self) -> None:
+        """Test that POST method is not allowed for this view."""
+        response = self.client.post(self.url, headers=self.headers)
+        self.assertEqual(response.status_code, 405)
+
+    # GET tests (modal retrieval)
+    def test_get_modal_success(self) -> None:
+        """Test successful retrieval of the delete modal for an in-progress submission."""
+        response = self.client.get(self.url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the correct template is used
+        self.assertTemplateUsed(response, "includes/delete_in_progress_submission_modal.html")
+
+        # Check that the context contains the required variables
+        self.assertEqual(response.context["in_progress"], self.in_progress)
+
+        # Check that the in-progress submission's title is included in the response
+        self.assertContains(response, "Test Submission 1")
+
+    def test_non_htmx_get_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.get(self.url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+    def test_cannot_get_other_users_submission_modal(self) -> None:
+        """Test that a user cannot get the modal for another user's in-progress submission."""
+        other_url = reverse(
+            "recordtransfer:in_progress_submission", kwargs={"uuid": self.other_in_progress.uuid}
+        )
+
+        response = self.client.get(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistent_submission(self) -> None:
+        """Test that requesting a modal for a nonexistent submission returns 404."""
+        nonexistent_url = reverse(
+            "recordtransfer:in_progress_submission", kwargs={"uuid": str(uuid.uuid4())}
+        )
+
+        response = self.client.get(nonexistent_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)

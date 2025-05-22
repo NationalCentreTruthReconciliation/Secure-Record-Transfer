@@ -184,9 +184,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertEqual(200, response.status_code)
                 # Check that response tells HTMX on client side to redirect to user profile
                 hx_redirect = response.headers.get("HX-Redirect") or ""
-                self.assertEqual(
-                    hx_redirect, reverse("recordtransfer:user_profile")
-                )
+                self.assertEqual(hx_redirect, reverse("recordtransfer:user_profile"))
                 # Follow the redirect to user profile
                 response = self.client.get(hx_redirect, follow=True)
                 self.assertEqual(200, response.status_code)
@@ -217,9 +215,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertEqual(200, response.status_code)
                 # Check that response tells HTMX on client side to redirect to user profile
                 hx_redirect = response.headers.get("HX-Redirect") or ""
-                self.assertEqual(
-                    hx_redirect, reverse("recordtransfer:user_profile")
-                )
+                self.assertEqual(hx_redirect, reverse("recordtransfer:user_profile"))
                 # Follow the redirect to user profile
                 response = self.client.get(hx_redirect, follow=True)
                 self.assertEqual(200, response.status_code)
@@ -249,129 +245,3 @@ class SubmissionFormWizardTests(TestCase):
         mock_expired.return_value = True
         response = self.client.get(self.url, {"resume": in_progress.uuid}, follow=True)
         self.assertRedirects(response, reverse("recordtransfer:in_progress_submission_expired"))
-
-
-class DeleteInProgressSubmissionTests(TestCase):
-    """Tests for the DeleteInProgressSubmission view."""
-
-    def setUp(self) -> None:
-        """Set up the test case with users and in-progress submissions."""
-        self.user = User.objects.create_user(
-            username="testuser1", email="test@example.com", password="testpassword"
-        )
-        self.other_user = User.objects.create_user(
-            username="testuser2", email="test2@example.com", password="testpassword"
-        )
-
-        # Create upload sessions for each user
-        self.upload_session = UploadSession.new_session(user=cast(User, self.user))
-        self.other_upload_session = UploadSession.new_session(user=cast(User, self.other_user))
-
-        # Create in-progress submissions for each user
-        self.in_progress = InProgressSubmission.objects.create(
-            user=self.user,
-            upload_session=self.upload_session,
-            current_step=SubmissionStep.CONTACT_INFO.value,
-        )
-        self.other_in_progress = InProgressSubmission.objects.create(
-            user=self.other_user,
-            upload_session=self.other_upload_session,
-            current_step=SubmissionStep.CONTACT_INFO.value,
-        )
-
-        self.client.force_login(self.user)
-        self.url = reverse(
-            "recordtransfer:delete_in_progress", kwargs={"uuid": self.in_progress.uuid}
-        )
-
-    def test_get_queryset(self) -> None:
-        """Test that get_queryset only returns submissions belonging to the current user."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        # View should only include the current user's submission
-        view = response.context["view"]
-        queryset = view.get_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().uuid, self.in_progress.uuid)
-
-        # Other user's submission should not be in the queryset
-        self.assertNotIn(self.other_in_progress, queryset)
-
-    def test_get_object(self) -> None:
-        """Test that get_object returns the correct submission."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        # The object in the context should be the user's in-progress submission
-        self.assertEqual(response.context["in_progress"].uuid, self.in_progress.uuid)
-
-    def test_delete_success(self) -> None:
-        """Test successful deletion of an in-progress submission."""
-        self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
-
-        response = self.client.delete(self.url, follow=True)
-
-        # Check that deletion was successful
-        self.assertFalse(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
-
-        # Check that we were redirected to user profile
-        self.assertRedirects(response, reverse("recordtransfer:user_profile"))
-
-        # Check for success message
-        messages = list(response.context["messages"])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), "In-progress submission deleted")
-
-    @patch("recordtransfer.views.pre_submission.InProgressSubmission.delete")
-    def test_delete_error(self, mock_delete: MagicMock) -> None:
-        """Test error handling during deletion."""
-        # Simulate an error during deletion
-        mock_delete.side_effect = Exception("Test error")
-
-        response = self.client.delete(self.url, follow=True)
-
-        # Check that we were redirected to user profile
-        self.assertRedirects(response, reverse("recordtransfer:user_profile"))
-
-        # Check for error message
-        messages = list(response.context["messages"])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(
-            str(messages[0]), "There was an error deleting the in-progress submission"
-        )
-
-    def test_cannot_delete_other_users_submission(self) -> None:
-        """Test that a user cannot delete another user's in-progress submission."""
-        other_url = reverse(
-            "recordtransfer:delete_in_progress", kwargs={"uuid": self.other_in_progress.uuid}
-        )
-
-        response = self.client.get(other_url)
-        self.assertEqual(response.status_code, 404)
-
-        response = self.client.delete(other_url)
-        self.assertEqual(response.status_code, 404)
-
-        # Verify the other user's submission still exists
-        self.assertTrue(
-            InProgressSubmission.objects.filter(uuid=self.other_in_progress.uuid).exists()
-        )
-
-    def test_login_required(self) -> None:
-        """Test that login is required to access the view."""
-        self.client.logout()
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 302)
-
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, 302)
-
-    def test_post_method_not_allowed(self) -> None:
-        """Test that POST method is not allowed for this view."""
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 405)

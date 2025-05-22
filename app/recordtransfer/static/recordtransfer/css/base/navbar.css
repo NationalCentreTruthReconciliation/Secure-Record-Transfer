@@ -259,6 +259,10 @@ header.homepage {
 
     .nav-icon-bars {
         margin-top: 20px;
+        position: fixed;
+        z-index: 1000;
+        right: 0;
+        transform: translateY(-100%);
     }
 
     .nav-wrapper.open {

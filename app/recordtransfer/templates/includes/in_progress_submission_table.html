@@ -41,7 +41,10 @@
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
-                    <a href="{% url 'recordtransfer:delete_in_progress' uuid=in_progress.uuid %}"
+                    <a hx-get="{% url "recordtransfer:in_progress_submission" uuid=in_progress.uuid %}"
+                       hx-target="#modal-container"
+                       hx-swap="innerHTML"
+                       hx-trigger="click"
                        class="link link-error tooltip"
                        data-tip="{% trans "Delete" %}">
                         <i class="fas fa-trash-alt"></i>
