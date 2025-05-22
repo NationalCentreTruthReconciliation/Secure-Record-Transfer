@@ -76,9 +76,7 @@ module.exports = {
         ],
         submission_form: "./app/recordtransfer/static/recordtransfer/js/submission_form/index.js", // eslint-disable-line
         profile: [
-            ...glob.sync(
-                "./app/recordtransfer/static/recordtransfer/js/profile/*.js")
-                .map(file => "./" + path.relative(__dirname, file)),
+            "./app/recordtransfer/static/recordtransfer/js/profile/index.js",
             ...glob.sync(
                 "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
