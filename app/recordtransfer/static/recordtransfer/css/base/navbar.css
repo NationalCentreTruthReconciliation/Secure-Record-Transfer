@@ -130,6 +130,10 @@ header.homepage {
 
 }
 
+.nav-wrapper {
+    top: 10%;
+}
+
 .nav-icon-close {
     display: none;
 }
@@ -238,7 +242,7 @@ header.homepage {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        margin-top: 35px;
+        margin-top: 31px;
     }
 
     .nav-wrapper.open {
