@@ -15,6 +15,7 @@
             <input type="text"
                    class="input input-bordered input-sm md:input-md validator w-full"
                    name="{{ form.name.name }}"
+                   value="{{ form.name.value|default_if_none:'' }}"
                    id="{{ form.name.id_for_label }}"
                    required>
             {% if form.name.errors %}
@@ -26,6 +27,7 @@
             <input type="text"
                    class="input input-bordered input-sm md:input-md validator w-full"
                    name="{{ form.description.name }}"
+                   value="{{ form.description.value|default_if_none:'' }}"
                    id="{{ form.description.id_for_label }}"
                    required>
             {% if form.description.errors %}
