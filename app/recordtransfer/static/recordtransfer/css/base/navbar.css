@@ -191,6 +191,7 @@ header.homepage {
         width: 80vw;
         right: 5vw;
         padding: 40px 15px;
+        z-index: 1000;
     }
 
     .nav-item-flex {
@@ -200,6 +201,7 @@ header.homepage {
     }
 
     .nav-wrapper {
+        z-index: 1000;
         flex-grow: 0;
         flex-shrink: 0;
         margin-left: auto;
@@ -225,6 +227,7 @@ header.homepage {
 @media all and (max-width: 799px) {
 
     .nav-items-container {
+        z-index: 1000;
         transition: opacity 0.3s ease-out;
     }
 
@@ -233,6 +236,7 @@ header.homepage {
     }
 
     .nav-wrapper {
+        z-index: 1000;
         right: 0;
         flex-grow: 0;
         transform: translateY(-100%);
