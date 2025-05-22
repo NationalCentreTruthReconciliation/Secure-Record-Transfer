@@ -18,7 +18,7 @@
             <button class="btn">{% trans "Cancel" %}</button>
             <button id="confirm_delete_ip_btn"
                     hx-delete="{{ in_progress.get_delete_url }}"
-                    hx-on::after-request="handleDeleteAfterRequest(event)"
+                    hx-on::after-request="handleDeleteIpSubmissionAfterRequest(event)"
                     class="btn btn-primary">{% trans "Yes" %}</button>
         </div>
     </form>

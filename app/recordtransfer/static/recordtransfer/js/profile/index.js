@@ -1,7 +1,7 @@
-import { handleDeleteAfterRequest } from "./delete_ip_submission.js";
 import { setupProfileForm } from "./profileForm.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 import { setupToastNotifications } from "./toast.js";
+import { handleDeleteIpSubmissionAfterRequest } from "./utils.js";
 
 
 /**
@@ -20,13 +20,13 @@ function initialize() {
     restoreTab();
     setupToastNotifications();
 
-    // Wrapper function that provides context to handleDeleteAfterRequest
-    window.handleDeleteAfterRequest = (e) => {
+    // Wrapper function that provides context to handleDeleteIpSubmissionAfterRequest
+    window.handleDeleteIpSubmissionAfterRequest = (e) => {
         if (!context) {
-            console.error("Context not available for handleDeleteAfterRequest");
+            console.error("Context not available for handleDeleteIpSubmissionAfterRequest");
             return;
         }
-        return handleDeleteAfterRequest(e, context);
+        return handleDeleteIpSubmissionAfterRequest(e, context);
     };
 }
 
