@@ -1,4 +1,4 @@
-import { addQueryParam, getCurrentTablePage } from "./utils.js";
+import { addQueryParam, closeModal, getCurrentTablePage } from "./utils.js";
 
 /**
  * Handles the UI and table refresh after a delete request for an in-progress submission.
@@ -16,11 +16,7 @@ import { addQueryParam, getCurrentTablePage } from "./utils.js";
  * submissions table to update.
  */
 export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
-    // Close the modal
-    const modal = document.getElementById("base_modal");
-    if (modal) {
-        modal.close();
-    }
+    closeModal();
 
     // If the request was successful, refresh the table
     if (e.detail.successful) {
@@ -41,3 +37,21 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
             });
     }
 };
+
+/**
+ * Sets up event listeners for submission group actions.
+ */
+export function setupSubmissionGroupListeners() {
+    // Close the modal if the server sends back nothing to fill the modal, which happens when the
+    // submission group is successfully created
+    window.htmx.on("htmx:beforeSwap", (e) => {
+        if (e.detail.target.id === "modal-content-container") {
+            if (!e.detail.serverResponse) {
+                e.preventDefault();
+                closeModal();
+            }
+        }
+    });
+}
+
+

@@ -36,3 +36,12 @@ export function addQueryParam(url, paramName, paramValue) {
     return url;
 }
 
+/**
+ * Closes the modal dialog.
+ */
+export function closeModal() {
+    const modal = document.getElementById("base_modal");
+    if (modal) {
+        modal.close();
+    }
+}

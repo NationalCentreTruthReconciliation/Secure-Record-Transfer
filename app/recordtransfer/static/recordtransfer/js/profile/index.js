@@ -1,7 +1,9 @@
+import {
+    handleDeleteIpSubmissionAfterRequest, setupSubmissionGroupListeners
+} from "./htmx.js";
 import { setupProfileForm } from "./profileForm.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 import { setupToastNotifications } from "./toast.js";
-import { handleDeleteIpSubmissionAfterRequest } from "./utils.js";
 
 
 /**
@@ -28,6 +30,8 @@ function initialize() {
         }
         return handleDeleteIpSubmissionAfterRequest(e, context);
     };
+
+    setupSubmissionGroupListeners();
 }
 
 document.addEventListener("DOMContentLoaded", initialize);
