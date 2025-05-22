@@ -41,33 +41,44 @@ export function setupNavbar() {
     /**
      *
      */
-    function resizeAppTitleGradually() {
+    function resizeAppTitleAndLogoGradually() {
         const title = document.getElementById("app-title");
+        const logo = document.getElementById("app-logo");
         if (!title) {return;}
 
-        const minFontSize = 12;  // Smallest font size in px
-        const maxFontSize = 26;  // Largest font size in px
-        const maxWidth = 950;   // Screen width at which font is max size
-        const minWidth = 320;    // Screen width at which font is min size
+        const minFontSize = 14;
+        const maxFontSize = 26;
+        const maxWidth = 950;
+        const minWidth = 320;
+
+        const minLogoSize = 40; // adjust as needed
+        const maxLogoSize = 50; // adjust as needed
 
         const screenWidth = window.innerWidth;
 
-        // Linear interpolation between min and max
         let fontSize = maxFontSize;
+        let logoSize = maxLogoSize;
+
 
         if (screenWidth <= minWidth) {
             fontSize = minFontSize;
+            logoSize = minLogoSize;
         } else if (screenWidth < maxWidth) {
             const scale = (screenWidth - minWidth) / (maxWidth - minWidth);
             fontSize = minFontSize + (maxFontSize - minFontSize) * scale;
+            logoSize = minLogoSize + (maxLogoSize - minLogoSize) * scale;
+
         }
 
         title.style.fontSize = `${fontSize}px`;
+        if (logo) {
+            logo.style.width = `${logoSize}px`;
+            logo.style.height = `${logoSize}px`;
+        }
     }
 
-    // Run on load and resize
-    window.addEventListener("load", resizeAppTitleGradually);
-    window.addEventListener("resize", resizeAppTitleGradually);
+    window.addEventListener("load", resizeAppTitleAndLogoGradually);
+    window.addEventListener("resize", resizeAppTitleAndLogoGradually);
 
 
 }
