@@ -38,4 +38,36 @@ export function setupNavbar() {
             toggleButton.classList.remove("active");
         }
     });
+    /**
+     *
+     */
+    function resizeAppTitleGradually() {
+        const title = document.getElementById("app-title");
+        if (!title) {return;}
+
+        const minFontSize = 12;  // Smallest font size in px
+        const maxFontSize = 26;  // Largest font size in px
+        const maxWidth = 950;   // Screen width at which font is max size
+        const minWidth = 320;    // Screen width at which font is min size
+
+        const screenWidth = window.innerWidth;
+
+        // Linear interpolation between min and max
+        let fontSize = maxFontSize;
+
+        if (screenWidth <= minWidth) {
+            fontSize = minFontSize;
+        } else if (screenWidth < maxWidth) {
+            const scale = (screenWidth - minWidth) / (maxWidth - minWidth);
+            fontSize = minFontSize + (maxFontSize - minFontSize) * scale;
+        }
+
+        title.style.fontSize = `${fontSize}px`;
+    }
+
+    // Run on load and resize
+    window.addEventListener("load", resizeAppTitleGradually);
+    window.addEventListener("resize", resizeAppTitleGradually);
+
+
 }
