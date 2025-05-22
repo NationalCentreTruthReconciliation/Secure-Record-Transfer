@@ -218,7 +218,9 @@ def _get_admin_recipient_list(subject: str) -> List[str]:
     """
     LOGGER.info('Finding Users to send "%s" email to', subject)
     recipients_list = list(
-        User.objects.filter(gets_submission_email_updates=True).values_list("email", flat=True)
+        User.objects.filter(gets_submission_email_updates=True, is_staff=True).values_list(
+            "email", flat=True
+        )
     )
 
     if not recipients_list:
