@@ -118,7 +118,7 @@ header.homepage {
 
 .nav-toggle-open {
     order: 1;
-    flex: 0;
+    flex: 1;
     text-align: right;
     display: block;
     font-size: 20pt;
@@ -132,8 +132,6 @@ header.homepage {
 
 .nav-wrapper {
     top: 10%;
-    margin-right: 10px;
-    height: 40px;
 }
 
 .nav-icon-close {
@@ -152,6 +150,7 @@ header.homepage {
     padding: 4px 15px;
     color: white;
     transition: all 0.3s ease;
+    position: relative;
     transition: color 0.3s ease;
 }
 
@@ -224,6 +223,7 @@ header.homepage {
 
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
+
     .nav-items-container {
         transition: opacity 0.3s ease-out;
     }
@@ -233,6 +233,7 @@ header.homepage {
     }
 
     .nav-wrapper {
+        position: fixed;
         z-index: 1000;
         right: 0;
         flex-grow: 0;
@@ -240,10 +241,10 @@ header.homepage {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        margin-top: 80px;
+        margin-top: 40px;
     }
 
-    .nav-wrapper.open {
+    .nav .nav-wrapper.open {
         transform: translateY(0);
     }
 }

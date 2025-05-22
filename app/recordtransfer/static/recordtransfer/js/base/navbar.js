@@ -38,8 +38,12 @@ export function setupNavbar() {
             toggleButton.classList.remove("active");
         }
     });
+
+
     /**
-     *
+     * Gradually resizes the application title text and logo icon
+     * based on the screen width. This ensures responsive scaling for
+     * both the title and the logo as the viewport size changes.
      */
     function resizeAppTitleAndLogoGradually() {
         const title = document.getElementById("app-title");
@@ -51,8 +55,8 @@ export function setupNavbar() {
         const maxWidth = 950;
         const minWidth = 320;
 
-        const minLogoSize = 40; // adjust as needed
-        const maxLogoSize = 50; // adjust as needed
+        const minLogoSize = 40;
+        const maxLogoSize = 50;
 
         const screenWidth = window.innerWidth;
 
@@ -80,5 +84,36 @@ export function setupNavbar() {
     window.addEventListener("load", resizeAppTitleAndLogoGradually);
     window.addEventListener("resize", resizeAppTitleAndLogoGradually);
 
+
+    /**
+     * Aligns the navigation wrapper (e.g. burger menu) with the title
+     * when the page is at the top. When the user scrolls, it moves the
+     * nav wrapper to a fixed position at the top-right corner.
+     */
+    function alignNavWrapper() {
+        const navWrapper = document.querySelector(".nav-wrapper");
+        const navTitle = document.querySelector(".nav-title");
+
+        if (!navWrapper || !navTitle) {return;}
+
+        const scrollTop = window.scrollY;
+
+        if (scrollTop === 0) {
+        // Align burger button with nav title
+            const titleRect = navTitle.getBoundingClientRect();
+            navWrapper.style.position = "fixed";
+            navWrapper.style.top = titleRect.top + "px";
+            navWrapper.style.left = (titleRect.right + 10) + "px";
+        } else {
+        // Keep burger fixed in top-right
+            navWrapper.style.top = "10px";
+            navWrapper.style.left = "unset";
+            navWrapper.style.right = "10px";
+        }
+    }
+
+    window.addEventListener("scroll", alignNavWrapper);
+    window.addEventListener("load", alignNavWrapper);
+    window.addEventListener("resize", alignNavWrapper);
 
 }
