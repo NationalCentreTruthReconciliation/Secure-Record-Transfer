@@ -130,6 +130,7 @@ header.homepage {
 }
 
 .nav-wrapper {
+    top: 10%;
     margin-right: 10px;
     height: 40px;
 }
