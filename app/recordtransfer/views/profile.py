@@ -30,7 +30,6 @@ from recordtransfer.constants import (
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
-from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
 
 
@@ -71,7 +70,6 @@ class UserProfile(UpdateView):
                         "recordtransfer:in_progress_submission_table"
                     ),
                 },
-                "submission_group_form": SubmissionGroupForm(),
                 # Table container IDs
                 "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
                 "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,

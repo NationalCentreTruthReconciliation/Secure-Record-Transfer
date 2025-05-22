@@ -7,9 +7,10 @@
     {% trans "Create a new submission group" %}
 {% endblock modal_title %}
 {% block modal_content %}
-    <form method="post"
-          action="{% url 'recordtransfer:submission_group_new' %}"
-          id="submission-group-form">
+    <form id="submission-group-form"
+          hx-post="{% url 'recordtransfer:submission_group_new' %}"
+          hx-target="#new_submission_group_modal"
+          hx-swap="outerHTML">
         {% csrf_token %}
         <fieldset class="fieldset">
             <legend class="fieldset-legend text-sm md:text-md">{% trans form.name.label %}</legend>

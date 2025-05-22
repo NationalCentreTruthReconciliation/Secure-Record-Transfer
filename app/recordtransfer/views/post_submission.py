@@ -173,22 +173,20 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         return self.request.path
 
 
-class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
+class SubmissionGroupCreateView(CreateView):
     """Creates a new submission group."""
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "recordtransfer/submission_group_detail.html"
     success_message = gettext("Group created")
-    error_message = gettext("There was an error creating the group")
 
-    def test_func(self) -> bool:
-        """Check if the user is authenticated."""
-        return self.request.user.is_authenticated
-
-    def handle_no_permission(self) -> HttpResponseRedirect:
-        """Override to return 404 instead of 403."""
-        raise Http404("Page not found")
+    def get_template_names(self) -> list[str]:
+        """Dynamically select template based on referrer."""
+        referrer = self.request.META.get("HTTP_REFERER", "")
+        if reverse("recordtransfer:user_profile") in referrer:
+            return ["includes/new_submission_group_modal.html"]
+        return [self.template_name]
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass context variables to the template."""
@@ -209,7 +207,7 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
         """Handle valid form submission."""
         response = super().form_valid(form)
         referer = self.request.headers.get("referer", "")
-        if "submission/" in referer:
+        if reverse("recordtransfer:submit") in referer:
             return JsonResponse(
                 {
                     "message": self.success_message,
@@ -222,19 +220,14 @@ class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
                 },
                 status=200,
             )
-        messages.success(self.request, self.success_message)
         return response
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
         referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
-        if "submission/" in referer:
+        if reverse("recordtransfer:submit") in referer:
             return JsonResponse({"message": error_message, "status": "error"}, status=400)
-        messages.error(
-            self.request,
-            self.error_message,
-        )
         return super().form_invalid(form)
 
 
