@@ -1,67 +1,33 @@
+{% extends "recordtransfer/email/email_base.html" %}
 {% load i18n %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description"
-              content="{% trans "Notification about account updates on the NCTR Record Transfer Portal." %}">
-        <title>{% trans "Account Update Notification" %}</title>
-        <style>
-            html {
-                font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-                margin: 0;
-            }
-            body {
-                margin: 0;
-            }
-            .header {
-                color: #333333;
-                font-size: 20pt;
-                padding: 6px 20px;
-                background-color: #eeeeee;
-                margin-bottom: 15px;
-            }
-            .content {
-                padding: 0px 20px;
-            }
-            .email-notification-info {
-                font-size: 10pt;
-                font-style: italic;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header">{{ subject }}</div>
-        <div class="content">
-            <p>
-                {% blocktrans %}
-                Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.
-                {% endblocktrans %}
-            </p>
-            {% if changed_list %}
-                <p>{% trans "The following changes have been made to your account:" %}</p>
-                <ul>
-                    {% for change in changed_list %}<li>{{ change }}</li>{% endfor %}
-                </ul>
-            {% endif %}
-            {% block postscript %}
-                <div class="email-notification-info">
-                    <div>
-                        {% blocktrans %}
-                        This email address is not monitored, do not reply to this message.
-                        {% endblocktrans %}
-                    </div>
-                    <div>
-                        {% url 'recordtransfer:user_profile' as profile_url %}
-                        {% blocktrans %}
-                        If you do not want to receive these emails anymore, you can change the
-                        "Receive notification emails?" setting in
-                        <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
-                        {% endblocktrans %}
-                    </div>
-                </div>
-            {% endblock postscript %}
-        </div>
-    </body>
-</html>
+{% load static %}
+{% block title %}
+    {% blocktrans %}  Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.{% endblocktrans %}
+{% endblock title %}
+{% block content %}
+    <div>
+        {% if changed_list %}
+            <p>{% trans "The following changes have been made to your account:" %}</p>
+            <ul>
+                {% for change in changed_list %}<li>{{ change }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div style="text-align: left; margin-top: 20px;">
+        <a href="http://{{ site_domain }}/login/"
+           style="display: inline-block;
+                  background-color: #EE7623;
+                  color: white;
+                  padding: 10px 20px;
+                  font-weight: bold;
+                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+            {% blocktrans %}Log In to Your Account{% endblocktrans %}
+        </a>
+        <!-- Fallback text link for plain-text clients -->
+        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+            {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
+            <br>
+            <a href="http://{{ site_domain }}/login/" style="color:#606060">http://{{ site_domain }}/login/</a>
+        </p>
+    </div>
+{% endblock content %}

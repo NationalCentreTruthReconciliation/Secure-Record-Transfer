@@ -1,78 +1,63 @@
+{% extends "recordtransfer/email/email_base.html" %}
 {% load i18n %}
-<!DOCTYPE html>
-<html style="
-    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;">
-    <body style="
-        margin: 0;">
-        <div style="
-            color: #333333;
-            font-size: 20pt;
-            padding: 6px 20px;
-            background-color: #eeeeee;
-            margin-bottom: 15px;">
-            {% trans "Thank You for Your Submission" %}
-        </div>
-        <div style="
-            padding: 0px 20px;">
-            <p>
-                {% blocktrans %}
-                Thank you for your record submission using the NCTR Record Transfer Portal. The
-                files you sent are being stored securely on our servers until an archivist has the
-                opportunity to view them.
-                {% endblocktrans %}
-            </p>
-            <p>
-                {% blocktrans %}
-                If you have any questions about your submission, you can email an NCTR archivist at
-                this email address:
-                {% endblocktrans %}
-            </p>
-            <p>
-                {{ archivist_email }}
-            </p>
-            <hr>
-            <h3>
-                {% trans "Submission Agreement" %}
-            </h3>
-            <p>
-                {% blocktrans %}
+{% load static %}
+{% block title %}
+    {% blocktrans %}Thank You for Your Submission{% endblocktrans %}
+{% endblock title %}
+{% block content %}
+    <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+        {% blocktrans %}
+            Thank you for your record submission using the NCTR Record Transfer Portal. The
+            files you sent are being stored securely on our servers until an archivist has the
+            opportunity to view them.
+            {% endblocktrans %}
+    </p>
+    <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+        {% blocktrans %}
+        If you have any questions about your submission, please contact an NCTR archivist
+        at this email address:
+        {% endblocktrans %}
+    </p>
+    <div style="text-align: left; margin-top: 20px;">
+        <a href="mailto:{{ archivist_email }}"
+           style="display: inline-block;
+                  background-color: #EE7623;
+                  color: white;
+                  padding: 10px 20px;
+                  font-weight: bold;
+                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+            {% blocktrans %}Contact NCTR Archivist{% endblocktrans %}
+        </a>
+    </div>
+    <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+        {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
+        <br>
+        <a href="mailto:{{ archivist_email }}" style="color:#606060">mailto:{{ archivist_email }}</a>
+    </p>
+    <div style="font-size: 10px;
+                color:#6a6969;
+                padding: 0 20px;
+                margin-top: 30px">
+        <h3 style="font-size: 9pt;
+                   color:#706c6c;
+                   font-weight: bold;
+                   margin-bottom: 10px">{% blocktrans %} Submission Agreement {% endblocktrans %}</h3>
+        <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+            {% blocktrans %}
                 Thank you for submitting records with the NCTR Record Transfer App. By completing
                 and submitting the form you hereby agree to give the National Centre for Truth and
                 Reconciliation (“NCTR”) legal and physical custody and control and responsibility
                 over the materials you have submitted for the purpose of allowing the NCTR Archives
                 to inspect, research and appraise this material for a potential donation to the
                 NCTR.
-                {% endblocktrans %}
-            </p>
-            <p>
-                {% blocktrans %}
+            {% endblocktrans %}
+        </p>
+        <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+            {% blocktrans %}
                 The NCTR accepts full responsibility for the physical condition of the materials you
                 have submitted during the period when the NCTR Archives staff will examine the
                 materials for potential donation.
-                {% endblocktrans %}
-            </p>
-            {% block postscript %}
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% blocktrans %}
-                This email address is not monitored, do not reply to this message.
-                {% endblocktrans %}
-                </i>
-            </div>
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% url 'recordtransfer:user_profile' as profile_url %}
-                {% blocktrans %}
-                If you do not want to receive these emails anymore, you can change the
-                "Receive notification emails?" setting in
-                <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
-                {% endblocktrans %}
-                </i>
-            </div>
-            {% endblock %}
-        </div>
-    </body>
-</html>
+            {% endblocktrans %}
+        </p>
+    </div>
+{% endblock content %}

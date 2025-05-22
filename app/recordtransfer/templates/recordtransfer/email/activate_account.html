@@ -1,53 +1,33 @@
+{% extends "recordtransfer/email/email_base.html" %}
 {% load i18n %}
-<!DOCTYPE html>
-<html style="
-    font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;">
-    <body style="
-        margin: 0;">
-        <div style="
-            color: #333333;
-            font-size: 20pt;
-            padding: 6px 20px;
-            background-color: #eeeeee;
-            margin-bottom: 15px;">
-            {% blocktrans %}Activate Your New Account, {{ username }}{% endblocktrans %}
-        </div>
-        <div style="
-            padding: 0px 20px;">
-            {% url 'recordtransfer:activate_account' uidb64=uid token=token as activate_account %}
-            <div>
-                {% blocktrans %}
+{% load static %}
+{% block title %}
+    {% blocktrans %}Activate Your New Account{% endblocktrans %}
+{% endblock title %}
+{% block content %}
+    <div>
+        {% blocktrans %}
                 An account was created for the NCTR Record Transfer Portal using this email.
-                To activate your account, <a href="http://{{ base_url }}{{ activate_account }}">click here</a>,
-                or copy and paste the following link into your favourite browser:
-                {% endblocktrans %}
-            </div>
-            <p>
-                http://{{ base_url }}{{ activate_account }}
-            </p>
-
-            {% block postscript %}
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% blocktrans %}
-                This email address is not monitored, do not reply to this message.
-                {% endblocktrans %}
-                </i>
-            </div>
-            <div style="
-                font-size: 10pt;">
-                <i>
-                {% url 'recordtransfer:user_profile' as profile_url %}
-                {% blocktrans %}
-                If you do not want to receive these emails anymore, you can change the
-                "Receive notification emails?" setting in
-                <a href="http://{{ site_domain }}{{ profile_url }}">your profile</a>.
-                {% endblocktrans %}
-                </i>
-            </div>
-            {% endblock %}
-        </div>
-    </body>
-</html>
+                To activate your account, click the button below.
+            {% endblocktrans %}
+    </div>
+    <div style="text-align: left; margin-top: 20px;">
+        {% url 'recordtransfer:activate_account' uidb64=uid token=token as activate_account %}
+        <a href="http://{{ base_url }}{{ activate_account }}"
+           style="display: inline-block;
+                  background-color: #EE7623;
+                  color: white;
+                  padding: 10px 20px;
+                  font-weight: bold;
+                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+            {% blocktrans %}Activate Account{% endblocktrans %}
+        </a>
+        <!-- Fallback text link for plain-text clients -->
+        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+            {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
+            <br>
+            <a href="http://{{ base_url }}{{ activate_account }}"
+               style="color:#606060">http://{{ base_url }}{{ activate_account }}</a>
+        </p>
+    </div>
+{% endblock content %}

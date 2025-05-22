@@ -1,0 +1,102 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="description"
+              content="Email communication from the National Centre for Truth and Reconciliation.">
+        <title></title>
+    </head>
+    <div style="margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+                font-family: 'Merriweather', Georgia, 'Times New Roman', serif">
+        <div style="background-color: #ffffff;
+                    margin: 40px auto;
+                    padding: 30px;
+                    width: 600px">
+            <!-- Logo -->
+            <div style="text-align: center;">
+                <img src="https://ehprnh2mwo3.exactdn.com/wp-content/uploads/2023/08/NCTR-BILINGUAL-sh.png"
+                     alt="{% blocktrans %}Company Logo{% endblocktrans %}"
+                     style="width: 80%;
+                            height: auto">
+            </div>
+            <!-- Header Image -->
+            <div style="text-align: center; margin-top: 20px;">
+                <img src="https://ehprnh2mwo3.exactdn.com/wp-content/uploads/2021/02/hero4-scaled.jpg"
+                     alt="{% blocktrans %}Company Image{% endblocktrans %}"
+                     style="width: 80%;
+                            height: auto">
+            </div>
+            <div style="text-align: center;
+                        font-weight: bold;
+                        color: #89181A;
+                        font-size: 20pt;
+                        padding: 6px 20px;
+                        background-color: #FFFFFF;
+                        margin-bottom: 15px;
+                        margin-top: 20px;
+                        font-family: 'Merriweather', Georgia, 'Times New Roman', serif">
+                {% block title %}<!-- Your dynamic title here -->{% endblock %}
+            </div>
+            <div style="font-size: 10pt;
+                        font-family: 'Open Sans', sans-serif;
+                        padding: 0 20px">
+                {% block content %}<!-- Your dynamic content here -->{% endblock %}
+            </div>
+        </div>
+        <div style="text-align: center;
+                    font-size: 10px;
+                    color:#ccc8c8;
+                    font-family: 'Open Sans', sans-serif;
+                    margin-top: 40px;
+                    line-height: 0.8">
+            <p>
+                {% blocktrans %}NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8{% endblocktrans %}
+            </p>
+            <p>
+                {% blocktrans %}Don't like these emails?{% endblocktrans %}
+                <a href="http://{{ site_domain }}{% url 'recordtransfer:user_profile' %}"
+                   style="color:#9f9f9f">{% blocktrans %}Unsubscribe in your profile{% endblocktrans %}</a>
+            </p>
+            <div style="text-align: center;">
+                <a href="https://www.facebook.com/nctr.ca"
+                   style="margin: 0 8px;
+                          display: inline-block">
+                    <img src="https://img.icons8.com/windows/38/bcbbbb/facebook-new.png"
+                         width="38"
+                         height="38"
+                         alt="facebook"
+                         style="vertical-align: middle">
+                </a>
+                <a href="https://ca.linkedin.com/company/nctr-um"
+                   style="margin: 0 8px;
+                          display: inline-block">
+                    <img src="https://img.icons8.com/windows/38/bcbbbb/linkedin.png"
+                         width="38"
+                         height="38"
+                         alt="linkedin"
+                         style="vertical-align: middle">
+                </a>
+                <a href="https://www.instagram.com/nctr_um/"
+                   style="margin: 0 8px;
+                          display: inline-block">
+                    <img src="https://img.icons8.com/fluency-systems-regular/48/bcbbbb/instagram-new--v1.png"
+                         width="38"
+                         height="38"
+                         alt="instagram"
+                         style="vertical-align: middle">
+                </a>
+                <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation"
+                   style="margin: 0 8px;
+                          display: inline-block">
+                    <img src="https://img.icons8.com/windows/32/bcbbbb/youtube-play.png"
+                         width="38"
+                         height="38"
+                         alt="youtube"
+                         style="vertical-align: middle">
+                </a>
+            </div>
+        </div>
+    </div>
+</html>
