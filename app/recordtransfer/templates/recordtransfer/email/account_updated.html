@@ -14,7 +14,7 @@
         {% endif %}
     </div>
     <div style="text-align: left; margin-top: 20px;">
-        <a href="http://{{ base_url }}/login/"
+        <a href="http://{{ site_domain }}/login/"
            style="display: inline-block;
                   background-color: #EE7623;
                   color: white;
@@ -25,9 +25,9 @@
         </a>
         <!-- Fallback text link for plain-text clients -->
         <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
-            If the button doesn’t work, copy and paste this link into your browser:
+            {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
             <br>
-            <a href="http://{{ base_url }}/login/" style="color:#606060">http://{{ base_url }}/login/</a>
+            <a href="http://{{ site_domain }}/login/" style="color:#606060">http://{{ site_domain }}/login/</a>
         </p>
     </div>
 {% endblock content %}
