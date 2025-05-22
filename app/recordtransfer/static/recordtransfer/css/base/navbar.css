@@ -127,7 +127,6 @@ header.homepage {
 /* Burger button */
 .nav-icon-bars {
     display: inline-block;
-    color: rgb(255, 166, 103)
 }
 
 .nav-wrapper {
@@ -190,10 +189,13 @@ header.homepage {
     }
 
     .nav-wrapper {
+        background-color: rgb(202, 200, 200, 0.6);
         position: fixed;
+        margin-right: 10px;
         z-index: 1000;
         right: 0;
         transform: translateY(-100%);
+        border-radius: 40px;
     }
 
     .nav-wrapper.open {
