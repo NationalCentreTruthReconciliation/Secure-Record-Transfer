@@ -21,6 +21,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.generic import CreateView, DetailView, UpdateView, View
+from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
@@ -205,7 +206,7 @@ class SubmissionGroupCreateView(CreateView):
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
-        response = super().form_valid(form)
+        super().form_valid(form)
         referer = self.request.headers.get("referer", "")
         if reverse("recordtransfer:submit") in referer:
             return JsonResponse(
@@ -220,7 +221,10 @@ class SubmissionGroupCreateView(CreateView):
                 },
                 status=200,
             )
-        return response
+        response = HttpResponse(status=201)
+        return trigger_client_event(
+            response, "showSuccess", {"value": "Submission group created."}
+        )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
