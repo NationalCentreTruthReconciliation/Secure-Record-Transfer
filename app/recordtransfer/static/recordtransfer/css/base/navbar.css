@@ -18,7 +18,6 @@ header.homepage {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    position: relative;
 }
 
 .nav-logo {
@@ -118,7 +117,7 @@ header.homepage {
 
 .nav-toggle-open {
     order: 1;
-    flex: 1;
+    flex: 0;
     text-align: right;
     display: block;
     font-size: 20pt;
@@ -131,7 +130,8 @@ header.homepage {
 }
 
 .nav-wrapper {
-    top: 10%;
+    margin-right: 10px;
+    height: 40px;
 }
 
 .nav-icon-close {
@@ -150,7 +150,6 @@ header.homepage {
     padding: 4px 15px;
     color: white;
     transition: all 0.3s ease;
-    position: relative;
     transition: color 0.3s ease;
 }
 
@@ -207,6 +206,32 @@ header.homepage {
         font-size: 14px;
         margin-bottom: 16px;
     }
+
+    .main-navbar {
+        flex-wrap: nowrap;
+    }
+
+    .nav-wrapper {
+        flex-grow: 0;
+        flex-shrink: 0;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 20px;
+
+    }
+
+    .nav-title {
+        margin-left: 20px;
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .nav-icon-bars {
+        margin-top: 20px;
+    }
+
 }
 
 /* Mobile-only transitions */
@@ -220,10 +245,19 @@ header.homepage {
     }
 
     .nav-wrapper {
-        position: fixed;
         z-index: 1000;
         right: 0;
+        flex-grow: 0;
         transform: translateY(-100%);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 50px;
+
+    }
+
+    .nav-icon-bars {
+        margin-top: 20px;
     }
 
     .nav-wrapper.open {
