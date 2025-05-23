@@ -55,3 +55,20 @@ export const setupProfileForm = (context) => {
 
     checkForChanges();
 };
+
+/**
+ * Disable the "Create group" button if the group name is empty
+ * @param {object} context - The context object containing form element IDs
+ * @param {string} context.id_submission_group_name - The ID of the group name input element
+ */
+export const setupSubmissionGroupForm = (context) => {
+    const groupName = document.getElementById(context["ID_SUBMISSION_GROUP_NAME"]);
+    const saveButton = document.getElementById("id_create_group_button");
+
+    const checkForChanges = () => {
+        saveButton.disabled = !groupName.value;
+    };
+
+    groupName.addEventListener("input", checkForChanges);
+    checkForChanges();
+};

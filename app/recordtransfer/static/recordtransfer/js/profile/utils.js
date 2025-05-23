@@ -45,3 +45,13 @@ export function closeModal() {
         modal.close();
     }
 }
+
+/**
+ * Opens the modal dialog.
+ */
+export function showModal() {
+    const modal = document.getElementById("base_modal");
+    if (modal) {
+        modal.showModal();
+    }
+}

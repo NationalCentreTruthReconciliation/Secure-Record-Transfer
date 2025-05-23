@@ -24,6 +24,7 @@ from recordtransfer.constants import (
     ID_IN_PROGRESS_SUBMISSION_TABLE,
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
+    ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_TABLE,
     ID_SUBMISSION_TABLE,
     PAGINATE_QUERY_NAME,
@@ -63,6 +64,8 @@ class UserProfile(UpdateView):
                     "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
                     "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                    # Submission group form
+                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
                     # Tables
                     "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
                     "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,

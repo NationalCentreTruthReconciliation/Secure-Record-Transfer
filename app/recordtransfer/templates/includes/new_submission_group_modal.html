@@ -26,8 +26,7 @@
                    class="input input-bordered input-sm md:input-md validator w-full"
                    name="{{ form.description.name }}"
                    value="{{ form.description.value|default_if_none:'' }}"
-                   id="{{ form.description.id_for_label }}"
-                   required>
+                   id="{{ form.description.id_for_label }}">
             {% if form.description.errors %}
                 <p class="text-error text-xs md:text-sm">{% trans form.description.errors.0 %}</p>
             {% endif %}
