@@ -209,6 +209,7 @@ header.homepage {
     }
 
     .nav-wrapper {
+        margin-right: 10px;
         background-color: transparent;
         transition: background-color 0.1s;
         border-radius: 40px;
@@ -216,7 +217,7 @@ header.homepage {
 
     .nav-wrapper.needs-background {
         /* Show background when needed */
-        background-color: rgba(198, 193, 193, 0.7);
+        background-color: rgba(198, 193, 193, 0.8);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 }
