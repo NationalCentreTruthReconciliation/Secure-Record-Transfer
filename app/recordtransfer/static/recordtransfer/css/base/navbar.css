@@ -229,7 +229,7 @@ header.homepage {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        margin-top: 40px;
+        margin-top: 32px;
     }
 
     .nav-wrapper.open {

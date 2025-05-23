@@ -110,7 +110,6 @@ export function setupNavbar() {
             navWrapper.style.top = titleRect.top + "px";
         } else {
         // Keep burger fixed in top-right
-            navWrapper.style.top = "60px";
             navWrapper.style.left = "unset";
             navWrapper.style.right = "10px";
         }
