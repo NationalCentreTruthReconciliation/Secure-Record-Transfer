@@ -676,7 +676,7 @@ class TestSubmissionGroupModalCreateView(TestCase):
         self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
 
-        self.url = reverse("recordtransfer:submission_group_modal")
+        self.submission_group_modal_url = reverse("recordtransfer:submission_group_modal")
         self.headers = {
             "HX-Request": "true",
         }
@@ -689,7 +689,7 @@ class TestSubmissionGroupModalCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, headers=self.headers)
+        response = self.client.post(self.submission_group_modal_url, data=form_data, headers=self.headers)
         self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
 
         self.assertIn("HX-Trigger", response.headers)
@@ -701,7 +701,7 @@ class TestSubmissionGroupModalCreateView(TestCase):
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, headers=self.headers)
+        response = self.client.post(self.submission_group_modal_url, data=form_data, headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "includes/new_submission_group_modal.html")
 
@@ -718,6 +718,6 @@ class TestSubmissionGroupModalCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.submission_group_modal_url, data=form_data)
         self.assertEqual(response.status_code, 404)
         self.assertFalse(SubmissionGroup.objects.filter(name="Test Group").exists())
