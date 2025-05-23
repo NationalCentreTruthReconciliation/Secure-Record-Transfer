@@ -10,12 +10,12 @@ urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     path(
         "submission/<uuid:uuid>/csv/",
-        login_required(views.post_submission.SubmissionCsv.as_view()),
+        login_required(views.post_submission.SubmissionCsvView.as_view()),
         name="submission_csv",
     ),
     path(
         "submission/<uuid:uuid>/",
-        login_required(views.post_submission.SubmissionDetail.as_view()),
+        login_required(views.post_submission.SubmissionDetailView.as_view()),
         name="submission_detail",
     ),
     path(
