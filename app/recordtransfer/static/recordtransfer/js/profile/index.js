@@ -1,5 +1,5 @@
 import {
-    handleDeleteIpSubmissionAfterRequest, setupSubmissionGroupListeners
+    handleDeleteIpSubmissionAfterRequest, handleModalBeforeSwap
 } from "./htmx.js";
 import { setupProfileForm } from "./profileForm.js";
 import { initTabListeners, restoreTab } from "./tab.js";
@@ -31,7 +31,7 @@ function initialize() {
         return handleDeleteIpSubmissionAfterRequest(e, context);
     };
 
-    setupSubmissionGroupListeners();
+    window.handleModalBeforeSwap = handleModalBeforeSwap;
 }
 
 document.addEventListener("DOMContentLoaded", initialize);

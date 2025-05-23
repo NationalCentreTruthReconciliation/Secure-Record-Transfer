@@ -38,20 +38,20 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
     }
 };
 
+
 /**
- * Sets up event listeners for submission group actions.
+ * Handles the modal swap event before content is replaced.
+ * Closes the modal if the server response is empty, which occurs when the submission group is
+ * successfully created.
+ * @param {CustomEvent} e - The event object containing the server response.
  */
-export function setupSubmissionGroupListeners() {
-    // Close the modal if the server sends back nothing to fill the modal, which happens when the
+export function handleModalBeforeSwap(e) {
+
     // submission group is successfully created
-    window.htmx.on("htmx:beforeSwap", (e) => {
-        if (e.detail.target.id === "modal-content-container") {
-            if (!e.detail.serverResponse) {
-                e.preventDefault();
-                closeModal();
-            }
-        }
-    });
+    if (!e.detail.serverResponse) {
+        e.preventDefault();
+        closeModal();
+    }
 }
 
 

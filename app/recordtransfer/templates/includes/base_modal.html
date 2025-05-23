@@ -6,7 +6,8 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         <div id="modal-content-container"
-             hx-on::after-swap="base_modal.showModal()">
+             hx-on::after-swap="base_modal.showModal()"
+             hx-on::before-swap="handleModalBeforeSwap(event)">
             {# after-swap listener is on the parent to persist after swaps #}
             <div id="modal-content">
                 {% block modal_content %}
