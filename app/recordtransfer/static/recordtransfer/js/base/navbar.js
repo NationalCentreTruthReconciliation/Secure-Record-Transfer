@@ -41,84 +41,6 @@ export function setupNavbar() {
 
 
     /**
-     * Gradually resizes the application title text and logo icon
-     * based on the screen width. This ensures responsive scaling for
-     * both the title and the logo as the viewport size changes.
-     */
-    function resizeAppTitleAndLogoGradually() {
-        const title = document.getElementById("app-title");
-        const logo = document.getElementById("app-logo");
-        if (!title) {return;}
-
-        const minFontSize = 14;
-        const maxFontSize = 26;
-        const maxWidth = 950;
-        const minWidth = 320;
-
-        const minLogoSize = 40;
-        const maxLogoSize = 50;
-
-        const screenWidth = window.innerWidth;
-
-        let fontSize = maxFontSize;
-        let logoSize = maxLogoSize;
-
-
-        if (screenWidth <= minWidth) {
-            fontSize = minFontSize;
-            logoSize = minLogoSize;
-        } else if (screenWidth < maxWidth) {
-            const scale = (screenWidth - minWidth) / (maxWidth - minWidth);
-            fontSize = minFontSize + (maxFontSize - minFontSize) * scale;
-            logoSize = minLogoSize + (maxLogoSize - minLogoSize) * scale;
-
-        }
-
-        title.style.fontSize = `${fontSize}px`;
-        if (logo) {
-            logo.style.width = `${logoSize}px`;
-            logo.style.height = `${logoSize}px`;
-        }
-    }
-
-    window.addEventListener("load", resizeAppTitleAndLogoGradually);
-    window.addEventListener("resize", resizeAppTitleAndLogoGradually);
-
-
-    /**
-     * Aligns the navigation wrapper (e.g. burger menu) with the title
-     * when the page is at the top. When the user scrolls, it moves the
-     * nav wrapper to a fixed position at the top-right corner.
-     */
-    function alignNavWrapper() {
-        const navWrapper = document.querySelector(".nav-wrapper");
-        const navTitle = document.querySelector(".nav-title");
-
-        const maxResponsiveWidth = 799;
-        if (window.innerWidth > maxResponsiveWidth) {
-            return;
-        }
-
-        if (!navWrapper || !navTitle) {return;}
-
-        const scrollTop = window.scrollY;
-
-        if (scrollTop === 0) {
-        // Align burger button with nav title
-            const titleRect = navTitle.getBoundingClientRect();
-            navWrapper.style.position = "fixed";
-            navWrapper.style.top = titleRect.top + "px";
-            navWrapper.style.left = (titleRect.right + 10) + "px";
-        } else {
-        // Keep burger fixed in top-right
-            navWrapper.style.top = "80px";
-            navWrapper.style.left = "unset";
-            navWrapper.style.right = "10px";
-        }
-    }
-
-
-    /**
      * Determines the effective background color at a given (x, y) coordinate
      * under a DOM element. If the element is an image, samples the pixel color.
      * Otherwise, walks up the DOM to find a non-transparent background color.
@@ -197,20 +119,11 @@ export function setupNavbar() {
             }
         }
     }
-
-    /**
-     * Calls alignNavWrapper and updateNavBackground together to
-     * keep the nav position and background in sync on scroll/resize.
-     */
-    function enhancedAlignNavWrapper() {
-        alignNavWrapper();
-        updateNavBackground();
-    }
+    window.addEventListener("scroll", updateNavBackground);
+    window.addEventListener("resize", updateNavBackground);
+    window.addEventListener("load", updateNavBackground);
 
 
-    window.addEventListener("scroll", enhancedAlignNavWrapper);
-    window.addEventListener("load", enhancedAlignNavWrapper);
-    window.addEventListener("resize", enhancedAlignNavWrapper);
 
 
 }
