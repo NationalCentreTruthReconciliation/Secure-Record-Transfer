@@ -174,26 +174,22 @@ class SubmissionGroupDetailView(UserPassesTestMixin, UpdateView):
         return self.request.path
 
 
-class SubmissionGroupCreateView(CreateView):
+class SubmissionGroupCreateView(UserPassesTestMixin, CreateView):
     """Creates a new submission group."""
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "recordtransfer/submission_group_detail.html"
     success_message = gettext("Group created")
+    error_message = gettext("There was an error creating the group")
 
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Pre-screen request to ensure requests from user_profile are made with HTMX."""
-        self.referer = request.META.get("HTTP_REFERER", "")
-        if reverse("recordtransfer:user_profile") in self.referer and not request.htmx:
-            raise Http404("Page not found")
-        return super().dispatch(request, *args, **kwargs)
+    def test_func(self) -> bool:
+        """Check if the user is authenticated."""
+        return self.request.user.is_authenticated
 
-    def get_template_names(self) -> list[str]:
-        """Dynamically select template based on referrer."""
-        if reverse("recordtransfer:user_profile") in self.referer:
-            return ["includes/new_submission_group_modal.html"]
-        return [self.template_name]
+    def handle_no_permission(self) -> HttpResponseRedirect:
+        """Override to return 404 instead of 403."""
+        raise Http404("Page not found")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass context variables to the template."""
@@ -212,8 +208,9 @@ class SubmissionGroupCreateView(CreateView):
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
-        super().form_valid(form)
-        if reverse("recordtransfer:submit") in self.referer:
+        response = super().form_valid(form)
+        referer = self.request.headers.get("referer", "")
+        if "submission/" in referer:
             return JsonResponse(
                 {
                     "message": self.success_message,
@@ -226,16 +223,19 @@ class SubmissionGroupCreateView(CreateView):
                 },
                 status=200,
             )
-        response = HttpResponse(status=201)
-        return trigger_client_event(
-            response, "showSuccess", {"value": "Submission group created."}
-        )
+        messages.success(self.request, self.success_message)
+        return response
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
+        referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
-        if reverse("recordtransfer:submit") in self.referer:
+        if "submission/" in referer:
             return JsonResponse({"message": error_message, "status": "error"}, status=400)
+        messages.error(
+            self.request,
+            self.error_message,
+        )
         return super().form_invalid(form)
 
 
