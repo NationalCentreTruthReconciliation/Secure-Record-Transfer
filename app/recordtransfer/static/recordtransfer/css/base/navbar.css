@@ -205,7 +205,7 @@ header.homepage {
 
     .nav-wrapper.needs-background {
         /* Show background when needed */
-        background-color: rgba(198, 196, 196, 0.85);
+        background-color: rgba(198, 193, 193, 0.7);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 }
