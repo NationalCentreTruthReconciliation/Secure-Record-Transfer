@@ -38,4 +38,32 @@ export function setupNavbar() {
             toggleButton.classList.remove("active");
         }
     });
+
+    /**
+     * Aligns the navigation wrapper (e.g. burger menu) with the title
+     * when the page is at the top. When the user scrolls, it moves the
+     * nav wrapper to a fixed position at the top-right corner.
+     */
+    function alignNavWrapper() {
+        const navWrapper = document.querySelector(".nav-wrapper");
+        const navTitle = document.querySelector(".nav-title");
+
+        if (!navWrapper || !navTitle) {
+            return;
+        }
+
+        const position = window.getComputedStyle(navWrapper).position;
+
+        // Position is fixed if mobile menu is active
+        if (position !== "fixed") {
+            return;
+        }
+
+        const titleRect = navTitle.getBoundingClientRect();
+        navWrapper.style.top = `${Math.max(20, titleRect.top)}px`;
+    }
+
+    window.addEventListener("scroll", alignNavWrapper);
+    window.addEventListener("resize", alignNavWrapper);
+    window.addEventListener("load", alignNavWrapper);
 }

@@ -48,10 +48,20 @@ header.homepage {
 /* Site title */
 .nav-title {
     margin-left: 20px;
-    flex-grow: 1;
+    flex: 1;
     align-content: start;
     justify-content: flex-start;
     text-align: left;
+    /* Add padding to account for fixed position mobile menu */
+    padding-right: 40px;
+}
+
+/* Mobile navigation container - wraps both toggle and menu */
+.nav-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 0;
+    z-index: 1001;
 }
 
 /* Sliding menu styles */
@@ -75,7 +85,7 @@ header.homepage {
 }
 
 .nav-items-container.open {
-    top: 80%;
+    top: 100%;
     visibility: visible;
     transition: top 0.3s ease, opacity 0.3s ease;
 }
@@ -118,20 +128,13 @@ header.homepage {
 
 .nav-toggle-open {
     order: 1;
-    flex: 1;
     text-align: right;
-    display: block;
     font-size: 20pt;
 }
 
 /* Burger button */
 .nav-icon-bars {
     display: inline-block;
-
-}
-
-.nav-wrapper {
-    top: 10%;
 }
 
 .nav-icon-close {
@@ -179,6 +182,22 @@ header.homepage {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+@media all and (max-width: 450px) {
+    .nav-title {
+        margin-left: 10px;
+    }
+
+    #app-logo {
+        width: 35px;
+        height: 35px;
+    }
+
+    #app-title {
+        font-size: 16pt;
+    }
+}
+
+
 /* Mobile-only transitions */
 @media all and (max-width: 799px) {
     .nav-items-container {
@@ -188,19 +207,7 @@ header.homepage {
     .nav-item:hover {
         background-color: #f2f2f2;
     }
-
-    .nav-wrapper {
-        position: fixed;
-        z-index: 1000;
-        right: 0;
-        transform: translateY(-100%);
-    }
-
-    .nav-wrapper.open {
-        transform: translateY(0);
-    }
 }
-
 
 /* Desktop menu */
 @media all and (min-width: 800px) {
@@ -208,6 +215,16 @@ header.homepage {
         align-items: center;
         flex-wrap: nowrap;
         background: none;
+    }
+
+    /* Reset mobile container for desktop */
+    .nav-wrapper {
+        position: static;
+    }
+
+    .nav-title {
+        /* Unset padding used to account for mobile menu */
+        padding-right: 0;
     }
 
     .nav-items-container {
