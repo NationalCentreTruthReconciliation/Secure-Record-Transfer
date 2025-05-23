@@ -282,7 +282,7 @@ class TestSubmissionCsvView(TestCase):
         User.objects.create_user(username="otheruser", password="password")
         self.client.login(username="otheruser", password="password")
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
     def test_access_staff_user(self, mock_export: MagicMock) -> None:
