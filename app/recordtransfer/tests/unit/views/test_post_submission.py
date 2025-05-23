@@ -16,7 +16,7 @@ class TestSubmissionGroupCreateView(TestCase):
     def setUpTestData(cls) -> None:
         """Set up test data."""
         cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.url = reverse("recordtransfer:submission_group_new")
+        cls.create_group_url = reverse("recordtransfer:submission_group_new")
 
     def setUp(self) -> None:
         """Set up test environment."""
@@ -24,15 +24,15 @@ class TestSubmissionGroupCreateView(TestCase):
 
     def test_access_authenticated_user(self) -> None:
         """Test that an authenticated user can access the view."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.create_group_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+        response = self.client.get(self.create_group_url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.create_group_url}")
 
     def test_valid_form_submission(self) -> None:
         """Test that a valid form submission creates a new SubmissionGroup."""
@@ -40,7 +40,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.create_group_url, data=form_data)
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("Group created"))
         self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
@@ -51,7 +51,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.create_group_url, data=form_data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
         messages = list(get_messages(response.wsgi_request))
@@ -65,7 +65,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
+        response = self.client.post(self.create_group_url, data=form_data, HTTP_REFERER="submission/")
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["message"], gettext("Group created"))
@@ -79,7 +79,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
+        response = self.client.post(self.create_group_url, data=form_data, HTTP_REFERER="submission/")
         self.assertEqual(response.status_code, 400)
         response_json = response.json()
         self.assertEqual(response_json["message"], "This field is required.")
@@ -99,7 +99,7 @@ class TestSubmissionGroupDetailView(TestCase):
         cls.group = SubmissionGroup.objects.create(
             name="Test Group", description="Test Description", created_by=cls.user
         )
-        cls.url = reverse(
+        cls.group_detail_url = reverse(
             "recordtransfer:submission_group_detail", kwargs={"uuid": cls.group.uuid}
         )
 
@@ -109,27 +109,27 @@ class TestSubmissionGroupDetailView(TestCase):
 
     def test_access_authenticated_user(self) -> None:
         """Test that an authenticated user can access the view."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+        response = self.client.get(self.group_detail_url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.group_detail_url}")
 
     def test_access_non_creator_user(self) -> None:
         """Test that a non-creator user cannot access the view."""
         User.objects.create_user(username="noncreator", password="password")
         self.client.login(username="noncreator", password="password")
-        response = self.client.get(self.url)
+        response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 404)
 
     def test_access_staff_user(self) -> None:
         """Test that a staff user can access the view."""
         self.client.login(username="staffuser", password="password")
-        response = self.client.get(self.url)
+        response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
 
@@ -139,9 +139,9 @@ class TestSubmissionGroupDetailView(TestCase):
             "name": "Updated Group",
             "description": "Updated Description",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.group_detail_url, data=form_data)
         # Check that the user is redirected back to the same page
-        self.assertRedirects(response, self.url)
+        self.assertRedirects(response, self.group_detail_url)
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("Group updated"))
         self.group.refresh_from_db()
@@ -154,7 +154,7 @@ class TestSubmissionGroupDetailView(TestCase):
             "name": "",
             "description": "Updated Description",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.group_detail_url, data=form_data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
         messages = list(get_messages(response.wsgi_request))
@@ -165,14 +165,14 @@ class TestSubmissionGroupDetailView(TestCase):
     def test_get_context_data(self) -> None:
         """Test that the context data includes the submissions associated with the group."""
         submission = Submission.objects.create(user=self.user, part_of_group=self.group)
-        response = self.client.get(self.url)
+        response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertIn("submissions", response.context)
         self.assertIn(submission, response.context["submissions"])
 
     def test_delete_submission_group(self) -> None:
         """Test that the submission group can be deleted."""
-        response = self.client.delete(self.url)
+        response = self.client.delete(self.group_detail_url)
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("Group deleted"))
         self.assertRedirects(response, reverse("recordtransfer:user_profile"))
@@ -192,7 +192,7 @@ class TestSubmissionGroupDetailView(TestCase):
     def test_delete_submission_group_error(self, mock_delete: MagicMock) -> None:
         """Test that an error during deletion is handled gracefully."""
         mock_delete.side_effect = Exception("Deletion error")
-        response = self.client.delete(self.url)
+        response = self.client.delete(self.group_detail_url)
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("There was an error deleting the group"))
         self.assertRedirects(response, reverse("recordtransfer:user_profile"))
@@ -208,40 +208,40 @@ class TestSubmissionDetailView(TestCase):
             username="staffuser", password="password", is_staff=True
         )
         self.submission = Submission.objects.create(user=self.user)
-        self.url = reverse(
+        self.submission_detail_url = reverse(
             "recordtransfer:submission_detail", kwargs={"uuid": self.submission.uuid}
         )
         self.client.login(username="testuser", password="password")
 
     def test_access_authenticated_user(self) -> None:
         """Test that an authenticated user can access the view."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_detail.html")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+        response = self.client.get(self.submission_detail_url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.submission_detail_url}")
 
     def test_access_non_owner_user(self) -> None:
         """Test that a non-owner user cannot access the view."""
         User.objects.create_user(username="otheruser", password="password")
         self.client.login(username="otheruser", password="password")
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_detail_url)
         self.assertEqual(response.status_code, 404)
 
     def test_access_staff_user(self) -> None:
         """Test that a staff user can access the view."""
         self.client.login(username="staffuser", password="password")
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_detail.html")
 
     def test_get_context_data(self) -> None:
         """Test that the context data includes required variables."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertIn("submission", response.context)
         self.assertIn("current_date", response.context)
@@ -268,20 +268,20 @@ class TestSubmissionCsvView(TestCase):
             username="staffuser", password="password", is_staff=True
         )
         self.submission = Submission.objects.create(user=self.user)
-        self.url = reverse("recordtransfer:submission_csv", kwargs={"uuid": self.submission.uuid})
+        self.submission_csv_url = reverse("recordtransfer:submission_csv", kwargs={"uuid": self.submission.uuid})
         self.client.login(username="testuser", password="password")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+        response = self.client.get(self.submission_csv_url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.submission_csv_url}")
 
     def test_access_non_owner_user(self) -> None:
         """Test that a non-owner user cannot access the view."""
         User.objects.create_user(username="otheruser", password="password")
         self.client.login(username="otheruser", password="password")
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_csv_url)
         self.assertEqual(response.status_code, 404)
 
     @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
@@ -289,14 +289,14 @@ class TestSubmissionCsvView(TestCase):
         """Test that a staff user can access the view."""
         mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
         self.client.login(username="staffuser", password="password")
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_csv_url)
         self.assertEqual(response.status_code, 200)
 
     @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
     def test_csv_generation(self, mock_export: MagicMock) -> None:
         """Test that the CSV export is called with correct parameters."""
         mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_csv_url)
         self.assertEqual(response.status_code, 200)
         mock_export.assert_called_once()
         # Check that the export was called with the correct parameters
