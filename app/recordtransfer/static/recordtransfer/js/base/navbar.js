@@ -72,10 +72,24 @@ export function setupNavbar() {
                     return "rgb(255,255,255)";
                 }
             }
-            const bg = window.getComputedStyle(el).backgroundColor;
-            if (bg && !bg.startsWith("rgba(0, 0, 0, 0)") && bg !== "transparent") {
-                return bg;
+            const style = window.getComputedStyle(el);
+            const bgColor = style.backgroundColor;
+            const bgImage = style.backgroundImage;
+
+            const hasColor =
+            bgColor && !bgColor.startsWith("rgba(0, 0, 0, 0)") && bgColor !== "transparent";
+            const hasImage =
+            bgImage && bgImage !== "none" && bgImage !== "initial";
+
+            if (hasColor) {
+                return bgColor;
             }
+
+            if (hasImage) {
+            // Treat background image (e.g., gradient) as an effective background
+                return bgColor || "rgb(255, 255, 255)";
+            }
+
             el = el.parentElement;
         }
         return "rgb(255, 255, 255)";
