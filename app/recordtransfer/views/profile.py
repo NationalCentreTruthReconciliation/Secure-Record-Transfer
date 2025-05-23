@@ -69,6 +69,10 @@ class UserProfile(UpdateView):
                     "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
                         "recordtransfer:in_progress_submission_table"
                     ),
+                    "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
+                    "SUBMISSION_GROUP_TABLE_URL": reverse(
+                        "recordtransfer:submission_group_table"
+                    ),
                 },
                 # Table container IDs
                 "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,

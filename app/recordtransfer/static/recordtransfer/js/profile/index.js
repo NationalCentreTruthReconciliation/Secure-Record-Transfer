@@ -13,25 +13,26 @@ function initialize() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
 
-    if (contextElement) {
-        context = JSON.parse(contextElement.textContent);
-        setupProfileForm(context);
+    context = JSON.parse(contextElement.textContent);
+    if (!context) {
+        console.error("Context not available to set up profile page.");
+        return;
     }
 
+    setupProfileForm(context);
     initTabListeners();
     restoreTab();
     setupToastNotifications();
 
     // Wrapper function that provides context to handleDeleteIpSubmissionAfterRequest
     window.handleDeleteIpSubmissionAfterRequest = (e) => {
-        if (!context) {
-            console.error("Context not available for handleDeleteIpSubmissionAfterRequest");
-            return;
-        }
         return handleDeleteIpSubmissionAfterRequest(e, context);
     };
 
-    window.handleModalBeforeSwap = handleModalBeforeSwap;
+    // Wrapper function that provides context to handleModalBeforeSwap
+    window.handleModalBeforeSwap = (e) => {
+        return handleModalBeforeSwap(e, context);
+    };
 }
 
 document.addEventListener("DOMContentLoaded", initialize);

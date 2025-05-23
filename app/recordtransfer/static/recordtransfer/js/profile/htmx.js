@@ -44,11 +44,32 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
  * Closes the modal if the server response is empty, which occurs when the submission group is
  * successfully created.
  * @param {CustomEvent} e - The event object containing the server response.
+ * @param {object} context - Context object with URLs and element IDs for table refresh.
+ * @param {string} context.SUBMISSION_GROUP_TABLE_URL - The URL to refresh the submission group
+ * table.
+ * @param {string} context.PAGINATE_QUERY_NAME - The query parameter name for pagination
+ * (e.g., "p").
+ * @param {string} context.ID_SUBMISSION_GROUP_TABLE - The DOM element ID of the submission group
+ * table to update.
  */
-export function handleModalBeforeSwap(e) {
+export function handleModalBeforeSwap(e, context) {
     if (!e.detail.serverResponse && e.detail.requestConfig.elt.id === "submission-group-form") {
-        e.stopPropagation(); // Stop the event from bubbling up
+        e.preventDefault(); // Stop the event from bubbling up
         closeModal();
+
+        // Refresh the table
+        const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
+        const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+        const currentPage = getCurrentTablePage();
+
+        const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
+
+        window.htmx.ajax("GET",
+            finalUrl,
+            {
+                target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
+                swap: "innerHTML"
+            });
     }
 }
 
