@@ -52,6 +52,16 @@ header.homepage {
     align-content: start;
     justify-content: flex-start;
     text-align: left;
+    /* Add padding to account for fixed position mobile menu */
+    padding-right: 40px;
+}
+
+/* Mobile navigation container - wraps both toggle and menu */
+.nav-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 0;
+    z-index: 1001;
 }
 
 /* Sliding menu styles */
@@ -75,7 +85,7 @@ header.homepage {
 }
 
 .nav-items-container.open {
-    top: 80%;
+    top: 100%;
     visibility: visible;
     transition: top 0.3s ease, opacity 0.3s ease;
 }
@@ -189,6 +199,16 @@ header.homepage {
         align-items: center;
         flex-wrap: nowrap;
         background: none;
+    }
+
+    /* Reset mobile container for desktop */
+    .nav-wrapper {
+        position: static;
+    }
+
+    .nav-title {
+        /* Unset padding used to account for mobile menu */
+        padding-right: 0;
     }
 
     .nav-items-container {
