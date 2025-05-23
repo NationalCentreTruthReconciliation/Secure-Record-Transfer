@@ -202,9 +202,6 @@ header.homepage {
 
     .nav-wrapper {
         z-index: 1000;
-        flex-grow: 0;
-        flex-shrink: 0;
-        margin-left: auto;
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -242,7 +239,7 @@ header.homepage {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        margin-top: 31px;
+        margin-top: 35px;
     }
 
     .nav-wrapper.open {
