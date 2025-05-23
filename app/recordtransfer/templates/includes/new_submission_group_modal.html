@@ -1,0 +1,39 @@
+{% extends "includes/base_modal.html" %}
+{% load i18n %}
+{% block modal_content %}
+    <h3 class="text-lg font-bold mb-5">{% trans "Create a new submission group" %}</h3>
+    <form id="submission-group-form"
+          hx-post="{% url 'recordtransfer:submission_group_modal' %}"
+          hx-target="#modal-content-container"
+          hx-swap="innerHTML"
+          hx-select="#modal-content">
+        {% csrf_token %}
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend text-sm md:text-md">{% trans form.name.label %}</legend>
+            <input type="text"
+                   class="input input-bordered input-sm md:input-md validator w-full"
+                   name="{{ form.name.name }}"
+                   value="{{ form.name.value|default_if_none:'' }}"
+                   id="{{ form.name.id_for_label }}"
+                   required>
+            {% if form.name.errors %}
+                <p class="text-error text-xs md:text-sm">{% trans form.name.errors.0 %}</p>
+            {% endif %}
+        </fieldset>
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend text-sm md:text-md">{% trans form.description.label %}</legend>
+            <input type="text"
+                   class="input input-bordered input-sm md:input-md validator w-full"
+                   name="{{ form.description.name }}"
+                   value="{{ form.description.value|default_if_none:'' }}"
+                   id="{{ form.description.id_for_label }}">
+            {% if form.description.errors %}
+                <p class="text-error text-xs md:text-sm">{% trans form.description.errors.0 %}</p>
+            {% endif %}
+        </fieldset>
+        <div class="modal-action">
+            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
+            <button type="submit" class="btn btn-primary" id="id_create_group_button">{% trans "Create" %}</button>
+        </div>
+    </form>
+{% endblock modal_content %}

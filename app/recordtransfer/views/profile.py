@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
-from django.views.generic import UpdateView
+from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import (
@@ -24,12 +24,14 @@ from recordtransfer.constants import (
     ID_IN_PROGRESS_SUBMISSION_TABLE,
     ID_LAST_NAME,
     ID_NEW_PASSWORD,
+    ID_SUBMISSION_GROUP_NAME,
     ID_SUBMISSION_GROUP_TABLE,
     ID_SUBMISSION_TABLE,
     PAGINATE_QUERY_NAME,
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
+from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
 
 
@@ -63,12 +65,16 @@ class UserProfile(UpdateView):
                     "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
                     "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
                     "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                    # Submission group form
+                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
                     # Tables
                     "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
                     "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
                     "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
                         "recordtransfer:in_progress_submission_table"
                     ),
+                    "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
+                    "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
                 },
                 # Table container IDs
                 "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
@@ -218,3 +224,31 @@ def submission_table(request: HttpRequest) -> HttpResponse:
         ID_SUBMISSION_TABLE,
         reverse("recordtransfer:submission_table"),
     )
+
+
+class SubmissionGroupModalCreateView(CreateView):
+    """Renders a modal form to create a new submission group."""
+
+    model = SubmissionGroup
+    form_class = SubmissionGroupForm
+    template_name = "includes/new_submission_group_modal.html"
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Ensure requests are made with HTMX."""
+        if not request.htmx:
+            raise Http404("Page not found")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        """Pass User instance to form to initialize it."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission."""
+        super().form_valid(form)
+        response = HttpResponse(status=201)
+        return trigger_client_event(
+            response, "showSuccess", {"value": "Submission group created."}
+        )
