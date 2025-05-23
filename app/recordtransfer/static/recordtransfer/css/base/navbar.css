@@ -207,6 +207,19 @@ header.homepage {
     .nav-item:hover {
         background-color: #f2f2f2;
     }
+
+    .nav-wrapper {
+        margin-right: 10px;
+        background-color: transparent;
+        transition: background-color 0.1s;
+        border-radius: 40px;
+    }
+
+    .nav-wrapper.needs-background {
+        /* Show background when needed */
+        background-color: rgba(198, 193, 193, 0.8);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
 }
 
 /* Desktop menu */
