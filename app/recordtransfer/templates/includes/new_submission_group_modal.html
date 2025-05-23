@@ -3,7 +3,7 @@
 {% block modal_content %}
     <h3 class="text-lg font-bold mb-5">{% trans "Create a new submission group" %}</h3>
     <form id="submission-group-form"
-          hx-post="{% url 'recordtransfer:submission_group_new' %}"
+          hx-post="{% url 'recordtransfer:submission_group_modal' %}"
           hx-target="#modal-content-container"
           hx-swap="innerHTML"
           hx-select="#modal-content">

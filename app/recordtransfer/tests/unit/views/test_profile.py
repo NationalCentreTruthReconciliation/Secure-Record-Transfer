@@ -666,3 +666,58 @@ class TestInProgressSubmission(TestCase):
 
         response = self.client.get(nonexistent_url, headers=self.headers)
         self.assertEqual(response.status_code, 404)
+
+
+class TestSubmissionGroupModalCreateView(TestCase):
+    """Tests for SubmissionGroupModalCreateView."""
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.user = User.objects.create_user(username="testuser", password="password")
+        self.client.login(username="testuser", password="password")
+
+        self.url = reverse("recordtransfer:submission_group_modal")
+        self.headers = {
+            "HX-Request": "true",
+        }
+
+    def test_valid_form_submission(self) -> None:
+        """Test that a valid form submission creates a new Submission and response includes
+        a trigger for the success toast.
+        """
+        form_data = {
+            "name": "Test Group",
+            "description": "Test Description",
+        }
+        response = self.client.post(self.url, data=form_data, headers=self.headers)
+        self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
+
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+    def test_invalid_form_submission(self) -> None:
+        """Test that an invalid form submission does not create a new SubmissionGroup."""
+        form_data = {
+            "name": "",
+            "description": "Test Description",
+        }
+        response = self.client.post(self.url, data=form_data, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "includes/new_submission_group_modal.html")
+
+        # Check that response contains the form with errors
+        form = response.context["form"]
+        self.assertTrue(form.errors)
+
+        # Check that new submission group is not created
+        self.assertFalse(SubmissionGroup.objects.all().exists())
+
+    def test_non_htmx_request_for_404(self) -> None:
+        """Test that a form submission not done through HTMX sends back 404."""
+        form_data = {
+            "name": "Test Group",
+            "description": "Test Description",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(SubmissionGroup.objects.filter(name="Test Group").exists())
