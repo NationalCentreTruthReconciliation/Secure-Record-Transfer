@@ -65,6 +65,5 @@ export function setupNavbar() {
 
     window.addEventListener("scroll", alignNavWrapper);
     window.addEventListener("resize", alignNavWrapper);
-
-    alignNavWrapper();
+    window.addEventListener("load", alignNavWrapper);
 }
