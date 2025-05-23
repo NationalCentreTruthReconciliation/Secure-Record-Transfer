@@ -189,7 +189,8 @@ header.homepage {
     }
 
     .nav-wrapper {
-        background-color: rgb(202, 200, 200, 0.6);
+        background-color: transparent;
+        transition: background-color 0.1s;
         position: fixed;
         margin-right: 10px;
         z-index: 1000;
@@ -200,6 +201,12 @@ header.homepage {
 
     .nav-wrapper.open {
         transform: translateY(0);
+    }
+
+    .nav-wrapper.needs-background {
+        /* Show background when needed */
+        background-color: rgba(198, 196, 196, 0.85);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 }
 
