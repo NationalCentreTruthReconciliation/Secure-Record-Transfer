@@ -46,10 +46,8 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
  * @param {CustomEvent} e - The event object containing the server response.
  */
 export function handleModalBeforeSwap(e) {
-
-    // submission group is successfully created
-    if (!e.detail.serverResponse) {
-        e.preventDefault();
+    if (!e.detail.serverResponse && e.detail.requestConfig.elt.id === "submission-group-form") {
+        e.stopPropagation(); // Stop the event from bubbling up
         closeModal();
     }
 }
