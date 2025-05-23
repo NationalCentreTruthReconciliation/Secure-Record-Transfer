@@ -29,7 +29,7 @@ from recordtransfer.models import Submission, SubmissionGroup
 LOGGER = logging.getLogger(__name__)
 
 
-class SubmissionDetail(UserPassesTestMixin, DetailView):
+class SubmissionDetailView(UserPassesTestMixin, DetailView):
     """Generates a report for a given submission."""
 
     model = Submission
@@ -58,7 +58,7 @@ class SubmissionDetail(UserPassesTestMixin, DetailView):
         return context
 
 
-class SubmissionCsv(UserPassesTestMixin, View):
+class SubmissionCsvView(UserPassesTestMixin, View):
     """Generates a CSV containing the submission and downloads that CSV."""
 
     def get_object(self) -> Submission:

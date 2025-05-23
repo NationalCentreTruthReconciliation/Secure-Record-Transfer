@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
+
 from django.contrib.messages import get_messages
+from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext
@@ -194,3 +196,120 @@ class TestSubmissionGroupDetailView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), gettext("There was an error deleting the group"))
         self.assertRedirects(response, reverse("recordtransfer:user_profile"))
+
+
+class TestSubmissionDetailView(TestCase):
+    """Tests for SubmissionDetailView."""
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.user = User.objects.create_user(username="testuser", password="password")
+        self.staff_user = User.objects.create_user(
+            username="staffuser", password="password", is_staff=True
+        )
+        self.submission = Submission.objects.create(user=self.user)
+        self.url = reverse(
+            "recordtransfer:submission_detail", kwargs={"uuid": self.submission.uuid}
+        )
+        self.client.login(username="testuser", password="password")
+
+    def test_access_authenticated_user(self) -> None:
+        """Test that an authenticated user can access the view."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/submission_detail.html")
+
+    def test_access_unauthenticated_user(self) -> None:
+        """Test that an unauthenticated user is redirected to the login page."""
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    def test_access_non_owner_user(self) -> None:
+        """Test that a non-owner user cannot access the view."""
+        User.objects.create_user(username="otheruser", password="password")
+        self.client.login(username="otheruser", password="password")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_access_staff_user(self) -> None:
+        """Test that a staff user can access the view."""
+        self.client.login(username="staffuser", password="password")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/submission_detail.html")
+
+    def test_get_context_data(self) -> None:
+        """Test that the context data includes required variables."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("submission", response.context)
+        self.assertIn("current_date", response.context)
+        self.assertIn("metadata", response.context)
+        self.assertEqual(response.context["submission"], self.submission)
+
+    def test_nonexistent_submission(self) -> None:
+        """Test that accessing a nonexistent submission returns 404."""
+        url = reverse(
+            "recordtransfer:submission_detail",
+            kwargs={"uuid": "00000000-0000-0000-0000-000000000000"},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+
+class TestSubmissionCsvView(TestCase):
+    """Tests for SubmissionCsvView."""
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.user = User.objects.create_user(username="testuser", password="password")
+        self.staff_user = User.objects.create_user(
+            username="staffuser", password="password", is_staff=True
+        )
+        self.submission = Submission.objects.create(user=self.user)
+        self.url = reverse("recordtransfer:submission_csv", kwargs={"uuid": self.submission.uuid})
+        self.client.login(username="testuser", password="password")
+
+    def test_access_unauthenticated_user(self) -> None:
+        """Test that an unauthenticated user is redirected to the login page."""
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    def test_access_non_owner_user(self) -> None:
+        """Test that a non-owner user cannot access the view."""
+        User.objects.create_user(username="otheruser", password="password")
+        self.client.login(username="otheruser", password="password")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    def test_access_staff_user(self, mock_export: MagicMock) -> None:
+        """Test that a staff user can access the view."""
+        mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
+        self.client.login(username="staffuser", password="password")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    def test_csv_generation(self, mock_export: MagicMock) -> None:
+        """Test that the CSV export is called with correct parameters."""
+        mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        mock_export.assert_called_once()
+        # Check that the export was called with the correct parameters
+        call_args = mock_export.call_args
+        self.assertIn("version", call_args.kwargs)
+        self.assertIn("filename_prefix", call_args.kwargs)
+        self.assertTrue(call_args.kwargs["filename_prefix"].startswith("testuser_export-"))
+
+    def test_nonexistent_submission(self) -> None:
+        """Test that accessing a nonexistent submission returns 404."""
+        invalid_csv_url = reverse(
+            "recordtransfer:submission_csv",
+            kwargs={"uuid": "00000000-0000-0000-0000-000000000000"},
+        )
+        response = self.client.get(invalid_csv_url)
+        self.assertEqual(response.status_code, 404)
