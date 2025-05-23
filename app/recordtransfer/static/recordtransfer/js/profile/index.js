@@ -33,11 +33,14 @@ function initialize() {
     window.handleModalBeforeSwap = (e) => {
         return handleModalBeforeSwap(e, context);
     };
-    
+
     window.handleModalAfterSwap = (e) => {
+        // Sets up the submission group form if the modal content swap was triggered by the
+        // new submission group button
         if (e.detail.requestConfig.elt.id === "id_new_submission_group_button") {
             setupSubmissionGroupForm(context);
         }
+        // Always show the modal after a swap on the modal content container
         showModal();
     };
 }
