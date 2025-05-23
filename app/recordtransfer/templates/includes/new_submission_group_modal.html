@@ -32,7 +32,7 @@
             {% endif %}
         </fieldset>
         <div class="modal-action">
-            <button class="btn">{% trans "Cancel" %}</button>
+            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
             <button type="submit" class="btn btn-primary" id="id_create_group_button">{% trans "Create" %}</button>
         </div>
     </form>
