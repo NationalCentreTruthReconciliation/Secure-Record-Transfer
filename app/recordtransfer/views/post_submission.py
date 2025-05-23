@@ -21,7 +21,6 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.generic import CreateView, DetailView, UpdateView, View
-from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
