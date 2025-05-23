@@ -182,13 +182,6 @@ header.homepage {
 
 /*Smaller resolution styles*/
 @media (max-width: 480px) {
-
-    .nav-item-flex {
-        height: 4vh;
-        font-size: 14px;
-        margin-bottom: 16px;
-    }
-
     .nav-wrapper {
         z-index: 1000;
         display: flex;
