@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
@@ -10,15 +11,14 @@ from recordtransfer.models import Submission, SubmissionGroup, User
 class TestSubmissionGroupCreateView(TestCase):
     """Tests for SubmissionGroupCreateView."""
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        """Set up test data."""
-        cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.url = reverse("recordtransfer:submission_group_new")
-
     def setUp(self) -> None:
         """Set up test environment."""
+        self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
+        self.url = reverse("recordtransfer:submission_group_new")
+        self.headers = {
+            "HX-Request": "true",
+        }
 
     def test_access_authenticated_user(self) -> None:
         """Test that an authenticated user can access the view."""
@@ -32,28 +32,34 @@ class TestSubmissionGroupCreateView(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
-    def test_valid_form_submission(self) -> None:
+    def test_valid_form_submission_with_htmx(self) -> None:
         """Test that a valid form submission creates a new SubmissionGroup."""
         form_data = {
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), gettext("Group created"))
+        response = self.client.post(self.url, data=form_data, headers=self.headers)
         self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
 
-    def test_invalid_form_submission(self) -> None:
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+    def test_invalid_form_submission_with_htmx(self) -> None:
         """Test that an invalid form submission does not create a new SubmissionGroup."""
         form_data = {
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.url, data=form_data, headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), gettext("There was an error creating the group"))
+        # Check that response contains the form with errors
+        form = response.context["form"]
+        self.assertTrue(form.errors)
+
+        # Check that new submission group is not created
+        self.assertFalse(SubmissionGroup.objects.all().exists())
 
     def test_form_valid_json_response(self) -> None:
         """Test that a JsonResponse is returned when the form is valid and submitted from the
@@ -63,7 +69,9 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
+        response = self.client.post(
+            self.url, data=form_data, HTTP_REFERER=reverse("recordtransfer:submit")
+        )
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["message"], gettext("Group created"))
@@ -77,7 +85,9 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.url, data=form_data, HTTP_REFERER="submission/")
+        response = self.client.post(
+            self.url, data=form_data, HTTP_REFERER=reverse("recordtransfer:submit")
+        )
         self.assertEqual(response.status_code, 400)
         response_json = response.json()
         self.assertEqual(response_json["message"], "This field is required.")

@@ -182,10 +182,16 @@ class SubmissionGroupCreateView(CreateView):
     template_name = "recordtransfer/submission_group_detail.html"
     success_message = gettext("Group created")
 
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Pre-screen request to ensure requests from user_profile are made with HTMX."""
+        self.referer = request.META.get("HTTP_REFERER", "")
+        if reverse("recordtransfer:user_profile") in self.referer and not request.htmx:
+            raise Http404("Page not found")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_template_names(self) -> list[str]:
         """Dynamically select template based on referrer."""
-        referrer = self.request.META.get("HTTP_REFERER", "")
-        if reverse("recordtransfer:user_profile") in referrer:
+        if reverse("recordtransfer:user_profile") in self.referer:
             return ["includes/new_submission_group_modal.html"]
         return [self.template_name]
 
@@ -207,8 +213,7 @@ class SubmissionGroupCreateView(CreateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         super().form_valid(form)
-        referer = self.request.headers.get("referer", "")
-        if reverse("recordtransfer:submit") in referer:
+        if reverse("recordtransfer:submit") in self.referer:
             return JsonResponse(
                 {
                     "message": self.success_message,
@@ -228,9 +233,8 @@ class SubmissionGroupCreateView(CreateView):
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
-        if reverse("recordtransfer:submit") in referer:
+        if reverse("recordtransfer:submit") in self.referer:
             return JsonResponse({"message": error_message, "status": "error"}, status=400)
         return super().form_invalid(form)
 
