@@ -38,7 +38,7 @@ urlpatterns = [
     ),
     path(
         "submission/in-progress/<uuid:uuid>/",
-        login_required(views.profile.in_progress_submission),
+        login_required(views.profile.delete_in_progress_submission),
         name="in_progress_submission",
     ),
     path("about/", views.home.About.as_view(), name="about"),
