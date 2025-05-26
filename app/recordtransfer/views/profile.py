@@ -15,6 +15,7 @@ from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
+from django.utils.html import escape
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
@@ -278,7 +279,7 @@ def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
             "showSuccess",
             {
                 "value": gettext('Submission group "%(name)s" deleted.')
-                % {"name": submission_group.name},
+                % {"name": escape(submission_group.name)},
             },
         )
     except Http404:
