@@ -134,14 +134,11 @@ if settings.TESTING or settings.SIGN_UP_ENABLED:
             path(
                 "account/activation/invalid/",
                 views.account.ActivationInvalid.as_view(),
+                name="activation_invalid",
             ),
-            re_path(
-                (
-                    "account/activation/"
-                    r"(?P<uidb64>[0-9A-Za-z_\-]+)/"
-                    r"(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$"
-                ),
-                views.account.activate_account,
+            path(
+                "account/activation/<uidb64>/<token>/",
+                views.account.ActivateAccount.as_view(),
                 name="activate_account",
             ),
         ]

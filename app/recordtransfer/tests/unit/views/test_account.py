@@ -4,10 +4,14 @@ import logging
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 from recordtransfer.forms import SignUpForm
+from recordtransfer.tokens import account_activation_token
 
 User = get_user_model()
 
@@ -226,3 +230,156 @@ class TestCreateAccount(TestCase):
         # These should be default Django user fields
         self.assertFalse(new_user.is_staff)
         self.assertFalse(new_user.is_superuser)
+
+class TestActivateAccount(TestCase):
+    """Tests for the ActivateAccount view."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        # Create inactive user for activation tests
+        self.inactive_user = User.objects.create_user(
+            username="inactiveuser",
+            first_name="Inactive",
+            last_name="User",
+            email="inactive@example.com",
+            password="password123",
+            is_active=False,
+        )
+
+        # Create active user for testing already activated scenarios
+        self.active_user = User.objects.create_user(
+            username="activeuser",
+            first_name="Active",
+            last_name="User",
+            email="active@example.com",
+            password="password123",
+            is_active=True,
+        )
+
+        # Generate valid activation token and uidb64
+        self.valid_token = account_activation_token.make_token(self.inactive_user)
+        self.valid_uidb64 = urlsafe_base64_encode(force_bytes(self.inactive_user.pk))
+
+        # Generate invalid token and uidb64
+        self.invalid_token = "invalid-token-123"
+        self.invalid_uidb64 = urlsafe_base64_encode(force_bytes(99999))  # Non-existent user ID
+
+    def test_get_activate_account_valid_token(self) -> None:
+        """Test successful account activation with valid token."""
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": self.valid_uidb64, "token": self.valid_token},
+        )
+
+        response = self.client.get(activate_url)
+
+        # Should redirect to success page
+        self.assertRedirects(response, reverse("recordtransfer:account_created"))
+
+        # User should now be active and logged in
+        self.inactive_user.refresh_from_db()
+        self.assertTrue(self.inactive_user.is_active)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    def test_get_activate_account_invalid_token(self) -> None:
+        """Test activation with invalid token shows error."""
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": self.valid_uidb64, "token": self.invalid_token},
+        )
+
+        response = self.client.get(activate_url)
+
+        # Should redirect to invalid activation page
+        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
+
+        # User should remain inactive and not logged in
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.inactive_user.refresh_from_db()
+        self.assertFalse(self.inactive_user.is_active)
+
+    def test_get_activate_account_invalid_uidb64(self) -> None:
+        """Test activation with invalid user ID shows error."""
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": self.invalid_uidb64, "token": self.valid_token},
+        )
+
+        response = self.client.get(activate_url)
+
+        # Should redirect to invalid activation page
+        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
+
+        # User should remain inactive and not logged in
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.inactive_user.refresh_from_db()
+        self.assertFalse(self.inactive_user.is_active)
+
+    def test_get_activate_account_already_active_user(self) -> None:
+        """Test activation of already active user."""
+        # Generate token for active user
+        token = default_token_generator.make_token(self.active_user)
+        uidb64 = urlsafe_base64_encode(force_bytes(self.active_user.pk))
+
+        activate_url = reverse(
+            "recordtransfer:activate_account", kwargs={"uidb64": uidb64, "token": token}
+        )
+
+        response = self.client.get(activate_url)
+
+        # Should redirect to invalid activation page
+        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
+
+        # User should remain active and not logged in
+        self.active_user.refresh_from_db()
+        self.assertTrue(self.active_user.is_active)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_get_activate_account_authenticated_user_redirected(self) -> None:
+        """Test that authenticated users are redirected to homepage."""
+        self.client.force_login(self.active_user)
+
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": self.valid_uidb64, "token": self.valid_token},
+        )
+
+        response = self.client.get(activate_url)
+        self.assertRedirects(response, reverse("recordtransfer:index"))
+
+    def test_get_activate_account_expired_token(self) -> None:
+        """Test activation with expired token shows error."""
+        # Create a token for a different user to simulate expired/invalid token
+        expired_token = default_token_generator.make_token(self.active_user)
+
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": self.valid_uidb64, "token": expired_token},
+        )
+
+        response = self.client.get(activate_url)
+
+        # Should redirect to invalid activation page
+        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
+
+        # User should remain inactive and not logged in
+        self.inactive_user.refresh_from_db()
+        self.assertFalse(self.inactive_user.is_active)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_get_activate_account_malformed_uidb64(self) -> None:
+        """Test activation with malformed uidb64 shows error."""
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": "malformed-uid", "token": self.valid_token},
+        )
+
+        response = self.client.get(activate_url)
+
+        # Should redirect to invalid activation page
+        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
+
+        # User should remain inactive and not logged in
+        self.inactive_user.refresh_from_db()
+        self.assertFalse(self.inactive_user.is_active)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
