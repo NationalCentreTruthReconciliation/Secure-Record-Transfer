@@ -38,6 +38,28 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
     }
 };
 
+export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
+    closeModal();
+
+    // If the request was successful, refresh the table
+    if (e.detail.successful) {
+        // Get base refresh URL
+        const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
+        const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+
+        // Get the current page number
+        const currentPage = getCurrentTablePage();
+
+        const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
+
+        window.htmx.ajax("GET",
+            finalUrl,
+            {
+                target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
+                swap: "innerHTML"
+            });
+    }
+};
 
 /**
  * Handles the modal swap event before content is replaced.
