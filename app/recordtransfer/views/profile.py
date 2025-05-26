@@ -139,17 +139,17 @@ def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpRespon
         in_progress.delete()
         response = HttpResponse(status=204)
         return trigger_client_event(
-            response, "showSuccess", {"value": "In-progress submission deleted."}
+            response, "showSuccess", {"value": gettext("In-progress submission deleted.")}
         )
     except Http404:
         response = HttpResponse(status=404)
         return trigger_client_event(
-            response, "showError", {"value": "In-progress submission not found."}
+            response, "showError", {"value": gettext("In-progress submission not found.")}
         )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
-            response, "showError", {"value": "Failed to delete in-progress submission."}
+            response, "showError", {"value": gettext("Failed to delete in-progress submission.")}
         )
 
 
@@ -274,15 +274,20 @@ def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
         submission_group.delete()
         response = HttpResponse(status=204)
         return trigger_client_event(
-            response, "showSuccess", {"value": "Submission group deleted."}
+            response,
+            "showSuccess",
+            {
+                "value": gettext('Submission group "%(name)s" deleted.')
+                % {"name": submission_group.name},
+            },
         )
     except Http404:
         response = HttpResponse(status=404)
         return trigger_client_event(
-            response, "showError", {"value": "Submission group not found."}
+            response, "showError", {"value": gettext("Submission group not found.")}
         )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
-            response, "showError", {"value": "Failed to delete submission group."}
+            response, "showError", {"value": gettext("Failed to delete submission group.")}
         )
