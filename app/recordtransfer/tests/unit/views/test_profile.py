@@ -26,7 +26,10 @@ from recordtransfer.models import (
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
 @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
 class TestUserProfileView(TestCase):
-    def setUp(self):
+    """Tests for the UserProfile view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user and initial data."""
         self.test_username = "testuser"
         self.test_first_name = "Test"
         self.test_last_name = "User"
@@ -99,19 +102,22 @@ class TestUserProfileView(TestCase):
             title=title,
         )
 
-    def test_access_authenticated_user(self):
+    def test_access_authenticated_user(self) -> None:
+        """Test that an authenticated user can access the profile page."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/profile.html")
 
-    def test_access_unauthenticated_user(self):
+    def test_access_unauthenticated_user(self) -> None:
+        """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
     ### Tests for Profile Details ###
 
-    def test_valid_name_change(self):
+    def test_valid_name_change(self) -> None:
+        """Test that a valid name change updates the user's first and last name."""
         form_data = {
             "first_name": "New",
             "last_name": "Name",
@@ -121,7 +127,8 @@ class TestUserProfileView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), self.success_message)
 
-    def test_accented_name_change(self):
+    def test_accented_name_change(self) -> None:
+        """Test that accented characters in names are handled correctly."""
         form_data = {
             "first_name": "Áccéntéd",
             "last_name": "Námé",
@@ -131,7 +138,8 @@ class TestUserProfileView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), self.success_message)
 
-    def test_invalid_first_name(self):
+    def test_invalid_first_name(self) -> None:
+        """Test that an invalid first name (e.g., numeric) returns an error message."""
         form_data = {
             "first_name": "123",
             "last_name": self.test_last_name,
@@ -145,7 +153,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_invalid_last_name(self):
+    def test_invalid_last_name(self) -> None:
+        """Test that an invalid last name (e.g., numeric) returns an error message."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": "123",
@@ -159,7 +168,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_valid_notification_setting_change(self):
+    def test_valid_notification_setting_change(self) -> None:
+        """Test that a valid notification setting change updates the user's preference."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -170,22 +180,8 @@ class TestUserProfileView(TestCase):
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), self.success_message)
 
-    def test_invalid_notification_setting_change(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": self.test_gets_notification_emails,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_valid_password_change(self):
+    def test_valid_password_change(self) -> None:
+        """Test that a valid password change updates the user's password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -200,7 +196,8 @@ class TestUserProfileView(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("new_password123"))
 
-    def test_wrong_password(self):
+    def test_wrong_password(self) -> None:
+        """Test that providing the wrong current password returns an error message."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -217,7 +214,10 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_passwords_do_not_match(self):
+    def test_passwords_do_not_match(self) -> None:
+        """Test that if the new password and confirmation do not match, an error message is
+        shown.
+        """
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -234,7 +234,10 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_same_password(self):
+    def test_same_password(self) -> None:
+        """Test that if the new password is the same as the current password, an error message is
+        shown.
+        """
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -251,7 +254,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_missing_current_password(self):
+    def test_missing_current_password(self) -> None:
+        """Test that if the current password is not provided, an error message is shown."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -267,7 +271,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_missing_new_password(self):
+    def test_missing_new_password(self) -> None:
+        """Test that if the new password is not provided, an error message is shown."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -283,7 +288,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_missing_confirm_new_password(self):
+    def test_missing_confirm_new_password(self) -> None:
+        """Test that if the confirm new password is not provided, an error message is shown."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -300,7 +306,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_no_changes(self):
+    def test_no_changes(self) -> None:
+        """Test that if no changes are made to the profile, an error message is shown."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -315,7 +322,8 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    def test_empty_form_submission(self):
+    def test_empty_form_submission(self) -> None:
+        """Test that submitting an empty form returns an error message."""
         form_data = {}
         response = self.client.post(self.url, data=form_data)
         self.assertEqual(response.status_code, 200)
@@ -377,7 +385,9 @@ class TestUserProfileView(TestCase):
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
     def test_in_progress_submission_expiring_soon(self) -> None:
-        """Test that the expiry date is shown with a warning icon if the in-progress submission is expiring soon."""
+        """Test that the expiry date is shown with a warning icon if the in-progress submission is
+        expiring soon.
+        """
         upload_session = UploadSession.new_session(user=cast(User, self.user))
         self._create_in_progress_submission(upload_session=upload_session)
 
