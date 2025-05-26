@@ -1,9 +1,13 @@
+import re
 from typing import Any
 
 from django import forms
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
+from django_recaptcha.fields import ReCaptchaField
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
@@ -15,7 +19,54 @@ from recordtransfer.constants import (
 )
 from recordtransfer.models import User
 
-import re
+
+class SignUpForm(UserCreationForm):
+    """Form for a user to create a new account."""
+
+    class Meta:
+        """Meta class for SignUpForm."""
+
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
+
+    def clean(self) -> dict[str, Any]:
+        """Clean data, make sure username and email are not already in use."""
+        cleaned_data = super().clean()
+        new_username = cleaned_data['username']
+        username_exists = User.objects.filter(username=new_username).first() is not None
+        if username_exists:
+            self.add_error('username', f'The username {new_username} is already in use')
+        new_email = cleaned_data['email']
+        email_exists = User.objects.filter(email=new_email).first() is not None
+        if email_exists:
+            self.add_error('email', f'The email {new_email} is already in use')
+        return cleaned_data
+
+    email = forms.EmailField(max_length=256,
+        required=True,
+        widget=forms.TextInput(),
+        label=gettext('Email'))
+
+    username = forms.CharField(max_length=256,
+        min_length=6,
+        required=True,
+        widget=forms.TextInput(),
+        label=gettext('Username'),
+        help_text=gettext('This is the username you will use to log in to your account'))
+
+    first_name = forms.CharField(max_length=256,
+        min_length=2,
+        required=True,
+        widget=forms.TextInput(),
+        label=gettext('First name'))
+
+    last_name = forms.CharField(max_length=256,
+        min_length=2,
+        required=True,
+        widget=forms.TextInput(),
+        label=gettext('Last name'))
+
+    captcha = ReCaptchaField()
 
 
 class UserProfileForm(forms.ModelForm):
@@ -80,7 +131,7 @@ class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def clean(self) -> "dict[str, Any]":
+    def clean(self) -> dict[str, Any]:
         """Clean the form data."""
         if not self.data:
             raise ValidationError(_("Form is empty."))
@@ -166,7 +217,7 @@ class UserProfileForm(forms.ModelForm):
             user.save()
         return user
 
-    def reset_form(self):
+    def reset_form(self) -> None:
         """Reset form fields to initial values from instance."""
         if self.instance:
             self.data = self.data.copy()
