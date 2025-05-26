@@ -522,7 +522,7 @@ class TestUserProfileView(TestCase):
 
 
 class TestInProgressSubmission(TestCase):
-    """Tests for the in_progress_submission view."""
+    """Tests for the delete_in_progress_submission view."""
 
     def setUp(self) -> None:
         """Set up the test case with users and in-progress submissions."""
@@ -672,6 +672,159 @@ class TestInProgressSubmission(TestCase):
         """Test that requesting a modal for a nonexistent submission returns 404."""
         nonexistent_url = reverse(
             "recordtransfer:in_progress_submission", kwargs={"uuid": str(uuid.uuid4())}
+        )
+
+        response = self.client.get(nonexistent_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+
+class TestDeleteSubmissionGroupView(TestCase):
+    """Tests for the delete_submission_group view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with users and submission groups."""
+        self.user = User.objects.create_user(
+            username="testuser1", email="test@example.com", password="testpassword"
+        )
+        self.other_user = User.objects.create_user(
+            username="testuser2", email="test2@example.com", password="testpassword"
+        )
+
+        # Create submission groups for each user
+        self.submission_group = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Test Group 1",
+            uuid=uuid.uuid4(),
+        )
+        self.other_submission_group = SubmissionGroup.objects.create(
+            created_by=self.other_user,
+            name="Test Group 2",
+            uuid=uuid.uuid4(),
+        )
+
+        self.client.force_login(self.user)
+        self.delete_group_url = reverse(
+            "recordtransfer:delete_submission_group_modal", kwargs={"uuid": self.submission_group.uuid}
+        )
+        self.headers = {
+            "HX-Request": "true",
+        }
+
+    # DELETE tests
+    def test_delete_success(self) -> None:
+        """Test successful deletion of a submission group."""
+        self.assertTrue(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+        response = self.client.delete(self.delete_group_url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Check that deletion was successful
+        self.assertFalse(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+    @patch("recordtransfer.views.profile.SubmissionGroup.delete")
+    def test_delete_error(self, mock_delete: MagicMock) -> None:
+        """Test that an error during deletion returns a 500 status code."""
+        mock_delete.side_effect = Exception("Deletion error")
+
+        response = self.client.delete(self.delete_group_url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 500)
+
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+        # Check that the submission group still exists
+        self.assertTrue(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+    def test_non_htmx_delete_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.delete(self.delete_group_url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+        # Check that the submission group still exists
+        self.assertTrue(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+    def test_cannot_delete_other_users_submission_group(self) -> None:
+        """Test that a user cannot delete another user's submission group."""
+        other_url = reverse(
+            "recordtransfer:delete_submission_group_modal",
+            kwargs={"uuid": self.other_submission_group.uuid},
+        )
+
+        response = self.client.delete(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+        # Verify the other user's submission group still exists
+        self.assertTrue(
+            SubmissionGroup.objects.filter(uuid=self.other_submission_group.uuid).exists()
+        )
+
+    def test_login_required(self) -> None:
+        """Test that login is required to access the view."""
+        self.client.logout()
+
+        response = self.client.get(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.delete(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+    def test_post_method_not_allowed(self) -> None:
+        """Test that POST method is not allowed for this view."""
+        response = self.client.post(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 405)
+
+    # GET tests (modal retrieval)
+    def test_get_modal_success(self) -> None:
+        """Test successful retrieval of the delete modal for a submission group."""
+        response = self.client.get(self.delete_group_url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the correct template is used
+        self.assertTemplateUsed(response, "includes/delete_submission_group_modal.html")
+
+        # Check that the context contains the required variables
+        self.assertEqual(response.context["submission_group"], self.submission_group)
+
+        # Check that the submission group's name is included in the response
+        self.assertContains(response, "Test Group 1")
+
+    def test_non_htmx_get_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.get(self.delete_group_url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+    def test_cannot_get_other_users_submission_group_modal(self) -> None:
+        """Test that a user cannot get the modal for another user's submission group."""
+        other_url = reverse(
+            "recordtransfer:delete_submission_group_modal",
+            kwargs={"uuid": self.other_submission_group.uuid},
+        )
+
+        response = self.client.get(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistent_submission_group(self) -> None:
+        """Test that requesting a modal for a nonexistent submission group returns 404."""
+        nonexistent_url = reverse(
+            "recordtransfer:delete_submission_group_modal", kwargs={"uuid": str(uuid.uuid4())}
         )
 
         response = self.client.get(nonexistent_url, headers=self.headers)
