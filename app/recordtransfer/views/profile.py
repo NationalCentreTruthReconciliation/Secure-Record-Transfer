@@ -11,11 +11,11 @@ from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils.html import escape
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
-from django.utils.html import escape
 
 from recordtransfer.constants import (
     ID_CONFIRM_NEW_PASSWORD,
