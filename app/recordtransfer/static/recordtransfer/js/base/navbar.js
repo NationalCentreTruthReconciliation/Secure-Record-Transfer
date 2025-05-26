@@ -43,8 +43,12 @@ export function setupNavbar() {
      * Aligns the navigation wrapper (e.g. burger menu) with the title
      * when the page is at the top. When the user scrolls, it moves the
      * nav wrapper to a fixed position at the top-right corner.
+     * Also determines whether the nav wrapper should have a background
+     * based on its vertical position relative to the main graphic/header and footer.
+     * Adds the 'needs-background' class if the nav is in the main content area,
+     * otherwise removes it for visual clarity.
      */
-    function alignNavWrapper() {
+    function refreshMobileMenu() {
         const navWrapper = document.querySelector(".nav-wrapper");
         const navTitle = document.querySelector(".nav-title");
 
@@ -89,9 +93,9 @@ export function setupNavbar() {
         }
     }
 
-    window.addEventListener("scroll", alignNavWrapper);
-    window.addEventListener("resize", alignNavWrapper);
-    window.addEventListener("load", alignNavWrapper);
+    window.addEventListener("scroll", refreshMobileMenu);
+    window.addEventListener("resize", refreshMobileMenu);
+    window.addEventListener("load", refreshMobileMenu);
 
 }
 
