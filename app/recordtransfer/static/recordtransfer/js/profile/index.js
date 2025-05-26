@@ -1,6 +1,8 @@
 import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import {
-    handleDeleteIpSubmissionAfterRequest, handleModalBeforeSwap
+    handleDeleteIpSubmissionAfterRequest,
+    handleDeleteSubmissionGroupAfterRequest,
+    handleModalBeforeSwap
 } from "./htmx.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 import { setupToastNotifications } from "./toast.js";
@@ -24,12 +26,15 @@ function initialize() {
     restoreTab();
     setupToastNotifications();
 
-    // Wrapper function that provides context to handleDeleteIpSubmissionAfterRequest
+    // Wrapper functions to provide context to HTMX event handlers
     window.handleDeleteIpSubmissionAfterRequest = (e) => {
         return handleDeleteIpSubmissionAfterRequest(e, context);
     };
 
-    // Wrapper function that provides context to handleModalBeforeSwap
+    window.handleDeleteSubmissionGroupAfterRequest = (e) => {
+        return handleDeleteSubmissionGroupAfterRequest(e, context);
+    };
+
     window.handleModalBeforeSwap = (e) => {
         return handleModalBeforeSwap(e, context);
     };

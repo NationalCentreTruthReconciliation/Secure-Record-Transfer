@@ -665,6 +665,10 @@ class SubmissionGroup(models.Model):
         """Return the URL to access a detail view of this submission group."""
         return reverse("recordtransfer:submission_group_detail", kwargs={"uuid": self.uuid})
 
+    def get_delete_url(self) -> str:
+        """Return the URL to delete this submission group."""
+        return reverse("recordtransfer:delete_submission_group_modal", kwargs={"uuid": self.uuid})
+
     def __str__(self):
         return f"{self.name} ({self.created_by})"
 

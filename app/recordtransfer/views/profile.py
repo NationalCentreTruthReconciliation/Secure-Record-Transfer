@@ -227,7 +227,9 @@ def submission_table(request: HttpRequest) -> HttpResponse:
 
 
 class SubmissionGroupModalCreateView(CreateView):
-    """Renders a modal form to create a new submission group."""
+    """Renders a modal form to create a new submission group. Handles GET requests to show the
+    modal and POST requests to create the submission group. Both requests must be made by HTMX.
+    """
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
@@ -251,4 +253,36 @@ class SubmissionGroupModalCreateView(CreateView):
         response = HttpResponse(status=201)
         return trigger_client_event(
             response, "showSuccess", {"value": "Submission group created."}
+        )
+
+
+@require_http_methods(["GET", "DELETE"])
+def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Handle GET (show delete confirmation modal) and DELETE (delete submission group). Both
+    requests must be made by HTMX.
+    """
+    if not request.htmx:
+        return HttpResponse(status=400)
+
+    try:
+        submission_group = get_object_or_404(SubmissionGroup, uuid=uuid, created_by=request.user)
+
+        if request.method == "GET":
+            context = {"submission_group": submission_group}
+            return render(request, "includes/delete_submission_group_modal.html", context)
+
+        submission_group.delete()
+        response = HttpResponse(status=204)
+        return trigger_client_event(
+            response, "showSuccess", {"value": "Submission group deleted."}
+        )
+    except Http404:
+        response = HttpResponse(status=404)
+        return trigger_client_event(
+            response, "showError", {"value": "Submission group not found."}
+        )
+    except Exception:
+        response = HttpResponse(status=500)
+        return trigger_client_event(
+            response, "showError", {"value": "Failed to delete submission group."}
         )
