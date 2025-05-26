@@ -31,14 +31,10 @@ class SignUpForm(UserCreationForm):
 
     def clean(self) -> dict[str, Any]:
         """Clean data, make sure username and email are not already in use."""
+        # Check for duplicate username is handled by superclass UserCreationForm
         cleaned_data = super().clean()
-        new_username = cleaned_data['username']
-        username_exists = User.objects.filter(username=new_username).first() is not None
-        if username_exists:
-            self.add_error('username', f'The username {new_username} is already in use')
-        new_email = cleaned_data['email']
-        email_exists = User.objects.filter(email=new_email).first() is not None
-        if email_exists:
+        new_email = cleaned_data.get('email')
+        if new_email and User.objects.filter(email__iexact=new_email).exists():
             self.add_error('email', f'The email {new_email} is already in use')
         return cleaned_data
 
