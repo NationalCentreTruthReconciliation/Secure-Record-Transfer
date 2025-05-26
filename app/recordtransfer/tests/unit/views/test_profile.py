@@ -676,7 +676,7 @@ class TestSubmissionGroupModalCreateView(TestCase):
         self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
 
-        self.submission_group_modal_url = reverse("recordtransfer:submission_group_modal")
+        self.submission_group_modal_url = reverse("recordtransfer:create_submission_group_modal")
         self.headers = {
             "HX-Request": "true",
         }

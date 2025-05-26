@@ -77,9 +77,9 @@ urlpatterns = [
         name="submission_table",
     ),
     path(
-        "submission-group-modal",
+        "create-submission-group-modal",
         login_required(views.profile.SubmissionGroupModalCreateView.as_view()),
-        name="submission_group_modal",
+        name="create_submission_group_modal",
     ),
 ]
 
