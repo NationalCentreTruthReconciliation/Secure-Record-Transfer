@@ -253,7 +253,7 @@ class SubmissionGroupModalCreateView(CreateView):
         super().form_valid(form)
         response = HttpResponse(status=201)
         return trigger_client_event(
-            response, "showSuccess", {"value": "Submission group created."}
+            response, "showSuccess", {"value": gettext("Submission group created.")}
         )
 
 
