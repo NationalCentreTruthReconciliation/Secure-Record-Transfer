@@ -57,7 +57,7 @@ time before the expiry date that the reminder email is sent can be configured in
 
 Resuming an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Users can resume working on an in-progress submission by clicking on "Resume" for the relevant
+Users can resume working on an in-progress submission by clicking on "Resume" for the relevant 
 submission in the table. This will take them back to the submission form where they left off.
 
 .. image:: images/user_profile_resume_in_progress_submission.webp
