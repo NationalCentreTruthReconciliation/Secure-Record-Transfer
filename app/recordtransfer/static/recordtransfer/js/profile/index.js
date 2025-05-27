@@ -11,7 +11,7 @@ import { showModal } from "./utils.js";
 /**
  * Main initialization function to set up all profile-related functionality
  */
-function initialize() {
+export function initialize() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
 
@@ -49,5 +49,3 @@ function initialize() {
         showModal();
     };
 }
-
-document.addEventListener("DOMContentLoaded", initialize);
