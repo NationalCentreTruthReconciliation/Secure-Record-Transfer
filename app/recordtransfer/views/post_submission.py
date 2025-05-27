@@ -19,7 +19,11 @@ from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.generic import CreateView, DetailView, UpdateView
 
-from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
+from recordtransfer.constants import (
+    ID_SUBMISSION_GROUP_DESCRIPTION,
+    ID_SUBMISSION_GROUP_NAME,
+    SUBMISSION_GROUP_QUERY_NAME,
+)
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup
 
@@ -123,6 +127,7 @@ class SubmissionGroupDetailView(UpdateView):
         context = super().get_context_data(**kwargs)
         context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
         context["IS_NEW"] = False
+        context["SUBMISSION_GROUP_QUERY_NAME"] = SUBMISSION_GROUP_QUERY_NAME
         context["js_context"] = {
             "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
             "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,

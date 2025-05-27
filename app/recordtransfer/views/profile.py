@@ -29,6 +29,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_TABLE,
     ID_SUBMISSION_TABLE,
     PAGINATE_QUERY_NAME,
+    SUBMISSION_GROUP_QUERY_NAME,
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
@@ -217,7 +218,14 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
 
 def submission_table(request: HttpRequest) -> HttpResponse:
     """Render the past submission table with pagination."""
-    queryset = Submission.objects.filter(user=request.user).order_by("-submission_date")
+    group_uuid = request.GET.get(SUBMISSION_GROUP_QUERY_NAME)
+    queryset = None
+    if group_uuid:
+        queryset = Submission.objects.filter(user=request.user, part_of_group__uuid=group_uuid)
+    else:
+        queryset = Submission.objects.filter(user=request.user)
+
+    queryset = queryset.order_by("-submission_date")
     return _paginated_table_view(
         request,
         queryset,
