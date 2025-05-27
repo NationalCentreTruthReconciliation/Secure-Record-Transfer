@@ -13,13 +13,22 @@ import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
+import { setup } from "./submission_form/index";
 
 window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
+    setup();
 });
 
 window.addEventListener("load", () => {
     setupHelpTooltips();
+});
+
+// Re-setup the form when HTMX swaps the main container
+document.addEventListener("htmx:afterSwap", (event) => {
+    if (event.detail.target.id === "main-container") {
+        setup();
+    }
 });
