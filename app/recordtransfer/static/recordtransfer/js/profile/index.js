@@ -15,6 +15,9 @@ export function initialize() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
 
+    if (!contextElement) {
+        return;
+    }
     context = JSON.parse(contextElement.textContent);
     if (!context) {
         console.error("Context not available to set up profile page.");
