@@ -57,7 +57,7 @@ time before the expiry date that the reminder email is sent can be configured in
 
 Resuming an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Users can resume working on an in-progress submission by clicking on "Resume" for the relevant
+Users can resume working on an in-progress submission by clicking on green play icon for the relevant
 submission in the table. This will take them back to the submission form where they left off.
 
 .. image:: images/user_profile_resume_in_progress_submission.webp
@@ -69,15 +69,12 @@ will be listed under the :ref:`Past Submissions` section.
 Deleting an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Users can delete an in-progress submission if they no longer wish to complete it or if it has
-expired. To delete a submission, click the "Delete" button on the relevant row of the table.
+expired. To delete a submission, click the trash can icon on the relevant row of the table.
 
 .. image:: images/user_profile_delete_in_progress_submission.webp
     :alt: User profile delete submission
 
-This will take the user to a confirmation page where they can confirm that they want to delete the
-in-progress submission. If "OK" is clicked, the in-progress submission and any uploaded files
-associated with it will be permanently removed from the system. Clicking on "Cancel" will take the
-user back to the Profile page.
+This will open a confirmation dialog where the user can confirm that they want to delete the in-progress submission. If 'OK' is clicked, the in-progress submission and any uploaded files associated with it will be permanently removed from the system. Clicking on 'Cancel' will close the dialog and keep the user on the Profile page.
 
 .. image:: images/user_profile_delete_in_progress_submission_confirmation.webp
     :alt: User profile delete submission confirmation
@@ -91,15 +88,14 @@ This section displays a table of all submissions that the user has submitted in 
 .. image:: images/user_profile_past_submissions.webp
     :alt: User profile past submissions
 
-The user can view the details of a past submission by clicking on the "Click to view report" button
+The user can view the details of a past submission by clicking on the blue file icon
 on the relevant row of the table. This will open up a submission details page for that
 submission.
 
 .. image:: images/submission_details.webp
     :alt: Submission details
 
-Alternatively, the user can download a CSV file of the submission by clicking on the "Click to
-download" button.
+Alternatively, the user can download a CSV file of the submission by clicking on the green download icon on the relevant row of the table.
 
 Submission Groups
 -----------------
