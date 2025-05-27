@@ -53,6 +53,9 @@ export const setup = () => {
     _setupWithContext();
 
     const submitButton = document.getElementById("submit-form-btn");
+    if (!submitButton) {
+        return;
+    }
     if (submitButton) {
         submitButton.addEventListener("click", () => {
             singleCaptchaFn();
