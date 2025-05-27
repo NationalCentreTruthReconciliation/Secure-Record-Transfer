@@ -33,7 +33,7 @@
     {% block form_explanation %}
     {% endblock form_explanation %}
     <form id="submission-form"
-          hx-post="{{ request.path }}"
+          hx-post="{{ request.get_full_path }}"
           hx-target="#main-container"
           hx-select="#main-container"
           hx-swap="outerHTML"
