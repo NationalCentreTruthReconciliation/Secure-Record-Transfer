@@ -33,6 +33,10 @@ export const setupProfileForm = (context) => {
     ];
 
     const saveButton = document.getElementById("id_save_button");
+    if(!saveButton) {
+        console.error("Save button not found. Ensure the ID is correct.");
+        return;
+    }
 
     const initialValues = {
         firstName: firstName.value,
