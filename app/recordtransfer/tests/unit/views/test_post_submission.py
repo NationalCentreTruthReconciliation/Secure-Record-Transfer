@@ -40,7 +40,15 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        self.client.post(self.create_group_url, data=form_data)
+        response = self.client.post(self.create_group_url, data=form_data)
+        # Check that JSON response returns success
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertEqual(response_json["status"], "success")
+        self.assertEqual(response_json["group"]["name"], "Test Group")
+        self.assertEqual(response_json["group"]["description"], "Test Description")
+        created_group = SubmissionGroup.objects.get(name="Test Group")
+        self.assertEqual(response_json["group"]["uuid"], str(created_group.uuid))
         self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
 
     def test_invalid_form_submission(self) -> None:
@@ -51,6 +59,9 @@ class TestSubmissionGroupCreateView(TestCase):
         }
         response = self.client.post(self.create_group_url, data=form_data)
         self.assertEqual(response.status_code, 400)
+        response_json = response.json()
+        self.assertEqual(response_json["status"], "error")
+        self.assertTrue(response_json["message"])
         self.assertFalse(SubmissionGroup.objects.filter(description="Test Description").exists())
 
     def test_form_valid_json_response(self) -> None:
@@ -141,6 +152,8 @@ class TestSubmissionGroupDetailView(TestCase):
         }
         response = self.client.post(self.group_detail_url, data=form_data)
         self.assertEqual(response.status_code, 200)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
         self.group.refresh_from_db()
         self.assertEqual(self.group.name, "Updated Group")
@@ -155,6 +168,8 @@ class TestSubmissionGroupDetailView(TestCase):
         response = self.client.post(self.group_detail_url, data=form_data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
         self.group.refresh_from_db()
         self.assertNotEqual(self.group.description, "Updated Description")
 
