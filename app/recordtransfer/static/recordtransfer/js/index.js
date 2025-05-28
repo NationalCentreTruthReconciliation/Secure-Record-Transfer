@@ -12,12 +12,18 @@ import "../css/submission_form/review_step.css";
 import "../css/submission_form/uppy.css";
 import "../css/submission_form/modal.css";
 
+import "../css/submission_group/submission_group.css";
+
+
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
 import { setup } from "./submission_form/index";
+import { initializeSubmissionGroup } from "./submission_group/submission_group_form";
+
+
 
 
 window.htmx = htmx;
@@ -36,3 +42,5 @@ document.addEventListener("htmx:afterSwap", (event) => {
         setup();
     }
 });
+
+document.addEventListener("DOMContentLoaded", initializeSubmissionGroup);
