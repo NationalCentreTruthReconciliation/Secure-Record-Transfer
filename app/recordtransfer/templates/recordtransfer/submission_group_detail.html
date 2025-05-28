@@ -26,15 +26,15 @@
             <span class="ml-2">{% trans "Profile" %}</span>
         </a>
         <div class="flex flex-row items-center justify-between mb-4">
-            <span id="title-text" class="title-text">{% trans "Submission Group: " %}{{ group.name }}</span>
+            <span id="title-text" class="text-xl">{% trans "Submission Group: " %}{{ group.name }}</span>
             <button hx-get="{{ group.get_delete_url }}"
-                hx-target="#modal-content-container"
-                hx-swap="innerHTML"
-                hx-select="#modal-content"
-                hx-trigger="click"
-                class="btn btn-error btn-outline btn-sm">
-            {% trans "Delete group" %}
-            <i class="fas fa-trash-alt"></i>
+                    hx-target="#modal-content-container"
+                    hx-swap="innerHTML"
+                    hx-select="#modal-content"
+                    hx-trigger="click"
+                    class="btn btn-error btn-outline btn-sm">
+                {% trans "Delete group" %}
+                <i class="fas fa-trash-alt"></i>
             </button>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
