@@ -69,6 +69,10 @@ export const setupSubmissionGroupForm = (context) => {
     const groupName = document.getElementById(context["ID_SUBMISSION_GROUP_NAME"]);
     const saveButton = document.getElementById("id_create_group_button");
 
+    if (!groupName || !saveButton) {
+        return;
+    }
+
     const checkForChanges = () => {
         saveButton.disabled = !groupName.value;
     };
