@@ -3,6 +3,8 @@
 import logging
 from typing import Any, Optional
 
+from django.urls import reverse
+
 from caais.export import ExportVersion
 from django.contrib import messages
 from django.db.models import QuerySet
@@ -131,6 +133,7 @@ class SubmissionGroupDetailView(UpdateView):
         context["js_context"] = {
             "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
             "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
+            "PROFILE_URL": reverse("recordtransfer:user_profile"),
         }
         return context
 

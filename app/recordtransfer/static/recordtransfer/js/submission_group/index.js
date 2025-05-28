@@ -33,6 +33,12 @@ function initialize() {
             setupSubmissionGroupForm(newContext);
         }
     };
+
+    window.handleDeleteSubmissionGroupAfterRequest = (e) => {
+        if (e.detail.successful) {
+            window.location.replace(context["PROFILE_URL"]);
+        }
+    };
 }
 
 /**
