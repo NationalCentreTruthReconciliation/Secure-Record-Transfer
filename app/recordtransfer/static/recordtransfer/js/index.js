@@ -14,6 +14,9 @@ import "../css/submission_form/modal.css";
 
 import "../css/profile/profile.css";
 
+import "../css/submission_group/submission_group.css";
+
+
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
@@ -21,12 +24,15 @@ import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
 import { initialize } from "./profile/index";
 import { setup } from "./submission_form/index";
+import { initializeSubmissionGroup } from "./submission_group/submission_group_form";
 
 window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
     setup();
+    initialize();
+    initializeSubmissionGroup();
 });
 
 window.addEventListener("load", () => {
@@ -40,4 +46,4 @@ document.addEventListener("htmx:afterSwap", (event) => {
     }
 });
 
-document.addEventListener("DOMContentLoaded", initialize);
+

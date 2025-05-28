@@ -1,4 +1,4 @@
-const initializeSubmissionGroup = function () {
+export const initializeSubmissionGroup = function () {
     const contextElement = document.getElementById("py_context_submission_group");
 
     if (!contextElement) {
@@ -53,4 +53,3 @@ const initializeSubmissionGroup = function () {
     checkForChanges();
 };
 
-document.addEventListener("DOMContentLoaded", initializeSubmissionGroup);
