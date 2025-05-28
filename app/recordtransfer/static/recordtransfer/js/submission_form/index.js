@@ -48,7 +48,7 @@ const _setupWithContext = () => {
     }
 };
 
-const setup = () => {
+export const setup = () => {
     setupDatePickers();
     setupInputMasks();
     setupUnsavedChangesProtection();
@@ -63,12 +63,3 @@ const setup = () => {
         });
     }
 };
-document.addEventListener("DOMContentLoaded", setup);
-
-
-// Re-setup the form when HTMX swaps the main container
-document.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id === "main-container") {
-        setup();
-    }
-});
