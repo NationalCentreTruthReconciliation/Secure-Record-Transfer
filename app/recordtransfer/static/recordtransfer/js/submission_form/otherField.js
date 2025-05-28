@@ -9,6 +9,11 @@ export function setupSelectOtherToggle(selectFieldInputId, otherFieldInputId, ot
     const selectField = document.getElementById(selectFieldInputId);
     const otherInput = document.getElementById(otherFieldInputId);
 
+    // Null checks for required elements
+    if (!selectField || !otherInput) {
+        return;
+    }
+
     updateOtherFieldVisibility(selectField, otherInput, otherValue);
 
     // Update other element when the select field changes

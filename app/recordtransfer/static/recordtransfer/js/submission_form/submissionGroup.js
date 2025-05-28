@@ -17,6 +17,13 @@ export async function setupSubmissionGroupForm() {
     const groupDescDisplay = document.getElementById(context["id_display_group_description"]);
     const noDescription = "No description available";
 
+
+    // Null checks for required elements
+    if (!selectField || !groupName || !groupDesc || !groupDescDisplay) {
+        return;
+    }
+
+
     // Set the initial content of the group description
     // This will be updated after the group descriptions have been fetched asynchronously
     groupDescDisplay.textContent = noDescription;
@@ -95,6 +102,10 @@ export async function setupSubmissionGroupForm() {
     const createNewGroupModal = document.getElementById("create-new-submissiongroup-modal");
     const closeModalButton = document.getElementById("close-new-submissiongroup-modal");
 
+    if (!createNewGroupForm || !createNewGroupModal || !closeModalButton) {
+        return;
+    }
+
     const hideCreateNewGroupModal = () => createNewGroupModal.classList.remove("visible");
     const showCreateNewGroupModal = () => createNewGroupModal.classList.add("visible");
 
@@ -112,12 +123,15 @@ export async function setupSubmissionGroupForm() {
         event.preventDefault();
 
         const formData = new FormData(this);
-
+        const csrfTokenInput = document.querySelector("[name=csrfmiddlewaretoken]");
+        if (!csrfTokenInput) {
+            return;
+        }
         fetch(this.action, {
             method: this.method,
             body: formData,
             headers: {
-                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                "X-CSRFToken": document.querySelector(csrfTokenInput.value)
             }
         })
             .then(response => {

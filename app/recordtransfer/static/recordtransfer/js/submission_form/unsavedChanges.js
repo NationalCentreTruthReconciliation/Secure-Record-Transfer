@@ -30,6 +30,18 @@ export function setupUnsavedChangesProtection() {
         formSaveButton: document.getElementById("form-save-button")
     };
 
+    // Null checks for modal and required buttons
+    if (
+        !elements.modal ||
+        !elements.saveButton ||
+        !elements.closeButton ||
+        !elements.cancelButton ||
+        !elements.leaveButton ||
+        !elements.formSaveButton
+    ) {
+        return;
+    }
+
     // The URL to navigate to when the user chooses to leave the form
     let targetUrl = "";
 

@@ -162,6 +162,10 @@ export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize) => {
     const remainingSizeElement = document.getElementById("remaining-size");
     const maxTotalUploadSizeBytes = maxUploadSize * 1000 * 1000;
 
+    if (!totalSizeElement || !remainingSizeElement) {
+        return;
+    }
+
     const updateElement = (element, value, isError) => {
         if (element) {
             element.innerHTML = value.toFixed(2);

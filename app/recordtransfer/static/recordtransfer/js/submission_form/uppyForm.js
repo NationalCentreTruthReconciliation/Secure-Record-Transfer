@@ -23,6 +23,10 @@ import {
 export async function setupUppy(context) {
     const reviewButton = document.getElementById("form-review-button");
     const submissionForm = document.getElementById("submission-form");
+
+    if (!context || !reviewButton || !submissionForm) {
+        return;
+    }
     const issueFileIds = [];
 
     /**

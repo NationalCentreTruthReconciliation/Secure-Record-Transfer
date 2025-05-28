@@ -8,6 +8,9 @@ import IMask from "imask";
  */
 export function setupDatePickers() {
     const dateInput = document.querySelector(".date-range-picker");
+    if (!dateInput) {
+        return;
+    }
 
     new AirDatepicker(dateInput, {
         locale: localeEn,
@@ -24,7 +27,12 @@ export function setupDatePickers() {
  * Setup input masks for phone numbers and dates.
  */
 export function setupInputMasks() {
-    document.querySelectorAll(".date-range-text").forEach((el) => {
+    const dateRangeTextInputs = document.querySelectorAll(".date-range-text");
+    if( !dateRangeTextInputs || dateRangeTextInputs.length === 0) {
+        return;
+    }
+
+    dateRangeTextInputs.forEach((el) => {
         IMask(el, {
             mask: [
                 {
@@ -74,10 +82,13 @@ export function setupInputMasks() {
         });
     });
 
+    const phoneInputs = document.querySelectorAll("input[id$=phone_number]");
+    if (!phoneInputs || phoneInputs.length === 0) {
+        return;
+    }
     document.querySelectorAll("input[id$=phone_number]").forEach((el) => {
         IMask(el, {
             mask: "+0 (000) 000-0000",
         });
     });
 }
-

@@ -5,6 +5,18 @@ import { setupSelectOtherToggle } from "./otherField";
  * @param {object} context - The context object containing form field IDs
  */
 export function setupSourceInfoForm(context) {
+    if (
+        !context ||
+        !context["id_source_type"] ||
+        !context["id_other_source_type"] ||
+        !context["other_type_id"] ||
+        !context["id_source_role"] ||
+        !context["id_other_source_role"] ||
+        !context["other_role_id"] ||
+        !context["id_enter_manual_source_info"]
+    ) {
+        return;
+    }
     // Toggles Other source type field depending on value of Source type field
     setupSelectOtherToggle(
         context["id_source_type"],
@@ -31,6 +43,10 @@ export function setupSourceInfoForm(context) {
     const sourceRoleSelect = document.getElementById(context["id_source_role"]);
     const enterManualInfoInputId = context["id_enter_manual_source_info"];
     const enterManualInfoInputElement = document.getElementById(enterManualInfoInputId);
+
+    if (!sourceTypeSelect || !sourceRoleSelect || !enterManualInfoInputElement) {
+        return;
+    }
 
     if (!enterManualInfoInputElement) {
         console.error(`No element exists with the id: ${enterManualInfoInputId}`);

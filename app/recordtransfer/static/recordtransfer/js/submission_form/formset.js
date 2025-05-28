@@ -13,8 +13,22 @@ export function setupFormset(prefix, onnewform = undefined) {
     const initialForms = parseInt(initialFormsInput.getAttribute("value"));
     const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
 
+    if (
+        !maxFormsInput ||
+        !initialFormsInput ||
+        !totalFormsInput ||
+        !removeFormButton ||
+        !addFormButton
+    ) {
+        return;
+    }
+
     let formsetForms = document.querySelectorAll(".form-row");
     let numForms = formsetForms.length;
+
+    if (numForms === 0) {
+        return;
+    }
 
     const refreshFormset = () => {
         formsetForms = document.querySelectorAll(".form-row");
