@@ -7,7 +7,6 @@
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_in_progress" }}
-    <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block content %}
     <div class="title-text">{% trans "Confirm In-Progress Submission Deletion" %}</div>
@@ -21,14 +20,8 @@
         <p>
             <button type="button"
                     onclick="window.location.href='{% url 'recordtransfer:user_profile' %}'"
-                    class="red-button margin-right-20px">
-                    {% trans "Cancel" %}
-            </button>
-            <button type="button"
-                    class="blue-button"
-                    id="ok-btn">
-                    {% trans "OK" %}
-            </button>
+                    class="red-button margin-right-20px">{% trans "Cancel" %}</button>
+            <button type="button" class="blue-button" id="ok-btn">{% trans "OK" %}</button>
         </p>
     </form>
 {% endblock content %}
