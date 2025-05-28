@@ -747,8 +747,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         email_input.send_keys(data["email"])
 
         # Save the form
-        form_save_button.click()
-
+        if form_save_button.is_displayed() and form_save_button.is_enabled():
+            form_save_button.click()
         # Check for success message
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
