@@ -51,16 +51,6 @@ class TestUserProfileView(TestCase):
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
 
-        # Table URLs
-        self.submission_group_table_url = reverse("recordtransfer:submission_group_table")
-        self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
-        self.submission_table_url = reverse("recordtransfer:submission_table")
-
-        # HTMX related
-        self.htmx_headers = {
-            "HX-Request": "true",
-        }
-
     def tearDown(self) -> None:
         """Clean up after each test."""
         UploadSession.objects.all().delete()
@@ -68,39 +58,6 @@ class TestUserProfileView(TestCase):
         SubmissionGroup.objects.all().delete()
         Submission.objects.all().delete()
         User.objects.all().delete()
-
-    def _create_in_progress_submission(
-        self,
-        title: Optional[str] = None,
-        user: Optional[User] = None,
-        upload_session: Optional[UploadSession] = None,
-    ) -> InProgressSubmission:
-        """Create an InProgressSubmission for testing.
-
-        Args:
-            title: Title for the submission. Defaults to "Test Submission".
-            user: User who owns the submission. Defaults to self.user.
-            upload_session: Associated upload session. Defaults to
-                creating a new session for the specified user.
-
-        Returns:
-            The newly created in-progress submission object.
-        """
-        if user is None:
-            user = self.user
-
-        if upload_session is None:
-            upload_session = UploadSession.new_session(user=cast(User, user))
-
-        if title is None:
-            title = "Test Submission"
-
-        return InProgressSubmission.objects.create(
-            user=user,
-            uuid=str(uuid.uuid4()),
-            upload_session=upload_session,
-            title=title,
-        )
 
     def test_access_authenticated_user(self) -> None:
         """Test that an authenticated user can access the profile page."""
@@ -334,18 +291,64 @@ class TestUserProfileView(TestCase):
             self.error_message,
         )
 
-    ### Tests for All Tables ###
-    def test_tables_require_htmx_request(self) -> None:
-        """Test that all table views require HTMX headers."""
-        for url in [
-            self.submission_group_table_url,
-            self.in_progress_table_url,
-            self.submission_table_url,
-        ]:
-            response = self.client.get(url)  # No HTMX headers
-            self.assertEqual(response.status_code, 400)
 
-    ### Tests for In-Progress Submission Table ###
+class TestInProgressSubmissionTableView(TestCase):
+    """Tests for the in-progress submission table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        UploadSession.objects.all().delete()
+        InProgressSubmission.objects.all().delete()
+        User.objects.all().delete()
+
+    def _create_in_progress_submission(
+        self,
+        title: Optional[str] = None,
+        user: Optional[User] = None,
+        upload_session: Optional[UploadSession] = None,
+    ) -> InProgressSubmission:
+        """Create an InProgressSubmission for testing.
+
+        Args:
+            title: Title for the submission. Defaults to "Test Submission".
+            user: User who owns the submission. Defaults to self.user.
+            upload_session: Associated upload session. Defaults to
+                creating a new session for the specified user.
+
+        Returns:
+            The newly created in-progress submission object.
+        """
+        if user is None:
+            user = self.user
+
+        if upload_session is None:
+            upload_session = UploadSession.new_session(user=cast(User, user))
+
+        if title is None:
+            title = "Test Submission"
+
+        return InProgressSubmission.objects.create(
+            user=user,
+            uuid=str(uuid.uuid4()),
+            upload_session=upload_session,
+            title=title,
+        )
+
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.in_progress_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
 
     def test_in_progress_submission_expires_at_no_expiry(self) -> None:
         """Test that the "Expires at" cell contains just a dash when the in-progress submission
@@ -364,6 +367,7 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
@@ -384,6 +388,7 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     def test_in_progress_submission_expiring_soon(self) -> None:
         """Test that the expiry date is shown with a warning icon if the in-progress submission is
         expiring soon.
@@ -407,6 +412,7 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     def test_in_progress_submission_expired(self) -> None:
         """Test that the expiry date is shown with the expired icon and tooltip if the in-progress
         submission has expired.
@@ -449,12 +455,14 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
 
+        # Note that in-progress submissions are ordered by creation date, so the most recent
+        # submissions will appear first in the table.
         # Test first page
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertIn("Test In-Progress Submission 2", response.content.decode())
         self.assertIn("Test In-Progress Submission 1", response.content.decode())
-        self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 0", response.content.decode())
 
         # Test second page
         response = self.client.get(
@@ -462,11 +470,34 @@ class TestUserProfileView(TestCase):
             headers=self.htmx_headers,
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Test In-Progress Submission 2", response.content.decode())
-        self.assertNotIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
         self.assertNotIn("Test In-Progress Submission 1", response.content.decode())
 
-    ### Tests for Submission Group Table ###
+
+class TestSubmissionGroupTableView(TestCase):
+    """Tests for the submission group table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.submission_group_table_url = reverse("recordtransfer:submission_group_table")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        SubmissionGroup.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.submission_group_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
 
     def test_submission_group_table_empty(self) -> None:
         """Test that the submission group table works with no groups."""
@@ -521,7 +552,32 @@ class TestUserProfileView(TestCase):
         self.assertNotIn("Test Group 1", response.content.decode())
 
 
-class TestInProgressSubmission(TestCase):
+class TestSubmissionTableView(TestCase):
+    """Tests for the submission table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.submission_table_url = reverse("recordtransfer:submission_table")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        Submission.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.submission_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
+
+
+class TestDeleteInProgressSubmission(TestCase):
     """Tests for the delete_in_progress_submission view."""
 
     def setUp(self) -> None:
@@ -553,7 +609,8 @@ class TestInProgressSubmission(TestCase):
 
         self.client.force_login(self.user)
         self.delete_ip_submission_url = reverse(
-            "recordtransfer:delete_in_progress_submission_modal", kwargs={"uuid": self.in_progress.uuid}
+            "recordtransfer:delete_in_progress_submission_modal",
+            kwargs={"uuid": self.in_progress.uuid},
         )
         self.headers = {
             "HX-Request": "true",
@@ -606,7 +663,8 @@ class TestInProgressSubmission(TestCase):
     def test_cannot_delete_other_users_submission(self) -> None:
         """Test that a user cannot delete another user's in-progress submission."""
         other_url = reverse(
-            "recordtransfer:delete_in_progress_submission_modal", kwargs={"uuid": self.other_in_progress.uuid}
+            "recordtransfer:delete_in_progress_submission_modal",
+            kwargs={"uuid": self.other_in_progress.uuid},
         )
 
         response = self.client.delete(other_url, headers=self.headers)
