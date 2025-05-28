@@ -11,13 +11,10 @@ import { showModal } from "./utils.js";
 /**
  * Main initialization function to set up all profile-related functionality
  */
-export function initialize() {
+function initialize() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
 
-    if (!contextElement) {
-        return;
-    }
     context = JSON.parse(contextElement.textContent);
     if (!context) {
         console.error("Context not available to set up profile page.");
@@ -52,3 +49,5 @@ export function initialize() {
         showModal();
     };
 }
+
+document.addEventListener("DOMContentLoaded", initialize);

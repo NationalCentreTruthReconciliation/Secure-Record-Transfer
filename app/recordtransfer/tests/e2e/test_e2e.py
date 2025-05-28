@@ -412,12 +412,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
 
         # Wait for the modal to appear
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "id_submission_group_name"))
-        )
-        WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "id_create_group_button"))
-        )
+        WebDriverWait(driver, 2)
+
         # Fill out the form in the modal
         group_name_input = driver.find_element(By.ID, "id_submission_group_name")
         group_description_input = driver.find_element(By.ID, "id_submission_group_description")
@@ -426,9 +422,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         group_description_input.send_keys(data["description"])
 
         # Submit the form to create the new group
-        WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "id_create_group_button"))
-        ).click()
+        driver.find_element(By.ID, "id_create_group_button").click()
 
         # Wait for the modal to close and the new group to be added to the select options
         WebDriverWait(driver, 2).until(
@@ -743,8 +737,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         email_input.send_keys(data["email"])
 
         # Save the form
-        if form_save_button.is_displayed() and form_save_button.is_enabled():
-            form_save_button.click()
+        form_save_button.click()
+
         # Check for success message
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
@@ -763,8 +757,12 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         in_progress_tab.click()
 
         # Look for resume icon and click it
-        resume_link = driver.find_element(By.XPATH, "//a[@data-tip='Resume']")
+        resume_link = driver.find_element(
+            By.XPATH,
+            "//a[@data-tip='Resume']"
+        )
         resume_link.click()
+
 
         # Wait for the Contact Information step to load
         WebDriverWait(driver, 10).until(

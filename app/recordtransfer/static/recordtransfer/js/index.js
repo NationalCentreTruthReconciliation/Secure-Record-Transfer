@@ -12,14 +12,11 @@ import "../css/submission_form/review_step.css";
 import "../css/submission_form/uppy.css";
 import "../css/submission_form/modal.css";
 
-import "../css/profile/profile.css";
-
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
-import { initialize } from "./profile/index";
 import { setup } from "./submission_form/index";
 
 window.htmx = htmx;
@@ -27,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
     setup();
-    initialize();
 });
 
 window.addEventListener("load", () => {
