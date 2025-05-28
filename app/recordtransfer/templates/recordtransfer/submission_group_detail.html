@@ -13,42 +13,43 @@
     <link rel="stylesheet" href="{% static 'profile.css' %}">
 {% endblock stylesheet %}
 {% block title %}
-    {% if IS_NEW %}
-        {% trans "Create New Submission Group" %}
-    {% else %}
-        {% trans "Submission Group: " %} {{ group.name }}
-    {% endif %}
+    {% trans "Submission Group: " %} {{ group.name }}
 {% endblock title %}
 {% block theme %}
     nctr
 {% endblock theme %}
 {% block content %}
-    <a href="{% url 'recordtransfer:user_profile' %}" class="back-to-btn">
-        <i class="fas fa-arrow-left"></i> {% trans "Back to Profile" %}
-    </a>
-    <div class="title-text">
-        {% if IS_NEW %}
-            {% trans "Create New Submission Group" %}
-        {% else %}
-            {% trans "Submission Group: " %} {{ group.name }}
-        {% endif %}
-    </div>
-    {% include "includes/submission_group_form.html" %}
-    <div class="bg-base-100 border-base-300 p-6">
-        <div hx-get="{% url 'recordtransfer:submission_table' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
-             hx-trigger="load"
-             id="{{ ID_SUBMISSION_TABLE }}">
-            <div class="flex flex-col w-full items-center gap-4">
-                <div class="skeleton h-32 w-full"></div>
-                <div class="skeleton h-5 w-1/10"></div>
+    <div class="mb-8">
+        <a href="{% url 'recordtransfer:user_profile' %}"
+           class="link link-info no-underline inline-block mb-4">
+            <i class="fas fa-arrow-left"></i><span class="ml-2">{% trans "Profile" %}</span>
+        </a>
+        <div class="title-text mb-5">{% trans "Submission Group Details" %}</div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Form Section -->
+            <div class="lg:col-span-1 bg-base-100 border border-base-300 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">{% trans "Edit Group" %}</h2>
+                {% include "includes/submission_group_updated_form.html" %}
             </div>
-        </div>
-        <div class="flex justify-end">
-            <a href="{% url 'recordtransfer:submit' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
-               class="btn btn-sm">
-                <span class="hidden md:inline">{% trans "New submission" %}</span>
-                <i class="fa fa-plus" aria-hidden="true"></i>
-            </a>
+            <!-- Table Section -->
+            <div class="lg:col-span-3 bg-base-100 border border-base-300 rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">{% trans "Submissions" %}</h2>
+                    <a href="{% url 'recordtransfer:submit' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
+                       class="btn btn-sm">
+                        <span class="hidden md:inline">{% trans "New submission" %}</span>
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div hx-get="{% url 'recordtransfer:submission_table' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
+                     hx-trigger="load"
+                     id="{{ ID_SUBMISSION_TABLE }}">
+                    <div class="flex flex-col w-full items-center gap-4">
+                        <div class="skeleton h-32 w-full"></div>
+                        <div class="skeleton h-5 w-1/10"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock content %}
