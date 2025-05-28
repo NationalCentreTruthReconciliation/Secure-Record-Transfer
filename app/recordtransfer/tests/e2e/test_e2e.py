@@ -411,9 +411,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Click the button to show the add new group dialog
         driver.find_element(By.ID, "show-add-new-group-dialog").click()
 
-        # Wait for the modal to appear
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "id_create_group_button"))
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "id_create_group_button"))
+        )
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "id_create_group_button"))
         )
         # Fill out the form in the modal
         group_name_input = driver.find_element(By.ID, "id_submission_group_name")
