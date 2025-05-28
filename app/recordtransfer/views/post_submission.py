@@ -129,12 +129,8 @@ class SubmissionGroupDetailView(UpdateView):
         context["IS_NEW"] = False
         context["SUBMISSION_GROUP_QUERY_NAME"] = SUBMISSION_GROUP_QUERY_NAME
         context["js_context"] = {
-            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
-            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
-            "DELETE_URL": reverse(
-                "recordtransfer:submission_group_detail",
-                kwargs={"uuid": self.get_object().uuid},
-            ),
+            "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+            "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
         }
         return context
 

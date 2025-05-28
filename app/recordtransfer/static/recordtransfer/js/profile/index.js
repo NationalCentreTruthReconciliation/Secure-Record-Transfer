@@ -1,12 +1,12 @@
-import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
     handleModalBeforeSwap
-} from "./htmx.js";
+} from "../utils/htmx.js";
+import { setupToastNotifications } from "../utils/toast.js";
+import { showModal } from "../utils/utils.js";
+import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import { initTabListeners, restoreTab } from "./tab.js";
-import { setupToastNotifications } from "./toast.js";
-import { showModal } from "./utils.js";
 
 /**
  * Main initialization function to set up all profile-related functionality
@@ -14,6 +14,11 @@ import { showModal } from "./utils.js";
 function initialize() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
+
+    if (!contextElement) {
+        console.error("Profile context element not found.");
+        return;
+    }
 
     context = JSON.parse(contextElement.textContent);
     if (!context) {

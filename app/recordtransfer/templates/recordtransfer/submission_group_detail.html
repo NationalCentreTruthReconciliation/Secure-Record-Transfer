@@ -21,10 +21,22 @@
 {% block content %}
     <div class="mb-8">
         <a href="{% url 'recordtransfer:user_profile' %}"
-           class="link link-info no-underline inline-block mb-4">
-            <i class="fas fa-arrow-left"></i><span class="ml-2">{% trans "Profile" %}</span>
+           class="link link-info no-underline inline-block mb-6">
+            <i class="fas fa-arrow-left"></i>
+            <span class="ml-2">{% trans "Profile" %}</span>
         </a>
-        <div class="title-text mb-5">{% trans "Submission Group Details" %}</div>
+        <div class="flex flex-row items-center gap-2 mb-4">
+            <span class="title-text">{% trans "Submission Group: " %}{{ group.name }}</span>
+            <a hx-get="{{ group.get_delete_url }}"
+               hx-target="#modal-content-container"
+               hx-swap="innerHTML"
+               hx-select="#modal-content"
+               hx-trigger="click"
+               class="link link-error tooltip"
+               data-tip="{% trans "Delete" %}">
+                <i class="fas fa-trash-alt"></i>
+            </a>
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Form Section -->
             <div class="lg:col-span-1 bg-base-100 border border-base-300 rounded-lg p-6">
@@ -33,13 +45,8 @@
             </div>
             <!-- Table Section -->
             <div class="lg:col-span-3 bg-base-100 border border-base-300 rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">{% trans "Submissions" %}</h2>
-                    <a href="{% url 'recordtransfer:submit' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
-                       class="btn btn-sm">
-                        <span class="hidden md:inline">{% trans "New submission" %}</span>
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </a>
+                <div class="mb-4">
+                    <h2 class="text-lg font-semibold">{% trans "Submissions in Group" %}</h2>
                 </div>
                 <div hx-get="{% url 'recordtransfer:submission_table' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
                      hx-trigger="load"
@@ -49,7 +56,15 @@
                         <div class="skeleton h-5 w-1/10"></div>
                     </div>
                 </div>
+                <div class="flex justify-end">
+                    <a href="{% url 'recordtransfer:submit' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
+                       class="btn btn-sm">
+                        <span class="hidden md:inline">{% trans "New submission" %}</span>
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+    {% include "includes/base_modal.html" %}
 {% endblock content %}
