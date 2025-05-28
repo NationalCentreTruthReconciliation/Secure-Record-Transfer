@@ -22,16 +22,19 @@ class TestSubmissionGroupCreateView(TestCase):
         """Set up test environment."""
         self.client.login(username="testuser", password="password")
 
-    def test_access_authenticated_user(self) -> None:
-        """Test that an authenticated user can access the view."""
+    def test_get_failure(self) -> None:
+        """Test that a GET request to the create view returns a 405 Method Not Allowed."""
         response = self.client.get(self.create_group_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "includes/submission_group_form.html")
+        self.assertEqual(response.status_code, 405)
 
-    def test_access_unauthenticated_user(self) -> None:
+    def test_unauthenticated_user_access(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
-        response = self.client.get(self.create_group_url)
+        form_data = {
+            "name": "Test Group",
+            "description": "Test Description",
+        }
+        response = self.client.post(self.create_group_url, data=form_data)
         self.assertRedirects(response, f"{reverse('login')}?next={self.create_group_url}")
 
     def test_valid_form_submission(self) -> None:
