@@ -428,6 +428,10 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Submit the form to create the new group
         group_button = driver.find_element(By.ID, "id_create_group_button")
         driver.execute_script("arguments[0].scrollIntoView(true);", group_button)
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "id_create_group_button"))
+        )
+
         group_button.click()
 
         # Wait for the modal to close and the new group to be added to the select options
