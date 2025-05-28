@@ -199,7 +199,7 @@ class SubmissionFormWizard(SessionWizardView):
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Dispatch the request to the appropriate handler method."""
-        self.in_progress_uuid = request.GET.get("resume")
+        self.in_progress_uuid = request.GET.get("resume") or request.POST.get("in_progress_uuid")
 
         if not self.in_progress_uuid:
             self.submission_group_uuid = request.GET.get("group")
@@ -535,6 +535,9 @@ class SubmissionFormWizard(SessionWizardView):
         context = super().get_context_data(form, **kwargs)
 
         context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
+
+        if self.in_progress_uuid:
+            context["in_progress_uuid"] = self.in_progress_uuid
 
         if INFOMESSAGE in self._TEMPLATES[self.current_step]:
             context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
