@@ -75,12 +75,6 @@ module.exports = {
                 "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        submission_detail: [
-            ...glob.sync(
-                "./app/recordtransfer/static/" +
-                "recordtransfer/css/submission_detail/*.css")
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
         // Admin Site static assets
         admin_metadata: [
             ...glob.sync("./app/caais/static/caais/css/base/*.css")

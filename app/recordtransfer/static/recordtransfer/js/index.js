@@ -14,6 +14,8 @@ import "../css/submission_form/modal.css";
 
 import "../css/submission_group/submission_group.css";
 
+import "../css/submission_detail/submission_detail.css";
+
 
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
