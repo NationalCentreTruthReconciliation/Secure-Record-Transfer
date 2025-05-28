@@ -423,7 +423,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
         # Submit the form to create the new group
         group_button = driver.find_element(By.ID, "id_create_group_button")
-        group_button.click()
+        if group_button:
+            group_button.click()
 
         # Wait for the modal to close and the new group to be added to the select options
         WebDriverWait(driver, 2).until(
