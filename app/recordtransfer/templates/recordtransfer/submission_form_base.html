@@ -8,6 +8,7 @@
 {% endblock title %}
 {% block javascript %}
     {{ block.super }}
+    <link rel="stylesheet" href="{% static 'main.css' %}">
     {{ wizard.steps.step1|json_script:"current_step_data" }}
     {{ js_context|json_script:js_context_id }}
 {% endblock javascript %}
