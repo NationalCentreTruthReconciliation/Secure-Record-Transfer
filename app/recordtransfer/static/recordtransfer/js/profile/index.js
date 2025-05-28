@@ -11,7 +11,7 @@ import { showModal } from "./utils.js";
 /**
  * Main initialization function to set up all profile-related functionality
  */
-function initialize() {
+export const initialize = function() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
 
@@ -48,6 +48,6 @@ function initialize() {
         // Always show the modal after a swap on the modal content container
         showModal();
     };
-}
+};
 
 document.addEventListener("DOMContentLoaded", initialize);

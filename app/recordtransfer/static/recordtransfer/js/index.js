@@ -16,12 +16,15 @@ import "../css/submission_group/submission_group.css";
 
 import "../css/submission_detail/submission_detail.css";
 
+import "../css/profile/profile.css";
+
 
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
+import { initialize } from "./profile/index";
 import { setup } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/submission_group_form";
 
@@ -46,3 +49,6 @@ document.addEventListener("htmx:afterSwap", (event) => {
 });
 
 document.addEventListener("DOMContentLoaded", initializeSubmissionGroup);
+
+document.addEventListener("DOMContentLoaded", initialize);
+
