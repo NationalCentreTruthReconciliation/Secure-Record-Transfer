@@ -34,7 +34,6 @@
     {% endblock form_explanation %}
     <form id="submission-form"
           hx-post="{{ request.path }}"
-          {% if in_progress_uuid %}hx-vals='{"in_progress_uuid":"{{ in_progress_uuid }}"}'{% endif %}
           hx-target="#main-container"
           hx-select="#main-container"
           hx-swap="outerHTML"
