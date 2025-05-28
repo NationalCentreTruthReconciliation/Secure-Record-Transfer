@@ -12,6 +12,9 @@ export function setupFormset(prefix, onnewform = undefined) {
     const initialFormsInput = document.getElementById(`id_${prefix}-INITIAL_FORMS`);
     const initialForms = parseInt(initialFormsInput.getAttribute("value"));
     const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+    const removeFormButton = document.querySelector(".remove-form-row");
+    const addFormButton = document.querySelector(".add-form-row");
+
 
     if (
         !maxFormsInput ||
@@ -42,8 +45,6 @@ export function setupFormset(prefix, onnewform = undefined) {
         addFormButton.disabled = numForms >= maxForms;
     };
 
-    const removeFormButton = document.querySelector(".remove-form-row");
-    const addFormButton = document.querySelector(".add-form-row");
 
     // Django may add extra forms when the formset is first created.
     // Initial forms may be set to zero, though, so don't remove all the forms.
