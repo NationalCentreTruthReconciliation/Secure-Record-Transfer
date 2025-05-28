@@ -4,7 +4,6 @@ import logging
 from typing import Any, Optional
 
 from caais.export import ExportVersion
-from django.contrib import messages
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import (
@@ -12,7 +11,7 @@ from django.http import (
     HttpResponse,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
