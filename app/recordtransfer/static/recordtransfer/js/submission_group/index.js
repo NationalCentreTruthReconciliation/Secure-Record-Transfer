@@ -2,7 +2,7 @@ import {
     handleModalBeforeSwap
 } from "../utils/htmx.js";
 import { setupToastNotifications } from "../utils/toast.js";
-import { showModal } from "../utils/utils.js";
+import { showModal, isValidUrl } from "../utils/utils.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     initialize();
@@ -47,7 +47,7 @@ function initialize() {
                 }
             }
 
-            window.location.replace(context["PROFILE_URL"]);
+            window.location.replace(isValidUrl(context["PROFILE_URL"]));
         }
     };
 }
