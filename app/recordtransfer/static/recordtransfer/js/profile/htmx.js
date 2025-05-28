@@ -18,11 +18,22 @@ import { addQueryParam, closeModal, getCurrentTablePage } from "./utils.js";
 export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
     closeModal();
 
+    // Null checks for event and context
+    if (!e || !e.detail || !context) {
+        return;
+    }
+
     // If the request was successful, refresh the table
     if (e.detail.successful) {
         // Get base refresh URL
         const refreshUrl = context["IN_PROGRESS_SUBMISSION_TABLE_URL"];
         const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+        const tableId = context["ID_IN_PROGRESS_SUBMISSION_TABLE"];
+
+
+        if (!refreshUrl || !paginateQueryName || !tableId) {
+            return;
+        }
 
         // Get the current page number
         const currentPage = getCurrentTablePage();
@@ -32,7 +43,7 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
         window.htmx.ajax("GET",
             finalUrl,
             {
-                target: "#" + context["ID_IN_PROGRESS_SUBMISSION_TABLE"],
+                target: "#" + tableId,
                 swap: "innerHTML"
             });
     }
@@ -41,11 +52,22 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
 export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
     closeModal();
 
+    // Null checks for event and context
+    if (!e || !e.detail || !context) {
+        return;
+    }
+
     // If the request was successful, refresh the table
     if (e.detail.successful) {
         // Get base refresh URL
         const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
         const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+        const tableId = context["ID_SUBMISSION_GROUP_TABLE"];
+
+
+        if (!refreshUrl || !paginateQueryName || !tableId) {
+            return;
+        }
 
         // Get the current page number
         const currentPage = getCurrentTablePage();
@@ -55,7 +77,7 @@ export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
         window.htmx.ajax("GET",
             finalUrl,
             {
-                target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
+                target: "#" + tableId,
                 swap: "innerHTML"
             });
     }
@@ -75,6 +97,12 @@ export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
  * table to update.
  */
 export function handleModalBeforeSwap(e, context) {
+
+    // Null checks for event and context
+    if (!e || !e.detail || !context) {
+        return;
+    }
+
     if (!e.detail.serverResponse && e.detail.requestConfig.elt.id === "submission-group-form") {
         e.preventDefault(); // Stop the event from bubbling up
         closeModal();
@@ -82,6 +110,12 @@ export function handleModalBeforeSwap(e, context) {
         // Refresh the table
         const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
         const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+        const tableId = context["ID_SUBMISSION_GROUP_TABLE"];
+
+
+        if (!refreshUrl || !paginateQueryName || !tableId) {
+            return;
+        }
         const currentPage = getCurrentTablePage();
 
         const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
@@ -89,7 +123,7 @@ export function handleModalBeforeSwap(e, context) {
         window.htmx.ajax("GET",
             finalUrl,
             {
-                target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
+                target: "#" + tableId,
                 swap: "innerHTML"
             });
     }

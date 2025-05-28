@@ -7,6 +7,11 @@ export function getCurrentTablePage() {
     const activeTabInput = document.querySelector(
         ".tabs input[name=\"profile_tabs\"]:checked"
     );
+
+    if (!activeTabInput) {
+        return null;
+    }
+
     const activeTabContent = activeTabInput
         ? activeTabInput.closest(".tab").nextElementSibling
         : null;

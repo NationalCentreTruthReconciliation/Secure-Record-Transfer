@@ -25,7 +25,11 @@ export const restoreTab = () => {
  */
 export const initTabListeners = () => {
     const tabs = document.querySelectorAll(".tabs input[name='profile_tabs']");
+    if (!tabs || tabs.length === 0) {
+        return;
+    }
     tabs.forEach((tab, index) => {
+        if (!tab) {return;}
         tab.addEventListener("change", () => {
             if (tab.checked) {
                 localStorage.setItem("activeProfileTab", index.toString());

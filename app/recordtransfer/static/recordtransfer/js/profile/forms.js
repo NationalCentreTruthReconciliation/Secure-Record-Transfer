@@ -23,6 +23,18 @@ export const setupProfileForm = (context) => {
         context["ID_CONFIRM_NEW_PASSWORD"]
     );
 
+    // Null checks for required elements
+    if (
+        !firstName ||
+        !lastName ||
+        !getsNotificationEmails ||
+        !currentPassword ||
+        !newPassword ||
+        !confirmNewPassword
+    ) {
+        return;
+    }
+
     const inputFields = [
         firstName,
         lastName,
@@ -33,6 +45,9 @@ export const setupProfileForm = (context) => {
     ];
 
     const saveButton = document.getElementById("id_save_button");
+    if (!saveButton) {
+        return;
+    }
 
     const initialValues = {
         firstName: firstName.value,
@@ -50,7 +65,10 @@ export const setupProfileForm = (context) => {
     };
 
     inputFields.forEach(input => {
-        input.addEventListener(input.type === "checkbox" ? "change" : "input", checkForChanges);
+        if (input) {
+            const eventType = input.type === "checkbox" ? "change" : "input";
+            input.addEventListener(eventType, checkForChanges);
+        }
     });
 
     checkForChanges();
@@ -64,6 +82,10 @@ export const setupProfileForm = (context) => {
 export const setupSubmissionGroupForm = (context) => {
     const groupName = document.getElementById(context["ID_SUBMISSION_GROUP_NAME"]);
     const saveButton = document.getElementById("id_create_group_button");
+
+    if (!groupName || !saveButton) {
+        return;
+    }
 
     const checkForChanges = () => {
         saveButton.disabled = !groupName.value;
