@@ -3,7 +3,7 @@ import {
     handleDeleteSubmissionGroupAfterRequest,
     handleModalBeforeSwap
 } from "../utils/htmx.js";
-import { setupToastNotifications } from "../utils/toast.js";
+import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
 import { showModal } from "../utils/utils.js";
 import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import { initTabListeners, restoreTab } from "./tab.js";
@@ -30,6 +30,7 @@ function initialize() {
     initTabListeners();
     restoreTab();
     setupToastNotifications();
+    displayStoredToast();
 
     // Wrapper functions to provide context to HTMX event handlers
     window.handleDeleteIpSubmissionAfterRequest = (e) => {

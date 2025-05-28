@@ -100,6 +100,35 @@ function showWarningToast(message) {
 }
 
 /**
+ * Displays a stored toast notification from session storage if one exists.
+ * This should be called on page load to show toasts from previous page actions.
+ */
+export function displayStoredToast() {
+    const storedToast = sessionStorage.getItem("pendingToast");
+    if (storedToast) {
+        try {
+            const toastData = JSON.parse(storedToast);
+
+            if (toastData.showSuccess) {
+                showSuccessToast(toastData.showSuccess.value);
+            } else if (toastData.showError) {
+                showErrorToast(toastData.showError.value);
+            } else if (toastData.showInfo) {
+                showInfoToast(toastData.showInfo.value);
+            } else if (toastData.showWarning) {
+                showWarningToast(toastData.showWarning.value);
+            }
+
+            // Clear the stored toast after displaying it
+            sessionStorage.removeItem("pendingToast");
+        } catch (error) {
+            console.error("Failed to parse stored toast data:", error);
+            sessionStorage.removeItem("pendingToast");
+        }
+    }
+}
+
+/**
  * Registers HTMX event listeners to show toast notifications for custom events.
  */
 export const setupToastNotifications = () => {

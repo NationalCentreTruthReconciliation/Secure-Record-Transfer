@@ -36,6 +36,17 @@ function initialize() {
 
     window.handleDeleteSubmissionGroupAfterRequest = (e) => {
         if (e.detail.successful) {
+            const hxTriggerHeader = e.detail.xhr.getResponseHeader("hx-trigger");
+
+            if (hxTriggerHeader) {
+                try {
+                    const triggerData = JSON.parse(hxTriggerHeader);
+                    sessionStorage.setItem("pendingToast", JSON.stringify(triggerData));
+                } catch (error) {
+                    console.error("Failed to parse HTMX trigger header:", error);
+                }
+            }
+
             window.location.replace(context["PROFILE_URL"]);
         }
     };
