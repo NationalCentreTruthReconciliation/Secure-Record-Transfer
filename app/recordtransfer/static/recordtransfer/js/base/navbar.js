@@ -8,6 +8,10 @@ export function setupNavbar() {
     const overlay = document.querySelector(".menu-overlay");
     const toggleButton = document.querySelector(".nav-toggle-button");
 
+    if (!openToggle || !navItemsContainer || !overlay || !toggleButton) {
+        return;
+    }
+
     toggleButton.addEventListener("click", function(e) {
         e.preventDefault();
         toggleButton.classList.toggle("active");
