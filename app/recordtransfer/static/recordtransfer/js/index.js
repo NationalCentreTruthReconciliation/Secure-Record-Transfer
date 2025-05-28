@@ -22,6 +22,7 @@ import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
+import { initialize } from "./profile/index";
 import { setup } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/submission_group_form";
 
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
     setup();
+    initialize();
 });
 
 window.addEventListener("load", () => {

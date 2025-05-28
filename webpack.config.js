@@ -69,12 +69,7 @@ module.exports = {
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.js",
-        profile: [
-            "./app/recordtransfer/static/recordtransfer/js/profile/index.js",
-            ...glob.sync(
-                "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
+
         // Admin Site static assets
         admin_metadata: [
             ...glob.sync("./app/caais/static/caais/css/base/*.css")
