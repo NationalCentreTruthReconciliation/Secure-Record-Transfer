@@ -422,7 +422,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         group_description_input.send_keys(data["description"])
 
         # Submit the form to create the new group
-        driver.find_element(By.ID, "id_create_group_button").click()
+        group_button = driver.find_element(By.ID, "id_create_group_button")
+        group_button.click()
 
         # Wait for the modal to close and the new group to be added to the select options
         WebDriverWait(driver, 2).until(
@@ -757,12 +758,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         in_progress_tab.click()
 
         # Look for resume icon and click it
-        resume_link = driver.find_element(
-            By.XPATH,
-            "//a[@data-tip='Resume']"
-        )
+        resume_link = driver.find_element(By.XPATH, "//a[@data-tip='Resume']")
         resume_link.click()
-
 
         # Wait for the Contact Information step to load
         WebDriverWait(driver, 10).until(
