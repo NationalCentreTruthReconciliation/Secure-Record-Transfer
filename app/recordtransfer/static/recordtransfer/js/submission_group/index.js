@@ -46,8 +46,13 @@ function initialize() {
                     console.error("Failed to parse HTMX trigger header:", error);
                 }
             }
-
-            window.location.replace(isValidUrl(context["PROFILE_URL"]));
+            if (isValidUrl(context["PROFILE_URL"])) {
+                // Redirect to the profile page after deletion
+                window.location.replace(context["PROFILE_URL"]);
+            } else {
+                console.error("Invalid PROFILE_URL in context:", context["PROFILE_URL"]);
+                window.location.href = "/";
+            }
         }
     };
 }
