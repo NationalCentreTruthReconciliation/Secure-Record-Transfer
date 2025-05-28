@@ -174,6 +174,10 @@ class SubmissionGroupCreateView(CreateView):
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.http_method_names = ["post"]
+
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
         kwargs = super().get_form_kwargs()
