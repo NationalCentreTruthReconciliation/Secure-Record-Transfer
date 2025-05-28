@@ -161,10 +161,13 @@ def _paginated_table_view(
     template_name: str,
     target_id: str,
     paginate_url: str,
+    context: Optional[dict[str, Any]] = None,
 ) -> HttpResponse:
     """Define a generic function to render paginated tables. Request must be made by HTMX, or else
     a 400 Error is returned.
     """
+    if context is None:
+        context = {}
     if not request.htmx:
         return HttpResponse(status=400)
 
@@ -181,15 +184,17 @@ def _paginated_table_view(
     elif page_num > paginator.num_pages:
         page_num = paginator.num_pages
 
-    data = {
-        "page": paginator.get_page(page_num),
-        "page_num": page_num,
-        "target_id": target_id,
-        "paginate_url": paginate_url,
-        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-    }
+    context.update(
+        {
+            "page": paginator.get_page(page_num),
+            "page_num": page_num,
+            "target_id": target_id,
+            "paginate_url": paginate_url,
+            "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+        }
+    )
 
-    return render(request, template_name, data)
+    return render(request, template_name, context)
 
 
 def submission_group_table(request: HttpRequest) -> HttpResponse:
@@ -220,18 +225,22 @@ def submission_table(request: HttpRequest) -> HttpResponse:
     """Render the past submission table with pagination."""
     group_uuid = request.GET.get(SUBMISSION_GROUP_QUERY_NAME)
     queryset = None
+    context = {}
     if group_uuid:
         queryset = Submission.objects.filter(user=request.user, part_of_group__uuid=group_uuid)
+        context["IN_GROUP"] = True
     else:
         queryset = Submission.objects.filter(user=request.user)
 
     queryset = queryset.order_by("-submission_date")
+
     return _paginated_table_view(
         request,
         queryset,
         "includes/submission_table.html",
         ID_SUBMISSION_TABLE,
         reverse("recordtransfer:submission_table"),
+        context,
     )
 
 
