@@ -171,17 +171,15 @@ class SubmissionGroupCreateView(CreateView):
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_detail.html"
+    template_name = "recordtransfer/submission_group_form.html"
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass context variables to the template."""
         context = super().get_context_data(**kwargs)
-        context["IS_NEW"] = True
         context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
         context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        context["MODAL_MODE"] = False
         return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -192,36 +190,24 @@ class SubmissionGroupCreateView(CreateView):
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
-        response = super().form_valid(form)
-        referer = self.request.headers.get("referer", "")
-        if "submission/" in referer:
-            return JsonResponse(
-                {
-                    "message": self.success_message,
-                    "status": "success",
-                    "group": {
-                        "uuid": str(self.object.uuid),
-                        "name": self.object.name,
-                        "description": self.object.description,
-                    },
+        super().form_valid(form)
+        return JsonResponse(
+            {
+                "message": self.success_message,
+                "status": "success",
+                "group": {
+                    "uuid": str(self.object.uuid),
+                    "name": self.object.name,
+                    "description": self.object.description,
                 },
-                status=200,
-            )
-        messages.success(self.request, self.success_message)
-        return response
+            },
+            status=200,
+        )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
-        if "submission/" in referer:
-            return JsonResponse({"message": error_message, "status": "error"}, status=400)
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        return super().form_invalid(form)
-
+        return JsonResponse({"message": error_message, "status": "error"}, status=400)
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
