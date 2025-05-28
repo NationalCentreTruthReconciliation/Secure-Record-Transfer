@@ -26,7 +26,7 @@ class TestSubmissionGroupCreateView(TestCase):
         """Test that an authenticated user can access the view."""
         response = self.client.get(self.create_group_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
+        self.assertTemplateUsed(response, "includes/submission_group_form.html")
 
     def test_access_unauthenticated_user(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
@@ -40,9 +40,7 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.create_group_url, data=form_data)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), gettext("Group created"))
+        self.client.post(self.create_group_url, data=form_data)
         self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
 
     def test_invalid_form_submission(self) -> None:
@@ -52,10 +50,8 @@ class TestSubmissionGroupCreateView(TestCase):
             "description": "Test Description",
         }
         response = self.client.post(self.create_group_url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/submission_group_detail.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), gettext("There was an error creating the group"))
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(SubmissionGroup.objects.filter(description="Test Description").exists())
 
     def test_form_valid_json_response(self) -> None:
         """Test that a JsonResponse is returned when the form is valid and submitted from the
@@ -65,7 +61,9 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "Test Group",
             "description": "Test Description",
         }
-        response = self.client.post(self.create_group_url, data=form_data, HTTP_REFERER="submission/")
+        response = self.client.post(
+            self.create_group_url, data=form_data, HTTP_REFERER="submission/"
+        )
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
         self.assertEqual(response_json["message"], gettext("Group created"))
@@ -79,7 +77,9 @@ class TestSubmissionGroupCreateView(TestCase):
             "name": "",
             "description": "Test Description",
         }
-        response = self.client.post(self.create_group_url, data=form_data, HTTP_REFERER="submission/")
+        response = self.client.post(
+            self.create_group_url, data=form_data, HTTP_REFERER="submission/"
+        )
         self.assertEqual(response.status_code, 400)
         response_json = response.json()
         self.assertEqual(response_json["message"], "This field is required.")
@@ -268,7 +268,9 @@ class TestSubmissionCsvView(TestCase):
             username="staffuser", password="password", is_staff=True
         )
         self.submission = Submission.objects.create(user=self.user)
-        self.submission_csv_url = reverse("recordtransfer:submission_csv", kwargs={"uuid": self.submission.uuid})
+        self.submission_csv_url = reverse(
+            "recordtransfer:submission_csv", kwargs={"uuid": self.submission.uuid}
+        )
         self.client.login(username="testuser", password="password")
 
     def test_access_unauthenticated_user(self) -> None:

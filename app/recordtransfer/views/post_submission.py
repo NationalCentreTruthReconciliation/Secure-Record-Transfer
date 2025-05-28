@@ -170,16 +170,9 @@ class SubmissionGroupCreateView(CreateView):
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_form.html"
+    template_name = "includes/submission_group_form.html"
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Pass context variables to the template."""
-        context = super().get_context_data(**kwargs)
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        return context
 
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
