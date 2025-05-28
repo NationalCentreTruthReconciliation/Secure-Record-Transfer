@@ -26,6 +26,13 @@ function initialize() {
     window.handleModalAfterSwap = () => {
         showModal();
     };
+
+    window.handleSubmissionGroupFormAfterSwap = () => {
+        const newContext = getContext();
+        if (newContext) {
+            setupSubmissionGroupForm(newContext);
+        }
+    };
 }
 
 /**

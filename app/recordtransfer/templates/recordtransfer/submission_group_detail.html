@@ -26,7 +26,7 @@
             <span class="ml-2">{% trans "Profile" %}</span>
         </a>
         <div class="flex flex-row items-center gap-2 mb-4">
-            <span class="title-text">{% trans "Submission Group: " %}{{ group.name }}</span>
+            <span id="title-text" class="title-text">{% trans "Submission Group: " %}{{ group.name }}</span>
             <a hx-get="{{ group.get_delete_url }}"
                hx-target="#modal-content-container"
                hx-swap="innerHTML"
@@ -41,7 +41,7 @@
             <!-- Form Section -->
             <div class="lg:col-span-1 bg-base-100 border border-base-300 rounded-lg p-6">
                 <h2 class="text-lg font-semibold mb-4">{% trans "Edit Group" %}</h2>
-                {% include "includes/submission_group_updated_form.html" %}
+                {% include "includes/submission_group_edit_form.html" %}
             </div>
             <!-- Table Section -->
             <div class="lg:col-span-3 bg-base-100 border border-base-300 rounded-lg p-6">

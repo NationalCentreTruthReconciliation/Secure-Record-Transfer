@@ -13,11 +13,11 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.generic import CreateView, DetailView, UpdateView
+from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_DESCRIPTION,
@@ -99,8 +99,10 @@ class SubmissionGroupDetailView(UpdateView):
     form_class = SubmissionGroupForm
     template_name = "recordtransfer/submission_group_detail.html"
     context_object_name = "group"
-    success_message = gettext("Group updated")
-    error_message = gettext("There was an error updating the group")
+    update_success_message = gettext("Group updated")
+    update_error_message = gettext("There was an error updating the group")
+    delete_success_message = gettext("Group deleted")
+    delete_error_message = gettext("There was an error deleting the group")
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -125,8 +127,6 @@ class SubmissionGroupDetailView(UpdateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
-        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
-        context["IS_NEW"] = False
         context["SUBMISSION_GROUP_QUERY_NAME"] = SUBMISSION_GROUP_QUERY_NAME
         context["js_context"] = {
             "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
@@ -155,16 +155,24 @@ class SubmissionGroupDetailView(UpdateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         response = super().form_valid(form)
-        messages.success(self.request, self.success_message)
-        return response
+        return trigger_client_event(
+            response,
+            "showSuccess",
+            {
+                "value": self.update_success_message,
+            },
+        )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        messages.error(
-            self.request,
-            self.error_message,
+        response = super().form_invalid(form)
+        return trigger_client_event(
+            response,
+            "showError",
+            {
+                "value": self.update_error_message,
+            },
         )
-        return super().form_invalid(form)
 
     def get_success_url(self) -> str:
         """Redirect back to the same page after updating the group."""

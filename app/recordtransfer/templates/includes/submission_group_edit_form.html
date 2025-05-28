@@ -1,0 +1,14 @@
+{% load i18n %}
+<form hx-post="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
+      hx-select="#submission-group-form"
+      hx-select-oob="#title-text"
+      id="submission-group-form"
+      hx-on::after-swap="handleSubmissionGroupFormAfterSwap(event)">
+    {% csrf_token %}
+    {% include "includes/submission_group_form_fields.html" %}
+    <div class="mt-2">
+        <button type="submit"
+                class="btn btn-sm btn-primary"
+                id="id_create_group_button">{% trans "Save" %}</button>
+    </div>
+</form>
