@@ -12,7 +12,7 @@ from django.http import (
     HttpResponse,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -154,7 +154,12 @@ class SubmissionGroupDetailView(UpdateView):
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
-        response = super().form_valid(form)
+        super().form_valid(form)
+        response = render(
+            self.request,
+            self.template_name,
+            self.get_context_data(),
+        )
         return trigger_client_event(
             response,
             "showSuccess",
@@ -173,10 +178,6 @@ class SubmissionGroupDetailView(UpdateView):
                 "value": self.update_error_message,
             },
         )
-
-    def get_success_url(self) -> str:
-        """Redirect back to the same page after updating the group."""
-        return self.request.path
 
 
 class SubmissionGroupCreateView(CreateView):
