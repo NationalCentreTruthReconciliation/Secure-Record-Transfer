@@ -112,13 +112,22 @@ group.
 .. image:: images/create_submission_group.webp
     :alt: Create submission group
 
+
 The user can also view and modify the details of an existing submission group by clicking on the
-blue eye button for that group in the table on the profile page. This will take the
-user to a page where they can modify the group name and group description, and also view past
-submissions made under this group.
+blue eye icon for that group in the table on the profile page.
+
+.. image:: images/user_profile_submission_groups_view.webp
+    :alt: User profile submission groups
+
+This will take the user to a page where they can modify the group name and group description, and also view past submissions made under this group.
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
 Clicking on "Click to make a new submission" takes the user to the Submission Form with the
 submission group pre-selected.
+
+You can also click on the red trash icon to remove a submission group. If there are any submissions associated with the group, they will **not** be deleted. However, the group will be unassigned from those submissions.
+
+.. image:: images/user_profile_submission_groups_delete.webp
+    :alt: User profile submission groups
