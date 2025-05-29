@@ -98,8 +98,6 @@ class SubmissionGroupDetailView(UpdateView):
     form_class = SubmissionGroupForm
     template_name = "recordtransfer/submission_group_detail.html"
     context_object_name = "group"
-    update_success_message = gettext("Group updated")
-    update_error_message = gettext("There was an error updating the group")
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -150,7 +148,7 @@ class SubmissionGroupDetailView(UpdateView):
             response,
             "showSuccess",
             {
-                "value": self.update_success_message,
+                "value": gettext("Group updated"),
             },
         )
 
@@ -161,7 +159,7 @@ class SubmissionGroupDetailView(UpdateView):
             response,
             "showError",
             {
-                "value": self.update_error_message,
+                "value": gettext("There was an error updating the group"),
             },
         )
 
@@ -187,7 +185,7 @@ class SubmissionGroupCreateView(CreateView):
             "SubmissionGroupCreateView is deprecated and will be removed soon. "
             "Use views.profile.SubmissionGroupModalCreateView instead.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
     def get_form_kwargs(self) -> dict[str, Any]:
@@ -216,6 +214,7 @@ class SubmissionGroupCreateView(CreateView):
         """Handle invalid form submission."""
         error_message = next(iter(form.errors.values()))[0]
         return JsonResponse({"message": error_message, "status": "error"}, status=400)
+
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
