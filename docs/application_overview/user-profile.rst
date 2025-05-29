@@ -124,10 +124,18 @@ This will take the user to a page where they can modify the group name and group
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
-Clicking on "New submission +" takes the user to the Submission Form with the
+Clicking on "Click to make a new submission" takes the user to the Submission Form with the
 submission group pre-selected.
 
-You can also click on the red trash icon to remove a submission group. If there are any submissions associated with the group, they will **not** be deleted. However, the group will be unassigned from those submissions.
-
+You can also click on the red trash icon to remove a submission group.
 .. image:: images/user_profile_submission_groups_delete.webp
     :alt: User profile submission groups
+
+When you do this, a confirmation dialog box will appear asking if you are sure you want to delete the group.
+
+.. image:: images/user_profile_submission_groups_delete_confirmation.webp
+    :alt: User profile submission groups
+
+Click **Yes** to proceed with deleting the submission group. This will remove the group, but any submissions previously associated with it will remain intact—they will simply no longer be associated with any group.
+
+Click **Cancel** if you do not wish to proceed with the deletion. This will close the dialog and return you to the profile page without making any changes.
