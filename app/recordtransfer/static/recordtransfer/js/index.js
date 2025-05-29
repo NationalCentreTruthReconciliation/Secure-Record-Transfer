@@ -14,7 +14,7 @@ import "../css/submission_form/review_step.css";
 import "../css/submission_form/uppy.css";
 import "../css/submission_form/modal.css";
 
-import "../css/submission_detail/submission_detail.css";
+// import "../css/submission_detail/submission_detail.css";
 
 
 import "htmx-ext-head-support";

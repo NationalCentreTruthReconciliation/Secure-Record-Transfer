@@ -69,7 +69,13 @@ module.exports = {
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.js",
-
+        // The submission detail page has its own styling (TODO: FIX!)
+        submission_detail: [
+            ...glob.sync(
+                "./app/recordtransfer/static/" +
+                "recordtransfer/css/submission_detail/*.css")
+                .map(file => "./" + path.relative(__dirname, file)),
+        ],
         // Admin Site static assets
         admin_metadata: [
             ...glob.sync("./app/caais/static/caais/css/base/*.css")
