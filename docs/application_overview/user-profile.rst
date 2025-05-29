@@ -137,6 +137,6 @@ When you do this, a confirmation dialog box will appear asking if you are sure y
 .. image:: images/user_profile_submission_groups_delete_confirmation.webp
     :alt: User profile submission groups
 
-Click **Yes** to proceed with deleting the submission group. This will remove the group, but any submissions previously associated with it will remain intact—they will simply no longer be associated with any group.
+Click **Yes** to proceed with deleting the submission group. This will remove the group, but any submissions previously associated with it will remain intact, they will simply no longer be associated with any group.
 
 Click **Cancel** if you do not wish to proceed with the deletion. This will close the dialog and return you to the profile page without making any changes.
