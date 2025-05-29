@@ -35,12 +35,12 @@
             {# Render hidden field #}
             {{ field }}
         {% endif %}
+        {% url 'recordtransfer:help' as help_url %}
         {% if field.name == "other_source_type" %}
             <div class="flex-item initially-hidden hidden-item">
                 <label></label>
                 <div>
                     <i>
-                        {% url 'recordtransfer:help' as help_url %}
                         {% blocktrans %}
                         <a class="non-nav-link" target="_blank" href="{{ help_url }}#source-types">Click here</a>
                         for an explanation of the different types of source types.
@@ -54,7 +54,6 @@
                 <label></label>
                 <div>
                     <i>
-                        {% url 'recordtransfer:help' as help_url %}
                         {% blocktrans %}
                         <a class="non-nav-link" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
