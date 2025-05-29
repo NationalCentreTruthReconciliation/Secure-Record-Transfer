@@ -1,11 +1,11 @@
-{% extends 'recordtransfer/submission_form_formset.html' %}
+{% extends "recordtransfer/submission_form_formset.html" %}
 {% load i18n %}
-
 {% block form_explanation %}
     <p>
+        {% url "recordtransfer:help" as help_url %}
         {% blocktrans %}
-        <a class="non-nav-link" target="_blank" href="/about/#rights-types">Click here</a>
+        <a class="non-nav-link" target="_blank" href="{{ help_url }}#rights-types">Click here</a>
         for an explanation of the different types of rights.
         {% endblocktrans %}
     </p>
-{% endblock %}
+{% endblock form_explanation %}
