@@ -1,6 +1,7 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
 import logging
+import warnings
 from typing import Any, Optional
 
 from caais.export import ExportVersion
@@ -166,7 +167,12 @@ class SubmissionGroupDetailView(UpdateView):
 
 
 class SubmissionGroupCreateView(CreateView):
-    """Creates a new submission group."""
+    """Creates a new submission group.
+
+    .. deprecated::
+        This class will be deprecated soon. Use
+        views.profile.SubmissionGroupModalCreateView instead to create new submission groups.
+    """
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
@@ -177,6 +183,12 @@ class SubmissionGroupCreateView(CreateView):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.http_method_names = ["post"]
+        warnings.warn(
+            "SubmissionGroupCreateView is deprecated and will be removed soon. "
+            "Use views.profile.SubmissionGroupModalCreateView instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
 
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
