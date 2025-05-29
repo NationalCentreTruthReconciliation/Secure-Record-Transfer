@@ -161,13 +161,11 @@ def _paginated_table_view(
     template_name: str,
     target_id: str,
     paginate_url: str,
-    context: Optional[dict[str, Any]] = None,
+    extra_context: Optional[dict[str, Any]] = None,
 ) -> HttpResponse:
     """Define a generic function to render paginated tables. Request must be made by HTMX, or else
     a 400 Error is returned.
     """
-    if context is None:
-        context = {}
     if not request.htmx:
         return HttpResponse(status=400)
 
@@ -184,15 +182,14 @@ def _paginated_table_view(
     elif page_num > paginator.num_pages:
         page_num = paginator.num_pages
 
-    context.update(
-        {
-            "page": paginator.get_page(page_num),
-            "page_num": page_num,
-            "target_id": target_id,
-            "paginate_url": paginate_url,
-            "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-        }
-    )
+    context = {
+        "page": paginator.get_page(page_num),
+        "page_num": page_num,
+        "target_id": target_id,
+        "paginate_url": paginate_url,
+        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+        **(extra_context or {})
+    }
 
     return render(request, template_name, context)
 
