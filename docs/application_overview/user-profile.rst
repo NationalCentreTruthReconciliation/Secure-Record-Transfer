@@ -128,6 +128,7 @@ Clicking on "Click to make a new submission" takes the user to the Submission Fo
 submission group pre-selected.
 
 You can also click on the red trash icon to remove a submission group.
+
 .. image:: images/user_profile_submission_groups_delete.webp
     :alt: User profile submission groups
 
