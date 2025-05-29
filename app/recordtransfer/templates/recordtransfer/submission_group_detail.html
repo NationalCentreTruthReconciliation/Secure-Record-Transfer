@@ -5,7 +5,6 @@
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
     <script src="{% static 'submission_group.bundle.js' %}"></script>
-    <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block stylesheet %}
     {{ block.super }}

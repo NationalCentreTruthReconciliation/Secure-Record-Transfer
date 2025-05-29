@@ -16,7 +16,6 @@ function initialize() {
     const contextElement = document.getElementById("py_context_user_profile");
 
     if (!contextElement) {
-        console.error("Profile context element not found.");
         return;
     }
 
