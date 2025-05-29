@@ -101,8 +101,7 @@ Submission Groups
 -----------------
 This section displays a table of all submission groups that the user has created. Submission groups
 that are made by the user during :ref:`Step 7: Assign Submission to Group` of the Submission Form
-will be listed here. A new submission group can also be created by clicking on "Click to add new
-group" found below the table.
+will be listed here. A new submission group can also be created by clicking on "New submission group +" found below the table.
 
 .. image:: images/user_profile_submission_groups.webp
     :alt: User profile submission groups
@@ -114,7 +113,7 @@ group.
     :alt: Create submission group
 
 The user can also view and modify the details of an existing submission group by clicking on the
-"Click to view group" button for that group in the table on the profile page. This will take the
+blue eye button for that group in the table on the profile page. This will take the
 user to a page where they can modify the group name and group description, and also view past
 submissions made under this group.
 
