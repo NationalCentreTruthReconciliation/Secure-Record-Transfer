@@ -1,4 +1,4 @@
-.modal {
+.recordtransfer-modal {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,12 +14,12 @@
     padding: 0;
 }
 
-.modal.visible {
+.recordtransfer-modal.visible {
     visibility: visible;
     opacity: 1;
 }
 
-.modal-content {
+.recordtransfer-modal-content {
     width: 700px;
     background: white;
     z-index: 10000;
@@ -28,7 +28,7 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.modal-header {
+.recordtransfer-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -36,52 +36,52 @@
     border-bottom: 1px solid #ddd;
 }
 
-.modal-header h3 {
+.recordtransfer-modal-header h3 {
     margin: 0;
     flex-grow: 1;
     text-align: left;
 }
 
-.close-modal-button {
+.close-recordtransfer-modal-button {
     background: none;
     border: none;
     cursor: pointer;
 }
 
-.close-modal-button img {
+.close-recordtransfer-modal-button img {
     display: block;
 }
 
-.modal-body {
+.recordtransfer-modal-body {
     padding: 10px;
     text-align: left;
 }
 
-.modal-footer {
+.recordtransfer-modal-footer {
     display: flex;
     justify-content: flex-end;
     padding-top: 10px;
 }
 
-.modal-footer button {
+.recordtransfer-modal-footer button {
     margin-left: 15px;
 }
 
 /* Responsive styles for screens below 800px */
 @media (max-width: 800px) {
-    .modal-content {
+    .recordtransfer-modal-content {
         max-width: 80%;
         padding: 15px;
     }
 
-    .modal-footer {
+    .recordtransfer-modal-footer {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
         width: 100%;
     }
 
-    .modal-footer button {
+    .recordtransfer-modal-footer button {
         margin: 10px;
         width: 100%;
         border-radius: 8px;
