@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Union
+from unittest.mock import patch
 
 from caais.models import SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -12,7 +13,130 @@ from recordtransfer.forms.submission_forms import (
     UploadFilesForm,
 )
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
+from recordtransfer.forms.user_forms import SignUpForm
 from recordtransfer.models import SubmissionGroup, TempUploadedFile, UploadSession, User
+
+
+class SignUpFormTest(TestCase):
+    """Tests for the SignUpForm."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        # Patch the ReCaptchaField clean method
+        self.mock_clean_patcher = patch("django_recaptcha.fields.ReCaptchaField.clean")
+        self.mock_clean = self.mock_clean_patcher.start()
+        self.mock_clean.return_value = "PASSED"
+
+        self.addCleanup(self.mock_clean_patcher.stop)
+
+        self.valid_form_data = {
+            "username": "testuser123",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "testuser@example.com",
+            "password1": "securepassword123",
+            "password2": "securepassword123",
+        }
+        self.existing_user = User.objects.create_user(
+            username="existinguser",
+            first_name="Existing",
+            last_name="User",
+            email="existing@example.com",
+            password="password123",
+        )
+
+    def test_form_save(self) -> None:
+        """Test that form saves user correctly with valid data."""
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertEqual(user.username, "testuser123")
+        self.assertEqual(user.first_name, "Test")
+        self.assertEqual(user.last_name, "User")
+        self.assertEqual(user.email, "testuser@example.com")
+        self.assertTrue(user.check_password("securepassword123"))
+
+    def test_form_duplicate_username(self) -> None:
+        """Test that form rejects duplicate username."""
+        self.valid_form_data["username"] = "existinguser"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("username", form.errors)
+
+    def test_form_duplicate_email(self) -> None:
+        """Test that form rejects duplicate email."""
+        self.valid_form_data["email"] = "existing@example.com"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+
+    def test_form_missing_username(self) -> None:
+        """Test that form requires username."""
+        del self.valid_form_data["username"]
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("username", form.errors)
+
+    def test_form_short_username(self) -> None:
+        """Test that form rejects username shorter than 6 characters."""
+        self.valid_form_data["username"] = "short"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("username", form.errors)
+
+    def test_form_missing_first_name(self) -> None:
+        """Test that form requires first name."""
+        del self.valid_form_data["first_name"]
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("first_name", form.errors)
+
+    def test_form_short_first_name(self) -> None:
+        """Test that form rejects first name shorter than 2 characters."""
+        self.valid_form_data["first_name"] = "A"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("first_name", form.errors)
+
+    def test_form_missing_last_name(self) -> None:
+        """Test that form requires last name."""
+        del self.valid_form_data["last_name"]
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("last_name", form.errors)
+
+    def test_form_short_last_name(self) -> None:
+        """Test that form rejects last name shorter than 2 characters."""
+        self.valid_form_data["last_name"] = "B"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("last_name", form.errors)
+
+    def test_form_missing_email(self) -> None:
+        """Test that form requires email."""
+        del self.valid_form_data["email"]
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+
+    def test_form_invalid_email(self) -> None:
+        """Test that form rejects invalid email format."""
+        self.valid_form_data["email"] = "invalid-email"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+
+    def test_form_case_sensitive_username_duplicate(self) -> None:
+        """Test that a username that differs from an existing username only by case is rejected."""
+        self.valid_form_data["username"] = "EXISTINGUSER"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
+
+    def test_form_case_insensitive_email_duplicate(self) -> None:
+        """Test that an email that differs from an existing email only by case is rejected."""
+        self.valid_form_data["email"] = "EXISTING@EXAMPLE.COM"
+        form = SignUpForm(data=self.valid_form_data)
+        self.assertFalse(form.is_valid())
 
 
 class UserProfileFormTest(TestCase):
