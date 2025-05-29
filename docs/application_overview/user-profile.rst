@@ -124,7 +124,7 @@ This will take the user to a page where they can modify the group name and group
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
-Clicking on "New submission" takes the user to the Submission Form with the
+Clicking on "New submission +" takes the user to the Submission Form with the
 submission group pre-selected.
 
 You can also click on the red trash icon to remove a submission group. If there are any submissions associated with the group, they will **not** be deleted. However, the group will be unassigned from those submissions.
