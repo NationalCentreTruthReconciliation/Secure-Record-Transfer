@@ -126,5 +126,14 @@ module.exports = {
             "...", // This keeps the default JavaScript minifier
             new CssMinimizerPlugin(), // Add this line to minify CSS
         ],
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: "vendors",
+                    chunks: "all"
+                }
+            }
+        },
     }
 };
