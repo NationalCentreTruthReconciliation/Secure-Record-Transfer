@@ -42,7 +42,7 @@
                         </a>
                     {% endif %}
                     <a hx-get="{% url "recordtransfer:delete_in_progress_submission_modal" uuid=in_progress.uuid %}"
-                       hx-target="#modal-content-container"
+                       hx-target="#-content-container"
                        hx-swap="innerHTML"
                        hx-select="#modal-content"
                        hx-trigger="click"

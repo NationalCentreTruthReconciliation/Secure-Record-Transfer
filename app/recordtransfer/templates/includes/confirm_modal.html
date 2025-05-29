@@ -1,8 +1,8 @@
 {% load i18n %}
 {% load static %}
-<dialog id="confirm-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
+<dialog id="confirm-modal" class="recordtransfer-modal">
+    <div class="recordtransfer-modal-content">
+        <div class="recordtransfer-modal-header">
             <h3>{{ title }}</h3>
             <button class="close-modal-button" id="close-modal-button">
                 <img height="20"
@@ -12,16 +12,12 @@
                      draggable="false">
             </button>
         </div>
-        <div class="modal-body">
-            <p>
-                {{ message }}
-            </p>
+        <div class="recordtransfer-modal-body">
+            <p>{{ message }}</p>
         </div>
-        <div class="modal-footer">
-            <button id="cancel-button"
-                    class="red-button large-button">{% trans "Cancel" %}</button>
-            <button id="confirm-button"
-                    class="green-button large-button">{% trans "Yes" %}</button>
+        <div class="recordtransfer-modal-footer">
+            <button id="cancel-button" class="red-button large-button">{% trans "Cancel" %}</button>
+            <button id="confirm-button" class="green-button large-button">{% trans "Yes" %}</button>
         </div>
     </div>
 </dialog>

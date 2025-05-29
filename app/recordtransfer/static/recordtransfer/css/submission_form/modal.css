@@ -42,13 +42,13 @@
     text-align: left;
 }
 
-.close-recordtransfer-modal-button {
+.close-modal-button {
     background: none;
     border: none;
     cursor: pointer;
 }
 
-.close-recordtransfer-modal-button img {
+.close-modal-button img {
     display: block;
 }
 

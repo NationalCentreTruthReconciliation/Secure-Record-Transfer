@@ -39,9 +39,9 @@
     </div>
 {% endblock formfields %}
 {% block dialog %}
-    <dialog id="create-new-submissiongroup-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <dialog id="create-new-submissiongroup-modal" class="recordtransfer-modal">
+        <div class="recordtransfer-modal-content">
+            <div class="recordtransfer-modal-header">
                 <h3>{% trans "Create New Submission Group" %}</h3>
                 <button class="close-modal-button" id="close-new-submissiongroup-modal">
                     <img height="20"
@@ -51,7 +51,9 @@
                          draggable="false">
                 </button>
             </div>
-            <div class="modal-body">{% include "includes/submission_group_form.html" with form=new_group_form %}</div>
+            <div class="recordtransfer-modal-body">
+                {% include "includes/submission_group_form.html" with form=new_group_form %}
+            </div>
         </div>
     </dialog>
 {% endblock dialog %}
