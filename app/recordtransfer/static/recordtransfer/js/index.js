@@ -1,3 +1,5 @@
+import "../css/main.css";
+
 import "../css/base/accounts.css";
 import "../css/base/banner.css";
 import "../css/base/base.css";
