@@ -40,8 +40,9 @@
                 <label></label>
                 <div>
                     <i>
+                        {% url 'recordtransfer:help' as help_url %}
                         {% blocktrans %}
-                        <a class="non-nav-link" target="_blank" href="/about/#source-types">Click here</a>
+                        <a class="non-nav-link" target="_blank" href="{{ help_url }}#source-types">Click here</a>
                         for an explanation of the different types of source types.
                         {% endblocktrans %}
                     </i>
@@ -53,8 +54,9 @@
                 <label></label>
                 <div>
                     <i>
+                        {% url 'recordtransfer:help' as help_url %}
                         {% blocktrans %}
-                        <a class="non-nav-link" target="_blank" href="/about/#source-roles">Click here</a>
+                        <a class="non-nav-link" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
                         {% endblocktrans %}
                     </i>
