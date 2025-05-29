@@ -1,32 +1,27 @@
 {% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block javascript %}
     {{ block.super }}
 {% endblock javascript %}
-
 {% block formfields %}
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
-            <div class="flex-error initially-hidden">
-                <label for="nothing"></label>
-                <div class="field-error">{{ error }}</div>
-            </div>
+                <div class="flex-error initially-hidden">
+                    <label for="nothing"></label>
+                    <div class="field-error">{{ error }}</div>
+                </div>
             {% endfor %}
         {% endif %}
         {% if field.label != 'hidden' %}
-            {% if field.name == "enter_manual_source_info" %}
-            <div class="flex-item">
-            {% else %}
-            <div class="flex-item initially-hidden hidden-item">
-            {% endif %}
+            <div class="flex-item {% if field.name != 'enter_manual_source_info' %}initially-hidden hidden-item{% endif %}">
                 <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
                 {{ field }}
                 {# Help tooltip #}
                 {% if field.help_text %}
-                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
+                    <div tooltip-content="{{ field.help_text }}"
+                         class="help-tooltip help-icon">
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                     </div>
                 {% endif %}
@@ -65,5 +60,6 @@
         {% endif %}
     {% endfor %}
 {% endblock formfields %}
-
-{% block buttonarrayclass %}flex-item{% endblock buttonarrayclass %}
+{% block buttonarrayclass %}
+    flex-item
+{% endblock buttonarrayclass %}
