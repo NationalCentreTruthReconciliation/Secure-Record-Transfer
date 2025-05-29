@@ -5,6 +5,7 @@
         "dbaeumer.vscode-eslint",
         "tamasfe.even-better-toml",
         "batisteo.vscode-django",
-        "monosans.djlint"
+        "monosans.djlint",
+        "bradlc.vscode-tailwindcss"
     ]
 }
