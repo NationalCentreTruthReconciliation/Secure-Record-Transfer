@@ -14,8 +14,6 @@ import "../css/submission_form/review_step.css";
 import "../css/submission_form/uppy.css";
 import "../css/submission_form/modal.css";
 
-import "../css/submission_group/submission_group.css";
-
 import "../css/submission_detail/submission_detail.css";
 
 
