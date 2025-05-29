@@ -29,6 +29,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_TABLE,
     ID_SUBMISSION_TABLE,
     PAGINATE_QUERY_NAME,
+    SUBMISSION_GROUP_QUERY_NAME,
 )
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
@@ -160,6 +161,7 @@ def _paginated_table_view(
     template_name: str,
     target_id: str,
     paginate_url: str,
+    extra_context: Optional[dict[str, Any]] = None,
 ) -> HttpResponse:
     """Define a generic function to render paginated tables. Request must be made by HTMX, or else
     a 400 Error is returned.
@@ -180,15 +182,16 @@ def _paginated_table_view(
     elif page_num > paginator.num_pages:
         page_num = paginator.num_pages
 
-    data = {
+    context = {
         "page": paginator.get_page(page_num),
         "page_num": page_num,
         "target_id": target_id,
         "paginate_url": paginate_url,
         "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
+        **(extra_context or {})
     }
 
-    return render(request, template_name, data)
+    return render(request, template_name, context)
 
 
 def submission_group_table(request: HttpRequest) -> HttpResponse:
@@ -217,13 +220,24 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
 
 def submission_table(request: HttpRequest) -> HttpResponse:
     """Render the past submission table with pagination."""
-    queryset = Submission.objects.filter(user=request.user).order_by("-submission_date")
+    group_uuid = request.GET.get(SUBMISSION_GROUP_QUERY_NAME)
+    queryset = None
+    context = {}
+    if group_uuid:
+        queryset = Submission.objects.filter(user=request.user, part_of_group__uuid=group_uuid)
+        context["IN_GROUP"] = True
+    else:
+        queryset = Submission.objects.filter(user=request.user)
+
+    queryset = queryset.order_by("-submission_date")
+
     return _paginated_table_view(
         request,
         queryset,
         "includes/submission_table.html",
         ID_SUBMISSION_TABLE,
         reverse("recordtransfer:submission_table"),
+        context,
     )
 
 

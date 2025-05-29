@@ -1,0 +1,24 @@
+{% load i18n %}
+<fieldset class="fieldset">
+    <legend class="fieldset-legend text-sm md:text-md">{% trans form.name.label %}</legend>
+    <input type="text"
+           class="input input-bordered input-sm md:input-md validator w-full"
+           name="{{ form.name.name }}"
+           value="{{ form.name.value|default_if_none:'' }}"
+           id="{{ form.name.id_for_label }}"
+           required>
+    {% if form.name.errors %}
+        <p class="text-error text-xs md:text-sm">{% trans form.name.errors.0 %}</p>
+    {% endif %}
+</fieldset>
+<fieldset class="fieldset">
+    <legend class="fieldset-legend text-sm md:text-md">{% trans form.description.label %}</legend>
+    <textarea class="textarea h-24 input-sm md:input-md validator w-full"
+              name="{{ form.description.name }}"
+              id="{{ form.description.id_for_label }}"
+              placeholder="Description">{{ form.description.value|default_if_none:'' }}</textarea>
+    <div class="label">Optional</div>
+    {% if form.description.errors %}
+        <p class="text-error text-xs md:text-sm">{% trans form.description.errors.0 %}</p>
+    {% endif %}
+</fieldset>

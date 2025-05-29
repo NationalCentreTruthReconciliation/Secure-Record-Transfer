@@ -55,3 +55,17 @@ export function showModal() {
         modal.showModal();
     }
 }
+
+/**
+ * Validates if a given string is a safe (from the same origin) and valid URL.
+ * @param {string} url - The URL to validate.
+ * @returns {boolean} True if the URL is valid, false otherwise.
+ */
+export function isValidUrl(url) {
+    try {
+        const parsedUrl = new URL(url, window.location.origin);
+        return parsedUrl.origin === window.location.origin;
+    } catch {
+        return false;
+    }
+}

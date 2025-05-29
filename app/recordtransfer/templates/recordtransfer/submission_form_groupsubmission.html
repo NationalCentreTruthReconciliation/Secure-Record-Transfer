@@ -5,7 +5,6 @@
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
-    <script src="{% static 'submission_group.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
