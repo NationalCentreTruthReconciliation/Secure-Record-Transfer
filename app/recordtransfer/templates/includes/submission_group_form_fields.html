@@ -13,11 +13,11 @@
 </fieldset>
 <fieldset class="fieldset">
     <legend class="fieldset-legend text-sm md:text-md">{% trans form.description.label %}</legend>
-    <input type="text"
-           class="input input-bordered input-sm md:input-md validator w-full"
-           name="{{ form.description.name }}"
-           value="{{ form.description.value|default_if_none:'' }}"
-           id="{{ form.description.id_for_label }}">
+    <textarea class="textarea h-24 input-sm md:input-md validator w-full"
+              name="{{ form.description.name }}"
+              id="{{ form.description.id_for_label }}"
+              placeholder="Description">{{ form.description.value|default_if_none:'' }}</textarea>
+    <div class="label">Optional</div>
     {% if form.description.errors %}
         <p class="text-error text-xs md:text-sm">{% trans form.description.errors.0 %}</p>
     {% endif %}
