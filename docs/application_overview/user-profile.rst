@@ -74,7 +74,7 @@ expired. To delete a submission, click the trash can icon on the relevant row of
 .. image:: images/user_profile_delete_in_progress_submission.webp
     :alt: User profile delete submission
 
-This will open a confirmation dialog where the user can confirm that they want to delete the in-progress submission. If 'OK' is clicked, the in-progress submission and any uploaded files associated with it will be permanently removed from the system. Clicking on 'Cancel' will close the dialog and keep the user on the Profile page.
+This will open a confirmation dialog where the user can confirm that they want to delete the in-progress submission. If 'Yes' is clicked, the in-progress submission and any uploaded files associated with it will be permanently removed from the system. Clicking on 'Cancel' will close the dialog and keep the user on the Profile page.
 
 .. image:: images/user_profile_delete_in_progress_submission_confirmation.webp
     :alt: User profile delete submission confirmation
