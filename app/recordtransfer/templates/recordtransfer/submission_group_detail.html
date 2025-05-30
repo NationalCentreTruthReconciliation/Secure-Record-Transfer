@@ -4,12 +4,9 @@
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
-    <script src="{% static 'submission_group.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block stylesheet %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'submission_group.css' %}">
-    <link rel="stylesheet" href="{% static 'profile.css' %}">
 {% endblock stylesheet %}
 {% block title %}
     {% blocktrans with name=group.name %}Submission Group: {{ name }}{% endblocktrans %}
