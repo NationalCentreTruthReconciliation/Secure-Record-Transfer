@@ -134,3 +134,40 @@ class TestRequireUploadStepDecorator(TestCase):
         response = dummy_view(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {"success": True})
+
+    def test_delete_request_during_upload_step(self) -> None:
+        """DELETE requests during the UPLOAD_FILES step should be allowed."""
+
+        @validate_upload_access
+        def dummy_view(request: HttpRequest, *args, **kwargs):
+            return JsonResponse({"success": True})
+
+        request = self.factory.delete("/dummy-url/")
+        request.session = SessionStore()
+        request.session["wizard_submission_form_wizard"] = {
+            "step": SubmissionStep.UPLOAD_FILES.value
+        }
+        response = dummy_view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {"success": True})
+
+    def test_delete_request_during_other_step(self) -> None:
+        """DELETE requests during any step other than UPLOAD_FILES should be forbidden."""
+
+        @validate_upload_access
+        def dummy_view(request: HttpRequest, *args, **kwargs):
+            return JsonResponse({"success": True})
+
+        for step in SubmissionStep:
+            if step == SubmissionStep.UPLOAD_FILES or step == SubmissionStep.REVIEW:
+                continue
+
+            request = self.factory.delete("/dummy-url/")
+            request.session = SessionStore()
+            request.session["wizard_submission_form_wizard"] = {"step": step.value}
+            response = dummy_view(request)
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(
+                json.loads(response.content),
+                {"error": gettext("Access denied. Please try again.")},
+            )

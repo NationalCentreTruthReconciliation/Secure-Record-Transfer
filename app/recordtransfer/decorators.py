@@ -29,8 +29,11 @@ def validate_upload_access(view_func: Callable) -> Callable:
                 status=403,
             )
 
-        # For POST requests, only allow during upload_files step
-        if request.method == "POST" and current_step != SubmissionStep.UPLOAD_FILES.value:
+        # For POST and DELETE requests, only allow during upload_files step
+        if (
+            request.method in ("POST", "DELETE")
+            and current_step != SubmissionStep.UPLOAD_FILES.value
+        ):
             return JsonResponse(
                 {"error": gettext("Uploads are only permitted during the file upload step")},
                 status=403,
