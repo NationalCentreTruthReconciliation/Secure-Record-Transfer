@@ -23,7 +23,7 @@ import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
 import { initialize } from "./profile/index";
 import { setup } from "./submission_form/index";
-import { initializeSubmissionGroup } from "./submission_group/submission_group_form";
+import { initializeSubmissionGroup } from "./submission_group/index";
 
 
 
