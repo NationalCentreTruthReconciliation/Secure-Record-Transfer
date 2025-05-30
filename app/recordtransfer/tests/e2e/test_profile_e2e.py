@@ -56,9 +56,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         self.login()
 
         # Step 1: Navigate to profile page
-        profile_url = reverse("user_profile")
 
-        driver.get(f"{self.live_server_url}{profile_url}")
+        driver.get(f"{self.live_server_url}/user/profile/")
 
         # Step 2: Fill in the change password form
         driver.find_element(By.NAME, "old_password").send_keys("testpassword")
