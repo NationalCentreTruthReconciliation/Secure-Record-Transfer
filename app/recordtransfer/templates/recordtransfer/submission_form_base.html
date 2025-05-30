@@ -87,7 +87,7 @@
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
             <label></label>
-            {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
+            {% if SHOW_SAVE_BUTTON %}
                 <button id="form-save-button"
                         class="text-link margin-top-25px"
                         formnovalidate="formnovalidate"

@@ -522,6 +522,13 @@ class SubmissionFormWizard(SessionWizardView):
         # If there are entries for every step of the form, then the review step has been reached
         return len(self.storage.data.get("step_data", [])) == self.steps.count
 
+    @property
+    def form_started(self) -> bool:
+        """Check if the user has started the form. This is true if there is an in-progress
+        submission, or if the user has submitted any data for the form.
+        """
+        return self.in_progress_submission is not None or self.storage.data.get("step_data", {})
+
     def get_context_data(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> dict[str, Any]:
         """Retrieve context data for the current form template, including context for the
         JavaScript files used alongside the template.
@@ -546,6 +553,9 @@ class SubmissionFormWizard(SessionWizardView):
             self.steps.step1 == self.steps.count - 1 or self.review_step_reached
         ):
             context["SHOW_REVIEW_BUTTON"] = True
+
+        if self.form_started and not self.review_step_reached:
+            context["SHOW_SAVE_BUTTON"] = True
 
         # Add template and JS contexts
         context.update(self._get_template_context())
