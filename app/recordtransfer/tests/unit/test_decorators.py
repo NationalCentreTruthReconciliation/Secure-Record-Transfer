@@ -76,9 +76,7 @@ class TestRequireUploadStepDecorator(TestCase):
 
         request = self.factory.post("/dummy-url/")
         request.session = SessionStore()
-        request.session["wizard_submission_form_wizard"] = {
-            "step": SubmissionStep.REVIEW.value
-        }
+        request.session["wizard_submission_form_wizard"] = {"step": SubmissionStep.REVIEW.value}
         response = dummy_view(request)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(
@@ -99,9 +97,7 @@ class TestRequireUploadStepDecorator(TestCase):
 
             request = self.factory.post("/dummy-url/")
             request.session = SessionStore()
-            request.session["wizard_submission_form_wizard"] = {
-                "step": step.value
-            }
+            request.session["wizard_submission_form_wizard"] = {"step": step.value}
             response = dummy_view(request)
             self.assertEqual(response.status_code, 403)
             self.assertEqual(
@@ -134,9 +130,7 @@ class TestRequireUploadStepDecorator(TestCase):
 
         request = self.factory.get("/dummy-url/")
         request.session = SessionStore()
-        request.session["wizard_submission_form_wizard"] = {
-            "step": SubmissionStep.REVIEW.value
-        }
+        request.session["wizard_submission_form_wizard"] = {"step": SubmissionStep.REVIEW.value}
         response = dummy_view(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {"success": True})
