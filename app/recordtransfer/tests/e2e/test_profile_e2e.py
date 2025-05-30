@@ -56,7 +56,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         self.login()
 
         # Step 1: Navigate to profile page
-        profile_url = reverse("profile")
+        profile_url = reverse("user_profile")
 
         driver.get(f"{self.live_server_url}{profile_url}")
 
