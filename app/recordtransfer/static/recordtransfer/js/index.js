@@ -21,19 +21,17 @@ import htmx from "htmx.org";
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
-import { initialize } from "./profile/index";
-import { setup } from "./submission_form/index";
+import { initializeProfile } from "./profile/index";
+import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
 
 
-
-
-window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
-    setup();
-    initialize();
+    initializeProfile();
+    initializeSubmissionForm();
+    initializeSubmissionGroup();
 });
 
 window.addEventListener("load", () => {
@@ -45,5 +43,3 @@ document.addEventListener("htmx:afterSwap", (event) => {
         setup();
     }
 });
-
-document.addEventListener("DOMContentLoaded", initializeSubmissionGroup);
