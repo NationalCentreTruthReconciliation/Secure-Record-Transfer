@@ -1,59 +1,64 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="en" data-theme={% block theme %}{% endblock theme %}>
-
-<head hx-head="merge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- JS -->
-    {% block javascript %}
-    <script src="{% static 'base.bundle.js' %}"></script>
-    {% endblock javascript %}
-    {# Fonts #}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
-        rel="stylesheet">
-    {# Icons #}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    {# CSS #}
-    {% block stylesheet %}
-    <link rel="stylesheet" href="{% static 'base.css' %}">
-    {% endblock stylesheet %}
-    {# Favicon #}
-    <link rel="shortcut icon" type="image/png" href="{% static 'recordtransfer/img/favicon.ico' %}" />
-    <title>
-        {% block title %}{% endblock title %}
-    </title>
-</head>
-
-<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' hx-ext="head-support">
-    <div class="flex-wrapper">
-        {% block banner %}
-        {% include "recordtransfer/banner.html" %}
-        {% endblock banner %}
-        {% block header %}
-        {% if request.path != "/" %}
-        {% include "recordtransfer/header.html" %}
-        {% endif %}
-        {% endblock header %}
-        <div class="main-container" id="main-container">
-            {% block dialog %}
-            {% endblock %}
-            <div class="focused-content">
-                {% block focused_content %}{% endblock focused_content %}
+<html lang="en" data-theme="{% block theme %}" {% endblock theme %}>
+    <head hx-head="merge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description"
+              content="Securely transfer files and metadata to your institution, conforming to the Canadian Archival Accession Information Standard (CAAIS). Includes tools for appraisal and export in BagIt format.">
+        <!-- JS -->
+        {% block javascript %}
+            <script src="{% static 'base.bundle.js' %}"></script>
+        {% endblock javascript %}
+        {# Fonts #}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap"
+              rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+              rel="stylesheet">
+        {# Icons #}
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        {# CSS #}
+        {% block stylesheet %}
+            <link rel="stylesheet" href="{% static 'base.css' %}">
+        {% endblock stylesheet %}
+        {# Favicon #}
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static 'recordtransfer/img/favicon.ico' %}" />
+        <title>
+            {% block title %}
+            {% endblock title %}
+        </title>
+    </head>
+    <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'
+          hx-ext="head-support">
+        <div class="flex-wrapper">
+            {% block banner %}
+                {% include "recordtransfer/banner.html" %}
+            {% endblock banner %}
+            {% block header %}
+                {% if request.path != "/" %}
+                    {% include "recordtransfer/header.html" %}
+                {% endif %}
+            {% endblock header %}
+            <div class="main-container" id="main-container">
+                {% block dialog %}
+                {% endblock dialog %}
+                <div class="focused-content">
+                    {% block focused_content %}
+                    {% endblock focused_content %}
+                </div>
+                <div class="main-content" id="main-content">
+                    {% block content %}
+                    {% endblock content %}
+                </div>
             </div>
-            <div class="main-content" id="main-content">
-                {% block content %}{% endblock content %}
-            </div>
+            {% block footer %}
+                {% include "recordtransfer/footer.html" %}
+            {% endblock footer %}
         </div>
-        {% block footer %}
-        {% include "recordtransfer/footer.html" %}
-        {% endblock footer %}
-    </div>
-</body>
-
+    </body>
 </html>
