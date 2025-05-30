@@ -45,13 +45,13 @@
                 {% endif %}
             {% endblock header %}
             <div class="main-container" id="main-container">
-                {% block dialog %}
-                {% endblock dialog %}
                 <div class="focused-content">
                     {% block focused_content %}
                     {% endblock focused_content %}
                 </div>
                 <div class="main-content" id="main-content">
+                    {% block dialog %}
+                    {% endblock dialog %}
                     {% block content %}
                     {% endblock content %}
                 </div>

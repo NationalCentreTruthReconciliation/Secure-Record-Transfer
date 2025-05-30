@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{% static 'submission_form.css' %}">
 {% endblock stylesheet %}
 {% block dialog %}
+    {{ block.super }}
     {% include "includes/unsaved_submission_form_modal.html" %}
 {% endblock dialog %}
 {% block content %}
