@@ -39,6 +39,6 @@ window.addEventListener("load", () => {
 
 document.addEventListener("htmx:afterSwap", (event) => {
     if (event.detail.target.id === "main-container") {
-        setup();
+        initializeSubmissionForm();
     }
 });
