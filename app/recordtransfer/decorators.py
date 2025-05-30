@@ -11,7 +11,7 @@ from recordtransfer.enums import SubmissionStep
 
 def validate_upload_access(view_func: Callable) -> Callable:
     """Restricts access to views based on the current wizard step. Only allows POST requests
-    during the UPLOAD_FILES step. GET requests are allowed for both UPLOAD_FILES and REVIEW steps.
+    during the UPLOAD_FILES step.
     """
 
     @functools.wraps(view_func)
