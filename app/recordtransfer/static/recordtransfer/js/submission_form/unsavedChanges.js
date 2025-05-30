@@ -3,15 +3,16 @@
  * Sets up a modal form that is displayed if a user tries to leave the page with unsaved changes.
  */
 export function setupUnsavedChangesProtection() {
-    const contextElement = document.querySelector("[id^='js_context_']");
+    const inProgressUuid = new URLSearchParams(window.location.search).get("resume");
+    const currentStepContextElement = document.getElementById("current_step_data");
 
-    if (!contextElement) {
+    if (!currentStepContextElement) {
         return;
     }
 
-    const context = JSON.parse(contextElement.textContent);
+    const currentFormStep = JSON.parse(currentStepContextElement.textContent);
     // Skip click-away protection if on the first step of a fresh form
-    if (!context["FORM_STARTED"]) {
+    if (currentFormStep <= 1 && !inProgressUuid) {
         return;
     }
 
