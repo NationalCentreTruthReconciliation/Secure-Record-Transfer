@@ -16,7 +16,6 @@ body {
     min-height: 100%;
     flex-direction: column;
     justify-content: space-between;
-    z-index: 9999;
 }
 
 .focused-content {
