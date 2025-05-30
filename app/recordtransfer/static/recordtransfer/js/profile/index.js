@@ -11,7 +11,7 @@ import { initTabListeners, restoreTab } from "./tab.js";
 /**
  * Main initialization function to set up all profile-related functionality
  */
-export const initialize = function() {
+export const initializeProfile = function() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
 

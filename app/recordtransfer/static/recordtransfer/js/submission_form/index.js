@@ -44,7 +44,7 @@ const _setupWithContext = () => {
     }
 };
 
-export const setup = () => {
+export const initializeSubmissionForm = () => {
     setupDatePickers();
     setupInputMasks();
     setupUnsavedChangesProtection();
