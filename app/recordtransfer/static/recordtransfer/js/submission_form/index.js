@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", setup);
 
 // Re-setup the form when HTMX swaps the main container
 document.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id === "main-container") {
+    if (event.detail.target.id === "main-content") {
         setup();
     }
 });

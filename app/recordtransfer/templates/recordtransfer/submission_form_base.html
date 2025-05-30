@@ -16,6 +16,9 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'submission_form.css' %}">
 {% endblock stylesheet %}
+{% block dialog %}
+    {% include "includes/unsaved_submission_form_modal.html" %}
+{% endblock dialog %}
 {% block content %}
     <div class="form-title title-text">
         {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
@@ -34,8 +37,8 @@
     {% endblock form_explanation %}
     <form id="submission-form"
           hx-post="{{ request.get_full_path }}"
-          hx-target="#main-container"
-          hx-select="#main-container"
+          hx-target="#main-content"
+          hx-select="#main-content"
           hx-swap="outerHTML"
           method="POST">
         {% csrf_token %}
@@ -93,5 +96,4 @@
             {% endif %}
         </div>
     </form>
-    {% include "includes/unsaved_submission_form_modal.html" %}
 {% endblock content %}
