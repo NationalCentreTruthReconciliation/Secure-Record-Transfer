@@ -8,6 +8,8 @@ import subprocess
 
 import pytest
 
+os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
+
 
 def pytest_runtestloop(session: pytest.Session) -> None:
     """Install node dependencies and build static assets only if E2E tests are selected to

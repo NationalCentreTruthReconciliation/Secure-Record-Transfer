@@ -84,6 +84,12 @@ uv sync --extra dev --extra podman
 
 When VSCode prompts if you want to select the new environment for this workspace folder, select **Yes**.
 
+To run the E2E tests, you will also need to install [Playwright's](https://playwright.dev/python/) required dependencies:
+
+```shell
+uv run playwright install
+```
+
 ## Local Javascript Environment Setup
 
 For JavaScript development, you need to install Node dependencies to gain access to the source code, build tools, and linting/formatting:
@@ -149,7 +155,7 @@ This will re-build the bundled JS files any time you save a change to a `.js` fi
 
 ## Running Tests
 
-Ensure you follow the instructions in the [Local Python Environment Setup](#local-python-environment-setup) section before continuing.
+Ensure you follow the instructions in the [Local Python Environment Setup](#local-python-environment-setup) section before continuing. If you're going to be running E2E tests you will need to run `uv run playwright install`.
 
 The tests can be run in a few different ways:
 
