@@ -24,7 +24,7 @@ import { initializeProfile } from "./profile/index";
 import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
 
-
+window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
     setupNavbar();
     setupMessages();
