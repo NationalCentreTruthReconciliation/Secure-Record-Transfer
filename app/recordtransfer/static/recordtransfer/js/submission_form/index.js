@@ -1,6 +1,4 @@
 /* global singleCaptchaFn */
-import "../../css/submission_form/review_step.css";
-import "../../css/submission_form/uppy.css";
 import { setupHelpTooltips } from "../base/tooltip";
 import { setupContactInfoForm } from "./contactInfo";
 import { setupOtherIdentifiersForm } from "./otherIdentifiers";
