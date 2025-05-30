@@ -48,7 +48,7 @@ export function setupUnsavedChangesProtection() {
     elements.saveButton.addEventListener("click", (event) => {
         event.preventDefault();
         // Save and submit the form using the form's save button
-        elements.formSaveButton.click();
+        document.getElementById("form-save-button").click();
         hideModal();
     });
 
