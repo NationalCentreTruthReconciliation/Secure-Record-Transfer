@@ -1,10 +1,10 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
 import logging
+import warnings
 from typing import Any, Optional
 
 from caais.export import ExportVersion
-from django.contrib import messages
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import (
@@ -12,14 +12,19 @@ from django.http import (
     HttpResponse,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django.views.generic import CreateView, DetailView, UpdateView
+from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import ID_SUBMISSION_GROUP_DESCRIPTION, ID_SUBMISSION_GROUP_NAME
+from recordtransfer.constants import (
+    ID_SUBMISSION_GROUP_DESCRIPTION,
+    ID_SUBMISSION_GROUP_NAME,
+    SUBMISSION_GROUP_QUERY_NAME,
+)
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup
 
@@ -87,16 +92,12 @@ class SubmissionCsvView(DetailView):
 
 
 class SubmissionGroupDetailView(UpdateView):
-    """Displays the associated submissions for a given submission group, and allows modification
-    of submission group details.
-    """
+    """Handles updating and viewing details of a submission group."""
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "recordtransfer/submission_group_detail.html"
     context_object_name = "group"
-    success_message = gettext("Group updated")
-    error_message = gettext("There was an error updating the group")
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -121,30 +122,14 @@ class SubmissionGroupDetailView(UpdateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
-        context["submissions"] = Submission.objects.filter(part_of_group=self.get_object())
-        context["IS_NEW"] = False
+        context["SUBMISSION_GROUP_QUERY_NAME"] = SUBMISSION_GROUP_QUERY_NAME
         context["js_context"] = {
-            "id_submission_group_name": ID_SUBMISSION_GROUP_NAME,
-            "id_submission_group_description": ID_SUBMISSION_GROUP_DESCRIPTION,
-            "DELETE_URL": reverse(
-                "recordtransfer:submission_group_detail",
-                kwargs={"uuid": self.get_object().uuid},
-            ),
+            "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+            "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
+            "PROFILE_URL": reverse("recordtransfer:user_profile"),
         }
         return context
 
-    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle DELETE request to delete the submission group."""
-        try:
-            group = self.get_object()
-            group.delete()
-            messages.success(request, gettext("Group deleted"))
-        except Exception as e:
-            messages.error(request, gettext("There was an error deleting the group"))
-            LOGGER.error("Error deleting submission group %s: %s", self.get_object().uuid, str(e))
-
-        return redirect("recordtransfer:user_profile")
-
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
         kwargs = super().get_form_kwargs()
@@ -153,40 +138,55 @@ class SubmissionGroupDetailView(UpdateView):
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
-        response = super().form_valid(form)
-        messages.success(self.request, self.success_message)
-        return response
+        super().form_valid(form)
+        response = render(
+            self.request,
+            self.template_name,
+            self.get_context_data(),
+        )
+        return trigger_client_event(
+            response,
+            "showSuccess",
+            {
+                "value": gettext("Group updated"),
+            },
+        )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        messages.error(
-            self.request,
-            self.error_message,
+        response = super().form_invalid(form)
+        return trigger_client_event(
+            response,
+            "showError",
+            {
+                "value": gettext("There was an error updating the group"),
+            },
         )
-        return super().form_invalid(form)
-
-    def get_success_url(self) -> str:
-        """Redirect back to the same page after updating the group."""
-        return self.request.path
 
 
 class SubmissionGroupCreateView(CreateView):
-    """Creates a new submission group."""
+    """Creates a new submission group.
+
+    .. deprecated::
+        This class will be deprecated soon. Use
+        views.profile.SubmissionGroupModalCreateView instead to create new submission groups.
+    """
 
     model = SubmissionGroup
     form_class = SubmissionGroupForm
-    template_name = "recordtransfer/submission_group_detail.html"
+    template_name = "includes/submission_group_form.html"
     success_message = gettext("Group created")
     error_message = gettext("There was an error creating the group")
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Pass context variables to the template."""
-        context = super().get_context_data(**kwargs)
-        context["IS_NEW"] = True
-        context["ID_SUBMISSION_GROUP_NAME"] = ID_SUBMISSION_GROUP_NAME
-        context["ID_SUBMISSION_GROUP_DESCRIPTION"] = ID_SUBMISSION_GROUP_DESCRIPTION
-        context["MODAL_MODE"] = False
-        return context
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.http_method_names = ["post"]
+        warnings.warn(
+            "SubmissionGroupCreateView is deprecated and will be removed soon. "
+            "Use views.profile.SubmissionGroupModalCreateView instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     def get_form_kwargs(self) -> dict[str, Any]:
         """Pass User instance to form to initialize it."""
@@ -196,35 +196,24 @@ class SubmissionGroupCreateView(CreateView):
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
-        response = super().form_valid(form)
-        referer = self.request.headers.get("referer", "")
-        if "submission/" in referer:
-            return JsonResponse(
-                {
-                    "message": self.success_message,
-                    "status": "success",
-                    "group": {
-                        "uuid": str(self.object.uuid),
-                        "name": self.object.name,
-                        "description": self.object.description,
-                    },
+        super().form_valid(form)
+        return JsonResponse(
+            {
+                "message": self.success_message,
+                "status": "success",
+                "group": {
+                    "uuid": str(self.object.uuid),
+                    "name": self.object.name,
+                    "description": self.object.description,
                 },
-                status=200,
-            )
-        messages.success(self.request, self.success_message)
-        return response
+            },
+            status=200,
+        )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        referer = self.request.headers.get("referer", "")
         error_message = next(iter(form.errors.values()))[0]
-        if "submission/" in referer:
-            return JsonResponse({"message": error_message, "status": "error"}, status=400)
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        return super().form_invalid(form)
+        return JsonResponse({"message": error_message, "status": "error"}, status=400)
 
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:

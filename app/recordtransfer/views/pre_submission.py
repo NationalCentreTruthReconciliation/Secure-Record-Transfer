@@ -45,6 +45,7 @@ from recordtransfer.constants import (
     ID_SUBMISSION_GROUP_SELECTION,
     INFOMESSAGE,
     OTHER_PROVINCE_OR_STATE_VALUE,
+    SUBMISSION_GROUP_QUERY_NAME,
     TEMPLATEREF,
 )
 from recordtransfer.emails import (
@@ -202,7 +203,7 @@ class SubmissionFormWizard(SessionWizardView):
         self.in_progress_uuid = request.GET.get("resume")
 
         if not self.in_progress_uuid:
-            self.submission_group_uuid = request.GET.get("group")
+            self.submission_group_uuid = request.GET.get(SUBMISSION_GROUP_QUERY_NAME)
             return super().dispatch(request, *args, **kwargs)
 
         self.in_progress_submission = InProgressSubmission.objects.filter(

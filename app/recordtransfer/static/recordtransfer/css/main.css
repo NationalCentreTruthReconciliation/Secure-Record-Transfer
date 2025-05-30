@@ -25,6 +25,8 @@
     /* PANTONE 158 */
     --color-accent-content: #fff;
     /* Opaque White */
+    --color-info: #007bff;
+    --color-error-content: #fff;
 
     --font-sans: "Open Sans", sans-serif;
     --font-serif: "Merriweather", serif;

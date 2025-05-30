@@ -32,8 +32,9 @@ FORMTITLE = "formtitle"
 INFOMESSAGE = "infomessage"
 FORM = "form"
 
-##### PAGINATION #####
+##### Tables #####
 PAGINATE_QUERY_NAME = "p"
+SUBMISSION_GROUP_QUERY_NAME = "group"
 
 # Pagination Table Container IDs
 ID_SUBMISSION_GROUP_TABLE = "submission-group-table-container"

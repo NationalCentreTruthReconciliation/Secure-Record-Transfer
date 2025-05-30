@@ -1,7 +1,7 @@
 {% load i18n %}
 {% include "includes/messages.html" %}
 <form method="post"
-      action="{% if not IS_NEW %}{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}{% else %}{% url 'recordtransfer:submission_group_new' %}{% endif %}"
+      action="{% url 'recordtransfer:submission_group_new' %}"
       id="submission-group-form"
       class="margin-top-25px">
     {% csrf_token %}
@@ -16,17 +16,6 @@
     {% endfor %}
     <div class="flex-item">
         <label></label>
-        <button type="submit" class="blue-button" id="id_create_group_button">
-            {% if IS_NEW %}
-                {% trans "Create" %}
-            {% else %}
-                {% trans "Save" %}
-            {% endif %}
-        </button>
-        {% if not IS_NEW %}
-            <button type="button" class="red-button ml-10" id="id_delete_group_button">
-                {% trans "Delete" %}
-            </button>
-        {% endif %}
+        <button type="submit" class="blue-button" id="id_create_group_button">{% trans "Create" %}</button>
     </div>
 </form>

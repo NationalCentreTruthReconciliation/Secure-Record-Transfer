@@ -1,12 +1,12 @@
-import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
     handleModalBeforeSwap
-} from "./htmx.js";
+} from "../utils/htmx.js";
+import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
+import { showModal } from "../utils/utils.js";
+import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import { initTabListeners, restoreTab } from "./tab.js";
-import { setupToastNotifications } from "./toast.js";
-import { showModal } from "./utils.js";
 
 /**
  * Main initialization function to set up all profile-related functionality
@@ -29,6 +29,7 @@ export const initialize = function() {
     initTabListeners();
     restoreTab();
     setupToastNotifications();
+    displayStoredToast();
 
     // Wrapper functions to provide context to HTMX event handlers
     window.handleDeleteIpSubmissionAfterRequest = (e) => {
