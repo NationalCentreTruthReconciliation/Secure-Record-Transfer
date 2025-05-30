@@ -776,7 +776,9 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         self.assertEqual(email_input.get_attribute("value"), data["email"])
 
     def test_unsaved_changes_protection(self) -> None:
-        """Test that the user is warned about unsaved changes through a modal when navigating away from an edited form."""
+        """Test that the user is warned about unsaved changes through a modal when navigating away
+        from an edited form.
+        """
         self.login()
         driver = self.driver
 
@@ -814,6 +816,11 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Verify the modal is visible
         modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
         self.assertTrue(modal.is_displayed())
+
+        # Wait for the buttons in the modal to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "unsaved-submission-form-modal-leave"))
+        )
 
         # Click on leave button in the modal
         leave_button = driver.find_element(By.ID, "unsaved-submission-form-modal-leave")
@@ -873,6 +880,9 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         # Verify the modal is visible
         modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
         self.assertTrue(modal.is_displayed())
+
+        # Wait for the buttons in the modal to be clickable
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-button")))
 
         # Click on save button in the modal
         save_button = driver.find_element(By.ID, "modal-save-button")
