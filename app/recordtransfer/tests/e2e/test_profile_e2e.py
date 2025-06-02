@@ -17,6 +17,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
+        if settings.SELENIUM_TESTS_HEADLESS_MODE:
+            chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--guest")
@@ -62,7 +64,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
         # Step 3: Submit the form
-        driver.find_element(By.ID, "password-reset-form").submit()
+        driver.find_element(By.XPATH, "//form").submit()
 
         # DEBUG: Print page source to see what actually happened
         import time
