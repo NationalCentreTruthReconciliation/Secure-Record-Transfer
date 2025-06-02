@@ -1,6 +1,6 @@
+import argparse
 import logging
 from datetime import timedelta
-import argparse
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
@@ -14,9 +14,7 @@ from recordtransfer.emails import (
     send_user_in_progress_submission_expiring,
     send_your_submission_did_not_go_through,
 )
-
 from recordtransfer.models import InProgressSubmission, Submission, UploadSession, User
-
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +30,8 @@ EMAIL_FUNCTIONS = {
 
 
 class Command(BaseCommand):
+    """Command to send a test email to a specified address using a given email ID."""
+
     help = "Send a test email to the specified address using the given email ID."
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
