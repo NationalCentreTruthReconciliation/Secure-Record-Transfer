@@ -56,18 +56,18 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         self.login()
 
         # Step 1: Navigate to profile page
+
         driver.get(f"{self.live_server_url}/user/profile/")
 
         # Step 2: Fill in the change password form
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password2").send_keys("newsecurepassword")
 
         # Step 3: Submit the form
-    submit_button = driver.find_element(By.ID, "id_save_button")
-    submit_button.click()        # DEBUG: Print page source to see what actually happened
+        driver.find_element(By.XPATH, "//form").submit()
 
-        # Step 4: Check for success message or redirect (fix this part)
+        # Step 4: Check for success message or redirect
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
