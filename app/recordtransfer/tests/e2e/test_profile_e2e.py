@@ -64,8 +64,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
         # Step 3: Submit the form
-        driver.find_element(By.ID, "password-reset-form").submit()
-        # DEBUG: Print page source to see what actually happened
+    submit_button = driver.find_element(By.ID, "id_save_button")
+    submit_button.click()        # DEBUG: Print page source to see what actually happened
 
         # Step 4: Check for success message or redirect (fix this part)
         WebDriverWait(driver, 10).until(
