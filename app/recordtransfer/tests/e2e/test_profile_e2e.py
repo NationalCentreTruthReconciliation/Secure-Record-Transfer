@@ -61,43 +61,53 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
-        # DEBUG: Save the page before doing anything
-        with open("/tmp/profile_before.html", "w") as f:
-            f.write(driver.page_source)
-        print("Page saved before form submission")
+        # DEBUG: Check for CSRF token
+        csrf_tokens = driver.find_elements(By.CSS_SELECTOR, "input[name='csrfmiddlewaretoken']")
+        print(f"CSRF tokens found: {len(csrf_tokens)}")
+        for token in csrf_tokens:
+            print(f"  CSRF value: {token.get_attribute('value')[:20]}...")
+
+        # DEBUG: Check what form fields exist
+        form_inputs = driver.find_elements(By.CSS_SELECTOR, "form input")
+        print("Form inputs found:")
+        for inp in form_inputs:
+            name = inp.get_attribute("name")
+            input_type = inp.get_attribute("type")
+            print(f"  - {input_type}: name='{name}'")
 
         # Fill form
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        # DEBUG: Check current URL and form action
-        print(f"Current URL: {driver.current_url}")
-
+        # Submit form
         form = driver.find_element(By.TAG_NAME, "form")
-        form_action = form.get_attribute("action")
-        form_method = form.get_attribute("method")
-        print(f"Form action: '{form_action}'")
-        print(f"Form method: '{form_method}'")
-
-        # Just submit the form directly
         form.submit()
         print("Form submitted directly")
 
-        # Wait and check what happened
         import time
 
         time.sleep(3)
 
-        # DEBUG: Save page after submission
-        with open("/tmp/profile_after.html", "w") as f:
-            f.write(driver.page_source)
-        print("Page saved after form submission")
+        # DEBUG: Check for error messages after submission
+        error_elements = driver.find_elements(
+            By.CSS_SELECTOR, ".alert, .error, .message, .errorlist"
+        )
+        print(f"Error/message elements found: {len(error_elements)}")
+        for error in error_elements:
+            print(f"  Error/Message: '{error.text}'")
 
-        # Check URL after submission
-        print(f"URL after submission: {driver.current_url}")
+        # Check if password fields are cleared (sign of successful submission)
+        current_val = driver.find_element(By.NAME, "current_password").get_attribute("value")
+        new_val = driver.find_element(By.NAME, "new_password").get_attribute("value")
+        confirm_val = driver.find_element(By.NAME, "confirm_new_password").get_attribute("value")
 
-        # Check if password actually changed in database
+        print(f"Form field values after submission:")
+        print(f"  Current password: '{current_val}'")
+        print(f"  New password: '{new_val}'")
+        print(f"  Confirm password: '{confirm_val}'")
+
+        # Check database
         from django.contrib.auth import authenticate
 
         old_works = authenticate(username="testuser", password="testpassword")
@@ -106,7 +116,6 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         print(f"Old password works: {old_works is not None}")
         print(f"New password works: {new_works is not None}")
 
-        # Don't assert yet - just print results
         if new_works:
             print("SUCCESS: Password was changed!")
         else:
