@@ -68,33 +68,15 @@ module.exports = {
             ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        base: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/js/base/*.js")
-                .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync("./app/recordtransfer/static/" +
-                "recordtransfer/css/base/*.css").map(file => "./" + path.relative(__dirname, file))
-        ],
-        submission_form: "./app/recordtransfer/static/recordtransfer/js/submission_form/index.js", // eslint-disable-line
-        profile: [
-            "./app/recordtransfer/static/recordtransfer/js/profile/index.js",
-            ...glob.sync(
-                "./app/recordtransfer/static/recordtransfer/css/profile/*.css")
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
+        main: "./app/recordtransfer/static/recordtransfer/js/index.js",
+        // The submission detail page has its own styling (TODO: FIX!)
         submission_detail: [
             ...glob.sync(
                 "./app/recordtransfer/static/" +
                 "recordtransfer/css/submission_detail/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        submission_group: [
-            ...glob.sync("./app/recordtransfer/static/" +
-                "recordtransfer/js/submission_group/index.js")
-                .map(file => "./" + path.relative(__dirname, file)),
-            ...glob.sync(
-                "./app/recordtransfer/static/recordtransfer/css/submission_group/*.css")
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
+
         // Admin Site static assets
         admin_metadata: [
             ...glob.sync("./app/caais/static/caais/css/base/*.css")
@@ -145,5 +127,16 @@ module.exports = {
             "...", // This keeps the default JavaScript minifier
             new CssMinimizerPlugin(), // Add this line to minify CSS
         ],
+
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: "vendors",
+                    chunks: "all"
+                }
+            }
+        },
     }
 };
+

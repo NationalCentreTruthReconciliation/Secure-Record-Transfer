@@ -4,15 +4,11 @@ import {
 import { setupToastNotifications } from "../utils/toast.js";
 import { showModal, isValidUrl } from "../utils/utils.js";
 
-document.addEventListener("DOMContentLoaded", function () {
-    initialize();
-});
-
 /**
  * Initializes the submission group page functionality including form setup,
  * toast notifications, and modal handlers
  */
-function initialize() {
+export const initializeSubmissionGroup = function () {
     const context = getContext();
     if (!context) {return;}
 
@@ -55,13 +51,13 @@ function initialize() {
             }
         }
     };
-}
+};
 
 /**
  * Gets the context object from the DOM element containing submission group data
  * @returns {object|null} The parsed context object or null if element not found
  */
-function getContext() {
+function getContext(){
     const contextElement = document.getElementById("py_context_submission_group");
     if (!contextElement) {
         return null;

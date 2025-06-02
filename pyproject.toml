@@ -1,6 +1,6 @@
 [project]
 name = "secure-record-transfer"
-version = "2025.04.30"
+version = "2025.05.30"
 description = "Transfer files and metadata to an archive based on accession standards"
 authors = [
     { name = "Daniel Lovegrove", email = "Daniel.Lovegrove@umanitoba.ca" },
