@@ -577,8 +577,6 @@ class SubmissionFormWizard(SessionWizardView):
         if self.current_step == SubmissionStep.GROUP_SUBMISSION:
             context.update(
                 {
-                    "IS_NEW": True,
-                    "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "new_group_form": SubmissionGroupForm(),
                 }
             )

@@ -78,10 +78,6 @@ class UserProfile(UpdateView):
                     "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
                     "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
                 },
-                # Table container IDs
-                "ID_SUBMISSION_TABLE": ID_SUBMISSION_TABLE,
-                "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
-                "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
             }
         )
 
@@ -187,8 +183,7 @@ def _paginated_table_view(
         "page_num": page_num,
         "target_id": target_id,
         "paginate_url": paginate_url,
-        "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-        **(extra_context or {})
+        **(extra_context or {}),
     }
 
     return render(request, template_name, context)
