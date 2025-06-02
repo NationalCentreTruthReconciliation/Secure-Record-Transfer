@@ -359,6 +359,12 @@ h2 {
     text-decoration: none;
 }
 
+a {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 @media (max-width: 1199px) {
 
     .main-header-content,
