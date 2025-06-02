@@ -52,8 +52,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
-    def test_reset_password_from_profile(self) -> None:
-        """Test resetting the password from the user profile page."""
+    def test_reset_password_from_profile(self):
         driver = self.driver
         self.login()
 
@@ -72,8 +71,9 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         )
         save_button.click()
 
-        WebDriverWait(driver, 10).until(
+        success_alert = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located(
                 (By.CSS_SELECTOR, ".alert.alert-dismissible.alert-success")
             )
         )
+        print("SUCCESS ALERT:", success_alert.text)
