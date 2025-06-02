@@ -38,13 +38,13 @@ LOGGER = logging.getLogger("recordtransfer")
 
 
 class User(AbstractUser):
-    """The main User object used to authenticate users"""
+    """The main User object used to authenticate users."""
 
     gets_submission_email_updates = models.BooleanField(default=False)
-    confirmed_email = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
 
-    def get_full_name(self):
+    def get_full_name(self) -> str:
+        """Return the full name of the user, which is a combination of first and last names."""
         return self.first_name + " " + self.last_name
 
 

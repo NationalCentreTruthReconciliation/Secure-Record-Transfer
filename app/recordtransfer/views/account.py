@@ -59,7 +59,6 @@ class ActivateAccount(View):
             if account_activation_token.check_token(user, token) and not user.is_active:
                 # Activate the user
                 user.is_active = True
-                user.confirmed_email = True
                 user.save()
                 login(request, user)
                 return redirect("recordtransfer:account_created")
