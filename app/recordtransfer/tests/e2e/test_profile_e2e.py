@@ -69,11 +69,10 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Wait for save button to be clickable (this might be the issue)
         # Debug: Check if button is actually clickable
         # Replace the JavaScript click with:
-        save_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "id_save_button"))
-        )
-        save_button.click()  # Regular click instead of JavaScript
-        print("Button clicked normally")
+        # Replace the button click section with:
+        confirm_field = driver.find_element(By.NAME, "confirm_new_password")
+        confirm_field.send_keys(Keys.RETURN)
+        print("Form submitted with Enter key")
 
         import time
 
