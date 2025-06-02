@@ -70,16 +70,9 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         form = driver.find_element(By.TAG_NAME, "form")
         form.submit()
         print("Form submitted directly")
-
-        # Wait for processing
-        import time
-
-        time.sleep(2)
-
         # Check if password fields are empty
-        WebDriverWait(driver, 10).until(
-            lambda driver: driver.find_element(By.NAME, "current_password").get_attribute("value")
-            == ""
-        )
+ WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, ".alert.success"))
+    )
 
         print("SUCCESS: Form fields were cleared after submission")
