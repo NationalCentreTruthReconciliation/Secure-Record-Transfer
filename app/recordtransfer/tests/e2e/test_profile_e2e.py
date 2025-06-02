@@ -68,13 +68,12 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # Wait for save button to be clickable (this might be the issue)
         # Debug: Check if button is actually clickable
-        save_button = driver.find_element(By.ID, "id_save_button")
-        print(f"Button found: {save_button.is_enabled()}")
-        print(f"Button visible: {save_button.is_displayed()}")
-
-        # Click the button
-        driver.execute_script("arguments[0].click();", save_button)
-        print("Button clicked with JavaScript")
+        # Replace the JavaScript click with:
+        save_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()  # Regular click instead of JavaScript
+        print("Button clicked normally")
 
         import time
 
