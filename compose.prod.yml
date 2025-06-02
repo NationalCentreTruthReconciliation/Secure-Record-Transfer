@@ -9,7 +9,7 @@ services:
       - ./docker/clamav/freshclam.conf:/etc/clamav/freshclam.conf:z
 
   redis:
-    image: docker.io/redis:7-alpine
+    image: docker.io/redis:8-alpine
     command: /usr/local/etc/redis/redis.conf
     restart: unless-stopped
     healthcheck:

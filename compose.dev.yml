@@ -11,7 +11,7 @@ services:
       - temp-directory:/tmp
 
   redis:
-    image: docker.io/redis:7-alpine
+    image: docker.io/redis:8-alpine
     container_name: redis_server
     command: /usr/local/etc/redis/redis.conf
     ports:
