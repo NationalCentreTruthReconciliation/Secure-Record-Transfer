@@ -52,30 +52,32 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
         def test_reset_password_from_profile(self):
-        driver = self.driver
-        self.login()
+            driver = self.driver
+            self.login()
 
-        driver.get(f"{self.live_server_url}/user/profile/")
+            driver.get(f"{self.live_server_url}/user/profile/")
 
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, "current_password"))
-        )
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.NAME, "current_password"))
+            )
 
-        # Fill form
-        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+            # Fill form
+            driver.find_element(By.NAME, "current_password").send_keys("testpassword")
+            driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
+            driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        # Wait for save button to be clickable (this might be the issue)
-        save_button = driver.find_element(By.ID, "id_save_button")
-        driver.execute_script("arguments[0].click();", save_button)
-        # Wait for processing
-        import time
-        time.sleep(3)
+            # Wait for save button to be clickable (this might be the issue)
+            save_button = driver.find_element(By.ID, "id_save_button")
+            driver.execute_script("arguments[0].click();", save_button)
+            # Wait for processing
+            import time
 
-        # Test if password actually changed
-        from django.contrib.auth import authenticate
-        user = authenticate(username="testuser", password="newsecurepassword")
+            time.sleep(3)
 
-        self.assertIsNotNone(user, "Password should be changed")
-        print("SUCCESS: Password changed")
+            # Test if password actually changed
+            from django.contrib.auth import authenticate
+
+            user = authenticate(username="testuser", password="newsecurepassword")
+
+            self.assertIsNotNone(user, "Password should be changed")
+            print("SUCCESS: Password changed")
