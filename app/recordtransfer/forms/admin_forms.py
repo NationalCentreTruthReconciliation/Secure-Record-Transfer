@@ -1,4 +1,6 @@
-"""Forms specific to the recordtransfer admin site"""
+"""Forms specific to the recordtransfer admin site."""
+
+from typing import ClassVar
 
 from django import forms
 from django.utils.html import format_html
@@ -10,9 +12,9 @@ from recordtransfer.models import (
 
 
 class RecordTransferModelForm(forms.ModelForm):
-    """Adds disabled_fields to forms.ModelForm"""
+    """Adds disabled_fields to forms.ModelForm."""
 
-    disabled_fields = []
+    disabled_fields: ClassVar[list] = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,6 +30,8 @@ class SubmissionModelForm(RecordTransferModelForm):
     """Form for editing Submissions."""
 
     class Meta:
+        """Meta class for SubmissionModelForm."""
+
         model = Submission
         fields = (
             "metadata",
@@ -37,7 +41,13 @@ class SubmissionModelForm(RecordTransferModelForm):
             "uuid",
         )
 
-    disabled_fields = ["metadata", "upload_session", "user", "part_of_group", "uuid"]
+    disabled_fields: ClassVar[list] = [
+        "metadata",
+        "upload_session",
+        "user",
+        "part_of_group",
+        "uuid",
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
