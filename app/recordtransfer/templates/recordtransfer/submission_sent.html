@@ -1,31 +1,37 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Submission Complete!" %}{% endblock %}
-
+{% block title %}
+    {% trans "Submission Complete!" %}
+{% endblock %}
 {% block content %}
-{% url 'recordtransfer:user_profile' as profileurl %}
-<div class="title-text">{% trans "Thank you for your Submission" %}</div>
-<p>
-    {% blocktrans %}
+    {% url 'recordtransfer:user_profile' as profileurl %}
+    <div class="title-text">{% trans "Thank you for your Submission" %}</div>
+    <p>
+        {% blocktrans %}
     Your files are being held at the NCTR until an archivist reviews them. You may be contacted by
     an archivist using the contact information you provided in the form you submitted. You may view
-    the current status of your submissions by visiting your <a href="{{ profileurl }}">profile</a>
+    the current status of your submissions by visiting your <a href="{{ profileurl }}" class="link link-primary">profile</a>
     page.
     {% endblocktrans %}
-</p>
-<p>
-    {% blocktrans with email=user.email %}
+    </p>
+    <p>
+        {% blocktrans with email=user.email %}
     An email will be sent to you at {{ email }} confirming that your submission has been
     received. The email will also contain the terms you agreed to when creating your submission.
     {% endblocktrans %}
-</p>
-<p>
-<div class="medium-text">{% trans "Links:" %}</div>
-<ul>
-    <li><a href="{% url 'recordtransfer:submit' %}">{% trans "Make another Submission" %}</a></li>
-    <li><a href="{% url 'recordtransfer:index' %}">{% trans "Go to Homepage" %}</a></li>
-    <li><a href="{{ profileurl }}">{% trans "View your Profile" %}</a></li>
-</ul>
-</p>
+    </p>
+    <p>
+        <div class="medium-text">{% trans "Links:" %}</div>
+        <ul>
+            <li>
+                <a href="{% url 'recordtransfer:submit' %}" class="link link-primary">{% trans "Make another Submission" %}</a>
+            </li>
+            <li>
+                <a href="{% url 'recordtransfer:index' %}" class="link link-primary">{% trans "Go to Homepage" %}</a>
+            </li>
+            <li>
+                <a href="{{ profileurl }}" class="link link-primary">{% trans "View your Profile" %}</a>
+            </li>
+        </ul>
+    </p>
 {% endblock %}
