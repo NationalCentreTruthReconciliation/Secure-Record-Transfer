@@ -69,5 +69,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # Step 4: Check for success message or redirect
         WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, ".alert.alert-dismissible.alert-success")
+            )
         )
