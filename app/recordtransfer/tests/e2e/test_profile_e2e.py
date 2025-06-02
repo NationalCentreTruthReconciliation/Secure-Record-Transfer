@@ -64,25 +64,10 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
         # Step 3: Submit the form
-        driver.find_element(By.XPATH, "//form").submit()
-
+        driver.find_element(By.ID, "password-reset-form").submit()
         # DEBUG: Print page source to see what actually happened
-        import time
-
-        time.sleep(2)
-        print("Page URL after submission:", driver.current_url)
-        print("Page title:", driver.title)
-        print("Page source snippet:", driver.page_source[:1000])
 
         # Step 4: Check for success message or redirect (fix this part)
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
-            )
-        except Exception as e:
-            print(f"Failed to find success alert: {e}")
-            # Try alternative selectors
-            success_elements = driver.find_elements(By.CSS_SELECTOR, ".alert, .message, .success")
-            print(f"Found {len(success_elements)} alert/message elements")
-            for elem in success_elements:
-                print(f"Element text: {elem.text}")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
