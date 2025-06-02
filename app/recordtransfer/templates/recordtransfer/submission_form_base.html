@@ -50,7 +50,7 @@
                             formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ wizard.steps.prev }}"
-                            class="blue-button-outline margin-right-10px">{% trans "Previous Step" %}</button>
+                            class="btn btn-outline btn-primary margin-right-10px">{% trans "Previous Step" %}</button>
                 {% endif %}
                 {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
                     {# Button is "next" by default but the id for a "submit" button can be overridden using this block #}
@@ -58,7 +58,7 @@
                             id="form-next-button"
                             {% endblock submitbuttonattributes %}
                             type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                            class="blue-button margin-right-30px">
+                            class="btn btn-primary margin-right-30px">
                         {% if wizard.steps.step1 == wizard.steps.count %}
                             {% trans "Submit" %}
                         {% else %}
@@ -84,7 +84,7 @@
             <label></label>
             {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
                 <button id="form-save-button"
-                        class="text-link margin-top-25px"
+                        class="link link-primary"
                         formnovalidate="formnovalidate"
                         name="save_form_step"
                         value="{{ wizard.steps.current }}">{% trans "Click to save form and resume later" %}</button>
