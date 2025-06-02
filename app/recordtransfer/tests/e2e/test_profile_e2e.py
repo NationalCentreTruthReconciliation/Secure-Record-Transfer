@@ -67,9 +67,15 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
         # Wait for save button to be clickable (this might be the issue)
+        # Debug: Check if button is actually clickable
         save_button = driver.find_element(By.ID, "id_save_button")
+        print(f"Button found: {save_button.is_enabled()}")
+        print(f"Button visible: {save_button.is_displayed()}")
+
+        # Click the button
         driver.execute_script("arguments[0].click();", save_button)
-        # Wait for processing
+        print("Button clicked with JavaScript")
+
         import time
 
         time.sleep(3)
