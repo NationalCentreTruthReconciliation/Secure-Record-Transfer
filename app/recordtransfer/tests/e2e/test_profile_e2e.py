@@ -51,7 +51,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Wait for the login to complete and redirect to the home page
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
-    def test_reset_password_from_profile(self):
+        def test_reset_password_from_profile(self):
         driver = self.driver
         self.login()
 
@@ -66,33 +66,16 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        # Find the form and submit it directly
-        form = driver.find_element(By.TAG_NAME, "form")
-        form.submit()
-        print("Form submitted directly")
-        # Check if password fields are empty
-        # Check for success message
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
-        )
+        # Wait for save button to be clickable (this might be the issue)
+        save_button = driver.find_element(By.ID, "id_save_button")
+        driver.execute_script("arguments[0].click();", save_button)
+        # Wait for processing
+        import time
+        time.sleep(3)
 
-        # Get the error message text
-        error_alert = driver.find_element(By.CLASS_NAME, "alert-error")
-        error_message = error_alert.text
-        print(f"ERROR FOUND: {error_message}")
+        # Test if password actually changed
+        from django.contrib.auth import authenticate
+        user = authenticate(username="testuser", password="newsecurepassword")
 
-        # Also check for other error elements
-        all_errors = driver.find_elements(
-            By.CSS_SELECTOR, ".error, .alert-error, .invalid-feedback, .errorlist"
-        )
-        print(f"Found {len(all_errors)} error elements:")
-        for i, error in enumerate(all_errors):
-            print(f"  Error {i}: {error.text}")
-
-        # Save page source for debugging
-        with open("/tmp/profile_error_debug.html", "w") as f:
-            f.write(driver.page_source)
-        print("Page source with errors saved to /tmp/profile_error_debug.html")
-
-        # The test should fail here so we can see what the error is
-        self.fail(f"Form submission failed with error: {error_message}")
+        self.assertIsNotNone(user, "Password should be changed")
+        print("SUCCESS: Password changed")
