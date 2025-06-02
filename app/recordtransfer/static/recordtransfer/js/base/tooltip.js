@@ -83,6 +83,7 @@ export function setupHelpTooltips() {
 
         icon.addEventListener("mouseleave", () => {
             tooltip.classList.remove("visible");
+            tooltip.style.display = "none";
         });
     });
 }

@@ -33,7 +33,7 @@
     {% block form_explanation %}
     {% endblock form_explanation %}
     <form id="submission-form"
-          hx-post="{{ request.path }}"
+          hx-post="{{ request.get_full_path }}"
           hx-target="#main-container"
           hx-select="#main-container"
           hx-swap="outerHTML"
@@ -84,7 +84,7 @@
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
             <label></label>
-            {% if wizard.steps.step1 > 1 and wizard.steps.step1 <= wizard.steps.count %}
+            {% if SHOW_SAVE_BUTTON %}
                 <button id="form-save-button"
                         class="text-link margin-top-25px"
                         formnovalidate="formnovalidate"

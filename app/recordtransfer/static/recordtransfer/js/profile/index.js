@@ -1,10 +1,12 @@
-import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import {
-    handleDeleteIpSubmissionAfterRequest, handleModalBeforeSwap
-} from "./htmx.js";
+    handleDeleteIpSubmissionAfterRequest,
+    handleDeleteSubmissionGroupAfterRequest,
+    handleModalBeforeSwap
+} from "../utils/htmx.js";
+import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
+import { showModal } from "../utils/utils.js";
+import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import { initTabListeners, restoreTab } from "./tab.js";
-import { setupToastNotifications } from "./toast.js";
-import { showModal } from "./utils.js";
 
 /**
  * Main initialization function to set up all profile-related functionality
@@ -12,6 +14,10 @@ import { showModal } from "./utils.js";
 function initialize() {
     let context = null;
     const contextElement = document.getElementById("py_context_user_profile");
+
+    if (!contextElement) {
+        return;
+    }
 
     context = JSON.parse(contextElement.textContent);
     if (!context) {
@@ -23,13 +29,17 @@ function initialize() {
     initTabListeners();
     restoreTab();
     setupToastNotifications();
+    displayStoredToast();
 
-    // Wrapper function that provides context to handleDeleteIpSubmissionAfterRequest
+    // Wrapper functions to provide context to HTMX event handlers
     window.handleDeleteIpSubmissionAfterRequest = (e) => {
         return handleDeleteIpSubmissionAfterRequest(e, context);
     };
 
-    // Wrapper function that provides context to handleModalBeforeSwap
+    window.handleDeleteSubmissionGroupAfterRequest = (e) => {
+        return handleDeleteSubmissionGroupAfterRequest(e, context);
+    };
+
     window.handleModalBeforeSwap = (e) => {
         return handleModalBeforeSwap(e, context);
     };

@@ -57,7 +57,7 @@ time before the expiry date that the reminder email is sent can be configured in
 
 Resuming an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Users can resume working on an in-progress submission by clicking on "Resume" for the relevant 
+Users can resume working on an in-progress submission by clicking on the green play icon for the relevant
 submission in the table. This will take them back to the submission form where they left off.
 
 .. image:: images/user_profile_resume_in_progress_submission.webp
@@ -69,15 +69,12 @@ will be listed under the :ref:`Past Submissions` section.
 Deleting an In-Progress Submission
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Users can delete an in-progress submission if they no longer wish to complete it or if it has
-expired. To delete a submission, click the "Delete" button on the relevant row of the table.
+expired. To delete a submission, click the trash can icon on the relevant row of the table.
 
 .. image:: images/user_profile_delete_in_progress_submission.webp
     :alt: User profile delete submission
 
-This will take the user to a confirmation page where they can confirm that they want to delete the
-in-progress submission. If "OK" is clicked, the in-progress submission and any uploaded files
-associated with it will be permanently removed from the system. Clicking on "Cancel" will take the
-user back to the Profile page.
+This will open a confirmation dialog where the user can confirm that they want to delete the in-progress submission. If 'Yes' is clicked, the in-progress submission and any uploaded files associated with it will be permanently removed from the system. Clicking on 'Cancel' will close the dialog and keep the user on the Profile page.
 
 .. image:: images/user_profile_delete_in_progress_submission_confirmation.webp
     :alt: User profile delete submission confirmation
@@ -91,22 +88,20 @@ This section displays a table of all submissions that the user has submitted in 
 .. image:: images/user_profile_past_submissions.webp
     :alt: User profile past submissions
 
-The user can view the details of a past submission by clicking on the "Click to view report" button
+The user can view the details of a past submission by clicking on the blue file icon
 on the relevant row of the table. This will open up a submission details page for that
 submission.
 
 .. image:: images/submission_details.webp
     :alt: Submission details
 
-Alternatively, the user can download a CSV file of the submission by clicking on the "Click to
-download" button.
+Alternatively, the user can download a CSV file of the submission by clicking on the green download icon on the relevant row of the table.
 
 Submission Groups
 -----------------
 This section displays a table of all submission groups that the user has created. Submission groups
 that are made by the user during :ref:`Step 7: Assign Submission to Group` of the Submission Form
-will be listed here. A new submission group can also be created by clicking on "Click to add new
-group" found below the table.
+will be listed here. A new submission group can also be created by clicking on "New submission group +" found below the table.
 
 .. image:: images/user_profile_submission_groups.webp
     :alt: User profile submission groups
@@ -117,13 +112,31 @@ group.
 .. image:: images/create_submission_group.webp
     :alt: Create submission group
 
+
 The user can also view and modify the details of an existing submission group by clicking on the
-"Click to view group" button for that group in the table on the profile page. This will take the
-user to a page where they can modify the group name and group description, and also view past
-submissions made under this group.
+blue eye icon for that group in the table on the profile page.
+
+.. image:: images/user_profile_submission_groups_view.webp
+    :alt: User profile submission groups
+
+This will take the user to a page where they can modify the group name and group description, and also view past submissions made under this group.
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
-Clicking on "Click to make a new submission" takes the user to the Submission Form with the
+Clicking on "New submission +" takes the user to the Submission Form with the
 submission group pre-selected.
+
+You can also click on the red trash icon to remove a submission group.
+
+.. image:: images/user_profile_submission_groups_delete.webp
+    :alt: User profile submission groups
+
+When you do this, a confirmation dialog box will appear asking if you are sure you want to delete the group.
+
+.. image:: images/user_profile_submission_groups_delete_confirmation.webp
+    :alt: User profile submission groups
+
+Click **Yes** to proceed with deleting the submission group. This will remove the group, but any submissions previously associated with it will remain intact, they will simply no longer be associated with any group.
+
+Click **Cancel** if you do not wish to proceed with the deletion. This will close the dialog and return you to the profile page without making any changes.

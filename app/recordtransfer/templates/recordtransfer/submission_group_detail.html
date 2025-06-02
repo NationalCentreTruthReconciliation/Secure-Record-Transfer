@@ -1,8 +1,6 @@
 {% extends "recordtransfer/base.html" %}
-
 {% load i18n %}
 {% load static %}
-
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_submission_group" }}
@@ -11,42 +9,61 @@
 {% block stylesheet %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'submission_group.css' %}">
+    <link rel="stylesheet" href="{% static 'profile.css' %}">
 {% endblock stylesheet %}
 {% block title %}
-    {% if IS_NEW %}
-        {% trans "Create New Submission Group" %}
-    {% else %}
-        {% trans "Submission Group: " %} {{ group.name }}
-    {% endif %}
+    {% blocktrans with name=group.name %}Submission Group: {{ name }}{% endblocktrans %}
 {% endblock title %}
+{% block theme %}
+    nctr
+{% endblock theme %}
 {% block content %}
-    {% if user.is_authenticated %}
-        <a href="{% url 'recordtransfer:user_profile' %}" class="back-to-btn">
-            <i class="fas fa-arrow-left"></i> {% trans "Back to Profile" %}
+    <div class="mb-8">
+        <a href="{% url 'recordtransfer:user_profile' %}"
+           class="link link-info no-underline inline-block mb-6">
+            <i class="fas fa-arrow-left"></i>
+            <span class="ml-2">{% trans "Profile" %}</span>
         </a>
-        <div class="title-text">
-            {% if IS_NEW %}
-                {% trans "Create New Submission Group" %}
-            {% else %}
-                {% trans "Submission Group: " %} {{ group.name }}
-            {% endif %}
+        <div class="flex flex-row items-center justify-between mb-4">
+            <span id="title-text" class="text-xl">{% trans "Submission Group: " %}{{ group.name }}</span>
+            <button hx-get="{{ group.get_delete_url }}"
+                    hx-target="#modal-content-container"
+                    hx-swap="innerHTML"
+                    hx-select="#modal-content"
+                    hx-trigger="click"
+                    class="btn btn-error btn-outline btn-sm">
+                {% trans "Delete group" %}
+                <i class="fas fa-trash-alt"></i>
+            </button>
         </div>
-        {% include "includes/submission_group_form.html" %}
-        {% if not IS_NEW %}
-            <div class="flex-med-width-item margin-top-25px">
-                <label class="medium-text">{% trans "Past Submissions in this Group" %}</label>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Form Section -->
+            <div class="lg:col-span-1 bg-base-100 border border-base-300 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">{% trans "Edit Group" %}</h2>
+                {% include "includes/submission_group_edit_form.html" %}
             </div>
-            {% if submissions %}
-                {% include "includes/submission_table.html" with submissions=submissions %}
-            {% else %}
-                <div class="flex-med-width-item">
-                    <p>{% trans "No submissions have been made under this group yet." %}</p>
+            <!-- Table Section -->
+            <div class="lg:col-span-3 bg-base-100 border border-base-300 rounded-lg p-6">
+                <div class="mb-4">
+                    <h2 class="text-lg font-semibold">{% trans "Submissions in Group" %}</h2>
                 </div>
-            {% endif %}
-            <div class="margin-top-25px">
-                <a href="{% url 'recordtransfer:submit' %}?group={{ group.uuid }} ">{% trans "Click to make a new submission" %}</a>
+                <div hx-get="{% url 'recordtransfer:submission_table' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
+                     hx-trigger="load"
+                     id="{{ ID_SUBMISSION_TABLE }}">
+                    <div class="flex flex-col w-full items-center gap-4">
+                        <div class="skeleton h-32 w-full"></div>
+                        <div class="skeleton h-5 w-1/10"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <a href="{% url 'recordtransfer:submit' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
+                       class="btn btn-sm">
+                        <span class="hidden md:inline">{% trans "New submission" %}</span>
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
-        {% endif %}
-    {% endif %}
-    {% include "includes/confirm_modal.html" with title=_("Are you sure you want to delete this submission group?") message=_("Submissions under this group will NOT be deleted. However, this group will be unassigned from all submissions and will no longer be available for use.") %}
+        </div>
+    </div>
+    {% include "includes/base_modal.html" %}
 {% endblock content %}

@@ -13,11 +13,22 @@
             <td>{{ group.description }}</td>
             <td>{{ group.number_of_submissions_in_group }}</td>
             <td>
-                <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
-                   class="link link-info tooltip"
-                   data-tip="{% trans "View group" %}">
-                    <i class="fas fa-eye"></i>
-                </a>
+                <div class="flex flex-row gap-4">
+                    <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
+                       class="link link-info tooltip"
+                       data-tip="{% trans "View group" %}">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a hx-get="{{ group.get_delete_url }}"
+                       hx-target="#modal-content-container"
+                       hx-swap="innerHTML"
+                       hx-select="#modal-content"
+                       hx-trigger="click"
+                       class="link link-error tooltip"
+                       data-tip="{% trans "Delete" %}">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
             </td>
         </tr>
     {% empty %}

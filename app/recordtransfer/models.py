@@ -665,6 +665,10 @@ class SubmissionGroup(models.Model):
         """Return the URL to access a detail view of this submission group."""
         return reverse("recordtransfer:submission_group_detail", kwargs={"uuid": self.uuid})
 
+    def get_delete_url(self) -> str:
+        """Return the URL to delete this submission group."""
+        return reverse("recordtransfer:delete_submission_group_modal", kwargs={"uuid": self.uuid})
+
     def __str__(self):
         return f"{self.name} ({self.created_by})"
 
@@ -1031,7 +1035,9 @@ class InProgressSubmission(models.Model):
 
     def get_delete_url(self) -> str:
         """Get the URL to delete this in-progress submission."""
-        return reverse("recordtransfer:in_progress_submission", kwargs={"uuid": self.uuid})
+        return reverse(
+            "recordtransfer:delete_in_progress_submission_modal", kwargs={"uuid": self.uuid}
+        )
 
     def reset_reminder_email_sent(self) -> None:
         """Reset the reminder email flag to False, if it isn't already False."""

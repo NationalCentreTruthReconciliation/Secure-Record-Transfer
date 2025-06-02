@@ -757,12 +757,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         in_progress_tab.click()
 
         # Look for resume icon and click it
-        resume_link = driver.find_element(
-            By.XPATH,
-            "//a[@data-tip='Resume']"
-        )
+        resume_link = driver.find_element(By.XPATH, "//a[@data-tip='Resume']")
         resume_link.click()
-
 
         # Wait for the Contact Information step to load
         WebDriverWait(driver, 10).until(
@@ -778,3 +774,121 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         self.assertEqual(contact_name_input.get_attribute("value"), data["contact_name"])
         self.assertEqual(phone_number_input.get_attribute("value"), data["phone_number"])
         self.assertEqual(email_input.get_attribute("value"), data["email"])
+
+    def test_unsaved_changes_protection(self) -> None:
+        """Test that the user is warned about unsaved changes through a modal when navigating away
+        from an edited form.
+        """
+        self.login()
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out some required fields in the Contact Information step
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
+        phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
+        email_input = driver.find_element(By.NAME, "contactinfo-email")
+
+        contact_name_input.send_keys(data["contact_name"])
+        phone_number_input.send_keys(data["phone_number"])
+        email_input.send_keys(data["email"])
+
+        # Attempt to navigate to Home page without saving - use JavaScript click
+        home_link = driver.find_element(By.ID, "nav-home")
+        driver.execute_script("arguments[0].click();", home_link)
+
+        # Check for unsaved changes modal
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "unsaved-submission-form-modal"))
+        )
+
+        # Verify the modal is visible
+        modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
+        self.assertTrue(modal.is_displayed())
+
+        # Wait for the buttons in the modal to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "unsaved-submission-form-modal-leave"))
+        )
+
+        # Click on leave button in the modal
+        leave_button = driver.find_element(By.ID, "unsaved-submission-form-modal-leave")
+        leave_button.click()
+
+        # Verify user is redirected to Home page
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:index")))
+        )
+
+    def test_unsaved_changes_protection_on_first_step_with_form_edits(self) -> None:
+        """Test that the unsaved changes modal functions correctly when on the first step of an
+        already edited form (user has completed at least one step and has navigated back to the
+        first step).
+        """
+        self.login()
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out some required fields in the Contact Information step
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Wait for Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        contact_name_input = driver.find_element(By.NAME, "contactinfo-contact_name")
+        phone_number_input = driver.find_element(By.NAME, "contactinfo-phone_number")
+        email_input = driver.find_element(By.NAME, "contactinfo-email")
+
+        contact_name_input.send_keys(data["contact_name"])
+        phone_number_input.send_keys(data["phone_number"])
+        email_input.send_keys(data["email"])
+
+        # Go back to the first step (Legal Agreement step)
+        driver.find_element(By.ID, "form-previous-button").click()
+
+        # Wait for the Legal Agreement step to load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "acceptlegal-agreement_accepted"))
+        )
+
+        # Attempt to navigate to Home page without saving - use JavaScript click
+        home_link = driver.find_element(By.ID, "nav-home")
+        driver.execute_script("arguments[0].click();", home_link)
+
+        # Check for unsaved changes modal
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "unsaved-submission-form-modal"))
+        )
+        # Verify the modal is visible
+        modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
+        self.assertTrue(modal.is_displayed())
+
+        # Wait for the buttons in the modal to be clickable
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-button")))
+
+        # Click on save button in the modal
+        save_button = driver.find_element(By.ID, "modal-save-button")
+        save_button.click()
+
+        # Check that user is redirected to the profile page
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
+        )

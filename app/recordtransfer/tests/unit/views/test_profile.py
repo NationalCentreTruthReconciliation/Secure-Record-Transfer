@@ -26,7 +26,10 @@ from recordtransfer.models import (
 @patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
 @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
 class TestUserProfileView(TestCase):
-    def setUp(self):
+    """Tests for the UserProfile view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user and initial data."""
         self.test_username = "testuser"
         self.test_first_name = "Test"
         self.test_last_name = "User"
@@ -48,12 +51,257 @@ class TestUserProfileView(TestCase):
         self.success_message = "Preferences updated"
         self.password_change_success_message = "Password updated"
 
-        # Table URLs
-        self.submission_group_table_url = reverse("recordtransfer:submission_group_table")
-        self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
-        self.submission_table_url = reverse("recordtransfer:submission_table")
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        UploadSession.objects.all().delete()
+        InProgressSubmission.objects.all().delete()
+        SubmissionGroup.objects.all().delete()
+        Submission.objects.all().delete()
+        User.objects.all().delete()
 
-        # HTMX related
+    def test_access_authenticated_user(self) -> None:
+        """Test that an authenticated user can access the profile page."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+
+    def test_access_unauthenticated_user(self) -> None:
+        """Test that an unauthenticated user is redirected to the login page."""
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    ### Tests for Profile Details ###
+
+    def test_valid_name_change(self) -> None:
+        """Test that a valid name change updates the user's first and last name."""
+        form_data = {
+            "first_name": "New",
+            "last_name": "Name",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
+    def test_accented_name_change(self) -> None:
+        """Test that accented characters in names are handled correctly."""
+        form_data = {
+            "first_name": "Áccéntéd",
+            "last_name": "Námé",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
+    def test_invalid_first_name(self) -> None:
+        """Test that an invalid first name (e.g., numeric) returns an error message."""
+        form_data = {
+            "first_name": "123",
+            "last_name": self.test_last_name,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_invalid_last_name(self) -> None:
+        """Test that an invalid last name (e.g., numeric) returns an error message."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": "123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_valid_notification_setting_change(self) -> None:
+        """Test that a valid notification setting change updates the user's preference."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "gets_notification_emails": False,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), self.success_message)
+
+    def test_valid_password_change(self) -> None:
+        """Test that a valid password change updates the user's password."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
+            "new_password": "new_password123",
+            "confirm_new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), "Password updated")
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("new_password123"))
+
+    def test_wrong_password(self) -> None:
+        """Test that providing the wrong current password returns an error message."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": "wrong_password",
+            "new_password": "new_password123",
+            "confirm_new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_passwords_do_not_match(self) -> None:
+        """Test that if the new password and confirmation do not match, an error message is
+        shown.
+        """
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
+            "new_password": "new_password123",
+            "confirm_new_password": "different_password",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_same_password(self) -> None:
+        """Test that if the new password is the same as the current password, an error message is
+        shown.
+        """
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
+            "new_password": self.test_current_password,
+            "confirm_new_password": self.test_current_password,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_missing_current_password(self) -> None:
+        """Test that if the current password is not provided, an error message is shown."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "new_password": "new_password123",
+            "confirm_new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_missing_new_password(self) -> None:
+        """Test that if the new password is not provided, an error message is shown."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "current_password": self.test_current_password,
+            "confirm_new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_missing_confirm_new_password(self) -> None:
+        """Test that if the confirm new password is not provided, an error message is shown."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "gets_notification_emails": True,
+            "current_password": self.test_current_password,
+            "new_password": "new_password123",
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_no_changes(self) -> None:
+        """Test that if no changes are made to the profile, an error message is shown."""
+        form_data = {
+            "first_name": self.test_first_name,
+            "last_name": self.test_last_name,
+            "gets_notification_emails": self.test_gets_notification_emails,
+        }
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+    def test_empty_form_submission(self) -> None:
+        """Test that submitting an empty form returns an error message."""
+        form_data = {}
+        response = self.client.post(self.url, data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recordtransfer/profile.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            self.error_message,
+        )
+
+
+class TestInProgressSubmissionTableView(TestCase):
+    """Tests for the in-progress submission table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.in_progress_table_url = reverse("recordtransfer:in_progress_submission_table")
         self.htmx_headers = {
             "HX-Request": "true",
         }
@@ -62,8 +310,6 @@ class TestUserProfileView(TestCase):
         """Clean up after each test."""
         UploadSession.objects.all().delete()
         InProgressSubmission.objects.all().delete()
-        SubmissionGroup.objects.all().delete()
-        Submission.objects.all().delete()
         User.objects.all().delete()
 
     def _create_in_progress_submission(
@@ -99,245 +345,10 @@ class TestUserProfileView(TestCase):
             title=title,
         )
 
-    def test_access_authenticated_user(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-
-    def test_access_unauthenticated_user(self):
-        self.client.logout()
-        response = self.client.get(self.url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
-
-    ### Tests for Profile Details ###
-
-    def test_valid_name_change(self):
-        form_data = {
-            "first_name": "New",
-            "last_name": "Name",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), self.success_message)
-
-    def test_accented_name_change(self):
-        form_data = {
-            "first_name": "Áccéntéd",
-            "last_name": "Námé",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), self.success_message)
-
-    def test_invalid_first_name(self):
-        form_data = {
-            "first_name": "123",
-            "last_name": self.test_last_name,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_invalid_last_name(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": "123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_valid_notification_setting_change(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": False,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), self.success_message)
-
-    def test_invalid_notification_setting_change(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": self.test_gets_notification_emails,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_valid_password_change(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "Password updated")
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password("new_password123"))
-
-    def test_wrong_password(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": "wrong_password",
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_passwords_do_not_match(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "new_password": "new_password123",
-            "confirm_new_password": "different_password",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_same_password(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "new_password": self.test_current_password,
-            "confirm_new_password": self.test_current_password,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_missing_current_password(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_missing_new_password(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "confirm_new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_missing_confirm_new_password(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": self.test_current_password,
-            "new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_no_changes(self):
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": self.test_gets_notification_emails,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_empty_form_submission(self):
-        form_data = {}
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    ### Tests for All Tables ###
-    def test_tables_require_htmx_request(self) -> None:
-        """Test that all table views require HTMX headers."""
-        for url in [
-            self.submission_group_table_url,
-            self.in_progress_table_url,
-            self.submission_table_url,
-        ]:
-            response = self.client.get(url)  # No HTMX headers
-            self.assertEqual(response.status_code, 400)
-
-    ### Tests for In-Progress Submission Table ###
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.in_progress_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
 
     def test_in_progress_submission_expires_at_no_expiry(self) -> None:
         """Test that the "Expires at" cell contains just a dash when the in-progress submission
@@ -356,6 +367,7 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     def test_in_progress_submission_expires_at(self) -> None:
         """Test that expiry date is shown for an in-progress submission with an upload session."""
         upload_session = UploadSession.new_session(user=cast(User, self.user))
@@ -376,8 +388,11 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     def test_in_progress_submission_expiring_soon(self) -> None:
-        """Test that the expiry date is shown with a warning icon if the in-progress submission is expiring soon."""
+        """Test that the expiry date is shown with a warning icon if the in-progress submission is
+        expiring soon.
+        """
         upload_session = UploadSession.new_session(user=cast(User, self.user))
         self._create_in_progress_submission(upload_session=upload_session)
 
@@ -397,6 +412,7 @@ class TestUserProfileView(TestCase):
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES", 30)
+    @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     def test_in_progress_submission_expired(self) -> None:
         """Test that the expiry date is shown with the expired icon and tooltip if the in-progress
         submission has expired.
@@ -439,12 +455,14 @@ class TestUserProfileView(TestCase):
         for i in range(3):
             self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
 
+        # Note that in-progress submissions are ordered by creation date, so the most recent
+        # submissions will appear first in the table.
         # Test first page
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertIn("Test In-Progress Submission 2", response.content.decode())
         self.assertIn("Test In-Progress Submission 1", response.content.decode())
-        self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 0", response.content.decode())
 
         # Test second page
         response = self.client.get(
@@ -452,11 +470,34 @@ class TestUserProfileView(TestCase):
             headers=self.htmx_headers,
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Test In-Progress Submission 2", response.content.decode())
-        self.assertNotIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertIn("Test In-Progress Submission 0", response.content.decode())
+        self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
         self.assertNotIn("Test In-Progress Submission 1", response.content.decode())
 
-    ### Tests for Submission Group Table ###
+
+class TestSubmissionGroupTableView(TestCase):
+    """Tests for the submission group table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.submission_group_table_url = reverse("recordtransfer:submission_group_table")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        SubmissionGroup.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.submission_group_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
 
     def test_submission_group_table_empty(self) -> None:
         """Test that the submission group table works with no groups."""
@@ -511,8 +552,33 @@ class TestUserProfileView(TestCase):
         self.assertNotIn("Test Group 1", response.content.decode())
 
 
-class TestInProgressSubmission(TestCase):
-    """Tests for the in_progress_submission view."""
+class TestSubmissionTableView(TestCase):
+    """Tests for the submission table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.submission_table_url = reverse("recordtransfer:submission_table")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        Submission.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.submission_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
+
+
+class TestDeleteInProgressSubmission(TestCase):
+    """Tests for the delete_in_progress_submission view."""
 
     def setUp(self) -> None:
         """Set up the test case with users and in-progress submissions."""
@@ -542,8 +608,9 @@ class TestInProgressSubmission(TestCase):
         )
 
         self.client.force_login(self.user)
-        self.url = reverse(
-            "recordtransfer:in_progress_submission", kwargs={"uuid": self.in_progress.uuid}
+        self.delete_ip_submission_url = reverse(
+            "recordtransfer:delete_in_progress_submission_modal",
+            kwargs={"uuid": self.in_progress.uuid},
         )
         self.headers = {
             "HX-Request": "true",
@@ -554,7 +621,7 @@ class TestInProgressSubmission(TestCase):
         """Test successful deletion of an in-progress submission."""
         self.assertTrue(InProgressSubmission.objects.filter(uuid=self.in_progress.uuid).exists())
 
-        response = self.client.delete(self.url, headers=self.headers)
+        response = self.client.delete(self.delete_ip_submission_url, headers=self.headers)
 
         # Check for proper status code
         self.assertEqual(response.status_code, 204)
@@ -571,7 +638,7 @@ class TestInProgressSubmission(TestCase):
         """Test that an error during deletion returns a 500 status code."""
         mock_delete.side_effect = Exception("Deletion error")
 
-        response = self.client.delete(self.url, headers=self.headers)
+        response = self.client.delete(self.delete_ip_submission_url, headers=self.headers)
 
         # Check for proper status code
         self.assertEqual(response.status_code, 500)
@@ -585,7 +652,7 @@ class TestInProgressSubmission(TestCase):
 
     def test_non_htmx_delete_fails(self) -> None:
         """Test that a non-HTMX request fails with a 400 status code."""
-        response = self.client.delete(self.url)
+        response = self.client.delete(self.delete_ip_submission_url)
 
         # Check for proper status code
         self.assertEqual(response.status_code, 400)
@@ -596,7 +663,8 @@ class TestInProgressSubmission(TestCase):
     def test_cannot_delete_other_users_submission(self) -> None:
         """Test that a user cannot delete another user's in-progress submission."""
         other_url = reverse(
-            "recordtransfer:in_progress_submission", kwargs={"uuid": self.other_in_progress.uuid}
+            "recordtransfer:delete_in_progress_submission_modal",
+            kwargs={"uuid": self.other_in_progress.uuid},
         )
 
         response = self.client.delete(other_url, headers=self.headers)
@@ -611,24 +679,24 @@ class TestInProgressSubmission(TestCase):
         """Test that login is required to access the view."""
         self.client.logout()
 
-        response = self.client.get(self.url, headers=self.headers)
+        response = self.client.get(self.delete_ip_submission_url, headers=self.headers)
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.post(self.url, headers=self.headers)
+        response = self.client.post(self.delete_ip_submission_url, headers=self.headers)
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.delete(self.url, headers=self.headers)
+        response = self.client.delete(self.delete_ip_submission_url, headers=self.headers)
         self.assertEqual(response.status_code, 302)
 
     def test_post_method_not_allowed(self) -> None:
         """Test that POST method is not allowed for this view."""
-        response = self.client.post(self.url, headers=self.headers)
+        response = self.client.post(self.delete_ip_submission_url, headers=self.headers)
         self.assertEqual(response.status_code, 405)
 
     # GET tests (modal retrieval)
     def test_get_modal_success(self) -> None:
         """Test successful retrieval of the delete modal for an in-progress submission."""
-        response = self.client.get(self.url, headers=self.headers)
+        response = self.client.get(self.delete_ip_submission_url, headers=self.headers)
 
         # Check for proper status code
         self.assertEqual(response.status_code, 200)
@@ -644,7 +712,7 @@ class TestInProgressSubmission(TestCase):
 
     def test_non_htmx_get_fails(self) -> None:
         """Test that a non-HTMX request fails with a 400 status code."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.delete_ip_submission_url)
 
         # Check for proper status code
         self.assertEqual(response.status_code, 400)
@@ -652,7 +720,8 @@ class TestInProgressSubmission(TestCase):
     def test_cannot_get_other_users_submission_modal(self) -> None:
         """Test that a user cannot get the modal for another user's in-progress submission."""
         other_url = reverse(
-            "recordtransfer:in_progress_submission", kwargs={"uuid": self.other_in_progress.uuid}
+            "recordtransfer:delete_in_progress_submission_modal",
+            kwargs={"uuid": self.other_in_progress.uuid},
         )
 
         response = self.client.get(other_url, headers=self.headers)
@@ -661,7 +730,162 @@ class TestInProgressSubmission(TestCase):
     def test_nonexistent_submission(self) -> None:
         """Test that requesting a modal for a nonexistent submission returns 404."""
         nonexistent_url = reverse(
-            "recordtransfer:in_progress_submission", kwargs={"uuid": str(uuid.uuid4())}
+            "recordtransfer:delete_in_progress_submission_modal",
+            kwargs={"uuid": str(uuid.uuid4())},
+        )
+
+        response = self.client.get(nonexistent_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+
+class TestDeleteSubmissionGroupView(TestCase):
+    """Tests for the delete_submission_group view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with users and submission groups."""
+        self.user = User.objects.create_user(
+            username="testuser1", email="test@example.com", password="testpassword"
+        )
+        self.other_user = User.objects.create_user(
+            username="testuser2", email="test2@example.com", password="testpassword"
+        )
+
+        # Create submission groups for each user
+        self.submission_group = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Test Group 1",
+            uuid=uuid.uuid4(),
+        )
+        self.other_submission_group = SubmissionGroup.objects.create(
+            created_by=self.other_user,
+            name="Test Group 2",
+            uuid=uuid.uuid4(),
+        )
+
+        self.client.force_login(self.user)
+        self.delete_group_url = reverse(
+            "recordtransfer:delete_submission_group_modal",
+            kwargs={"uuid": self.submission_group.uuid},
+        )
+        self.headers = {
+            "HX-Request": "true",
+        }
+
+    # DELETE tests
+    def test_delete_success(self) -> None:
+        """Test successful deletion of a submission group."""
+        self.assertTrue(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+        response = self.client.delete(self.delete_group_url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Check that deletion was successful
+        self.assertFalse(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+    @patch("recordtransfer.views.profile.SubmissionGroup.delete")
+    def test_delete_error(self, mock_delete: MagicMock) -> None:
+        """Test that an error during deletion returns a 500 status code."""
+        mock_delete.side_effect = Exception("Deletion error")
+
+        response = self.client.delete(self.delete_group_url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 500)
+
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+        # Check that the submission group still exists
+        self.assertTrue(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+    def test_non_htmx_delete_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.delete(self.delete_group_url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+        # Check that the submission group still exists
+        self.assertTrue(SubmissionGroup.objects.filter(uuid=self.submission_group.uuid).exists())
+
+    def test_cannot_delete_other_users_submission_group(self) -> None:
+        """Test that a user cannot delete another user's submission group."""
+        other_url = reverse(
+            "recordtransfer:delete_submission_group_modal",
+            kwargs={"uuid": self.other_submission_group.uuid},
+        )
+
+        response = self.client.delete(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+        # Verify the other user's submission group still exists
+        self.assertTrue(
+            SubmissionGroup.objects.filter(uuid=self.other_submission_group.uuid).exists()
+        )
+
+    def test_login_required(self) -> None:
+        """Test that login is required to access the view."""
+        self.client.logout()
+
+        response = self.client.get(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.delete(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 302)
+
+    def test_post_method_not_allowed(self) -> None:
+        """Test that POST method is not allowed for this view."""
+        response = self.client.post(self.delete_group_url, headers=self.headers)
+        self.assertEqual(response.status_code, 405)
+
+    # GET tests (modal retrieval)
+    def test_get_modal_success(self) -> None:
+        """Test successful retrieval of the delete modal for a submission group."""
+        response = self.client.get(self.delete_group_url, headers=self.headers)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the correct template is used
+        self.assertTemplateUsed(response, "includes/delete_submission_group_modal.html")
+
+        # Check that the context contains the required variables
+        self.assertEqual(response.context["submission_group"], self.submission_group)
+
+        # Check that the submission group's name is included in the response
+        self.assertContains(response, "Test Group 1")
+
+    def test_non_htmx_get_fails(self) -> None:
+        """Test that a non-HTMX request fails with a 400 status code."""
+        response = self.client.get(self.delete_group_url)
+
+        # Check for proper status code
+        self.assertEqual(response.status_code, 400)
+
+    def test_cannot_get_other_users_submission_group_modal(self) -> None:
+        """Test that a user cannot get the modal for another user's submission group."""
+        other_url = reverse(
+            "recordtransfer:delete_submission_group_modal",
+            kwargs={"uuid": self.other_submission_group.uuid},
+        )
+
+        response = self.client.get(other_url, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistent_submission_group(self) -> None:
+        """Test that requesting a modal for a nonexistent submission group returns 404."""
+        nonexistent_url = reverse(
+            "recordtransfer:delete_submission_group_modal", kwargs={"uuid": str(uuid.uuid4())}
         )
 
         response = self.client.get(nonexistent_url, headers=self.headers)
@@ -676,7 +900,7 @@ class TestSubmissionGroupModalCreateView(TestCase):
         self.user = User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
 
-        self.submission_group_modal_url = reverse("recordtransfer:submission_group_modal")
+        self.submission_group_modal_url = reverse("recordtransfer:create_submission_group_modal")
         self.headers = {
             "HX-Request": "true",
         }

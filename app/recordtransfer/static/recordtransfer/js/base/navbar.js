@@ -43,8 +43,12 @@ export function setupNavbar() {
      * Aligns the navigation wrapper (e.g. burger menu) with the title
      * when the page is at the top. When the user scrolls, it moves the
      * nav wrapper to a fixed position at the top-right corner.
+     * Also determines whether the nav wrapper should have a background
+     * based on its vertical position relative to the main graphic/header and footer.
+     * Adds the 'needs-background' class if the nav is in the main content area,
+     * otherwise removes it for visual clarity.
      */
-    function alignNavWrapper() {
+    function refreshMobileMenu() {
         const navWrapper = document.querySelector(".nav-wrapper");
         const navTitle = document.querySelector(".nav-title");
 
@@ -61,9 +65,37 @@ export function setupNavbar() {
 
         const titleRect = navTitle.getBoundingClientRect();
         navWrapper.style.top = `${Math.max(20, titleRect.top)}px`;
+
+        const header = document.querySelector(".header");
+        const graphic = document.getElementById("main-graphic");
+        const footer = document.querySelector(".footer");
+
+        if (!navWrapper || !footer ) {return;}
+        if( !header && !graphic) {return;}
+
+        const wrapperRect = navWrapper.getBoundingClientRect();
+        const footerRect = footer.getBoundingClientRect();
+
+        const navMiddle = (wrapperRect.top + wrapperRect.bottom) / 2;
+
+        // Decide which reference element to use for the top boundary
+        let topElement = null;
+        if (graphic) {
+            topElement = graphic.getBoundingClientRect();
+        } else if (header && !graphic) {
+            topElement= header.getBoundingClientRect();
+        }
+
+        if (navMiddle > topElement.bottom && navMiddle < footerRect.top) {
+            navWrapper.classList.add("needs-background");
+        } else {
+            navWrapper.classList.remove("needs-background");
+        }
     }
 
-    window.addEventListener("scroll", alignNavWrapper);
-    window.addEventListener("resize", alignNavWrapper);
-    window.addEventListener("load", alignNavWrapper);
+    window.addEventListener("scroll", refreshMobileMenu);
+    window.addEventListener("resize", refreshMobileMenu);
+    window.addEventListener("load", refreshMobileMenu);
+
 }
+
