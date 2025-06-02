@@ -1,8 +1,8 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
 {% block title %}
     {% trans "Submission Complete!" %}
-{% endblock %}
+{% endblock title %}
 {% block content %}
     {% url 'recordtransfer:user_profile' as profileurl %}
     <div class="title-text">{% trans "Thank you for your Submission" %}</div>
@@ -34,4 +34,4 @@
             </li>
         </ul>
     </p>
-{% endblock %}
+{% endblock content %}
