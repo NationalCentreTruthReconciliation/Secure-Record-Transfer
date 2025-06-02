@@ -53,7 +53,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
     def test_reset_password_from_profile(self):
         driver = self.driver
-        self.login()
+        self.login()  # should log in as "testuser" with "testpassword"
 
         driver.get(f"{self.live_server_url}/user/profile/")
 
@@ -61,64 +61,34 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
-        # DEBUG: Check for CSRF token
-        csrf_tokens = driver.find_elements(By.CSS_SELECTOR, "input[name='csrfmiddlewaretoken']")
-        print(f"CSRF tokens found: {len(csrf_tokens)}")
-        for token in csrf_tokens:
-            print(f"  CSRF value: {token.get_attribute('value')[:20]}...")
-
-        # DEBUG: Check what form fields exist
-        form_inputs = driver.find_elements(By.CSS_SELECTOR, "form input")
-        print("Form inputs found:")
-        for inp in form_inputs:
-            name = inp.get_attribute("name")
-            input_type = inp.get_attribute("type")
-            print(f"  - {input_type}: name='{name}'")
-
-        # Fill form
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        # Submit form
-        form = driver.find_element(By.TAG_NAME, "form")
-        form.submit()
-        print("Form submitted directly")
+        save_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
 
+        # Optional: Wait for success message
+        try:
+            success_alert = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located(
+                    (By.CSS_SELECTOR, ".alert.alert-dismissible.alert-success")
+                )
+            )
+            print("SUCCESS ALERT:", success_alert.text)
+        except TimeoutException:
+            print("Failed to find success alert.")
+            driver.save_screenshot("no_success_alert.png")
+            print(driver.page_source)
+
+        # Give some time for backend to process (if async)
         import time
 
-        time.sleep(3)
+        time.sleep(2)
 
-        # DEBUG: Check for error messages after submission
-        error_elements = driver.find_elements(
-            By.CSS_SELECTOR, ".alert, .error, .message, .errorlist"
-        )
-        print(f"Error/message elements found: {len(error_elements)}")
-        for error in error_elements:
-            print(f"  Error/Message: '{error.text}'")
-
-        # Check if password fields are cleared (sign of successful submission)
-        current_val = driver.find_element(By.NAME, "current_password").get_attribute("value")
-        new_val = driver.find_element(By.NAME, "new_password").get_attribute("value")
-        confirm_val = driver.find_element(By.NAME, "confirm_new_password").get_attribute("value")
-
-        print(f"Form field values after submission:")
-        print(f"  Current password: '{current_val}'")
-        print(f"  New password: '{new_val}'")
-        print(f"  Confirm password: '{confirm_val}'")
-
-        # Check database
         from django.contrib.auth import authenticate
 
-        old_works = authenticate(username="testuser", password="testpassword")
-        new_works = authenticate(username="testuser", password="newsecurepassword")
-
-        print(f"Old password works: {old_works is not None}")
-        print(f"New password works: {new_works is not None}")
-
-        if new_works:
-            print("SUCCESS: Password was changed!")
-        else:
-            print("FAILED: Password was not changed")
-            print("Check /tmp/profile_before.html and /tmp/profile_after.html")
-            self.fail("Password change was not successful")
+        user = authenticate(username="testuser", password="newsecurepassword")
+        self.assertIsNotNone(user, "Password should be changed")
