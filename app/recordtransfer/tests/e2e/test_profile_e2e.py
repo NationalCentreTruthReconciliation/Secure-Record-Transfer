@@ -112,3 +112,4 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         else:
             print("FAILED: Password was not changed")
             print("Check /tmp/profile_before.html and /tmp/profile_after.html")
+            self.fail("Password change was not successful")
