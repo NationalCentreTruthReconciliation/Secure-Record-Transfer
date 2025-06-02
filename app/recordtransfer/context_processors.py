@@ -34,7 +34,6 @@ def constants_context(request: HttpRequest) -> dict[str, str]:
         # Contact Information Form Field IDs
         "ID_CONTACT_INFO_PROVINCE_OR_STATE": constants.ID_CONTACT_INFO_PROVINCE_OR_STATE,
         "ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE": constants.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-        "OTHER_PROVINCE_OR_STATE_VALUE": constants.OTHER_PROVINCE_OR_STATE_VALUE,
         # Source Information Form Field IDs
         "ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO": constants.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
         "ID_SOURCE_INFO_SOURCE_TYPE": constants.ID_SOURCE_INFO_SOURCE_TYPE,
