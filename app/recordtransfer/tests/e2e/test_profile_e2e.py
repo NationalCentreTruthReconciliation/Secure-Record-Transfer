@@ -82,7 +82,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Check if password fields are empty (indicates successful form processing)
         WebDriverWait(driver, 10).until(
             lambda driver: driver.find_element(By.NAME, "current_password").get_attribute("value")
-            == "testpassword"
+            == ""
         )
 
         print("SUCCESS: Form fields were cleared after submission")
