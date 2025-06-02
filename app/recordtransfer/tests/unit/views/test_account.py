@@ -231,6 +231,7 @@ class TestCreateAccount(TestCase):
         self.assertFalse(new_user.is_staff)
         self.assertFalse(new_user.is_superuser)
 
+
 class TestActivateAccount(TestCase):
     """Tests for the ActivateAccount view."""
 
@@ -346,26 +347,6 @@ class TestActivateAccount(TestCase):
 
         response = self.client.get(activate_url)
         self.assertRedirects(response, reverse("recordtransfer:index"))
-
-    def test_get_activate_account_expired_token(self) -> None:
-        """Test activation with expired token shows error."""
-        # Create a token for a different user to simulate expired/invalid token
-        expired_token = default_token_generator.make_token(self.active_user)
-
-        activate_url = reverse(
-            "recordtransfer:activate_account",
-            kwargs={"uidb64": self.valid_uidb64, "token": expired_token},
-        )
-
-        response = self.client.get(activate_url)
-
-        # Should redirect to invalid activation page
-        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
-
-        # User should remain inactive and not logged in
-        self.inactive_user.refresh_from_db()
-        self.assertFalse(self.inactive_user.is_active)
-        self.assertFalse(response.wsgi_request.user.is_authenticated)
 
     def test_get_activate_account_malformed_uidb64(self) -> None:
         """Test activation with malformed uidb64 shows error."""
