@@ -65,7 +65,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
         # Step 3: Submit the form
-        driver.find_element(By.NAME, "id_save_button").click()
+        driver.find_element(By.ID, "id_save_button").click()
         # Step 4: Check for success message or redirect
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
