@@ -28,7 +28,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Set up the web driver (e.g., Chrome)
         self.driver = webdriver.Chrome(options=chrome_options)
         self.user = User.objects.create_user(
-            username="testuser", email="testuser@example.com", password="testpassword"
+            username="testuser",
+            email="testuser@example.com",
+            password="testpassword",
+            first_name="Test",  # Add this
+            last_name="User",  # Add this
         )
 
     def tearDown(self):
