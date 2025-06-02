@@ -804,9 +804,9 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         phone_number_input.send_keys(data["phone_number"])
         email_input.send_keys(data["email"])
 
-        # Attempt to navigate to Home page without saving
+        # Attempt to navigate to Home page without saving - use JavaScript click
         home_link = driver.find_element(By.ID, "nav-home")
-        home_link.click()
+        driver.execute_script("arguments[0].click();", home_link)
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
@@ -869,9 +869,9 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "acceptlegal-agreement_accepted"))
         )
 
-        # Click the Home link to navigate away
+        # Attempt to navigate to Home page without saving - use JavaScript click
         home_link = driver.find_element(By.ID, "nav-home")
-        home_link.click()
+        driver.execute_script("arguments[0].click();", home_link)
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
