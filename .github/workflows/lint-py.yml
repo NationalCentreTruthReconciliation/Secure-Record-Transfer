@@ -17,7 +17,7 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           src: >-
-            "./app/recordtransfer/views"
-            "./app/recordtransfer/forms"
+            ./app/recordtransfer/views
+            ./app/recordtransfer/forms
           version-file: "./pyproject.toml"
           args: "--config ./ruff.toml check"
