@@ -82,4 +82,3 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             print("Failed to find success alert.")
             driver.save_screenshot("no_success_alert.png")
             print(driver.page_source)
-            raise e
