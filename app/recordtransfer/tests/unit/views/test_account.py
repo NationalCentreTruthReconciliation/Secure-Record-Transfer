@@ -4,7 +4,6 @@ import logging
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
@@ -319,7 +318,7 @@ class TestActivateAccount(TestCase):
     def test_activate_account_already_active_user(self) -> None:
         """Test activation of already active user."""
         # Generate token for active user
-        token = default_token_generator.make_token(self.active_user)
+        token = account_activation_token.make_token(self.active_user)
         uidb64 = urlsafe_base64_encode(force_bytes(self.active_user.pk))
 
         activate_url = reverse(
@@ -335,6 +334,24 @@ class TestActivateAccount(TestCase):
         self.active_user.refresh_from_db()
         self.assertTrue(self.active_user.is_active)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_activate_account_on_user_activated_after_token_creation(self) -> None:
+        """Test that actiavation fails if user was activated after token creation."""
+        self.inactive_user.is_active = True
+        self.inactive_user.save()
+
+        activate_url = reverse(
+            "recordtransfer:activate_account",
+            kwargs={"uidb64": self.valid_uidb64, "token": self.valid_token},
+        )
+        response = self.client.get(activate_url)
+
+        # Should redirect to invalid activation page
+        self.assertRedirects(response, reverse("recordtransfer:activation_invalid"))
+
+        # User should remain active and not logged in
+        self.inactive_user.refresh_from_db()
+        self.assertTrue(self.inactive_user.is_active)
 
     def test_activate_account_authenticated_user_redirected(self) -> None:
         """Test that authenticated users are redirected to homepage."""
