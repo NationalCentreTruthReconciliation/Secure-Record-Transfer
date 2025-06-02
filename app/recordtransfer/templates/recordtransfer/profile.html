@@ -7,11 +7,9 @@
 {% block javascript %}
     {{ block.super }}
     {{ js_context|json_script:"py_context_user_profile" }}
-    <script src="{% static 'profile.bundle.js' %}"></script>
 {% endblock javascript %}
 {% block stylesheet %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'profile.css' %}">
 {% endblock stylesheet %}
 {% block theme %}
     nctr
