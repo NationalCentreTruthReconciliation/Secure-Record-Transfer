@@ -76,4 +76,23 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
         )
 
-        print("SUCCESS: Form fields were cleared after submission")
+        # Get the error message text
+        error_alert = driver.find_element(By.CLASS_NAME, "alert-error")
+        error_message = error_alert.text
+        print(f"ERROR FOUND: {error_message}")
+
+        # Also check for other error elements
+        all_errors = driver.find_elements(
+            By.CSS_SELECTOR, ".error, .alert-error, .invalid-feedback, .errorlist"
+        )
+        print(f"Found {len(all_errors)} error elements:")
+        for i, error in enumerate(all_errors):
+            print(f"  Error {i}: {error.text}")
+
+        # Save page source for debugging
+        with open("/tmp/profile_error_debug.html", "w") as f:
+            f.write(driver.page_source)
+        print("Page source with errors saved to /tmp/profile_error_debug.html")
+
+        # The test should fail here so we can see what the error is
+        self.fail(f"Form submission failed with error: {error_message}")
