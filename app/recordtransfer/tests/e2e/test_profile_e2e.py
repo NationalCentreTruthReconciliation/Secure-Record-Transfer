@@ -61,25 +61,22 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
-        # Fill and submit form
+        # Fill form
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        save_button = driver.find_element(By.ID, "id_save_button")
+        # Find the form and submit it directly
+        form = driver.find_element(By.TAG_NAME, "form")
+        form.submit()
+        print("Form submitted directly")
 
-        # Check button properties
-        print(f"Button text: {save_button.text}")
-        print(f"Button enabled: {save_button.is_enabled()}")
-
-        # NOW click it
-        save_button.click()
-        # Wait for processing and check if form was cleared (common Django pattern)
+        # Wait for processing
         import time
 
         time.sleep(2)
 
-        # Check if password fields are empty (indicates successful form processing)
+        # Check if password fields are empty
         WebDriverWait(driver, 10).until(
             lambda driver: driver.find_element(By.NAME, "current_password").get_attribute("value")
             == ""
