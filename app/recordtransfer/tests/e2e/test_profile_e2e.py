@@ -78,7 +78,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
                 )
             )
             print("SUCCESS ALERT:", success_alert.text)
-        except TimeoutException:
+        except Exception as e:
             print("Failed to find success alert.")
             driver.save_screenshot("no_success_alert.png")
             print(driver.page_source)
