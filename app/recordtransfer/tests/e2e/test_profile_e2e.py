@@ -62,7 +62,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Step 2: Fill in the change password form
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password2").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
         # Step 3: Submit the form
         driver.find_element(By.XPATH, "//form").submit()
