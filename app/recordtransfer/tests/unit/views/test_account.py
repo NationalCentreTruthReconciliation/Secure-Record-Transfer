@@ -265,7 +265,7 @@ class TestActivateAccount(TestCase):
         self.invalid_token = "invalid-token-123"
         self.invalid_uidb64 = urlsafe_base64_encode(force_bytes(99999))  # Non-existent user ID
 
-    def test_get_activate_account_valid_token(self) -> None:
+    def test_activate_account_valid_token(self) -> None:
         """Test successful account activation with valid token."""
         activate_url = reverse(
             "recordtransfer:activate_account",
@@ -282,7 +282,7 @@ class TestActivateAccount(TestCase):
         self.assertTrue(self.inactive_user.is_active)
         self.assertTrue(response.wsgi_request.user.is_authenticated)
 
-    def test_get_activate_account_invalid_token(self) -> None:
+    def test_activate_account_invalid_token(self) -> None:
         """Test activation with invalid token shows error."""
         activate_url = reverse(
             "recordtransfer:activate_account",
@@ -299,7 +299,7 @@ class TestActivateAccount(TestCase):
         self.inactive_user.refresh_from_db()
         self.assertFalse(self.inactive_user.is_active)
 
-    def test_get_activate_account_invalid_uidb64(self) -> None:
+    def test_activate_account_invalid_uidb64(self) -> None:
         """Test activation with invalid user ID shows error."""
         activate_url = reverse(
             "recordtransfer:activate_account",
@@ -316,7 +316,7 @@ class TestActivateAccount(TestCase):
         self.inactive_user.refresh_from_db()
         self.assertFalse(self.inactive_user.is_active)
 
-    def test_get_activate_account_already_active_user(self) -> None:
+    def test_activate_account_already_active_user(self) -> None:
         """Test activation of already active user."""
         # Generate token for active user
         token = default_token_generator.make_token(self.active_user)
@@ -336,7 +336,7 @@ class TestActivateAccount(TestCase):
         self.assertTrue(self.active_user.is_active)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-    def test_get_activate_account_authenticated_user_redirected(self) -> None:
+    def test_activate_account_authenticated_user_redirected(self) -> None:
         """Test that authenticated users are redirected to homepage."""
         self.client.force_login(self.active_user)
 
@@ -348,7 +348,7 @@ class TestActivateAccount(TestCase):
         response = self.client.get(activate_url)
         self.assertRedirects(response, reverse("recordtransfer:index"))
 
-    def test_get_activate_account_malformed_uidb64(self) -> None:
+    def test_activate_account_malformed_uidb64(self) -> None:
         """Test activation with malformed uidb64 shows error."""
         activate_url = reverse(
             "recordtransfer:activate_account",
