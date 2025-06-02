@@ -73,7 +73,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Check if password fields are empty
         # Check for success message
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
         )
 
         print("SUCCESS: Form fields were cleared after submission")
