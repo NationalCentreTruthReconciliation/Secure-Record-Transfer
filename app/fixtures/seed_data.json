@@ -14,7 +14,6 @@
             "is_active": true,
             "date_joined": "2025-04-07T17:26:52.748Z",
             "gets_submission_email_updates": false,
-            "confirmed_email": false,
             "gets_notification_emails": true,
             "groups": [],
             "user_permissions": []
