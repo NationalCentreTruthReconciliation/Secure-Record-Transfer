@@ -56,7 +56,7 @@ class ActivateAccount(View):
             user = User.objects.get(pk=uid)
 
             # Validate the token
-            if account_activation_token.check_token(user, token) and not user.is_active:
+            if account_activation_token.check_token(user, token):
                 # Activate the user
                 user.is_active = True
                 user.save()
