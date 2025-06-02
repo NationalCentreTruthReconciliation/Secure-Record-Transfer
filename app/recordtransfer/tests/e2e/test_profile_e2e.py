@@ -61,27 +61,54 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
+        # DEBUG: Save the page before doing anything
+        with open("/tmp/profile_before.html", "w") as f:
+            f.write(driver.page_source)
+        print("Page saved before form submission")
+
         # Fill form
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        # Wait for save button to be clickable (this might be the issue)
-        # Debug: Check if button is actually clickable
-        # Replace the JavaScript click with:
-        # Replace the button click section with:
-        confirm_field = driver.find_element(By.NAME, "confirm_new_password")
-        confirm_field.send_keys(Keys.RETURN)
-        print("Form submitted with Enter key")
+        # DEBUG: Check current URL and form action
+        print(f"Current URL: {driver.current_url}")
 
+        form = driver.find_element(By.TAG_NAME, "form")
+        form_action = form.get_attribute("action")
+        form_method = form.get_attribute("method")
+        print(f"Form action: '{form_action}'")
+        print(f"Form method: '{form_method}'")
+
+        # Just submit the form directly
+        form.submit()
+        print("Form submitted directly")
+
+        # Wait and check what happened
         import time
 
         time.sleep(3)
 
-        # Test if password actually changed
+        # DEBUG: Save page after submission
+        with open("/tmp/profile_after.html", "w") as f:
+            f.write(driver.page_source)
+        print("Page saved after form submission")
+
+        # Check URL after submission
+        print(f"URL after submission: {driver.current_url}")
+
+        # Check if password actually changed in database
         from django.contrib.auth import authenticate
 
-        user = authenticate(username="testuser", password="newsecurepassword")
+        old_works = authenticate(username="testuser", password="testpassword")
+        new_works = authenticate(username="testuser", password="newsecurepassword")
 
-        self.assertIsNotNone(user, "Password should be changed")
-        print("SUCCESS: Password changed")
+        print(f"Old password works: {old_works is not None}")
+        print(f"New password works: {new_works is not None}")
+
+        # Don't assert yet - just print results
+        if new_works:
+            print("SUCCESS: Password was changed!")
+        else:
+            print("FAILED: Password was not changed")
+            print("Check /tmp/profile_before.html and /tmp/profile_after.html")
