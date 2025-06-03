@@ -37,7 +37,8 @@
                     {% if not in_progress.upload_session_expired %}
                         <a href="{{ in_progress.get_resume_url }}"
                            class="link link-success tooltip"
-                           data-tip="{% trans "Resume" %}">
+                           data-tip="{% trans "Resume" %}"
+                           id="resume-in-progress">
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
@@ -47,7 +48,8 @@
                        hx-select="#modal-content"
                        hx-trigger="click"
                        class="link link-error tooltip"
-                       data-tip="{% trans "Delete" %}">
+                       data-tip="{% trans "Delete" %}"
+                       id="delete-in-progress">
                         <i class="fas fa-trash-alt"></i>
                     </a>
                 </div>

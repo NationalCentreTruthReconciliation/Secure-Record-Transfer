@@ -9,9 +9,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from unittest.mock import patch, MagicMock
 
-from recordtransfer.models import User, Submission, Metadata
-
-from django.test import override_settings
+from recordtransfer.models import (
+    User,
+    Submission,
+    Metadata,
+    InProgressSubmission,
+)
 
 
 @tag("e2e")
@@ -43,10 +46,14 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             user=self.user,
             metadata=self.metadata,
         )
-
+        # Create the InProgressSubmission
+        self.in_progress_submission = InProgressSubmission.objects.create(
+            user=self.user,
+        )
         self.login()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
+        """Tear down the test case by quitting the web driver."""
         self.driver.quit()
 
     def login(self) -> None:
@@ -64,7 +71,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
     @patch("recordtransfer.views.profile.send_user_account_updated")
-    def test_reset_password_from_profile(self, email_mock: MagicMock):
+    def test_reset_password_from_profile(self, email_mock: MagicMock) -> None:
+        """Test resetting the password from the profile page."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
@@ -92,7 +100,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             print(driver.page_source)
             self.fail(f"Success alert not found: {e}")
 
-    def test_submission_view_from_profile(self):
+    def test_submission_view_from_profile(self) -> None:
+        """Test that the submission view can be accessed from the profile page."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
@@ -121,7 +130,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             print(f"FAILED to find main-title: {e}")
             self.fail("Could not find main-title element")
 
-    def test_new_submission_button_from_profile(self):
+    def test_new_submission_button_from_profile(self) -> None:
+        """Test that the new submission button from the profile page works correctly."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
@@ -139,3 +149,29 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             "submission",
             current_url.lower(),
         )
+
+    def move_to_in_progress_submission(self) -> None:
+        """Help method to move to an in-progress submission."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # Find the label for the in-progress tab by 'for' attribute or by containing the input
+        in_progress_label = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, "//label[input[@id='id_in_progress_tab']]"))
+        )
+        in_progress_label.click()
+
+    def test_resume_in_progress_submission(self) -> None:
+        """Test resuming an in-progress submission from the profile page."""
+        driver = self.driver
+        self.move_to_in_progress_submission()
+        resume_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "resume-in-progress"))
+        )
+
+        resume_button.click()
+
+        # Assert that you are now on the resume page (adjust as needed)
+        WebDriverWait(driver, 10).until(EC.url_contains("resume"))
+        self.assertIn("resume", driver.current_url)
