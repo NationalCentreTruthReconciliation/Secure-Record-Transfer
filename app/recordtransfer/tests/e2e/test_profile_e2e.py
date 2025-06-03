@@ -68,7 +68,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         password_input.send_keys("testpassword")
         password_input.send_keys(Keys.RETURN)
 
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
     @patch("recordtransfer.views.profile.send_user_account_updated")
     def test_reset_password_from_profile(self, email_mock: MagicMock) -> None:
@@ -76,7 +76,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
@@ -166,28 +166,27 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         """Test resuming an in-progress submission from the profile page."""
         driver = self.driver
         self.move_to_in_progress_submission()
-        resume_button = WebDriverWait(driver, 10).until(
+        resume_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "resume-in-progress"))
         )
 
         resume_button.click()
 
         # Assert that you are now on the resume page (adjust as needed)
-        WebDriverWait(driver, 10).until(EC.url_contains("resume"))
+        WebDriverWait(driver, 5).until(EC.url_contains("resume"))
         self.assertIn("resume", driver.current_url)
 
     def test_resume_does_not_duplicate_in_progress(self) -> None:
         """Test that resuming an in-progress submission does not create a duplicate."""
         driver = self.driver
         self.move_to_in_progress_submission()
-        resume_button = WebDriverWait(driver, 10).until(
+        resume_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "resume-in-progress"))
         )
 
         resume_button.click()
 
-        # Assert that you are now on the resume page (adjust as needed)
-        WebDriverWait(driver, 10).until(EC.url_contains("resume"))
+        WebDriverWait(driver, 5).until(EC.url_contains("resume"))
         self.assertIn("resume", driver.current_url)
 
         # Check that no new InProgressSubmission was created
@@ -202,7 +201,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         self.move_to_in_progress_submission()
 
         # Click the delete button in that row (adjust class or selector if needed)
-        delete_button = WebDriverWait(driver, 10).until(
+        delete_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "delete-in-progress"))
         )
         delete_button.click()
@@ -210,7 +209,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # If a confirmation dialog appears, accept it
         try:
             # Wait for the "Yes" button to be clickable and click it
-            confirm_button = WebDriverWait(driver, 10).until(
+            confirm_button = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.ID, "confirm_delete_ip_btn"))
             )
             confirm_button.click()
@@ -219,6 +218,6 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             pass  # No alert appeared
 
         # Wait for the row to be removed or for a "no submissions" message
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "empty_in_progress_submission"))
         )
