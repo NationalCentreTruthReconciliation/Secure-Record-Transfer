@@ -8,7 +8,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.6.12",
     "@tailwindcss/postcss": "^4.1.7",
     "@uppy/core": "^4.4.0",
     "@uppy/dashboard": "^4.1.3",
