@@ -175,3 +175,26 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Assert that you are now on the resume page (adjust as needed)
         WebDriverWait(driver, 10).until(EC.url_contains("resume"))
         self.assertIn("resume", driver.current_url)
+
+    def test_delete_in_progress_submission(self):
+        driver = self.driver
+        self.move_to_in_progress_submission()
+
+        # Click the delete button in that row (adjust class or selector if needed)
+        delete_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "delete-in-progress"))
+        )
+        delete_button.click()
+
+        # If a confirmation dialog appears, accept it
+        try:
+            WebDriverWait(driver, 3).until(EC.alert_is_present())
+            alert = driver.switch_to.alert
+            alert.accept()
+        except Exception:
+            pass  # No alert appeared
+
+        # Wait for the row to be removed or for a "no submissions" message
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "empty_in_progress_submission"))
+        )

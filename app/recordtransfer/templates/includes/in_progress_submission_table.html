@@ -57,7 +57,9 @@
         </tr>
     {% empty %}
         <tr>
-            <td colspan="4" class="text-center p-4">{% trans "You have no submissions that are in progress." %}</td>
+            <td colspan="4" class="text-center p-4" id="empty_in_progress_submission">
+                {% trans "You have no submissions that are in progress." %}
+            </td>
         </tr>
     {% endfor %}
 {% endblock table_content %}
