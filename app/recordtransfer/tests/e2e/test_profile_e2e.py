@@ -278,3 +278,30 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         WebDriverWait(driver, 5).until(lambda d: "submission-group" in d.current_url)
         self.assertIn("submission-group", driver.current_url)
+
+    def test_delete_submission_group(self) -> None:
+        """Test deleting a submission group from the profile page."""
+        driver = self.driver
+        self.move_to_submission_groups()
+
+        # Click the delete button in that row (adjust class or selector if needed)
+        delete_button = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "delete_submission_group"))
+        )
+        delete_button.click()
+
+        # If a confirmation dialog appears, accept it
+        try:
+            # Wait for the "Yes" button to be clickable and click it
+            confirm_button = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.ID, "confirm_delete_submission_group_btn"))
+            )
+            confirm_button.click()
+        except Exception:
+            print("No alert appeared, proceeding without confirmation.")
+            pass  # No alert appeared
+
+        # Wait for the row to be removed or for a "no submissions" message
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
