@@ -35,18 +35,13 @@ class TestCreateDownloadableBag(unittest.TestCase):
     @freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
     @override_settings(BAG_CHECKSUMS="sha1")
     @patch("recordtransfer.jobs.Job")
-    def test_job_creation_and_setup(self, mock_job_class: MagicMock) -> None:
-        """Test that a Job is created and configured correctly."""
+    def test_bag_creation_success(self, mock_job_class: MagicMock) -> None:
+        """Test that a bag gets created successfully (happy path)."""
         mock_job_class.JobStatus = Job.JobStatus
         mock_job_class.return_value = self.mock_job
 
         # Successful make_bag call
-        self.mock_submission.make_bag.return_value = {
-            "missing_files": [],
-            "bag_created": True,
-            "bag_valid": True,
-            "time_created": timezone.now(),
-        }
+        self.mock_submission.make_bag.return_value = None
 
         with (
             patch("recordtransfer.jobs.LOGGER"),
@@ -55,7 +50,6 @@ class TestCreateDownloadableBag(unittest.TestCase):
             patch("recordtransfer.jobs.zip_directory"),
             patch("recordtransfer.jobs.tempfile.TemporaryFile"),
             patch("recordtransfer.jobs.os.makedirs"),
-            patch("recordtransfer.jobs.shutil.rmtree"),
             patch("recordtransfer.jobs.zipfile.ZipFile"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
@@ -75,8 +69,162 @@ class TestCreateDownloadableBag(unittest.TestCase):
         # Verify submission make_bag called correctly
         self.mock_submission.make_bag.assert_called_with(algorithms="sha1")
 
-        # Verify final job is in the proper state
+        # Verify job completed
         self.assertEqual(self.mock_job.job_status, Job.JobStatus.COMPLETE)
+
+    @freeze_time(datetime(2025, 2, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
+    @override_settings(BAG_CHECKSUMS="sha1")
+    @patch("recordtransfer.jobs.Job")
+    def test_bag_creation_error_missing_files(self, mock_job_class: MagicMock) -> None:
+        """Test that a bag is not created when files are missing."""
+        mock_job_class.JobStatus = Job.JobStatus
+        mock_job_class.return_value = self.mock_job
+
+        self.mock_submission.make_bag.side_effect = FileNotFoundError("missing files")
+
+        with (
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.jobs.JobLogHandler"),
+            patch("recordtransfer.jobs.os.path.exists", return_value=False),
+            patch("recordtransfer.jobs.zip_directory"),
+            patch("recordtransfer.jobs.tempfile.TemporaryFile"),
+            patch("recordtransfer.jobs.os.makedirs"),
+            patch("recordtransfer.jobs.zipfile.ZipFile"),
+        ):
+            create_downloadable_bag(self.mock_submission, self.mock_user)
+
+        # Verify submission make_bag called correctly
+        self.mock_submission.make_bag.assert_called_with(algorithms="sha1")
+
+        # Verify job completed
+        self.assertEqual(self.mock_job.job_status, Job.JobStatus.FAILED)
+
+    @freeze_time(datetime(2025, 3, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
+    @override_settings(BAG_CHECKSUMS="sha1")
+    @patch("recordtransfer.jobs.Job")
+    def test_bag_creation_error_generic_err(self, mock_job_class: MagicMock) -> None:
+        """Test that a bag is not created when some error occured in make_bag."""
+        mock_job_class.JobStatus = Job.JobStatus
+        mock_job_class.return_value = self.mock_job
+
+        self.mock_submission.make_bag.side_effect = ValueError("no metadata")
+
+        with (
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.jobs.JobLogHandler"),
+            patch("recordtransfer.jobs.os.path.exists", return_value=False),
+            patch("recordtransfer.jobs.zip_directory"),
+            patch("recordtransfer.jobs.tempfile.TemporaryFile"),
+            patch("recordtransfer.jobs.os.makedirs"),
+            patch("recordtransfer.jobs.zipfile.ZipFile"),
+        ):
+            create_downloadable_bag(self.mock_submission, self.mock_user)
+
+        # Verify submission make_bag called correctly
+        self.mock_submission.make_bag.assert_called_with(algorithms="sha1")
+
+        # Verify job failure
+        self.assertEqual(self.mock_job.job_status, Job.JobStatus.FAILED)
+
+    @freeze_time(datetime(2025, 3, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
+    @override_settings(BAG_CHECKSUMS="sha1")
+    @override_settings(TEMP_STORAGE_FOLDER="/tmp")
+    @patch("recordtransfer.jobs.Job")
+    @patch("recordtransfer.jobs.File")
+    @patch("recordtransfer.jobs.zip_directory")
+    @patch("recordtransfer.jobs.zipfile.ZipFile")
+    @patch("recordtransfer.jobs.tempfile.TemporaryFile")
+    def test_attach_zipped_bag_to_job(
+        self,
+        mock_temp_file_class: MagicMock,
+        mock_zip_class: MagicMock,
+        mock_zip_directory: MagicMock,
+        mock_file_class: MagicMock,
+        mock_job_class: MagicMock,
+    ) -> None:
+        """Test that the submission is bagged, zipped, and attached to job."""
+        mock_job_class.JobStatus = Job.JobStatus
+        mock_job_class.return_value = self.mock_job
+
+        # Mock calling TemporaryFile()
+        mock_temp_file_instance = MagicMock()
+        mock_temp_file_instance.name = "temp_file.zip"
+        mock_temp_file_class.return_value.__enter__.return_value = mock_temp_file_instance
+
+        # Mock calling zipfile.ZipFile()
+        mock_zipfile_instance = MagicMock()
+        mock_zip_class.return_value = mock_zipfile_instance
+
+        # Mock calling File()
+        mock_file = MagicMock()
+        mock_file_class.return_value = mock_file
+
+        with (
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.jobs.JobLogHandler"),
+            patch("recordtransfer.jobs.os.path.exists", return_value=False),
+            patch("recordtransfer.jobs.os.makedirs"),
+        ):
+            create_downloadable_bag(self.mock_submission, self.mock_user)
+
+        # Verify zip creation
+        mock_zip_directory.assert_called_with("/path/to/submission", mock_zipfile_instance)
+
+        # Verify file saved to model
+        self.mock_job.attached_file.save.assert_called_once_with(
+            "TestUser-test-bag.zip", mock_file, save=True
+        )
+
+        # Verify job completed
+        self.assertEqual(self.mock_job.job_status, Job.JobStatus.COMPLETE)
+
+    @freeze_time(datetime(2025, 3, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
+    @override_settings(BAG_CHECKSUMS="sha1")
+    @override_settings(TEMP_STORAGE_FOLDER="/tmp")
+    @patch("recordtransfer.jobs.Job")
+    @patch("recordtransfer.jobs.File")
+    @patch("recordtransfer.jobs.zip_directory")
+    @patch("recordtransfer.jobs.zipfile.ZipFile")
+    @patch("recordtransfer.jobs.tempfile.TemporaryFile")
+    def test_attach_zipped_bag_to_job_failure(
+        self,
+        mock_temp_file_class: MagicMock,
+        mock_zip_class: MagicMock,
+        mock_zip_directory: MagicMock,
+        mock_file_class: MagicMock,
+        mock_job_class: MagicMock,
+    ) -> None:
+        """Test that the job status is set correctly when an exception is raised."""
+        mock_job_class.JobStatus = Job.JobStatus
+        mock_job_class.return_value = self.mock_job
+
+        # Simulate no disk space left
+        mock_temp_file_class.side_effect = OSError("Disk full")
+
+        # Mock calling zipfile.ZipFile()
+        mock_zipfile_instance = MagicMock()
+        mock_zip_class.return_value = mock_zipfile_instance
+
+        # Mock calling File()
+        mock_file = MagicMock()
+        mock_file_class.return_value = mock_file
+
+        with (
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.jobs.JobLogHandler"),
+            patch("recordtransfer.jobs.os.path.exists", return_value=False),
+            patch("recordtransfer.jobs.os.makedirs"),
+        ):
+            create_downloadable_bag(self.mock_submission, self.mock_user)
+
+        # Verify zip was not created
+        mock_zip_directory.assert_not_called()
+
+        # Verify file was not saved
+        self.mock_job.attached_file.save.assert_not_called()
+
+        # Verify job failure
+        self.assertEqual(self.mock_job.job_status, Job.JobStatus.FAILED)
 
 
 class TestCheckExpiringInProgressSubmissions(unittest.TestCase):
