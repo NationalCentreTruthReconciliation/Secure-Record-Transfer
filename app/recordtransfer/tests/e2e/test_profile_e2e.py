@@ -221,3 +221,15 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "empty_in_progress_submission"))
         )
+
+    def move_to_submission_groups(self) -> None:
+        """Help method to move to an in-progress submission."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # Find the label for the in-progress tab by 'for' attribute or by containing the input
+        submission_group_label = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, "//label[input[@id='id_submission_group_tab']]"))
+        )
+        submission_group_label.click()
