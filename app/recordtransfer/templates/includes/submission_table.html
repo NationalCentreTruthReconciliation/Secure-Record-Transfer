@@ -17,7 +17,8 @@
                     <a href="{% url 'recordtransfer:submission_detail' uuid=submission.uuid %}"
                        class="link link-info tooltip"
                        data-tip="{% trans "View Report" %}"
-                       target="_blank">
+                       target="_blank"
+                       id="view_submission_report">
                         <i class="fas fa-file-alt"></i>
                     </a>
                     <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"

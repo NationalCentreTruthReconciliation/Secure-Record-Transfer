@@ -107,7 +107,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.get(f"{self.live_server_url}{profile_url}")
 
         submission_link = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "link-info"))
+            EC.presence_of_element_located((By.ID, "view_submission_report"))
         )
         original_window = driver.current_window_handle
 
