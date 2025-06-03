@@ -60,44 +60,43 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 new_job.save()
                 return
 
-        try:
+        if not os.path.exists(settings.TEMP_STORAGE_FOLDER):
             os.makedirs(settings.TEMP_STORAGE_FOLDER, exist_ok=True)
-            with tempfile.TemporaryFile(
-                suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
-            ) as temp_zip_file:
-                LOGGER.info(
-                    "Creating temporary zip file on disk at %s ...",
-                    f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
-                )
-                zip_directory(
-                    submission.location,
-                    zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
-                )
-                LOGGER.info("Zipped directory successfully")
 
-                file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
-                LOGGER.info("Saving zip file as %s ...", file_name)
-                new_job.attached_file.save(file_name, File(temp_zip_file), save=True)
-                LOGGER.info("Saved file successfully")
-
-                new_job.job_status = Job.JobStatus.COMPLETE
-                new_job.end_time = timezone.now()
-                new_job.save()
-
-                LOGGER.info("Downloadable bag created successfully")
-        except Exception as exc:
-            new_job.job_status = Job.JobStatus.FAILED
-            new_job.save()
-            LOGGER.error(
-                "Creating zipped bag failed due to exception, %s: %s",
-                exc.__class__.__name__,
-                str(exc),
+        with tempfile.TemporaryFile(
+            suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
+        ) as temp_zip_file:
+            LOGGER.info(
+                "Creating temporary zip file on disk at %s ...",
+                f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
             )
-        finally:
-            if os.path.exists(submission.location):
-                LOGGER.info("Removing bag from disk after zip generation.")
-                shutil.rmtree(submission.location)
+            zip_directory(
+                submission.location,
+                zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
+            )
+            LOGGER.info("Zipped directory successfully")
+
+            file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
+            LOGGER.info("Saving zip file as %s ...", file_name)
+            new_job.attached_file.save(file_name, File(temp_zip_file), save=True)
+            LOGGER.info("Saved file successfully")
+
+            new_job.job_status = Job.JobStatus.COMPLETE
+            new_job.end_time = timezone.now()
+            new_job.save()
+
+            LOGGER.info("Downloadable bag created successfully")
+
+    except Exception as exc:
+        new_job.job_status = Job.JobStatus.FAILED
+        new_job.save()
+        LOGGER.error("Creating zipped bag failed due to exception!", exc_info=exc)
+
     finally:
+        if os.path.exists(submission.location):
+            LOGGER.info("Removing bag from disk after zip generation.")
+            shutil.rmtree(submission.location)
+
         LOGGER.removeHandler(job_handler)
         job_handler.close()
 
