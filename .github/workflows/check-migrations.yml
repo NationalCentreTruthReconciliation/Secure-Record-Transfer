@@ -2,7 +2,7 @@ name: Check for Unmigrated Model Changes
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, 640-migrate-ui-components-to-daisyui]
   push:
     branches: [master]
 

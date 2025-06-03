@@ -2,7 +2,7 @@ name: PR JS Lint Check
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, 640-migrate-ui-components-to-daisyui]
     types: [opened, synchronize, reopened]
 
 permissions:
