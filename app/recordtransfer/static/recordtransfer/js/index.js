@@ -7,7 +7,6 @@ import "../css/base/footer.css";
 import "../css/base/home.css";
 import "../css/base/navbar.css";
 import "../css/base/submission_form.css";
-import "../css/base/tooltip.css";
 import "../css/base/widget.css";
 
 import "../css/submission_form/review_step.css";
@@ -19,7 +18,6 @@ import htmx from "htmx.org";
 
 import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
-import { setupHelpTooltips } from "./base/tooltip";
 import { initializeProfile } from "./profile/index";
 import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
@@ -31,10 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeProfile();
     initializeSubmissionForm();
     initializeSubmissionGroup();
-});
-
-window.addEventListener("load", () => {
-    setupHelpTooltips();
 });
 
 document.addEventListener("htmx:afterSwap", (event) => {
