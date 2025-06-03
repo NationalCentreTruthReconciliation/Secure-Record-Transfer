@@ -233,3 +233,31 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.element_to_be_clickable((By.XPATH, "//label[input[@id='id_submission_group_tab']]"))
         )
         submission_group_label.click()
+
+    def test_new_submission_group(self) -> None:
+        """Test creating a new submission group from the profile page."""
+        driver = self.driver
+        self.move_to_submission_groups()
+
+        # Click the new submission group button
+        new_group_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_new_submission_group_button"))
+        )
+        new_group_button.click()
+
+        # Wait for the modal to appear and fill in the form
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "modal-box"))
+        )
+        group_name_input = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "id_submission_group_name"))
+        )
+        group_name_input.send_keys("Test Group")
+        # Submit the form
+        submit_button = driver.find_element(By.ID, "id_create_group_button")
+        submit_button.click()
+
+        # Check if the group was created successfully
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
