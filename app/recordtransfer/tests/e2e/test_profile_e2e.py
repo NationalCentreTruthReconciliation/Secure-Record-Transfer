@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from unittest.mock import patch, MagicMock
 
-from recordtransfer.models import User
+from recordtransfer.models import User, Submission, Metadata
 
 from django.test import override_settings
 
@@ -36,6 +36,12 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             password="testpassword",
             first_name="Test",
             last_name="User",
+        )
+        self.metadata = Metadata.objects.create()
+
+        self.submission = Submission.objects.create(
+            user=self.user,
+            metadata=self.metadata,
         )
 
     def tearDown(self):
@@ -85,3 +91,33 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             print("Failed to find success alert.")
             print(driver.page_source)
             self.fail(f"Success alert not found: {e}")
+
+    def test_submission_view_from_profile(self):
+        driver = self.driver
+        self.login()
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        submission_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "link-info"))
+        )
+        original_window = driver.current_window_handle
+
+        submission_link.click()
+
+        # Get all window handles
+        all_windows = driver.window_handles
+
+        new_window = next(window for window in all_windows if window != original_window)
+        driver.switch_to.window(new_window)
+
+        try:
+            # Increase timeout and add more specific waiting
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
+                )
+            )
+        except Exception as e:
+            print(f"FAILED to find main-title: {e}")
+            self.fail("Could not find main-title element")
