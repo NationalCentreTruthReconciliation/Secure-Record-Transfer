@@ -25,7 +25,10 @@
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
                     {% if field.help_text %}
-                        <div class="tooltip tooltip-right ml-2" data-tip="{{ field.help_text }}">
+                        <div class="tooltip tooltip-right ml-2">
+                            <div class="tooltip-content">
+                                {{ field.help_text }}
+                            </div>
                             <i class="fa fa-info-circle" aria-hidden="true"></i>
                         </div>
                     {% else %}
