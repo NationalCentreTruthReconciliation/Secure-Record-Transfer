@@ -9,12 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from unittest.mock import patch, MagicMock
 
-from recordtransfer.models import (
-    User,
-    Submission,
-    Metadata,
-    InProgressSubmission,
-)
+from recordtransfer.models import User, Submission, Metadata, InProgressSubmission, SubmissionGroup
 
 
 @tag("e2e")
@@ -49,6 +44,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Create the InProgressSubmission
         self.in_progress_submission = InProgressSubmission.objects.create(
             user=self.user,
+        )
+
+        self.submission_group = SubmissionGroup.objects.create(
+            name="Test Submission Group",
+            created_by=self.user,
         )
         self.login()
 
@@ -261,3 +261,20 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+
+    def test_view_submission_group(self) -> None:
+        """Test viewing a submission group from the profile page."""
+        driver = self.driver
+        self.move_to_submission_groups()
+
+        # Click the link to view the submission group
+        group_link = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "view_submission_group"))
+        )
+
+        group_link.click()
+
+        # Wait for the URL to update and check it contains 'submission-group'
+
+        WebDriverWait(driver, 5).until(lambda d: "submission-group" in d.current_url)
+        self.assertIn("submission-group", driver.current_url)

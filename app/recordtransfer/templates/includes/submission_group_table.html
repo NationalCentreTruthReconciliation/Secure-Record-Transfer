@@ -16,7 +16,8 @@
                 <div class="flex flex-row gap-4">
                     <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
                        class="link link-info tooltip"
-                       data-tip="{% trans "View group" %}">
+                       data-tip="{% trans "View group" %}"
+                       id="view_submission_group">
                         <i class="fas fa-eye"></i>
                     </a>
                     <a hx-get="{{ group.get_delete_url }}"
