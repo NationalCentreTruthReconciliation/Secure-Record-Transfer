@@ -1,11 +1,11 @@
+import { setupProfileForm } from "../forms/forms.js";
 import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
-    handleModalBeforeSwap
+    handleSubmissionGroupModalFormBeforeSwap,
+    handleSubmissionGroupModalFormAfterSwap
 } from "../utils/htmx.js";
 import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
-import { showModal } from "../utils/utils.js";
-import { setupProfileForm, setupSubmissionGroupForm } from "./forms.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 
 /**
@@ -41,16 +41,10 @@ export const initializeProfile = function() {
     };
 
     window.handleModalBeforeSwap = (e) => {
-        return handleModalBeforeSwap(e, context);
+        return handleSubmissionGroupModalFormBeforeSwap(e, context);
     };
 
     window.handleModalAfterSwap = (e) => {
-        // Sets up the submission group form if the modal content swap was triggered by the
-        // new submission group button
-        if (e.detail.requestConfig.elt.id === "id_new_submission_group_button") {
-            setupSubmissionGroupForm(context);
-        }
-        // Always show the modal after a swap on the modal content container
-        showModal();
+        return handleSubmissionGroupModalFormAfterSwap(e, context);
     };
 };

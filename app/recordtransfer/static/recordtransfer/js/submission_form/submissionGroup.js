@@ -1,19 +1,24 @@
+import {
+    handleSubmissionGroupModalFormBeforeSwap,
+    handleSubmissionGroupModalFormAfterSwap
+} from "../utils/htmx.js";
+
 /**
  * Sets up the modal version of the submission group form.
+ * @param {object} context - The context object containing URLs and element IDs for the form.
  */
-export async function setupSubmissionGroupForm() {
-    const addNewGroupButton = document.getElementById("show-add-new-group-dialog");
-    const contextElement = document.getElementById("py_context_submission_group");
+export async function setupSubmissionGroupForm(context) {
 
-    if (!addNewGroupButton || !contextElement) {
-        return;
-    }
-
-    const context = JSON.parse(contextElement.textContent);
+    window.handleModalBeforeSwap = (e) => {
+        return handleSubmissionGroupModalFormBeforeSwap(e, context);
+    };
+    window.handleModalAfterSwap = (e) => {
+        return handleSubmissionGroupModalFormAfterSwap(e, context);
+    };
 
     const selectField = document.getElementById(context["id_submission_group_selection"]);
-    const groupName = document.getElementById(context["id_submission_group_name"]);
-    const groupDesc = document.getElementById(context["id_submission_group_description"]);
+    const groupName = document.getElementById(context["ID_SUBMISSION_GROUP_NAME"]);
+    const groupDesc = document.getElementById(context["ID_SUBMISSION_GROUP_DESCRIPTION"]);
     const groupDescDisplay = document.getElementById(context["id_display_group_description"]);
     const noDescription = "No description available";
 
@@ -90,56 +95,4 @@ export async function setupSubmissionGroupForm() {
     selectGroup(context?.default_group_uuid);
 
     selectField.addEventListener("change", updateGroupDescription);
-
-    const createNewGroupForm = document.getElementById("submission-group-form");
-    const createNewGroupModal = document.getElementById("create-new-submissiongroup-modal");
-    const closeModalButton = document.getElementById("close-new-submissiongroup-modal");
-
-    const hideCreateNewGroupModal = () => createNewGroupModal.classList.remove("visible");
-    const showCreateNewGroupModal = () => createNewGroupModal.classList.add("visible");
-
-    addNewGroupButton.addEventListener("click", function (event) {
-        event.preventDefault();
-        showCreateNewGroupModal();
-    });
-
-    closeModalButton.addEventListener("click", function (event) {
-        event.preventDefault();
-        hideCreateNewGroupModal();
-    });
-
-    createNewGroupForm.addEventListener("submit", function(event) {
-        event.preventDefault();
-
-        const formData = new FormData(this);
-
-        fetch(this.action, {
-            method: this.method,
-            body: formData,
-            headers: {
-                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return Promise.reject(response);
-                }
-
-                return response.json();
-            })
-            .then(data => {
-                if (data.group) {
-                    groupName.value = "";
-                    groupDesc.value = "";
-                    handleNewGroupAdded(data.group);
-                    hideCreateNewGroupModal();
-                }
-            })
-            .catch(response => {
-                response.json().then(data => {
-                    const message = data?.message ?? "Could not create submission group";
-                    alert(message);
-                });
-            });
-    });
 }
