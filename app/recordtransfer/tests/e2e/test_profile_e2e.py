@@ -176,7 +176,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 10).until(EC.url_contains("resume"))
         self.assertIn("resume", driver.current_url)
 
-    def test_delete_in_progress_submission(self):
+    def test_delete_in_progress_submission(self) -> None:
+        """Test deleting an in-progress submission from the profile page."""
         driver = self.driver
         self.move_to_in_progress_submission()
 
@@ -192,6 +193,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             alert = driver.switch_to.alert
             alert.accept()
         except Exception:
+            print("No alert appeared, proceeding without confirmation.")
             pass  # No alert appeared
 
         # Wait for the row to be removed or for a "no submissions" message
