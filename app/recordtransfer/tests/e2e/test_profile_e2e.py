@@ -14,14 +14,6 @@ from recordtransfer.models import User
 from django.test import override_settings
 
 
-@override_settings(
-    CACHES={
-        "default": {
-            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
-        }
-    },
-    SESSION_ENGINE="django.contrib.sessions.backends.db",  # Use database instead of Redis
-)
 @tag("e2e")
 class ProfilePasswordResetTest(StaticLiveServerTestCase):
     def setUp(self):
@@ -67,8 +59,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
     def test_reset_password_from_profile(self, email_mock: MagicMock):
         driver = self.driver
         self.login()
-
-        driver.get(f"{self.live_server_url}/user/profile/")
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
 
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "current_password"))
