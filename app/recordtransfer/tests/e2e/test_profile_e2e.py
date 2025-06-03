@@ -44,6 +44,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             metadata=self.metadata,
         )
 
+        self.login()
+
     def tearDown(self):
         self.driver.quit()
 
@@ -64,10 +66,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
     @patch("recordtransfer.views.profile.send_user_account_updated")
     def test_reset_password_from_profile(self, email_mock: MagicMock):
         driver = self.driver
-        self.login()
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
@@ -94,7 +94,6 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
     def test_submission_view_from_profile(self):
         driver = self.driver
-        self.login()
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
 
@@ -121,3 +120,22 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         except Exception as e:
             print(f"FAILED to find main-title: {e}")
             self.fail("Could not find main-title element")
+
+    def test_new_submission_button_from_profile(self):
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # Wait for and click the new submission button
+        new_submission_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_new_submission_button"))
+        )
+        new_submission_button.click()
+
+        current_url = driver.current_url
+
+        # Check if URL contains 'submission'
+        self.assertIn(
+            "submission",
+            current_url.lower(),
+        )
