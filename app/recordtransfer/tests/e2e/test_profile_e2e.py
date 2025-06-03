@@ -176,6 +176,26 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 10).until(EC.url_contains("resume"))
         self.assertIn("resume", driver.current_url)
 
+    def test_resume_does_not_duplicate_in_progress(self) -> None:
+        """Test that resuming an in-progress submission does not create a duplicate."""
+        driver = self.driver
+        self.move_to_in_progress_submission()
+        resume_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "resume-in-progress"))
+        )
+
+        resume_button.click()
+
+        # Assert that you are now on the resume page (adjust as needed)
+        WebDriverWait(driver, 10).until(EC.url_contains("resume"))
+        self.assertIn("resume", driver.current_url)
+
+        # Check that no new InProgressSubmission was created
+        in_progress_count = InProgressSubmission.objects.filter(user=self.user).count()
+        self.assertEqual(
+            in_progress_count, 1, "Resuming should not create a new in-progress submission."
+        )
+
     def test_delete_in_progress_submission(self) -> None:
         """Test deleting an in-progress submission from the profile page."""
         driver = self.driver
