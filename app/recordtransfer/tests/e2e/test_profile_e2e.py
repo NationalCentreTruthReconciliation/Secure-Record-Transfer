@@ -189,9 +189,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # If a confirmation dialog appears, accept it
         try:
-            WebDriverWait(driver, 3).until(EC.alert_is_present())
-            alert = driver.switch_to.alert
-            alert.accept()
+            # Wait for the "Yes" button to be clickable and click it
+            confirm_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "confirm_delete_ip_btn"))
+            )
+            confirm_button.click()
         except Exception:
             print("No alert appeared, proceeding without confirmation.")
             pass  # No alert appeared
