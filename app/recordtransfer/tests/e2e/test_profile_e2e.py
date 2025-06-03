@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from unittest.mock import patch, MagicMock
 
 from recordtransfer.models import User
 
@@ -62,7 +63,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
-    def test_reset_password_from_profile(self):
+    @patch("recordtransfer.views.profile.send_user_account_updated")
+    def test_reset_password_from_profile(self, email_mock: MagicMock):
         driver = self.driver
         self.login()
 
