@@ -810,20 +810,20 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "unsaved-submission-form-modal"))
+            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
         )
 
         # Verify the modal is visible
-        modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
+        modal = driver.find_element(By.ID, "unsaved_changes_modal")
         self.assertTrue(modal.is_displayed())
 
         # Wait for the buttons in the modal to be clickable
         WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "unsaved-submission-form-modal-leave"))
+            EC.element_to_be_clickable((By.ID, "unsaved-changes-leave-btn"))
         )
 
         # Click on leave button in the modal
-        leave_button = driver.find_element(By.ID, "unsaved-submission-form-modal-leave")
+        leave_button = driver.find_element(By.ID, "unsaved-changes-leave-btn")
         leave_button.click()
 
         # Verify user is redirected to Home page
@@ -875,17 +875,17 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "unsaved-submission-form-modal"))
+            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
         )
         # Verify the modal is visible
-        modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
+        modal = driver.find_element(By.ID, "unsaved_changes_modal")
         self.assertTrue(modal.is_displayed())
 
         # Wait for the buttons in the modal to be clickable
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-button")))
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-link")))
 
         # Click on save button in the modal
-        save_button = driver.find_element(By.ID, "modal-save-button")
+        save_button = driver.find_element(By.ID, "modal-save-link")
         save_button.click()
 
         # Check that user is redirected to the profile page
