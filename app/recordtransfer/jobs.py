@@ -49,7 +49,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
 
         if not os.path.exists(submission.location):
             LOGGER.info("No bag exists at %s, creating it now.", str(submission.location))
-            result = submission.make_bag(algorithms=settings.BAG_CHECKSUMS, logger=LOGGER)
+            result = submission.make_bag(algorithms=settings.BAG_CHECKSUMS)
             if (
                 len(result["missing_files"]) != 0
                 or not result["bag_created"]
