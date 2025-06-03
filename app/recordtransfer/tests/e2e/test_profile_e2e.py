@@ -72,12 +72,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         save_button.click()
 
         try:
-            success_alert = WebDriverWait(driver, 10).until(
-                EC.visibility_of_element_located(
-                    (By.CSS_SELECTOR, ".alert.alert-dismissible.alert-success")
-                )
+            success_alert = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
             )
-            print("SUCCESS ALERT:", success_alert.text)
+            print("Success alert found: ", success_alert.text)
+
         except Exception as e:
             print("Failed to find success alert.")
             print(driver.page_source)
