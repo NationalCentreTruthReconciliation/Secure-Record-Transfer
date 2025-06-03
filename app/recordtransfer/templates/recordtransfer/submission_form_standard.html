@@ -1,16 +1,15 @@
-{% extends 'recordtransfer/submission_form_base.html' %}
+{% extends "recordtransfer/submission_form_base.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block buttonarrayclass %}flex-item{% endblock %}
 {% block formfields %}
     {% for field in wizard.form %}
         {% if field.errors %}
             {% for error in field.errors %}
-            <div class="flex-error">
-                <label for="nothing"></label>
-                <div class="field-error">{{ error }}</div>
-            </div>
+                <div class="flex-error">
+                    <label for="nothing"></label>
+                    <div class="field-error">{{ error }}</div>
+                </div>
             {% endfor %}
         {% endif %}
         {% if field.label != 'hidden' %}
@@ -19,7 +18,7 @@
                 {{ field }}
                 {# Help tooltip #}
                 {% if field.help_text %}
-                    <div class="tooltip ml-2" data-tip="{{ field.help_text }}">
+                    <div class="tooltip ml-2" data-tip="{{ field.help_text|striptags }}">
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                     </div>
                 {% endif %}

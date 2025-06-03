@@ -20,7 +20,7 @@
                 {{ field }}
                 {# Help tooltip #}
                 {% if field.help_text %}
-                    <div class="tooltip ml-2" data-tip="{{ field.help_text }}">
+                    <div class="tooltip ml-2" data-tip="{{ field.help_text|striptags }}">
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                     </div>
                 {% endif %}
