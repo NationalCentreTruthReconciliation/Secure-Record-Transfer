@@ -86,7 +86,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
     finally:
         if os.path.exists(submission.location):
             LOGGER.info("Removing bag from disk after zip generation.")
-            shutil.rmtree(submission.location)
+            submission.remove_bag()
 
         LOGGER.removeHandler(job_handler)
         job_handler.close()
