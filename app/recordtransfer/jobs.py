@@ -49,16 +49,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
 
         if not os.path.exists(submission.location):
             LOGGER.info("No bag exists at %s, creating it now.", str(submission.location))
-            result = submission.make_bag(algorithms=settings.BAG_CHECKSUMS)
-            if (
-                len(result["missing_files"]) != 0
-                or not result["bag_created"]
-                or not result["bag_valid"]
-                or result["time_created"] is None
-            ):
-                new_job.job_status = Job.JobStatus.FAILED
-                new_job.save()
-                return
+            submission.make_bag(algorithms=settings.BAG_CHECKSUMS)
 
         if not os.path.exists(settings.TEMP_STORAGE_FOLDER):
             os.makedirs(settings.TEMP_STORAGE_FOLDER, exist_ok=True)

@@ -34,7 +34,7 @@ from recordtransfer.managers import (
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
-LOGGER = logging.getLogger("recordtransfer")
+LOGGER = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
@@ -815,20 +815,22 @@ class Submission(models.Model):
     def __str__(self):
         return f"Submission by {self.user} at {self.submission_date}"
 
-    def make_bag(self, algorithms: Union[str, list] = "sha512", file_perms: str = "644"):
+    def make_bag(self, algorithms: Union[str, list] = "sha512", file_perms: str = "644") -> None:
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
         is determined by self.location. Checks the validity of the Bag post-creation to ensure that
         integrity is maintained. The data payload files come from the UploadSession associated with
         this submission.
 
+        Raises:
+            ValueError: If any required state is incorrect (e.g., no upload session)
+            FileNotFoundError: If any files are missing when copying to temp location
+            FileExistsError: If the Bag at self.location already exists
+            bagit.BagValidationError: If the Bag is created, but it's invalid
+
         Args:
             algorithms (Union[str, list]): The algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
         """
-
-        if not algorithms:
-            raise ValueError("algorithms cannot be empty")
-
         if not self.upload_session:
             raise ValueError("This submission has no associated upload session")
 
@@ -838,22 +840,7 @@ class Submission(models.Model):
         if isinstance(algorithms, str):
             algorithms = [a.strip() for a in algorithms.split(",")]
 
-        for algorithm in algorithms:
-            if algorithm not in bagit.CHECKSUM_ALGOS:
-                raise ValueError("{0} is not a valid checksum algorithm".format(algorithm))
-
-        if not os.path.exists(settings.BAG_STORAGE_FOLDER) or not os.path.isdir(
-            settings.BAG_STORAGE_FOLDER
-        ):
-            LOGGER.error(
-                'The BAG_STORAGE_FOLDER "%s" does not exist!', settings.BAG_STORAGE_FOLDER
-            )
-            return {
-                "missing_files": [],
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
+        os.makedirs(settings.BAG_STORAGE_FOLDER, exist_ok=True)
 
         if not os.path.exists(self.user_folder) or not os.path.isdir(self.user_folder):
             os.mkdir(self.user_folder)
@@ -861,28 +848,20 @@ class Submission(models.Model):
 
         if os.path.exists(self.location):
             LOGGER.warning('A bag already exists at "%s"', self.location)
-            return {
-                "missing_files": [],
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
+            raise FileExistsError(
+                f"Could not create a Bag because one already exists at: {self.location}"
+            )
 
         os.mkdir(self.location)
         LOGGER.info('Created new bag folder at "%s"', self.user_folder)
 
-        copied, missing = self.upload_session.copy_session_uploads(self.location, logger)
+        copied, missing = self.upload_session.copy_session_uploads(self.location)
 
         if missing:
             LOGGER.error("One or more uploaded files is missing!")
             LOGGER.info('Removing bag at "%s" due to missing files', self.location)
             self.remove_bag()
-            return {
-                "missing_files": missing,
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
+            raise FileNotFoundError(f"Could not create Bag due to {len(missing)} file(s) missing")
 
         LOGGER.info('Creating BagIt bag at "%s"', self.location)
         LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
@@ -903,24 +882,11 @@ class Submission(models.Model):
             LOGGER.error("Bag is INVALID!")
             LOGGER.info('Removing bag at "%s" since it\'s invalid', self.location)
             self.remove_bag()
-            return {
-                "missing_files": [],
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
+            raise bagit.BagValidationError("Bag was invalid!")
 
         LOGGER.info("Bag is VALID")
-        current_time = timezone.now()
 
-        return {
-            "missing_files": [],
-            "bag_created": True,
-            "bag_valid": True,
-            "time_created": current_time,
-        }
-
-    def remove_bag(self):
+    def remove_bag(self) -> None:
         """Remove the BagIt bag if it exists."""
         if os.path.exists(self.location):
             shutil.rmtree(self.location)
