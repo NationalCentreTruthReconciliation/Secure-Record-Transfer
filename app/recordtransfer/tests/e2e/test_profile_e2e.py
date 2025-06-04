@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
 
 
 @tag("e2e")
@@ -52,13 +53,13 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             name="Test Group",
             created_by=self.user,
         )
-        self.login()
+        self.login("testuser", "testpassword")
 
     def tearDown(self) -> None:
         """Tear down the test case by quitting the web driver."""
         self.driver.quit()
 
-    def login(self) -> None:
+    def login(self, username: str, password: str) -> None:
         """Log in the test user."""
         driver = self.driver
         login_url = reverse("login")
@@ -66,8 +67,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         username_input = driver.find_element(By.NAME, "username")
         password_input = driver.find_element(By.NAME, "password")
-        username_input.send_keys("testuser")
-        password_input.send_keys("testpassword")
+        username_input.send_keys(username)
+        password_input.send_keys(password)
         password_input.send_keys(Keys.RETURN)
 
         WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "logout-btn")))
@@ -110,14 +111,24 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
 
-        save_button = WebDriverWait(driver, 20).until(
+        save_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_save_button"))
         )
         save_button.click()
 
-        WebDriverWait(driver, 20).until(
+        alert_success = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+        logout_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "logout-btn"))
+        )
+        logout_button.click()
+
+        self.login("testuser", "newsecurepassword")
+
+        logout_btn = driver.find_element(By.ID, "logout-btn")
+        self.assertIsNotNone(logout_btn)
+        self.assertIsNotNone(alert_success)
 
     def test_profile_password_change_errors(self) -> None:
         """Test error cases for changing the profile password."""
@@ -178,7 +189,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.get(f"{self.live_server_url}{profile_url}")
 
         submission_link = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "view_submission_report"))
+            EC.presence_of_element_located((By.ID, "view_submission_report_1"))
         )
         original_window = driver.current_window_handle
 
@@ -191,11 +202,13 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.switch_to.window(new_window)
 
         # Increase timeout and add more specific waiting
-        WebDriverWait(driver, 5).until(
+        submission_report_heading = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
                 (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
             )
         )
+
+        self.assertIsNotNone(submission_report_heading)
 
     def test_download_submission_report_for_profile(self) -> None:
         """Test downloading the submission report from the profile page."""
@@ -204,8 +217,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver.get(f"{self.live_server_url}{profile_url}")
 
         # Find the download button and check its href
-        download_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "id_download_csv"))
+        download_button = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "id_download_csv_1"))
         )
         download_url = download_button.get_attribute("href")
 
@@ -285,21 +298,26 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         driver = self.driver
         self.move_to_in_progress_submission()
         resume_button = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "resume-in-progress"))
+            EC.presence_of_element_located((By.ID, "resume_in_progress_1"))
         )
 
         resume_button.click()
 
         # Assert that you are now on the resume page (adjust as needed)
         WebDriverWait(driver, 5).until(EC.url_contains("resume"))
-        self.assertIn("resume", driver.current_url)
+
+        expected_query = f"resume={self.in_progress_submission.uuid}"
+        parsed_url = urlparse(driver.current_url)
+
+        self.assertEqual(reverse("recordtransfer:submit"), parsed_url.path)
+        self.assertIn(expected_query, parsed_url.query)
 
     def test_resume_does_not_duplicate_in_progress(self) -> None:
         """Test that resuming an in-progress submission does not create a duplicate."""
         driver = self.driver
         self.move_to_in_progress_submission()
         resume_button = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "resume-in-progress"))
+            EC.presence_of_element_located((By.ID, "resume_in_progress_1"))
         )
 
         resume_button.click()
@@ -320,7 +338,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # Click the delete button in that row (adjust class or selector if needed)
         delete_button = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "delete-in-progress"))
+            EC.presence_of_element_located((By.ID, "delete_in_progress_1"))
         )
         delete_button.click()
 
@@ -331,9 +349,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
-        WebDriverWait(driver, 5).until(
+        empty_in_progress_submission_text = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "empty_in_progress_submission"))
         )
+
+        self.assertIsNotNone(empty_in_progress_submission_text)
 
     def test_new_submission_group(self) -> None:
         """Test creating a new submission group from the profile page."""
@@ -359,9 +379,10 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         submit_button.click()
 
         # Check if the group was created successfully
-        WebDriverWait(driver, 5).until(
+        success_alert = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+        self.assertIsNotNone(success_alert)
 
     def test_view_submission_group(self) -> None:
         """Test viewing a submission group from the profile page."""
@@ -370,7 +391,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # Click the link to view the submission group
         group_link = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "view_submission_group"))
+            EC.presence_of_element_located((By.ID, "view_submission_group_1"))
         )
 
         group_link.click()
@@ -387,7 +408,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # Click the delete button in that row (adjust class or selector if needed)
         delete_button = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "delete_submission_group"))
+            EC.presence_of_element_located((By.ID, "delete_submission_group_1"))
         )
         delete_button.click()
 
@@ -397,9 +418,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
-        WebDriverWait(driver, 5).until(
+        success_message = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+
+        self.assertIsNotNone(success_message)
 
     def test_duplicate_submission_group_name_not_allowed(self) -> None:
         """Test that creating a submission group with a duplicate name is not allowed."""
