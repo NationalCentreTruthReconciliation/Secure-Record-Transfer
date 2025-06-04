@@ -103,6 +103,57 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             print(driver.page_source)
             self.fail(f"Success alert not found: {e}")
 
+    def test_profile_password_change_errors(self):
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
+
+        # --- Case 1: Wrong current password ---
+        driver.find_element(By.NAME, "current_password").send_keys("wrongpassword")
+        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        # Assert error message is shown
+        error_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        alert_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
+        )
+        self.assertIsNotNone(error_present)
+        self.assertIsNotNone(alert_present)
+
+        # --- Case 2: New passwords do not match ---
+        # Clear fields
+        driver.find_element(By.NAME, "current_password").clear()
+        driver.find_element(By.NAME, "new_password").clear()
+        driver.find_element(By.NAME, "confirm_new_password").clear()
+
+        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
+        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("differentpassword")
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        # Assert error message is shown
+        error_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        alert_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
+        )
+        self.assertIsNotNone(error_present)
+        self.assertIsNotNone(alert_present)
+
     def test_submission_view_from_profile(self) -> None:
         """Test that the submission view can be accessed from the profile page."""
         driver = self.driver
