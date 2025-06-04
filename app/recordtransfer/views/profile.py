@@ -17,20 +17,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import (
-    ID_CONFIRM_NEW_PASSWORD,
-    ID_CURRENT_PASSWORD,
-    ID_FIRST_NAME,
-    ID_GETS_NOTIFICATION_EMAILS,
-    ID_IN_PROGRESS_SUBMISSION_TABLE,
-    ID_LAST_NAME,
-    ID_NEW_PASSWORD,
-    ID_SUBMISSION_GROUP_NAME,
-    ID_SUBMISSION_GROUP_TABLE,
-    ID_SUBMISSION_TABLE,
-    PAGINATE_QUERY_NAME,
-    SUBMISSION_GROUP_QUERY_NAME,
-)
+from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
@@ -61,21 +48,21 @@ class UserProfile(UpdateView):
             {
                 "js_context": {
                     # User profile form
-                    "ID_FIRST_NAME": ID_FIRST_NAME,
-                    "ID_LAST_NAME": ID_LAST_NAME,
-                    "ID_GETS_NOTIFICATION_EMAILS": ID_GETS_NOTIFICATION_EMAILS,
-                    "ID_CURRENT_PASSWORD": ID_CURRENT_PASSWORD,
-                    "ID_NEW_PASSWORD": ID_NEW_PASSWORD,
-                    "ID_CONFIRM_NEW_PASSWORD": ID_CONFIRM_NEW_PASSWORD,
+                    "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
+                    "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
+                    "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
+                    "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
+                    "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
+                    "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
                     # Submission group form
-                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+                    "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
                     # Tables
-                    "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-                    "ID_IN_PROGRESS_SUBMISSION_TABLE": ID_IN_PROGRESS_SUBMISSION_TABLE,
+                    "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
+                    "ID_IN_PROGRESS_SUBMISSION_TABLE": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
                     "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
                         "recordtransfer:in_progress_submission_table"
                     ),
-                    "ID_SUBMISSION_GROUP_TABLE": ID_SUBMISSION_GROUP_TABLE,
+                    "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
                     "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
                 },
             }
@@ -166,7 +153,7 @@ def _paginated_table_view(
         return HttpResponse(status=400)
 
     paginator = Paginator(queryset, settings.PAGINATE_BY)
-    page_num = request.GET.get(PAGINATE_QUERY_NAME, 1)
+    page_num = request.GET.get(QueryParameters.PAGINATE_QUERY_NAME, 1)
 
     try:
         page_num = int(page_num)
@@ -196,7 +183,7 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
         request,
         queryset,
         "includes/submission_group_table.html",
-        ID_SUBMISSION_GROUP_TABLE,
+        HtmlIds.ID_SUBMISSION_GROUP_TABLE,
         reverse("recordtransfer:submission_group_table"),
     )
 
@@ -208,14 +195,14 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
         request,
         queryset,
         "includes/in_progress_submission_table.html",
-        ID_IN_PROGRESS_SUBMISSION_TABLE,
+        HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
         reverse("recordtransfer:in_progress_submission_table"),
     )
 
 
 def submission_table(request: HttpRequest) -> HttpResponse:
     """Render the past submission table with pagination."""
-    group_uuid = request.GET.get(SUBMISSION_GROUP_QUERY_NAME)
+    group_uuid = request.GET.get(QueryParameters.SUBMISSION_GROUP_QUERY_NAME)
     queryset = None
     context = {}
     if group_uuid:
@@ -230,7 +217,7 @@ def submission_table(request: HttpRequest) -> HttpResponse:
         request,
         queryset,
         "includes/submission_table.html",
-        ID_SUBMISSION_TABLE,
+        HtmlIds.ID_SUBMISSION_TABLE,
         reverse("recordtransfer:submission_table"),
         context,
     )
