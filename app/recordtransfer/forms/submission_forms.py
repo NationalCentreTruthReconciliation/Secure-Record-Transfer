@@ -19,15 +19,8 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
-    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-    ID_CONTACT_INFO_PROVINCE_OR_STATE,
-    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
-    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
-    ID_SOURCE_INFO_SOURCE_ROLE,
-    ID_SOURCE_INFO_SOURCE_TYPE,
-    ID_SUBMISSION_GROUP_SELECTION,
     OTHER_PROVINCE_OR_STATE_VALUE,
+    HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
@@ -174,7 +167,7 @@ class ContactInfoForm(SubmissionForm):
         required=True,
         widget=forms.Select(
             attrs={
-                "id": ID_CONTACT_INFO_PROVINCE_OR_STATE,
+                "id": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
@@ -257,7 +250,7 @@ class ContactInfoForm(SubmissionForm):
         max_length=64,
         widget=forms.TextInput(
             attrs={
-                "id": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+                "id": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
@@ -388,7 +381,7 @@ class SourceInfoForm(SubmissionForm):
             ("no", gettext("No")),
         ],
         widget=forms.RadioSelect(
-            attrs={"id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
+            attrs={"id": HtmlIds.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
         ),
         label=gettext("Submitting on behalf of an organization/another person"),
         initial="no",
@@ -427,7 +420,7 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width faux-required-field",
-                "id": ID_SOURCE_INFO_SOURCE_TYPE,
+                "id": HtmlIds.ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
     )
@@ -438,7 +431,7 @@ class SourceInfoForm(SubmissionForm):
             attrs={
                 "placeholder": gettext("A source type not covered by the other choices"),
                 "class": "faux-required-field",
-                "id": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                "id": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
         label=gettext("Other source type"),
@@ -461,7 +454,7 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width faux-required-field",
-                "id": ID_SOURCE_INFO_SOURCE_ROLE,
+                "id": HtmlIds.ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
     )
@@ -472,7 +465,7 @@ class SourceInfoForm(SubmissionForm):
             attrs={
                 "placeholder": gettext("A source role not covered by the other choices"),
                 "class": "faux-required-field",
-                "id": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+                "id": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),
         label=gettext("Other source role"),
@@ -902,7 +895,7 @@ class GroupSubmissionForm(SubmissionForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width",
-                "id": ID_SUBMISSION_GROUP_SELECTION,
+                "id": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
             }
         ),
         label=gettext("Assigned group"),
