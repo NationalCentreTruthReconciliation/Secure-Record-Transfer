@@ -25,7 +25,7 @@
                 </div>
             {% endif %}
             {% if field.name == "group_uuid" %}
-                <a hx-get="{% url 'recordtransfer:create_submission_group_modal' %}"
+                <button hx-get="{% url 'recordtransfer:create_submission_group_modal' %}"
                    hx-target="#modal-content-container"
                    hx-swap="innerHTML"
                    hx-select="#modal-content"
@@ -33,7 +33,7 @@
                    class="btn btn-sm">
                     <span class="hidden md:inline">{% trans "New submission group" %}</span>
                     <i class="fa fa-plus" aria-hidden="true"></i>
-                </a>
+            </button>
             {% endif %}
         </div>
     {% endfor %}
