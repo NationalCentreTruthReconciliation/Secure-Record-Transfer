@@ -30,8 +30,8 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
-    OtherValues,
     HtmlIds,
+    OtherValues,
     QueryParameters,
     SubmissionFormWizardKeys,
 )

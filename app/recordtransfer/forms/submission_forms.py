@@ -19,8 +19,8 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
-    OtherValues,
     HtmlIds,
+    OtherValues,
 )
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
