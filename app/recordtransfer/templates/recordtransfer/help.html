@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
     <div class="container mx-auto max-w-6xl py-8">
-        <div class="card bg-base-100 shadow-xl mb-8">
+        <div class="card bg-base-100 shadow-lg mb-8">
             <div class="card-body">
                 <h1 class="card-title text-3xl mb-4" id="form-help">{% trans "Form Help" %}</h1>
                 <p class="mb-6 prose">
@@ -30,7 +30,7 @@
                 </p>
                 <div class="collapse collapse-arrow">
                     <input type="checkbox" class="peer" />
-                    <div class="collapse-title text-base font-medium">{% trans "Show details" %}</div>
+                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if source_types %}
                             <div class="bg-primary text-primary-content mb-2 mt-2 rounded-lg p-4">
@@ -65,7 +65,7 @@
                 </p>
                 <div class="collapse collapse-arrow">
                     <input type="checkbox" class="peer" />
-                    <div class="collapse-title text-base font-medium">{% trans "Show details" %}</div>
+                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if source_roles %}
                             <div class="bg-primary text-primary-content mb-2 mt-2 rounded-lg p-4">
@@ -101,7 +101,7 @@
                 </p>
                 <div class="collapse collapse-arrow">
                     <input type="checkbox" class="peer" />
-                    <div class="collapse-title text-base font-medium">{% trans "Show details" %}</div>
+                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if rights_types %}
                             <div class="bg-primary text-primary-content mb-2 mt-2 rounded-lg p-4">
