@@ -30,7 +30,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
-    OTHER_PROVINCE_OR_STATE_VALUE,
+    OtherValues,
     HtmlIds,
     QueryParameters,
     SubmissionFormWizardKeys,
@@ -616,7 +616,7 @@ class SubmissionFormWizard(SessionWizardView):
                 {
                     "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                     "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-                    "other_province_or_state_value": OTHER_PROVINCE_OR_STATE_VALUE,
+                    "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
                 }
             )
 

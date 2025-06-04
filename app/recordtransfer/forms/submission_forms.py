@@ -19,7 +19,7 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
-    OTHER_PROVINCE_OR_STATE_VALUE,
+    OtherValues,
     HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
@@ -174,7 +174,7 @@ class ContactInfoForm(SubmissionForm):
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext(OTHER_PROVINCE_OR_STATE_VALUE)),
+            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),

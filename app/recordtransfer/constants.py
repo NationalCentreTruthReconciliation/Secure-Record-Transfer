@@ -68,5 +68,12 @@ class SubmissionFormWizardKeys:
         return dataclasses.asdict(self)
 
 
-# Value to use for the "Other" option in the Province/State dropdown
-OTHER_PROVINCE_OR_STATE_VALUE = "Other"
+@dataclasses.dataclass(frozen=True)
+class OtherValues:
+    """Class to hold 'Other' option values used in dropdowns."""
+
+    PROVINCE_OR_STATE: str = "Other"
+
+    def asdict(self) -> dict[str, str]:
+        """Return the dataclass as a dictionary."""
+        return dataclasses.asdict(self)
