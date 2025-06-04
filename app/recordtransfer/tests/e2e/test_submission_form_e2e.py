@@ -86,6 +86,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     }
 
     def setUp(self) -> None:
+        """Set up the test case environment."""
         super().setUp()
         # Create a test user
         self.setUpTestData()

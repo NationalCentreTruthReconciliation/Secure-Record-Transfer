@@ -332,6 +332,9 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
 
         self.assertIsNotNone(empty_in_progress_submission_text)
+        # Assert in the database that the in-progress submission is deleted
+        exists = InProgressSubmission.objects.filter(pk=self.in_progress_submission.pk).exists()
+        self.assertFalse(exists)
 
     def test_new_submission_group(self) -> None:
         """Test creating a new submission group from the profile page."""
