@@ -173,16 +173,12 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         new_window = next(window for window in all_windows if window != original_window)
         driver.switch_to.window(new_window)
 
-        try:
-            # Increase timeout and add more specific waiting
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
-                )
+        # Increase timeout and add more specific waiting
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
             )
-        except Exception as e:
-            print(f"FAILED to find main-title: {e}")
-            self.fail("Could not find main-title element")
+        )
 
     def test_download_submission_report_for_profile(self) -> None:
         """Test downloading the submission report from the profile page."""
@@ -213,12 +209,9 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         new_submission_button.click()
 
         current_url = driver.current_url
+        expected_url = f"{self.live_server_url}{reverse("recordtransfer:submit")}"
 
-        # Check if URL contains 'submission'
-        self.assertIn(
-            "submission",
-            current_url.lower(),
-        )
+        self.assertEqual(current_url, expected_url)
 
     def test_edit_profile_settings(self) -> None:
         """Test editing profile settings from the profile page."""
@@ -294,7 +287,12 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         # Assert that you are now on the resume page (adjust as needed)
         WebDriverWait(driver, 5).until(EC.url_contains("resume"))
-        self.assertIn("resume", driver.current_url)
+        
+        expected_query = f"resume={self.in_progress_submission.uuid}"
+        parsed_url = urlparse(driver.current_url)
+        
+        self.assertEqual(reverse("recordtransfer:submit"), parsed_url.path)
+        self.assertIn(expected_query, parsed_url.query)
 
     def test_resume_does_not_duplicate_in_progress(self) -> None:
         """Test that resuming an in-progress submission does not create a duplicate."""
@@ -327,15 +325,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         delete_button.click()
 
         # If a confirmation dialog appears, accept it
-        try:
-            # Wait for the "Yes" button to be clickable and click it
-            confirm_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "confirm_delete_ip_btn"))
-            )
-            confirm_button.click()
-        except Exception:
-            print("No alert appeared, proceeding without confirmation.")
-            pass  # No alert appeared
+        # Wait for the "Yes" button to be clickable and click it
+        confirm_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "confirm_delete_ip_btn"))
+        )
+        confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
         WebDriverWait(driver, 5).until(
@@ -397,7 +391,10 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Wait for the URL to update and check it contains 'submission-group'
 
         WebDriverWait(driver, 5).until(lambda d: "submission-group" in d.current_url)
-        self.assertIn("submission-group", driver.current_url)
+        self.assertEqual(
+            driver.current_url,
+            f"{self.live_server_url}{reverse("recordtransfer:submission_group_detail", uuid=str(self.submission_group.uuid))}")
+        )
 
     def test_delete_submission_group(self) -> None:
         """Test deleting a submission group from the profile page."""

@@ -18,13 +18,13 @@
                        class="link link-info tooltip"
                        data-tip="{% trans "View Report" %}"
                        target="_blank"
-                       id="view_submission_report">
+                       id="view_submission_report_{{ forloop.counter }}">
                         <i class="fas fa-file-alt"></i>
                     </a>
                     <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"
                        class="link link-success tooltip"
                        data-tip="{% trans "Download CSV" %}"
-                       id="id_download_csv">
+                       id="id_download_csv_{{ forloop.counter }}">
                         <i class="fas fa-download"></i>
                     </a>
                 </div>

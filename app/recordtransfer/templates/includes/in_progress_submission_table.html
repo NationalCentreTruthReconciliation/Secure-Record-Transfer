@@ -38,7 +38,7 @@
                         <a href="{{ in_progress.get_resume_url }}"
                            class="link link-success tooltip"
                            data-tip="{% trans "Resume" %}"
-                           id="resume-in-progress">
+                           id="resume_in_progress_{{ forloop.counter }}">
                             <i class="fas fa-play"></i>
                         </a>
                     {% endif %}
@@ -49,7 +49,7 @@
                        hx-trigger="click"
                        class="link link-error tooltip"
                        data-tip="{% trans "Delete" %}"
-                       id="delete-in-progress">
+                       id="delete_in_progress_{{ forloop.counter }}">
                         <i class="fas fa-trash-alt"></i>
                     </a>
                 </div>
