@@ -8,7 +8,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.html import escape
@@ -188,7 +188,7 @@ def _paginated_table_view(
         "target_id": target_id,
         "paginate_url": paginate_url,
         "PAGINATE_QUERY_NAME": PAGINATE_QUERY_NAME,
-        **(extra_context or {})
+        **(extra_context or {}),
     }
 
     return render(request, template_name, context)
@@ -249,6 +249,7 @@ class SubmissionGroupModalCreateView(CreateView):
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "includes/new_submission_group_modal.html"
+    success_message = gettext("Submission group created successfully.")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -265,9 +266,26 @@ class SubmissionGroupModalCreateView(CreateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         super().form_valid(form)
+        referer = self.request.META.get("HTTP_REFERER", "")
         response = HttpResponse(status=201)
+
+        if reverse("recordtransfer:submit") in referer:
+            return trigger_client_event(
+                response,
+                "submissionGroupCreated",
+                {
+                    "message": self.success_message,
+                    "status": "success",
+                    "group": {
+                        "uuid": str(self.object.uuid),
+                        "name": self.object.name,
+                        "description": self.object.description,
+                    },
+                },
+            )
+
         return trigger_client_event(
-            response, "showSuccess", {"value": gettext("Submission group created.")}
+            response, "showSuccess", {"value": self.success_message}
         )
 
 
