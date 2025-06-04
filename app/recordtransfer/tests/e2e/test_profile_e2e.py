@@ -405,6 +405,10 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
 
         self.assertIsNotNone(success_message)
 
+        # Assert in the database that the submission group is deleted
+        exists = SubmissionGroup.objects.filter(pk=self.submission_group.pk).exists()
+        self.assertFalse(exists)
+
     def test_duplicate_submission_group_name_not_allowed(self) -> None:
         """Test that creating a submission group with a duplicate name is not allowed."""
         driver = self.driver
