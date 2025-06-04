@@ -18,6 +18,8 @@ from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
 from recordtransfer.views.pre_submission import SubmissionFormWizard
 
+from .selenium_setup import SeleniumLiveServerTestCase
+
 
 def get_section_title(step: SubmissionStep) -> str:
     """Get section title for a given step."""
@@ -25,7 +27,7 @@ def get_section_title(step: SubmissionStep) -> str:
 
 
 @tag("e2e")
-class SubmissionFormWizardTest(StaticLiveServerTestCase):
+class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     """End-to-end tests for the submission form wizard."""
 
     test_data: ClassVar[dict] = {
@@ -84,21 +86,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
     }
 
     def setUp(self) -> None:
-        """Set up the web driver and create a test user."""
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--disable-autofill")
-        chrome_options.add_argument("--disable-save-password-bubble")
-        if settings.SELENIUM_TESTS_HEADLESS_MODE:
-            chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--guest")
-        prefs = {"autofill.profile_enabled": False}
-        chrome_options.add_experimental_option("prefs", prefs)
-
-        # Set up the web driver (e.g., Chrome)
-        self.driver = webdriver.Chrome(options=chrome_options)
-
+        super().setUp()
         # Create a test user
         self.setUpTestData()
 

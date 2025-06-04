@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
 from django.urls import reverse
 from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
@@ -12,25 +10,14 @@ from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse
 
 
-@tag("e2e")
-class ProfilePasswordResetTest(StaticLiveServerTestCase):
-    def setUp(self) -> None:
-        """Set up the test case by initializing the web driver and test data."""
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--disable-autofill")
-        chrome_options.add_argument("--disable-save-password-bubble")
-        if settings.SELENIUM_TESTS_HEADLESS_MODE:
-            chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--guest")
+from .selenium_setup import SeleniumLiveServerTestCase
 
-        prefs = {
-            "autofill.profile_enabled": False,
-        }
-        chrome_options.add_experimental_option("prefs", prefs)
-        # Set up the web driver (e.g., Chrome)
-        self.driver = webdriver.Chrome(options=chrome_options)
+
+@tag("e2e")
+class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
+    def setUp(self) -> None:
+        """Set up test data and log in the test user."""
+        super().setUp()
         self.user = User.objects.create_user(
             username="testuser",
             email="testuser@example.com",
