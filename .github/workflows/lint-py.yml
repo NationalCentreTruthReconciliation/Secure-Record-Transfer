@@ -2,7 +2,7 @@ name: PR Python Lint Check
 
 on:
   pull_request:
-    branches: [master, 644-expand-ruff-linting]
+    branches: [master]
     types: [opened, synchronize, reopened]
 
 permissions:
