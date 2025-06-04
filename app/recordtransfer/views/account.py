@@ -2,11 +2,12 @@
 
 from django.contrib.auth import login
 from django.forms import BaseModelForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from recordtransfer.emails import send_user_activation_email
@@ -40,22 +41,32 @@ class CreateAccount(FormView):
         return super().form_valid(form)
 
 
-def activate_account(request: HttpRequest, uidb64: str, token: str) -> HttpResponse:
-    """Activate a user's account using the uidb64 and token from the activation email."""
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
+class ActivateAccount(View):
+    """View for activating user accounts via email link."""
 
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.confirmed_email = True
-        user.save()
-        login(request, user)
-        return HttpResponseRedirect(reverse("recordtransfer:account_created"))
+    def get(self, request: HttpRequest, uidb64: str, token: str) -> HttpResponse:
+        """Handle GET request for account activation."""
+        # Redirect authenticated users to homepage
+        if request.user.is_authenticated:
+            return redirect("recordtransfer:index")
 
-    return HttpResponseRedirect(reverse("recordtransfer:activation_invalid"))
+        try:
+            # Decode the user ID
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+
+            # Validate the token
+            if account_activation_token.check_token(user, token) and not user.is_active:
+                # Activate the user
+                user.is_active = True
+                user.save()
+                login(request, user)
+                return redirect("recordtransfer:account_created")
+            else:
+                return redirect("recordtransfer:activation_invalid")
+
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return redirect("recordtransfer:activation_invalid")
 
 
 class ActivationSent(TemplateView):
