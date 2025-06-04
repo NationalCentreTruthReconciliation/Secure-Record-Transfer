@@ -610,7 +610,7 @@ class SubmissionFormWizard(SessionWizardView):
                 {
                     "id_province_or_state": ID_CONTACT_INFO_PROVINCE_OR_STATE,
                     "id_other_province_or_state": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-                    "other_province_or_state_id": OTHER_PROVINCE_OR_STATE_VALUE,
+                    "other_province_or_state_value": OTHER_PROVINCE_OR_STATE_VALUE,
                 }
             )
 
