@@ -1,15 +1,16 @@
+import os
+
 from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
 from django.urls import reverse
+from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
-from unittest.mock import patch, MagicMock
-
-from recordtransfer.models import User, Submission, Metadata, InProgressSubmission, SubmissionGroup
+from selenium.webdriver.support.ui import WebDriverWait
+from unittest.mock import MagicMock, patch
 
 
 @tag("e2e")
@@ -18,14 +19,27 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
-        if settings.SELENIUM_TESTS_HEADLESS_MODE:
-            chrome_options.add_argument("--headless")
+        # if settings.SELENIUM_TESTS_HEADLESS_MODE:
+        #     chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--guest")
-        prefs = {"autofill.profile_enabled": False}
-        chrome_options.add_experimental_option("prefs", prefs)
 
+        self.download_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "download_reports")
+        )
+        os.makedirs(self.download_dir, exist_ok=True)
+        prefs = {
+            "download.default_directory": self.download_dir,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": True,
+            "safebrowsing.disable_download_protection": True,
+            "profile.default_content_settings.popups": 0,
+            "profile.default_content_setting_values.automatic_downloads": 1,
+            "autofill.profile_enabled": False,
+        }
+        chrome_options.add_experimental_option("prefs", prefs)
         # Set up the web driver (e.g., Chrome)
         self.driver = webdriver.Chrome(options=chrome_options)
         self.user = User.objects.create_user(
@@ -355,3 +369,18 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
         self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
+
+    def test_download_submission_report(self):
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # Find the download button and check its href
+        download_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "id_download_csv"))
+        )
+        download_url = download_button.get_attribute("href")
+
+        # Build the expected URL using Django's reverse and the submission's UUID
+        expected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_csv', kwargs={'uuid': str(self.submission.uuid)})}"
+        self.assertEqual(download_url, expected_url)
