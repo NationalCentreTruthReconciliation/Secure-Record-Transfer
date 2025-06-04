@@ -144,6 +144,22 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             print(f"FAILED to find main-title: {e}")
             self.fail("Could not find main-title element")
 
+    def test_download_submission_report_for_profile(self) -> None:
+        """Test downloading the submission report from the profile page."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # Find the download button and check its href
+        download_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "id_download_csv"))
+        )
+        download_url = download_button.get_attribute("href")
+
+        # Build the expected URL using Django's reverse and the submission's UUID
+        expected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_csv', kwargs={'uuid': str(self.submission.uuid)})}"
+        self.assertEqual(download_url, expected_url)
+
     def test_new_submission_button_from_profile(self) -> None:
         """Test that the new submission button from the profile page works correctly."""
         driver = self.driver
@@ -163,6 +179,56 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             "submission",
             current_url.lower(),
         )
+
+    def test_edit_profile_settings(self) -> None:
+        """Test editing profile settings from the profile page."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # First two fields: should be editable
+        first_name_input = driver.find_element(By.ID, "id_first_name")
+        last_name_input = driver.find_element(By.ID, "id_last_name")
+        # Last two fields: should NOT be editable/clickable
+        email_input = driver.find_element(By.ID, "id_email")
+        username_input = driver.find_element(By.ID, "id_username")
+        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
+
+        # Check first two are enabled and editable
+        self.assertTrue(first_name_input.is_enabled())
+        self.assertTrue(last_name_input.is_enabled())
+        first_name_input.clear()
+        last_name_input.clear()
+        first_name_input.send_keys("EditedFirst")
+        last_name_input.send_keys("EditedLast")
+        initial_state = notifications_checkbox.is_selected()
+
+        # Toggle the checkbox
+        notifications_checkbox.click()
+
+        # Check last two are disabled (not editable/clickable)
+        self.assertFalse(email_input.is_enabled())
+        self.assertFalse(username_input.is_enabled())
+
+        # Click save
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        # Wait for success alert
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Reload the page and check if the changes persisted
+        first_name_input = driver.find_element(By.ID, "id_first_name")
+        last_name_input = driver.find_element(By.ID, "id_last_name")
+        self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
+        self.assertEqual(last_name_input.get_attribute("value"), "EditedLast")
+
+        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
+        self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
 
     def move_to_in_progress_submission(self) -> None:
         """Help method to move to an in-progress submission."""
@@ -319,68 +385,3 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
-
-    def test_edit_profile_settings(self) -> None:
-        """Test editing profile settings from the profile page."""
-        driver = self.driver
-        profile_url = reverse("recordtransfer:user_profile")
-        driver.get(f"{self.live_server_url}{profile_url}")
-
-        # First two fields: should be editable
-        first_name_input = driver.find_element(By.ID, "id_first_name")
-        last_name_input = driver.find_element(By.ID, "id_last_name")
-        # Last two fields: should NOT be editable/clickable
-        email_input = driver.find_element(By.ID, "id_email")
-        username_input = driver.find_element(By.ID, "id_username")
-        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
-
-        # Check first two are enabled and editable
-        self.assertTrue(first_name_input.is_enabled())
-        self.assertTrue(last_name_input.is_enabled())
-        first_name_input.clear()
-        last_name_input.clear()
-        first_name_input.send_keys("EditedFirst")
-        last_name_input.send_keys("EditedLast")
-        initial_state = notifications_checkbox.is_selected()
-
-        # Toggle the checkbox
-        notifications_checkbox.click()
-
-        # Check last two are disabled (not editable/clickable)
-        self.assertFalse(email_input.is_enabled())
-        self.assertFalse(username_input.is_enabled())
-
-        # Click save
-        save_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "id_save_button"))
-        )
-        save_button.click()
-
-        # Wait for success alert
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
-        )
-
-        # Reload the page and check if the changes persisted
-        first_name_input = driver.find_element(By.ID, "id_first_name")
-        last_name_input = driver.find_element(By.ID, "id_last_name")
-        self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
-        self.assertEqual(last_name_input.get_attribute("value"), "EditedLast")
-
-        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
-        self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
-
-    def test_download_submission_report(self):
-        driver = self.driver
-        profile_url = reverse("recordtransfer:user_profile")
-        driver.get(f"{self.live_server_url}{profile_url}")
-
-        # Find the download button and check its href
-        download_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "id_download_csv"))
-        )
-        download_url = download_button.get_attribute("href")
-
-        # Build the expected URL using Django's reverse and the submission's UUID
-        expected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_csv', kwargs={'uuid': str(self.submission.uuid)})}"
-        self.assertEqual(download_url, expected_url)
