@@ -23,7 +23,7 @@ jobs:
       - name: Start containers
         run: docker compose -f compose.prod.yml up -d
         env:
-          SECRET_KEY: ${{ vars.SECRET_KEY }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Wait for app to start
         run: |
