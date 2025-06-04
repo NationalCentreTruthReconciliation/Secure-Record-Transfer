@@ -14,8 +14,6 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
-SECRET_KEY = config("SECRET_KEY", default="q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz1$g=i$wp2r!s-")
-
 # MySQL Database
 
 DEV_DATABASE_NAME = config("DEV_DATABASE_NAME", default="development_database.sqlite3")
