@@ -1,7 +1,7 @@
 {% extends "includes/base_modal.html" %}
 {% load i18n %}
 {# djlint:off #}
-{% block modal_id %}submission_group_modal{% endblock modal_id %}
+{% block modal_id %}new_submission_group_modal{% endblock modal_id %}
 {# djlint:on #}
 {% block modal_content %}
     <h3 class="text-lg font-bold mb-5">{% trans "Create a new submission group" %}</h3>
@@ -13,7 +13,7 @@
         {% csrf_token %}
         {% include "includes/submission_group_form_fields.html" %}
         <div class="modal-action">
-            <button hx-on:click="submission_group_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
+            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
             <button type="submit" class="btn btn-primary" id="id_create_group_button">{% trans "Create" %}</button>
         </div>
     </form>
