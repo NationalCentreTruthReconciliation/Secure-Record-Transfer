@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Optional
 
 from django import forms
 from django.contrib.auth import password_validation
@@ -27,40 +27,45 @@ class SignUpForm(UserCreationForm):
         """Meta class for SignUpForm."""
 
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
+        fields = ("username", "first_name", "last_name", "email", "password1", "password2")
 
     def clean(self) -> dict[str, Any]:
         """Clean data, make sure username and email are not already in use."""
         # Check for duplicate username is handled by superclass UserCreationForm
         cleaned_data = super().clean()
-        new_email = cleaned_data.get('email')
+        new_email = cleaned_data.get("email")
         if new_email and User.objects.filter(email__iexact=new_email).exists():
-            self.add_error('email', f'The email {new_email} is already in use')
+            self.add_error("email", f"The email {new_email} is already in use")
         return cleaned_data
 
-    email = forms.EmailField(max_length=256,
-        required=True,
-        widget=forms.TextInput(),
-        label=gettext('Email'))
+    email = forms.EmailField(
+        max_length=256, required=True, widget=forms.TextInput(), label=gettext("Email")
+    )
 
-    username = forms.CharField(max_length=256,
+    username = forms.CharField(
+        max_length=256,
         min_length=6,
         required=True,
         widget=forms.TextInput(),
-        label=gettext('Username'),
-        help_text=gettext('This is the username you will use to log in to your account'))
+        label=gettext("Username"),
+        help_text=gettext("This is the username you will use to log in to your account"),
+    )
 
-    first_name = forms.CharField(max_length=256,
+    first_name = forms.CharField(
+        max_length=256,
         min_length=2,
         required=True,
         widget=forms.TextInput(),
-        label=gettext('First name'))
+        label=gettext("First name"),
+    )
 
-    last_name = forms.CharField(max_length=256,
+    last_name = forms.CharField(
+        max_length=256,
         min_length=2,
         required=True,
         widget=forms.TextInput(),
-        label=gettext('Last name'))
+        label=gettext("Last name"),
+    )
 
     captcha = ReCaptchaField()
 
@@ -127,6 +132,65 @@ class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def _validate_password_change(
+        self,
+        current_password: Optional[str],
+        new_password: Optional[str],
+        confirm_new_password: Optional[str],
+    ) -> None:
+        """Validate password change fields."""
+        if not current_password:
+            raise ValidationError(
+                {
+                    "current_password": [
+                        _("Required"),
+                    ]
+                }
+            )
+        if not new_password:
+            raise ValidationError(
+                {
+                    "new_password": [
+                        _("Required"),
+                    ]
+                }
+            )
+        if not confirm_new_password:
+            raise ValidationError(
+                {
+                    "confirm_new_password": [
+                        _("Required"),
+                    ]
+                }
+            )
+
+        if new_password != confirm_new_password:
+            raise ValidationError(
+                {
+                    "confirm_new_password": [
+                        _("The new passwords do not match."),
+                    ]
+                }
+            )
+
+        if new_password == current_password:
+            raise ValidationError(
+                {
+                    "new_password": [
+                        _("The new password must be different from the current password."),
+                    ]
+                }
+            )
+
+        if not self.instance.check_password(current_password):
+            raise ValidationError(
+                {
+                    "current_password": [
+                        _("Password is incorrect."),
+                    ]
+                }
+            )
+
     def clean(self) -> dict[str, Any]:
         """Clean the form data."""
         if not self.data:
@@ -137,64 +201,10 @@ class UserProfileForm(forms.ModelForm):
         new_password = cleaned_data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
 
-        password_change = False
+        password_change = bool(current_password or new_password or confirm_new_password)
 
-        if current_password or new_password or confirm_new_password:
-            if not current_password:
-                raise ValidationError(
-                    {
-                        "current_password": [
-                            _("Required"),
-                        ]
-                    }
-                )
-            if not new_password:
-                raise ValidationError(
-                    {
-                        "new_password": [
-                            _("Required"),
-                        ]
-                    }
-                )
-            if not confirm_new_password:
-                raise ValidationError(
-                    {
-                        "confirm_new_password": [
-                            _("Required"),
-                        ]
-                    }
-                )
-
-            if new_password != confirm_new_password:
-                raise ValidationError(
-                    {
-                        "confirm_new_password": [
-                            _("The new passwords do not match."),
-                        ]
-                    }
-                )
-
-            if new_password == current_password:
-                raise ValidationError(
-                    {
-                        "new_password": [
-                            _(
-                                "The new password must be different from the current password."
-                            ),
-                        ]
-                    }
-                )
-
-            if not self.instance.check_password(current_password):
-                raise ValidationError(
-                    {
-                        "current_password": [
-                            _("Password is incorrect."),
-                        ]
-                    }
-                )
-
-            password_change = True
+        if password_change:
+            self._validate_password_change(current_password, new_password, confirm_new_password)
 
         if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
@@ -219,9 +229,7 @@ class UserProfileForm(forms.ModelForm):
             self.data = self.data.copy()
             self.data["first_name"] = self.instance.first_name
             self.data["last_name"] = self.instance.last_name
-            self.data["gets_notification_emails"] = (
-                self.instance.gets_notification_emails
-            )
+            self.data["gets_notification_emails"] = self.instance.gets_notification_emails
             self.data["current_password"] = ""
             self.data["new_password"] = ""
             self.data["confirm_new_password"] = ""
