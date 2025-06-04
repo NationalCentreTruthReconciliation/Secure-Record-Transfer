@@ -19,24 +19,13 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")
-        # if settings.SELENIUM_TESTS_HEADLESS_MODE:
-        #     chrome_options.add_argument("--headless")
+        if settings.SELENIUM_TESTS_HEADLESS_MODE:
+            chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--guest")
 
-        self.download_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "download_reports")
-        )
-        os.makedirs(self.download_dir, exist_ok=True)
         prefs = {
-            "download.default_directory": self.download_dir,
-            "download.prompt_for_download": False,
-            "download.directory_upgrade": True,
-            "safebrowsing.enabled": True,
-            "safebrowsing.disable_download_protection": True,
-            "profile.default_content_settings.popups": 0,
-            "profile.default_content_setting_values.automatic_downloads": 1,
             "autofill.profile_enabled": False,
         }
         chrome_options.add_experimental_option("prefs", prefs)
@@ -61,7 +50,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         )
 
         self.submission_group = SubmissionGroup.objects.create(
-            name="Test Submission Group",
+            name="Test Group",
             created_by=self.user,
         )
         self.login()
@@ -385,3 +374,35 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+
+    def test_duplicate_submission_group_name_not_allowed(self):
+        driver = self.driver
+        self.move_to_submission_groups()
+
+        # Try to create a duplicate group with the same name as in setUp
+        new_group_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_new_submission_group_button"))
+        )
+        new_group_button.click()
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "modal-box"))
+        )
+        group_name_input = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_submission_group_name"))
+        )
+        group_name_input.clear()
+        group_name_input.send_keys("Test Group")
+        submit_button = driver.find_element(By.ID, "id_create_group_button")
+        submit_button.click()
+
+        # Assert the modal is still present (not closed)
+        modal_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "modal-box"))
+        )
+        self.assertIsNotNone(modal_present)
+
+        # Assert an error message is shown
+        error_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        self.assertIsNotNone(error_present)
