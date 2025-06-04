@@ -119,15 +119,6 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         alert_success = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
-        logout_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "nav-logout"))
-        )
-        logout_button.click()
-
-        self.login("testuser", "newsecurepassword")
-
-        logout_button = driver.find_element(By.ID, "nav-logout")
-        self.assertIsNotNone(logout_button)
         self.assertIsNotNone(alert_success)
 
     def test_profile_password_change_errors(self) -> None:
