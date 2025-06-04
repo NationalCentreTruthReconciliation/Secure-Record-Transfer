@@ -318,6 +318,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         # Last two fields: should NOT be editable/clickable
         email_input = driver.find_element(By.ID, "id_email")
         username_input = driver.find_element(By.ID, "id_username")
+        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
 
         # Check first two are enabled and editable
         self.assertTrue(first_name_input.is_enabled())
@@ -326,6 +327,10 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         last_name_input.clear()
         first_name_input.send_keys("EditedFirst")
         last_name_input.send_keys("EditedLast")
+        initial_state = notifications_checkbox.is_selected()
+
+        # Toggle the checkbox
+        notifications_checkbox.click()
 
         # Check last two are disabled (not editable/clickable)
         self.assertFalse(email_input.is_enabled())
@@ -347,3 +352,6 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         last_name_input = driver.find_element(By.ID, "id_last_name")
         self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
         self.assertEqual(last_name_input.get_attribute("value"), "EditedLast")
+
+        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
+        self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
