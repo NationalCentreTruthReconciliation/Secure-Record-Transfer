@@ -91,16 +91,9 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         )
         save_button.click()
 
-        try:
-            success_alert = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
-            )
-            print("Success alert found: ", success_alert.text)
-
-        except Exception as e:
-            print("Failed to find success alert.")
-            print(driver.page_source)
-            self.fail(f"Success alert not found: {e}")
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
 
     def test_profile_password_change_errors(self) -> None:
         """Test error cases for changing the profile password."""
@@ -173,16 +166,12 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         new_window = next(window for window in all_windows if window != original_window)
         driver.switch_to.window(new_window)
 
-        try:
-            # Increase timeout and add more specific waiting
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
-                )
+        # Increase timeout and add more specific waiting
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
             )
-        except Exception as e:
-            print(f"FAILED to find main-title: {e}")
-            self.fail("Could not find main-title element")
+        )
 
     def test_download_submission_report_for_profile(self) -> None:
         """Test downloading the submission report from the profile page."""
@@ -323,16 +312,11 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         )
         delete_button.click()
 
-        # If a confirmation dialog appears, accept it
-        try:
-            # Wait for the "Yes" button to be clickable and click it
-            confirm_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "confirm_delete_ip_btn"))
-            )
-            confirm_button.click()
-        except Exception:
-            print("No alert appeared, proceeding without confirmation.")
-            pass  # No alert appeared
+        # Wait for the "Yes" button to be clickable and click it
+        confirm_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "confirm_delete_ip_btn"))
+        )
+        confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
         WebDriverWait(driver, 5).until(
@@ -407,16 +391,10 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         )
         delete_button.click()
 
-        # If a confirmation dialog appears, accept it
-        try:
-            # Wait for the "Yes" button to be clickable and click it
-            confirm_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "confirm_delete_submission_group_btn"))
-            )
-            confirm_button.click()
-        except Exception:
-            print("No alert appeared, proceeding without confirmation.")
-            pass  # No alert appeared
+        confirm_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "confirm_delete_submission_group_btn"))
+        )
+        confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
         WebDriverWait(driver, 5).until(
