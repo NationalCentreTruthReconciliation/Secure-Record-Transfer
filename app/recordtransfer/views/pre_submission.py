@@ -651,7 +651,6 @@ class SubmissionFormWizard(SessionWizardView):
                 {
                     # Submission group form
                     "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
-                    "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
                     "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
                     "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
                     "fetch_group_descriptions_url": reverse(
