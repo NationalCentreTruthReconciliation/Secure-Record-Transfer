@@ -201,7 +201,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
 
         self.assertIsNotNone(submission_report_heading)
 
-    def test_download_submission_report_for_profile(self) -> None:
+    def test_download_submission_CSV_for_profile(self) -> None:
         """Test downloading the submission report from the profile page."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
