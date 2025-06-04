@@ -321,7 +321,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         group_name_input = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_submission_group_name"))
         )
-        group_name_input.send_keys("Test Group")
+        group_name_input.send_keys("Test Submission Group")
         # Submit the form
         submit_button = driver.find_element(By.ID, "id_create_group_button")
         submit_button.click()
@@ -375,7 +375,8 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
 
-    def test_duplicate_submission_group_name_not_allowed(self):
+    def test_duplicate_submission_group_name_not_allowed(self) -> None:
+        """Test that creating a submission group with a duplicate name is not allowed."""
         driver = self.driver
         self.move_to_submission_groups()
 
