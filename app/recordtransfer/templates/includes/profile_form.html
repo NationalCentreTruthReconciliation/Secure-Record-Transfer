@@ -37,13 +37,15 @@
                         <legend class="fieldset-legend text-sm md:text-md">{% trans "Email" %}</legend>
                         <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
                                disabled
-                               value="{{ user.email }}">
+                               value="{{ user.email }}"
+                               id="id_email">
                     </fieldset>
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend text-sm md:text-md">{% trans "Username" %}</legend>
                         <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
                                disabled
-                               value="{{ user.username }}">
+                               value="{{ user.username }}"
+                               id="id_username">
                     </fieldset>
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend text-sm md:text-md">{% trans "Notification options" %}</legend>

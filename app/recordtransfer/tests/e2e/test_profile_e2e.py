@@ -249,7 +249,7 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "modal-box"))
         )
-        group_name_input = WebDriverWait(driver, 10).until(
+        group_name_input = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_submission_group_name"))
         )
         group_name_input.send_keys("Test Group")
@@ -305,3 +305,45 @@ class ProfilePasswordResetTest(StaticLiveServerTestCase):
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+
+    def test_edit_profile_settings(self) -> None:
+        """Test editing profile settings from the profile page."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # First two fields: should be editable
+        first_name_input = driver.find_element(By.ID, "id_first_name")
+        last_name_input = driver.find_element(By.ID, "id_last_name")
+        # Last two fields: should NOT be editable/clickable
+        email_input = driver.find_element(By.ID, "id_email")
+        username_input = driver.find_element(By.ID, "id_username")
+
+        # Check first two are enabled and editable
+        self.assertTrue(first_name_input.is_enabled())
+        self.assertTrue(last_name_input.is_enabled())
+        first_name_input.clear()
+        last_name_input.clear()
+        first_name_input.send_keys("EditedFirst")
+        last_name_input.send_keys("EditedLast")
+
+        # Check last two are disabled (not editable/clickable)
+        self.assertFalse(email_input.is_enabled())
+        self.assertFalse(username_input.is_enabled())
+
+        # Click save
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        # Wait for success alert
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Reload the page and check if the changes persisted
+        first_name_input = driver.find_element(By.ID, "id_first_name")
+        last_name_input = driver.find_element(By.ID, "id_last_name")
+        self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
+        self.assertEqual(last_name_input.get_attribute("value"), "EditedLast")
