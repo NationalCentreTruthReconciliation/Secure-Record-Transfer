@@ -2,7 +2,6 @@ from django.test import tag
 from django.urls import reverse
 from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from unittest.mock import MagicMock, patch
@@ -115,10 +114,22 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         save_button.click()
 
-        alert_success = WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
-        self.assertIsNotNone(alert_success)
+
+        # Log out to test the new password
+        logout_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "logout-btn"))
+        )
+        logout_button.click()
+
+        self.login("testuser", "newsecurepassword")
+
+        logout_button = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "logout-btn"))
+        )
+        self.assertIsNotNone(logout_button)
 
     def test_profile_password_change_errors(self) -> None:
         """Test error cases for changing the profile password."""
@@ -274,7 +285,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
 
-        # Reload the page and check if the changes persisted
+        # Check if the changes persisted
         first_name_input = driver.find_element(By.ID, "id_first_name")
         last_name_input = driver.find_element(By.ID, "id_last_name")
         self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
@@ -401,9 +412,11 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         group_link.click()
 
         # Wait for the URL to update and check it contains 'submission-group'
-
         WebDriverWait(driver, 5).until(lambda d: "submission-group" in d.current_url)
-        self.assertIn("submission-group", driver.current_url)
+
+        # Assert that the current URL is the expected one
+        exoected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_group_detail', kwargs={'uuid': str(self.submission_group.uuid)})}"
+        self.assertEqual(driver.current_url, exoected_url)
 
     def test_delete_submission_group(self) -> None:
         """Test deleting a submission group from the profile page."""
@@ -453,11 +466,9 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         submit_button = driver.find_element(By.ID, "id_create_group_button")
         submit_button.click()
 
-        # Assert the modal is still present (not closed)
-        modal_present = WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "modal-box"))
         )
-        self.assertIsNotNone(modal_present)
 
         # Assert an error message is shown
         error_present = WebDriverWait(driver, 5).until(
