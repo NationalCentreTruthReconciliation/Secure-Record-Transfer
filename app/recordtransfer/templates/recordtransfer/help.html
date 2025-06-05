@@ -7,8 +7,7 @@
     <div class="container mx-auto max-w-6xl py-8">
         <div class="card bg-base-100 shadow-lg mb-8">
             <div class="card-body">
-                <h1 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
-                    id="form-help">{% trans "Form Help" %}</h1>
+                <h1 class="card-title text-3xl mb-4" id="form-help">{% trans "Form Help" %}</h1>
                 <p class="mb-4 text-base">
                     {% blocktrans %}
                 Refer to the following section if you come across a part of the form that you need assistance
@@ -22,7 +21,7 @@
             <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="source-types">{% trans "Source Types" %}</h2>
-                <span class="inline-block  text-primary text-md font-semibold rounded px-2 py-1 mb-2">Step 3 of Submission Form</span>
+                <span class="inline-block bg-primary/10 text-primary text-xs font-semibold rounded px-2 py-1 mb-2">Step 3 of Submission Form</span>
                 <p class="mb-4 prose">
                     {% blocktrans %}
                 The <i>source type</i> describes what type of entity the source of the records is. If none of
@@ -35,11 +34,11 @@
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if source_types %}
-                            <div class="text-primary mb-3 mt-2 rounded-lg px-4 py-2 text-md leading-relaxed font-semibold">
+                            <span class="block bg-primary/10 text-primary mb-3 mt-2 rounded-lg px-4 py-2 font-semibold shadow-sm border border-primary/10">
                                 {% blocktrans %}
                                     The following is a description of each source type:
                                     {% endblocktrans %}
-                            </div>
+                            </span>
                             <ul class="list-disc list-inside mb-2">
                                 {% for source_type in source_types %}
                                     <li class="leading-relaxed">
@@ -56,7 +55,7 @@
             <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 ">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="source-roles">{% trans "Source Roles" %}</h2>
-                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">Step 3 of Submission Form</span>
+                <span class="inline-block bg-primary/10 text-primary text-xs font-semibold rounded px-2 py-1 mb-2">Step 3 of Submission Form</span>
                 <p class="mb-4 prose">
                     {% blocktrans %}
                 The <i>source role</i> describes how the entity relates to the records. If none of the
@@ -69,11 +68,11 @@
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if source_roles %}
-                            <div class="text-primary mb-3 mt-2 rounded-lg px-4 py-2 text-md leading-relaxed font-semibold">
+                            <span class="block bg-primary/10 text-primary mb-3 mt-2 rounded-lg px-4 py-2 font-semibold shadow-sm border border-primary/10">
                                 {% blocktrans %}
                             The following is a description of each source role:
                             {% endblocktrans %}
-                            </div>
+                            </span>
                             <ul class="list-disc list-inside mb-2">
                                 {% for source_role in source_roles %}
                                     <li class="leading-relaxed">
@@ -90,7 +89,7 @@
             <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="rights-types">{% trans "Rights Types" %}</h2>
-                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">Step 5 of Submission Form</span>
+                <span class="inline-block bg-primary/10 text-primary text-xs font-semibold rounded px-2 py-1 mb-2">Step 5 of Submission Form</span>
                 <p class="mb-4 prose">
                     {% blocktrans %}
                 Depending on the records you are submitting, there may be specific rights that govern
@@ -104,11 +103,11 @@
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if rights_types %}
-                            <div class="text-primary mb-3 mt-2 rounded-lg px-4 py-2 text-md leading-relaxed font-semibold">
+                            <span class="block bg-primary/10 text-primary mb-3 mt-2 rounded-lg px-4 py-2 font-semibold shadow-sm border border-primary/10">
                                 {% blocktrans %}
-    The following is a description of each rights type:
-    {% endblocktrans %}
-                            </div>
+                            The following is a description of each rights type:
+                            {% endblocktrans %}
+                            </span>
                             <ul class="list-disc list-inside mb-2">
                                 {% for rights_type in rights_types %}
                                     <li class="leading-relaxed">
