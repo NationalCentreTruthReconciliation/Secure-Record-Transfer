@@ -2,7 +2,7 @@ name: Check for Unmigrated Model Changes
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, 640-migrate-ui-components-to-daisyui]
   push:
     branches: [master]
 
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version-file: '.python-version'
+          python-version-file: ".python-version"
 
       - name: Install dependencies
         run: uv sync --locked

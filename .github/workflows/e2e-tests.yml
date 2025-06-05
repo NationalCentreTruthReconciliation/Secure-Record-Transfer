@@ -2,7 +2,7 @@ name: Run E2E Tests
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, 640-migrate-ui-components-to-daisyui]
   push:
     branches: [master]
   workflow_dispatch:
@@ -34,8 +34,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Setup Chrome for Selenium
         uses: browser-actions/setup-chrome@latest
