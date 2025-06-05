@@ -1,0 +1,23 @@
+{# filepath: app/recordtransfer/templates/recordtransfer/help_card.html #}
+<div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col mb-8">
+    <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
+        id="{{ card_id }}">{{ title|safe }}</h2>
+    <p class="mb-4 text-base">{{ description|safe }}</p>
+    <div class="collapse collapse-arrow mt-auto mb-2">
+        <input type="checkbox" class="peer" />
+        <div class="collapse-title text-lg font-semibold flex items-center">{% trans "Show details" %}</div>
+        <div class="collapse-content p-0">
+            {% if items %}
+                <span class="block border-l-4 border-primary/20 pl-4 mb-2 mt-2 text-primary">{{ details|safe }}</span>
+                <ul class="list-disc list-inside mb-2">
+                    {% for item in items %}
+                        <li class="leading-relaxed">
+                            <span class="font-semibold text-primary">{{ item.name }}</span>:
+                            <span>{{ item.description }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
