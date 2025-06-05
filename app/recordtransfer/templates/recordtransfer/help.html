@@ -1,80 +1,126 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Help" %}{% endblock %}
-
+{% block title %}
+    {% trans "Help" %}
+{% endblock title %}
 {% block content %}
-
-<h1 class="margin-top-25px" id="form-help">{% trans "Form Help" %}</h1>
-<p>
-    {% blocktrans %}
-    Refer to the following section if you come across a part of the form that you need assistance
-    with.
-    {% endblocktrans %}
-</p>
-
-<h2 class="margin-top-25px" id="source-types">{% trans "Source Types" %}</h2>
-<p>
-    {% blocktrans %}
-    The <i>source type</i> describes what type of entity the source of the records is. If none of
-    the provided options properly describe the source entity, select <b>Other</b> in the
-    source types dropdown and enter your own type.
-    {% endblocktrans %}
-</p>
-{% if source_types %}
-<p>
-    {% blocktrans %}
-    The following is a description of each source type:
-    {% endblocktrans %}
-</p>
-<ul>
-    {% for source_type in source_types %}
-    <li><b>{{ source_type.name }}:</b> {{ source_type.description }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-<h2 class="margin-top-25px" id="source-roles">{% trans "Source Roles" %}</h2>
-<p>
-    {% blocktrans %}
-    The <i>source role</i> describes how the entity relates to the records. If none of the
-    provided options properly describe the source's relationship to the records, select
-    <b>Other</b> in the source roles dropdown and enter your own type.
-    {% endblocktrans %}
-</p>
-{% if source_roles %}
-<p>
-    {% blocktrans %}
-    The following is a description of each source role:
-    {% endblocktrans %}
-</p>
-<ul>
-    {% for source_role in source_roles %}
-    <li><b>{{ source_role.name }}:</b> {{ source_role.description }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-<h2 class="margin-top-25px" id="rights-types">{% trans "Rights Types" %}</h2>
-<p>
-    {% blocktrans %}
-    Depending on the records you are submitting, there may be specific rights that govern
-    the access of your records. The following is a brief description about the types of
-    rights that are available to be used. If none suit your needs, select <b>Other</b> in
-    the rights dropdown.
-    {% endblocktrans %}
-</p>
-{% if rights_types %}
-<p>
-    {% blocktrans %}
-    The following is a description of each rights type:
-    {% endblocktrans %}
-</p>
-<ul>
-    {% for rights_type in rights_types %}
-    <li><b>{{ rights_type.name }}:</b> {{ rights_type.description }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-{% endblock %}
+    <div class="container mx-auto max-w-6xl py-8">
+        <div class="card bg-base-100 shadow-lg mb-8">
+            <div class="card-body">
+                <h1 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
+                    id="form-help">{% trans "Form Help" %}</h1>
+                <p class="mb-4 text-base">
+                    {% blocktrans %}
+                Refer to the following section if you come across a part of the form that you need assistance
+                with.
+                {% endblocktrans %}
+                </p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Source Types Card -->
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
+                <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
+                    id="source-types">{% trans "Source Types" %}</h2>
+                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">Step 3 of Submission Form</span>
+                <p class="mb-4 prose">
+                    {% blocktrans %}
+                The <i>source type</i> describes what type of entity the source of the records is. If none of
+                the provided options properly describe the source entity, select <b>Other</b> in the
+                source types dropdown and enter your own type.
+                {% endblocktrans %}
+                </p>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
+                    <div class="collapse-content p-0">
+                        {% if source_types %}
+                            <span class="block text-primary mb-3 mt-2 rounded-lg px-2 py-1 font-semibold">
+                                {% blocktrans %}
+                                    The following is a description of each source type:
+                                    {% endblocktrans %}
+                            </span>
+                            <ul class="list-disc list-inside mb-2">
+                                {% for source_type in source_types %}
+                                    <li class="leading-relaxed">
+                                        <span class="font-semibold text-primary">{{ source_type.name }}</span>:
+                                        <span>{{ source_type.description }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- Source Roles Card -->
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 ">
+                <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
+                    id="source-roles">{% trans "Source Roles" %}</h2>
+                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">Step 3 of Submission Form</span>
+                <p class="mb-4 prose">
+                    {% blocktrans %}
+                The <i>source role</i> describes how the entity relates to the records. If none of the
+                provided options properly describe the source's relationship to the records, select
+                <b>Other</b> in the source roles dropdown and enter your own type.
+                {% endblocktrans %}
+                </p>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
+                    <div class="collapse-content p-0">
+                        {% if source_roles %}
+                            <span class="block text-primary mb-3 mt-2 rounded-lg px-2 py-1 font-semibold">
+                                {% blocktrans %}
+                            The following is a description of each source role:
+                            {% endblocktrans %}
+                            </span>
+                            <ul class="list-disc list-inside mb-2">
+                                {% for source_role in source_roles %}
+                                    <li class="leading-relaxed">
+                                        <span class="font-semibold text-primary">{{ source_role.name }}</span>:
+                                        <span>{{ source_role.description }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- Rights Types Card -->
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
+                <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
+                    id="rights-types">{% trans "Rights Types" %}</h2>
+                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">Step 5 of Submission Form</span>
+                <p class="mb-4 prose">
+                    {% blocktrans %}
+                Depending on the records you are submitting, there may be specific rights that govern
+                the access of your records. The following is a brief description about the types of
+                rights that are available to be used. If none suit your needs, select <b>Other</b> in
+                the rights dropdown.
+                {% endblocktrans %}
+                </p>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
+                    <div class="collapse-content p-0">
+                        {% if rights_types %}
+                            <span class="block text-primary mb-3 mt-2 rounded-lg px-2 py-1 font-semibold">
+                                {% blocktrans %}
+                            The following is a description of each rights type:
+                            {% endblocktrans %}
+                            </span>
+                            <ul class="list-disc list-inside mb-2">
+                                {% for rights_type in rights_types %}
+                                    <li class="leading-relaxed">
+                                        <span class="font-semibold text-primary">{{ rights_type.name }}</span>:
+                                        <span>{{ rights_type.description }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
