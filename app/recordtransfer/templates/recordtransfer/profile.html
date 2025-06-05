@@ -22,7 +22,10 @@
         <div class="tabs tabs-lift">
             <!-- Past Submissions Tab -->
             <label class="tab">
-                <input type="radio" name="profile_tabs" checked="checked">
+                <input type="radio"
+                       name="profile_tabs"
+                       checked="checked"
+                       id="id_past_submissions_tab">
                 <i class="fa fa-check me-2" aria-hidden="true"></i> {% trans "Past Submissions" %}
             </label>
             <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -35,7 +38,9 @@
                     </div>
                 </div>
                 <div class="flex justify-end">
-                    <a href="{% url 'recordtransfer:submit' %}" class="btn btn-sm">
+                    <a href="{% url 'recordtransfer:submit' %}"
+                       class="btn btn-sm "
+                       id="id_new_submission_button">
                         <span class="hidden md:inline">{% trans "New submission" %}</span>
                         <i class="fa fa-plus" aria-hidden="true"></i>
                     </a>
@@ -43,7 +48,7 @@
             </div>
             <!-- In-Progress Submissions Tab -->
             <label class="tab">
-                <input type="radio" name="profile_tabs">
+                <input type="radio" name="profile_tabs" id="id_in_progress_tab">
                 <i class="fa fa-clock me-2" aria-hidden="true"></i> {% trans "In-Progress" %}
             </label>
             <div class="tab-content bg-base-100 border-base-300 p-6">
@@ -58,7 +63,7 @@
             </div>
             <!-- Submission Groups Tab -->
             <label class="tab">
-                <input type="radio" name="profile_tabs">
+                <input type="radio" name="profile_tabs" id="id_submission_group_tab">
                 <i class="fa fa-folder me-2" aria-hidden="true"></i> {% trans "Submission Groups" %}
             </label>
             <div class="tab-content bg-base-100 border-base-300 p-6">
