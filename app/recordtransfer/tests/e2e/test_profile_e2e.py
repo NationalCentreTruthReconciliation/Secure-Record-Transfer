@@ -347,8 +347,8 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def test_delete_in_progress_submission(self) -> None:
         """Test deleting an in-progress submission from the profile page."""
         driver = self.driver
+        self.in_progress_submission = self.create_in_progress_submission()
         self.move_to_in_progress_submission()
-        self.in_progress_submission = InProgressSubmission.objects.filter(user=self.user).first()
         # Click the delete button in that row (adjust class or selector if needed)
         delete_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "delete_in_progress_1"))
