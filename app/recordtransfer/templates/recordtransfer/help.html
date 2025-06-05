@@ -18,7 +18,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Source Types Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col">
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="source-types">{% trans "Source Types" %}</h2>
                 <p class="mb-4 prose">
@@ -28,18 +28,16 @@
                 source types dropdown and enter your own type.
                 {% endblocktrans %}
                 </p>
-                <div class="collapse collapse-arrow mt-auto mb-2">
+                <div class="collapse collapse-arrow mt-4">
                     <input type="checkbox" class="peer" />
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if source_types %}
-                            <div class="bg-primary text-primary-content mb-2 mt-2 rounded-lg p-4">
-                                <span>
-                                    {% blocktrans %}
+                            <span class="block border-l-4 border-primary/20 pl-4 mb-2 mt-2 text-primary">
+                                {% blocktrans %}
                                     The following is a description of each source type:
                                     {% endblocktrans %}
-                                </span>
-                            </div>
+                            </span>
                             <ul class="list-disc list-inside mb-2">
                                 {% for source_type in source_types %}
                                     <li class="leading-relaxed">
@@ -53,7 +51,7 @@
                 </div>
             </div>
             <!-- Source Roles Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col">
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 ">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="source-roles">{% trans "Source Roles" %}</h2>
                 <p class="mb-4 prose">
@@ -63,18 +61,16 @@
                 <b>Other</b> in the source roles dropdown and enter your own type.
                 {% endblocktrans %}
                 </p>
-                <div class="collapse collapse-arrow mt-auto mb-2">
+                <div class="collapse collapse-arrow mt-4">
                     <input type="checkbox" class="peer" />
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if source_roles %}
-                            <div class="bg-primary text-primary-content mb-2 mt-2 rounded-lg p-4">
-                                <span>
-                                    {% blocktrans %}
+                            <span class="block border-l-4 border-primary/20 pl-4 mb-2 mt-2 text-primary">
+                                {% blocktrans %}
                             The following is a description of each source role:
                             {% endblocktrans %}
-                                </span>
-                            </div>
+                            </span>
                             <ul class="list-disc list-inside mb-2">
                                 {% for source_role in source_roles %}
                                     <li class="leading-relaxed">
@@ -88,7 +84,7 @@
                 </div>
             </div>
             <!-- Rights Types Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col">
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="rights-types">{% trans "Rights Types" %}</h2>
                 <p class="mb-4 prose">
@@ -99,18 +95,16 @@
                 the rights dropdown.
                 {% endblocktrans %}
                 </p>
-                <div class="collapse collapse-arrow mt-auto mb-2">
+                <div class="collapse collapse-arrow mt-4">
                     <input type="checkbox" class="peer" />
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
                         {% if rights_types %}
-                            <div class="bg-primary text-primary-content mb-2 mt-2 rounded-lg p-4">
-                                <span>
-                                    {% blocktrans %}
+                            <span class="block border-l-4 border-primary/20 pl-4 mb-2 mt-2 text-primary">
+                                {% blocktrans %}
                             The following is a description of each rights type:
                             {% endblocktrans %}
-                                </span>
-                            </div>
+                            </span>
                             <ul class="list-disc list-inside mb-2">
                                 {% for rights_type in rights_types %}
                                     <li class="leading-relaxed">
