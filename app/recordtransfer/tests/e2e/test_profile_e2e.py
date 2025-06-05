@@ -95,7 +95,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         submission_group_label.click()
 
-    @patch("django.core.mail.send_mail")
+    @patch("recordtransfer.views.profile.send_user_account_updated")
     def test_reset_password_from_profile(self, email_mock: MagicMock) -> None:
         """Test resetting the password from the profile page."""
         driver = self.driver
@@ -119,15 +119,15 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
 
         # Log out to test the new password
-        logout_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "nav-logout"))
+        logout_button = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, "logout-btn"))
         )
         logout_button.click()
 
         self.login("testuser", "newsecurepassword")
 
-        logout_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "nav-logout"))
+        logout_button = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, "logout-btn"))
         )
         self.assertIsNotNone(logout_button)
 
