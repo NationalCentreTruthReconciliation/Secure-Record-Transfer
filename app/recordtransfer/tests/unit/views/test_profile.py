@@ -1,3 +1,4 @@
+import json
 import re
 import uuid
 from datetime import datetime, timedelta
@@ -935,7 +936,7 @@ class TestSubmissionGroupModalCreateView(TestCase):
             self.submission_group_modal_url,
             data=form_data,
             headers=self.headers,
-            HTTP_REFERER=reverse("recordtransfer:submit")
+            HTTP_REFERER=reverse("recordtransfer:submit"),
         )
 
         # Check that submission group was created
