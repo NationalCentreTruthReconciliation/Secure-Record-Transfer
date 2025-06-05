@@ -21,26 +21,21 @@ export function setupUnsavedChangesProtection() {
     };
 
     const elements = {
-        modal: document.getElementById("unsaved-submission-form-modal"),
-        saveButton: document.getElementById("modal-save-button"),
-        closeButton: document.getElementById("close-modal-button"),
-        cancelButton: document.getElementById("unsaved-submission-form-modal-cancel"),
-        leaveButton: document.getElementById("unsaved-submission-form-modal-leave"),
-        formSaveButton: document.getElementById("form-save-button")
+        get modal() { return document.getElementById("unsaved_changes_modal"); },
+        get saveButton() { return document.getElementById("modal-save-link"); },
+        get leaveButton() { return document.getElementById("unsaved-changes-leave-btn"); },
+        get formSaveButton() { return document.getElementById("form-save-button"); }
     };
 
     // The URL to navigate to when the user chooses to leave the form
     let targetUrl = "";
-
-    const hideModal = () => elements.modal.classList.remove("visible");
-    const showModal = () => elements.modal.classList.add("visible");
 
     // Add event listeners to only navigational links
     document.querySelectorAll("a:not(.non-nav-link)").forEach(link => {
         link.addEventListener("click", (event) => {
             event.preventDefault();
             targetUrl = event.currentTarget.href;
-            showModal();
+            elements.modal.showModal();
         });
     });
 
@@ -48,11 +43,8 @@ export function setupUnsavedChangesProtection() {
         event.preventDefault();
         // Save and submit the form using the form's save button
         elements.formSaveButton.click();
-        hideModal();
+        elements.modal.close();
     });
-
-    elements.closeButton.addEventListener("click", hideModal);
-    elements.cancelButton.addEventListener("click", hideModal);
 
     elements.leaveButton.addEventListener("click", () => {
         window.removeEventListener("beforeunload", beforeUnloadListener);

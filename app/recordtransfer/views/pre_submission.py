@@ -30,10 +30,22 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
-    HtmlIds,
-    OtherValues,
-    QueryParameters,
-    SubmissionFormWizardKeys,
+    FORM,
+    FORMTITLE,
+    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+    ID_CONTACT_INFO_PROVINCE_OR_STATE,
+    ID_DISPLAY_GROUP_DESCRIPTION,
+    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+    ID_SOURCE_INFO_SOURCE_ROLE,
+    ID_SOURCE_INFO_SOURCE_TYPE,
+    ID_SUBMISSION_GROUP_NAME,
+    ID_SUBMISSION_GROUP_SELECTION,
+    INFOMESSAGE,
+    OTHER_PROVINCE_OR_STATE_VALUE,
+    SUBMISSION_GROUP_QUERY_NAME,
+    TEMPLATEREF,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -653,10 +665,10 @@ class SubmissionFormWizard(SessionWizardView):
         elif step == SubmissionStep.GROUP_SUBMISSION:
             js_context.update(
                 {
-                    "id_submission_group_name": HtmlIds.ID_SUBMISSION_GROUP_NAME,
-                    "id_submission_group_description": HtmlIds.ID_SUBMISSION_GROUP_DESCRIPTION,
-                    "id_display_group_description": HtmlIds.ID_DISPLAY_GROUP_DESCRIPTION,
-                    "id_submission_group_selection": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
+                    # Submission group form
+                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
+                    "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
+                    "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
                     "fetch_group_descriptions_url": reverse(
                         "recordtransfer:get_user_submission_groups",
                         kwargs={"user_id": self.request.user.pk},

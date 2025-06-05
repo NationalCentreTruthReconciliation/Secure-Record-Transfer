@@ -12,7 +12,6 @@ import "../css/base/widget.css";
 
 import "../css/submission_form/review_step.css";
 import "../css/submission_form/uppy.css";
-import "../css/submission_form/modal.css";
 
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
@@ -22,7 +21,7 @@ import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
 import { initializeProfile } from "./profile/index";
 import { initializeSubmissionForm } from "./submission_form/index";
-import { initializeSubmissionGroup } from "./submission_group/index";
+import { initializeSubmissionGroupDetail } from "./submission_group_detail/index";
 
 window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
@@ -30,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupMessages();
     initializeProfile();
     initializeSubmissionForm();
-    initializeSubmissionGroup();
+    initializeSubmissionGroupDetail();
 });
 
 window.addEventListener("load", () => {
