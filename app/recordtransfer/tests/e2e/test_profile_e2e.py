@@ -120,14 +120,14 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
 
         # Log out to test the new password
         logout_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "logout-btn"))
+            EC.presence_of_element_located((By.ID, "nav-logout"))
         )
         logout_button.click()
 
         self.login("testuser", "newsecurepassword")
 
         logout_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "logout-btn"))
+            EC.presence_of_element_located((By.ID, "nav-logout"))
         )
         self.assertIsNotNone(logout_button)
 
