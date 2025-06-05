@@ -18,7 +18,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Source Types Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="source-types">{% trans "Source Types" %}</h2>
                 <p class="mb-4 prose">
@@ -28,7 +28,7 @@
                 source types dropdown and enter your own type.
                 {% endblocktrans %}
                 </p>
-                <div class="collapse collapse-arrow">
+                <div class="collapse collapse-arrow mt-auto mb-2">
                     <input type="checkbox" class="peer" />
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
@@ -53,7 +53,7 @@
                 </div>
             </div>
             <!-- Source Roles Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="source-roles">{% trans "Source Roles" %}</h2>
                 <p class="mb-4 prose">
@@ -63,7 +63,7 @@
                 <b>Other</b> in the source roles dropdown and enter your own type.
                 {% endblocktrans %}
                 </p>
-                <div class="collapse collapse-arrow">
+                <div class="collapse collapse-arrow mt-auto mb-2">
                     <input type="checkbox" class="peer" />
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
@@ -88,7 +88,7 @@
                 </div>
             </div>
             <!-- Rights Types Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
+            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 flex flex-col">
                 <h2 class="text-2xl font-bold text-primary mb-4 tracking-wide border-b-2 border-primary/20 pb-2"
                     id="rights-types">{% trans "Rights Types" %}</h2>
                 <p class="mb-4 prose">
@@ -99,7 +99,7 @@
                 the rights dropdown.
                 {% endblocktrans %}
                 </p>
-                <div class="collapse collapse-arrow">
+                <div class="collapse collapse-arrow mt-auto mb-2">
                     <input type="checkbox" class="peer" />
                     <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
                     <div class="collapse-content p-0">
