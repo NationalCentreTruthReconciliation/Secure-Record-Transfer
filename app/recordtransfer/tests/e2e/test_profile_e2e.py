@@ -345,13 +345,10 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
-        empty_in_progress_submission_text = WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "empty_in_progress_submission"))
         )
 
-        self.assertIsNotNone(empty_in_progress_submission_text)
-        if self.in_progress_submission is None:
-            self.fail("In-progress submission was not found")
         # Assert in the database that the in-progress submission is deleted
         exists = InProgressSubmission.objects.filter(pk=self.in_progress_submission.pk).exists()
         self.assertFalse(exists)
@@ -380,10 +377,9 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         submit_button.click()
 
         # Check if the group was created successfully
-        success_alert = WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
-        self.assertIsNotNone(success_alert)
 
         # Assert in the database that the group exists
         exists = SubmissionGroup.objects.filter(name="Test Submission Group").exists()
@@ -425,11 +421,9 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         confirm_button.click()
 
         # Wait for the row to be removed or for a "no submissions" message
-        success_message = WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
-
-        self.assertIsNotNone(success_message)
 
         # Assert in the database that the submission group is deleted
         exists = SubmissionGroup.objects.filter(pk=self.submission_group.pk).exists()
