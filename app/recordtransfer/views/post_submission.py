@@ -1,7 +1,6 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
 import logging
-import warnings
 from typing import Any, Optional
 
 from caais.export import ExportVersion
@@ -17,7 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import (
