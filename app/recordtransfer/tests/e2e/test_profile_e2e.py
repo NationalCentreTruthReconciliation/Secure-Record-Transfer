@@ -1,15 +1,12 @@
 from django.test import tag
 from django.urls import reverse
 from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse
-
-
 from .selenium_setup import SeleniumLiveServerTestCase
 
 
@@ -30,10 +27,6 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         self.submission = Submission.objects.create(
             user=self.user,
             metadata=self.metadata,
-        )
-        # Create the InProgressSubmission
-        self.in_progress_submission = InProgressSubmission.objects.create(
-            user=self.user,
         )
 
         self.submission_group = SubmissionGroup.objects.create(
@@ -71,6 +64,43 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
             EC.element_to_be_clickable((By.XPATH, "//label[input[@id='id_in_progress_tab']]"))
         )
         in_progress_label.click()
+
+    def create_in_progress_submission(self) -> InProgressSubmission:
+        """Create an in-progress submission for the current user and return it.
+        Moved to second page as it needed to have click on the "Save for later" button.
+        """
+        driver = self.driver
+        # Go to the new submission page
+        new_submission_url = reverse("recordtransfer:submit")
+        driver.get(f"{self.live_server_url}{new_submission_url}")
+
+        # Fill the first page (accept legal)
+        checkbox = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.NAME, "acceptlegal-agreement_accepted"))
+        )
+        checkbox.click()
+
+        # Click "Next" to go to the next page
+        next_btn = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "form-next-button"))
+        )
+        next_btn.click()
+
+        # Click "Save for later"
+        save_btn = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "form-save-button"))
+        )
+        save_btn.click()
+
+        # Wait for success alert
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Now fetch the submission from the DB
+        submission = InProgressSubmission.objects.filter(user=self.user).order_by("-pk").first()
+        assert submission is not None
+        return submission
 
     def move_to_submission_groups(self) -> None:
         """Help method to move to an in-progress submission."""
@@ -274,7 +304,10 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def test_resume_in_progress_submission(self) -> None:
         """Test resuming an in-progress submission from the profile page."""
         driver = self.driver
+        self.in_progress_submission = self.create_in_progress_submission()
         self.move_to_in_progress_submission()
+
+        # Wait for the resume button to be present
         resume_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "resume_in_progress_1"))
         )
@@ -283,7 +316,6 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
 
         # Assert that you are now on the resume page (adjust as needed)
         WebDriverWait(driver, 5).until(EC.url_contains("resume"))
-
         expected_query = f"resume={self.in_progress_submission.uuid}"
         parsed_url = urlparse(driver.current_url)
 
@@ -293,27 +325,30 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def test_resume_does_not_duplicate_in_progress(self) -> None:
         """Test that resuming an in-progress submission does not create a duplicate."""
         driver = self.driver
+        self.create_in_progress_submission()
         self.move_to_in_progress_submission()
+
         resume_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "resume_in_progress_1"))
         )
 
         resume_button.click()
 
-        WebDriverWait(driver, 5).until(EC.url_contains("resume"))
-        self.assertIn("resume", driver.current_url)
-
-        # Check that no new InProgressSubmission was created
-        in_progress_count = InProgressSubmission.objects.filter(user=self.user).count()
-        self.assertEqual(
-            in_progress_count, 1, "Resuming should not create a new in-progress submission."
+        # Now click the "Save for later" button
+        save_for_later = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "form-save-button"))
         )
+        save_for_later.click()
+
+        # # Assert only one InProgressSubmission exists for this user
+        in_progress_count = InProgressSubmission.objects.filter(user=self.user).count()
+        self.assertEqual(in_progress_count, 1)
 
     def test_delete_in_progress_submission(self) -> None:
         """Test deleting an in-progress submission from the profile page."""
         driver = self.driver
         self.move_to_in_progress_submission()
-
+        self.in_progress_submission = InProgressSubmission.objects.filter(user=self.user).first()
         # Click the delete button in that row (adjust class or selector if needed)
         delete_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "delete_in_progress_1"))
@@ -332,6 +367,8 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
 
         self.assertIsNotNone(empty_in_progress_submission_text)
+        if self.in_progress_submission is None:
+            self.fail("In-progress submission was not found")
         # Assert in the database that the in-progress submission is deleted
         exists = InProgressSubmission.objects.filter(pk=self.in_progress_submission.pk).exists()
         self.assertFalse(exists)
@@ -364,6 +401,10 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
         self.assertIsNotNone(success_alert)
+
+        # Assert in the database that the group exists
+        exists = SubmissionGroup.objects.filter(name="Test Submission Group").exists()
+        self.assertTrue(exists)
 
     def test_view_submission_group(self) -> None:
         """Test viewing a submission group from the profile page."""
