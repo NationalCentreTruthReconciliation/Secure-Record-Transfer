@@ -95,7 +95,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         submission_group_label.click()
 
-    @patch("recordtransfer.views.profile.send_user_account_updated")
+    @patch("django.core.mail.send_mail")
     def test_reset_password_from_profile(self, email_mock: MagicMock) -> None:
         """Test resetting the password from the profile page."""
         driver = self.driver
