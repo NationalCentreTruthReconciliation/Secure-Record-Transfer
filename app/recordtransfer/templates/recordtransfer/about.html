@@ -4,7 +4,7 @@
     {% trans "About" %}
 {% endblock title %}
 {% block content %}
-    <div class="title-text">{% trans "About" %}</div>
+    <h1>{% trans "About" %}</h1>
     <p>
         {% blocktrans %}
         The NCTR Record Transfer Portal allows people to send records to the National Centre for Truth
@@ -13,7 +13,7 @@
         {% endblocktrans %}
     </p>
     {% if FILE_UPLOAD_ENABLED %}
-        <div class="title-text margin-top-25px">{% trans "Maximum Submission Size" %}</div>
+        <h1>{% trans "Maximum Submission Size" %}</h1>
         <p>
             {% blocktrans %}
             Submissions made through the transfer portal are subject to the maximum submission size.
@@ -24,7 +24,7 @@
             submissions together so our archivists know your submissions are related.
             {% endblocktrans %}
         </p>
-        <div class="title-text margin-top-25px">{% trans "Accepted File Types" %}</div>
+        <h1>{% trans "Accepted File Types" %}</h1>
         <p>
             {% blocktrans %}
             The following are the types of files that donors can submit using this application.
@@ -32,7 +32,7 @@
         </p>
         {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
             {% if extensions %}
-                <div class="medium-text">{{ group }} Files</div>
+                <div>{{ group }} Files</div>
                 <ul>
                     {% for extension in extensions %}<li>{{ extension }}</li>{% endfor %}
                 </ul>
