@@ -9,14 +9,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_recaptcha.fields import ReCaptchaField
 
-from recordtransfer.constants import (
-    ID_CONFIRM_NEW_PASSWORD,
-    ID_CURRENT_PASSWORD,
-    ID_FIRST_NAME,
-    ID_GETS_NOTIFICATION_EMAILS,
-    ID_LAST_NAME,
-    ID_NEW_PASSWORD,
-)
+from recordtransfer.constants import HtmlIds
 from recordtransfer.models import User
 
 
@@ -83,7 +76,7 @@ class UserProfileForm(forms.ModelForm):
 
     first_name = forms.RegexField(
         regex=NAME_PATTERN,
-        widget=forms.TextInput(attrs={"id": ID_FIRST_NAME}),
+        widget=forms.TextInput(attrs={"id": HtmlIds.ID_FIRST_NAME}),
         label=_("First Name"),
         required=True,
         error_messages={
@@ -93,7 +86,7 @@ class UserProfileForm(forms.ModelForm):
     )
     last_name = forms.RegexField(
         regex=NAME_PATTERN,
-        widget=forms.TextInput(attrs={"id": ID_LAST_NAME}),
+        widget=forms.TextInput(attrs={"id": HtmlIds.ID_LAST_NAME}),
         label=_("Last Name"),
         required=True,
         error_messages={
@@ -102,23 +95,23 @@ class UserProfileForm(forms.ModelForm):
         },
     )
     gets_notification_emails = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={"id": ID_GETS_NOTIFICATION_EMAILS}),
+        widget=forms.CheckboxInput(attrs={"id": HtmlIds.ID_GETS_NOTIFICATION_EMAILS}),
         label=_("Receive notification emails?"),
         required=False,
     )
     current_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"id": ID_CURRENT_PASSWORD}),
+        widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CURRENT_PASSWORD}),
         label=_("Current Password"),
         required=False,
     )
     new_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"id": ID_NEW_PASSWORD}),
+        widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_NEW_PASSWORD}),
         label=_("New Password"),
         required=False,
         validators=[password_validation.validate_password],
     )
     confirm_new_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"id": ID_CONFIRM_NEW_PASSWORD}),
+        widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CONFIRM_NEW_PASSWORD}),
         label=_("Confirm New Password"),
         required=False,
     )
