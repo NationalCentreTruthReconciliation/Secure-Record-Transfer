@@ -35,24 +35,6 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         self.login("testuser", "testpassword")
 
-    def tearDown(self) -> None:
-        """Tear down the test case by quitting the web driver."""
-        self.driver.quit()
-
-    def login(self, username: str, password: str) -> None:
-        """Log in the test user."""
-        driver = self.driver
-        login_url = reverse("login")
-        driver.get(f"{self.live_server_url}{login_url}")
-
-        username_input = driver.find_element(By.NAME, "username")
-        password_input = driver.find_element(By.NAME, "password")
-        username_input.send_keys(username)
-        password_input.send_keys(password)
-        password_input.send_keys(Keys.RETURN)
-
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "logout-btn")))
-
     def move_to_in_progress_submission(self) -> None:
         """Help method to move to an in-progress submission."""
         driver = self.driver

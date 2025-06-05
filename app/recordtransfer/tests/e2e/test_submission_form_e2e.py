@@ -3,13 +3,9 @@ from typing import ClassVar
 from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
-from django.conf import settings
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
 from django.urls import reverse
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
@@ -135,27 +131,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         )
         if created:
             other_role.save()
-
-    def tearDown(self) -> None:
-        """Close the web driver."""
-        self.driver.quit()
-
-    def login(self) -> None:
-        """Log in the test user."""
-        driver = self.driver
-
-        # Open the login page
-        driver.get(f"{self.live_server_url}/account/login/")
-
-        # Log in
-        username_input = driver.find_element(By.NAME, "username")
-        password_input = driver.find_element(By.NAME, "password")
-        username_input.send_keys("testuser")
-        password_input.send_keys("testpassword")
-        password_input.send_keys(Keys.RETURN)
-
-        # Wait for the login to complete and redirect to the home page
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
     def go_next_step(self) -> None:
         """Go to the next step in the form."""
@@ -455,7 +430,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
     def complete_form_till_review_step(self) -> None:
         """Complete the form till the review step."""
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -472,7 +447,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
     def test_login(self) -> None:
         """Test that the user can log in."""
-        self.login()
+        self.login("testuser", "testpassword")
         # Verify that the user is logged in by checking the presence of a specific element
         self.assertTrue(self.driver.find_element(By.ID, "logout-btn"))
 
@@ -579,7 +554,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         """Test that the form data is saved when going to the previous step. Uses the Contact
         Information step and the Record Description step as test cases.
         """
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -699,7 +674,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
     def test_form_save(self) -> None:
         """Test saving the form at a given step and resuming later."""
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -768,7 +743,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         """Test that the user is warned about unsaved changes through a modal when navigating away
         from an edited form.
         """
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -825,7 +800,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         already edited form (user has completed at least one step and has navigated back to the
         first step).
         """
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
