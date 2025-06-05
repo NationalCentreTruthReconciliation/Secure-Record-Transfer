@@ -131,8 +131,8 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         self.assertIsNotNone(logout_button)
 
-    def test_profile_password_change_errors(self) -> None:
-        """Test error cases for changing the profile password."""
+    def test_profile_password_change_wrong_current_password(self) -> None:
+        """Test error when the current password is wrong."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
@@ -140,7 +140,6 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
-        # --- Case 1: Wrong current password ---
         driver.find_element(By.NAME, "current_password").send_keys("wrongpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
         driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
@@ -149,21 +148,22 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         save_button.click()
 
-        # Assert error message is shown
         error_present = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
         alert_present = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
         )
-        self.assertIsNotNone(error_present)
-        self.assertIsNotNone(alert_present)
+        self.assertTrue(error_present and alert_present)
 
-        # --- Case 2: New passwords do not match ---
-        # Clear fields
-        driver.find_element(By.NAME, "current_password").clear()
-        driver.find_element(By.NAME, "new_password").clear()
-        driver.find_element(By.NAME, "confirm_new_password").clear()
+    def test_profile_password_change_mismatched_new_passwords(self) -> None:
+        """Test error when new passwords do not match."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
 
         driver.find_element(By.NAME, "current_password").send_keys("testpassword")
         driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
@@ -173,15 +173,13 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         save_button.click()
 
-        # Assert error message is shown
         error_present = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
         alert_present = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
         )
-        self.assertIsNotNone(error_present)
-        self.assertIsNotNone(alert_present)
+        self.assertTrue(error_present and alert_present)
 
     def test_submission_view_from_profile(self) -> None:
         """Test that the submission view can be accessed from the profile page."""
