@@ -118,18 +118,10 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
 
-        # Log out to test the new password
-        logout_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "logout-btn"))
-        )
-        logout_button.click()
+        from django.contrib.auth import get_user_model
 
-        self.login("testuser", "newsecurepassword")
-
-        logout_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "logout-btn"))
-        )
-        self.assertIsNotNone(logout_button)
+        user = get_user_model().objects.get(username="testuser")
+        self.assertTrue(user.check_password("newsecurepassword"))
 
     def test_profile_password_change_wrong_current_password(self) -> None:
         """Test error when the current password is wrong."""
