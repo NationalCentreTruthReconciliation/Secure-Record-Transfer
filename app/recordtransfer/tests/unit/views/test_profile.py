@@ -945,14 +945,24 @@ class TestSubmissionGroupModalCreateView(TestCase):
         # Check response status and trigger event
         self.assertEqual(response.status_code, 201)
         self.assertIn("HX-Trigger", response.headers)
-        self.assertIn("submissionGroupCreated", response.headers["HX-Trigger"])
-        self.assertNotIn("showSuccess", response.headers["HX-Trigger"])
+
         # Check that the response includes the correct data in the trigger event
-        trigger_data = response.headers["HX-Trigger"]
-        self.assertIn(f'"uuid": "{submission_group.uuid!s}"', trigger_data)
-        self.assertIn(f'"name": "{submission_group.name}"', trigger_data)
-        self.assertIn(f'"description": "{submission_group.description}"', trigger_data)
-        self.assertIn('"status": "success"', trigger_data)
+        trigger_data = json.loads(response.headers["HX-Trigger"])
+
+        self.assertEqual(
+            trigger_data,
+            {
+                "submissionGroupCreated": {
+                    "message": "Submission group created successfully.",
+                    "status": "success",
+                    "group": {
+                        "uuid": str(submission_group.uuid),
+                        "name": submission_group.name,
+                        "description": submission_group.description,
+                    },
+                }
+            },
+        )
 
     def test_invalid_form_submission(self) -> None:
         """Test that an invalid form submission does not create a new SubmissionGroup."""
