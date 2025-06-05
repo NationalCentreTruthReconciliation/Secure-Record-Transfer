@@ -19,15 +19,8 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
-    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-    ID_CONTACT_INFO_PROVINCE_OR_STATE,
-    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
-    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
-    ID_SOURCE_INFO_SOURCE_ROLE,
-    ID_SOURCE_INFO_SOURCE_TYPE,
-    ID_SUBMISSION_GROUP_SELECTION,
-    OTHER_PROVINCE_OR_STATE_VALUE,
+    HtmlIds,
+    OtherValues,
 )
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import SubmissionGroup, UploadSession, User
@@ -174,14 +167,14 @@ class ContactInfoForm(SubmissionForm):
         required=True,
         widget=forms.Select(
             attrs={
-                "id": ID_CONTACT_INFO_PROVINCE_OR_STATE,
+                "id": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext(OTHER_PROVINCE_OR_STATE_VALUE)),
+            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
@@ -257,7 +250,7 @@ class ContactInfoForm(SubmissionForm):
         max_length=64,
         widget=forms.TextInput(
             attrs={
-                "id": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+                "id": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                 "class": "reduce-form-field-width",
             }
         ),
@@ -388,7 +381,7 @@ class SourceInfoForm(SubmissionForm):
             ("no", gettext("No")),
         ],
         widget=forms.RadioSelect(
-            attrs={"id": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
+            attrs={"id": HtmlIds.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
         ),
         label=gettext("Submitting on behalf of an organization/another person"),
         initial="no",
@@ -427,7 +420,7 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width faux-required-field",
-                "id": ID_SOURCE_INFO_SOURCE_TYPE,
+                "id": HtmlIds.ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
     )
@@ -438,7 +431,7 @@ class SourceInfoForm(SubmissionForm):
             attrs={
                 "placeholder": gettext("A source type not covered by the other choices"),
                 "class": "faux-required-field",
-                "id": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                "id": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
         label=gettext("Other source type"),
@@ -461,7 +454,7 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width faux-required-field",
-                "id": ID_SOURCE_INFO_SOURCE_ROLE,
+                "id": HtmlIds.ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
     )
@@ -472,7 +465,7 @@ class SourceInfoForm(SubmissionForm):
             attrs={
                 "placeholder": gettext("A source role not covered by the other choices"),
                 "class": "faux-required-field",
-                "id": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+                "id": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),
         label=gettext("Other source role"),
@@ -532,72 +525,68 @@ class RecordDescriptionForm(SubmissionForm):
         cleaned_data = super().clean()
 
         if date := cleaned_data.get("date_of_materials"):
-            match_obj = re.match(RecordDescriptionForm.DATE_REGEX, date)
-
-            if match_obj is None:
-                self.add_error("date_of_materials", gettext("Invalid date format"))
-                return cleaned_data
-
-            raw_start_date = match_obj.group("start_date")
-
-            try:
-                raw_end_date = match_obj.group("end_date")
-            except IndexError:
-                raw_end_date = None
-
-            invalid_date_message_added = False
-            future_date_message_added = False
-            early_date_message_added = False
-
-            start_date = None
-
-            try:
-                start_date = datetime.strptime(raw_start_date, r"%Y-%m-%d").date()
-
-                if start_date > datetime.now().date():
-                    self.add_error("date_of_materials", gettext("Date cannot be in the future"))
-                    future_date_message_added = True
-
-                if start_date < datetime(1800, 1, 1).date():
-                    self.add_error("date_of_materials", gettext("Date cannot be before 1800"))
-                    early_date_message_added = True
-
-            except ValueError:
-                self.add_error("date_of_materials", gettext("Invalid date format"))
-                invalid_date_message_added = True
-
-            end_date = None
-            if raw_end_date:
-                try:
-                    end_date = datetime.strptime(raw_end_date, r"%Y-%m-%d").date()
-
-                    if not future_date_message_added and end_date > datetime.now().date():
-                        self.add_error(
-                            "date_of_materials", gettext("End date cannot be in the future")
-                        )
-
-                    if not early_date_message_added and end_date < datetime(1800, 1, 1).date():
-                        self.add_error(
-                            "date_of_materials", gettext("End date cannot be before 1800")
-                        )
-
-                except ValueError:
-                    if not invalid_date_message_added:
-                        self.add_error(
-                            "date_of_materials", gettext("Invalid date format for end date")
-                        )
-
-            if end_date and start_date:
-                if end_date < start_date:
-                    self.add_error(
-                        "date_of_materials",
-                        gettext("End date must be later than start date"),
-                    )
-
-                if end_date == start_date:
-                    cleaned_data["date_of_materials"] = raw_start_date
+            self._validate_date_format_and_parse(date, cleaned_data)
 
         return cleaned_data
+
+    def _validate_date_format_and_parse(self, date: str, cleaned_data: dict) -> None:
+        """Validate date format and parse dates."""
+        match_obj = re.match(RecordDescriptionForm.DATE_REGEX, date)
+
+        if match_obj is None:
+            self.add_error("date_of_materials", gettext("Invalid date format"))
+            return
+
+        raw_start_date = match_obj.group("start_date")
+        raw_end_date = match_obj.group("end_date") if match_obj.group("end_date") else None
+
+        start_date = self._validate_single_date(raw_start_date, "start")
+        end_date = self._validate_single_date(raw_end_date, "end") if raw_end_date else None
+
+        if start_date and end_date:
+            self._validate_date_range(start_date, end_date, raw_start_date, cleaned_data)
+
+    def _validate_single_date(self, raw_date: str, date_type: str) -> Optional[datetime]:
+        """Validate a single date string and return parsed date."""
+        try:
+            parsed_date = datetime.strptime(raw_date, r"%Y-%m-%d")
+
+            if parsed_date.date() > datetime.now().date():
+                error_msg = (
+                    gettext("Date cannot be in the future")
+                    if date_type == "start"
+                    else gettext("End date cannot be in the future")
+                )
+                self.add_error("date_of_materials", error_msg)
+
+            if parsed_date.date() < datetime(1800, 1, 1).date():
+                error_msg = (
+                    gettext("Date cannot be before 1800")
+                    if date_type == "start"
+                    else gettext("End date cannot be before 1800")
+                )
+                self.add_error("date_of_materials", error_msg)
+
+            return parsed_date
+
+        except ValueError:
+            error_msg = (
+                gettext("Invalid date format")
+                if date_type == "start"
+                else gettext("Invalid date format for end date")
+            )
+            self.add_error("date_of_materials", error_msg)
+            return None
+
+    def _validate_date_range(
+        self, start_date: datetime, end_date: datetime, raw_start_date: str, cleaned_data: dict
+    ) -> None:
+        """Validate date range constraints."""
+        if end_date < start_date:
+            self.add_error("date_of_materials", gettext("End date must be later than start date"))
+
+        if end_date == start_date:
+            cleaned_data["date_of_materials"] = raw_start_date
 
     accession_title = forms.CharField(
         min_length=2,
@@ -720,7 +709,7 @@ class RightsForm(SubmissionForm):
 
         submission_step = SubmissionStep.RIGHTS
 
-    def clean(self):
+    def clean(self) -> dict:
         """Check that the rights type is set if the other rights type is not."""
         cleaned_data = super().clean()
 
@@ -802,7 +791,7 @@ class OtherIdentifiersForm(SubmissionForm):
 
         submission_step = SubmissionStep.OTHER_IDENTIFIERS
 
-    def clean(self):
+    def clean(self) -> dict:
         """Check that the other identifier type and value are set if the note is set."""
         cleaned_data = super().clean()
 
@@ -906,7 +895,7 @@ class GroupSubmissionForm(SubmissionForm):
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width",
-                "id": ID_SUBMISSION_GROUP_SELECTION,
+                "id": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
             }
         ),
         label=gettext("Assigned group"),

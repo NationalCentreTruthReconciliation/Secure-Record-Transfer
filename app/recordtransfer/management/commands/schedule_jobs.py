@@ -59,7 +59,10 @@ def register_scheduled_jobs() -> None:
 
 
 class Command(rqscheduler.Command):
-    def handle(self, *args, **kwargs):
+    """Command to schedule jobs for the recordtransfer app."""
+
+    def handle(self, *args, **kwargs) -> None:
+        """Handle the command to schedule jobs."""
         # This is necessary to prevent dupes
         clear_scheduled_jobs()
         register_scheduled_jobs()

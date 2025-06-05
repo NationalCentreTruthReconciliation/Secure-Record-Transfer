@@ -7,7 +7,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.management import call_command
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandParser
 
 
 class Command(BaseCommand):
@@ -15,8 +15,7 @@ class Command(BaseCommand):
 
     help = """Resets the database by completely removing the development database file and
     recreating schema"""
-
-    def add_arguments(self, parser) -> None:
+    def add_arguments(self, parser: CommandParser) -> None:
         """Add arguments for the command."""
         parser.add_argument(
             "--seed",

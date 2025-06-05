@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-from recordtransfer.constants import FORMTITLE
+from recordtransfer.constants import SubmissionFormWizardKeys
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
 from recordtransfer.views.pre_submission import SubmissionFormWizard
@@ -19,7 +19,7 @@ from .selenium_setup import SeleniumLiveServerTestCase
 
 def get_section_title(step: SubmissionStep) -> str:
     """Get section title for a given step."""
-    return SubmissionFormWizard._TEMPLATES[step][FORMTITLE]
+    return SubmissionFormWizard._TEMPLATES[step][SubmissionFormWizardKeys.FORMTITLE]
 
 
 @tag("e2e")
