@@ -31,14 +31,32 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <a href="{% url 'recordtransfer:submit' %}"
                    class="btn btn-outline btn-primary flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
                     {% trans "Make Another Submission" %}
                 </a>
                 <a href="{% url 'recordtransfer:index' %}"
                    class="btn btn-outline btn-primary flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
                     {% trans "Go to Homepage" %}
                 </a>
                 <a href="{{ profileurl }}"
                    class="btn btn-outline btn-primary flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
                     {% trans "View your Profile" %}
                 </a>
             </div>
