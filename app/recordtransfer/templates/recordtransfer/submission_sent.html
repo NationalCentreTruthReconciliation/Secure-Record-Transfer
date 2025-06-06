@@ -5,33 +5,25 @@
 {% endblock title %}
 {% block content %}
     {% url 'recordtransfer:user_profile' as profileurl %}
-    <div class="title-text">{% trans "Thank you for your Submission" %}</div>
-    <p>
-        {% blocktrans %}
-    Your files are being held at the NCTR until an archivist reviews them. You may be contacted by
-    an archivist using the contact information you provided in the form you submitted. You may view
-    the current status of your submissions by visiting your <a href="{{ profileurl }}" class="link link-primary">profile</a>
-    page.
-    {% endblocktrans %}
-    </p>
-    <p>
-        {% blocktrans with email=user.email %}
-    An email will be sent to you at {{ email }} confirming that your submission has been
-    received. The email will also contain the terms you agreed to when creating your submission.
-    {% endblocktrans %}
-    </p>
-    <p>
-        <div class="medium-text">{% trans "Links:" %}</div>
-        <ul>
-            <li>
-                <a href="{% url 'recordtransfer:submit' %}" class="link link-primary">{% trans "Make another Submission" %}</a>
-            </li>
-            <li>
-                <a href="{% url 'recordtransfer:index' %}" class="link link-primary">{% trans "Go to Homepage" %}</a>
-            </li>
-            <li>
-                <a href="{{ profileurl }}" class="link link-primary">{% trans "View your Profile" %}</a>
-            </li>
-        </ul>
-    </p>
+    <div class="flex flex-col items-center justify-center max-w-3xl mx-auto py-8 px-4">
+        <!-- Title -->
+        <div class="text-3xl font-bold text-primary mb-6 text-center">{% trans "Thank you for your Submission" %}</div>
+        <!-- Message Section -->
+        <div class="bg-base-100 shadow-md rounded-lg p-6 mb-8 w-full">
+            <p class="mb-4 text-gray-700">
+                {% blocktrans %}
+                Your files are being held at the NCTR until an archivist reviews them. You may be contacted by
+                an archivist using the contact information you provided in the form you submitted. You may view
+                the current status of your submissions by visiting your <a href="{{ profileurl }}" class="text-primary hover:text-primary/80 font-medium">profile</a>
+                page.
+                {% endblocktrans %}
+            </p>
+            <p class="text-gray-700">
+                {% blocktrans with email=user.email %}
+                An email will be sent to you at <span class="font-semibold">{{ email }}</span> confirming that your submission has been
+                received. The email will also contain the terms you agreed to when creating your submission.
+                {% endblocktrans %}
+            </p>
+        </div>
+    </div>
 {% endblock content %}
