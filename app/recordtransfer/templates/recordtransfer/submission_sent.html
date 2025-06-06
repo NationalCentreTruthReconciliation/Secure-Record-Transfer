@@ -25,5 +25,23 @@
                 {% endblocktrans %}
             </p>
         </div>
+        <!-- Quick Links Section -->
+        <div class="bg-base-100 shadow-md rounded-lg p-6 mb-8 w-full">
+            <div class="font-bold text-lg text-primary mb-4">{% trans "Quick Links" %}</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="{% url 'recordtransfer:submit' %}"
+                   class="btn btn-outline btn-primary flex items-center justify-center gap-2">
+                    {% trans "Make Another Submission" %}
+                </a>
+                <a href="{% url 'recordtransfer:index' %}"
+                   class="btn btn-outline btn-primary flex items-center justify-center gap-2">
+                    {% trans "Go to Homepage" %}
+                </a>
+                <a href="{{ profileurl }}"
+                   class="btn btn-outline btn-primary flex items-center justify-center gap-2">
+                    {% trans "View your Profile" %}
+                </a>
+            </div>
+        </div>
     </div>
 {% endblock content %}
