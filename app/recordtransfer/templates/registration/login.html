@@ -1,45 +1,44 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Login" %}{% endblock %}
-
+{% block title %}
+    {% trans "Login" %}
+{% endblock %}
 {% block content %}
-    <div class="account-form-container">
-        <div class="account-page-title title-text">
-            {% trans "Login to your Account" %}
-        </div>
-
-        {% if form.non_field_errors %}
-            <div class="account-error">
-                {% trans "Your username or password was not correct." %}
-            </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            {% for field in form %}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div class="flex-error">
-                            <label></label>
-                            <div class="field-error">{{ error }}</div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-                <div class="flex-item">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
+    <div class="container mx-auto max-w-md py-8 px-4">
+        <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-100">
+            <!-- Title -->
+            <div class="text-2xl font-bold text-primary mb-6 text-center">{% trans "Login to your Account" %}</div>
+            <!-- Error Message -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+                    {% trans "Your username or password was not correct." %}
                 </div>
-            {% endfor %}
-            <div class="flex-item">
-                <label></label>
-                <button type="submit" class="blue-button">{% trans "Login" %}</button>
+            {% endif %}
+            <!-- Form -->
+            <form method="post" action="{% url 'login' %}" class="space-y-4">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}<div class="text-red-600 text-sm mb-2">{{ error }}</div>{% endfor %}
+                    {% endif %}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}" class="block mb-2 font-medium">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                <!-- Submit Button -->
+                <div class="mt-6">
+                    <button type="submit"
+                            class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90">
+                        {% trans "Login" %}
+                    </button>
+                </div>
+            </form>
+            <!-- Forgot Password -->
+            <div class="mt-6 text-center">
+                <a href="{% url 'password_reset' %}"
+                   class="text-primary hover:text-primary/80">{% trans "Forgot your password?" %}</a>
             </div>
-        </form>
-
-        <div id="forgot-password" class="flex-item">
-            <label></label>
-            <p><a href="{% url 'password_reset' %}">{% trans "Forgot your password?" %}</a></p>
         </div>
     </div>
 {% endblock %}
