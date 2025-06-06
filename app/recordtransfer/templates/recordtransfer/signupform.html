@@ -30,7 +30,15 @@
                         <!-- Email field with icon -->
                         {% if field.html_name == 'email' %}
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-5 w-5 text-gray-400"
+                                         viewBox="0 0 20 20"
+                                         fill="currentColor">
+                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                    </svg>
+                                </div>
                                 <input type="{{ field.field.widget.input_type }}"
                                        name="{{ field.html_name }}"
                                        id="{{ field.id_for_label }}"
@@ -40,7 +48,14 @@
                             <!-- Username field with icon -->
                         {% elif field.html_name == 'username' %}
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-5 w-5 text-gray-400"
+                                         viewBox="0 0 20 20"
+                                         fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                                 <input type="{{ field.field.widget.input_type }}"
                                        name="{{ field.html_name }}"
                                        id="{{ field.id_for_label }}"
@@ -50,7 +65,14 @@
                             <!-- Password fields with icon -->
                         {% elif 'password' in field.html_name %}
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-5 w-5 text-gray-400"
+                                         viewBox="0 0 20 20"
+                                         fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                                 <input type="password"
                                        name="{{ field.html_name }}"
                                        id="{{ field.id_for_label }}"
@@ -70,20 +92,6 @@
                                    id="{{ field.id_for_label }}"
                                    class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                    {% if field.field.required %}required{% endif %}>
-                            <!-- CAPTCHA field styling -->
-                        {% elif field.html_name == 'captcha_1' %}
-                            <div class="flex items-center space-x-2">
-                                <div class="flex-shrink-0">{{ field.field.widget.render_0|safe }}</div>
-                                <input type="text"
-                                       name="{{ field.html_name }}"
-                                       id="{{ field.id_for_label }}"
-                                       class="flex-1 py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                                       placeholder="{% trans 'Enter CAPTCHA' %}"
-                                       {% if field.field.required %}required{% endif %}>
-                            </div>
-                            <!-- Hide the hidden CAPTCHA field -->
-                        {% elif field.html_name == 'captcha_0' %}
-                            {{ field.as_hidden }}
                             <!-- Default rendering for other fields -->
                         {% else %}
                             {{ field }}
