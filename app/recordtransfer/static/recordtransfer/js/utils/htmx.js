@@ -115,5 +115,3 @@ const refreshSubmissionGroupTable = (context) => {
             swap: "innerHTML"
         });
 };
-
-
