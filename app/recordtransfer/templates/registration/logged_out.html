@@ -1,17 +1,25 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Logged Out" %}{% endblock %}
-
+{% block title %}
+    {% trans "Logged Out" %}
+{% endblock %}
 {% block content %}
-    <div class="title-text">{% trans "Logged Out" %}</div>
-    <p>
-        {% trans "You have been successfully logged out." %}
-    </p>
-    <p>
-        {% url 'login' as login %}
-        {% blocktrans %}
-            <a href="{{ login }}">Click here</a> to log back in.
-        {% endblocktrans %}
-    </p>
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center py-10 px-4">
+        <div class="bg-base-100 shadow-lg rounded-lg p-8 max-w-md w-full">
+            <div class="text-3xl font-semibold text-primary mb-6">{% trans "Logged Out" %}</div>
+            <div class="mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-16 w-16 mx-auto text-primary/60 mb-4"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <p class="text-gray-700 font-semibold mb-6">{% trans "You have been successfully logged out." %}</p>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'login' %}" class="btn btn-primary w-full">{% trans "Log Back In" %}</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}
