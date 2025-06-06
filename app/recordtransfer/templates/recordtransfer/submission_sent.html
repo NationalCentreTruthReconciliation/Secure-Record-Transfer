@@ -6,6 +6,15 @@
 {% block content %}
     {% url 'recordtransfer:user_profile' as profileurl %}
     <div class="flex flex-col items-center justify-center max-w-3xl mx-auto py-8 px-4">
+        <div class="mb-6 text-primary/60">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-20 w-20"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
         <!-- Title -->
         <div class="text-3xl font-bold text-primary mb-6 text-center">{% trans "Thank you for your Submission" %}</div>
         <!-- Message Section -->
