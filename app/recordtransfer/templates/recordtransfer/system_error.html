@@ -10,28 +10,33 @@
         <!-- Animation Container -->
         <div id="animation-container"
              class="w-full max-w-md h-64 mb-8 flex items-center justify-center">
-            <lottie-player src="{% static 'recordtransfer/img/error_animation.json' %}"  background="transparent" speed="1" style="width: 200%; height: 200%;" loop autoplay>
+            <lottie-player src="{% static 'recordtransfer/img/error_animation.json' %}"  background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay>
             </lottie-player>
         </div>
         <!-- Error Message -->
         <div class="max-w-md">
-            <div class="bg-primary/20 text-2xl font-bold text-primary rounded-md px-4 py-2 mb-4 inline-block">
-                {% trans "System Error" %}
-            </div>
-            <p class="mb-4 text-gray-700 text-lg font-medium leading-relaxed">
-                {% trans "We're sorry, but this site is experiencing some issues." %}
-            </p>
-            <p class="text-gray-600 text-base leading-relaxed">
-                {% trans "An administrator has been notified. Please try back later." %}
-            </p>
-            <div class="mt-6 pt-4 border-t border-gray-200">
-                <a href="{% url 'recordtransfer:index' %}"
-                   class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
-                    <!-- Simple left arrow -->
-                    <span class="mr-2 font-bold">←</span>
-                    {% trans "Return to Home" %}
-                </a>
-            </div>
+            <h2 class="text-2xl font-bold text-primary mb-4">{% trans "System Error" %}</h2>
+            <p class="mb-2">{% trans "We're sorry, but this site is experiencing some issues." %}</p>
+            <p>{% trans "An administrator has been notified. Please try back later." %}</p>
         </div>
     </div>
+    <!-- Fallback script -->
+    <script>
+        console.log('Script running');
+        setTimeout(() => {
+            const container = document.getElementById('animation-container');
+            const lottiePlayer = document.querySelector('lottie-player');
+
+            if (!customElements.get('lottie-player') || !lottiePlayer) {
+                console.log('Lottie not available, showing fallback');
+                container.innerHTML = `
+                    <div class="text-error animate-pulse">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                `;
+            }
+        }, 1000);
+    </script>
 {% endblock %}
