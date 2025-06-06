@@ -30,13 +30,22 @@
             The following are the types of files that donors can submit using this application.
             {% endblocktrans %}
         </p>
-        {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
-            {% if extensions %}
-                <div>{{ group }} Files</div>
-                <ul>
-                    {% for extension in extensions %}<li>{{ extension }}</li>{% endfor %}
-                </ul>
-            {% endif %}
-        {% endfor %}
+        <ul class="list bg-base-100 rounded-box shadow-md">
+            {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
+                {% if extensions %}
+                    <li class="list-row">
+                        <div class="list-col-grow">
+                            <div class="uppercase font-semibold opacity-60">{{ group }} Files</div>
+                            <p class="list-col-wrap">
+                                {% for extension in extensions %}
+                                    {{ extension }}
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </p>
+                        </div>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
     {% endif %}
 {% endblock content %}
