@@ -19,11 +19,7 @@ from django.utils.translation import gettext
 from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import (
-    ID_SUBMISSION_GROUP_DESCRIPTION,
-    ID_SUBMISSION_GROUP_NAME,
-    SUBMISSION_GROUP_QUERY_NAME,
-)
+from recordtransfer.constants import HtmlIds
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup
 
@@ -121,10 +117,9 @@ class SubmissionGroupDetailView(UpdateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
         context = super().get_context_data(**kwargs)
-        context["SUBMISSION_GROUP_QUERY_NAME"] = SUBMISSION_GROUP_QUERY_NAME
         context["js_context"] = {
-            "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
-            "ID_SUBMISSION_GROUP_DESCRIPTION": ID_SUBMISSION_GROUP_DESCRIPTION,
+            "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
+            "ID_SUBMISSION_GROUP_DESCRIPTION": HtmlIds.ID_SUBMISSION_GROUP_DESCRIPTION,
             "PROFILE_URL": reverse("recordtransfer:user_profile"),
         }
         return context

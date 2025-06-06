@@ -187,6 +187,81 @@ def verify_max_upload_size() -> None:
         )
 
 
+def _validate_extension_format(extension: str, group_name: str) -> None:
+    """Validate a single file extension format.
+
+    Args:
+        extension: The file extension to validate.
+        group_name: The group name containing this extension.
+
+    Raises:
+        ImproperlyConfigured: If the extension format is invalid.
+    """
+    if not isinstance(extension, str):
+        raise ImproperlyConfigured(
+            (
+                'The extension in the "{0}" group of the '
+                "ACCEPTED_FILE_FORMATS settings is the wrong type "
+                "(currently: {1}), should be str"
+            ).format(group_name, type(extension))
+        )
+
+    if extension[0] == ".":
+        raise ImproperlyConfigured(
+            (
+                'The file extension "{0}" in the "{1}" group of the '
+                "ACCEPTED_FILE_FORMATS setting starts with a period (.), "
+                "file extensions should not start with periods"
+            ).format(extension, group_name)
+        )
+
+    match_obj = re.match(r"^[a-z0-9][\.a-z0-9]*[a-z0-9]$", extension)
+    if not match_obj:
+        raise ImproperlyConfigured(
+            (
+                'The file extension "{0}" in the "{1}" group of the '
+                "ACCEPTED_FILE_FORMATS setting is invalid. File extensions "
+                "may only contain lowercase letters and numbers, and MAY "
+                "contain periods EXCEPT at the start and end of the "
+                "extension name"
+            ).format(extension, group_name)
+        )
+
+
+def _check_extension_duplicates(extension: str, group_name: str, inverted_formats: dict) -> None:
+    """Check for duplicate extensions across groups.
+
+    Args:
+        extension: The file extension to check.
+        group_name: The current group name.
+        inverted_formats: Dictionary mapping extensions to their group names.
+
+    Raises:
+        ImproperlyConfigured: If the extension appears in multiple groups.
+    """
+    if extension in inverted_formats:
+        last_seen_group = inverted_formats[extension]
+
+        if last_seen_group == group_name:
+            raise ImproperlyConfigured(
+                (
+                    'The file extension "{0}" appears more than once in '
+                    'the "{1}" group of the ACCEPTED_FILE_FORMATS setting. '
+                    "Ensure each extension appears only once across all "
+                    "groups"
+                ).format(extension, group_name)
+            )
+
+        raise ImproperlyConfigured(
+            (
+                'The file extension "{0}" appears across more than one '
+                "group in the ACCEPTED_FILE_FORMATS setting (appears in "
+                'the "{1}" and "{2}" groups). Ensure each extension '
+                "appears only once across all groups"
+            ).format(extension, group_name, last_seen_group)
+        )
+
+
 def verify_accepted_file_formats() -> None:
     """Verify the setting.
 
@@ -212,68 +287,18 @@ def verify_accepted_file_formats() -> None:
     inverted_formats = {}
 
     for group_name, extensions in formats.items():
-        if not isinstance(extensions, list) and not isinstance(extensions, set):
+        if not isinstance(extensions, set):
             raise ImproperlyConfigured(
                 (
                     'The extension collection for the "{0}" group of the '
                     "ACCEPTED_FILE_FORMATS settings is the wrong type "
-                    "(currently: {1}), should be list"
+                    "(currently: {1}), should be set"
                 ).format(group_name, type(extensions))
             )
 
-        for i, extension in enumerate(extensions, 0):
-            if not isinstance(extension, str):
-                raise ImproperlyConfigured(
-                    (
-                        'The extension at index {0} in the "{1}" group of the '
-                        "ACCEPTED_FILE_FORMATS settings is the wrong type "
-                        "(currently: {2}), should be str"
-                    ).format(i, group_name, type(extension))
-                )
-
-            if extension[0] == ".":
-                raise ImproperlyConfigured(
-                    (
-                        'The file extension "{0}" in the "{1}" group of the '
-                        "ACCEPTED_FILE_FORMATS setting starts with a period (.), "
-                        "file extensions should not start with periods"
-                    ).format(extension, group_name)
-                )
-
-            match_obj = re.match(r"^[a-z0-9][\.a-z0-9]*[a-z0-9]$", extension)
-            if not match_obj:
-                raise ImproperlyConfigured(
-                    (
-                        'The file extension "{0}" in the "{1}" group of the '
-                        "ACCEPTED_FILE_FORMATS setting is invalid. File extensions "
-                        "may only contain lowercase letters and numbers, and MAY "
-                        "contain periods EXCEPT at the start and end of the "
-                        "extension name"
-                    ).format(extension, group_name)
-                )
-
-            if extension in inverted_formats:
-                last_seen_group = inverted_formats[extension]
-
-                if last_seen_group == group_name:
-                    raise ImproperlyConfigured(
-                        (
-                            'The file extension "{0}" appears more than once in '
-                            'the "{1}" group of the ACCEPTED_FILE_FORMATS setting. '
-                            "Ensure each extension appears only once across all "
-                            "groups"
-                        ).format(extension, group_name)
-                    )
-
-                raise ImproperlyConfigured(
-                    (
-                        'The file extension "{0}" appears across more than one '
-                        "group in the ACCEPTED_FILE_FORMATS setting (appears in "
-                        'the "{1}" and "{2}" groups). Ensure each extension '
-                        "appears only once across all groups"
-                    ).format(extension, group_name, last_seen_group)
-                )
-
+        for extension in extensions:
+            _validate_extension_format(extension, group_name)
+            _check_extension_duplicates(extension, group_name, inverted_formats)
             inverted_formats[extension] = group_name
 
 

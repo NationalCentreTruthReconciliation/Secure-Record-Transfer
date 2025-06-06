@@ -8,7 +8,7 @@ import { showModal, isValidUrl } from "../utils/utils.js";
  * Initializes the submission group page functionality including form setup,
  * toast notifications, and modal handlers
  */
-export const initializeSubmissionGroupDetail = function () {
+export const initializeSubmissionGroup = function () {
     const context = getContext();
     if (!context) {return;}
 

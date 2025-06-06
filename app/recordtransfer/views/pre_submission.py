@@ -30,22 +30,10 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
-    FORM,
-    FORMTITLE,
-    ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-    ID_CONTACT_INFO_PROVINCE_OR_STATE,
-    ID_DISPLAY_GROUP_DESCRIPTION,
-    ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-    ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
-    ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
-    ID_SOURCE_INFO_SOURCE_ROLE,
-    ID_SOURCE_INFO_SOURCE_TYPE,
-    ID_SUBMISSION_GROUP_NAME,
-    ID_SUBMISSION_GROUP_SELECTION,
-    INFOMESSAGE,
-    OTHER_PROVINCE_OR_STATE_VALUE,
-    SUBMISSION_GROUP_QUERY_NAME,
-    TEMPLATEREF,
+    HtmlIds,
+    OtherValues,
+    QueryParameters,
+    SubmissionFormWizardKeys,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -85,63 +73,67 @@ class SubmissionFormWizard(SessionWizardView):
 
     _TEMPLATES: ClassVar[dict] = {
         SubmissionStep.ACCEPT_LEGAL: {
-            TEMPLATEREF: "recordtransfer/submission_form_legal.html",
-            FORMTITLE: gettext("Legal Agreement"),
-            FORM: forms.AcceptLegal,
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_legal.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Legal Agreement"),
+            SubmissionFormWizardKeys.FORM: forms.AcceptLegal,
         },
         SubmissionStep.CONTACT_INFO: {
-            TEMPLATEREF: "recordtransfer/submission_form_standard.html",
-            FORMTITLE: gettext("Contact Information"),
-            FORM: forms.ContactInfoForm,
-            INFOMESSAGE: gettext(
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_standard.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Contact Information"),
+            SubmissionFormWizardKeys.FORM: forms.ContactInfoForm,
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your submission"
             ),
         },
         SubmissionStep.SOURCE_INFO: {
-            TEMPLATEREF: "recordtransfer/submission_form_sourceinfo.html",
-            FORMTITLE: gettext("Source Information (Optional)"),
-            FORM: forms.SourceInfoForm,
-            INFOMESSAGE: gettext(
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_sourceinfo.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Source Information (Optional)"),
+            SubmissionFormWizardKeys.FORM: forms.SourceInfoForm,
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                 "Select Yes if you would like to manually enter source information"
             ),
         },
         SubmissionStep.RECORD_DESCRIPTION: {
-            TEMPLATEREF: "recordtransfer/submission_form_standard.html",
-            FORMTITLE: gettext("Record Description"),
-            FORM: forms.RecordDescriptionForm
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_standard.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Record Description"),
+            SubmissionFormWizardKeys.FORM: forms.RecordDescriptionForm
             if settings.FILE_UPLOAD_ENABLED
             else forms.ExtendedRecordDescriptionForm,
-            INFOMESSAGE: gettext("Provide a brief description of the records you're submitting"),
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+                "Provide a brief description of the records you're submitting"
+            ),
         },
         SubmissionStep.RIGHTS: {
-            TEMPLATEREF: "recordtransfer/submission_form_rights.html",
-            FORMTITLE: gettext("Record Rights"),
-            FORM: formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
-            INFOMESSAGE: gettext(
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_rights.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Record Rights"),
+            SubmissionFormWizardKeys.FORM: formset_factory(
+                forms.RightsForm, formset=forms.RightsFormSet, extra=1
+            ),
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                 "Enter any associated rights that apply to the records. Add as many rights "
                 "sections as you like using the + More button. You may enter another type of "
                 "rights if the dropdown does not contain the type of rights you're looking for."
             ),
         },
         SubmissionStep.OTHER_IDENTIFIERS: {
-            TEMPLATEREF: "recordtransfer/submission_form_formset.html",
-            FORMTITLE: gettext("Other Identifiers (Optional)"),
-            FORM: formset_factory(
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_formset.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Other Identifiers (Optional)"),
+            SubmissionFormWizardKeys.FORM: formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
                 extra=1,
             ),
-            INFOMESSAGE: gettext(
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             ),
         },
         SubmissionStep.GROUP_SUBMISSION: {
-            TEMPLATEREF: "recordtransfer/submission_form_groupsubmission.html",
-            FORMTITLE: gettext("Assign Submission to Group (Optional)"),
-            FORM: forms.GroupSubmissionForm,
-            INFOMESSAGE: gettext(
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_groupsubmission.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Assign Submission to Group (Optional)"),
+            SubmissionFormWizardKeys.FORM: forms.GroupSubmissionForm,
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                 "If this submission belongs in a group with other submissions you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
@@ -149,10 +141,10 @@ class SubmissionFormWizard(SessionWizardView):
         **(
             {
                 SubmissionStep.UPLOAD_FILES: {
-                    TEMPLATEREF: "recordtransfer/submission_form_uploadfiles.html",
-                    FORMTITLE: gettext("Upload Files"),
-                    FORM: forms.UploadFilesForm,
-                    INFOMESSAGE: gettext(
+                    SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_uploadfiles.html",
+                    SubmissionFormWizardKeys.FORMTITLE: gettext("Upload Files"),
+                    SubmissionFormWizardKeys.FORM: forms.UploadFilesForm,
+                    SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                         "Add any final notes you would like to add, and upload your files"
                     ),
                 }
@@ -160,25 +152,28 @@ class SubmissionFormWizard(SessionWizardView):
             if settings.FILE_UPLOAD_ENABLED
             else {
                 SubmissionStep.FINAL_NOTES: {
-                    TEMPLATEREF: "recordtransfer/submission_form_standard.html",
-                    FORMTITLE: gettext("Final Notes"),
-                    FORM: forms.FinalStepFormNoUpload,
-                    INFOMESSAGE: gettext(
+                    SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_standard.html",
+                    SubmissionFormWizardKeys.FORMTITLE: gettext("Final Notes"),
+                    SubmissionFormWizardKeys.FORM: forms.FinalStepFormNoUpload,
+                    SubmissionFormWizardKeys.INFOMESSAGE: gettext(
                         "Add any final notes that may not have fit in previous steps"
                     ),
                 }
             }
         ),
         SubmissionStep.REVIEW: {
-            TEMPLATEREF: "recordtransfer/submission_form_review.html",
-            FORMTITLE: gettext("Review"),
-            FORM: forms.ReviewForm,
-            INFOMESSAGE: gettext("Review the information you've entered before submitting"),
+            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_review.html",
+            SubmissionFormWizardKeys.FORMTITLE: gettext("Review"),
+            SubmissionFormWizardKeys.FORM: forms.ReviewForm,
+            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+                "Review the information you've entered before submitting"
+            ),
         },
     }
 
     form_list: ClassVar[list[tuple]] = [
-        (step.value, template[FORM]) for step, template in _TEMPLATES.items()
+        (step.value, template[SubmissionFormWizardKeys.FORM])
+        for step, template in _TEMPLATES.items()
     ]
 
     def __init__(self, *args, **kwargs):
@@ -202,7 +197,9 @@ class SubmissionFormWizard(SessionWizardView):
         self.in_progress_uuid = request.GET.get("resume")
 
         if not self.in_progress_uuid:
-            self.submission_group_uuid = request.GET.get(SUBMISSION_GROUP_QUERY_NAME)
+            self.submission_group_uuid = request.GET.get(
+                QueryParameters.SUBMISSION_GROUP_QUERY_NAME
+            )
             return super().dispatch(request, *args, **kwargs)
 
         self.in_progress_submission = InProgressSubmission.objects.filter(
@@ -439,7 +436,7 @@ class SubmissionFormWizard(SessionWizardView):
         """Override the parent method to return the template name to render for the current
         step.
         """
-        return [self._TEMPLATES[self.current_step][TEMPLATEREF]]
+        return [self._TEMPLATES[self.current_step][SubmissionFormWizardKeys.TEMPLATEREF]]
 
     def get_name_of_user(self, user: User) -> str:
         """Get the name of a user.
@@ -508,9 +505,11 @@ class SubmissionFormWizard(SessionWizardView):
                 files=self.storage.get_step_files(form_step),
             )
             form_obj.is_valid()  # This populates the cleaned_data attribute of the form
-            final_forms[SubmissionFormWizard._TEMPLATES[SubmissionStep(form_step)][FORMTITLE]] = (
-                form_obj
-            )
+            final_forms[
+                SubmissionFormWizard._TEMPLATES[SubmissionStep(form_step)][
+                    SubmissionFormWizardKeys.FORMTITLE
+                ]
+            ] = form_obj
         return final_forms
 
     @property
@@ -543,10 +542,18 @@ class SubmissionFormWizard(SessionWizardView):
         """
         context = super().get_context_data(form, **kwargs)
 
-        context.update({"form_title": self._TEMPLATES[self.current_step][FORMTITLE]})
+        context.update(
+            {"form_title": self._TEMPLATES[self.current_step][SubmissionFormWizardKeys.FORMTITLE]}
+        )
 
-        if INFOMESSAGE in self._TEMPLATES[self.current_step]:
-            context.update({"info_message": self._TEMPLATES[self.current_step][INFOMESSAGE]})
+        if SubmissionFormWizardKeys.INFOMESSAGE in self._TEMPLATES[self.current_step]:
+            context.update(
+                {
+                    "info_message": self._TEMPLATES[self.current_step][
+                        SubmissionFormWizardKeys.INFOMESSAGE
+                    ]
+                }
+            )
 
         # Show the review button if the user has reached the step before the review step
         # or if they have reached the review step once before
@@ -576,8 +583,6 @@ class SubmissionFormWizard(SessionWizardView):
         if self.current_step == SubmissionStep.GROUP_SUBMISSION:
             context.update(
                 {
-                    "IS_NEW": True,
-                    "ID_DISPLAY_GROUP_DESCRIPTION": ID_DISPLAY_GROUP_DESCRIPTION,
                     "new_group_form": SubmissionGroupForm(),
                 }
             )
@@ -609,9 +614,9 @@ class SubmissionFormWizard(SessionWizardView):
         if step == SubmissionStep.CONTACT_INFO:
             js_context.update(
                 {
-                    "id_province_or_state": ID_CONTACT_INFO_PROVINCE_OR_STATE,
-                    "id_other_province_or_state": ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-                    "other_province_or_state_id": OTHER_PROVINCE_OR_STATE_VALUE,
+                    "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
+                    "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+                    "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
                 }
             )
 
@@ -636,11 +641,11 @@ class SubmissionFormWizard(SessionWizardView):
 
             js_context.update(
                 {
-                    "id_enter_manual_source_info": ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
-                    "id_source_type": ID_SOURCE_INFO_SOURCE_TYPE,
-                    "id_other_source_type": ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
-                    "id_source_role": ID_SOURCE_INFO_SOURCE_ROLE,
-                    "id_other_source_role": ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
+                    "id_enter_manual_source_info": HtmlIds.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO,
+                    "id_source_type": HtmlIds.ID_SOURCE_INFO_SOURCE_TYPE,
+                    "id_other_source_type": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
+                    "id_source_role": HtmlIds.ID_SOURCE_INFO_SOURCE_ROLE,
+                    "id_other_source_role": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
                     "other_role_id": other_role.pk if other_role else 0,
                     "other_type_id": other_type.pk if other_type else 0,
                 }
@@ -648,10 +653,10 @@ class SubmissionFormWizard(SessionWizardView):
         elif step == SubmissionStep.GROUP_SUBMISSION:
             js_context.update(
                 {
-                    # Submission group form
-                    "ID_SUBMISSION_GROUP_NAME": ID_SUBMISSION_GROUP_NAME,
-                    "id_display_group_description": ID_DISPLAY_GROUP_DESCRIPTION,
-                    "id_submission_group_selection": ID_SUBMISSION_GROUP_SELECTION,
+                    "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
+                    "id_submission_group_description": HtmlIds.ID_SUBMISSION_GROUP_DESCRIPTION,
+                    "id_display_group_description": HtmlIds.ID_DISPLAY_GROUP_DESCRIPTION,
+                    "id_submission_group_selection": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
                     "fetch_group_descriptions_url": reverse(
                         "recordtransfer:get_user_submission_groups",
                         kwargs={"user_id": self.request.user.pk},
