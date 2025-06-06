@@ -14,6 +14,7 @@ from recordtransfer.forms.submission_forms import (
     RightsForm,
     RightsFormSet,
     SourceInfoForm,
+    SubmissionForm,
     UploadFilesForm,
     clear_form_errors,
 )
@@ -34,6 +35,7 @@ __all__ = [
     "RightsFormSet",
     "SignUpForm",
     "SourceInfoForm",
+    "SubmissionForm",
     "SubmissionGroupForm",
     "SubmissionModelForm",
     "UploadFilesForm",
