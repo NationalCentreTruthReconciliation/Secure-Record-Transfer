@@ -18,7 +18,9 @@
                 <p class="text-gray-700 font-semibold mb-6">{% trans "You have been successfully logged out." %}</p>
             </div>
             <div class="mt-4">
-                <a href="{% url 'login' %}" class="btn btn-primary w-full">{% trans "Log Back In" %}</a>
+                <a href="{% url 'login' %}"
+                   class="btn btn-outline btn-primary hover:bg-primary hover:text-white w-full transition-colors duration-200">
+                {% trans "Log Back In" %}</a>
             </div>
         </div>
     </div>
