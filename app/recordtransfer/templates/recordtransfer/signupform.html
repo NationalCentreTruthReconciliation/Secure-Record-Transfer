@@ -5,40 +5,124 @@
     {% trans "Create Account" %}
 {% endblock title %}
 {% block content %}
-    <div class="account-form-container">
-        <div class="account-page-title title-text">{% trans "Create a New Account" %}</div>
-        {% if form.non_field_errors %}
-            <div class="account-error">{% trans "The form was not valid." %}</div>
-        {% endif %}
-        <form method="post" action="{% url 'recordtransfer:create_account' %}">
-            {% csrf_token %}
-            {% for field in form %}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div class="flex-error">
-                            <label></label>
-                            <div class="field-error">{{ error }}</div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-                <div class="flex-item">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <div tooltip-content="{{ field.help_text }}"
-                             class="help-tooltip help-icon">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                        </div>
-                    {% else %}
-                        {# dummy element #}
-                        <span class="help-icon" style="width: 20px"></span>
-                    {% endif %}
+    <div class="container mx-auto max-w-xl py-8 px-4">
+        <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-100">
+            <!-- Title -->
+            <div class="text-2xl font-bold text-primary mb-6 text-center">{% trans "Create a New Account" %}</div>
+            <!-- Error Message -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+                    {% trans "The form was not valid." %}
                 </div>
-            {% endfor %}
-            <div class="flex-item">
-                <label></label>
-                <button type="submit" class="blue-button">{% trans "Sign Up" %}</button>
+            {% endif %}
+            <!-- Form -->
+            <form method="post"
+                  action="{% url 'recordtransfer:create_account' %}"
+                  class="space-y-4">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}<div class="text-red-600 text-sm mb-2">{{ error }}</div>{% endfor %}
+                    {% endif %}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}"
+                               class="block mb-2 font-medium text-gray-700">{{ field.label }}</label>
+                        <!-- Email field with icon -->
+                        {% if field.html_name == 'email' %}
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       id="{{ field.id_for_label }}"
+                                       class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                       {% if field.field.required %}required{% endif %}>
+                            </div>
+                            <!-- Username field with icon -->
+                        {% elif field.html_name == 'username' %}
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
+                                <input type="{{ field.field.widget.input_type }}"
+                                       name="{{ field.html_name }}"
+                                       id="{{ field.id_for_label }}"
+                                       class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                       {% if field.field.required %}required{% endif %}>
+                            </div>
+                            <!-- Password fields with icon -->
+                        {% elif 'password' in field.html_name %}
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"></div>
+                                <input type="password"
+                                       name="{{ field.html_name }}"
+                                       id="{{ field.id_for_label }}"
+                                       class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                       {% if field.field.required %}required{% endif %}>
+                            </div>
+                        {% elif field.html_name == 'first_name' %}
+                            <input type="text"
+                                   name="{{ field.html_name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                   {% if field.field.required %}required{% endif %}>
+                            <!-- Last Name field - no icon -->
+                        {% elif field.html_name == 'last_name' %}
+                            <input type="text"
+                                   name="{{ field.html_name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                   {% if field.field.required %}required{% endif %}>
+                            <!-- CAPTCHA field styling -->
+                        {% elif field.html_name == 'captcha_1' %}
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-shrink-0">{{ field.field.widget.render_0|safe }}</div>
+                                <input type="text"
+                                       name="{{ field.html_name }}"
+                                       id="{{ field.id_for_label }}"
+                                       class="flex-1 py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                       placeholder="{% trans 'Enter CAPTCHA' %}"
+                                       {% if field.field.required %}required{% endif %}>
+                            </div>
+                            <!-- Hide the hidden CAPTCHA field -->
+                        {% elif field.html_name == 'captcha_0' %}
+                            {{ field.as_hidden }}
+                            <!-- Default rendering for other fields -->
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        <!-- Help text with tooltip -->
+                        {% if field.help_text %}
+                            <div class="mt-1 group relative">
+                                <span class="text-gray-500 text-sm flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-4 w-4 mr-1"
+                                         viewBox="0 0 20 20"
+                                         fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="text-xs">Help</span>
+                                </span>
+                                <span class="absolute bottom-full mb-2 left-0 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    {{ field.help_text }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <!-- Submit Button -->
+                <div class="mt-6">
+                    <button type="submit"
+                            class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition-colors shadow-sm">
+                        {% trans "Sign Up" %}
+                    </button>
+                </div>
+            </form>
+            <!-- Login Link -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    {% trans "Already have an account?" %}
+                    <a href="{% url 'login' %}"
+                       class="text-primary hover:text-primary/80 ml-1">{% trans "Log in" %}</a>
+                </p>
             </div>
-        </form>
+        </div>
     </div>
 {% endblock content %}
