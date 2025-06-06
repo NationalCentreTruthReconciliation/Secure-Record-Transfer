@@ -22,6 +22,14 @@
                    class="btn btn-outline btn-primary hover:bg-primary hover:text-white w-full transition-colors duration-200">
                 {% trans "Log Back In" %}</a>
             </div>
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <a href="{% url 'recordtransfer:index' %}"
+                   class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                    <!-- Simple left arrow -->
+                    <span class="mr-2 font-bold">←</span>
+                    {% trans "Return to Home" %}
+                </a>
+            </div>
         </div>
     </div>
 {% endblock content %}
