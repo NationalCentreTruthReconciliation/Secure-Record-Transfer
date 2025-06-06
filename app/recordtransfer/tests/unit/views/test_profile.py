@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
-from recordtransfer.constants import PAGINATE_QUERY_NAME
+from recordtransfer.constants import QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
@@ -467,7 +467,7 @@ class TestInProgressSubmissionTableView(TestCase):
 
         # Test second page
         response = self.client.get(
-            f"{self.in_progress_table_url}?{PAGINATE_QUERY_NAME}=2",
+            f"{self.in_progress_table_url}?{QueryParameters.PAGINATE_QUERY_NAME}=2",
             headers=self.htmx_headers,
         )
         self.assertEqual(response.status_code, 200)
@@ -544,7 +544,7 @@ class TestSubmissionGroupTableView(TestCase):
 
         # Test second page
         response = self.client.get(
-            f"{self.submission_group_table_url}?{PAGINATE_QUERY_NAME}=2",
+            f"{self.submission_group_table_url}?{QueryParameters.PAGINATE_QUERY_NAME}=2",
             headers=self.htmx_headers,
         )
         self.assertEqual(response.status_code, 200)
