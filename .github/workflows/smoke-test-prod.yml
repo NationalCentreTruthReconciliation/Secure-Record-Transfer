@@ -22,8 +22,7 @@ jobs:
 
       - name: Add SECRET_KEY to environment file
         run: |
-          echo "" >> .prod.env
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
+          echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
 
       - name: Start containers
         run: docker compose -f compose.prod.yml up -d
