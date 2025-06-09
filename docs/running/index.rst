@@ -101,15 +101,6 @@ From the root of the repository, run the following commands before running the a
 
     cp example.prod.env .prod.env
 
-After copying the file, you **must** set a :ref:`SECRET_KEY` value in the :code:`.prod.env` file. Open the file in a text editor and uncomment the SECRET_KEY line, then set it to a secure random string:
-
-.. code-block:: bash
-
-    # Uncomment and set this line in .prod.env:
-    SECRET_KEY=your-secret-key-here
-
-.. warning::
-    The :ref:`SECRET_KEY` is critical for Django's security. Use a long, random string and keep it secret. The application will fail to start without this value set.
 
 The settings in the :code:`.prod.env` file control the application, as well as some other settings
 Django loads. Refer to :ref:`Application Settings` for application
