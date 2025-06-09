@@ -5,8 +5,9 @@
 {% endblock title %}
 {% block content %}
     {% url 'recordtransfer:user_profile' as profileurl %}
-    <div class="flex flex-col items-center justify-center max-w-3xl mx-auto py-8 px-4">
-        <div class="mb-6 text-primary/60">
+    <div class="flex flex-col items-left justify-center max-w-3xl mx-auto py-8 px-4">
+        <div class="mb-2 flex text-primary/60 items-center gap-3">
+            <div class="mb-2 text-4xl text-primary">{% trans "Thank you for your Submission" %}</div>
             <svg xmlns="http://www.w3.org/2000/svg"
                  class="h-20 w-20"
                  fill="none"
@@ -16,7 +17,6 @@
             </svg>
         </div>
         <!-- Title -->
-        <div class="text-3xl font-bold text-primary mb-6 text-center">{% trans "Thank you for your Submission" %}</div>
         <!-- Message Section -->
         <div class="bg-base-100 shadow-md rounded-lg p-6 mb-8 w-full">
             <p class="mb-4 text-gray-700">
