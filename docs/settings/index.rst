@@ -36,47 +36,6 @@ PAGINATE_BY
         PAGINATE_BY=20
 
 
-Security
---------
-
-SECRET_KEY
-^^^^^^^^^^
-
-    *Django's secret key for cryptographic signing*
-
-    .. table::
-
-        =======================  =========
-        Default                  Type
-        =======================  =========
-        Development key only     string
-        =======================  =========
-
-    The SECRET_KEY is a critical security setting used by Django for cryptographic signing, including:
-
-    - Session security and CSRF protection
-    - Password reset tokens and user authentication
-    - Secure cookies and form validation
-    - Digital signatures for sensitive data
-
-    In development, a default key is provided for convenience, but **you must set a strong, unique SECRET_KEY for production deployments**. The application will fail to start in production without this setting.
-
-    **.env Example:**
-
-    ::
-
-        # file: .prod.env
-        SECRET_KEY=your-very-long-random-secret-key-with-letters-numbers-and-symbols
-
-    **Generating a Strong Secret Key:**
-
-    You can generate a secure SECRET_KEY using Python:
-
-    ::
-
-        python -c "import secrets; print(secrets.token_urlsafe(50))"
-
-
 Application Features
 --------------------
 
