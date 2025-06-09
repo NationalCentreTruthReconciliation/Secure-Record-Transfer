@@ -10,8 +10,6 @@ SITE_ID = config("SITE_ID", default=1, cast=int)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=str).split(",")
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
 
-SECRET_KEY = config("SECRET_KEY", cast=str)
-
 # MySQL Database
 
 DATABASES = {
