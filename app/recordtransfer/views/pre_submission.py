@@ -2,6 +2,7 @@
 deleting in-progress submissions, as well as handling the final submission.
 """
 
+import dataclasses
 import logging
 import pickle
 import re
@@ -33,7 +34,6 @@ from recordtransfer.constants import (
     HtmlIds,
     OtherValues,
     QueryParameters,
-    SubmissionFormWizardKeys,
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
@@ -42,8 +42,6 @@ from recordtransfer.emails import (
     send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.forms.submission_forms import ReviewForm, clear_form_errors
-from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -71,109 +69,113 @@ class SubmissionFormWizard(SessionWizardView):
     more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
     """
 
-    _TEMPLATES: ClassVar[dict] = {
-        SubmissionStep.ACCEPT_LEGAL: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_legal.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Legal Agreement"),
-            SubmissionFormWizardKeys.FORM: forms.AcceptLegal,
-        },
-        SubmissionStep.CONTACT_INFO: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_standard.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Contact Information"),
-            SubmissionFormWizardKeys.FORM: forms.ContactInfoForm,
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+    @dataclasses.dataclass
+    class SubmissionStepMeta:
+        """Metadata for each submission step, including the template to render, title, form class,
+        and an optional info message to display on the page.
+        """
+
+        template: str
+        title: str
+        form: type[Union[forms.SubmissionForm, BaseFormSet]]
+        info_message: Optional[str] = None
+
+    _TEMPLATES: ClassVar[dict[SubmissionStep, SubmissionStepMeta]] = {
+        SubmissionStep.ACCEPT_LEGAL: SubmissionStepMeta(
+            template="recordtransfer/submission_form_legal.html",
+            title=gettext("Legal Agreement"),
+            form=forms.AcceptLegal,
+        ),
+        SubmissionStep.CONTACT_INFO: SubmissionStepMeta(
+            template="recordtransfer/submission_form_standard.html",
+            title=gettext("Contact Information"),
+            form=forms.ContactInfoForm,
+            info_message=gettext(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your submission"
             ),
-        },
-        SubmissionStep.SOURCE_INFO: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_sourceinfo.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Source Information (Optional)"),
-            SubmissionFormWizardKeys.FORM: forms.SourceInfoForm,
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+        ),
+        SubmissionStep.SOURCE_INFO: SubmissionStepMeta(
+            template="recordtransfer/submission_form_sourceinfo.html",
+            title=gettext("Source Information (Optional)"),
+            form=forms.SourceInfoForm,
+            info_message=gettext(
                 "Select Yes if you would like to manually enter source information"
             ),
-        },
-        SubmissionStep.RECORD_DESCRIPTION: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_standard.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Record Description"),
-            SubmissionFormWizardKeys.FORM: forms.RecordDescriptionForm
+        ),
+        SubmissionStep.RECORD_DESCRIPTION: SubmissionStepMeta(
+            template="recordtransfer/submission_form_standard.html",
+            title=gettext("Record Description"),
+            form=forms.RecordDescriptionForm
             if settings.FILE_UPLOAD_ENABLED
             else forms.ExtendedRecordDescriptionForm,
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
-                "Provide a brief description of the records you're submitting"
-            ),
-        },
-        SubmissionStep.RIGHTS: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_rights.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Record Rights"),
-            SubmissionFormWizardKeys.FORM: formset_factory(
-                forms.RightsForm, formset=forms.RightsFormSet, extra=1
-            ),
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+            info_message=gettext("Provide a brief description of the records you're submitting"),
+        ),
+        SubmissionStep.RIGHTS: SubmissionStepMeta(
+            template="recordtransfer/submission_form_rights.html",
+            title=gettext("Record Rights"),
+            form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
+            info_message=gettext(
                 "Enter any associated rights that apply to the records. Add as many rights "
                 "sections as you like using the + More button. You may enter another type of "
                 "rights if the dropdown does not contain the type of rights you're looking for."
             ),
-        },
-        SubmissionStep.OTHER_IDENTIFIERS: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_formset.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Other Identifiers (Optional)"),
-            SubmissionFormWizardKeys.FORM: formset_factory(
+        ),
+        SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
+            template="recordtransfer/submission_form_formset.html",
+            title=gettext("Other Identifiers (Optional)"),
+            form=formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
                 extra=1,
             ),
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+            info_message=gettext(
                 "This step is optional, if you do not have any other IDs associated with the "
                 "records, go to the next step"
             ),
-        },
-        SubmissionStep.GROUP_SUBMISSION: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_groupsubmission.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Assign Submission to Group (Optional)"),
-            SubmissionFormWizardKeys.FORM: forms.GroupSubmissionForm,
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+        ),
+        SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(
+            template="recordtransfer/submission_form_groupsubmission.html",
+            title=gettext("Assign Submission to Group (Optional)"),
+            form=forms.GroupSubmissionForm,
+            info_message=gettext(
                 "If this submission belongs in a group with other submissions you have made or will "
                 "make, select the group it belongs in in the dropdown below, or create a new group"
             ),
-        },
+        ),
         **(
             {
-                SubmissionStep.UPLOAD_FILES: {
-                    SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_uploadfiles.html",
-                    SubmissionFormWizardKeys.FORMTITLE: gettext("Upload Files"),
-                    SubmissionFormWizardKeys.FORM: forms.UploadFilesForm,
-                    SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+                SubmissionStep.UPLOAD_FILES: SubmissionStepMeta(
+                    template="recordtransfer/submission_form_uploadfiles.html",
+                    title=gettext("Upload Files"),
+                    form=forms.UploadFilesForm,
+                    info_message=gettext(
                         "Add any final notes you would like to add, and upload your files"
                     ),
-                }
+                )
             }
             if settings.FILE_UPLOAD_ENABLED
             else {
-                SubmissionStep.FINAL_NOTES: {
-                    SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_standard.html",
-                    SubmissionFormWizardKeys.FORMTITLE: gettext("Final Notes"),
-                    SubmissionFormWizardKeys.FORM: forms.FinalStepFormNoUpload,
-                    SubmissionFormWizardKeys.INFOMESSAGE: gettext(
+                SubmissionStep.FINAL_NOTES: SubmissionStepMeta(
+                    template="recordtransfer/submission_form_standard.html",
+                    title=gettext("Final Notes"),
+                    form=forms.FinalStepFormNoUpload,
+                    info_message=gettext(
                         "Add any final notes that may not have fit in previous steps"
                     ),
-                }
+                )
             }
         ),
-        SubmissionStep.REVIEW: {
-            SubmissionFormWizardKeys.TEMPLATEREF: "recordtransfer/submission_form_review.html",
-            SubmissionFormWizardKeys.FORMTITLE: gettext("Review"),
-            SubmissionFormWizardKeys.FORM: forms.ReviewForm,
-            SubmissionFormWizardKeys.INFOMESSAGE: gettext(
-                "Review the information you've entered before submitting"
-            ),
-        },
+        SubmissionStep.REVIEW: SubmissionStepMeta(
+            template="recordtransfer/submission_form_review.html",
+            title=gettext("Review"),
+            form=forms.ReviewForm,
+            info_message=gettext("Review the information you've entered before submitting"),
+        ),
     }
 
     form_list: ClassVar[list[tuple]] = [
-        (step.value, template[SubmissionFormWizardKeys.FORM])
-        for step, template in _TEMPLATES.items()
+        (step.value, step_metadata.form) for step, step_metadata in _TEMPLATES.items()
     ]
 
     def __init__(self, *args, **kwargs):
@@ -342,7 +344,7 @@ class SubmissionFormWizard(SessionWizardView):
             data=self.storage.get_step_data(self.steps.current),
             files=self.storage.get_step_files(self.steps.current),
         )
-        clear_form_errors(next_form)
+        forms.clear_form_errors(next_form)
         return self.render(next_form, **kwargs)
 
     def render_next_step(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> HttpResponse:
@@ -357,7 +359,7 @@ class SubmissionFormWizard(SessionWizardView):
         )
         ##########################
         # This part is different from the parent class. We need to clear the errors from the form
-        clear_form_errors(new_form)
+        forms.clear_form_errors(new_form)
         ##########################
 
         # change the stored current step
@@ -436,7 +438,7 @@ class SubmissionFormWizard(SessionWizardView):
         """Override the parent method to return the template name to render for the current
         step.
         """
-        return [self._TEMPLATES[self.current_step][SubmissionFormWizardKeys.TEMPLATEREF]]
+        return [self._TEMPLATES[self.current_step].template]
 
     def get_name_of_user(self, user: User) -> str:
         """Get the name of a user.
@@ -505,11 +507,9 @@ class SubmissionFormWizard(SessionWizardView):
                 files=self.storage.get_step_files(form_step),
             )
             form_obj.is_valid()  # This populates the cleaned_data attribute of the form
-            final_forms[
-                SubmissionFormWizard._TEMPLATES[SubmissionStep(form_step)][
-                    SubmissionFormWizardKeys.FORMTITLE
-                ]
-            ] = form_obj
+            final_forms[SubmissionFormWizard._TEMPLATES[SubmissionStep(form_step)].title] = (
+                form_obj
+            )
         return final_forms
 
     @property
@@ -543,17 +543,11 @@ class SubmissionFormWizard(SessionWizardView):
         context = super().get_context_data(form, **kwargs)
 
         context.update(
-            {"form_title": self._TEMPLATES[self.current_step][SubmissionFormWizardKeys.FORMTITLE]}
+            {
+                "form_title": self._TEMPLATES[self.current_step].title,
+                "info_message": self._TEMPLATES[self.current_step].info_message,
+            }
         )
-
-        if SubmissionFormWizardKeys.INFOMESSAGE in self._TEMPLATES[self.current_step]:
-            context.update(
-                {
-                    "info_message": self._TEMPLATES[self.current_step][
-                        SubmissionFormWizardKeys.INFOMESSAGE
-                    ]
-                }
-            )
 
         # Show the review button if the user has reached the step before the review step
         # or if they have reached the review step once before
@@ -583,7 +577,7 @@ class SubmissionFormWizard(SessionWizardView):
         if self.current_step == SubmissionStep.GROUP_SUBMISSION:
             context.update(
                 {
-                    "new_group_form": SubmissionGroupForm(),
+                    "new_group_form": forms.SubmissionGroupForm(),
                 }
             )
 
@@ -597,7 +591,7 @@ class SubmissionFormWizard(SessionWizardView):
             )
 
         elif self.current_step == SubmissionStep.REVIEW:
-            context["form_list"] = ReviewForm.format_form_data(
+            context["form_list"] = forms.ReviewForm.format_form_data(
                 self.get_forms_for_review(), user=cast(User, self.request.user)
             )
         return context

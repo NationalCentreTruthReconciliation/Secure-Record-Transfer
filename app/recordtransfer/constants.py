@@ -55,20 +55,6 @@ class QueryParameters:
 
 
 @dataclasses.dataclass(frozen=True)
-class SubmissionFormWizardKeys:
-    """Class to hold dictionary keys used in SubmissionFormWizard."""
-
-    TEMPLATEREF: str = "templateref"
-    FORMTITLE: str = "formtitle"
-    INFOMESSAGE: str = "infomessage"
-    FORM: str = "form"
-
-    def asdict(self) -> dict[str, str]:
-        """Return the dataclass as a dictionary."""
-        return dataclasses.asdict(self)
-
-
-@dataclasses.dataclass(frozen=True)
 class OtherValues:
     """Class to hold 'Other' option values used in dropdowns."""
 
