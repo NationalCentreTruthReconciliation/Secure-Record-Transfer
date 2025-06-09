@@ -1,11 +1,13 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
-{% block title %}
-    {% trans "Logged Out" %}
-{% endblock %}
+
+{% block title %}{% trans "Logged Out" %}{% endblock %}
+
 {% block content %}
     <div class="title-text">{% trans "Logged Out" %}</div>
-    <p>{% trans "You have been successfully logged out." %}</p>
+    <p>
+        {% trans "You have been successfully logged out." %}
+    </p>
     <p>
         {% url 'login' as login %}
         {% blocktrans %}
