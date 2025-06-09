@@ -234,7 +234,7 @@ def _get_admin_recipient_list(subject: str) -> List[str]:
 
 def _get_do_not_reply_email_address() -> str:
     """Get a do not reply email address using the current site's domain and the
-    DO_NOT_REPLY_USERNAME.
+    DO_NOT_REPLY_USERNAME site setting.
     """
     domain = Site.objects.get_current().domain
     matched = re.match(r"^(?P<domain>[^:]+)(?::(?P<port>\d+))?$", domain)
@@ -258,7 +258,7 @@ def _get_do_not_reply_email_address() -> str:
     else:
         clean_domain = domain
 
-    return f"{settings.DO_NOT_REPLY_USERNAME}@{clean_domain}"
+    return f"{SiteSetting.get_value(SiteSetting.Key.DO_NOT_REPLY_USERNAME)}@{clean_domain}"
 
 
 def _send_mail_with_logs(

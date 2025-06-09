@@ -661,34 +661,6 @@ BAG_CHECKSUMS
         BAG_CHECKSUMS=sha1,blake2b,md5
 
 
-Emailing
---------
-
-
-DO_NOT_REPLY_USERNAME
-^^^^^^^^^^^^^^^^^^^^^
-
-    *Choose username for do not reply emails*
-
-    .. table::
-
-        ============  =========
-        Default       Type
-        ============  =========
-        do-not-reply  string
-        ============  =========
-
-    A username for the application to send "do not reply" emails from. This username is combined
-    with the site's base URL to create an email address. The URL can be set from the admin site.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        DO_NOT_REPLY_USERNAME=donotreply
-
-
 Data Formatting and Defaults
 ----------------------------
 

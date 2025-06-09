@@ -20,7 +20,6 @@ class Command(BaseCommand):
         """Verify application settings."""
         try:
             LOGGER.info("Verifying settings in %s", settings.SETTINGS_MODULE)
-            verify_email_settings()
             verify_date_format()
             verify_checksum_settings()
             verify_storage_folder_settings()
@@ -40,18 +39,6 @@ class Command(BaseCommand):
                     )
                 ) from exc
             raise exc
-
-
-def verify_email_settings() -> None:
-    """Verify these settings.
-
-    - DO_NOT_REPLY_USERNAME
-
-    Raises:
-        ImproperlyConfigured: If either DO_NOT_REPLY_USERNAME is empty.
-    """
-    if not settings.DO_NOT_REPLY_USERNAME:
-        raise ImproperlyConfigured("The DO_NOT_REPLY_USERNAME setting is empty")
 
 
 def verify_date_format() -> None:
