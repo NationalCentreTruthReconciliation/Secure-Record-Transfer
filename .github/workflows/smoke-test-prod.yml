@@ -20,6 +20,10 @@ jobs:
       - name: Copy environment file
         run: cp example.prod.env .prod.env
 
+      - name: Add SECRET_KEY to environment file
+        run: |
+          echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
+
       - name: Start containers
         run: docker compose -f compose.prod.yml up -d
 
