@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import uuid
+from enum import Enum
 from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Optional, Union
@@ -13,10 +14,11 @@ from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -46,6 +48,108 @@ class User(AbstractUser):
     def get_full_name(self) -> str:
         """Return the full name of the user, which is a combination of first and last names."""
         return self.first_name + " " + self.last_name
+
+
+class SiteSetting(models.Model):
+    """A model to store configurable site settings that administrators can modify
+    through the Django admin interface without requiring code changes.
+
+    This model supports caching of settings values for improved performance.
+    """
+
+    class Key(Enum):
+        """The keys for the site settings. These keys are used to store and retrieve settings from
+        the database.
+        """
+
+        # Emails
+        ARCHIVIST_EMAIL = "ARCHIVIST_EMAIL"
+        DO_NOT_REPLY_USERNAME = "DO_NOT_REPLY_USERNAME"
+
+        # Pagination
+        PAGINATE_BY = "PAGINATE_BY"
+
+        # CAAIS defaults
+        CAAIS_DEFAULT_REPOSITORY = "CAAIS_DEFAULT_REPOSITORY"
+        CAAIS_DEFAULT_ACCESSION_TITLE = "CAAIS_DEFAULT_ACCESSION_TITLE"
+        CAAIS_DEFAULT_ARCHIVAL_UNIT = "CAAIS_DEFAULT_ARCHIVAL_UNIT"
+        CAAIS_DEFAULT_DISPOSITION_AUTHORITY = "CAAIS_DEFAULT_DISPOSITION_AUTHORITY"
+        CAAIS_DEFAULT_ACQUISITION_METHOD = "CAAIS_DEFAULT_ACQUISITION_METHOD"
+        CAAIS_DEFAULT_STATUS = "CAAIS_DEFAULT_STATUS"
+        CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY = "CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY"
+        CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY = "CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY"
+        CAAIS_DEFAULT_DATE_OF_MATERIALS = "CAAIS_DEFAULT_DATE_OF_MATERIALS"
+        CAAIS_DEFAULT_EXTENT_TYPE = "CAAIS_DEFAULT_EXTENT_TYPE"
+        CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE = "CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_UNITS"
+        CAAIS_DEFAULT_CONTENT_TYPE = "CAAIS_DEFAULT_CONTENT_TYPE"
+        CAAIS_DEFAULT_CARRIER_TYPE = "CAAIS_DEFAULT_CARRIER_TYPE"
+        CAAIS_DEFAULT_EXTENT_NOTE = "CAAIS_DEFAULT_EXTENT_NOTE"
+        CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT = "CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT"
+        CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL = "CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL"
+        CAAIS_DEFAULT_STORAGE_LOCATION = "CAAIS_DEFAULT_STORAGE_LOCATION"
+        CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE = (
+            "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE"
+        )
+        CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE = (
+            "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE"
+        )
+        CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE = (
+            "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE"
+        )
+        CAAIS_DEFAULT_APPRAISAL_TYPE = "CAAIS_DEFAULT_APPRAISAL_TYPE"
+        CAAIS_DEFAULT_APPRAISAL_VALUE = "CAAIS_DEFAULT_APPRAISAL_VALUE"
+        CAAIS_DEFAULT_APPRAISAL_NOTE = "CAAIS_DEFAULT_APPRAISAL_NOTE"
+        CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE = "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE"
+        CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE = (
+            "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE"
+        )
+        CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE = "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE"
+        CAAIS_DEFAULT_GENERAL_NOTE = "CAAIS_DEFAULT_GENERAL_NOTE"
+        CAAIS_DEFAULT_RULES_OR_CONVENTIONS = "CAAIS_DEFAULT_RULES_OR_CONVENTIONS"
+        CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD = "CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD"
+        # CAAIS event defaults
+        CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE = "CAAIS_DEFAULT_EVENT_TYPE"
+        CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT = "CAAIS_DEFAULT_EVENT_AGENT"
+        CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE = "CAAIS_DEFAULT_EVENT_NOTE"
+        # CAAIS creation defaults
+        CAAIS_DEFAULT_CREATION_TYPE = "CAAIS_DEFAULT_CREATION_TYPE"
+        CAAIS_DEFAULT_CREATION_AGENT = "CAAIS_DEFAULT_CREATION_AGENT"
+        CAAIS_DEFAULT_CREATION_NOTE = "CAAIS_DEFAULT_CREATION_NOTE"
+
+    key = models.CharField(max_length=255, unique=True)
+    value = models.TextField()
+    change_date = models.DateTimeField(auto_now_add=True, verbose_name=_("Change date"))
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        editable=False,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Changed by"),
+    )
+
+    def set_cache(self) -> None:
+        """Cache the value of this setting."""
+        cache.set(self.key, self.value)
+
+    @staticmethod
+    def get_value(key: SiteSetting.Key) -> str:
+        """Can throw SiteSetting.DoesNotExist."""
+        val = cache.get(str(key))
+        if val:
+            return val
+        obj = SiteSetting.objects.get(key=key)
+        obj.set_cache()
+        return obj.value
+
+    def __str__(self):
+        """Return a string representing this setting."""
+        return f"{self.key}={self.value}"
+
+
+@receiver(post_save, sender=SiteSetting)
+def update_cache_post_save(sender: SiteSetting, instance: SiteSetting, **kwargs) -> None:
+    """Update cached value when setting is saved."""
+    instance.set_cache()
 
 
 class UploadSession(models.Model):
