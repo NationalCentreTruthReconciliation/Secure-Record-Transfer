@@ -10,20 +10,14 @@
             <!-- Title -->
             <div class="mb-4 text-4xl text-primary text-center">{% trans "Create a New Account" %}</div>
             <!-- Error Message -->
-            {% if form.non_field_errors %}
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
-                    {% trans "The form was not valid." %}
-                </div>
-            {% endif %}
+            {% include "recordtransfer/signup_errors.html" %}
             <!-- Form -->
-            <form method="post"
-                  action="{% url 'recordtransfer:create_account' %}"
+            <form hx-post="{% url 'recordtransfer:create_account' %}"
+                  hx-target="#signup-error-container"
+                  hx-swap="innerHTML"
                   class="space-y-4">
                 {% csrf_token %}
                 {% for field in form %}
-                    {% if field.errors %}
-                        {% for error in field.errors %}<div class="text-red-600 text-sm mb-2">{{ error }}</div>{% endfor %}
-                    {% endif %}
                     <div class="mb-4">
                         <label for="{{ field.id_for_label }}"
                                class="block mb-2 font-medium text-gray-700">{{ field.label }}</label>
