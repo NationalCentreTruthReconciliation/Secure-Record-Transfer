@@ -5,7 +5,8 @@
 {% endblock title %}
 {% block content %}
     {% url 'recordtransfer:user_profile' as profileurl %}
-    <div class="flex flex-col items-left justify-center max-w-3xl mx-auto py-8 px-4">
+    <!-- Title -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
         <div class="mb-2 flex text-primary/60 items-center gap-3">
             <div class="mb-2 text-4xl text-primary">{% trans "Thank you for your Submission" %}</div>
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -16,23 +17,24 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-        <!-- Title -->
         <!-- Message Section -->
-        <div class="bg-base-100 shadow-md rounded-lg p-6 mb-8 w-full">
-            <p class="mb-4 text-gray-700">
-                {% blocktrans %}
+        <div class="card">
+            <div class="card-body">
+                <p class="text-lg leading-relaxed text-base-content">
+                    {% blocktrans %}
                 Your files are being held at the NCTR until an archivist reviews them. You may be contacted by
                 an archivist using the contact information you provided in the form you submitted. You may view
                 the current status of your submissions by visiting your <a href="{{ profileurl }}" class="text-primary hover:text-primary/80 font-medium">profile</a>
                 page.
                 {% endblocktrans %}
-            </p>
-            <p class="text-gray-700">
-                {% blocktrans with email=user.email %}
+                </p>
+                <p class="text-lg leading-relaxed text-base-content">
+                    {% blocktrans with email=user.email %}
                 An email will be sent to you at <span class="font-semibold">{{ email }}</span> confirming that your submission has been
                 received. The email will also contain the terms you agreed to when creating your submission.
                 {% endblocktrans %}
-            </p>
+                </p>
+            </div>
         </div>
         <!-- Quick Links Section -->
         <div class="bg-base-100 shadow-md rounded-lg p-6 mb-8 w-full">
