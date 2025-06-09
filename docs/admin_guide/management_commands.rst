@@ -1,5 +1,5 @@
 Management Commands
-==================
+===================
 
 The record transfer application provides several Django management commands to help administrators perform common maintenance and configuration tasks. These commands are run from within the application container using Django's ``manage.py`` script.
 

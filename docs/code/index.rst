@@ -17,3 +17,4 @@ part of this application.
     models
     utils
     decorators
+    commands
