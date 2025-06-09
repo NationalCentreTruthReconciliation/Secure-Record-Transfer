@@ -8,7 +8,7 @@ Set Domain
 
 Sets the domain of the current site. If you are running the record transfer app somewhere other than your localhost, you will need to add your site's domain to the database. If you do not set the domain, your emails will not send correctly, and will have the wrong link to your site.
 
-.. code-block:: console
+.. code-block:: bash
 
     python manage.py set_domain "my.domain.com"
 
@@ -22,7 +22,7 @@ Sets the domain of the current site. If you are running the record transfer app 
 
 **Examples:**
 
-.. code-block:: console
+.. code-block:: bash
 
     # Set domain only
     python manage.py set_domain "my.domain.com"
@@ -41,7 +41,7 @@ Send Test Email
 Sends test emails to verify that email functionality is working correctly. This is useful for
 testing email configuration after initial setup or changes.
 
-.. code-block:: console
+.. code-block:: bash
 
     python manage.py send_test_email <email_type> <recipient_email>
 
@@ -62,7 +62,7 @@ testing email configuration after initial setup or changes.
 
 **Examples:**
 
-.. code-block:: console
+.. code-block:: bash
 
     # Test user activation email
     python manage.py send_test_email user_activation_email admin@example.com
@@ -78,7 +78,7 @@ Resets application data to a clean state. This command is designed for developme
 testing purposes to restore the application to its initial state. This command is
 disabled in production environments for safety and only works with SQLite3 databases.
 
-.. code-block:: console
+.. code-block:: bash
 
     python manage.py reset
 
@@ -89,7 +89,7 @@ disabled in production environments for safety and only works with SQLite3 datab
 
 **Examples:**
 
-.. code-block:: console
+.. code-block:: bash
 
     # Basic reset with confirmation prompt
     python manage.py reset
@@ -116,7 +116,7 @@ Getting Help
 
 You can get help for any management command by using the ``--help`` flag:
 
-.. code-block:: console
+.. code-block:: bash
 
     python manage.py <command> --help
 
@@ -124,6 +124,6 @@ This will display detailed information about the command's arguments, and option
 
 You can also list all available management commands:
 
-.. code-block:: console
+.. code-block:: bash
 
     python manage.py help

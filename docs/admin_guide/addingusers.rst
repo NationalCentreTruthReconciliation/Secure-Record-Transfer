@@ -18,7 +18,7 @@ assign superuser status sparingly, as these accounts are very powerful.
 To create a superuser, use the Django manage script to create a superuser. This script is available
 in the container running the Django application.
 
-.. code-block:: console
+.. code-block:: bash
 
     # If running the development version of the app:
     podman-compose -f compose.dev.yml exec app python manage.py createsuperuser
