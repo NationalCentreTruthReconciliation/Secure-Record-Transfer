@@ -9,8 +9,8 @@
             <!-- Title -->
             <div class="mb-4 text-4xl text-primary text-center">{% trans "Login to your Account" %}</div>
             <!-- Error Message -->
+            {% include "registration/login_errors.html" %}
             <!-- Form -->
-            <!-- Wrap the form in a container div for dynamic replacement -->
             <div id="login-form-container">{% include "registration/login_form.html" %}</div>
             <!-- Forgot Password -->
             <div class="mt-6 text-center">

@@ -1,0 +1,13 @@
+{% load i18n %}
+<div id="login-error-container">
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
+    {% for field in form %}
+        {% if field.errors %}
+            {% for error in field.errors %}<div class="text-red-600 text-sm mb-2">{{ field.label }}: {{ error }}</div>{% endfor %}
+        {% endif %}
+    {% endfor %}
+</div>

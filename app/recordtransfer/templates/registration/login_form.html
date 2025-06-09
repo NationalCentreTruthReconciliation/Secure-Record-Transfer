@@ -1,18 +1,10 @@
 {% load i18n %}
-{% if form.non_field_errors %}
-    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
-        {% trans "Your username or password was not correct." %}
-    </div>
-{% endif %}
 <form class="space-y-4"
       hx-post="{% url 'login' %}"
-      hx-target="#login-form-container"
-      hx-swap="outerHTML">
+      hx-target="#login-error-container"
+      hx-swap="innerHTML">
     {% csrf_token %}
     {% for field in form %}
-        {% if field.errors %}
-            {% for error in field.errors %}<div class="text-red-600 text-sm mb-2">{{ error }}</div>{% endfor %}
-        {% endif %}
         <div class="mb-4">
             <label for="{{ field.id_for_label }}"
                    class="block mb-2 font-medium text-gray-700">{{ field.label }}</label>
