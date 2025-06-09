@@ -665,29 +665,6 @@ Emailing
 --------
 
 
-ARCHIVIST_EMAIL
-^^^^^^^^^^^^^^^
-
-    *Choose contact email address*
-
-    .. table::
-
-        =====================  =========
-        Default                Type
-        =====================  =========
-        archivist@example.com  string
-        =====================  =========
-
-    The email displayed for people to contact an archivist.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        ARCHIVIST_EMAIL=archives@domain.ca
-
-
 DO_NOT_REPLY_USERNAME
 ^^^^^^^^^^^^^^^^^^^^^
 

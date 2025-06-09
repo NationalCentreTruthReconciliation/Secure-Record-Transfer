@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from recordtransfer.models import InProgressSubmission, Submission, User
+from recordtransfer.models import InProgressSubmission, SiteSetting, Submission, User
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text
 
@@ -111,7 +111,7 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission) 
             subject="Thank You For Your Submission",
             template_name="recordtransfer/email/submission_success.html",
             context={
-                "archivist_email": settings.ARCHIVIST_EMAIL,
+                "archivist_email": SiteSetting.get_value(SiteSetting.Key.ARCHIVIST_EMAIL),
             },
         )
 
@@ -135,7 +135,7 @@ def send_your_submission_did_not_go_through(form_data: dict, user_submitted: Use
                 "username": user_submitted.username,
                 "first_name": user_submitted.first_name,
                 "last_name": user_submitted.last_name,
-                "archivist_email": settings.ARCHIVIST_EMAIL,
+                "archivist_email": SiteSetting.get_value(SiteSetting.Key.ARCHIVIST_EMAIL),
             },
         )
 
