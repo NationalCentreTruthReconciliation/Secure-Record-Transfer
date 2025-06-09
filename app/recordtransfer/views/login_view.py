@@ -1,11 +1,10 @@
-from django.contrib.auth.views import LoginView
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template.loader import render_to_string
-from django.shortcuts import redirect
-from django.contrib.auth.forms import AuthenticationForm
-
-
 import logging
+
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.template.loader import render_to_string
 
 logger = logging.getLogger(__name__)
 
