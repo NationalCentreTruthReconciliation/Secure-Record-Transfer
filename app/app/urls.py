@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import PasswordResetView
 from django.urls import include, path
+from recordtransfer.views.login_view import HTMXLoginView
 
 urlpatterns = [
     path("admin/django_rq/", include("django_rq.urls")),
@@ -35,9 +36,7 @@ urlpatterns = [
     # Override the login view with redirect behavior
     path(
         "account/login/",
-        auth_views.LoginView.as_view(
-            redirect_authenticated_user=True  # This is the key parameter
-        ),
+        HTMXLoginView.as_view(redirect_authenticated_user=True),
         name="login",
     ),
     path("account/", include("django.contrib.auth.urls")),
