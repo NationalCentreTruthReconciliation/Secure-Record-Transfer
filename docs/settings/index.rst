@@ -102,15 +102,15 @@ USE_DATE_WIDGETS
       True          bool
       ============  =========
 
-    If set to True, a date picker widget is used for date fields. If set to False, input text
-    fields with an input mask are used instead.
+  If set to True, a date picker widget is used for date fields. If set to False, input text
+  fields with an input mask are used instead.
 
-    **.env Example:**
+  **.env Example:**
 
-    ::
+  ::
 
-        #file: .env
-        USE_DATE_WIDGETS=false
+      #file: .env
+      USE_DATE_WIDGETS=false
 
 
 Services

@@ -3,7 +3,7 @@ Management Commands
 
 The record transfer application provides several Django management commands to help administrators perform common maintenance and configuration tasks. These commands are run from within the application container using Django's ``manage.py`` script.
 
-set_domain
+Set Domain
 ----------
 
 Sets the domain of the current site. If you are running the record transfer app somewhere other than your localhost, you will need to add your site's domain to the database. If you do not set the domain, your emails will not send correctly, and will have the wrong link to your site.
@@ -35,7 +35,7 @@ Sets the domain of the current site. If you are running the record transfer app 
     itself, such as "example.com" or "subdomain.example.com".
 
 
-send_test_email
+Send Test Email
 ---------------
 
 Sends test emails to verify that email functionality is working correctly. This is useful for
@@ -71,8 +71,8 @@ testing email configuration after initial setup or changes.
     python manage.py send_test_email submission_creation_success user@example.com
 
 
-reset
------
+Reset App
+---------
 
 Resets application data to a clean state. This command is designed for development and
 testing purposes to restore the application to its initial state. This command is
