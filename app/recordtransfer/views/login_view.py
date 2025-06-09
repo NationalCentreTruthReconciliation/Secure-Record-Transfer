@@ -27,7 +27,7 @@ class HTMXLoginView(LoginView):
         """Handle invalid login form submissions."""
         if self.request.headers.get("HX-Request"):
             html = render_to_string(
-                "registration/login_form.html",  # Changed to form-only template
+                "registration/login_errors.html",  # Changed to form-only template
                 {"form": form},
                 request=self.request,
             )
