@@ -143,7 +143,7 @@ Domain Setup
 ^^^^^^^^^^^^
 
 After starting the app up, you will need to set the domain so that emails send correctly. To do
-that, refer to the section of the docs on :ref:`Updating the Domain of Your Site`.
+that, refer to the documentation for the :ref:`Set Domain` command.
 
 Nginx Configuration
 ^^^^^^^^^^^^^^^^^^^
