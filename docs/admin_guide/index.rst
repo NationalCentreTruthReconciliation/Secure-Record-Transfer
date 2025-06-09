@@ -11,6 +11,6 @@ using command-line interfaces and terminal environments.
     addingusers
     adding_terms
     managing_submissions
-    sitename
+    management_commands
 
 See also: :ref:`Application Settings`.
