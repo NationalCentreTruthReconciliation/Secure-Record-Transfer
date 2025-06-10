@@ -116,8 +116,21 @@ class SiteSetting(models.Model):
         CAAIS_DEFAULT_CREATION_AGENT = "CAAIS_DEFAULT_CREATION_AGENT"
         CAAIS_DEFAULT_CREATION_NOTE = "CAAIS_DEFAULT_CREATION_NOTE"
 
+    class SettingType(models.TextChoices):
+        """The type of the setting value, stored as a string."""
+
+        INT = "int", _("Integer")
+        STR = "str", _("String")
+
+
     key = models.CharField(max_length=255, unique=True)
     value = models.TextField()
+    value_type = models.CharField(
+        max_length=8,
+        choices=SettingType.choices,
+        verbose_name=_("Setting value type"),
+    )
+
     change_date = models.DateTimeField(auto_now_add=True, verbose_name=_("Change date"))
     changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -127,19 +140,36 @@ class SiteSetting(models.Model):
         verbose_name=_("Changed by"),
     )
 
-    def set_cache(self) -> None:
+    def set_cache(self, value: Union[str, int]) -> None:
         """Cache the value of this setting."""
-        cache.set(self.key, self.value)
+        cache.set(self.key, value)
 
     @staticmethod
-    def get_value(key: SiteSetting.Key) -> str:
-        """Can throw SiteSetting.DoesNotExist."""
+    def get_value(key: SiteSetting.Key) -> Union[str, int]:
+        """Get the value of a site setting by its key.
+
+        Args:
+            key: The key of the setting to retrieve.
+
+        Returns:
+            The value of the setting, cached if available, or fetched from the database. The value
+            is already cast to the appropriate type.
+        """
         val = cache.get(key.value)
         if val:
             return val
         obj = SiteSetting.objects.get(key=key.value)
-        obj.set_cache()
-        return obj.value
+        return_value = obj.value
+        if obj.value_type == SiteSetting.SettingType.INT:
+            try:
+                return_value = int(obj.value)
+            except ValueError as e:
+                raise ValidationError(
+                    f"Value for setting {obj.key} is not a valid integer: {obj.value}"
+                ) from e
+
+        obj.set_cache(return_value)
+        return return_value
 
     def __str__(self):
         """Return a string representing this setting."""
@@ -149,8 +179,13 @@ class SiteSetting(models.Model):
 @receiver(post_save, sender=SiteSetting)
 def update_cache_post_save(sender: SiteSetting, instance: SiteSetting, **kwargs) -> None:
     """Update cached value when setting is saved."""
-    instance.set_cache()
-
+    value = instance.value
+    if instance.value_type == SiteSetting.SettingType.INT:
+        try:
+            value = int(instance.value)
+        except ValueError:
+            value = instance.value
+    instance.set_cache(value)
 
 class UploadSession(models.Model):
     """Represents a file upload session. This model is used to track the files that a

@@ -11,54 +11,54 @@ def populate_site_settings(apps, schema_editor):
 
     settings_mapping = {
         # Email settings
-        "ARCHIVIST_EMAIL": "archivist@example.com",
-        "DO_NOT_REPLY_USERNAME": "do-not-reply",
+        "ARCHIVIST_EMAIL": ("archivist@example.com", "str"),
+        "DO_NOT_REPLY_USERNAME": ("do-not-reply", "str"),
         # Pagination
-        "PAGINATE_BY": "10",
+        "PAGINATE_BY": ("10", "int"),
         # CAAIS defaults
-        "CAAIS_DEFAULT_REPOSITORY": "",
-        "CAAIS_DEFAULT_ACCESSION_TITLE": "",
-        "CAAIS_DEFAULT_ARCHIVAL_UNIT": "",
-        "CAAIS_DEFAULT_DISPOSITION_AUTHORITY": "",
-        "CAAIS_DEFAULT_ACQUISITION_METHOD": "",
-        "CAAIS_DEFAULT_STATUS": "",
-        "CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY": "",
-        "CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY": "",
-        "CAAIS_DEFAULT_DATE_OF_MATERIALS": "",
-        "CAAIS_DEFAULT_EXTENT_TYPE": "",
-        "CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE": "",
-        "CAAIS_DEFAULT_CONTENT_TYPE": "",
-        "CAAIS_DEFAULT_CARRIER_TYPE": "",
-        "CAAIS_DEFAULT_EXTENT_NOTE": "",
-        "CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT": "",
-        "CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL": "",
-        "CAAIS_DEFAULT_STORAGE_LOCATION": "",
-        "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE": "",
-        "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE": "",
-        "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE": "",
-        "CAAIS_DEFAULT_APPRAISAL_TYPE": "",
-        "CAAIS_DEFAULT_APPRAISAL_VALUE": "",
-        "CAAIS_DEFAULT_APPRAISAL_NOTE": "",
-        "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE": "",
-        "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE": "",
-        "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE": "",
-        "CAAIS_DEFAULT_GENERAL_NOTE": "",
-        "CAAIS_DEFAULT_RULES_OR_CONVENTIONS": "",
-        "CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD": "",
+        "CAAIS_DEFAULT_REPOSITORY": ("", "str"),
+        "CAAIS_DEFAULT_ACCESSION_TITLE": ("", "str"),
+        "CAAIS_DEFAULT_ARCHIVAL_UNIT": ("", "str"),
+        "CAAIS_DEFAULT_DISPOSITION_AUTHORITY": ("", "str"),
+        "CAAIS_DEFAULT_ACQUISITION_METHOD": ("", "str"),
+        "CAAIS_DEFAULT_STATUS": ("", "str"),
+        "CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY": ("", "str"),
+        "CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY": ("", "str"),
+        "CAAIS_DEFAULT_DATE_OF_MATERIALS": ("", "str"),
+        "CAAIS_DEFAULT_EXTENT_TYPE": ("", "str"),
+        "CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE": ("", "str"),
+        "CAAIS_DEFAULT_CONTENT_TYPE": ("", "str"),
+        "CAAIS_DEFAULT_CARRIER_TYPE": ("", "str"),
+        "CAAIS_DEFAULT_EXTENT_NOTE": ("", "str"),
+        "CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT": ("", "str"),
+        "CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL": ("", "str"),
+        "CAAIS_DEFAULT_STORAGE_LOCATION": ("", "str"),
+        "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE": ("", "str"),
+        "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE": ("", "str"),
+        "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE": ("", "str"),
+        "CAAIS_DEFAULT_APPRAISAL_TYPE": ("", "str"),
+        "CAAIS_DEFAULT_APPRAISAL_VALUE": ("", "str"),
+        "CAAIS_DEFAULT_APPRAISAL_NOTE": ("", "str"),
+        "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE": ("", "str"),
+        "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE": ("", "str"),
+        "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE": ("", "str"),
+        "CAAIS_DEFAULT_GENERAL_NOTE": ("", "str"),
+        "CAAIS_DEFAULT_RULES_OR_CONVENTIONS": ("", "str"),
+        "CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD": ("", "str"),
         # CAAIS event defaults
-        "CAAIS_DEFAULT_EVENT_TYPE": "Transfer Submitted",
-        "CAAIS_DEFAULT_EVENT_AGENT": "",
-        "CAAIS_DEFAULT_EVENT_NOTE": "",
+        "CAAIS_DEFAULT_EVENT_TYPE": ("Transfer Submitted", "str"),
+        "CAAIS_DEFAULT_EVENT_AGENT": ("", "str"),
+        "CAAIS_DEFAULT_EVENT_NOTE": ("", "str"),
         # CAAIS creation defaults
-        "CAAIS_DEFAULT_CREATION_TYPE": "Creation",
-        "CAAIS_DEFAULT_CREATION_AGENT": "",
-        "CAAIS_DEFAULT_CREATION_NOTE": "",
+        "CAAIS_DEFAULT_CREATION_TYPE": ("Creation", "str"),
+        "CAAIS_DEFAULT_CREATION_AGENT": ("", "str"),
+        "CAAIS_DEFAULT_CREATION_NOTE": ("", "str"),
     }
 
     # Create SiteSetting objects for each setting
     settings_to_create = []
-    for key, value in settings_mapping.items():
-        settings_to_create.append(SiteSetting(key=key, value=str(value)))
+    for key, (value, value_type) in settings_mapping.items():
+        settings_to_create.append(SiteSetting(key=key, value=str(value), value_type=value_type))
 
     # Bulk create all settings
     SiteSetting.objects.bulk_create(settings_to_create)
@@ -81,6 +81,14 @@ class Migration(migrations.Migration):
                 ),
                 ("key", models.CharField(max_length=255, unique=True)),
                 ("value", models.TextField()),
+                (
+                    "value_type",
+                    models.CharField(
+                        max_length=8,
+                        choices=[("int", "Integer"), ("str", "String")],
+                        verbose_name="Setting value type",
+                    ),
+                ),
                 (
                     "change_date",
                     models.DateTimeField(auto_now_add=True, verbose_name="Change date"),
