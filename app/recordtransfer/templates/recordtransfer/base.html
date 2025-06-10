@@ -8,7 +8,6 @@
         <meta name="description" content="Secure Record Transfer Application">
         <!-- JS -->
         {% block javascript %}
-            {% render_bundle 'vendors' 'js' %}
             {% render_bundle 'main' 'js' %}
         {% endblock javascript %}
         {# Fonts #}
@@ -23,7 +22,6 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {# CSS #}
         {% block stylesheet %}
-            {% render_bundle 'vendors' 'css' %}
             {% render_bundle 'main' 'css' %}
         {% endblock stylesheet %}
         {# Favicon #}
