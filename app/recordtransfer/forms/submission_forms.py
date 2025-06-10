@@ -774,13 +774,11 @@ class RightsForm(SubmissionForm):
         label=gettext("Notes for rights"),
     )
 
-    """
-    rights_note = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput(),
-        label='hidden'
-    )
-    """
+    # rights_note = forms.CharField(
+    #     required=False,
+    #     widget=forms.HiddenInput(),
+    #     label='hidden'
+    # )
 
 
 class OtherIdentifiersForm(SubmissionForm):
