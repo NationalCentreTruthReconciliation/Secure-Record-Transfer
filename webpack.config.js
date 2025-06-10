@@ -98,8 +98,9 @@ module.exports = {
         ]
     },
     output: {
-        path: path.join(__dirname, "../build"),
-        filename: "js/[name].js",
+        path: path.join(__dirname, "dist"), // Match your Django STATICFILES_DIRS
+        filename: "js/[name].[contenthash:8].js", // Add content hashing
+        chunkFilename: "js/[name].[contenthash:8].chunk.js",
         publicPath: "/static/",
     },
     module: {
