@@ -8,10 +8,10 @@ from django.core.files.base import File
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
+from recordtransfer import utils
 from recordtransfer.emails import send_user_in_progress_submission_expiring
 from recordtransfer.handlers import JobLogHandler
 from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
-from recordtransfer.utils import zip_directory
 
 LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 "Creating temporary zip file on disk at %s ...",
                 f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
             )
-            zip_directory(
+            utils.zip_directory(
                 str(submission.location),
                 zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
             )

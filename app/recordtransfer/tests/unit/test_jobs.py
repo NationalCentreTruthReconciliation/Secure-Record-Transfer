@@ -5,7 +5,6 @@ from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.test import override_settings
-from django.utils import timezone
 from freezegun import freeze_time
 
 from recordtransfer.jobs import (
@@ -44,13 +43,13 @@ class TestCreateDownloadableBag(unittest.TestCase):
         self.mock_submission.make_bag.return_value = None
 
         with (
-            patch("recordtransfer.jobs.LOGGER"),
+            patch("os.makedirs"),
+            patch("os.path.exists", return_value=False),
+            patch("tempfile.TemporaryFile"),
+            patch("zipfile.ZipFile"),
             patch("recordtransfer.jobs.JobLogHandler"),
-            patch("recordtransfer.jobs.os.path.exists", return_value=False),
-            patch("recordtransfer.jobs.zip_directory"),
-            patch("recordtransfer.jobs.tempfile.TemporaryFile"),
-            patch("recordtransfer.jobs.os.makedirs"),
-            patch("recordtransfer.jobs.zipfile.ZipFile"),
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.utils.zip_directory"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
@@ -83,13 +82,13 @@ class TestCreateDownloadableBag(unittest.TestCase):
         self.mock_submission.make_bag.side_effect = FileNotFoundError("missing files")
 
         with (
-            patch("recordtransfer.jobs.LOGGER"),
+            patch("os.makedirs"),
+            patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
-            patch("recordtransfer.jobs.os.path.exists", return_value=False),
-            patch("recordtransfer.jobs.zip_directory"),
-            patch("recordtransfer.jobs.tempfile.TemporaryFile"),
-            patch("recordtransfer.jobs.os.makedirs"),
-            patch("recordtransfer.jobs.zipfile.ZipFile"),
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.utils.zip_directory"),
+            patch("tempfile.TemporaryFile"),
+            patch("zipfile.ZipFile"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
@@ -110,13 +109,13 @@ class TestCreateDownloadableBag(unittest.TestCase):
         self.mock_submission.make_bag.side_effect = ValueError("no metadata")
 
         with (
-            patch("recordtransfer.jobs.LOGGER"),
+            patch("os.makedirs"),
+            patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
-            patch("recordtransfer.jobs.os.path.exists", return_value=False),
-            patch("recordtransfer.jobs.zip_directory"),
-            patch("recordtransfer.jobs.tempfile.TemporaryFile"),
-            patch("recordtransfer.jobs.os.makedirs"),
-            patch("recordtransfer.jobs.zipfile.ZipFile"),
+            patch("recordtransfer.jobs.LOGGER"),
+            patch("recordtransfer.utils.zip_directory"),
+            patch("tempfile.TemporaryFile"),
+            patch("zipfile.ZipFile"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
@@ -131,9 +130,9 @@ class TestCreateDownloadableBag(unittest.TestCase):
     @override_settings(TEMP_STORAGE_FOLDER="/tmp")
     @patch("recordtransfer.jobs.Job")
     @patch("recordtransfer.jobs.File")
-    @patch("recordtransfer.jobs.zip_directory")
-    @patch("recordtransfer.jobs.zipfile.ZipFile")
-    @patch("recordtransfer.jobs.tempfile.TemporaryFile")
+    @patch("recordtransfer.utils.zip_directory")
+    @patch("zipfile.ZipFile")
+    @patch("tempfile.TemporaryFile")
     def test_attach_zipped_bag_to_job(
         self,
         mock_temp_file_class: MagicMock,
@@ -160,10 +159,10 @@ class TestCreateDownloadableBag(unittest.TestCase):
         mock_file_class.return_value = mock_file
 
         with (
-            patch("recordtransfer.jobs.LOGGER"),
+            patch("os.makedirs"),
+            patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
-            patch("recordtransfer.jobs.os.path.exists", return_value=False),
-            patch("recordtransfer.jobs.os.makedirs"),
+            patch("recordtransfer.jobs.LOGGER"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
@@ -183,9 +182,9 @@ class TestCreateDownloadableBag(unittest.TestCase):
     @override_settings(TEMP_STORAGE_FOLDER="/tmp")
     @patch("recordtransfer.jobs.Job")
     @patch("recordtransfer.jobs.File")
-    @patch("recordtransfer.jobs.zip_directory")
-    @patch("recordtransfer.jobs.zipfile.ZipFile")
-    @patch("recordtransfer.jobs.tempfile.TemporaryFile")
+    @patch("recordtransfer.utils.zip_directory")
+    @patch("zipfile.ZipFile")
+    @patch("tempfile.TemporaryFile")
     def test_attach_zipped_bag_to_job_failure(
         self,
         mock_temp_file_class: MagicMock,
@@ -210,10 +209,10 @@ class TestCreateDownloadableBag(unittest.TestCase):
         mock_file_class.return_value = mock_file
 
         with (
-            patch("recordtransfer.jobs.LOGGER"),
+            patch("os.makedirs"),
+            patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
-            patch("recordtransfer.jobs.os.path.exists", return_value=False),
-            patch("recordtransfer.jobs.os.makedirs"),
+            patch("recordtransfer.jobs.LOGGER"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
