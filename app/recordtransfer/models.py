@@ -122,12 +122,14 @@ class SiteSetting(models.Model):
         INT = "int", _("Integer")
         STR = "str", _("String")
 
-    key = models.CharField(max_length=255, unique=True)
+    key = models.CharField(max_length=255, unique=True, null=False, editable=False)
     value = models.TextField()
     value_type = models.CharField(
         max_length=8,
         choices=SettingType.choices,
         verbose_name=_("Setting value type"),
+        null=False,
+        editable=False,
     )
 
     change_date = models.DateTimeField(
@@ -182,7 +184,7 @@ class SiteSetting(models.Model):
             ValidationError: If the setting is not of type :attr:`SettingType.INT`.
         """
         val = cache.get(key.value)
-        if not val:
+        if val is not None:
             return val
 
         obj = SiteSetting.objects.get(key=key.value)
