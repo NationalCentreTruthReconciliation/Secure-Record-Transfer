@@ -22,7 +22,7 @@ class CreateAccount(FormView):
     successfully, send an email to that user with a link that lets them activate their account.
     """
 
-    template_name = "recordtransfer/signupform.html"
+    template_name = "recordtransfer/signup.html"
     form_class = SignUpForm
     success_url = reverse_lazy("recordtransfer:activation_sent")
 
@@ -51,7 +51,7 @@ class CreateAccount(FormView):
         if self.request.headers.get("HX-Request"):
             # Return only the error template for HTMX requests
             html = render_to_string(
-                "recordtransfer/signup_errors.html",
+                "recordtransfer/signup_form.html",
                 {"form": form},
                 request=self.request,
             )
