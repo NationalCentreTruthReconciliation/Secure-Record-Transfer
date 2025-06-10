@@ -66,9 +66,19 @@
                 </form>
             </div>
             <!-- Forgot Password -->
-            <div class="mt-6 text-center">
-                <a href="{% url 'password_reset' %}"
-                   class="text-primary hover:text-primary/80">{% trans "Forgot your password?" %}</a>
+            <!-- Account Links -->
+            <div class="mt-6 text-center space-y-3">
+                <div>
+                    <a href="{% url 'password_reset' %}"
+                       class="text-primary hover:text-primary/80">{% trans "Forgot your password?" %}</a>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="text-gray-600">
+                        {% trans "Already have an account?" %}
+                        <a href="{% url 'login' %}"
+                           class="text-primary hover:text-primary/80 ml-1">{% trans "Sign Up" %}</a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
