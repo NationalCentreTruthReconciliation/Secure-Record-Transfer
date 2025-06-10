@@ -23,11 +23,13 @@ from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
     SubmissionModelForm,
 )
+from recordtransfer.forms.admin_forms import SiteSettingModelForm
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
     BaseUploadedFile,
     Job,
     PermUploadedFile,
+    SiteSetting,
     Submission,
     SubmissionGroup,
     TempUploadedFile,
@@ -689,3 +691,25 @@ class CustomUserAdmin(UserAdmin):
                     gettext("Staff privileges have been removed from your account.")
                 )
         return message_list
+
+@admin.register(SiteSetting)
+class SiteSettingAdmin(admin.ModelAdmin):
+    """Admin for the SiteSetting model.
+
+    Permissions:
+        - add: Not allowed
+        - change: Allowed
+        - delete: Only by superusers
+    """
+
+    list_display = ["key", "value_type", "value"]
+    search_fields = ["name", "value"]
+    readonly_fields = ["key", "value_type"]
+
+    form = SiteSettingModelForm
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

@@ -4,6 +4,7 @@ from typing import Any, ClassVar
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
@@ -109,9 +110,13 @@ class SiteSettingModelForm(RecordTransferModelForm):
         """Additional form-level validation."""
         cleaned_data = super().clean()
 
-        key = cleaned_data.get("key")
+        key = SiteSetting.Key(self.instance.key)
+        value = cleaned_data.get("value")
 
-        if key == SiteSetting.Key.PAGINATE_BY.value:
+        if not value:
+            raise ValidationError(f"{key.name} cannot be empty.")
+
+        if key == SiteSetting.Key.PAGINATE_BY:
             try:
                 paginate_by = int(cleaned_data.get("value", 0))
                 if paginate_by <= 0:
@@ -121,6 +126,14 @@ class SiteSettingModelForm(RecordTransferModelForm):
             except (ValueError, TypeError) as exc:
                 raise ValidationError(
                     f"{SiteSetting.Key.PAGINATE_BY.name} must be a positive whole number."
+                ) from exc
+        elif key == SiteSetting.Key.ARCHIVIST_EMAIL:
+            value = cleaned_data.get("value", "")
+            try:
+                validate_email(value)
+            except ValidationError as exc:
+                raise ValidationError(
+                    f"{SiteSetting.Key.ARCHIVIST_EMAIL.name} must be a valid email address."
                 ) from exc
 
         return cleaned_data
