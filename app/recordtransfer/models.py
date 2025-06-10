@@ -736,41 +736,29 @@ class Submission(models.Model):
         title = self.metadata.accession_title or "No title"
         abbrev_title = title if len(title) <= 20 else title[0:20]
 
-        bag_name = "{username}_{datetime}_{title}".format(
+        return "{username}_{datetime}_{title}".format(
             username=slugify(self.user.username),
-            datetime=timezone.localtime(timezone.now()).strftime(r"%Y%m%d-%H%M%S"),
+            datetime=self.submission_date.strftime(r"%Y%m%d-%H%M%S"),
             title=slugify(abbrev_title),
         )
 
-        self.bag_name = bag_name
-        self.save()
-
     @property
-    def user_folder(self) -> str:
-        """Get the location of the submission user's bag storage folder.
-
-        Raises:
-            ValueError: If there is no user associated with this submission.
-        """
-        if not self.user:
-            raise ValueError("There is no user associated with this submission")
-        return os.path.join(str(settings.BAG_STORAGE_FOLDER), slugify(self.user.username))
-
-    @property
-    def location(self) -> str:
+    def location(self) -> Path:
         """Get the location on the file system for the BagIt bag for this submission.
 
-        Raises:
-            ValueError: If there is no user associated with this submission.
+        Returns:
+            The absolute file system path where the BagIt bag should be stored.
         """
-        if not self.user:
-            raise ValueError("There is no user associated with this submission")
         if not self.bag_name:
-            self.generate_bag_name()
-        return os.path.join(self.user_folder, self.bag_name)  # type: ignore
+            self.bag_name = self.generate_bag_name()
+            self.save()
+
+        uuid_str = str(self.uuid)
+        first_two_chars = uuid_str[0:2]
+        return Path(settings.BAG_STORAGE_FOLDER) / first_two_chars / uuid_str / self.bag_name
 
     @property
-    def extent_statements(self):
+    def extent_statements(self) -> str:
         """Return the first extent statement for this submission."""
         return (
             next(
@@ -780,37 +768,29 @@ class Submission(models.Model):
             else ""
         )
 
-    def get_admin_metadata_change_url(self):
-        """Get the URL to change the metadata object in the admin"""
+    def get_admin_metadata_change_url(self) -> str:
+        """Get the URL to change the metadata object in the admin."""
+        if not self.metadata:
+            raise ValueError("Cannot create a URL for non-existent metadata")
         view_name = "admin:{0}_{1}_change".format(
             self.metadata._meta.app_label, self.metadata._meta.model_name
         )
         return reverse(view_name, args=(self.metadata.pk,))
 
-    def get_admin_metadata_change_url(self):
-        """Get the URL to change the metadata object in the admin"""
-        view_name = "admin:{0}_{1}_change".format(
-            self.metadata._meta.app_label, self.metadata._meta.model_name
-        )
-        return reverse(view_name, args=(self.metadata.pk,))
-
-    def get_admin_change_url(self):
-        """Get the URL to change this object in the admin"""
+    def get_admin_change_url(self) -> str:
+        """Get the URL to change this object in the admin."""
         view_name = "admin:{0}_{1}_change".format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-    def get_admin_report_url(self):
-        """Get the URL to generate a report for this object in the admin"""
+    def get_admin_report_url(self) -> str:
+        """Get the URL to generate a report for this object in the admin."""
         view_name = "admin:{0}_{1}_report".format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-    def get_admin_zip_url(self):
-        """Get the URL to generate a zipped bag for this object in the admin"""
+    def get_admin_zip_url(self) -> str:
+        """Get the URL to generate a zipped bag for this object in the admin."""
         view_name = f"admin:{self._meta.app_label}_{self._meta.model_name}_zip"
         return reverse(view_name, args=(self.pk,))
-
-    def __str__(self):
-        return f"Submission by {self.user} at {self.submission_date}"
 
     def make_bag(self, algorithms: Iterable[str] = ("sha512",), file_perms: str = "644") -> None:
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
@@ -879,9 +859,25 @@ class Submission(models.Model):
         LOGGER.info("Bag is VALID")
 
     def remove_bag(self) -> None:
-        """Remove the BagIt bag if it exists."""
-        if os.path.exists(self.location):
-            shutil.rmtree(self.location)
+        """Remove everything in the Bag, including the Bag folder itself."""
+        if not os.path.exists(self.location):
+            return
+        self.remove_bag_contents()
+        self.location.rmdir()
+
+    def remove_bag_contents(self) -> None:
+        """Remove everything in the Bag, but not the Bag directory itself."""
+        if not os.path.exists(self.location):
+            return
+        for item in self.location.iterdir():
+            if item.is_file():
+                item.unlink()
+            else:
+                shutil.rmtree(item)
+
+    def __str__(self) -> str:
+        """Get a string representation of this submission."""
+        return f"Submission by {self.user} at {self.submission_date}"
 
 
 class Job(models.Model):
