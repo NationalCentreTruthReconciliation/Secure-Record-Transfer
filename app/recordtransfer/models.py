@@ -145,31 +145,57 @@ class SiteSetting(models.Model):
         cache.set(self.key, value)
 
     @staticmethod
-    def get_value(key: SiteSetting.Key) -> Union[str, int]:
-        """Get the value of a site setting by its key.
+    def get_value_str(key: SiteSetting.Key) -> str:
+        """Get the value of a site setting of type :attr:`SettingType.STR` by its key.
 
         Args:
             key: The key of the setting to retrieve.
 
         Returns:
-            The value of the setting, cached if available, or fetched from the database. The value
-            is already cast to the appropriate type.
+            The value of the setting as a string, cached if available, or fetched from the
+            database.
+
+        Raises:
+            ValidationError: If the setting is not of type :attr:`SettingType.STR`.
         """
         val = cache.get(key.value)
         if val:
             return val
         obj = SiteSetting.objects.get(key=key.value)
-        return_value = obj.value
-        if obj.value_type == SiteSetting.SettingType.INT:
-            try:
-                return_value = int(obj.value)
-            except ValueError as e:
-                raise ValidationError(
-                    f"Value for setting {obj.key} is not a valid integer: {obj.value}"
-                ) from e
+
+        obj.set_cache(obj.value)
+        return obj.value
+
+    @staticmethod
+    def get_value_int(key: SiteSetting.Key) -> int:
+        """Get the value of a site setting of type :attr:`SettingType.INT` by its key.
+
+        Args:
+            key: The key of the setting to retrieve.
+
+        Returns:
+            The value of the setting as an integer, cached if available, or fetched from the
+            database.
+
+        Raises:
+            ValidationError: If the setting is not of type :attr:`SettingType.INT`.
+        """
+        val = cache.get(key.value)
+        if not val:
+            return val
+
+        obj = SiteSetting.objects.get(key=key.value)
+
+        if obj.value_type != SiteSetting.SettingType.INT:
+            raise ValidationError(
+                f"Setting {key.value} is not of type INT, but of type {obj.value_type}"
+            )
+
+        return_value = int(obj.value)
 
         obj.set_cache(return_value)
         return return_value
+
 
     def __str__(self):
         """Return a string representing this setting."""
