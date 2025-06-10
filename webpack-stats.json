@@ -1,0 +1,98 @@
+{
+    "status": "done",
+    "chunks": {
+        "images": [],
+        "main": [
+            "css/app-aa8376c33dd9651044e4.css",
+            "js/vendors.js",
+            "css/app-1c9df2e007e9e9c0e16b.css",
+            "js/main.js"
+        ],
+        "submission_detail": [
+            "css/app-41a117509af1f68fc1d0.css",
+            "js/submission_detail.js"
+        ],
+        "admin_metadata": [
+            "css/app-8913e4756eb179e1239e.css",
+            "js/admin_metadata.js"
+        ],
+        "admin_uploadedfile": [
+            "js/admin_uploadedfile.js"
+        ],
+        "admin_job": [
+            "css/app-9bd942b86b60c29267a5.css",
+            "js/admin_job.js"
+        ]
+    },
+    "publicPath": "/static/",
+    "assets": {
+        "unesco.webp": {
+            "name": "unesco.webp",
+            "publicPath": "/static/unesco.webp"
+        },
+        "css/app-1c9df2e007e9e9c0e16b.css": {
+            "name": "css/app-1c9df2e007e9e9c0e16b.css",
+            "publicPath": "/static/css/app-1c9df2e007e9e9c0e16b.css"
+        },
+        "js/main.js": {
+            "name": "js/main.js",
+            "publicPath": "/static/js/main.js"
+        },
+        "css/app-41a117509af1f68fc1d0.css": {
+            "name": "css/app-41a117509af1f68fc1d0.css",
+            "publicPath": "/static/css/app-41a117509af1f68fc1d0.css"
+        },
+        "js/submission_detail.js": {
+            "name": "js/submission_detail.js",
+            "publicPath": "/static/js/submission_detail.js"
+        },
+        "css/app-8913e4756eb179e1239e.css": {
+            "name": "css/app-8913e4756eb179e1239e.css",
+            "publicPath": "/static/css/app-8913e4756eb179e1239e.css"
+        },
+        "js/admin_metadata.js": {
+            "name": "js/admin_metadata.js",
+            "publicPath": "/static/js/admin_metadata.js"
+        },
+        "js/admin_uploadedfile.js": {
+            "name": "js/admin_uploadedfile.js",
+            "publicPath": "/static/js/admin_uploadedfile.js"
+        },
+        "css/app-9bd942b86b60c29267a5.css": {
+            "name": "css/app-9bd942b86b60c29267a5.css",
+            "publicPath": "/static/css/app-9bd942b86b60c29267a5.css"
+        },
+        "js/admin_job.js": {
+            "name": "js/admin_job.js",
+            "publicPath": "/static/js/admin_job.js"
+        },
+        "css/app-aa8376c33dd9651044e4.css": {
+            "name": "css/app-aa8376c33dd9651044e4.css",
+            "publicPath": "/static/css/app-aa8376c33dd9651044e4.css"
+        },
+        "js/vendors.js": {
+            "name": "js/vendors.js",
+            "publicPath": "/static/js/vendors.js"
+        },
+        "close_menu_64x64px.webp": {
+            "name": "close_menu_64x64px.webp",
+            "publicPath": "/static/close_menu_64x64px.webp"
+        },
+        "logo-white.webp": {
+            "name": "logo-white.webp",
+            "publicPath": "/static/logo-white.webp"
+        },
+        "nctrlogo_flame_150x150px.webp": {
+            "name": "nctrlogo_flame_150x150px.webp",
+            "publicPath": "/static/nctrlogo_flame_150x150px.webp"
+        },
+        "hero4-scaled.webp": {
+            "name": "hero4-scaled.webp",
+            "publicPath": "/static/hero4-scaled.webp"
+        },
+        "PHABNE_00281.webp": {
+            "name": "PHABNE_00281.webp",
+            "publicPath": "/static/PHABNE_00281.webp"
+        }
+    }
+}

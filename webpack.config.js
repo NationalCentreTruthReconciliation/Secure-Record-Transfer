@@ -98,9 +98,9 @@ module.exports = {
         ]
     },
     output: {
-        filename: "js/[name].[chunkhash:8].js",
-        chunkFilename: "js/[name].[chunkhash:8].chunk.js",
-        path: path.resolve(__dirname, "dist/")
+        path: path.join(__dirname, "../build"),
+        filename: "js/[name].js",
+        publicPath: "/static/",
     },
     module: {
         rules: [
