@@ -139,7 +139,7 @@ COUNTRIES_FLAG_URL = "flags/{code}.gif"
 MEDIA_URL = "/media/"
 STATIC_URL = "/static/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 FILE_UPLOAD_PERMISSIONS = 0o644
 
 STATICFILES_FINDERS = [
@@ -158,7 +158,7 @@ STATICFILES_DIRS = [
 # See: https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-STORAGES
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
 # CAAIS dates
@@ -306,3 +306,10 @@ FIXTURE_DIRS = [
 ]
 
 SELENIUM_TESTS_HEADLESS_MODE = config("SELENIUM_TESTS_HEADLESS_MODE", default=False, cast=bool)
+
+WEBPACK_LOADER = {
+    "DEFAULT": {
+        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "webpack-stats.json"),
+        "BUNDLE_DIR_NAME": "dist/",  # must end with slash
+    },
+}
