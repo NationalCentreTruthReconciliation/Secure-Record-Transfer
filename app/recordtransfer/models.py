@@ -134,10 +134,10 @@ class SiteSetting(models.Model):
     @staticmethod
     def get_value(key: SiteSetting.Key) -> str:
         """Can throw SiteSetting.DoesNotExist."""
-        val = cache.get(str(key))
+        val = cache.get(key.value)
         if val:
             return val
-        obj = SiteSetting.objects.get(key=key)
+        obj = SiteSetting.objects.get(key=key.value)
         obj.set_cache()
         return obj.value
 
