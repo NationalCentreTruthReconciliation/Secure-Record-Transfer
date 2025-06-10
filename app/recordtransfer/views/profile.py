@@ -2,7 +2,6 @@
 
 from typing import Any, Optional, cast
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
