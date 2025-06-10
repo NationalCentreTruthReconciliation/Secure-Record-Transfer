@@ -750,11 +750,8 @@ class Submission(models.Model):
         """Get the location of the submission user's bag storage folder.
 
         Raises:
-            FileNotFoundError: If BAG_STORAGE_FOLDER is not set.
             ValueError: If there is no user associated with this submission.
         """
-        if not settings.BAG_STORAGE_FOLDER:
-            raise FileNotFoundError("BAG_STORAGE_FOLDER is not set")
         if not self.user:
             raise ValueError("There is no user associated with this submission")
         return os.path.join(str(settings.BAG_STORAGE_FOLDER), slugify(self.user.username))
@@ -836,8 +833,6 @@ class Submission(models.Model):
 
         if not self.metadata:
             raise ValueError("This submission has no associated metadata")
-
-        os.makedirs(settings.BAG_STORAGE_FOLDER, exist_ok=True)
 
         if not os.path.exists(self.user_folder) or not os.path.isdir(self.user_folder):
             os.mkdir(self.user_folder)
