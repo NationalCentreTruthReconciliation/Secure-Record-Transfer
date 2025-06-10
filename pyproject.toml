@@ -18,6 +18,7 @@ dependencies = [
     "django-htmx>=1.23.0,<2",
     "django-recaptcha>=4.0.0,<5",
     "django-rq>=3.0.0,<4",
+    "django-webpack-loader==1.8.1",
     "python-decouple~=3.8",
     "rq-scheduler>=0.14.0,<0.15",
     "setuptools~=78.1.1",
