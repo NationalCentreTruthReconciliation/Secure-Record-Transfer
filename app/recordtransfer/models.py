@@ -6,7 +6,7 @@ import shutil
 import uuid
 from itertools import chain
 from pathlib import Path
-from typing import ClassVar, Optional, Union
+from typing import ClassVar, Iterable, Optional, Union
 
 import bagit
 from caais.export import ExportVersion
@@ -815,7 +815,7 @@ class Submission(models.Model):
     def __str__(self):
         return f"Submission by {self.user} at {self.submission_date}"
 
-    def make_bag(self, algorithms: Union[str, list] = "sha512", file_perms: str = "644") -> None:
+    def make_bag(self, algorithms: Iterable[str] = ("sha512",), file_perms: str = "644") -> None:
         """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
         is determined by self.location. Checks the validity of the Bag post-creation to ensure that
         integrity is maintained. The data payload files come from the UploadSession associated with
@@ -828,7 +828,7 @@ class Submission(models.Model):
             bagit.BagValidationError: If the Bag is created, but it's invalid
 
         Args:
-            algorithms (Union[str, list]): The algorithms to generate the BagIt bag with
+            algorithms (Iterable[str]): The checksum algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
         """
         if not self.upload_session:
@@ -836,9 +836,6 @@ class Submission(models.Model):
 
         if not self.metadata:
             raise ValueError("This submission has no associated metadata")
-
-        if isinstance(algorithms, str):
-            algorithms = [a.strip() for a in algorithms.split(",")]
 
         os.makedirs(settings.BAG_STORAGE_FOLDER, exist_ok=True)
 
