@@ -63,7 +63,7 @@ class TestCreateAccount(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Create a New Account")
         self.assertIsInstance(response.context["form"], SignUpForm)
-        self.assertTemplateUsed(response, "recordtransfer/signupform.html")
+        self.assertTemplateUsed(response, "recordtransfer/signup.html")
 
     def test_get_create_account_authenticated_user_redirected(self) -> None:
         """Test that authenticated users are redirected to homepage."""
