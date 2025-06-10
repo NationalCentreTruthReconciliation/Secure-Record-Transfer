@@ -122,7 +122,6 @@ class SiteSetting(models.Model):
         INT = "int", _("Integer")
         STR = "str", _("String")
 
-
     key = models.CharField(max_length=255, unique=True)
     value = models.TextField()
     value_type = models.CharField(
@@ -131,7 +130,9 @@ class SiteSetting(models.Model):
         verbose_name=_("Setting value type"),
     )
 
-    change_date = models.DateTimeField(auto_now_add=True, verbose_name=_("Change date"))
+    change_date = models.DateTimeField(
+        auto_now_add=True, editable=False, verbose_name=_("Change date")
+    )
     changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         editable=False,
@@ -196,7 +197,6 @@ class SiteSetting(models.Model):
         obj.set_cache(return_value)
         return return_value
 
-
     def __str__(self):
         """Return a string representing this setting."""
         return f"{self.key}={self.value}"
@@ -212,6 +212,7 @@ def update_cache_post_save(sender: SiteSetting, instance: SiteSetting, **kwargs)
         except ValueError:
             value = instance.value
     instance.set_cache(value)
+
 
 class UploadSession(models.Model):
     """Represents a file upload session. This model is used to track the files that a
