@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django_rq",
     "django_recaptcha",
     "django_htmx",
+    "webpack_loader",
 ]
 
 MIDDLEWARE = [
@@ -305,3 +306,10 @@ FIXTURE_DIRS = [
 ]
 
 SELENIUM_TESTS_HEADLESS_MODE = config("SELENIUM_TESTS_HEADLESS_MODE", default=False, cast=bool)
+
+WEBPACK_LOADER = {
+    "DEFAULT": {
+        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "webpack-stats.json"),
+        "BUNDLE_DIR_NAME": "dist/",  # must end with slash
+    },
+}
