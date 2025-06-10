@@ -57,7 +57,14 @@ EMAIL_USE_TLS = False
 
 SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
 
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
+WEBPACK_LOADER = {
+    "DEFAULT": {
+        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "webpack-stats.json"),
+        "BUNDLE_DIR_NAME": "dist/",  # must end with slash
+    },
+}
 # Logging
 
 LOGGING = {
