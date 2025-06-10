@@ -1,0 +1,9 @@
+{% extends "recordtransfer/base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}
+    {% trans "Create Account" %}
+{% endblock title %}
+{% block content %}
+    {% include "recordtransfer/signup_form.html" %}
+{% endblock content %}
