@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
+import bagit
+from caais.models import Metadata
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
@@ -19,6 +21,7 @@ from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
+    Submission,
     TempUploadedFile,
     UploadSession,
     User,
@@ -1003,6 +1006,284 @@ class TestTempUploadedFile(TestPermUploadedFile):
         self.assertFalse(self.uploaded_file.exists)
         perm_uploaded_file = PermUploadedFile.objects.get(session=self.session, name="test.pdf")
         self.assertTrue(perm_uploaded_file.exists)
+
+
+class TestSubmission(TestCase):
+    """Tests for the Submission model."""
+
+    HELLO_FILE_MD5 = "5a8dd3ad0756a93ded72b823b19dd877"
+    WORLD_FILE_MD5 = "08cf82251c975a5e9734699fadf5e9c0"
+
+    def setUp(self) -> None:
+        """Set up test."""
+        self.user = User.objects.create(username="testuser", password="password")
+
+        self.upload_session = UploadSession.new_session()
+        self.upload_session.status = UploadSession.SessionStatus.STORED
+        self.upload_session.save()
+
+        self.test_perm_file_unexpected_1 = get_mock_perm_uploaded_file(
+            "test.pdf", size=1024, session=self.upload_session
+        )
+
+        self.test_perm_file_unexpected_2 = get_mock_perm_uploaded_file(
+            "README.md", size=512, session=self.upload_session
+        )
+
+        self.test_perm_file_expected_1 = get_mock_perm_uploaded_file(
+            "hello.txt", size=7, session=self.upload_session
+        )
+
+        self.test_perm_file_expected_2 = get_mock_perm_uploaded_file(
+            "world.txt", size=7, session=self.upload_session
+        )
+
+        self.metadata = Metadata.objects.create(accession_title="My Test Title")
+
+        self.submission = Submission(
+            user=self.user,
+            metadata=self.metadata,
+            uuid="2a7262f5-07a4-49a3-a351-dc1269d7822b",
+            upload_session=self.upload_session,
+            bag_name="the-bag",
+        )
+
+        bag_folder = Path(settings.BAG_STORAGE_FOLDER)
+        if not bag_folder.exists():
+            bag_folder.mkdir()
+
+    def tearDown(self) -> None:
+        """Remove any temp files created during test."""
+        for item in Path(settings.BAG_STORAGE_FOLDER).iterdir():
+            if item.is_file():
+                item.unlink()
+            else:
+                shutil.rmtree(item)
+
+    def _create_new_files_OK(self, loc: str) -> tuple[list[str], list[str]]:
+        """Create hello.txt and world.txt."""
+        with open(Path(loc) / "hello.txt", "w") as fp:
+            fp.write("hello!")
+        with open(Path(loc) / "world.txt", "w") as fp:
+            fp.write("world!")
+        return (["hello.txt", "world.txt"], [])
+
+    def _create_new_files_MISSING(self, loc: str) -> tuple[list[str], list[str]]:
+        """Create hello.txt, but world.txt is missing."""
+        with open(Path(loc) / "hello.txt", "w") as fp:
+            fp.write("hello!")
+        return (["hello.txt"], ["world.txt"])
+
+    def test_create_bag_exception_if_no_metadata(self) -> None:
+        """Assert that a ValueError is raised if there's no Metadata."""
+        self.improper_submission = Submission(
+            user=self.user,
+            upload_session=self.upload_session,
+        )
+
+        with self.assertRaises(ValueError):
+            self.improper_submission.make_bag(["md5"])
+
+    def test_create_bag_exception_if_no_upload(self) -> None:
+        """Assert that a ValueError is raised if there's no UploadSession."""
+        self.improper_submission = Submission(
+            user=self.user,
+            metadata=self.metadata,
+        )
+
+        with self.assertRaises(ValueError):
+            self.improper_submission.make_bag(["md5"])
+
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("recordtransfer.models.Submission.remove_bag")
+    def test_create_bag_exception_if_missing_file(
+        self, remove_bag_mock: MagicMock, copy_uploads_mock: MagicMock
+    ) -> None:
+        """Test that an exception is thrown if there are missing files."""
+        copy_uploads_mock.side_effect = self._create_new_files_MISSING
+
+        with self.assertRaises(FileNotFoundError):
+            self.submission.make_bag(["md5"])
+
+        # Check that the Bag is removed after an error
+        remove_bag_mock.assert_called_once()
+
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("recordtransfer.models.Submission.remove_bag")
+    @patch("bagit.Bag.is_valid")
+    def test_create_new_exception_if_bag_invalid(
+        self, bag_valid_mock: MagicMock, remove_bag_mock: MagicMock, copy_uploads_mock: MagicMock
+    ) -> None:
+        """Test creating a new Bag that ends up being invalid."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+        bag_valid_mock.return_value = False
+
+        with self.assertRaises(bagit.BagValidationError):
+            self.submission.make_bag(["md5"])
+
+        # Check that the Bag is removed after an error
+        remove_bag_mock.assert_called_once()
+
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    def test_create_new_bag(self, copy_uploads_mock: MagicMock) -> None:
+        """Test creating a new Bag when one does not exist."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        self.submission.make_bag(["md5"])
+
+        copy_uploads_mock.assert_called_once_with(str(self.submission.location))
+
+        self.assertTrue(self.submission.location.exists())
+        self.assertTrue((self.submission.location / "data").exists())
+        self.assertTrue((self.submission.location / "data" / "hello.txt").exists())
+        self.assertTrue((self.submission.location / "data" / "world.txt").exists())
+        self.assertTrue((self.submission.location / "manifest-md5.txt").exists())
+        # Read all non-empty lines in manifest file
+        manifest_lines = list(
+            filter(
+                None, Path(self.submission.location / "manifest-md5.txt").read_text().split("\n")
+            )
+        )
+        self.assertEqual(len(manifest_lines), 2)
+        self.assertIn(f"{self.HELLO_FILE_MD5}  data/hello.txt", manifest_lines)
+        self.assertIn(f"{self.WORLD_FILE_MD5}  data/world.txt", manifest_lines)
+
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    def test_create_new_bag_multiple_algorithms(self, copy_uploads_mock: MagicMock) -> None:
+        """Test creating a new Bag with multiple checksum algorithms."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        self.submission.make_bag(["md5", "sha1", "sha256"])
+
+        self.assertTrue(self.submission.location.exists())
+        self.assertTrue((self.submission.location / "manifest-md5.txt").exists())
+        self.assertTrue((self.submission.location / "manifest-sha1.txt").exists())
+        self.assertTrue((self.submission.location / "manifest-sha256.txt").exists())
+
+    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    def test_update_existing_bag(
+        self, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
+    ) -> None:
+        """Test the case where the permanent files match what's in the bag."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        perm_upload_mock.return_value = [
+            self.test_perm_file_expected_1,
+            self.test_perm_file_expected_2,
+        ]
+
+        # Make a bag first
+        self.submission.make_bag(["md5"])
+
+        # Check the first title
+        self.assertIn(
+            "accessionTitle: My Test Title",
+            (self.submission.location / "bag-info.txt").read_text(),
+        )
+
+        # Store the modification time of the hello.txt file
+        mod_time_before = (self.submission.location / "data" / "hello.txt").stat().st_mtime
+
+        # Change the accession title (so there's something to update in the bag)
+        self.metadata.accession_title = "New Title"
+        self.metadata.save()
+
+        # Update the bag, and be sure bagit.make_bag is not called
+        with patch("bagit.make_bag") as make_bag_mock:
+            self.submission.make_bag(["md5"])
+            make_bag_mock.assert_not_called()
+
+        # Check that the bag's metadata was updated
+        self.assertIn(
+            "accessionTitle: New Title",
+            (self.submission.location / "bag-info.txt").read_text(),
+        )
+
+        # Check that the modification time of the file was not changed
+        mod_time_after = (self.submission.location / "data" / "hello.txt").stat().st_mtime
+
+        self.assertEqual(mod_time_before, mod_time_after)
+
+    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    def test_update_existing_bag_files_differ(
+        self, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
+    ) -> None:
+        """Test the case where the permanent files do not match what's in the bag."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        # Make a bag first
+        self.submission.make_bag(["md5"])
+
+        # Return two unexpected files
+        perm_upload_mock.return_value = [
+            self.test_perm_file_unexpected_1,
+            self.test_perm_file_unexpected_2,
+        ]
+
+        # Try to re-make the bag. The permanent uploads do not match so the Bag will be re-created
+        # Ensure bagit.make_bag is called again by mocking it this time
+        with patch("bagit.make_bag") as make_bag_mock:
+            self.submission.make_bag(["md5"])
+            make_bag_mock.assert_called_once()
+
+        self.assertEqual(copy_uploads_mock.call_count, 2)
+
+    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("bagit.Bag")
+    def test_update_existing_bag_exception(
+        self, bag_mock: MagicMock, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
+    ) -> None:
+        """Test the case where a BagError is thrown when trying to update the Bag."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        # Make a bag first with MD5 checksums
+        self.submission.make_bag(["md5"])
+
+        # Return two expected files
+        perm_upload_mock.return_value = [
+            self.test_perm_file_expected_1,
+            self.test_perm_file_expected_2,
+        ]
+
+        bag_mock.side_effect = bagit.BagError("Expected bagit.txt does not exist")
+
+        # Try to re-make the bag. There will be a BagError, so the Bag will be re-generated
+        # Ensure bagit.make_bag is called again by mocking it this time
+        with patch("bagit.make_bag") as make_bag_mock:
+            self.submission.make_bag(["md5"])
+            make_bag_mock.assert_called_once()
+
+        self.assertEqual(copy_uploads_mock.call_count, 2)
+
+    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    def test_update_existing_bag_algorithms_differ(
+        self, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
+    ) -> None:
+        """Test the case where different checksums are requested for a Bag."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        # Make a bag first with MD5 checksums
+        self.submission.make_bag(["md5"])
+
+        # Return two expected files
+        perm_upload_mock.return_value = [
+            self.test_perm_file_expected_1,
+            self.test_perm_file_expected_2,
+        ]
+
+        # Try to re-make the bag. The algorithms do not match so the Bag will be re-created
+        # Ensure bagit.make_bag is called again by mocking it this time
+        with patch("bagit.make_bag") as make_bag_mock:
+            self.submission.make_bag(["sha1", "sha256"])
+            make_bag_mock.assert_called_once()
+
+        self.assertEqual(copy_uploads_mock.call_count, 2)
+        self.assertTrue((self.submission.location / "manifest-sha1.txt").exists())
+        self.assertTrue((self.submission.location / "manifest-sha256.txt").exists())
 
 
 class TestInProgressSubmission(TestCase):

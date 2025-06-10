@@ -842,12 +842,25 @@ class Submission(models.Model):
         assert self.upload_session, "This submission has no upload session!"
         assert self.metadata, "This submission has no associated metadata!"
 
-        bag = bagit.Bag(str(self.location))
+        bag = None
+
+        try:
+            bag = bagit.Bag(str(self.location))
+        except bagit.BagError as exc:
+            LOGGER.warning("Encountered BagError for existing location. Error was: '%s'", exc)
+            LOGGER.info("Re-generating Bag due to error")
+            return self._create_new_bag(algorithms, file_perms)
+
+        if set(bag.algorithms) != set(algorithms):
+            LOGGER.info(
+                "Checksum algorithms differ (current=%s, desired=%s), re-generating Bag",
+                ",".join(bag.algorithms),
+                ",".join(algorithms),
+            )
+            return self._create_new_bag(algorithms, file_perms)
 
         payload_file_set = {Path(payload_file).name for payload_file in bag.payload_files()}
-        perm_file_set = set(
-            self.upload_session.permuploadedfile_set.all().values_list("name", flat=True)
-        )
+        perm_file_set = {file.name for file in self.upload_session.get_permanent_uploads()}
 
         files_not_in_payload = perm_file_set - payload_file_set
         files_not_in_uploads = payload_file_set - perm_file_set
@@ -866,7 +879,7 @@ class Submission(models.Model):
             LOGGER.warning("Re-generating Bag due to file count mismatch")
             return self._create_new_bag(algorithms, file_perms)
 
-        # Update metadata since no files changed, but the metadata model might have
+        # Update metadata since no files or algorithms changed, but the metadata model might have
         bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
         bag.info.update(bagit_info)
         bag.save()
