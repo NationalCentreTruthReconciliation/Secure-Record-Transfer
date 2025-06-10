@@ -717,15 +717,12 @@ class Submission(models.Model):
 
     objects = SubmissionQuerySet.as_manager()
 
-    def generate_bag_name(self) -> None:
-        """Generate a name suitable for a submission bag, and set self.bag_name to that name.
+    def generate_bag_name(self) -> str:
+        """Generate a name suitable for a submission bag.
 
         Raises:
             ValueError: If there is no metadata or no user associated with this submission.
         """
-        if self.bag_name:
-            return
-
         if not self.metadata:
             raise ValueError(
                 "There is no metadata associated with this submission, cannot generate a bag name"
@@ -808,26 +805,85 @@ class Submission(models.Model):
             algorithms (Iterable[str]): The checksum algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
         """
-        if not self.upload_session:
-            raise ValueError("This submission has no associated upload session")
-
         if not self.metadata:
-            raise ValueError("This submission has no associated metadata")
-
-        if not os.path.exists(self.user_folder) or not os.path.isdir(self.user_folder):
-            os.mkdir(self.user_folder)
-            LOGGER.info('Created new user folder at "%s"', self.user_folder)
-
-        if os.path.exists(self.location):
-            LOGGER.warning('A bag already exists at "%s"', self.location)
-            raise FileExistsError(
-                f"Could not create a Bag because one already exists at: {self.location}"
+            raise ValueError(
+                "This submission has no associated metadata, this is required to make a bag"
+            )
+        if not self.upload_session:
+            raise ValueError(
+                "This submission has no associated upload session, this is required to make a bag"
             )
 
-        os.mkdir(self.location)
-        LOGGER.info('Created new bag folder at "%s"', self.user_folder)
+        if os.path.exists(self.location) and os.path.exists(self.location / "data"):
+            LOGGER.info('Bag already exists. Updating it in-place at "%s"', self.location)
+            bag = self._update_existing_bag(algorithms, file_perms)
+        else:
+            LOGGER.info('Bag does not exist, creating a new one at "%s"', self.location)
+            bag = self._create_new_bag(algorithms, file_perms)
 
-        copied, missing = self.upload_session.copy_session_uploads(self.location)
+        LOGGER.info('Validating the bag at "%s"', self.location)
+        valid = bag.is_valid()
+
+        if not valid:
+            LOGGER.error("Bag is INVALID!")
+            LOGGER.info('Removing bag at "%s" since it\'s invalid', self.location)
+            self.remove_bag()
+            raise bagit.BagValidationError("Bag was invalid!")
+
+        LOGGER.info("Bag is VALID")
+
+    def _update_existing_bag(
+        self, algorithms: Iterable[str], file_perms: str = "644"
+    ) -> bagit.Bag:
+        """Update the Bag if it exists.
+
+        If there are any files missing or any extra files, the Bag is re-generated.
+        """
+        assert self.upload_session, "This submission has no upload session!"
+        assert self.metadata, "This submission has no associated metadata!"
+
+        bag = bagit.Bag(str(self.location))
+
+        payload_file_set = {Path(payload_file).name for payload_file in bag.payload_files()}
+        perm_file_set = set(
+            self.upload_session.permuploadedfile_set.all().values_list("name", flat=True)
+        )
+
+        files_not_in_payload = perm_file_set - payload_file_set
+        files_not_in_uploads = payload_file_set - perm_file_set
+
+        if files_not_in_uploads or files_not_in_payload:
+            if files_not_in_uploads:
+                LOGGER.warning(
+                    "Found %d extra file(s) in Bag not in the Upload session!",
+                    len(files_not_in_uploads),
+                )
+            if files_not_in_payload:
+                LOGGER.warning(
+                    "Found %d extra file(s) in Upload session not in the Bag!",
+                    len(files_not_in_payload),
+                )
+            LOGGER.warning("Re-generating Bag due to file count mismatch")
+            return self._create_new_bag(algorithms, file_perms)
+
+        # Update metadata since no files changed, but the metadata model might have
+        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
+        bag.info.update(bagit_info)
+        bag.save()
+
+        return bag
+
+    def _create_new_bag(self, algorithms: Iterable[str], file_perms: str = "644") -> bagit.Bag:
+        """Create a new Bag if it does not exist."""
+        assert self.upload_session, "This submission has no upload session!"
+        assert self.metadata, "This submission has no associated metadata!"
+
+        os.makedirs(self.location, exist_ok=True)
+
+        # Clear any items in the location first
+        self.remove_bag_contents()
+
+        copied, missing = self.upload_session.copy_session_uploads(str(self.location))
 
         if missing:
             LOGGER.error("One or more uploaded files is missing!")
@@ -839,7 +895,7 @@ class Submission(models.Model):
         LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
 
         bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
-        bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
+        bag = bagit.make_bag(str(self.location), bagit_info, checksums=algorithms)
 
         LOGGER.info("Setting file mode for bag payload files to %s", file_perms)
         perms = int(file_perms, 8)
@@ -847,16 +903,7 @@ class Submission(models.Model):
             payload_file_path = os.path.join(self.location, payload_file)
             os.chmod(payload_file_path, perms)
 
-        LOGGER.info('Validating the bag created at "%s"', self.location)
-        valid = bag.is_valid()
-
-        if not valid:
-            LOGGER.error("Bag is INVALID!")
-            LOGGER.info('Removing bag at "%s" since it\'s invalid', self.location)
-            self.remove_bag()
-            raise bagit.BagValidationError("Bag was invalid!")
-
-        LOGGER.info("Bag is VALID")
+        return bag
 
     def remove_bag(self) -> None:
         """Remove everything in the Bag, including the Bag folder itself."""

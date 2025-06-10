@@ -1,6 +1,4 @@
 import logging
-import os.path
-import shutil
 import tempfile
 import zipfile
 
@@ -47,12 +45,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
     try:
         LOGGER.info("Creating zipped bag from %s", submission.location)
 
-        if not os.path.exists(submission.location):
-            LOGGER.info("No bag exists at %s, creating it now.", str(submission.location))
-            submission.make_bag(algorithms=settings.BAG_CHECKSUMS)
-
-        if not os.path.exists(settings.TEMP_STORAGE_FOLDER):
-            os.makedirs(settings.TEMP_STORAGE_FOLDER, exist_ok=True)
+        submission.make_bag(algorithms=settings.BAG_CHECKSUMS)
 
         with tempfile.TemporaryFile(
             suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
@@ -62,7 +55,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
             )
             zip_directory(
-                submission.location,
+                str(submission.location),
                 zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
             )
             LOGGER.info("Zipped directory successfully")
@@ -84,10 +77,6 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         LOGGER.error("Creating zipped bag failed due to exception!", exc_info=exc)
 
     finally:
-        if os.path.exists(submission.location):
-            LOGGER.info("Removing bag from disk after zip generation.")
-            submission.remove_bag()
-
         LOGGER.removeHandler(job_handler)
         job_handler.close()
 
