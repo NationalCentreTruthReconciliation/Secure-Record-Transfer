@@ -37,7 +37,6 @@ function setupFormValidation(buttonID) {
     }
 
     checkFormValidity();
-    console.log("Form validation initialized. Required fields: %d", requiredFields.length);
 
     requiredFields.forEach(field => {
         field.addEventListener("input", checkFormValidity);
