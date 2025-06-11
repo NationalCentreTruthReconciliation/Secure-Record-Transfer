@@ -77,19 +77,18 @@ class SiteSetting(models.Model):
 
            from django.db import migrations
 
+
            def add_new_setting(apps, schema_editor):
-               SiteSetting = apps.get_model('recordtransfer', 'SiteSetting')
+               SiteSetting = apps.get_model("recordtransfer", "SiteSetting")
                SiteSetting.objects.get_or_create(
                    key="NEW_SETTING_NAME",
-                   defaults={
-                       "value": "Default string value",
-                       "value_type": "str"
-                   }
+                   defaults={"value": "Default string value", "value_type": "str"},
                )
+
 
            class Migration(migrations.Migration):
                dependencies = [
-                   ('recordtransfer', 'XXXX_previous_migration'),
+                   ("recordtransfer", "XXXX_previous_migration"),
                ]
 
                operations = [
@@ -101,7 +100,7 @@ class SiteSetting(models.Model):
        - For ``value_type`` "int": the ``value`` must be a valid string representation
          of an integer (e.g., "42", "-1", "0")
        - For ``value_type`` "str": the ``value`` can be any string
-       - The ``change_date`` and ``changed_by`` fields are auto-generated
+       - ``change_date`` is auto-generated and ``changed_by`` does not need to be set
 
     Removing a Setting
     ------------------
@@ -116,13 +115,15 @@ class SiteSetting(models.Model):
 
            from django.db import migrations
 
+
            def remove_old_setting(apps, schema_editor):
-               SiteSetting = apps.get_model('recordtransfer', 'SiteSetting')
+               SiteSetting = apps.get_model("recordtransfer", "SiteSetting")
                SiteSetting.objects.filter(key="OLD_SETTING_NAME").delete()
+
 
            class Migration(migrations.Migration):
                dependencies = [
-                   ('recordtransfer', 'XXXX_previous_migration'),
+                   ("recordtransfer", "XXXX_previous_migration"),
                ]
 
                operations = [
@@ -302,14 +303,21 @@ class SiteSetting(models.Model):
 
 
 @receiver(post_save, sender=SiteSetting)
-def update_cache_post_save(sender: SiteSetting, instance: SiteSetting, **kwargs) -> None:
-    """Update cached value when setting is saved."""
+def update_cache_post_save(
+    sender: SiteSetting, instance: SiteSetting, created: bool, **kwargs
+) -> None:
+    """Update cached value when setting is saved, but not on creation."""
+    if created:
+        return
+
     value = instance.value
     if instance.value_type == SiteSetting.SettingType.INT:
         try:
             value = int(instance.value)
-        except ValueError:
-            value = instance.value
+        except ValueError as exc:
+            raise ValidationError(
+                f"Value for setting {instance.key} must be an integer, but got '{instance.value}'"
+            ) from exc
     instance.set_cache(value)
 
 
