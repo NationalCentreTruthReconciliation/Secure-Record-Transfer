@@ -110,3 +110,7 @@ WEBPACK_LOADER = {
         "BUNDLE_DIR_NAME": "dist/",  # must end with slash
     },
 }
+# Add context processor for debug flag
+TEMPLATES[0]["OPTIONS"]["context_processors"].append(
+    "recordtransfer.context_processors.debug_mode"
+)

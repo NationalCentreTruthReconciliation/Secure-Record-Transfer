@@ -22,3 +22,10 @@ def constants_context(request: HttpRequest) -> dict[str, str]:
         **constants.HtmlIds().asdict(),
         **constants.QueryParameters().asdict(),
     }
+
+
+def debug_mode(request) -> dict[str, bool]:
+    """Add debug flag to all template contexts."""
+    from django.conf import settings
+
+    return {"debug": settings.DEBUG}

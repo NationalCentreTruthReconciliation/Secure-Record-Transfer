@@ -1,6 +1,6 @@
 {% load static %}
 {% load i18n %}
-{% with debug=request.META.settings.DEBUG %}{% endwith %}
+{% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
 <html lang="en" data-theme={% block theme %}nctr{% endblock theme %}>
     <head hx-head="merge">
@@ -9,7 +9,6 @@
         <!-- JS -->
         {% block javascript %}
             {% if debug %}
-                {% load render_bundle from webpack_loader %}
                 {% render_bundle 'main' 'js' %}
             {% else %}
                 <script src="{% static 'js/main.js' %}"></script>
@@ -28,7 +27,12 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {# CSS #}
         {% block stylesheet %}
-            {% render_bundle 'main' 'css' %}
+            {% if debug %}
+                {% render_bundle 'main' 'css' %}
+            {% else %}
+                <script src="{% static 'css/main.css' %}"></script>
+                <script src="{% static 'css/vendors.css' %}"></script>
+            {% endif %}
         {% endblock stylesheet %}
         {# Favicon #}
         <link rel="shortcut icon"
