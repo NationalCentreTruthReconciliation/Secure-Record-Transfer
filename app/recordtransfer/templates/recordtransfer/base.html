@@ -6,7 +6,10 @@
         {% render_bundle 'main' 'js' %}
         {% render_bundle 'main' 'css' %}
     {% else %}
-        {% load render_bundle from webpack_loader %}
+        <script src="{% static 'js/main.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <!-- Add other bundles as needed -->
+        <script src="{% static 'js/vendors.js' %}"></script>
     {% endif %}
 {% endwith %}
 {% load render_bundle from webpack_loader %}
