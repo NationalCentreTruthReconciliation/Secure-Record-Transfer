@@ -4,24 +4,24 @@
         "images": [],
         "main": [
             "css/vendors.css",
-            "js/vendors.dea0b556.js",
+            "js/vendors.js",
             "css/main.css",
-            "js/main.e5f514f8.js"
+            "js/main.js"
         ],
         "submission_detail": [
             "css/submission_detail.css",
-            "js/submission_detail.b28d7620.js"
+            "js/submission_detail.js"
         ],
         "admin_metadata": [
             "css/admin_metadata.css",
-            "js/admin_metadata.ece7c566.js"
+            "js/admin_metadata.js"
         ],
         "admin_uploadedfile": [
-            "js/admin_uploadedfile.2b732f5b.js"
+            "js/admin_uploadedfile.js"
         ],
         "admin_job": [
             "css/admin_job.css",
-            "js/admin_job.41067abb.js"
+            "js/admin_job.js"
         ]
     },
     "publicPath": "/static/",
@@ -34,45 +34,45 @@
             "name": "css/main.css",
             "publicPath": "/static/css/main.css"
         },
-        "js/main.e5f514f8.js": {
-            "name": "js/main.e5f514f8.js",
-            "publicPath": "/static/js/main.e5f514f8.js"
+        "js/main.js": {
+            "name": "js/main.js",
+            "publicPath": "/static/js/main.js"
         },
         "css/submission_detail.css": {
             "name": "css/submission_detail.css",
             "publicPath": "/static/css/submission_detail.css"
         },
-        "js/submission_detail.b28d7620.js": {
-            "name": "js/submission_detail.b28d7620.js",
-            "publicPath": "/static/js/submission_detail.b28d7620.js"
+        "js/submission_detail.js": {
+            "name": "js/submission_detail.js",
+            "publicPath": "/static/js/submission_detail.js"
         },
         "css/admin_metadata.css": {
             "name": "css/admin_metadata.css",
             "publicPath": "/static/css/admin_metadata.css"
         },
-        "js/admin_metadata.ece7c566.js": {
-            "name": "js/admin_metadata.ece7c566.js",
-            "publicPath": "/static/js/admin_metadata.ece7c566.js"
+        "js/admin_metadata.js": {
+            "name": "js/admin_metadata.js",
+            "publicPath": "/static/js/admin_metadata.js"
         },
-        "js/admin_uploadedfile.2b732f5b.js": {
-            "name": "js/admin_uploadedfile.2b732f5b.js",
-            "publicPath": "/static/js/admin_uploadedfile.2b732f5b.js"
+        "js/admin_uploadedfile.js": {
+            "name": "js/admin_uploadedfile.js",
+            "publicPath": "/static/js/admin_uploadedfile.js"
         },
         "css/admin_job.css": {
             "name": "css/admin_job.css",
             "publicPath": "/static/css/admin_job.css"
         },
-        "js/admin_job.41067abb.js": {
-            "name": "js/admin_job.41067abb.js",
-            "publicPath": "/static/js/admin_job.41067abb.js"
+        "js/admin_job.js": {
+            "name": "js/admin_job.js",
+            "publicPath": "/static/js/admin_job.js"
         },
         "css/vendors.css": {
             "name": "css/vendors.css",
             "publicPath": "/static/css/vendors.css"
         },
-        "js/vendors.dea0b556.js": {
-            "name": "js/vendors.dea0b556.js",
-            "publicPath": "/static/js/vendors.dea0b556.js"
+        "js/vendors.js": {
+            "name": "js/vendors.js",
+            "publicPath": "/static/js/vendors.js"
         },
         "close_menu_64x64px.webp": {
             "name": "close_menu_64x64px.webp",
@@ -93,6 +93,10 @@
         "PHABNE_00281.webp": {
             "name": "PHABNE_00281.webp",
             "publicPath": "/static/PHABNE_00281.webp"
+        },
+        "js/vendors.js.LICENSE.txt": {
+            "name": "js/vendors.js.LICENSE.txt",
+            "publicPath": "/static/js/vendors.js.LICENSE.txt"
         }
     }
 }
