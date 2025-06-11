@@ -98,9 +98,14 @@ module.exports = {
         ]
     },
     output: {
-        path: path.join(__dirname, "dist"), // Match your Django STATICFILES_DIRS
-        filename: "js/[name].[contenthash:8].js", // Add content hashing
-        chunkFilename: "js/[name].[contenthash:8].chunk.js",
+        path: path.join(__dirname, "dist"),
+        // Conditional filenames based on mode
+        filename: process.env.WEBPACK_MODE === "production"
+            ?  "js/[name].js"
+            : "js/[name].[contenthash:8].js",
+        chunkFilename: process.env.WEBPACK_MODE === "production"
+            ? "js/[name].[contenthash:8].chunk.js"
+            : "js/[name].chunk.js",
         publicPath: "/static/",
     },
     module: {
@@ -120,7 +125,9 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: "css/app-[contenthash].css",
+            filename: process.env.WEBPACK_MODE !== "production"
+                ? "css/app.css"
+                :  "css/app-[contenthash].css",
         }),
         new WebPConverterPlugin({
             quality: 80
