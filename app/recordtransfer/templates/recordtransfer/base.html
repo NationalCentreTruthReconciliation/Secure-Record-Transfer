@@ -12,12 +12,15 @@
         <script src="{% static 'js/vendors.js' %}"></script>
     {% endif %}
 {% endwith %}
-{% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
 <html lang="en" data-theme={% block theme %}nctr{% endblock theme %}>
     <head hx-head="merge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Secure Record Transfer Application">
+        <!-- JS -->
+        {% block javascript %}
+            {% render_bundle 'main' 'js' %}
+        {% endblock javascript %}
         {# Fonts #}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +32,9 @@
         <link rel="stylesheet"
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {# CSS #}
+        {% block stylesheet %}
+            {% render_bundle 'main' 'css' %}
+        {% endblock stylesheet %}
         {# Favicon #}
         <link rel="shortcut icon"
               type="image/png"
