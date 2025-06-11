@@ -119,8 +119,8 @@ module.exports = {
             ?  "js/[name].js"
             : "js/[name].[contenthash:8].js",
         chunkFilename: process.env.WEBPACK_MODE === "production"
-            ? "js/[name].[contenthash:8].chunk.js"
-            : "js/[name].chunk.js",
+            ?  "js/[name].chunk.js"
+            : "js/[name].[contenthash:8].chunk.js",
         publicPath: "/static/",
     },
     module: {
