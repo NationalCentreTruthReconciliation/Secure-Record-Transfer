@@ -126,8 +126,8 @@ module.exports = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: process.env.WEBPACK_MODE !== "production"
-                ? "css/app.css"
-                :  "css/app-[contenthash].css",
+                ? "css/[name].css"
+                : "css/app-[contenthash].css",
         }),
         new WebPConverterPlugin({
             quality: 80
