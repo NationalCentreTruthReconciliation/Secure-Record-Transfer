@@ -11,15 +11,23 @@ from recordtransfer.models import SiteSetting, User
 class TestSiteSettingModelForm(TestCase):
     """Tests for the SiteSettingModelForm."""
 
-    # Create TestKey by combining existing SiteSetting.Key values with test values
-    TestKey = Enum(
-        "TestKey",
-        {
-            **{key.name: key.value for key in SiteSetting.Key},
-            "TEST_STRING_SETTING": "TEST_STRING_SETTING",
-            "TEST_INT_SETTING": "TEST_INT_SETTING",
-        },
-    )
+    # Create TestKey by combining necessary key-value pairs from SiteSetting.Key enum with custom
+    # key-value pairs for testing
+    class TestKey(Enum):
+        """Test-specific keys for SiteSetting."""
+
+        # Copy necessary keys from SiteSetting.Key
+        PAGINATE_BY = SiteSetting.Key.PAGINATE_BY.value
+        ARCHIVIST_EMAIL = SiteSetting.Key.ARCHIVIST_EMAIL.value
+
+        # Add test-specific keys
+        TEST_STRING_SETTING = "TEST_STRING_SETTING"
+        TEST_INT_SETTING = "TEST_INT_SETTING"
+
+        @property
+        def description(self) -> str:
+            """Return a description for the test key."""
+            return "Test description"
 
     def setUp(self) -> None:
         """Set up test fixtures."""

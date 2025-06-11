@@ -79,6 +79,15 @@ class SiteSettingModelForm(RecordTransferModelForm):
 
     disabled_fields: ClassVar[list] = []
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.key:
+            try:
+                key_enum = SiteSetting.Key(self.instance.key)
+                self.fields["value"].help_text = key_enum.description
+            except ValueError:
+                self.fields["value"].help_text = "No description available for this setting."
+
     def clean_value(self) -> Any:
         """Validate the value field based on the selected value_type."""
         value = self.cleaned_data.get("value")

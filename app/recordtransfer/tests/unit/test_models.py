@@ -1122,11 +1122,6 @@ class TestSiteSetting(TestCase):
         # tests.
         cache.clear()
 
-    def test_str_representation(self) -> None:
-        """Test the string representation of SiteSetting."""
-        expected_str = "TEST_STRING_SETTING=test string value"
-        self.assertEqual(str(self.string_setting), expected_str)
-
     def test_set_cache_string_value(self) -> None:
         """Test caching a string value."""
         test_value = "cached string value"

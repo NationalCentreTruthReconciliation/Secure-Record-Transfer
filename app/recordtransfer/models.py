@@ -444,9 +444,13 @@ class SiteSetting(models.Model):
         obj.set_cache(return_value)
         return return_value
 
-    def __str__(self):
-        """Return a string representing this setting."""
-        return f"{self.key}={self.value}"
+    def __str__(self) -> str:
+        """Return a human-readable representation of the setting."""
+        try:
+            key_enum = self.Key(self.key)
+            return f"{key_enum.name.replace('_', ' ').title()}"
+        except ValueError:
+            return f"Setting: {self.key}"
 
 
 @receiver(post_save, sender=SiteSetting)
