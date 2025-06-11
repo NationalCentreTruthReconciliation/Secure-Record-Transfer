@@ -293,7 +293,7 @@ def add_submission_event(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is guaranteed to have a value
-    submission_type_name = SiteSetting.get_value(
+    submission_type_name = SiteSetting.get_value_str(
         SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
     )
 
@@ -306,8 +306,8 @@ def add_submission_event(metadata: Metadata):
             submission_type_name,
         )
 
-    event_agent = SiteSetting.get_value(SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT)
-    event_note = SiteSetting.get_value(SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE)
+    event_agent = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT)
+    event_note = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE)
 
     Event.objects.create(
         metadata=metadata,
@@ -330,7 +330,7 @@ def add_date_of_creation(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_CREATION_TYPE is guaranteed to have a value
-    creation_type_name = SiteSetting.get_value(SiteSetting.Key.CAAIS_DEFAULT_CREATION_TYPE)
+    creation_type_name = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_CREATION_TYPE)
 
     creation_type, created = CreationOrRevisionType.objects.get_or_create(name=creation_type_name)
 
@@ -341,8 +341,8 @@ def add_date_of_creation(metadata: Metadata):
             creation_type_name,
         )
 
-    creation_agent = SiteSetting.get_value(SiteSetting.Key.CAAIS_DEFAULT_CREATION_AGENT)
-    creation_note = SiteSetting.get_value(SiteSetting.Key.CAAIS_DEFAULT_CREATION_NOTE)
+    creation_agent = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_CREATION_AGENT)
+    creation_note = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_CREATION_NOTE)
 
     DateOfCreationOrRevision.objects.create(
         metadata=metadata,
@@ -427,7 +427,7 @@ def str_or_default(form_data: dict, field_name: str, default: str = "") -> str:
     setting_key = get_setting_key(field_name)
     if setting_key:
         try:
-            setting_value = SiteSetting.get_value(setting_key)
+            setting_value = SiteSetting.get_value_str(setting_key)
         except SiteSetting.DoesNotExist:
             setting_value = ""
     return form_data.get(field_name, "") or setting_value or default

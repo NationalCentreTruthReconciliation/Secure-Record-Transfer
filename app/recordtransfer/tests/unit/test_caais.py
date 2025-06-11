@@ -37,9 +37,9 @@ class TestFormToMetadata(TestCase):
         super().setUpClass()
         logging.disable(logging.CRITICAL)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_repository_no_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_repository_no_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_REPOSITORY: ""
         }.get(key, "")
 
@@ -49,9 +49,9 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.repository, "")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_repository_with_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_repository_with_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_REPOSITORY: "REPOSITORY A"
         }.get(key, "")
 
@@ -61,9 +61,9 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.repository, "REPOSITORY A")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_accession_title_no_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_accession_title_no_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ACCESSION_TITLE: ""
         }.get(key, "")
 
@@ -75,9 +75,9 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.accession_title, "My Title")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_accession_title_with_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_accession_title_with_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ACCESSION_TITLE: "TITLE A"
         }.get(key, "")
 
@@ -87,11 +87,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.accession_title, "TITLE A")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_accession_title_with_default_prefer_form(
-        self, mock_get_value: MagicMock, *patches
+        self, mock_get_value_str: MagicMock, *patches
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ACCESSION_TITLE: "TITLE A"
         }.get(key, "")
 
@@ -103,9 +103,9 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.accession_title, "My Title")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_acquisition_method_no_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_acquisition_method_no_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ACQUISITION_METHOD: ""
         }.get(key, "")
 
@@ -115,9 +115,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertFalse(metadata.acquisition_method)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_acquisition_method_with_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_acquisition_method_with_default(
+        self, mock_get_value_str: MagicMock, *patches
+    ):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ACQUISITION_METHOD: "Digital Transfer"
         }.get(key, "")
 
@@ -128,11 +130,11 @@ class TestFormToMetadata(TestCase):
         self.assertTrue(metadata.acquisition_method)
         self.assertEqual(metadata.acquisition_method.name, "Digital Transfer")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_acquisition_method_with_default_already_created(
-        self, mock_get_value: MagicMock, *patches
+        self, mock_get_value_str: MagicMock, *patches
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ACQUISITION_METHOD: "Digital Transfer 2"
         }.get(key, "")
 
@@ -146,11 +148,11 @@ class TestFormToMetadata(TestCase):
         self.assertTrue(metadata.acquisition_method)
         self.assertEqual(metadata.acquisition_method.name, "Digital Transfer 2")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_status_no_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {SiteSetting.Key.CAAIS_DEFAULT_STATUS: ""}.get(
-            key, ""
-        )
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_status_no_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
+            SiteSetting.Key.CAAIS_DEFAULT_STATUS: ""
+        }.get(key, "")
 
         form_data = {}
 
@@ -158,9 +160,9 @@ class TestFormToMetadata(TestCase):
 
         self.assertFalse(metadata.status)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_status_with_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_status_with_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_STATUS: "Not Reviewed"
         }.get(key, "")
 
@@ -171,11 +173,11 @@ class TestFormToMetadata(TestCase):
         self.assertTrue(metadata.status)
         self.assertEqual(metadata.status.name, "Not Reviewed")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_status_with_default_already_created(
-        self, mock_get_value: MagicMock, *patches
+        self, mock_get_value_str: MagicMock, *patches
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_STATUS: "Transferred, Not Reviewed"
         }.get(key, "")
 
@@ -189,9 +191,9 @@ class TestFormToMetadata(TestCase):
         self.assertTrue(metadata.status)
         self.assertEqual(metadata.status.name, "Transferred, Not Reviewed")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_date_of_materials_no_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_date_of_materials_no_default(self, mock_get_value_str: MagicMock, *patches):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_DATE_OF_MATERIALS: ""
         }.get(key, "")
 
@@ -203,9 +205,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.date_of_materials, "2010")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_date_of_materials_with_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_date_of_materials_with_default(
+        self, mock_get_value_str: MagicMock, *patches
+    ):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_DATE_OF_MATERIALS: "2016-01-01 - 2018-12-31"
         }.get(key, "")
 
@@ -215,11 +219,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.date_of_materials, "2016-01-01 - 2018-12-31")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_date_of_materials_with_default_prefer_form(
-        self, mock_get_value: MagicMock, *patches
+        self, mock_get_value_str: MagicMock, *patches
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_DATE_OF_MATERIALS: "2018"
         }.get(key, "")
 
@@ -229,9 +233,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.date_of_materials, "2001")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_rules_or_conventions_no_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_rules_or_conventions_no_default(
+        self, mock_get_value_str: MagicMock, *patches
+    ):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_RULES_OR_CONVENTIONS: ""
         }.get(key, "")
 
@@ -241,9 +247,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.rules_or_conventions, "")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_rules_or_conventions_with_default(self, mock_get_value: MagicMock, *patches):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_rules_or_conventions_with_default(
+        self, mock_get_value_str: MagicMock, *patches
+    ):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_RULES_OR_CONVENTIONS: "CAAIS v1.0"
         }.get(key, "")
 
@@ -253,11 +261,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.rules_or_conventions, "CAAIS v1.0")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_language_of_accession_record_no_default(
-        self, mock_get_value: MagicMock, *patches
+        self, mock_get_value_str: MagicMock, *patches
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD: ""
         }.get(key, "")
 
@@ -267,11 +275,11 @@ class TestFormToMetadata(TestCase):
 
         self.assertEqual(metadata.language_of_accession_record, "")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_language_of_accession_record_with_default(
-        self, mock_get_value: MagicMock, *patches
+        self, mock_get_value_str: MagicMock, *patches
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD: "English"
         }.get(key, "")
 
@@ -428,9 +436,9 @@ class TestFormToArchivalUnit(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_archival_unit_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_archival_unit_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ARCHIVAL_UNIT: ""
         }.get(key, "")
 
@@ -438,9 +446,9 @@ class TestFormToArchivalUnit(TestCase):
 
         self.assertEqual(self.metadata.archival_units.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_archival_unit_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_archival_unit_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ARCHIVAL_UNIT: "Archives Unit"
         }.get(key, "")
 
@@ -463,9 +471,9 @@ class TestFormToDispositionAuthority(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_disposition_authority_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_disposition_authority_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_DISPOSITION_AUTHORITY: ""
         }.get(key, "")
 
@@ -473,9 +481,9 @@ class TestFormToDispositionAuthority(TestCase):
 
         self.assertEqual(self.metadata.disposition_authorities.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_disposition_authority_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_disposition_authority_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_DISPOSITION_AUTHORITY: "Disposition Authority"
         }.get(key, "")
 
@@ -503,9 +511,9 @@ class TestFormToSourceOfMaterial(TestCase):
         self.other_source_role, _ = SourceRole.objects.get_or_create(name="Other")
         self.other_source_type, _ = SourceType.objects.get_or_create(name="Other")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_source_of_material_no_data(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_source_of_material_no_data(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY: ""
         }.get(key, "")
 
@@ -515,11 +523,11 @@ class TestFormToSourceOfMaterial(TestCase):
 
         self.assertEqual(self.metadata.source_of_materials.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_source_of_materials_with_default_confidentiality(
-        self, mock_get_value: MagicMock
+        self, mock_get_value_str: MagicMock
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY: "Anonymous"
         }.get(key, "")
 
@@ -533,9 +541,9 @@ class TestFormToSourceOfMaterial(TestCase):
             self.metadata.source_of_materials.first().source_confidentiality.name, "Anonymous"
         )
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_add_source_of_material_no_other_types_chosen(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_add_source_of_material_no_other_types_chosen(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY: ""
         }.get(key, "")
 
@@ -692,9 +700,9 @@ class TestFormToPreliminaryCustodialHistory(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_prelim_custodial_history_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_prelim_custodial_history_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY: ""
         }.get(key, "")
 
@@ -704,9 +712,9 @@ class TestFormToPreliminaryCustodialHistory(TestCase):
 
         self.assertEqual(self.metadata.preliminary_custodial_histories.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_prelim_custodial_history_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_prelim_custodial_history_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY: "No history recorded."
         }.get(key, "")
 
@@ -720,11 +728,11 @@ class TestFormToPreliminaryCustodialHistory(TestCase):
             "No history recorded.",
         )
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_prelim_custodial_history_with_default_prefer_form(
-        self, mock_get_value: MagicMock
+        self, mock_get_value_str: MagicMock
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY: "No history recorded."
         }.get(key, "")
 
@@ -752,9 +760,9 @@ class TestFormToExtentStatment(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_extent_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_extent_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_EXTENT_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE: "",
             SiteSetting.Key.CAAIS_DEFAULT_CONTENT_TYPE: "",
@@ -768,9 +776,9 @@ class TestFormToExtentStatment(TestCase):
 
         self.assertEqual(self.metadata.extent_statements.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_all_defaults(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_all_defaults(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_EXTENT_TYPE: "Extent Received",
             SiteSetting.Key.CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE: "No files transferred.",
             SiteSetting.Key.CAAIS_DEFAULT_CONTENT_TYPE: "Metadata-Only Transfer",
@@ -793,9 +801,9 @@ class TestFormToExtentStatment(TestCase):
         self.assertEqual(extent.carrier_type.name, "Digital Transfer")
         self.assertEqual(extent.extent_note, "File uploads are disabled.")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_extent_from_form_no_defaults(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_extent_from_form_no_defaults(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_EXTENT_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE: "",
             SiteSetting.Key.CAAIS_DEFAULT_CONTENT_TYPE: "",
@@ -817,9 +825,9 @@ class TestFormToExtentStatment(TestCase):
         self.assertFalse(extent.extent_note)
         self.assertFalse(extent.carrier_type)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_extent_with_default_prefer_form(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_extent_with_default_prefer_form(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_EXTENT_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE: "No quantity or unit of measure.",
             SiteSetting.Key.CAAIS_DEFAULT_CONTENT_TYPE: "",
@@ -851,9 +859,9 @@ class TestFormToPreliminaryScopeAndContent(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_prelim_scope_and_content_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_prelim_scope_and_content_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT: ""
         }.get(key, "")
 
@@ -863,9 +871,9 @@ class TestFormToPreliminaryScopeAndContent(TestCase):
 
         self.assertEqual(self.metadata.preliminary_custodial_histories.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_prelim_scope_and_content_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_prelim_scope_and_content_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT: "No scope and content provided."
         }.get(key, "")
 
@@ -879,11 +887,11 @@ class TestFormToPreliminaryScopeAndContent(TestCase):
             "No scope and content provided.",
         )
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_prelim_scope_and_content_with_default_prefer_form(
-        self, mock_get_value: MagicMock
+        self, mock_get_value_str: MagicMock
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT: "No scope and content recorded."
         }.get(key, "")
 
@@ -911,9 +919,9 @@ class TestFormToLanguageOfMaterial(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_language_of_material_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_language_of_material_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL: ""
         }.get(key, "")
 
@@ -923,9 +931,9 @@ class TestFormToLanguageOfMaterial(TestCase):
 
         self.assertEqual(self.metadata.language_of_materials.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_language_of_material_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_language_of_material_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL: "EN"
         }.get(key, "")
 
@@ -936,11 +944,11 @@ class TestFormToLanguageOfMaterial(TestCase):
         self.assertEqual(self.metadata.language_of_materials.count(), 1)
         self.assertEqual(self.metadata.language_of_materials.first().language_of_material, "EN")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_populate_language_of_material_with_default_prefer_form(
-        self, mock_get_value: MagicMock
+        self, mock_get_value_str: MagicMock
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL: "EN"
         }.get(key, "")
 
@@ -967,9 +975,9 @@ class TestFormToStorageLocation(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_storage_location_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_storage_location_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_STORAGE_LOCATION: ""
         }.get(key, "")
 
@@ -977,9 +985,9 @@ class TestFormToStorageLocation(TestCase):
 
         self.assertEqual(self.metadata.storage_locations.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_storage_location_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_storage_location_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_STORAGE_LOCATION: "Preservation System"
         }.get(key, "")
 
@@ -1238,9 +1246,9 @@ class TestFormToPreservationRequirements(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_preservation_requirements_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_preservation_requirements_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: "",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: "",
@@ -1250,9 +1258,9 @@ class TestFormToPreservationRequirements(TestCase):
 
         self.assertEqual(self.metadata.preservation_requirements.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_preservation_requirements_only_type(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_preservation_requirements_only_type(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: "None Required",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: "",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: "",
@@ -1267,9 +1275,9 @@ class TestFormToPreservationRequirements(TestCase):
         self.assertFalse(req.preservation_requirements_value)
         self.assertFalse(req.preservation_requirements_note)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_preservation_requirements_only_value(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_preservation_requirements_only_value(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: "Value Here",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: "",
@@ -1283,9 +1291,9 @@ class TestFormToPreservationRequirements(TestCase):
         self.assertEqual(req.preservation_requirements_value, "Value Here")
         self.assertFalse(req.preservation_requirements_note)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_preservation_requirements_only_note(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_preservation_requirements_only_note(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: "",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: "Note Here",
@@ -1299,9 +1307,9 @@ class TestFormToPreservationRequirements(TestCase):
         self.assertFalse(req.preservation_requirements_value)
         self.assertEqual(req.preservation_requirements_note, "Note Here")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_preservation_requirements_all_defaults(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_preservation_requirements_all_defaults(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: "Type Here",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: "Value Here",
             SiteSetting.Key.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: "Note Here",
@@ -1333,28 +1341,28 @@ class TestFormToAppraisal(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_appraisal_no_default(self, mock_get_value: MagicMock):
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_appraisal_no_default(self, mock_get_value_str: MagicMock):
         # Create a mapping of keys to return values
         return_values = {
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_VALUE: "",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_NOTE: "",
         }
-        mock_get_value.side_effect = lambda key: return_values.get(key, "")
+        mock_get_value_str.side_effect = lambda key: return_values.get(key, "")
         add_related_models({}, self.metadata, Appraisal)
 
         self.assertEqual(self.metadata.appraisals.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_appraisal_only_type(self, mock_get_value: MagicMock):
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_appraisal_only_type(self, mock_get_value_str: MagicMock):
         # Create a mapping of keys to return values
         return_values = {
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_TYPE: "Type Here",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_VALUE: "",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_NOTE: "",
         }
-        mock_get_value.side_effect = lambda key: return_values.get(key, "")
+        mock_get_value_str.side_effect = lambda key: return_values.get(key, "")
 
         add_related_models({}, self.metadata, Appraisal)
 
@@ -1365,9 +1373,9 @@ class TestFormToAppraisal(TestCase):
         self.assertFalse(appraisal.appraisal_value)
         self.assertFalse(appraisal.appraisal_note)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_appraisal_only_value(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_appraisal_only_value(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_VALUE: "Value Here",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_NOTE: "",
@@ -1381,9 +1389,9 @@ class TestFormToAppraisal(TestCase):
         self.assertEqual(appraisal.appraisal_value, "Value Here")
         self.assertFalse(appraisal.appraisal_note)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_appraisal_only_note(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_appraisal_only_note(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_VALUE: "",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_NOTE: "Note Here",
@@ -1397,9 +1405,9 @@ class TestFormToAppraisal(TestCase):
         self.assertFalse(appraisal.appraisal_value)
         self.assertEqual(appraisal.appraisal_note, "Note Here")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_appraisal_all_defaults(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_appraisal_all_defaults(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_TYPE: "Type Here",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_VALUE: "Value Here",
             SiteSetting.Key.CAAIS_DEFAULT_APPRAISAL_NOTE: "Note Here",
@@ -1431,9 +1439,9 @@ class TestFormToAssociatedDocumentation(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_associated_documentation_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_associated_documentation_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: "",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: "",
@@ -1443,9 +1451,9 @@ class TestFormToAssociatedDocumentation(TestCase):
 
         self.assertEqual(self.metadata.associated_documentation.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_associated_documentation_only_type(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_associated_documentation_only_type(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: "Type Here",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: "",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: "",
@@ -1460,9 +1468,9 @@ class TestFormToAssociatedDocumentation(TestCase):
         self.assertFalse(doc.associated_documentation_title)
         self.assertFalse(doc.associated_documentation_note)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_associated_documentation_only_title(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_associated_documentation_only_title(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: "Title Here",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: "",
@@ -1476,9 +1484,9 @@ class TestFormToAssociatedDocumentation(TestCase):
         self.assertEqual(doc.associated_documentation_title, "Title Here")
         self.assertFalse(doc.associated_documentation_note)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_associated_documentation_only_note(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_associated_documentation_only_note(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: "",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: "",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: "Note Here",
@@ -1492,9 +1500,9 @@ class TestFormToAssociatedDocumentation(TestCase):
         self.assertFalse(doc.associated_documentation_title)
         self.assertEqual(doc.associated_documentation_note, "Note Here")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_associated_documentation_all_defaults(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_associated_documentation_all_defaults(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: "Type Here",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: "Title Here",
             SiteSetting.Key.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: "Note Here",
@@ -1526,11 +1534,11 @@ class TestFormToEvent(TestCase):
         "now",
         return_value=datetime(2023, 9, 29, 9, 0, 0, tzinfo=timezone.get_current_timezone()),
     )
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_add_submission_event_only_mandatory_default(
-        self, mock_get_value: MagicMock, timezone_now__patch
+        self, mock_get_value_str: MagicMock, timezone_now__patch
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE: "Submitted",
             SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT: "",
             SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE: "",
@@ -1551,11 +1559,11 @@ class TestFormToEvent(TestCase):
         "now",
         return_value=datetime(2023, 10, 3, 12, 0, 0, tzinfo=timezone.get_current_timezone()),
     )
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_add_submission_event_all_defaults(
-        self, mock_get_value: MagicMock, timezone_now__patch
+        self, mock_get_value_str: MagicMock, timezone_now__patch
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE: "Submission",
             SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT: "Record Transfer",
             SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE: "Submitted by user via Record Transfer",
@@ -1585,9 +1593,9 @@ class TestFormToGeneralNote(TestCase):
     def setUp(self):
         self.metadata = Metadata.objects.create()
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_general_note_no_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_general_note_no_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_GENERAL_NOTE: ""
         }.get(key, "")
 
@@ -1597,9 +1605,9 @@ class TestFormToGeneralNote(TestCase):
 
         self.assertEqual(self.metadata.general_notes.count(), 0)
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_general_note_with_default(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_general_note_with_default(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_GENERAL_NOTE: "Default note"
         }.get(key, "")
 
@@ -1609,9 +1617,9 @@ class TestFormToGeneralNote(TestCase):
 
         self.assertEqual(self.metadata.general_notes.first().general_note, "Default note")
 
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_populate_general_note_with_default_prefer_form(self, mock_get_value: MagicMock):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_populate_general_note_with_default_prefer_form(self, mock_get_value_str: MagicMock):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_GENERAL_NOTE: "Default note"
         }.get(key, "")
 
@@ -1640,11 +1648,11 @@ class TestFormToDatesOfCreationOrRevision(TestCase):
         "now",
         return_value=datetime(2023, 10, 24, 9, 33, 0, tzinfo=timezone.get_current_timezone()),
     )
-    @patch("recordtransfer.models.SiteSetting.get_value")
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
     def test_add_creation_event_only_mandatory_default(
-        self, mock_get_value: MagicMock, timezone_now__patch
+        self, mock_get_value_str: MagicMock, timezone_now__patch
     ):
-        mock_get_value.side_effect = lambda key: {
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_CREATION_TYPE: "Creation",
             SiteSetting.Key.CAAIS_DEFAULT_CREATION_AGENT: "",
             SiteSetting.Key.CAAIS_DEFAULT_CREATION_NOTE: "",
@@ -1666,9 +1674,11 @@ class TestFormToDatesOfCreationOrRevision(TestCase):
         "now",
         return_value=datetime(2023, 10, 24, 9, 33, 0, tzinfo=timezone.get_current_timezone()),
     )
-    @patch("recordtransfer.models.SiteSetting.get_value")
-    def test_add_creation_event_all_defaults(self, mock_get_value: MagicMock, timezone_now__patch):
-        mock_get_value.side_effect = lambda key: {
+    @patch("recordtransfer.models.SiteSetting.get_value_str")
+    def test_add_creation_event_all_defaults(
+        self, mock_get_value_str: MagicMock, timezone_now__patch
+    ):
+        mock_get_value_str.side_effect = lambda key: {
             SiteSetting.Key.CAAIS_DEFAULT_CREATION_TYPE: "Creation",
             SiteSetting.Key.CAAIS_DEFAULT_CREATION_AGENT: "Transfer Application",
             SiteSetting.Key.CAAIS_DEFAULT_CREATION_NOTE: "Date submission was created",

@@ -111,7 +111,7 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission) 
             subject="Thank You For Your Submission",
             template_name="recordtransfer/email/submission_success.html",
             context={
-                "archivist_email": SiteSetting.get_value(SiteSetting.Key.ARCHIVIST_EMAIL),
+                "archivist_email": SiteSetting.get_value_str(SiteSetting.Key.ARCHIVIST_EMAIL),
             },
         )
 
@@ -135,7 +135,7 @@ def send_your_submission_did_not_go_through(form_data: dict, user_submitted: Use
                 "username": user_submitted.username,
                 "first_name": user_submitted.first_name,
                 "last_name": user_submitted.last_name,
-                "archivist_email": SiteSetting.get_value(SiteSetting.Key.ARCHIVIST_EMAIL),
+                "archivist_email": SiteSetting.get_value_str(SiteSetting.Key.ARCHIVIST_EMAIL),
             },
         )
 
@@ -258,7 +258,7 @@ def _get_do_not_reply_email_address() -> str:
     else:
         clean_domain = domain
 
-    return f"{SiteSetting.get_value(SiteSetting.Key.DO_NOT_REPLY_USERNAME)}@{clean_domain}"
+    return f"{SiteSetting.get_value_str(SiteSetting.Key.DO_NOT_REPLY_USERNAME)}@{clean_domain}"
 
 
 def _send_mail_with_logs(
