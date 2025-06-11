@@ -55,6 +55,95 @@ class SiteSetting(models.Model):
     through the Django admin interface without requiring code changes.
 
     This model supports caching of settings values for improved performance.
+
+    Adding a New Setting
+    --------------------
+
+    To add a new setting to the database, follow these steps:
+
+    1. **Add a new entry to the Key enum class**:
+       Add your new setting key to the :class:`Key` enum. The key should be descriptive and follow
+       existing naming conventions (i.e., all uppercase with underscores).
+
+    2. **Create a data migration**:
+       Create a Django data migration to add the setting to the database. The migration
+       should create a new SiteSetting instance with the required fields:
+
+       - ``key``: Must be unique and match the enum value (string)
+       - ``value``: The default value as a string
+       - ``value_type``: Either "int" for integers or "str" for strings
+
+       Example migration for a string setting::
+
+           from django.db import migrations
+
+           def add_new_setting(apps, schema_editor):
+               SiteSetting = apps.get_model('recordtransfer', 'SiteSetting')
+               SiteSetting.objects.get_or_create(
+                   key="NEW_SETTING_NAME",
+                   defaults={
+                       "value": "Default string value",
+                       "value_type": "str"
+                   }
+               )
+
+           class Migration(migrations.Migration):
+               dependencies = [
+                   ('recordtransfer', 'XXXX_previous_migration'),
+               ]
+
+               operations = [
+                   migrations.RunPython(add_new_setting),
+               ]
+
+    3. **Validation requirements**:
+       - The ``key`` field must be unique across all settings
+       - For ``value_type`` "int": the ``value`` must be a valid string representation
+         of an integer (e.g., "42", "-1", "0")
+       - For ``value_type`` "str": the ``value`` can be any string
+       - The ``change_date`` and ``changed_by`` fields are auto-generated
+
+    Removing a Setting
+    ------------------
+
+    To remove an existing setting from the database:
+
+    1. **Remove the key from the Key enum class**:
+       Delete the corresponding enum entry from the :class:`Key` enum.
+
+    2. **Create a data migration**:
+       Create a Django data migration to remove the setting from the database::
+
+           from django.db import migrations
+
+           def remove_old_setting(apps, schema_editor):
+               SiteSetting = apps.get_model('recordtransfer', 'SiteSetting')
+               SiteSetting.objects.filter(key="OLD_SETTING_NAME").delete()
+
+           class Migration(migrations.Migration):
+               dependencies = [
+                   ('recordtransfer', 'XXXX_previous_migration'),
+               ]
+
+               operations = [
+                   migrations.RunPython(remove_old_setting),
+               ]
+
+    3. **Update code references**:
+       Remove any code that references the old setting key.
+
+    Retrieving Settings in Code
+    ---------------------------
+
+    Once a setting has been added to the database, retrieve it using the appropriate static method:
+
+    - **For string settings**::
+
+        value = SiteSetting.get_value_str(SiteSetting.Key.SETTING_NAME)
+
+    - **For integer settings**::
+
+        value = SiteSetting.get_value_int(SiteSetting.Key.SETTING_NAME)
     """
 
     class Key(Enum):
@@ -117,7 +206,15 @@ class SiteSetting(models.Model):
         CAAIS_DEFAULT_CREATION_NOTE = "CAAIS_DEFAULT_CREATION_NOTE"
 
     class SettingType(models.TextChoices):
-        """The type of the setting value, stored as a string."""
+        """The type of the setting value, stored as a string.
+
+        This is used to determine how the value should be interpreted when retrieved from the
+        database.
+
+        Attributes:
+            INT: Integer numeric values
+            STR: Text string values
+        """
 
         INT = "int", _("Integer")
         STR = "str", _("String")

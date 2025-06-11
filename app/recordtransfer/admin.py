@@ -10,7 +10,6 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
-from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
