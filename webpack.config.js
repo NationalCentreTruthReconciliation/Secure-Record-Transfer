@@ -56,7 +56,7 @@ const plugins = [
     new MiniCssExtractPlugin({
         filename: process.env.WEBPACK_MODE !== "production"
             ? "css/[name].css"
-            : "css/[name].css", // No hashing in production
+            : "css/[name].[contenthash:8].css", // No hashing in production
     }),
     new WebPConverterPlugin({
         quality: 80
