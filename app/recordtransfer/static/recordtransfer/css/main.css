@@ -1,4 +1,4 @@
-@import "tailwindcss.css";
+@import "tailwindcss";
 
 @plugin "daisyui";
 
@@ -31,3 +31,4 @@
     --font-sans: "Open Sans", sans-serif;
     --font-serif: "Merriweather", serif;
 }
+
