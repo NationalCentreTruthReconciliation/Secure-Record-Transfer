@@ -52,6 +52,21 @@ class WebPConverterPlugin {
         });
     }
 }
+const plugins = [
+    new MiniCssExtractPlugin({
+        filename: process.env.WEBPACK_MODE !== "production"
+            ? "css/[name].css"
+            : "css/[name].css", // No hashing in production
+    }),
+    new WebPConverterPlugin({
+        quality: 80
+    })
+];
+
+// Only add BundleTracker in non-production mode
+if (process.env.WEBPACK_MODE !== "production") {
+    plugins.push(new BundleTracker({filename: "./webpack-stats.json"}));
+}
 
 
 module.exports = {
@@ -123,18 +138,8 @@ module.exports = {
             },
         ]
     },
-    plugins: [
-        new MiniCssExtractPlugin({
-            filename: process.env.WEBPACK_MODE !== "production"
-                ? "css/[name].css"
-                : "css/app-[contenthash].css",
-        }),
-        new WebPConverterPlugin({
-            quality: 80
-        }),
-        new BundleTracker({filename: "./webpack-stats.json"}),
+    plugins: plugins, // Use the conditionally populated plugins array
 
-    ],
     optimization: {
         minimizer: [
             "...", // This keeps the default JavaScript minifier
