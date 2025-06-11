@@ -30,8 +30,8 @@
             {% if debug %}
                 {% render_bundle 'main' 'css' %}
             {% else %}
-                <script src="{% static 'css/main.css' %}"></script>
-                <script src="{% static 'css/vendors.css' %}"></script>
+                <link rel="stylesheet" href="{% static 'css/main.css' %}">
+                <link rel="stylesheet" href="{% static 'css/vendors.css' %}">
             {% endif %}
         {% endblock stylesheet %}
         {# Favicon #}
