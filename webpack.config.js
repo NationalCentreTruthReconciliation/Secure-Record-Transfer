@@ -96,7 +96,8 @@ module.exports = {
         ]
     },
     output: {
-        filename: "[name].bundle.js", // Output JS files
+        filename: "js/[name].[chunkhash:8].js",
+        chunkFilename: "js/[name].[chunkhash:8].chunk.js",
         path: path.resolve(__dirname, "dist/")
     },
     module: {
@@ -116,8 +117,9 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: "[name].css" // Output CSS file
+            filename: "css/app-[contenthash].css",
         }),
+
         new WebPConverterPlugin({
             quality: 80
         }),
