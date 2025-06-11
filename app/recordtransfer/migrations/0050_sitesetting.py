@@ -15,6 +15,11 @@ def populate_site_settings(apps, schema_editor):
         "DO_NOT_REPLY_USERNAME": ("do-not-reply", "str"),
         # Pagination
         "PAGINATE_BY": ("10", "int"),
+        "APPROXIMATE_DATE_FORMAT": ("[ca. {date}]", "str"),
+        # CAAIS dates
+        "CAAIS_UNKNOWN_DATE_TEXT": ("Unknown date", "str"),
+        "CAAIS_UNKNOWN_START_DATE": ("1800-01-01", "str"),
+        "CAAIS_UNKNOWN_END_DATE": ("2020-01-01", "str"),
         # CAAIS defaults
         "CAAIS_DEFAULT_REPOSITORY": ("", "str"),
         "CAAIS_DEFAULT_ACCESSION_TITLE": ("", "str"),

@@ -167,6 +167,12 @@ class SiteSetting(models.Model):
         # Pagination
         PAGINATE_BY = "PAGINATE_BY"
 
+        # CAAIS dates
+        CAAIS_UNKNOWN_DATE_TEXT = "CAAIS_UNKNOWN_DATE_TEXT"
+        CAAIS_UNKNOWN_START_DATE = "CAAIS_UNKNOWN_START_DATE"
+        CAAIS_UNKNOWN_END_DATE = "CAAIS_UNKNOWN_END_DATE"
+        APPROXIMATE_DATE_FORMAT = "APPROXIMATE_DATE_FORMAT"
+
         # CAAIS defaults
         CAAIS_DEFAULT_REPOSITORY = "CAAIS_DEFAULT_REPOSITORY"
         CAAIS_DEFAULT_ACCESSION_TITLE = "CAAIS_DEFAULT_ACCESSION_TITLE"
@@ -231,6 +237,23 @@ class SiteSetting(models.Model):
                 self.PAGINATE_BY: (
                     "This setting controls how many rows of items are shown per page in tables "
                     "that support pagination."
+                ),
+                self.APPROXIMATE_DATE_FORMAT: (
+                    'A format string for the date to indicate an approximate date. The string '
+                    'variable "{date}" must be present for the date format to be used.'
+                ),
+                # CAAIS dates
+                self.CAAIS_UNKNOWN_DATE_TEXT: (
+                    "A string to use in the CAAIS metadata when a user indicates that a date is "
+                    "not known."
+                ),
+                self.CAAIS_UNKNOWN_START_DATE: (
+                    "Default start date to use for unknown CAAIS date ranges in ISO format "
+                    "(YYYY-MM-DD)"
+                ),
+                self.CAAIS_UNKNOWN_END_DATE: (
+                    "Default end date to use for unknown CAAIS date ranges in ISO format "
+                    "(YYYY-MM-DD)"
                 ),
                 # CAAIS defaults
                 self.CAAIS_DEFAULT_REPOSITORY: (
