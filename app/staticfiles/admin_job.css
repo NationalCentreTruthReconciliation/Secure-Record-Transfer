@@ -1,0 +1,14 @@
+/*!********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/admin/job.css ***!
+  \********************************************************************************************************************************************************/
+.field-message_log .readonly {
+    background-color: #000;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+}

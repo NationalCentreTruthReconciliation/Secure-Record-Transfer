@@ -1,0 +1,1759 @@
+/*!***************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/main.css ***!
+  \***************************************************************************************************************************************************/
+
+/*!************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/accounts.css ***!
+  \************************************************************************************************************************************************************/
+.account-form-container {
+    margin-top: 30px;
+    padding: 30px 30px 30px 30px;
+    border-radius: 4px;
+    background-color: #eeeeee;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 4px 4px 3px -1px #bbbbbb;
+}
+
+.account-page-title {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.account-error,
+.account-info {
+    text-align: center;
+}
+
+.account-error {
+    color: red;
+    margin-bottom: 10px;
+}
+
+#forgot-password {
+    margin-bottom: 0px;
+}
+
+@media(min-width: 1000px) {
+    .account-form-container {
+        width: 50%;
+    }
+}
+
+/*!**********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/banner.css ***!
+  \**********************************************************************************************************************************************************/
+.banner-container {
+    background: linear-gradient(90deg, #89140a 0, #ba5b3c 100%);
+    color: white;
+    padding: 12px 40px;
+}
+
+.banner-text {
+    font-family: Merriweather,serif;
+    font-size: 11pt;
+}
+
+.banner-link {
+    text-decoration: none;
+    color: white;
+    font-family: inherit;
+    font-size: 11pt;
+}
+
+.banner-link:hover {
+    color: #7a7a7a;
+}
+
+/*!********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/base.css ***!
+  \********************************************************************************************************************************************************/
+textarea,
+input,
+button,
+select,
+html {
+    font-family: "Open Sans", sans-serif;
+}
+
+body {
+    margin: 0;
+    height: 100%;
+}
+
+.flex-wrapper {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.focused-content {
+    padding: 0;
+}
+
+.main-container {
+    flex: 1 0 auto;
+}
+
+.main-content {
+    padding: 18px 12px 18px 12px;
+}
+
+.main-header-content,
+.main-content {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.main-header-content {
+    padding: 10px 0px;
+}
+
+h1,
+.title-text {
+    font-weight: normal;
+    color: #333333;
+    font-size: 20pt;
+}
+
+h2 {
+    font-weight: normal;
+    color: #333333;
+    font-size: 16;
+}
+
+.text-light {
+    color: white;
+}
+
+.medium-text {
+    font-weight: normal;
+    color: #333333;
+    font-size: 16pt;
+}
+
+.red-button,
+.green-button,
+.blue-button,
+.blue-button-outline {
+    margin: auto;
+    font-size: 11pt;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px 6px 12px;
+    margin: 0;
+    text-decoration: none;
+    transition: background 50ms ease;
+    -webkit-appearance: none;
+}
+
+.large-button {
+    font-size: 13pt;
+    padding: 8px 16px;
+}
+
+.less-padding {
+    padding: 4px 6px 4px 6px !important;
+}
+
+.red-button {
+    background: #ce2929;
+    color: #fefefe;
+}
+
+.green-button {
+    background: #0ba124;
+    color: #fefefe;
+}
+
+.blue-button {
+    background: #2d30d4;
+    color: #fefefe;
+}
+
+.blue-button-outline {
+    background: transparent;
+    color: #2d30d4;
+    border: 2px solid #2d30d4;
+}
+
+.blue-button-outline:hover,
+.blue-button-outline:focus {
+    background: #2d30d4;
+    color: #ffffff;
+    transition: background 150ms ease;
+}
+
+.red-button:hover,
+.red-button:focus,
+.green-button:hover,
+.green-button:focus,
+.blue-button:hover,
+.blue-button:focus,
+.blue-button-outline:hover,
+.blue-button-outline:focus {
+    cursor: pointer;
+}
+
+.red-button:hover,
+.red-button:focus {
+    background: #ff7070;
+    color: #ffffff;
+}
+
+.green-button:hover,
+.green-button:focus {
+    background: #3fb953;
+    color: #ffffff;
+}
+
+.blue-button:hover,
+.blue-button:focus {
+    background: #316dee;
+    color: #ffffff;
+}
+
+.red-button:disabled,
+.green-button:disabled,
+.blue-button:disabled {
+    background: #747474;
+    color: #ffffff;
+    cursor: default;
+}
+
+.blue-button-outline:disabled {
+    background: transparent;
+    color: #747474;
+    border: 2px solid #747474;
+    cursor: default;
+}
+
+/*
+ * Credits: Adapted from https://codepen.io/adevade/pen/AeZBVV
+ */
+.btn-arrow {
+    color: transparent;
+    display: block;
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+
+
+    transition: all 150ms ease-out;
+
+    &::before,
+    &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        background-color: #606060;
+
+        transition: all 150ms ease-out;
+    }
+
+    &::before {
+        width: 75%;
+        height: 25%;
+    }
+
+    &::after {
+        width: 25%;
+        height: 75%;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: rgba(black, .1);
+
+        &::before,
+        &::after {
+            background-color: #404040;
+        }
+    }
+
+    &.btn-arrow-left,
+    &.btn-arrow-right {
+
+        &::before,
+        &::after {
+            top: 12.5%;
+            left: 12.5%;
+        }
+    }
+
+    &.btn-arrow-left {
+        transform: rotate(-45deg);
+    }
+
+    &.btn-arrow-right {
+        transform: rotate(135deg);
+    }
+
+    &.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.no-decoration {
+    text-decoration: inherit;
+    color: inherit;
+}
+
+.margin-right-10px {
+    margin-right: 10px;
+}
+
+.margin-right-20px {
+    margin-right: 20px;
+}
+
+.margin-right-30px {
+    margin-right: 20px;
+}
+
+.margin-top-15px {
+    margin-top: 15px;
+}
+
+.margin-top-25px {
+    margin-top: 25px;
+}
+
+.margin-bottom-25px {
+    margin-bottom: 25px;
+}
+
+.standard-table {
+    text-align: left;
+    font-size: 11pt;
+}
+
+.standard-table th,
+.standard-table td {
+    padding: 10px;
+}
+
+.standard-table tr:nth-child(odd) {
+    background-color: #eee;
+}
+
+
+/**
+ * Messages styles
+ */
+
+.alert {
+    display: flex;
+    flex-grow: 1;
+    padding: 12px;
+    margin: 8px 0px;
+    border-radius: 10px;
+}
+
+.alert-dismiss {
+    /* unset default button styles */
+    all: unset;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.alert-success {
+    color: #053f00;
+    background-color: #c9ffc6;
+}
+
+.alert-error {
+    color: #690000;
+    background-color: #ffc1c1;
+}
+
+
+.text-link {
+    background: none;
+    border: none;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+}
+
+.text-link:disabled {
+    color: gray;
+    text-decoration: none;
+    cursor: not-allowed;
+}
+
+.step-link,
+.back-to-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+
+.step-link:hover,
+.back-to-btn:hover {
+    color: #0056b3;
+}
+
+.step-link i,
+.back-to-btn i {
+    font-size: 0.8rem;
+}
+
+.step-link {
+    padding: 0.5rem 1rem;
+}
+
+.back-to-btn {
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+}
+
+@media (max-width: 1199px) {
+
+    .main-header-content,
+    .main-content {
+        width: 95%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+/*!**********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/footer.css ***!
+  \**********************************************************************************************************************************************************/
+.footer {
+    background-color: #89140a;
+    color: white;
+    padding: 50px 80px 20px 80px;
+    font-family: "Open Sans", sans-serif;
+}
+
+.footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1600px;
+    margin: 0 auto;
+    column-gap: 40px;
+    row-gap: 20px;
+}
+
+.footer-column {
+    margin-bottom: 30px;
+    /* Four column layout for large screens */
+    width: calc(25% - 30px);
+}
+
+/* Logo styling */
+.footer-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logo {
+    max-width: 100%;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Headings */
+.footer h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: large;
+    font-weight: 600;
+}
+
+/* Footer links */
+.footer-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-menu li {
+    margin-bottom: 12px;
+}
+
+.footer a,
+.footer p {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+}
+
+.footer-more a,
+.footer-more p,
+.footer-contact a,
+.footer-contact p {
+    font-size: small;
+}
+
+.footer-contact i,
+.footer-social i {
+    color: white;
+}
+
+.contact-content i {
+    margin-right: 10px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin: 15px 0;
+}
+
+.icon-container {
+    width: 20px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 3px;
+}
+
+.contact-item a {
+    padding-left: 10px;
+    display: block;
+}
+
+.footer a:hover,
+.social-icons i:hover {
+    color: #F5A81C;
+    transition: color 0.3s ease-in-out;
+}
+
+.footer ul,
+.footer p {
+    margin: 15px 0;
+}
+
+/* Social icons */
+.social-icons {
+    display: flex;
+    gap: 30px;
+}
+
+.social-icon {
+    font-size: 35px;
+}
+
+.hidden-social-content {
+    display: none;
+    margin-top: 30px;
+}
+
+/* Footer bottom */
+.footer-bottom {
+    text-align: left;
+    font-size: xx-small;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.footer-bottom p {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Media query for medium screens (two columns) */
+@media (max-width: 1200px) {
+    .footer-more {
+        order: 1;
+    }
+
+    .footer-contact {
+        order: 2;
+    }
+
+    .footer-logo {
+        order: 3;
+    }
+
+    .footer-social {
+        order: 4;
+    }
+
+    .footer-column {
+        width: calc(50% - 30px);
+        margin-bottom: 10px;
+    }
+
+    .footer-logo {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 10px;
+        width: 100%;
+        gap: 0;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        flex: 1;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+    }
+
+    .social-content {
+        display: none;
+    }
+
+    .hidden-social-content {
+        display: block;
+    }
+
+    .logo {
+        max-width: 70%;
+    }
+
+    .social-icon {
+        font-size: 35px !important;
+    }
+}
+
+/* Media query for small screens (one column) */
+@media (max-width: 800px) {
+    .footer-more {
+        order: 1;
+    }
+
+    .footer-contact {
+        order: 2;
+    }
+
+    .footer-logo {
+        order: 3;
+    }
+
+    .footer-social {
+        order: 4;
+    }
+
+    .footer-column {
+        width: 100%;
+    }
+
+    .footer-logo {
+        row-gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 200px;
+        max-width: 350px;
+    }
+
+    .footer-container {
+        row-gap: 0;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+
+    .footer,
+    .footer-bottom {
+        text-align: center;
+    }
+
+    .social-content {
+        display: block;
+    }
+
+    .hidden-social-content,
+    .social-header {
+        display: none;
+    }
+
+    .social-icon {
+        font-size: 30px !important;
+    }
+
+    .contact-item {
+        display: block;
+        text-align: center;
+    }
+    
+    .icon-container {
+        display: inline;
+        width: auto;
+    }
+    
+    .contact-item a {
+        display: inline;
+        padding-left: 5px;
+    }
+}
+/*!********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/home.css ***!
+  \********************************************************************************************************************************************************/
+#main-graphic-container {
+    width: 100%;
+    height: 97vh;
+    position: relative;
+}
+
+#main-graphic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.main-graphic-text-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: "Merriweather", serif;
+    width: 60%;
+}
+
+.main-graphic-text {
+    text-align: left;
+    width: 60%;
+    font-size: 3.75em;
+    margin-bottom: 30px;
+    margin-right: 30px;
+}
+
+.hero-button,
+.homepage-button {
+    font-family: "Merriweather", serif;
+    display: inline-block;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+.hero-button a,
+.homepage-button a {
+    color: white;
+    text-decoration: none;
+}
+
+.hero-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+.hero-button {
+    padding: 12px;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    font-size: 1.2em;
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
+    width: 30%;
+}
+
+.hero-button:hover {
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.hero-button:hover a {
+    color: #ee7421;
+    transition: color 0.3s ease;
+}
+
+.homepage-button {
+    margin-bottom: 0;
+    padding: 10px;
+    border: 2px solid #89140a;
+    background-color: #89140a;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.homepage-header {
+    font-family: "Merriweather", serif;
+    margin-top: 40px;
+    color: #89140a;
+    text-align: center;
+}
+
+.lead-text {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #2c3e50;
+    max-width: 750px;
+    margin: 1.5rem auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.feature-box {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+}
+
+.feature-box h2 {
+    margin-bottom: 1rem;
+}
+
+.cta-section {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin: 3rem 0;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.primary-button, .secondary-button {
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.primary-button {
+    background: #89140a;
+    color: white;
+}
+
+.secondary-button {
+    background: white;
+    color: #89140a;
+    border: 2px solid #89140a;
+}
+
+.primary-button:hover, .secondary-button:hover {
+    transform: translateY(-2px);
+}
+
+.primary-button:hover {
+    background: #6b0f08;
+}
+
+.secondary-button:hover {
+    background: #fff5f4;
+}
+
+.related-section {
+    margin: 4rem 0;
+    padding: 0 2rem;
+}
+
+.related-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.related-links {
+    max-width: 100%;
+}
+
+.related-links h2 {
+    margin-bottom: 2rem;
+}
+
+.links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.link-item {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    padding: 1.5rem;
+    border-left: 4px solid #89140a;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.link-item:hover {
+    background: #fff5f4;
+    transform: translateX(10px);
+}
+
+.link-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #89140a;
+    margin-bottom: 0.5rem;
+}
+
+.link-description {
+    color: #2c3e50;
+}
+
+.related-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.github-section {
+    background: #f8fafc;
+    padding: 4rem 2rem;
+    border-radius: 12px;
+    margin: 3rem 0;
+}
+
+.github-section h2 {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    text-align: left;
+}
+
+.github-container {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 3rem;
+}
+
+.github-content {
+    flex: 2;
+}
+
+.github-graphic {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    font-size: 8rem;
+    color: #89140a;
+}
+
+.github-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #89140a;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.github-button:hover {
+    background: #6b0f08;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 1199px) {
+    .main-graphic-text-container {
+        width: 80%;
+    }
+
+    #main-graphic-container {
+        height: 70vh;
+    }
+
+    .main-graphic-text {
+        width: 100%;
+    }
+}
+
+@media (max-width: 799px) {
+    .main-graphic-text {
+        font-size: 2em;
+        text-align: center;
+    }
+
+    .hero-button {
+        font-size: 1em;
+        width: 75%;
+    }
+
+    .hero-button-container {
+        align-items: center;
+    }
+
+    .github-container {
+        flex-direction: column;
+    }
+
+    .github-graphic {
+        display: none;
+        /* font-size: 6rem; */
+    }
+
+    .related-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/*!**********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/navbar.css ***!
+  \**********************************************************************************************************************************************************/
+/* Mobile-first styles for navbar */
+
+header {
+    background-color: rgb(137, 34, 26);
+    width: 100%;
+    box-shadow: 0 4px 3px -3px #bbbbbb;
+}
+
+header.homepage {
+    position: absolute;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.main-navbar {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+}
+
+.nav-logo {
+    order: 0;
+    flex-grow: 0;
+}
+
+/* Greyed-out overlay applied when mobile menu is open */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 999;
+}
+
+.menu-overlay.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Site title */
+.nav-title {
+    margin-left: 20px;
+    flex: 1;
+    align-content: start;
+    justify-content: flex-start;
+    text-align: left;
+    /* Add padding to account for fixed position mobile menu */
+    padding-right: 40px;
+}
+
+/* Mobile navigation container - wraps both toggle and menu */
+.nav-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 0;
+    z-index: 1001;
+}
+
+/* Sliding menu styles */
+.nav-items-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 60%;
+    right: 0;
+    transform: translateY(0);
+    height: auto;
+    max-height: 100vh;
+    width: 300px;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    padding: 50px 20px;
+    z-index: 1000;
+    visibility: hidden;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.nav-items-container.open {
+    top: 100%;
+    visibility: visible;
+    transition: top 0.3s ease, opacity 0.3s ease;
+}
+
+/* Container for each nav item */
+.nav-item {
+    flex-grow: 0;
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: rgb(137, 34, 26);
+}
+
+/* Container for login/logout button */
+.nav-item-button {
+    margin-top: 40px;
+    margin-bottom: 0px;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: rgb(137, 34, 26);
+}
+
+/* Adds flex display to nav items */
+.nav-item-flex {
+    display: flex;
+    align-items: center;
+}
+
+.nav-link,
+.nav-link-icon {
+    flex-grow: 1;
+    text-decoration: none;
+    line-height: 40px;
+    color: inherit;
+}
+
+.nav-toggle-open {
+    order: 1;
+    text-align: right;
+    font-size: 20pt;
+}
+
+/* Burger button */
+.nav-icon-bars {
+    display: inline-block;
+}
+
+.nav-icon-close {
+    display: none;
+}
+
+.nav-toggle-button.active .nav-icon-bars {
+    display: none;
+}
+
+.nav-toggle-button.active .nav-icon-close {
+    display: inline-block;
+}
+
+.nav-toggle-button {
+    padding: 4px 15px;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-toggle-button.active {
+    background-color: white;
+    color: #ee7421;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-bottom: 20px;
+    z-index: 1001;
+    transition: all 0.3s ease;
+}
+
+/* Login/logout button */
+.nav-button {
+    border: 3px solid rgb(137, 34, 26);
+    border-radius: 3rem;
+    text-decoration: none !important;
+}
+
+.nav-button:hover {
+    background-color: rgb(137, 34, 26);
+    color: #ffffff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@media all and (max-width: 450px) {
+    .nav-title {
+        margin-left: 10px;
+    }
+
+    #app-logo {
+        width: 35px;
+        height: 35px;
+    }
+
+    #app-title {
+        font-size: 16pt;
+    }
+}
+
+
+/* Mobile-only transitions */
+@media all and (max-width: 799px) {
+    .nav-items-container {
+        transition: opacity 0.3s ease-out;
+    }
+
+    .nav-item:hover {
+        background-color: #f2f2f2;
+    }
+
+    .nav-wrapper {
+        margin-right: 10px;
+        background-color: transparent;
+        transition: background-color 0.1s;
+        border-radius: 40px;
+    }
+
+    .nav-wrapper.needs-background {
+        /* Show background when needed */
+        background-color: rgba(198, 193, 193, 0.8);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+}
+
+/* Desktop menu */
+@media all and (min-width: 800px) {
+    .main-navbar {
+        align-items: center;
+        flex-wrap: nowrap;
+        background: none;
+    }
+
+    /* Reset mobile container for desktop */
+    .nav-wrapper {
+        position: static;
+    }
+
+    .nav-title {
+        /* Unset padding used to account for mobile menu */
+        padding-right: 0;
+    }
+
+    .nav-items-container {
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        height: auto;
+        width: auto;
+        background: none;
+        box-shadow: none;
+        padding: 0;
+        display: flex;
+        visibility: visible;
+        transition: none;
+    }
+
+    .nav-item,
+    .nav-item-button {
+        margin-bottom: 0;
+        margin-top: 0;
+        margin-left: 20px;
+        position: relative;
+        display: block;
+        width: auto;
+    }
+
+    /* Hide the burger menu in desktop mode */
+    .nav-toggle-open {
+        display: none;
+    }
+
+    .nav-link {
+        color: white;
+    }
+
+    .nav-link:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 4px;
+        text-underline-offset: 12px;
+    }
+
+    /* Hide the navigation icons in desktop mode */
+    .nav-link-icon {
+        display: none;
+    }
+
+    .nav-button {
+        border: 3px solid rgba(255, 255, 255, 0.7);
+        border-radius: 3rem;
+        padding: 0.1rem 0.8rem;
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .nav-button:hover {
+        background-color: #ffffff;
+        color: #ee7421;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+}
+/*!*******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/submission_form.css ***!
+  \*******************************************************************************************************************************************************************/
+.form-title {
+    margin-bottom: 25px;
+    margin-top: 25px;
+}
+
+.flex-item,
+.flex-error {
+    color: #333333;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.flex-item {
+    margin-bottom: 15px;
+}
+
+.flex-full-width-item {
+    max-width: 100%;
+    margin-bottom: 15px;
+}
+
+.flex-full-width-error,
+.flex-med-width-item {
+    flex: 1 1 auto;
+    max-width: 790px;
+}
+
+.flex-med-width-item {
+    margin-bottom: 15px;
+}
+
+.flex-item>label {
+    font-style: italic;
+}
+
+.flex-error>label,
+.flex-item>label {
+    flex: 0 1 180px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.flex-item>input:not([type='checkbox']),
+.flex-item>textarea,
+.flex-item>select {
+    flex: 1 1 auto;
+    max-width: 600px;
+    border-radius: 3px;
+    border: 1px solid #919191;
+    padding: 2px 2px;
+    background-color: #f9f9f9;
+}
+
+
+.flex-item>input[type='checkbox'] {
+    flex: 0 0 auto;
+    max-width: 600px;
+    padding: 2px 2px 2px 2px;
+}
+
+.flex-item>select {
+    margin-right: 10px;
+}
+
+.full-width-table {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.reduce-form-field-width {
+    width: 200px !important;
+    max-width: 200px !important;
+}
+
+.flex-item>textarea {
+    resize: none;
+    font-size: medium;
+}
+
+.flex-item>input {
+    resize: none;
+    font-size: medium;
+}
+
+.flex-error>div {
+    flex: 1 1 0;
+    max-width: 600px;
+}
+
+.button-array {
+    flex: 1 1 auto;
+    max-width: 600px;
+}
+
+.field-error {
+    color: red;
+}
+
+.fa-info-circle {
+    color: #6c757d;
+    font-size: 14pt;
+    transition: color 0.1s ease-in-out;
+}
+
+.fa-info-circle:hover {
+    color: #545b62;
+}
+
+.imminent-removal {
+    label {
+        color: red;
+        text-decoration: line-through;
+        transition: 120ms ease-in-out;
+    }
+
+    select,
+    input,
+    textarea {
+        background-color: #fff1f1 !important;
+        border: 1px solid red !important;
+        border-radius: 3px;
+        transition: 120ms ease-in-out;
+    }
+}
+
+.hidden-item {
+    display: none !important;
+}
+
+.required-field:after,
+.faux-required-field:after {
+    content: "  *";
+    color: #d00;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+@media (max-width: 600px) {
+
+    .flex-item>label,
+    .flex-error>label {
+        flex: 1 1 100%;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+
+    .flex-item>input,
+    .flex-error>div {
+        flex: 1 1 100%;
+    }
+}
+/*!***********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/tooltip.css ***!
+  \***********************************************************************************************************************************************************/
+.form-tooltip {
+    /* Float on top of the UI */
+    position: absolute;
+    display: none;
+
+    /* Avoid layout interference */
+    width: max-content;
+    top: 0;
+    left: 0;
+
+    /* Fade in/out */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+
+    padding: 6px;
+    font-size: 11pt;
+    background-color: #333333;
+    color: white;
+    border: 5px;
+    border-radius: 5px;
+}
+
+.help-tooltip.help-icon {
+    margin-left: 10px;
+}
+
+.form-tooltip.visible {
+    opacity: 1;
+}
+
+.tooltip-arrow {
+    position: absolute;
+    background-color: #333333;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+}
+
+@media(max-width: 700px) {
+    .form-tooltip {
+        width: 200px;
+    }
+}
+/*!**********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/base/widget.css ***!
+  \**********************************************************************************************************************************************************/
+.ui-widget.ui-widget-content {
+    box-shadow: 4px 4px 3px -3px #bbbbbb;
+    border: 1px solid #575757;
+}
+/*!**************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/submission_form/review_step.css ***!
+  \**************************************************************************************************************************************************************************/
+.review-summary {
+    max-width: 800px;
+    margin: 2rem 0;
+}
+
+.review-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.section-title {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.field-list {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+dt {
+    font-weight: bold;
+    color: #495057;
+}
+
+dd {
+    margin: 0;
+    color: #212529;
+}
+
+.empty-value, .section-note {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.section-note {
+    margin-left: 1rem;
+}
+
+.formset-entry {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.file-entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.file-entry i {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
+.file-entry a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.file-entry a:hover {
+    text-decoration: underline;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.align-center {
+    align-self: center;
+}
+/*!*******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/submission_form/uppy.css ***!
+  \*******************************************************************************************************************************************************************/
+.uppy-DashboardContent-title {
+    display: none !important;
+}
+
+.uppy-Dashboard-Item-action--copyLink {
+    display: none !important;
+}
+/*!********************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./app/recordtransfer/static/recordtransfer/css/submission_form/modal.css ***!
+  \********************************************************************************************************************************************************************/
+.recordtransfer-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    visibility: hidden;
+    opacity: 0;
+    padding: 0;
+}
+
+.recordtransfer-modal.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal-content {
+    width: 700px;
+    background: white;
+    z-index: 10000;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recordtransfer-modal-content {
+    width: 700px;
+    background: white;
+    z-index: 10000;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recordtransfer-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.recordtransfer-modal-header h3 {
+    margin: 0;
+    flex-grow: 1;
+    text-align: left;
+}
+
+.close-modal-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.close-modal-button img {
+    display: block;
+}
+
+.recordtransfer-modal-body {
+    padding: 10px;
+    text-align: left;
+}
+
+.recordtransfer-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+}
+
+.recordtransfer-modal-footer button {
+    margin-left: 15px;
+}
+
+/* Responsive styles for screens below 800px */
+@media (max-width: 800px) {
+    .recordtransfer-modal-content {
+        max-width: 80%;
+        padding: 15px;
+    }
+
+    .recordtransfer-modal-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .recordtransfer-modal-footer button {
+        margin: 10px;
+        width: 100%;
+        border-radius: 8px;
+    }
+}

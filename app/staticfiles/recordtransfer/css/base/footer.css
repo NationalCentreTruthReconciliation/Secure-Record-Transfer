@@ -1,0 +1,269 @@
+.footer {
+    background-color: #89140a;
+    color: white;
+    padding: 50px 80px 20px 80px;
+    font-family: "Open Sans", sans-serif;
+}
+
+.footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1600px;
+    margin: 0 auto;
+    column-gap: 40px;
+    row-gap: 20px;
+}
+
+.footer-column {
+    margin-bottom: 30px;
+    /* Four column layout for large screens */
+    width: calc(25% - 30px);
+}
+
+/* Logo styling */
+.footer-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logo {
+    max-width: 100%;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Headings */
+.footer h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: large;
+    font-weight: 600;
+}
+
+/* Footer links */
+.footer-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-menu li {
+    margin-bottom: 12px;
+}
+
+.footer a,
+.footer p {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+}
+
+.footer-more a,
+.footer-more p,
+.footer-contact a,
+.footer-contact p {
+    font-size: small;
+}
+
+.footer-contact i,
+.footer-social i {
+    color: white;
+}
+
+.contact-content i {
+    margin-right: 10px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin: 15px 0;
+}
+
+.icon-container {
+    width: 20px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 3px;
+}
+
+.contact-item a {
+    padding-left: 10px;
+    display: block;
+}
+
+.footer a:hover,
+.social-icons i:hover {
+    color: #F5A81C;
+    transition: color 0.3s ease-in-out;
+}
+
+.footer ul,
+.footer p {
+    margin: 15px 0;
+}
+
+/* Social icons */
+.social-icons {
+    display: flex;
+    gap: 30px;
+}
+
+.social-icon {
+    font-size: 35px;
+}
+
+.hidden-social-content {
+    display: none;
+    margin-top: 30px;
+}
+
+/* Footer bottom */
+.footer-bottom {
+    text-align: left;
+    font-size: xx-small;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.footer-bottom p {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Media query for medium screens (two columns) */
+@media (max-width: 1200px) {
+    .footer-more {
+        order: 1;
+    }
+
+    .footer-contact {
+        order: 2;
+    }
+
+    .footer-logo {
+        order: 3;
+    }
+
+    .footer-social {
+        order: 4;
+    }
+
+    .footer-column {
+        width: calc(50% - 30px);
+        margin-bottom: 10px;
+    }
+
+    .footer-logo {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 10px;
+        width: 100%;
+        gap: 0;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        flex: 1;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+    }
+
+    .social-content {
+        display: none;
+    }
+
+    .hidden-social-content {
+        display: block;
+    }
+
+    .logo {
+        max-width: 70%;
+    }
+
+    .social-icon {
+        font-size: 35px !important;
+    }
+}
+
+/* Media query for small screens (one column) */
+@media (max-width: 800px) {
+    .footer-more {
+        order: 1;
+    }
+
+    .footer-contact {
+        order: 2;
+    }
+
+    .footer-logo {
+        order: 3;
+    }
+
+    .footer-social {
+        order: 4;
+    }
+
+    .footer-column {
+        width: 100%;
+    }
+
+    .footer-logo {
+        row-gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nctr-logo-container,
+    .unesco-logo-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 200px;
+        max-width: 350px;
+    }
+
+    .footer-container {
+        row-gap: 0;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+
+    .footer,
+    .footer-bottom {
+        text-align: center;
+    }
+
+    .social-content {
+        display: block;
+    }
+
+    .hidden-social-content,
+    .social-header {
+        display: none;
+    }
+
+    .social-icon {
+        font-size: 30px !important;
+    }
+
+    .contact-item {
+        display: block;
+        text-align: center;
+    }
+    
+    .icon-container {
+        display: inline;
+        width: auto;
+    }
+    
+    .contact-item a {
+        display: inline;
+        padding-left: 5px;
+    }
+}
