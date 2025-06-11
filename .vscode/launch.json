@@ -35,5 +35,48 @@
                 },
             ]
         },
+        {
+            "name": "Debug Pytest: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${file}",
+                "-v",
+                "-s"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/app"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "django": true
+        },
+        {
+            "name": "Debug Pytest: Specific Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "-s",
+                "${input:testName}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/app"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "django": true
+        },
+    ],
+    "inputs": [
+        {
+            "id": "testName",
+            "description": "Test name (e.g., app/recordtransfer/tests/unit/test_models.py::TestUploadSession::test_new_session_creation)",
+            "type": "promptString"
+        }
     ]
 }
