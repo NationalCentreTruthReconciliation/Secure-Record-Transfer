@@ -54,9 +54,9 @@ class WebPConverterPlugin {
 }
 const plugins = [
     new MiniCssExtractPlugin({
-        filename: process.env.WEBPACK_MODE !== "production"
+        filename: process.env.WEBPACK_MODE === "production"
             ? "css/[name].css"
-            : "css/[name].[contenthash:8].css", // No hashing in production
+            : "css/[name].[contenthash:8].css",
     }),
     new WebPConverterPlugin({
         quality: 80
@@ -64,7 +64,7 @@ const plugins = [
 ];
 
 // Only add BundleTracker in non-production mode
-if (process.env.WEBPACK_MODE !== "production") {
+if (process.env.WEBPACK_MODE === "production") {
     plugins.push(new BundleTracker({filename: "./webpack-stats.json"}));
 }
 
