@@ -65,7 +65,12 @@ class SiteSetting(models.Model):
        Add your new setting key to the :class:`Key` enum. The key should be descriptive and follow
        existing naming conventions (i.e., all uppercase with underscores).
 
-    2. **Create a data migration**:
+    2. **Add a description for the new setting**:
+       Add an entry to the ``_get_descriptions()`` method mapping your new key to a
+       human-readable description. This description will be displayed in the admin interface
+       and should explain what the setting controls.
+
+    3. **Create a data migration**:
        Create a Django data migration to add the setting to the database. The migration
        should create a new SiteSetting instance with the required fields:
 
@@ -95,7 +100,7 @@ class SiteSetting(models.Model):
                    migrations.RunPython(add_new_setting),
                ]
 
-    3. **Validation requirements**:
+    4. **Validation requirements**:
        - The ``key`` field must be unique across all settings
        - For ``value_type`` "int": the ``value`` must be a valid string representation
          of an integer (e.g., "42", "-1", "0")
@@ -110,7 +115,10 @@ class SiteSetting(models.Model):
     1. **Remove the key from the Key enum class**:
        Delete the corresponding enum entry from the :class:`Key` enum.
 
-    2. **Create a data migration**:
+    2. **Remove the description**:
+       Remove the corresponding entry from the ``_get_descriptions()`` method.
+
+    3. **Create a data migration**:
        Create a Django data migration to remove the setting from the database::
 
            from django.db import migrations
@@ -130,7 +138,7 @@ class SiteSetting(models.Model):
                    migrations.RunPython(remove_old_setting),
                ]
 
-    3. **Update code references**:
+    4. **Update code references**:
        Remove any code that references the old setting key.
 
     Retrieving Settings in Code
@@ -205,6 +213,145 @@ class SiteSetting(models.Model):
         CAAIS_DEFAULT_CREATION_TYPE = "CAAIS_DEFAULT_CREATION_TYPE"
         CAAIS_DEFAULT_CREATION_AGENT = "CAAIS_DEFAULT_CREATION_AGENT"
         CAAIS_DEFAULT_CREATION_NOTE = "CAAIS_DEFAULT_CREATION_NOTE"
+
+        @property
+        def description(self) -> str:
+            """Get the human-readable description for this setting key."""
+            return self._get_descriptions().get(self, "No description available.")
+
+        def _get_descriptions(self) -> dict:
+            """Return the mapping of keys to descriptions."""
+            return {
+                self.ARCHIVIST_EMAIL: "The email displayed for people to contact an archivist.",
+                self.DO_NOT_REPLY_USERNAME: (
+                    'A username for the application to send "do not reply" emails from. This '
+                    "username is combined with the site's base URL to create an email address. "
+                    "The URL can be set from the admin site."
+                ),
+                self.PAGINATE_BY: (
+                    "This setting controls how many rows of items are shown per page in tables "
+                    "that support pagination."
+                ),
+                # CAAIS defaults
+                self.CAAIS_DEFAULT_REPOSITORY: (
+                    "Default value to fill in metadata for CAAIS sec. 1.1 - Repository"
+                ),
+                self.CAAIS_DEFAULT_ACCESSION_TITLE: (
+                    "Default value to fill in metadata for CAAIS sec. 1.3 - Accession Title"
+                ),
+                self.CAAIS_DEFAULT_ARCHIVAL_UNIT: (
+                    "Default value to fill in metadata for CAAIS sec. 1.4 - Archival Unit"
+                ),
+                self.CAAIS_DEFAULT_DISPOSITION_AUTHORITY: (
+                    "Default value to fill in metadata for CAAIS sec. 1.6 - Disposition Authority"
+                ),
+                self.CAAIS_DEFAULT_ACQUISITION_METHOD: (
+                    "Default value to fill in metadata for CAAIS sec. 1.5 - Acquisition Method"
+                ),
+                self.CAAIS_DEFAULT_STATUS: (
+                    "Default value to fill in metadata for CAAIS sec. 1.7 - Status"
+                ),
+                self.CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY: (
+                    "Default value to fill in metadata for CAAIS sec. 2.1.6 - Source "
+                    "Confidentiality"
+                ),
+                self.CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY: (
+                    "Default value to fill in metadata for CAAIS sec. 2.2 - Preliminary Custodial "
+                    "History"
+                ),
+                self.CAAIS_DEFAULT_DATE_OF_MATERIALS: (
+                    "Default value to fill in metadata for CAAIS sec. 3.1 - Date of Materials"
+                ),
+                self.CAAIS_DEFAULT_EXTENT_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.1 - Extent Type"
+                ),
+                self.CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.2 - Quantity and Unit of"
+                    " Measure"
+                ),
+                self.CAAIS_DEFAULT_CONTENT_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.3 - Content Type"
+                ),
+                self.CAAIS_DEFAULT_CARRIER_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.4 - Carrier Type"
+                ),
+                self.CAAIS_DEFAULT_EXTENT_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.5 - Extent Note"
+                ),
+                self.CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT: (
+                    "Default value to fill in metadata for CAAIS sec. 3.3 - Preliminary Scope and "
+                    "Content"
+                ),
+                self.CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL: (
+                    "Default value to fill in metadata for CAAIS sec. 3.4 - Language of Material"
+                ),
+                self.CAAIS_DEFAULT_STORAGE_LOCATION: (
+                    "Default value to fill in metadata for CAAIS sec. 4.1 - Storage Location"
+                ),
+                self.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.3.1 - Preservation "
+                    "Requirements Type"
+                ),
+                self.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.3.2 - Preservation "
+                    "Requirements Value"
+                ),
+                self.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.3.3 - Preservation "
+                    "Requirements Note"
+                ),
+                self.CAAIS_DEFAULT_APPRAISAL_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.4.1 - Appraisal Type"
+                ),
+                self.CAAIS_DEFAULT_APPRAISAL_VALUE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.4.2 - Appraisal Value"
+                ),
+                self.CAAIS_DEFAULT_APPRAISAL_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.4.3 - Appraisal Note"
+                ),
+                self.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.5.1 - Associated "
+                    "Documentation Type"
+                ),
+                self.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.5.2 - Associated "
+                    "Documentation Title"
+                ),
+                self.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.5.3 - Associated "
+                    "Documentation Note"
+                ),
+                self.CAAIS_DEFAULT_GENERAL_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 6.1 - General Note"
+                ),
+                self.CAAIS_DEFAULT_RULES_OR_CONVENTIONS: (
+                    "Default value to fill in metadata for CAAIS sec. 7.1 - Rules or Conventions"
+                ),
+                self.CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD: (
+                    "Default value to fill in metadata for CAAIS sec. 7.3 - Language of Accession "
+                    "Record"
+                ),
+                # CAAIS event defaults
+                self.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE: (
+                    "Default submission event type name - related to CAAIS sec. 5.1.1"
+                ),
+                self.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT: (
+                    "Default submission event agent - related to CAAIS sec. 5.1.3"
+                ),
+                self.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE: (
+                    "Default submission event note - related to CAAIS sec. 5.1.4"
+                ),
+                # CAAIS creation defaults
+                self.CAAIS_DEFAULT_CREATION_TYPE: (
+                    "Default date of creation event name - related to CAAIS sec. 7.2.1"
+                ),
+                self.CAAIS_DEFAULT_CREATION_AGENT: (
+                    "Default date of creation event agent - related to CAAIS sec. 7.2.3"
+                ),
+                self.CAAIS_DEFAULT_CREATION_NOTE: (
+                    "Default date of creation event note - related to CAAIS sec. 7.2.4"
+                ),
+            }
 
     class SettingType(models.TextChoices):
         """The type of the setting value, stored as a string.
