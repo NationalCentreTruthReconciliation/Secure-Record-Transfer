@@ -65,7 +65,7 @@ module.exports = {
     },
     entry: {
         images: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp}") // eslint-disable-line
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.js",
@@ -111,6 +111,13 @@ module.exports = {
                 type: "asset/resource",
                 generator: {
                     filename: "[name][ext]"
+                }
+            }, // Add this new rule for favicon and other icon files
+            {
+                test: /\.ico$/i,
+                type: "asset/resource",
+                generator: {
+                    filename: "[name][ext]" // Match your template path
                 }
             },
         ]
