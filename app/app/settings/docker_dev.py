@@ -106,7 +106,7 @@ STORAGES = {
 
 WEBPACK_LOADER = {
     "DEFAULT": {
-        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "webpack-stats.json"),
+        "STATS_FILE": os.path.join("/opt/secure-record-transfer", "webpack-stats.json"),
         "BUNDLE_DIR_NAME": "dist/",  # must end with slash
     },
 }

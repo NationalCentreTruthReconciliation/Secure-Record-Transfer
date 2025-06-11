@@ -64,7 +64,7 @@ const plugins = [
 ];
 
 // Only add BundleTracker in non-production mode
-if (process.env.WEBPACK_MODE === "production") {
+if (process.env.WEBPACK_MODE === "development") {
     plugins.push(new BundleTracker({filename: "./webpack-stats.json"}));
 }
 
