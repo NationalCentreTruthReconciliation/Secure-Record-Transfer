@@ -127,7 +127,7 @@ class ReadOnlyInline(admin.TabularInline):
         return False
 
 
-@admin.register(TempUploadedFile, PermUploadedFile)
+@admin.register(PermUploadedFile)
 class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model.
 
