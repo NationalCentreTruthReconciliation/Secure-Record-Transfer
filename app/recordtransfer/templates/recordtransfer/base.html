@@ -1,5 +1,7 @@
 {% load static %}
 {% load i18n %}
+{% load render_bundle from webpack_loader %}
+
 <!DOCTYPE html>
 <html lang="en" data-theme={% block theme %}nctr{% endblock theme %}>
     <head hx-head="merge">
@@ -7,8 +9,7 @@
         <meta name="description" content="Secure Record Transfer Application">
         <!-- JS -->
         {% block javascript %}
-            <script src= '/static/js/vendors.7ea62a3d.js'></script>
-            <script src= '/static/js/main.fc651525.js'></script>
+            {% render_bundle 'main' 'js' %}
         {% endblock javascript %}
         {# Fonts #}
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +23,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {# CSS #}
         {% block stylesheet %}
-            <link rel="stylesheet" href='/static/css/app-4c9b326d8d60b8dbb0ef.css'>
-            <link rel="stylesheet" href='/static/css/app-aa8376c33dd9651044e4.css'>
+            {% render_bundle 'main' 'css' %}
         {% endblock stylesheet %}
         {# Favicon #}
         <link rel="shortcut icon"
