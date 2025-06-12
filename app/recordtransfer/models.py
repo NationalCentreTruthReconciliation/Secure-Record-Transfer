@@ -589,8 +589,8 @@ class TempUploadedFile(BaseUploadedFile):
     class Meta(BaseUploadedFile.Meta):
         """Meta information."""
 
-        verbose_name = "Temporary uploaded file"
-        verbose_name_plural = "Temporary uploaded files"
+        verbose_name = "File Currently Being Uploaded"
+        verbose_name_plural = "Files Currently Being Uploaded"
 
     file_upload = models.FileField(
         null=True, storage=TempFileStorage, upload_to=session_upload_location
