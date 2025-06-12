@@ -279,6 +279,15 @@ wheels = [
 ]
 
 [[package]]
+name = "django-webpack-loader"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/6d/59f24beaafc18a6924ec277c7ffe693e1831b88b52089dfd84a937a4fa84/django-webpack-loader-1.0.0.tar.gz", hash = "sha256:2cee0ff147bd0f34e046c23835720d7e3eabddcba3bfab1853d9c4fd0df12565", size = 13475, upload-time = "2021-05-12T19:49:28.405Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/7e/75459ec15a2b4c16b71a62a40a5fa33e82d0357f7ec30e177390c7037fae/django_webpack_loader-1.0.0-py2.py3-none-any.whl", hash = "sha256:9a768b03f33d0a6977aceb67ddd02eba7a9e3763ae30004ee512d90628ed5713", size = 14309, upload-time = "2021-05-12T19:49:26.684Z" },
+]
+
+[[package]]
 name = "djlint"
 version = "1.36.4"
 source = { registry = "https://pypi.org/simple" }
@@ -789,6 +798,7 @@ dependencies = [
     { name = "django-htmx" },
     { name = "django-recaptcha" },
     { name = "django-rq" },
+    { name = "django-webpack-loader" },
     { name = "python-decouple" },
     { name = "rq-scheduler" },
     { name = "setuptools" },
@@ -830,6 +840,7 @@ requires-dist = [
     { name = "django-htmx", specifier = ">=1.23.0,<2" },
     { name = "django-recaptcha", specifier = ">=4.0.0,<5" },
     { name = "django-rq", specifier = ">=3.0.0,<4" },
+    { name = "django-webpack-loader", specifier = "==1.0.0" },
     { name = "djlint", marker = "extra == 'dev'", specifier = ">=1.36.4" },
     { name = "freezegun", marker = "extra == 'dev'", specifier = ">=1.5.1,<2" },
     { name = "gunicorn", marker = "extra == 'prod'", specifier = ">=23.0.0,<24" },
