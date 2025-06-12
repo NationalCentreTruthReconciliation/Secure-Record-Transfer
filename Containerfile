@@ -85,6 +85,8 @@ RUN apt-get update && \
 COPY --from=builder ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
 COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
 COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
+COPY --from=builder ${PROJ_DIR}/app/static ${APP_DIR}/static
+COPY --from=builder ${PROJ_DIR}/webpack-stats.json ${PROJ_DIR}/webpack-stats.json
 COPY --from=builder ${APP_DIR} ${APP_DIR}
 # Activate virtual environment
 ENV PATH="${PROJ_DIR}/.venv/bin:$PATH"
