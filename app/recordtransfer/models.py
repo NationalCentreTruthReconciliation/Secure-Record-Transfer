@@ -432,7 +432,6 @@ class UploadSession(models.Model):
         Returns:
             A tuple containing lists of copied and missing files
         """
-
         if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
                 f"Cannot copy files from session {self.token} to {destination} because the "

@@ -137,9 +137,6 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    class Media:
-        js = ("admin_uploadedfile.bundle.js",)
-
     fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
 
     search_fields = [
