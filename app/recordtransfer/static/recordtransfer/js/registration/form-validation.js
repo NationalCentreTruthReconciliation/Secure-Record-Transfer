@@ -2,7 +2,7 @@
 /**
  * Sets up validation for the signup form, enabling
  *  or disabling the submit button based on required fields.
- * @param buttonID
+ * @param {string} buttonID - The ID of the submit button to enable or disable.
  */
 function setupFormValidation(buttonID) {
     const form = document.querySelector("form");
