@@ -3,6 +3,8 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const glob = require("glob");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const sharp = require("sharp");
+const BundleTracker = require("webpack-bundle-tracker");
+
 
 console.info("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE);
 
@@ -130,6 +132,8 @@ module.exports = {
         new WebPConverterPlugin({
             quality: 80
         }),
+        new BundleTracker({filename: "./webpack-stats.json"}),
+
     ],
     optimization: {
         minimizer: [
