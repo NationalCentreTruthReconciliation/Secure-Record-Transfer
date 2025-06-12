@@ -77,6 +77,11 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
     return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
 
 
+def media_url(obj: BaseUploadedFile):
+    """Return the media URL for a BaseUploadedFile instance."""
+    return format_html('<a href="{}">{}</a>', obj.get_file_access_url(), obj.file_upload.name)
+
+
 class ReadOnlyAdmin(admin.ModelAdmin):
     """A model admin that does not allow any editing/changing/ or deletions.
 
@@ -137,7 +142,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), media_url]
 
     search_fields = [
         "name",
@@ -183,7 +188,6 @@ class PermUploadedFileInline(ReadOnlyInline):
     model = PermUploadedFile
     fields = ["name", format_upload_size, "exists"]
     readonly_fields = ["exists", format_upload_size]
-
 
 @admin.register(UploadSession)
 class UploadSessionAdmin(ReadOnlyAdmin):

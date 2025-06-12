@@ -199,7 +199,7 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(response_json["uploadSessionToken"], self.token)
         self.assertEqual(self.session.file_count, 1)
         # Check that no error is raised if the uploaded file is looked up within the session
-        self.session.get_temp_file_by_name("File.pdf")
+        self.session.get_file_by_name("File.pdf")
 
     def test_error_from_invalid_token(self) -> None:
         """Test that a 400 error is received if the token is invalid."""

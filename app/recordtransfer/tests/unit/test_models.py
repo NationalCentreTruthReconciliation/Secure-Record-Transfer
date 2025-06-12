@@ -533,7 +533,7 @@ class TestUploadSession(TestCase):
         """Test getting a temp file from the session by name."""
         mock_temp_files.get = MagicMock(return_value=self.test_temp_file)
         self.session.status = UploadSession.SessionStatus.UPLOADING
-        temp_uploaded_file = self.session.get_temp_file_by_name(self.test_temp_file.name)
+        temp_uploaded_file = self.session.get_file_by_name(self.test_temp_file.name)
         self.assertIsNotNone(temp_uploaded_file)
         self.assertEqual(temp_uploaded_file.name, self.test_temp_file.name)
 
@@ -553,7 +553,7 @@ class TestUploadSession(TestCase):
         for status in statuses:
             self.session.status = status
             with self.assertRaises(ValueError):
-                self.session.get_temp_file_by_name(self.test_file_1.name)
+                self.session.get_file_by_name(self.test_file_1.name)
 
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_get_temporary_uploads(self, mock_temp_files: BaseManager) -> None:

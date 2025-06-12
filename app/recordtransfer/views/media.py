@@ -187,7 +187,6 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
         )
 
 
-@validate_upload_access
 @require_http_methods(["DELETE", "GET"])
 def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
     """Get or delete a file that has been uploaded in a given upload session.
@@ -238,7 +237,7 @@ def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> Http
 
 def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpResponse:
     try:
-        uploaded_file = session.get_temp_file_by_name(file_name)
+        uploaded_file = session.get_file_by_name(file_name)
     except FileNotFoundError:
         return JsonResponse(
             {"error": gettext("File not found in upload session")},
