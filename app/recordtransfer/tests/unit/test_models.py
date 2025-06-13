@@ -1276,10 +1276,7 @@ class TestSubmission(TestCase):
         ]
 
         # Try to re-make the bag. The algorithms do not match so the Bag will be re-created
-        # Ensure bagit.make_bag is called again by mocking it this time
-        with patch("bagit.make_bag") as make_bag_mock:
-            self.submission.make_bag(["sha1", "sha256"])
-            make_bag_mock.assert_called_once()
+        self.submission.make_bag(["sha1", "sha256"])
 
         self.assertEqual(copy_uploads_mock.call_count, 2)
         self.assertTrue((self.submission.location / "manifest-sha1.txt").exists())
