@@ -203,7 +203,10 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
             X-Accel-Redirect to the file's media path if in production.
     """
     try:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
+        if request.user.is_staff:
+            session = UploadSession.objects.filter(token=session_token).first()
+        else:
+            session = UploadSession.objects.filter(token=session_token, user=request.user).first()
         if not session:
             return JsonResponse(
                 {"error": gettext("Invalid filename or upload session token")}, status=404
