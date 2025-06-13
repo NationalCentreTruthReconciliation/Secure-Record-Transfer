@@ -944,6 +944,12 @@ class Submission(models.Model):
         """Get a string representation of this submission."""
         return f"Submission by {self.user} at {self.submission_date}"
 
+    def __repr__(self) -> str:
+        """Get a detailed string representation of this submission."""
+        user = f"'{self.user.username}'" if self.user else "None"
+        session = f"'{self.upload_session.token[0:8]}...'" if self.upload_session else "None"
+        return f"<Submission(uuid='{self.uuid}', submission_date='{self.submission_date}' user={user}, upload_session={session})>"
+
 
 class Job(models.Model):
     """A background job executed by an admin user."""
