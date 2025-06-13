@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from datetime import datetime, timedelta
 from datetime import timezone as dttimezone
+from itertools import chain
 from pathlib import Path
 from typing import Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
@@ -1054,7 +1055,10 @@ class TestSubmission(TestCase):
 
     def tearDown(self) -> None:
         """Remove any temp files created during test."""
-        for item in Path(settings.BAG_STORAGE_FOLDER).iterdir():
+        for item in chain(
+            Path(settings.BAG_STORAGE_FOLDER).iterdir(),
+            Path(settings.TEMP_STORAGE_FOLDER).iterdir(),
+        ):
             if item.is_file():
                 item.unlink()
             else:
@@ -1129,11 +1133,12 @@ class TestSubmission(TestCase):
         """Test creating a new Bag when one does not exist."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
 
-        self.submission.make_bag(["md5"])
+        bag = self.submission.make_bag(["md5"])
 
         copy_uploads_mock.assert_called_once_with(str(self.submission.location))
 
         self.assertTrue(self.submission.location.exists())
+        self.assertTrue(bag.is_valid())
         self.assertTrue((self.submission.location / "data").exists())
         self.assertTrue((self.submission.location / "data" / "hello.txt").exists())
         self.assertTrue((self.submission.location / "data" / "world.txt").exists())
@@ -1147,6 +1152,27 @@ class TestSubmission(TestCase):
         self.assertEqual(len(manifest_lines), 2)
         self.assertIn(f"{self.HELLO_FILE_MD5}  data/hello.txt", manifest_lines)
         self.assertIn(f"{self.WORLD_FILE_MD5}  data/world.txt", manifest_lines)
+
+    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    def test_create_new_bag_explicit_location(self, copy_uploads_mock: MagicMock) -> None:
+        """Test creating a new Bag in an explicitly set location."""
+        copy_uploads_mock.side_effect = self._create_new_files_OK
+
+        explicit_location = Path(settings.TEMP_STORAGE_FOLDER) / "sample-location"
+        explicit_location.mkdir(parents=True, exist_ok=True)
+
+        bag = self.submission.make_bag(
+            ["md5"],
+            location=explicit_location,
+        )
+
+        copy_uploads_mock.assert_called_once_with(str(explicit_location))
+
+        self.assertFalse(self.submission.location.exists())
+        self.assertTrue(explicit_location.exists())
+        self.assertTrue(bag.is_valid())
+        self.assertTrue((explicit_location / "data").exists())
+        self.assertEqual(len(list(bag.payload_files())), 2)
 
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
     def test_create_new_bag_multiple_algorithms(self, copy_uploads_mock: MagicMock) -> None:
