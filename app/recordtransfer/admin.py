@@ -77,6 +77,7 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
     return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
 
 
+@display(description=gettext("File Link"))
 def media_url(obj: BaseUploadedFile):
     """Return the media URL for a BaseUploadedFile instance."""
     return format_html('<a href="{}">{}</a>', obj.get_file_access_url(), obj.file_upload.name)
@@ -171,8 +172,8 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = ["name", format_upload_size, "exists"]
-    readonly_fields = ["exists", format_upload_size]
+    fields = ["name", media_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", media_url, format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -186,8 +187,9 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = ["name", format_upload_size, "exists"]
-    readonly_fields = ["exists", format_upload_size]
+    fields = ["name", media_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", media_url, format_upload_size]
+
 
 @admin.register(UploadSession)
 class UploadSessionAdmin(ReadOnlyAdmin):
