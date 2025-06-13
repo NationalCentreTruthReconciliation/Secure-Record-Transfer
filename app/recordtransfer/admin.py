@@ -10,13 +10,12 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
-from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
@@ -67,7 +66,7 @@ def linkify(field_name: str) -> Callable:
 
 @receiver(pre_delete, sender=Job)
 def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
-    """FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
+    """FileFields are not deleted automatically after Django 1.11, instead this receiver doesit."""
     instance.attached_file.delete(False)
 
 
@@ -78,7 +77,7 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
 
 
 @display(description=gettext("File Link"))
-def media_url(obj: BaseUploadedFile):
+def media_url(obj: BaseUploadedFile) -> SafeText:
     """Return the media URL for a BaseUploadedFile instance."""
     return format_html('<a href="{}">{}</a>', obj.get_file_access_url(), obj.file_upload.name)
 
@@ -225,14 +224,22 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "expires_at",
     ]
 
-    inlines = [
-        TempUploadedFileInline,
-        PermUploadedFileInline,
-    ]
-
     ordering = [
         "-started_at",
     ]
+
+    def get_inlines(self, request, obj=None) -> list:
+        """Return the inlines to display for the UploadSession."""
+        if obj and obj.status in {
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            UploadSession.SessionStatus.EXPIRED,
+        }:
+            return [TempUploadedFileInline]
+        elif obj and obj.status == UploadSession.SessionStatus.STORED:
+            return [PermUploadedFileInline]
+        return []
 
     def file_count(self, obj: UploadSession) -> Union[int, str]:
         """Display the number of files uploaded to the session."""
