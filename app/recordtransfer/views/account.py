@@ -1,6 +1,8 @@
 """Views for creating and activating user accounts."""
 
 from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -103,3 +105,29 @@ class ActivationInvalid(TemplateView):
     """The page a user sees if their account could not be activated."""
 
     template_name = "recordtransfer/activation_invalid.html"
+
+
+class Login(LoginView):
+    """Custom LoginView that supports HTMX requests for login forms."""
+
+    template_name = "registration/login.html"
+
+    def form_valid(self, form: AuthenticationForm) -> HttpResponse:
+        """Successful login handler."""
+        super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            response = HttpResponse()
+            response["HX-Redirect"] = self.get_success_url()
+            return response
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
+        """Handle invalid login form submissions."""
+        if self.request.headers.get("HX-Request"):
+            html = render_to_string(
+                "registration/login_errors.html",  # Changed to form-only template
+                {"form": form},
+                request=self.request,
+            )
+            return HttpResponse(html)
+        return super().form_invalid(form)
