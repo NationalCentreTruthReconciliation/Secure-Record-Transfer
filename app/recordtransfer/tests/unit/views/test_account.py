@@ -230,6 +230,30 @@ class TestCreateAccount(TestCase):
         self.assertFalse(new_user.is_staff)
         self.assertFalse(new_user.is_superuser)
 
+    def test_htmx_post_valid_form(self) -> None:
+        """Test successful account creation via HTMX request."""
+        initial_user_count = User.objects.count()
+
+        response = self.client.post(
+            self.create_account_url,
+            data=self.valid_form_data,
+            HTTP_HX_REQUEST="true",  # Add HTMX header
+        )
+
+        # Check for HX-Redirect response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers["HX-Redirect"], reverse("recordtransfer:activation_sent")
+        )
+
+        # Check user was created
+        self.assertEqual(User.objects.count(), initial_user_count + 1)
+        new_user = User.objects.get(username="testuser123")
+        self.assertFalse(new_user.is_active)
+
+        # Check activation email was sent
+        self.mock_send_email.assert_called_once_with(new_user)
+
 
 class TestActivateAccount(TestCase):
     """Tests for the ActivateAccount view."""
