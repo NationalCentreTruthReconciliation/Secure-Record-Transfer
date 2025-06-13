@@ -3,8 +3,8 @@ import shutil
 import tempfile
 from datetime import datetime, timedelta
 from datetime import timezone as dttimezone
-from itertools import chain
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
@@ -1049,16 +1049,9 @@ class TestSubmission(TestCase):
             bag_name="the-bag",
         )
 
-        bag_folder = Path(settings.BAG_STORAGE_FOLDER)
-        if not bag_folder.exists():
-            bag_folder.mkdir()
-
     def tearDown(self) -> None:
         """Remove any temp files created during test."""
-        for item in chain(
-            Path(settings.BAG_STORAGE_FOLDER).iterdir(),
-            Path(settings.TEMP_STORAGE_FOLDER).iterdir(),
-        ):
+        for item in Path(settings.TEMP_STORAGE_FOLDER).iterdir():
             if item.is_file():
                 item.unlink()
             else:
@@ -1085,8 +1078,11 @@ class TestSubmission(TestCase):
             upload_session=self.upload_session,
         )
 
-        with self.assertRaises(ValueError):
-            self.improper_submission.make_bag(["md5"])
+        with (
+            self.assertRaises(ValueError),
+            TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir,
+        ):
+            self.improper_submission.make_bag(Path(temp_dir), ["md5"])
 
     def test_create_bag_exception_if_no_upload(self) -> None:
         """Assert that a ValueError is raised if there's no UploadSession."""
@@ -1095,8 +1091,11 @@ class TestSubmission(TestCase):
             metadata=self.metadata,
         )
 
-        with self.assertRaises(ValueError):
-            self.improper_submission.make_bag(["md5"])
+        with (
+            self.assertRaises(ValueError),
+            TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir,
+        ):
+            self.improper_submission.make_bag(Path(temp_dir), ["md5"])
 
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
     @patch("recordtransfer.models.Submission.remove_bag")
@@ -1106,8 +1105,11 @@ class TestSubmission(TestCase):
         """Test that an exception is thrown if there are missing files."""
         copy_uploads_mock.side_effect = self._create_new_files_MISSING
 
-        with self.assertRaises(FileNotFoundError):
-            self.submission.make_bag(["md5"])
+        with (
+            self.assertRaises(FileNotFoundError),
+            TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir,
+        ):
+            self.submission.make_bag(Path(temp_dir), ["md5"])
 
         # Check that the Bag is removed after an error
         remove_bag_mock.assert_called_once()
@@ -1122,8 +1124,11 @@ class TestSubmission(TestCase):
         copy_uploads_mock.side_effect = self._create_new_files_OK
         bag_valid_mock.return_value = False
 
-        with self.assertRaises(bagit.BagValidationError):
-            self.submission.make_bag(["md5"])
+        with (
+            self.assertRaises(bagit.BagValidationError),
+            TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir,
+        ):
+            self.submission.make_bag(Path(temp_dir), ["md5"])
 
         # Check that the Bag is removed after an error
         remove_bag_mock.assert_called_once()
@@ -1133,58 +1138,41 @@ class TestSubmission(TestCase):
         """Test creating a new Bag when one does not exist."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
 
-        bag = self.submission.make_bag(["md5"])
+        with TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir:
+            temp_dir_path = Path(temp_dir)
 
-        copy_uploads_mock.assert_called_once_with(str(self.submission.location))
+            bag = self.submission.make_bag(temp_dir_path, ["md5"])
 
-        self.assertTrue(self.submission.location.exists())
-        self.assertTrue(bag.is_valid())
-        self.assertTrue((self.submission.location / "data").exists())
-        self.assertTrue((self.submission.location / "data" / "hello.txt").exists())
-        self.assertTrue((self.submission.location / "data" / "world.txt").exists())
-        self.assertTrue((self.submission.location / "manifest-md5.txt").exists())
-        # Read all non-empty lines in manifest file
-        manifest_lines = list(
-            filter(
-                None, Path(self.submission.location / "manifest-md5.txt").read_text().split("\n")
+            copy_uploads_mock.assert_called_once_with(temp_dir)
+
+            self.assertTrue(temp_dir_path.exists())
+            self.assertTrue(bag.is_valid())
+            self.assertTrue((temp_dir_path / "data").exists())
+            self.assertTrue((temp_dir_path / "data" / "hello.txt").exists())
+            self.assertTrue((temp_dir_path / "data" / "world.txt").exists())
+            self.assertTrue((temp_dir_path / "manifest-md5.txt").exists())
+            # Read all non-empty lines in manifest file
+            manifest_lines = list(
+                filter(None, Path(temp_dir_path / "manifest-md5.txt").read_text().split("\n"))
             )
-        )
-        self.assertEqual(len(manifest_lines), 2)
-        self.assertIn(f"{self.HELLO_FILE_MD5}  data/hello.txt", manifest_lines)
-        self.assertIn(f"{self.WORLD_FILE_MD5}  data/world.txt", manifest_lines)
-
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
-    def test_create_new_bag_explicit_location(self, copy_uploads_mock: MagicMock) -> None:
-        """Test creating a new Bag in an explicitly set location."""
-        copy_uploads_mock.side_effect = self._create_new_files_OK
-
-        explicit_location = Path(settings.TEMP_STORAGE_FOLDER) / "sample-location"
-        explicit_location.mkdir(parents=True, exist_ok=True)
-
-        bag = self.submission.make_bag(
-            ["md5"],
-            location=explicit_location,
-        )
-
-        copy_uploads_mock.assert_called_once_with(str(explicit_location))
-
-        self.assertFalse(self.submission.location.exists())
-        self.assertTrue(explicit_location.exists())
-        self.assertTrue(bag.is_valid())
-        self.assertTrue((explicit_location / "data").exists())
-        self.assertEqual(len(list(bag.payload_files())), 2)
+            self.assertEqual(len(manifest_lines), 2)
+            self.assertIn(f"{self.HELLO_FILE_MD5}  data/hello.txt", manifest_lines)
+            self.assertIn(f"{self.WORLD_FILE_MD5}  data/world.txt", manifest_lines)
 
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
     def test_create_new_bag_multiple_algorithms(self, copy_uploads_mock: MagicMock) -> None:
         """Test creating a new Bag with multiple checksum algorithms."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
 
-        self.submission.make_bag(["md5", "sha1", "sha256"])
+        with TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir:
+            temp_dir_path = Path(temp_dir)
 
-        self.assertTrue(self.submission.location.exists())
-        self.assertTrue((self.submission.location / "manifest-md5.txt").exists())
-        self.assertTrue((self.submission.location / "manifest-sha1.txt").exists())
-        self.assertTrue((self.submission.location / "manifest-sha256.txt").exists())
+            self.submission.make_bag(temp_dir_path, ["md5", "sha1", "sha256"])
+
+            self.assertTrue(temp_dir_path.exists())
+            self.assertTrue((temp_dir_path / "manifest-md5.txt").exists())
+            self.assertTrue((temp_dir_path / "manifest-sha1.txt").exists())
+            self.assertTrue((temp_dir_path / "manifest-sha256.txt").exists())
 
     @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
@@ -1199,37 +1187,40 @@ class TestSubmission(TestCase):
             self.test_perm_file_expected_2,
         ]
 
-        # Make a bag first
-        self.submission.make_bag(["md5"])
+        with TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir:
+            temp_dir_path = Path(temp_dir)
 
-        # Check the first title
-        self.assertIn(
-            "accessionTitle: My Test Title",
-            (self.submission.location / "bag-info.txt").read_text(),
-        )
+            # Make a bag first
+            self.submission.make_bag(temp_dir_path, ["md5"])
 
-        # Store the modification time of the hello.txt file
-        mod_time_before = (self.submission.location / "data" / "hello.txt").stat().st_mtime
+            # Check the first title
+            self.assertIn(
+                "accessionTitle: My Test Title",
+                (temp_dir_path / "bag-info.txt").read_text(),
+            )
 
-        # Change the accession title (so there's something to update in the bag)
-        self.metadata.accession_title = "New Title"
-        self.metadata.save()
+            # Store the modification time of the hello.txt file
+            mod_time_before = (temp_dir_path / "data" / "hello.txt").stat().st_mtime
 
-        # Update the bag, and be sure bagit.make_bag is not called
-        with patch("bagit.make_bag") as make_bag_mock:
-            self.submission.make_bag(["md5"])
-            make_bag_mock.assert_not_called()
+            # Change the accession title (so there's something to update in the bag)
+            self.metadata.accession_title = "New Title"
+            self.metadata.save()
 
-        # Check that the bag's metadata was updated
-        self.assertIn(
-            "accessionTitle: New Title",
-            (self.submission.location / "bag-info.txt").read_text(),
-        )
+            # Update the bag, and be sure bagit.make_bag is not called
+            with patch("bagit.make_bag") as make_bag_mock:
+                self.submission.make_bag(temp_dir_path, ["md5"])
+                make_bag_mock.assert_not_called()
 
-        # Check that the modification time of the file was not changed
-        mod_time_after = (self.submission.location / "data" / "hello.txt").stat().st_mtime
+            # Check that the bag's metadata was updated
+            self.assertIn(
+                "accessionTitle: New Title",
+                (temp_dir_path / "bag-info.txt").read_text(),
+            )
 
-        self.assertEqual(mod_time_before, mod_time_after)
+            # Check that the modification time of the file was not changed
+            mod_time_after = (temp_dir_path / "data" / "hello.txt").stat().st_mtime
+
+            self.assertEqual(mod_time_before, mod_time_after)
 
     @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
@@ -1239,22 +1230,25 @@ class TestSubmission(TestCase):
         """Test the case where the permanent files do not match what's in the bag."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
 
-        # Make a bag first
-        self.submission.make_bag(["md5"])
+        with TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir:
+            temp_dir_path = Path(temp_dir)
 
-        # Return two unexpected files
-        perm_upload_mock.return_value = [
-            self.test_perm_file_unexpected_1,
-            self.test_perm_file_unexpected_2,
-        ]
+            # Make a bag first
+            self.submission.make_bag(temp_dir_path, ["md5"])
 
-        # Try to re-make the bag. The permanent uploads do not match so the Bag will be re-created
-        # Ensure bagit.make_bag is called again by mocking it this time
-        with patch("bagit.make_bag") as make_bag_mock:
-            self.submission.make_bag(["md5"])
-            make_bag_mock.assert_called_once()
+            # Return two unexpected files
+            perm_upload_mock.return_value = [
+                self.test_perm_file_unexpected_1,
+                self.test_perm_file_unexpected_2,
+            ]
 
-        self.assertEqual(copy_uploads_mock.call_count, 2)
+            # Try to re-make the bag. The permanent uploads do not match so the Bag will be
+            # re-created. Ensure bagit.make_bag is called again by mocking it this time
+            with patch("bagit.make_bag") as make_bag_mock:
+                self.submission.make_bag(temp_dir_path, ["md5"])
+                make_bag_mock.assert_called_once()
+
+            self.assertEqual(copy_uploads_mock.call_count, 2)
 
     @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
@@ -1265,24 +1259,27 @@ class TestSubmission(TestCase):
         """Test the case where a BagError is thrown when trying to update the Bag."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
 
-        # Make a bag first with MD5 checksums
-        self.submission.make_bag(["md5"])
+        with TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir:
+            temp_dir_path = Path(temp_dir)
 
-        # Return two expected files
-        perm_upload_mock.return_value = [
-            self.test_perm_file_expected_1,
-            self.test_perm_file_expected_2,
-        ]
+            # Make a bag first with MD5 checksums
+            self.submission.make_bag(temp_dir_path, ["md5"])
 
-        bag_mock.side_effect = bagit.BagError("Expected bagit.txt does not exist")
+            # Return two expected files
+            perm_upload_mock.return_value = [
+                self.test_perm_file_expected_1,
+                self.test_perm_file_expected_2,
+            ]
 
-        # Try to re-make the bag. There will be a BagError, so the Bag will be re-generated
-        # Ensure bagit.make_bag is called again by mocking it this time
-        with patch("bagit.make_bag") as make_bag_mock:
-            self.submission.make_bag(["md5"])
-            make_bag_mock.assert_called_once()
+            bag_mock.side_effect = bagit.BagError("Expected bagit.txt does not exist")
 
-        self.assertEqual(copy_uploads_mock.call_count, 2)
+            # Try to re-make the bag. There will be a BagError, so the Bag will be re-generated
+            # Ensure bagit.make_bag is called again by mocking it this time
+            with patch("bagit.make_bag") as make_bag_mock:
+                self.submission.make_bag(temp_dir_path, ["md5"])
+                make_bag_mock.assert_called_once()
+
+            self.assertEqual(copy_uploads_mock.call_count, 2)
 
     @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
     @patch("recordtransfer.models.UploadSession.copy_session_uploads")
@@ -1292,21 +1289,24 @@ class TestSubmission(TestCase):
         """Test the case where different checksums are requested for a Bag."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
 
-        # Make a bag first with MD5 checksums
-        self.submission.make_bag(["md5"])
+        with TemporaryDirectory(dir=settings.TEMP_STORAGE_FOLDER) as temp_dir:
+            temp_dir_path = Path(temp_dir)
 
-        # Return two expected files
-        perm_upload_mock.return_value = [
-            self.test_perm_file_expected_1,
-            self.test_perm_file_expected_2,
-        ]
+            # Make a bag first with MD5 checksums
+            self.submission.make_bag(temp_dir_path, ["md5"])
 
-        # Try to re-make the bag. The algorithms do not match so the Bag will be re-created
-        self.submission.make_bag(["sha1", "sha256"])
+            # Return two expected files
+            perm_upload_mock.return_value = [
+                self.test_perm_file_expected_1,
+                self.test_perm_file_expected_2,
+            ]
 
-        self.assertEqual(copy_uploads_mock.call_count, 2)
-        self.assertTrue((self.submission.location / "manifest-sha1.txt").exists())
-        self.assertTrue((self.submission.location / "manifest-sha256.txt").exists())
+            # Try to re-make the bag. The algorithms do not match so the Bag will be re-created
+            self.submission.make_bag(temp_dir_path, ["sha1", "sha256"])
+
+            self.assertEqual(copy_uploads_mock.call_count, 2)
+            self.assertTrue((temp_dir_path / "manifest-sha1.txt").exists())
+            self.assertTrue((temp_dir_path / "manifest-sha256.txt").exists())
 
 
 class TestInProgressSubmission(TestCase):

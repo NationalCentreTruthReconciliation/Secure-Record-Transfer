@@ -1,6 +1,7 @@
 import logging
 import tempfile
 import zipfile
+from pathlib import Path
 
 import django_rq
 from django.conf import settings
@@ -11,6 +12,7 @@ from django.utils import timezone
 from recordtransfer import utils
 from recordtransfer.emails import send_user_in_progress_submission_expiring
 from recordtransfer.handlers import JobLogHandler
+from recordtransfer.models import LOGGER as RECORDTRANSFER_MODELS_LOGGER
 from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
 
 LOGGER = logging.getLogger(__name__)
@@ -40,27 +42,34 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
     # Set up job logging handler
     job_handler = JobLogHandler(new_job)
     job_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-    LOGGER.addHandler(job_handler)
 
     try:
-        LOGGER.info("Creating zipped bag from %s", submission.location)
+        LOGGER.addHandler(job_handler)
+        RECORDTRANSFER_MODELS_LOGGER.addHandler(job_handler)
 
-        submission.make_bag(algorithms=settings.BAG_CHECKSUMS)
+        with (
+            tempfile.TemporaryFile(
+                suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
+            ) as temp_zip_file,
+            tempfile.TemporaryDirectory(
+                prefix=f"Job-{new_job.pk:06d}-", dir=settings.TEMP_STORAGE_FOLDER
+            ) as temp_dir,
+        ):
+            LOGGER.info("Creating Bag for submission %s at %s ...", repr(submission), temp_dir)
 
-        with tempfile.TemporaryFile(
-            suffix=".zip", dir=settings.TEMP_STORAGE_FOLDER
-        ) as temp_zip_file:
+            submission.make_bag(algorithms=settings.BAG_CHECKSUMS, location=Path(temp_dir))
+
             LOGGER.info(
-                "Creating temporary zip file on disk at %s ...",
+                "Zipping Bag to temp file on disk at %s ...",
                 f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
             )
             utils.zip_directory(
-                str(submission.location),
+                temp_dir,
                 zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
             )
             LOGGER.info("Zipped directory successfully")
 
-            file_name = f"{user_triggered.username}-{submission.bag_name}.zip"
+            file_name = f"{submission.bag_name}.zip"
             LOGGER.info("Saving zip file as %s ...", file_name)
             new_job.attached_file.save(file_name, File(temp_zip_file), save=True)
             LOGGER.info("Saved file successfully")
@@ -78,6 +87,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
 
     finally:
         LOGGER.removeHandler(job_handler)
+        RECORDTRANSFER_MODELS_LOGGER.removeHandler(job_handler)
         job_handler.close()
 
 
