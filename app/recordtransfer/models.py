@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import uuid
+from enum import Enum
 from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Optional, Union
@@ -13,10 +14,11 @@ from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -46,6 +48,451 @@ class User(AbstractUser):
     def get_full_name(self) -> str:
         """Return the full name of the user, which is a combination of first and last names."""
         return self.first_name + " " + self.last_name
+
+
+class SiteSetting(models.Model):
+    """A model to store configurable site settings that administrators can modify
+    through the Django admin interface without requiring code changes.
+
+    This model supports caching of settings values for improved performance.
+
+    Adding a New Setting
+    --------------------
+
+    To add a new setting to the database, follow these steps:
+
+    1. **Add a new entry to the Key enum class**:
+       Add your new setting key to the :class:`Key` enum. The key should be descriptive and follow
+       existing naming conventions (i.e., all uppercase with underscores).
+
+    2. **Add a description for the new setting**:
+       Add an entry to the ``_get_descriptions()`` method mapping your new key to a
+       human-readable description. This description will be displayed in the admin interface
+       and should explain what the setting controls.
+
+    3. **Create a data migration**:
+       Create a Django data migration to add the setting to the database. The migration
+       should create a new SiteSetting instance with the required fields:
+
+       - ``key``: Must be unique and match the enum value (string)
+       - ``value``: The default value as a string
+       - ``value_type``: Either "int" for integers or "str" for strings
+
+       Example migration for a string setting::
+
+           from django.db import migrations
+
+
+           def add_new_setting(apps, schema_editor):
+               SiteSetting = apps.get_model("recordtransfer", "SiteSetting")
+               SiteSetting.objects.get_or_create(
+                   key="NEW_SETTING_NAME",
+                   defaults={"value": "Default string value", "value_type": "str"},
+               )
+
+
+           class Migration(migrations.Migration):
+               dependencies = [
+                   ("recordtransfer", "XXXX_previous_migration"),
+               ]
+
+               operations = [
+                   migrations.RunPython(add_new_setting),
+               ]
+
+    4. **Validation requirements**:
+       - The ``key`` field must be unique across all settings
+       - For ``value_type`` "int": the ``value`` must be a valid string representation
+         of an integer (e.g., "42", "-1", "0")
+       - For ``value_type`` "str": the ``value`` can be any string
+       - ``change_date`` is auto-generated and ``changed_by`` does not need to be set
+
+    Removing a Setting
+    ------------------
+
+    To remove an existing setting from the database:
+
+    1. **Remove the key from the Key enum class**:
+       Delete the corresponding enum entry from the :class:`Key` enum.
+
+    2. **Remove the description**:
+       Remove the corresponding entry from the ``_get_descriptions()`` method.
+
+    3. **Create a data migration**:
+       Create a Django data migration to remove the setting from the database::
+
+           from django.db import migrations
+
+
+           def remove_old_setting(apps, schema_editor):
+               SiteSetting = apps.get_model("recordtransfer", "SiteSetting")
+               SiteSetting.objects.filter(key="OLD_SETTING_NAME").delete()
+
+
+           class Migration(migrations.Migration):
+               dependencies = [
+                   ("recordtransfer", "XXXX_previous_migration"),
+               ]
+
+               operations = [
+                   migrations.RunPython(remove_old_setting),
+               ]
+
+    4. **Update code references**:
+       Remove any code that references the old setting key.
+
+    Retrieving Settings in Code
+    ---------------------------
+
+    Once a setting has been added to the database, retrieve it using the appropriate static method:
+
+    - **For string settings**::
+
+        value = SiteSetting.get_value_str(SiteSetting.Key.SETTING_NAME)
+
+    - **For integer settings**::
+
+        value = SiteSetting.get_value_int(SiteSetting.Key.SETTING_NAME)
+    """
+
+    class Key(Enum):
+        """The keys for the site settings. These keys are used to store and retrieve settings from
+        the database.
+        """
+
+        # Emails
+        ARCHIVIST_EMAIL = "ARCHIVIST_EMAIL"
+        DO_NOT_REPLY_USERNAME = "DO_NOT_REPLY_USERNAME"
+
+        # Pagination
+        PAGINATE_BY = "PAGINATE_BY"
+
+        # CAAIS dates
+        CAAIS_UNKNOWN_DATE_TEXT = "CAAIS_UNKNOWN_DATE_TEXT"
+        CAAIS_UNKNOWN_START_DATE = "CAAIS_UNKNOWN_START_DATE"
+        CAAIS_UNKNOWN_END_DATE = "CAAIS_UNKNOWN_END_DATE"
+        APPROXIMATE_DATE_FORMAT = "APPROXIMATE_DATE_FORMAT"
+
+        # CAAIS defaults
+        CAAIS_DEFAULT_REPOSITORY = "CAAIS_DEFAULT_REPOSITORY"
+        CAAIS_DEFAULT_ACCESSION_TITLE = "CAAIS_DEFAULT_ACCESSION_TITLE"
+        CAAIS_DEFAULT_ARCHIVAL_UNIT = "CAAIS_DEFAULT_ARCHIVAL_UNIT"
+        CAAIS_DEFAULT_DISPOSITION_AUTHORITY = "CAAIS_DEFAULT_DISPOSITION_AUTHORITY"
+        CAAIS_DEFAULT_ACQUISITION_METHOD = "CAAIS_DEFAULT_ACQUISITION_METHOD"
+        CAAIS_DEFAULT_STATUS = "CAAIS_DEFAULT_STATUS"
+        CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY = "CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY"
+        CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY = "CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY"
+        CAAIS_DEFAULT_DATE_OF_MATERIALS = "CAAIS_DEFAULT_DATE_OF_MATERIALS"
+        CAAIS_DEFAULT_EXTENT_TYPE = "CAAIS_DEFAULT_EXTENT_TYPE"
+        CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE = "CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE"
+        CAAIS_DEFAULT_CONTENT_TYPE = "CAAIS_DEFAULT_CONTENT_TYPE"
+        CAAIS_DEFAULT_CARRIER_TYPE = "CAAIS_DEFAULT_CARRIER_TYPE"
+        CAAIS_DEFAULT_EXTENT_NOTE = "CAAIS_DEFAULT_EXTENT_NOTE"
+        CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT = "CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT"
+        CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL = "CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL"
+        CAAIS_DEFAULT_STORAGE_LOCATION = "CAAIS_DEFAULT_STORAGE_LOCATION"
+        CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE = (
+            "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE"
+        )
+        CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE = (
+            "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE"
+        )
+        CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE = (
+            "CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE"
+        )
+        CAAIS_DEFAULT_APPRAISAL_TYPE = "CAAIS_DEFAULT_APPRAISAL_TYPE"
+        CAAIS_DEFAULT_APPRAISAL_VALUE = "CAAIS_DEFAULT_APPRAISAL_VALUE"
+        CAAIS_DEFAULT_APPRAISAL_NOTE = "CAAIS_DEFAULT_APPRAISAL_NOTE"
+        CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE = "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE"
+        CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE = (
+            "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE"
+        )
+        CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE = "CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE"
+        CAAIS_DEFAULT_GENERAL_NOTE = "CAAIS_DEFAULT_GENERAL_NOTE"
+        CAAIS_DEFAULT_RULES_OR_CONVENTIONS = "CAAIS_DEFAULT_RULES_OR_CONVENTIONS"
+        CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD = "CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD"
+        # CAAIS event defaults
+        CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE = "CAAIS_DEFAULT_EVENT_TYPE"
+        CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT = "CAAIS_DEFAULT_EVENT_AGENT"
+        CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE = "CAAIS_DEFAULT_EVENT_NOTE"
+        # CAAIS creation defaults
+        CAAIS_DEFAULT_CREATION_TYPE = "CAAIS_DEFAULT_CREATION_TYPE"
+        CAAIS_DEFAULT_CREATION_AGENT = "CAAIS_DEFAULT_CREATION_AGENT"
+        CAAIS_DEFAULT_CREATION_NOTE = "CAAIS_DEFAULT_CREATION_NOTE"
+
+        @property
+        def description(self) -> str:
+            """Get the human-readable description for this setting key."""
+            return self._get_descriptions().get(self, "No description available.")
+
+        def _get_descriptions(self) -> dict:
+            """Return the mapping of keys to descriptions."""
+            return {
+                self.ARCHIVIST_EMAIL: "The email displayed for people to contact an archivist.",
+                self.DO_NOT_REPLY_USERNAME: (
+                    'A username for the application to send "do not reply" emails from. This '
+                    "username is combined with the site's base URL to create an email address. "
+                    "The URL can be set from the admin site."
+                ),
+                self.PAGINATE_BY: (
+                    "This setting controls how many rows of items are shown per page in tables "
+                    "that support pagination."
+                ),
+                self.APPROXIMATE_DATE_FORMAT: (
+                    'A format string for the date to indicate an approximate date. The string '
+                    'variable "{date}" must be present for the date format to be used.'
+                ),
+                # CAAIS dates
+                self.CAAIS_UNKNOWN_DATE_TEXT: (
+                    "A string to use in the CAAIS metadata when a user indicates that a date is "
+                    "not known."
+                ),
+                self.CAAIS_UNKNOWN_START_DATE: (
+                    "Default start date to use for unknown CAAIS date ranges in ISO format "
+                    "(YYYY-MM-DD)"
+                ),
+                self.CAAIS_UNKNOWN_END_DATE: (
+                    "Default end date to use for unknown CAAIS date ranges in ISO format "
+                    "(YYYY-MM-DD)"
+                ),
+                # CAAIS defaults
+                self.CAAIS_DEFAULT_REPOSITORY: (
+                    "Default value to fill in metadata for CAAIS sec. 1.1 - Repository"
+                ),
+                self.CAAIS_DEFAULT_ACCESSION_TITLE: (
+                    "Default value to fill in metadata for CAAIS sec. 1.3 - Accession Title"
+                ),
+                self.CAAIS_DEFAULT_ARCHIVAL_UNIT: (
+                    "Default value to fill in metadata for CAAIS sec. 1.4 - Archival Unit"
+                ),
+                self.CAAIS_DEFAULT_DISPOSITION_AUTHORITY: (
+                    "Default value to fill in metadata for CAAIS sec. 1.6 - Disposition Authority"
+                ),
+                self.CAAIS_DEFAULT_ACQUISITION_METHOD: (
+                    "Default value to fill in metadata for CAAIS sec. 1.5 - Acquisition Method"
+                ),
+                self.CAAIS_DEFAULT_STATUS: (
+                    "Default value to fill in metadata for CAAIS sec. 1.7 - Status"
+                ),
+                self.CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY: (
+                    "Default value to fill in metadata for CAAIS sec. 2.1.6 - Source "
+                    "Confidentiality"
+                ),
+                self.CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY: (
+                    "Default value to fill in metadata for CAAIS sec. 2.2 - Preliminary Custodial "
+                    "History"
+                ),
+                self.CAAIS_DEFAULT_DATE_OF_MATERIALS: (
+                    "Default value to fill in metadata for CAAIS sec. 3.1 - Date of Materials"
+                ),
+                self.CAAIS_DEFAULT_EXTENT_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.1 - Extent Type"
+                ),
+                self.CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.2 - Quantity and Unit of"
+                    " Measure"
+                ),
+                self.CAAIS_DEFAULT_CONTENT_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.3 - Content Type"
+                ),
+                self.CAAIS_DEFAULT_CARRIER_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.4 - Carrier Type"
+                ),
+                self.CAAIS_DEFAULT_EXTENT_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 3.2.5 - Extent Note"
+                ),
+                self.CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT: (
+                    "Default value to fill in metadata for CAAIS sec. 3.3 - Preliminary Scope and "
+                    "Content"
+                ),
+                self.CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL: (
+                    "Default value to fill in metadata for CAAIS sec. 3.4 - Language of Material"
+                ),
+                self.CAAIS_DEFAULT_STORAGE_LOCATION: (
+                    "Default value to fill in metadata for CAAIS sec. 4.1 - Storage Location"
+                ),
+                self.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.3.1 - Preservation "
+                    "Requirements Type"
+                ),
+                self.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.3.2 - Preservation "
+                    "Requirements Value"
+                ),
+                self.CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.3.3 - Preservation "
+                    "Requirements Note"
+                ),
+                self.CAAIS_DEFAULT_APPRAISAL_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.4.1 - Appraisal Type"
+                ),
+                self.CAAIS_DEFAULT_APPRAISAL_VALUE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.4.2 - Appraisal Value"
+                ),
+                self.CAAIS_DEFAULT_APPRAISAL_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.4.3 - Appraisal Note"
+                ),
+                self.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.5.1 - Associated "
+                    "Documentation Type"
+                ),
+                self.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.5.2 - Associated "
+                    "Documentation Title"
+                ),
+                self.CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 4.5.3 - Associated "
+                    "Documentation Note"
+                ),
+                self.CAAIS_DEFAULT_GENERAL_NOTE: (
+                    "Default value to fill in metadata for CAAIS sec. 6.1 - General Note"
+                ),
+                self.CAAIS_DEFAULT_RULES_OR_CONVENTIONS: (
+                    "Default value to fill in metadata for CAAIS sec. 7.1 - Rules or Conventions"
+                ),
+                self.CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD: (
+                    "Default value to fill in metadata for CAAIS sec. 7.3 - Language of Accession "
+                    "Record"
+                ),
+                # CAAIS event defaults
+                self.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE: (
+                    "Default submission event type name - related to CAAIS sec. 5.1.1"
+                ),
+                self.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT: (
+                    "Default submission event agent - related to CAAIS sec. 5.1.3"
+                ),
+                self.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE: (
+                    "Default submission event note - related to CAAIS sec. 5.1.4"
+                ),
+                # CAAIS creation defaults
+                self.CAAIS_DEFAULT_CREATION_TYPE: (
+                    "Default date of creation event name - related to CAAIS sec. 7.2.1"
+                ),
+                self.CAAIS_DEFAULT_CREATION_AGENT: (
+                    "Default date of creation event agent - related to CAAIS sec. 7.2.3"
+                ),
+                self.CAAIS_DEFAULT_CREATION_NOTE: (
+                    "Default date of creation event note - related to CAAIS sec. 7.2.4"
+                ),
+            }
+
+    class SettingType(models.TextChoices):
+        """The type of the setting value, stored as a string.
+
+        This is used to determine how the value should be interpreted when retrieved from the
+        database.
+
+        Attributes:
+            INT: Integer numeric values
+            STR: Text string values
+        """
+
+        INT = "int", _("Integer")
+        STR = "str", _("String")
+
+    key = models.CharField(max_length=255, unique=True, null=False, editable=False)
+    value = models.TextField()
+    value_type = models.CharField(
+        max_length=8,
+        choices=SettingType.choices,
+        verbose_name=_("Setting value type"),
+        null=False,
+        editable=False,
+    )
+
+    change_date = models.DateTimeField(
+        auto_now_add=True, editable=False, verbose_name=_("Change date")
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        editable=False,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Changed by"),
+    )
+
+    def set_cache(self, value: Union[str, int]) -> None:
+        """Cache the value of this setting."""
+        cache.set(self.key, value)
+
+    @staticmethod
+    def get_value_str(key: SiteSetting.Key) -> str:
+        """Get the value of a site setting of type :attr:`SettingType.STR` by its key.
+
+        Args:
+            key: The key of the setting to retrieve.
+
+        Returns:
+            The value of the setting as a string, cached if available, or fetched from the
+            database.
+
+        Raises:
+            ValidationError: If the setting is not of type :attr:`SettingType.STR`.
+        """
+        val = cache.get(key.value)
+        if val:
+            return val
+        obj = SiteSetting.objects.get(key=key.value)
+
+        obj.set_cache(obj.value)
+        return obj.value
+
+    @staticmethod
+    def get_value_int(key: SiteSetting.Key) -> int:
+        """Get the value of a site setting of type :attr:`SettingType.INT` by its key.
+
+        Args:
+            key: The key of the setting to retrieve.
+
+        Returns:
+            The value of the setting as an integer, cached if available, or fetched from the
+            database.
+
+        Raises:
+            ValidationError: If the setting is not of type :attr:`SettingType.INT`.
+        """
+        val = cache.get(key.value)
+        if val is not None:
+            return val
+
+        obj = SiteSetting.objects.get(key=key.value)
+
+        if obj.value_type != SiteSetting.SettingType.INT:
+            raise ValidationError(
+                f"Setting {key.value} is not of type INT, but of type {obj.value_type}"
+            )
+
+        return_value = int(obj.value)
+
+        obj.set_cache(return_value)
+        return return_value
+
+    def __str__(self) -> str:
+        """Return a human-readable representation of the setting."""
+        try:
+            key_enum = self.Key(self.key)
+            return f"{key_enum.name.replace('_', ' ').title()}"
+        except ValueError:
+            return f"Setting: {self.key}"
+
+
+@receiver(post_save, sender=SiteSetting)
+def update_cache_post_save(
+    sender: SiteSetting, instance: SiteSetting, created: bool, **kwargs
+) -> None:
+    """Update cached value when setting is saved, but not on creation."""
+    if created:
+        return
+
+    value = instance.value
+    if instance.value_type == SiteSetting.SettingType.INT:
+        try:
+            value = int(instance.value)
+        except ValueError as exc:
+            raise ValidationError(
+                f"Value for setting {instance.key} must be an integer, but got '{instance.value}'"
+            ) from exc
+    instance.set_cache(value)
 
 
 class UploadSession(models.Model):

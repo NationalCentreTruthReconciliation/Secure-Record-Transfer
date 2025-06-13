@@ -2,7 +2,6 @@
 
 from typing import Any, Optional, cast
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
@@ -21,7 +20,13 @@ from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
+from recordtransfer.models import (
+    InProgressSubmission,
+    SiteSetting,
+    Submission,
+    SubmissionGroup,
+    User,
+)
 
 
 class UserProfile(UpdateView):
@@ -152,7 +157,7 @@ def _paginated_table_view(
     if not request.htmx:
         return HttpResponse(status=400)
 
-    paginator = Paginator(queryset, settings.PAGINATE_BY)
+    paginator = Paginator(queryset, SiteSetting.get_value_int(SiteSetting.Key.PAGINATE_BY))
     page_num = request.GET.get(QueryParameters.PAGINATE_QUERY_NAME, 1)
 
     try:

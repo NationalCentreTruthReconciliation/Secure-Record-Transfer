@@ -8,33 +8,6 @@ below.
 
 .. contents:: List of Settings
 
-General Settings
-----------------
-
-PAGINATE_BY
-^^^^^^^^^^^
-
-    *Set the number of items per page for paginated views*
-
-    .. table::
-
-        ============  =========
-        Default       Type
-        ============  =========
-        10            int
-        ============  =========
-
-    This setting controls how many items are shown per page in list views that support pagination.
-    You can adjust it to improve usability depending on the context (e.g., fewer items for mobile
-    views or more items for data-heavy admin views).
-
-    **.env Example:**
-
-    ::
-
-        # file: .env
-        PAGINATE_BY=20
-
 
 Security
 --------
@@ -659,57 +632,6 @@ BAG_CHECKSUMS
 
         #file: .env
         BAG_CHECKSUMS=sha1,blake2b,md5
-
-
-Emailing
---------
-
-
-ARCHIVIST_EMAIL
-^^^^^^^^^^^^^^^
-
-    *Choose contact email address*
-
-    .. table::
-
-        =====================  =========
-        Default                Type
-        =====================  =========
-        archivist@example.com  string
-        =====================  =========
-
-    The email displayed for people to contact an archivist.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        ARCHIVIST_EMAIL=archives@domain.ca
-
-
-DO_NOT_REPLY_USERNAME
-^^^^^^^^^^^^^^^^^^^^^
-
-    *Choose username for do not reply emails*
-
-    .. table::
-
-        ============  =========
-        Default       Type
-        ============  =========
-        do-not-reply  string
-        ============  =========
-
-    A username for the application to send "do not reply" emails from. This username is combined
-    with the site's base URL to create an email address. The URL can be set from the admin site.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        DO_NOT_REPLY_USERNAME=donotreply
 
 
 Data Formatting and Defaults
