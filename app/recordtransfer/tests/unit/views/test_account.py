@@ -237,7 +237,7 @@ class TestCreateAccount(TestCase):
         response = self.client.post(
             self.create_account_url,
             data=self.valid_form_data,
-            HTTP_HX_REQUEST="true",  # Add HTMX header
+            HTTP_HX_REQUEST="true",
         )
 
         # Check for HX-Redirect response
@@ -253,6 +253,32 @@ class TestCreateAccount(TestCase):
 
         # Check activation email was sent
         self.mock_send_email.assert_called_once_with(new_user)
+
+    def test_htmx_post_invalid_form(self) -> None:
+        """Test form submission with invalid data via HTMX request."""
+        invalid_data = self.valid_form_data.copy()
+        invalid_data["password2"] = "different_password"
+
+        response = self.client.post(
+            self.create_account_url,
+            data=invalid_data,
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Check for HX-Redirect response
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Create a New Account", str(response.content))
+
+        # Test that form is invalid
+
+        form = SignUpForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+
+        # User should not be created
+        self.assertFalse(User.objects.filter(username="testuser123").exists())
+
+        # Email should not be sent
+        self.mock_send_email.assert_not_called()
 
 
 class TestActivateAccount(TestCase):
