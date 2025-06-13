@@ -529,7 +529,7 @@ class TestUploadSession(TestCase):
             self.session.remove_temp_file_by_name("non_existent_file.pdf")
 
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
-    def test_get_temp_file_by_name(self, mock_temp_files: BaseManager) -> None:
+    def test_get_file_by_name(self, mock_temp_files: BaseManager) -> None:
         """Test getting a temp file from the session by name."""
         mock_temp_files.get = MagicMock(return_value=self.test_temp_file)
         self.session.status = UploadSession.SessionStatus.UPLOADING
@@ -537,8 +537,8 @@ class TestUploadSession(TestCase):
         self.assertIsNotNone(temp_uploaded_file)
         self.assertEqual(temp_uploaded_file.name, self.test_temp_file.name)
 
-    def test_get_temp_file_by_name_invalid_status(self) -> None:
-        """Test getting a temp file from the session by name raises an exception when the session
+    def test_get_file_by_name_invalid_status(self) -> None:
+        """Test getting a file from the session by name raises an exception when the session
         is in an invalid state.
         """
         self.session.add_temp_file(self.test_file_1)
@@ -547,7 +547,6 @@ class TestUploadSession(TestCase):
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
-            UploadSession.SessionStatus.STORED,
             UploadSession.SessionStatus.COPYING_FAILED,
         ]
         for status in statuses:
