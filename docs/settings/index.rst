@@ -541,29 +541,6 @@ Storage Locations
 -----------------
 
 
-BAG_STORAGE_FOLDER
-^^^^^^^^^^^^^^^^^^
-
-    *Choose where BagIt bags are stored*
-
-    .. table::
-
-        ===========================================  ============================================  ======
-        Default in Dev                               Default in Prod                               Type
-        ===========================================  ============================================  ======
-        /opt/secure-record-transfer/app/media/bags/  /opt/secure-record-transfer/app/media/bags/   string
-        ===========================================  ============================================  ======
-
-    The folder on the server where bags are to be stored.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        BAG_STORAGE_FOLDER=/path/to/your/folder
-
-
 UPLOAD_STORAGE_FOLDER
 ^^^^^^^^^^^^^^^^^^^^^
 
