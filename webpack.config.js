@@ -134,8 +134,10 @@ module.exports = {
         new WebPConverterPlugin({
             quality: 80
         }),
-        new BundleTracker({filename: "./webpack-stats.json"}),
-
+        new BundleTracker({
+            path: path.resolve(__dirname),
+            filename: "webpack-stats.json"
+        })
     ],
     optimization: {
         minimizer: [

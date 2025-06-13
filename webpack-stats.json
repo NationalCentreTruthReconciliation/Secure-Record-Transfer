@@ -1,1 +1,122 @@
-{"status":"done","chunks":{"images":[],"main":["js/vendors.289de7b5.js","css/app-c72b0889d8f729aed282.css","js/main.150e5693.js","css/app-442a9a398e6b62ace8a3.css"],"submission_detail":["js/submission_detail.c71b28fa.js","css/app-b771771c54d0fe77683a.css"],"admin_metadata":["js/admin_metadata.8954df7e.js","css/app-0fee962da22a6f10dbc4.css"],"admin_uploadedfile":["js/admin_uploadedfile.80a54816.js"],"admin_job":["js/admin_job.80eb3ba1.js","css/app-8eba8dbb23cdb7aaf5b4.css"]},"publicPath":"/static/","assets":{"unesco.webp":{"name":"unesco.webp","publicPath":"/static/unesco.webp"},"favicon.ico":{"name":"favicon.ico","publicPath":"/static/favicon.ico"},"js/main.150e5693.js":{"name":"js/main.150e5693.js","publicPath":"/static/js/main.150e5693.js"},"js/submission_detail.c71b28fa.js":{"name":"js/submission_detail.c71b28fa.js","publicPath":"/static/js/submission_detail.c71b28fa.js"},"js/admin_metadata.8954df7e.js":{"name":"js/admin_metadata.8954df7e.js","publicPath":"/static/js/admin_metadata.8954df7e.js"},"js/admin_uploadedfile.80a54816.js":{"name":"js/admin_uploadedfile.80a54816.js","publicPath":"/static/js/admin_uploadedfile.80a54816.js"},"js/admin_job.80eb3ba1.js":{"name":"js/admin_job.80eb3ba1.js","publicPath":"/static/js/admin_job.80eb3ba1.js"},"js/vendors.289de7b5.js":{"name":"js/vendors.289de7b5.js","publicPath":"/static/js/vendors.289de7b5.js"},"close_menu_64x64px.webp":{"name":"close_menu_64x64px.webp","publicPath":"/static/close_menu_64x64px.webp"},"logo-white.webp":{"name":"logo-white.webp","publicPath":"/static/logo-white.webp"},"nctrlogo_flame_150x150px.webp":{"name":"nctrlogo_flame_150x150px.webp","publicPath":"/static/nctrlogo_flame_150x150px.webp"},"hero4-scaled.webp":{"name":"hero4-scaled.webp","publicPath":"/static/hero4-scaled.webp"},"PHABNE_00281.webp":{"name":"PHABNE_00281.webp","publicPath":"/static/PHABNE_00281.webp"},"js/vendors.289de7b5.js.LICENSE.txt":{"name":"js/vendors.289de7b5.js.LICENSE.txt","publicPath":"/static/js/vendors.289de7b5.js.LICENSE.txt"},"css/app-442a9a398e6b62ace8a3.css":{"name":"css/app-442a9a398e6b62ace8a3.css","publicPath":"/static/css/app-442a9a398e6b62ace8a3.css"},"css/app-b771771c54d0fe77683a.css":{"name":"css/app-b771771c54d0fe77683a.css","publicPath":"/static/css/app-b771771c54d0fe77683a.css"},"css/app-0fee962da22a6f10dbc4.css":{"name":"css/app-0fee962da22a6f10dbc4.css","publicPath":"/static/css/app-0fee962da22a6f10dbc4.css"},"css/app-8eba8dbb23cdb7aaf5b4.css":{"name":"css/app-8eba8dbb23cdb7aaf5b4.css","publicPath":"/static/css/app-8eba8dbb23cdb7aaf5b4.css"},"css/app-c72b0889d8f729aed282.css":{"name":"css/app-c72b0889d8f729aed282.css","publicPath":"/static/css/app-c72b0889d8f729aed282.css"}}}
+{
+  "status": "done",
+  "assets": {
+    "close_menu_64x64px.webp": {
+      "name": "close_menu_64x64px.webp",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/close_menu_64x64px.webp",
+      "publicPath": "/static/close_menu_64x64px.webp"
+    },
+    "css/app-1c9df2e007e9e9c0e16b.css": {
+      "name": "css/app-1c9df2e007e9e9c0e16b.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-1c9df2e007e9e9c0e16b.css",
+      "publicPath": "/static/css/app-1c9df2e007e9e9c0e16b.css"
+    },
+    "css/app-41a117509af1f68fc1d0.css": {
+      "name": "css/app-41a117509af1f68fc1d0.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-41a117509af1f68fc1d0.css",
+      "publicPath": "/static/css/app-41a117509af1f68fc1d0.css"
+    },
+    "css/app-8913e4756eb179e1239e.css": {
+      "name": "css/app-8913e4756eb179e1239e.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-8913e4756eb179e1239e.css",
+      "publicPath": "/static/css/app-8913e4756eb179e1239e.css"
+    },
+    "css/app-9bd942b86b60c29267a5.css": {
+      "name": "css/app-9bd942b86b60c29267a5.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-9bd942b86b60c29267a5.css",
+      "publicPath": "/static/css/app-9bd942b86b60c29267a5.css"
+    },
+    "css/app-aa8376c33dd9651044e4.css": {
+      "name": "css/app-aa8376c33dd9651044e4.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-aa8376c33dd9651044e4.css",
+      "publicPath": "/static/css/app-aa8376c33dd9651044e4.css"
+    },
+    "favicon.ico": {
+      "name": "favicon.ico",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/favicon.ico",
+      "publicPath": "/static/favicon.ico",
+      "sourceFilename": "app/recordtransfer/static/recordtransfer/img/favicon.ico"
+    },
+    "hero4-scaled.webp": {
+      "name": "hero4-scaled.webp",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/hero4-scaled.webp",
+      "publicPath": "/static/hero4-scaled.webp"
+    },
+    "js/admin_job.14074b3b.js": {
+      "name": "js/admin_job.14074b3b.js",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/js/admin_job.14074b3b.js",
+      "publicPath": "/static/js/admin_job.14074b3b.js"
+    },
+    "js/admin_metadata.7c792fa0.js": {
+      "name": "js/admin_metadata.7c792fa0.js",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/js/admin_metadata.7c792fa0.js",
+      "publicPath": "/static/js/admin_metadata.7c792fa0.js"
+    },
+    "js/admin_uploadedfile.d7ec9f43.js": {
+      "name": "js/admin_uploadedfile.d7ec9f43.js",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/js/admin_uploadedfile.d7ec9f43.js",
+      "publicPath": "/static/js/admin_uploadedfile.d7ec9f43.js"
+    },
+    "js/main.d568e044.js": {
+      "name": "js/main.d568e044.js",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/js/main.d568e044.js",
+      "publicPath": "/static/js/main.d568e044.js"
+    },
+    "js/submission_detail.baee1b93.js": {
+      "name": "js/submission_detail.baee1b93.js",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/js/submission_detail.baee1b93.js",
+      "publicPath": "/static/js/submission_detail.baee1b93.js"
+    },
+    "js/vendors.7ea62a3d.js": {
+      "name": "js/vendors.7ea62a3d.js",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/js/vendors.7ea62a3d.js",
+      "publicPath": "/static/js/vendors.7ea62a3d.js"
+    },
+    "logo-white.webp": {
+      "name": "logo-white.webp",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/logo-white.webp",
+      "publicPath": "/static/logo-white.webp"
+    },
+    "nctrlogo_flame_150x150px.webp": {
+      "name": "nctrlogo_flame_150x150px.webp",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/nctrlogo_flame_150x150px.webp",
+      "publicPath": "/static/nctrlogo_flame_150x150px.webp"
+    },
+    "PHABNE_00281.webp": {
+      "name": "PHABNE_00281.webp",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/PHABNE_00281.webp",
+      "publicPath": "/static/PHABNE_00281.webp"
+    },
+    "unesco.webp": {
+      "name": "unesco.webp",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/unesco.webp",
+      "publicPath": "/static/unesco.webp",
+      "sourceFilename": "app/recordtransfer/static/recordtransfer/img/unesco.webp"
+    }
+  },
+  "chunks": {
+    "admin_job": [
+      "css/app-9bd942b86b60c29267a5.css",
+      "js/admin_job.14074b3b.js"
+    ],
+    "admin_metadata": [
+      "css/app-8913e4756eb179e1239e.css",
+      "js/admin_metadata.7c792fa0.js"
+    ],
+    "admin_uploadedfile": [
+      "js/admin_uploadedfile.d7ec9f43.js"
+    ],
+    "images": [],
+    "main": [
+      "css/app-aa8376c33dd9651044e4.css",
+      "js/vendors.7ea62a3d.js",
+      "css/app-1c9df2e007e9e9c0e16b.css",
+      "js/main.d568e044.js"
+    ],
+    "submission_detail": [
+      "css/app-41a117509af1f68fc1d0.css",
+      "js/submission_detail.baee1b93.js"
+    ]
+  },
+  "publicPath": "/static/"
+}
