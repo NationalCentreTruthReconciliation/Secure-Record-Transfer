@@ -189,7 +189,9 @@ pytest -k "e2e"
 
 ### Debugging Tests with VSCode
 
-You can debug Python tests directly in VSCode using the pre-configured launch settings in `.vscode/launch.json`. Two useful configurations are provided:
+You can debug Python tests directly in VSCode using the pre-configured launch settings in `.vscode/launch.json`. To access these launch settings, open the Run & Debug menu (press `Ctrl+Shift+D` on Windows/Linux or `Cmd+Shift+D` on Mac).
+
+Two useful configurations are provided:
 
 - **Debug Pytest: Current File**
     Runs and debugs all tests in the currently open file. Open the test file you want to debug, select this configuration from the Run and Debug panel, set desired breakpoints, and press the green play button.
