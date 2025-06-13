@@ -1,6 +1,7 @@
 """Views for creating and activating user accounts."""
 
 from django.contrib.auth import login
+from django.contrib.auth.views import PasswordResetView
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -12,6 +13,7 @@ from django.views.generic import FormView, TemplateView
 
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm
+from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
 
@@ -85,3 +87,10 @@ class ActivationInvalid(TemplateView):
     """The page a user sees if their account could not be activated."""
 
     template_name = "recordtransfer/activation_invalid.html"
+
+class AsyncPasswordResetView(PasswordResetView):
+    """The page a user sees when they request a password reset."""
+
+    email_template_name="registration/password_reset_email.txt"
+    html_email_template_name="registration/password_reset_email.html"
+    form_class = AsyncPasswordResetForm
