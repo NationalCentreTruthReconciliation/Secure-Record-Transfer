@@ -66,7 +66,9 @@ def linkify(field_name: str) -> Callable:
 
 @receiver(pre_delete, sender=Job)
 def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
-    """FileFields are not deleted automatically after Django 1.11, instead this receiver doesit."""
+    """FileFields are not deleted automatically after Django 1.11, instead this receiver does
+    it.
+    """
     instance.attached_file.delete(False)
 
 
