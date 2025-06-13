@@ -1,13 +1,24 @@
 {% load i18n %}
 <div id="login-error-container">
     {% if form.non_field_errors %}
-        {% for error in form.non_field_errors %}<div class="bg-red-50 border border-red-200 text-red-700 px-1 py-1 rounded-md mb-2">{{ error }}</div>{% endfor %}
+        {% for error in form.non_field_errors %}
+        <div class="alert alert-error animate-error-appear">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ error }}
+            </div>{% endfor %}
     {% endif %}
     {% for field in form %}
         {% if field.errors %}
             {% for error in field.errors %}
-                <div class="bg-red-50 border border-red-200 text-red-700 px-1 py-1 rounded-md mb-2">{{ field.label }}: {{ error }}</div>
+                <div class="alert alert-error animate-error-appear">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                     {{ field.label }}: {{ error }}</div>
             {% endfor %}
         {% endif %}
     {% endfor %}
 </div>
+
