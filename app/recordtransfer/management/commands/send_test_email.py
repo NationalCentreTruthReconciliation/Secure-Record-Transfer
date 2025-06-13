@@ -26,6 +26,7 @@ EMAIL_FUNCTIONS = {
     "user_activation_email": send_user_activation_email,
     "user_account_updated": send_user_account_updated,
     "user_in_progress_submission_expiring": send_user_in_progress_submission_expiring,
+    "password_reset_email": None,  # Placeholder for future email function
 }
 
 

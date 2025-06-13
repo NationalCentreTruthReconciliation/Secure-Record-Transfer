@@ -3,13 +3,14 @@ from typing import Any, Optional
 
 from django import forms
 from django.contrib.auth import password_validation
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_recaptcha.fields import ReCaptchaField
 
 from recordtransfer.constants import HtmlIds
+from recordtransfer.emails import send_password_reset_email
 from recordtransfer.models import User
 
 
@@ -226,3 +227,34 @@ class UserProfileForm(forms.ModelForm):
             self.data["current_password"] = ""
             self.data["new_password"] = ""
             self.data["confirm_new_password"] = ""
+
+
+class AsyncPasswordResetForm(PasswordResetForm):
+    """Form for resetting a user's password."""
+
+    def send_mail(
+        self,
+        subject_template_name: str,
+        email_template_name: str,
+        context: dict[str, Any],
+        from_email: str | None,
+        to_email: str,
+        html_email_template_name: Optional[str] = None,
+    ) -> None:
+        """Send password reset email asynchronously using django_rq.
+
+        Args:
+            subject_template_name: Template name for the email subject
+            email_template_name: Template name for the plain text email body
+            context: Template context variables
+            from_email: Sender email address
+            to_email: Recipient email address
+            html_email_template_name: Template name for the HTML email body (optional)
+        """
+        send_password_reset_email.delay(
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name,
+            context=context,
+            to_email=to_email,
+            html_email_template_name=html_email_template_name,
+        )

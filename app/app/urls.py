@@ -17,26 +17,22 @@ Including another URLconf
 
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.views import PasswordResetView
 from django.urls import include, path
+from recordtransfer.views.account import AsyncPasswordResetView
 
 urlpatterns = [
     path("admin/django_rq/", include("django_rq.urls")),
     path("admin/", admin.site.urls),
     path("", include("recordtransfer.urls")),
-    # HTML email is set to None by default, so we set html_email_template_name here
     path(
         "account/password_reset/",
-        PasswordResetView.as_view(
-            email_template_name="registration/password_reset_email.txt",
-            html_email_template_name="registration/password_reset_email.html",
-        ),
+        AsyncPasswordResetView.as_view(),
     ),
     # Override the login view with redirect behavior
     path(
         "account/login/",
         auth_views.LoginView.as_view(
-            redirect_authenticated_user=True  # This is the key parameter
+            redirect_authenticated_user=True
         ),
         name="login",
     ),
