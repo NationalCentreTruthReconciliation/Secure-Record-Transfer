@@ -84,11 +84,7 @@ module.exports = {
             ...glob.sync("./app/caais/static/caais/js/admin/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        admin_uploadedfile: [
-            ...glob.sync("./app/recordtransfer/static/" +
-                "recordtransfer/js/admin/*.js")
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
+
         admin_job: [
             ...glob.sync("./app/recordtransfer/static/" +
                 "recordtransfer/css/admin/job.css")
