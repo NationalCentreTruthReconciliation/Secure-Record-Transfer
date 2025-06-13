@@ -57,7 +57,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         ):
             LOGGER.info("Creating Bag for submission %s at %s ...", repr(submission), temp_dir)
 
-            submission.make_bag(algorithms=settings.BAG_CHECKSUMS, location=Path(temp_dir))
+            submission.make_bag(Path(temp_dir), algorithms=settings.BAG_CHECKSUMS)
 
             LOGGER.info(
                 "Zipping Bag to temp file on disk at %s ...",

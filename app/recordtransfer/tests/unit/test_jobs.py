@@ -77,8 +77,8 @@ class TestCreateDownloadableBag(unittest.TestCase):
 
         # Verify submission make_bag called correctly
         self.mock_submission.make_bag.assert_called_with(
+            Path("/tmp/my-bag"),
             algorithms=["sha1"],
-            location=Path("/tmp/my-bag"),
         )
 
         # Verify job completed
@@ -112,7 +112,8 @@ class TestCreateDownloadableBag(unittest.TestCase):
 
         # Verify submission make_bag called correctly
         self.mock_submission.make_bag.assert_called_with(
-            algorithms=["sha1"], location=Path("/tmp/my-bag")
+            Path("/tmp/my-bag"),
+            algorithms=["sha1"],
         )
 
         # Verify job completed
@@ -146,7 +147,8 @@ class TestCreateDownloadableBag(unittest.TestCase):
 
         # Verify submission make_bag called correctly
         self.mock_submission.make_bag.assert_called_with(
-            algorithms=["sha1"], location=Path("/tmp/my-bag")
+            Path("/tmp/my-bag"),
+            algorithms=["sha1"],
         )
 
         # Verify job failure
