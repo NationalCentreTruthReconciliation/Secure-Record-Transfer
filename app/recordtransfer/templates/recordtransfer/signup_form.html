@@ -1,0 +1,136 @@
+{% load static %}
+{% load i18n %}
+<div id="id_card_signup" class="container mx-auto max-w-xl py-8 px-4">
+    <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-100">
+        <!-- Title -->
+        <div class="mb-4 text-4xl text-primary text-center">{% trans "Create a New Account" %}</div>
+        <!-- Error Message -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-error animate-error-appear">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            {% trans "The form was not valid." %}</div>
+        {% endif %}
+        <!-- Form -->
+        <form hx-post="{% url 'recordtransfer:create_account' %}"
+              hx-target="#id_card_signup"
+              hx-swap="innerHTML"
+              class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}<div class="alert alert-error animate-error-appear">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    {{ error }}</div>{% endfor %}
+                {% endif %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}"
+                           class="block mb-2 font-medium text-gray-700">{{ field.label }}</label>
+                    <!-- Email field with icon -->
+                    {% if field.html_name == 'email' %}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="h-5 w-5 text-gray-400"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                </svg>
+                            </div>
+                            <input type="{{ field.field.widget.input_type }}"
+                                   name="{{ field.html_name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                   {% if field.field.required %}required{% endif %}>
+                        </div>
+                        <!-- Username field with icon -->
+                    {% elif field.html_name == 'username' %}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="h-5 w-5 text-gray-400"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input type="{{ field.field.widget.input_type }}"
+                                   name="{{ field.html_name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                   {% if field.field.required %}required{% endif %}>
+                        </div>
+                        <!-- Password fields with icon -->
+                    {% elif 'password' in field.html_name %}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="h-5 w-5 text-gray-400"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input type="password"
+                                   name="{{ field.html_name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                   {% if field.field.required %}required{% endif %}>
+                        </div>
+                    {% elif field.html_name == 'first_name' %}
+                        <input type="text"
+                               name="{{ field.html_name }}"
+                               id="{{ field.id_for_label }}"
+                               class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                               {% if field.field.required %}required{% endif %}>
+                        <!-- Last Name field - no icon -->
+                    {% elif field.html_name == 'last_name' %}
+                        <input type="text"
+                               name="{{ field.html_name }}"
+                               id="{{ field.id_for_label }}"
+                               class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                               {% if field.field.required %}required{% endif %}>
+                        <!-- Default rendering for other fields -->
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    <!-- Help text with tooltip -->
+                    {% if field.help_text %}
+                        <div class="mt-1 flex items-center">
+                            <div class="relative inline-block">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help peer"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 peer-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                                    {{ field.help_text }}
+                                </span>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">Help</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <!-- Submit Button -->
+            <div class="mt-6">
+                <button type="submit"
+                        class="w-full bg-primary text-white font-bold py-2 px-4 rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+                        id="id_submit_button">{% trans "Sign Up" %}</button>
+            </div>
+        </form>
+        <!-- Login Link -->
+        <div class="mt-6 text-center">
+            <p class="text-gray-600">
+                {% trans "Already have an account?" %}
+                <a href="{% url 'login' %}"
+                   class="text-primary hover:text-primary/80 ml-1">{% trans "Log In" %}</a>
+            </p>
+        </div>
+    </div>
+</div>

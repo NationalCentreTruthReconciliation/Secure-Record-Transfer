@@ -1,9 +1,12 @@
 """Views for creating and activating user accounts."""
 
 from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -21,7 +24,7 @@ class CreateAccount(FormView):
     successfully, send an email to that user with a link that lets them activate their account.
     """
 
-    template_name = "recordtransfer/signupform.html"
+    template_name = "recordtransfer/signup.html"
     form_class = SignUpForm
     success_url = reverse_lazy("recordtransfer:activation_sent")
 
@@ -38,7 +41,24 @@ class CreateAccount(FormView):
         new_user.gets_submission_email_updates = False
         new_user.save()
         send_user_activation_email.delay(new_user)
+        if self.request.headers.get("HX-Request"):
+            response = HttpResponse()
+            response["HX-Redirect"] = self.get_success_url()
+            return response
+
         return super().form_valid(form)
+
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid signup form submissions."""
+        if self.request.headers.get("HX-Request"):
+            # Return only the error template for HTMX requests
+            html = render_to_string(
+                "recordtransfer/signup_form.html",
+                {"form": form},
+                request=self.request,
+            )
+            return HttpResponse(html)
+        return super().form_invalid(form)
 
 
 class ActivateAccount(View):
@@ -85,3 +105,29 @@ class ActivationInvalid(TemplateView):
     """The page a user sees if their account could not be activated."""
 
     template_name = "recordtransfer/activation_invalid.html"
+
+
+class Login(LoginView):
+    """Custom LoginView that supports HTMX requests for login forms."""
+
+    template_name = "registration/login.html"
+
+    def form_valid(self, form: AuthenticationForm) -> HttpResponse:
+        """Successful login handler."""
+        super().form_valid(form)
+        if self.request.headers.get("HX-Request"):
+            response = HttpResponse()
+            response["HX-Redirect"] = self.get_success_url()
+            return response
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
+        """Handle invalid login form submissions."""
+        if self.request.headers.get("HX-Request"):
+            html = render_to_string(
+                "registration/login_errors.html",  # Changed to form-only template
+                {"form": form},
+                request=self.request,
+            )
+            return HttpResponse(html)
+        return super().form_invalid(form)

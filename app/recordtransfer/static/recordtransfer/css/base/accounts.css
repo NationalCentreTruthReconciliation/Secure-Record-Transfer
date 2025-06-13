@@ -29,6 +29,35 @@
     margin-bottom: 0px;
 }
 
+/* Error animation */
+@keyframes errorAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    50% {
+        transform: translateY(0) translateX(3px);
+    }
+
+    65% {
+        transform: translateY(0) translateX(-2px);
+    }
+
+    80% {
+        transform: translateY(0) translateX(1px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateX(0);
+    }
+}
+
+.animate-error-appear {
+    animation: errorAppear 0.5s ease-out forwards;
+}
+
 @media(min-width: 1000px) {
     .account-form-container {
         width: 50%;

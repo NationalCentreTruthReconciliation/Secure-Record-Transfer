@@ -63,7 +63,7 @@ class TestCreateAccount(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Create a New Account")
         self.assertIsInstance(response.context["form"], SignUpForm)
-        self.assertTemplateUsed(response, "recordtransfer/signupform.html")
+        self.assertTemplateUsed(response, "recordtransfer/signup.html")
 
     def test_get_create_account_authenticated_user_redirected(self) -> None:
         """Test that authenticated users are redirected to homepage."""
@@ -229,6 +229,88 @@ class TestCreateAccount(TestCase):
         # These should be default Django user fields
         self.assertFalse(new_user.is_staff)
         self.assertFalse(new_user.is_superuser)
+
+    def test_htmx_post_valid_form(self) -> None:
+        """Test successful account creation via HTMX request."""
+        initial_user_count = User.objects.count()
+
+        response = self.client.post(
+            self.create_account_url,
+            data=self.valid_form_data,
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Check for HX-Redirect response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers["HX-Redirect"], reverse("recordtransfer:activation_sent")
+        )
+
+        # Check user was created
+        self.assertEqual(User.objects.count(), initial_user_count + 1)
+        new_user = User.objects.get(username="testuser123")
+        self.assertFalse(new_user.is_active)
+
+        # Check activation email was sent
+        self.mock_send_email.assert_called_once_with(new_user)
+
+    def test_htmx_post_invalid_form(self) -> None:
+        """Test form submission with invalid data via HTMX request."""
+        invalid_data = self.valid_form_data.copy()
+        invalid_data["password2"] = "different_password"
+
+        response = self.client.post(
+            self.create_account_url,
+            data=invalid_data,
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Check for HX-Redirect response
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Create a New Account", str(response.content))
+
+        # Test that form is invalid
+
+        form = SignUpForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+
+        # User should not be created
+        self.assertFalse(User.objects.filter(username="testuser123").exists())
+
+        # Email should not be sent
+        self.mock_send_email.assert_not_called()
+
+    def test_htmx_post_empty_form(self) -> None:
+        """Test HTMX submission with empty form data."""
+        response = self.client.post(
+            self.create_account_url,
+            data={},  # Empty data
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Should return form with errors
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error indicators
+        self.assertIn("alert-error", str(response.content))
+
+        required_fields = {
+            "username": "This field is required",
+            "first_name": "This field is required",
+            "last_name": "This field is required",
+            "email": "This field is required",
+            "password1": "This field is required",
+            "password2": "This field is required",
+        }
+
+        for field, error_message in required_fields.items():
+            # Verify field exists in the response
+            self.assertIn(f"id_{field}", str(response.content))
+            # Verify the specific error message appears for this field
+            self.assertIn(error_message, str(response.content))
+
+        # User should not be created
+        self.assertEqual(User.objects.count(), 1)
 
 
 class TestActivateAccount(TestCase):
