@@ -6,30 +6,30 @@
       "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/close_menu_64x64px.webp",
       "publicPath": "/static/close_menu_64x64px.webp"
     },
-    "css/app-1c9df2e007e9e9c0e16b.css": {
-      "name": "css/app-1c9df2e007e9e9c0e16b.css",
-      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-1c9df2e007e9e9c0e16b.css",
-      "publicPath": "/static/css/app-1c9df2e007e9e9c0e16b.css"
+    "css/admin_job.9bd942b8.css": {
+      "name": "css/admin_job.9bd942b8.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/admin_job.9bd942b8.css",
+      "publicPath": "/static/css/admin_job.9bd942b8.css"
     },
-    "css/app-41a117509af1f68fc1d0.css": {
-      "name": "css/app-41a117509af1f68fc1d0.css",
-      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-41a117509af1f68fc1d0.css",
-      "publicPath": "/static/css/app-41a117509af1f68fc1d0.css"
+    "css/admin_metadata.8913e475.css": {
+      "name": "css/admin_metadata.8913e475.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/admin_metadata.8913e475.css",
+      "publicPath": "/static/css/admin_metadata.8913e475.css"
     },
-    "css/app-8913e4756eb179e1239e.css": {
-      "name": "css/app-8913e4756eb179e1239e.css",
-      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-8913e4756eb179e1239e.css",
-      "publicPath": "/static/css/app-8913e4756eb179e1239e.css"
+    "css/main.1c9df2e0.css": {
+      "name": "css/main.1c9df2e0.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/main.1c9df2e0.css",
+      "publicPath": "/static/css/main.1c9df2e0.css"
     },
-    "css/app-9bd942b86b60c29267a5.css": {
-      "name": "css/app-9bd942b86b60c29267a5.css",
-      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-9bd942b86b60c29267a5.css",
-      "publicPath": "/static/css/app-9bd942b86b60c29267a5.css"
+    "css/submission_detail.41a11750.css": {
+      "name": "css/submission_detail.41a11750.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/submission_detail.41a11750.css",
+      "publicPath": "/static/css/submission_detail.41a11750.css"
     },
-    "css/app-aa8376c33dd9651044e4.css": {
-      "name": "css/app-aa8376c33dd9651044e4.css",
-      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/app-aa8376c33dd9651044e4.css",
-      "publicPath": "/static/css/app-aa8376c33dd9651044e4.css"
+    "css/vendors.aa8376c3.css": {
+      "name": "css/vendors.aa8376c3.css",
+      "path": "/Users/eashanasinghal/Secure-Record-Transfer/dist/css/vendors.aa8376c3.css",
+      "publicPath": "/static/css/vendors.aa8376c3.css"
     },
     "favicon.ico": {
       "name": "favicon.ico",
@@ -96,11 +96,11 @@
   },
   "chunks": {
     "admin_job": [
-      "css/app-9bd942b86b60c29267a5.css",
+      "css/admin_job.9bd942b8.css",
       "js/admin_job.14074b3b.js"
     ],
     "admin_metadata": [
-      "css/app-8913e4756eb179e1239e.css",
+      "css/admin_metadata.8913e475.css",
       "js/admin_metadata.7c792fa0.js"
     ],
     "admin_uploadedfile": [
@@ -108,13 +108,13 @@
     ],
     "images": [],
     "main": [
-      "css/app-aa8376c33dd9651044e4.css",
+      "css/vendors.aa8376c3.css",
       "js/vendors.7ea62a3d.js",
-      "css/app-1c9df2e007e9e9c0e16b.css",
+      "css/main.1c9df2e0.css",
       "js/main.d568e044.js"
     ],
     "submission_detail": [
-      "css/app-41a117509af1f68fc1d0.css",
+      "css/submission_detail.41a11750.css",
       "js/submission_detail.baee1b93.js"
     ]
   },
