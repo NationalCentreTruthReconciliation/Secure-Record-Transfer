@@ -280,6 +280,38 @@ class TestCreateAccount(TestCase):
         # Email should not be sent
         self.mock_send_email.assert_not_called()
 
+    def test_htmx_post_empty_form(self) -> None:
+        """Test HTMX submission with empty form data."""
+        response = self.client.post(
+            self.create_account_url,
+            data={},  # Empty data
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Should return form with errors
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error indicators
+        self.assertIn("alert-error", str(response.content))
+
+        required_fields = {
+            "username": "This field is required",
+            "first_name": "This field is required",
+            "last_name": "This field is required",
+            "email": "This field is required",
+            "password1": "This field is required",
+            "password2": "This field is required",
+        }
+
+        for field, error_message in required_fields.items():
+            # Verify field exists in the response
+            self.assertIn(f"id_{field}", str(response.content))
+            # Verify the specific error message appears for this field
+            self.assertIn(error_message, str(response.content))
+
+        # User should not be created
+        self.assertEqual(User.objects.count(), 1)
+
 
 class TestActivateAccount(TestCase):
     """Tests for the ActivateAccount view."""
