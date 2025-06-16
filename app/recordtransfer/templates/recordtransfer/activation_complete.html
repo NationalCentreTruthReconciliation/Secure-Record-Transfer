@@ -1,17 +1,54 @@
 {% extends 'recordtransfer/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Account Activated" %}{% endblock %}
+
+{% block title %}{% trans "Email Sent" %}{% endblock %}
 
 {% block content %}
-    <div class="title-text">{% trans "Account Activated" %}</div>
-    <p>
-    {% blocktrans %}
-        Your account has been activated, and you should now be logged in. You may now submit
+<div class="flex flex-col items-center justify-center min-h-[50vh] text-center py-10 px-4">
+    <div class="bg-white shadow-lg rounded-lg p-8 border border-gray-100 max-w-md w-full">
+        <!-- Email icon -->
+        <div class="flex justify-center mb-6 text-primary/60">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-20 w-20"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <!-- Title -->
+        <div class="mb-2 text-4xl text-primary">
+            {% trans "Account Activated" %}
+        </div>
+
+        <!-- Main message -->
+        <div class="my-6 text-gray-600 text-center">
+            {% blocktrans %}
+           Your account has been activated, and you should now be logged in. You may now submit
         records to the NCTR!
-    {% endblocktrans %}
-    </p>
-    <a href="{% url 'recordtransfer:submit' %}">{% trans "Start a Submission" %}</a>
-    <br>
-    <a href="{% url 'recordtransfer:index' %}">{% trans "Home" %}</a>
+            {% endblocktrans %}
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col gap-4 mt-8">
+            <a href="{% url 'recordtransfer:submit' %}" class="btn btn-outline btn-primary hover:bg-primary hover:text-white w-full transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                {% trans "Start a Submission" %}
+            </a>
+        </div>
+
+
+        <div class="text-center mt-6 pt-4 border-t border-gray-200">
+            <a href="{% url 'recordtransfer:index' %}"
+            class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                <!-- Simple left arrow -->
+                <span class="mr-2 font-bold">←</span>
+                {% trans "Return to Home" %}
+            </a>
+        </div>
+</div>
 {% endblock %}
