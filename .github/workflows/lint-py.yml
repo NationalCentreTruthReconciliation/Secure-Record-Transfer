@@ -2,7 +2,7 @@ name: PR Python Lint Check
 
 on:
   pull_request:
-    branches: [master, 640-migrate-ui-components-to-daisyui]
+    branches: [master]
     types: [opened, synchronize, reopened]
 
 permissions:
