@@ -232,7 +232,7 @@ class UserProfileForm(forms.ModelForm):
 class AsyncPasswordResetForm(PasswordResetForm):
     """Form for resetting a user's password."""
 
-    def send_mail(
+    def send_mail(  # noqa: D417
         self,
         subject_template_name: str,
         email_template_name: str,
@@ -244,17 +244,9 @@ class AsyncPasswordResetForm(PasswordResetForm):
         """Send password reset email asynchronously using django_rq.
 
         Args:
-            subject_template_name: Template name for the email subject
-            email_template_name: Template name for the plain text email body
-            context: Template context variables
-            from_email: Sender email address
             to_email: Recipient email address
-            html_email_template_name: Template name for the HTML email body (optional)
         """
         send_password_reset_email.delay(
-            subject_template_name=subject_template_name,
-            email_template_name=email_template_name,
             context=context,
             to_email=to_email,
-            html_email_template_name=html_email_template_name,
         )
