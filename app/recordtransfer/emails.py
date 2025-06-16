@@ -210,31 +210,22 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
 
 @django_rq.job
 def send_password_reset_email(
-    subject_template_name: str,
-    email_template_name: str,
     context: dict,
     to_email: str,
-    html_email_template_name: Optional[str] = None,
 ) -> None:
     """Send a password reset email asynchronously using django_rq.
 
     Args:
-        subject_template_name: Template name for the email subject
-        email_template_name: Template name for the plain text email body
         context: Template context variables
-        from_email: Sender email address (can be None, will use default)
         to_email: Recipient email address
-        html_email_template_name: Template name for the HTML email body (optional)
     """
-    subject = render_to_string(subject_template_name, context).strip()
-
-    template_name = html_email_template_name or email_template_name
+    subject = "Password Reset on NCTR Record Transfer Portal"
 
     _send_mail_with_logs(
         recipients=[to_email],
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
-        template_name=template_name,
+        template_name="registration/password_reset_email.html",
         context=context,
     )
 

@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from recordtransfer.emails import (
+    send_password_reset_email,
     send_submission_creation_failure,
     send_submission_creation_success,
     send_thank_you_for_your_submission,
@@ -26,7 +27,7 @@ EMAIL_FUNCTIONS = {
     "user_activation_email": send_user_activation_email,
     "user_account_updated": send_user_account_updated,
     "user_in_progress_submission_expiring": send_user_in_progress_submission_expiring,
-    "password_reset_email": None,  # Placeholder for future email function
+    "password_reset_email": send_password_reset_email,
 }
 
 
@@ -152,5 +153,17 @@ class Command(BaseCommand):
             )
         elif email_id == "user_in_progress_submission_expiring":
             func(in_progress)
+        elif email_id == "password_reset_email":
+            func(
+                to_email=user.email,
+                context={
+                    "email": user.email,
+                    "domain": "example.com",
+                    "uid": "dGVzdHVzZXIxMjM=",
+                    "user": user,
+                    "token": "example-token-123",
+                    "protocol": "https",
+                },
+            )
         else:
             raise CommandError(f"No handler implemented for email_id '{email_id}'")
