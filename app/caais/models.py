@@ -1260,11 +1260,14 @@ class Rights(models.Model):
         metadata (ForeignKey):
             Link to :py:class:`~caais.models.Metadata` object. Access instances
             of this model with :code:`metadata.rights`
+
         rights_type (ForeignKey):
             See :py:class:`~caais.models.RightsType` [CAAIS, Section 4.2.1]
+
         rights_value (TextField):
             **Rights Value** [CAAIS, Section 4.2.2]. Definition: *The parameters
             and conditions pertaining to the rights statement.*
+
         rights_note (TextField):
             **Rights Note** [CAAIS, Section 4.2.3]. Definition: *Additional
             information related to the rights statement not otherwise recorded.*
