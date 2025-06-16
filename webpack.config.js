@@ -135,7 +135,7 @@ module.exports = {
             quality: 80
         }),
         new BundleTracker({
-            path: path.resolve(__dirname, "dist"),
+            path: path.resolve(__dirname),
             filename: "webpack-stats.json"
         })
     ],
