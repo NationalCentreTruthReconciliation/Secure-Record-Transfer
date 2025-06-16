@@ -82,7 +82,7 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
 
 @display(description=gettext("File Link"))
 def file_url(obj: BaseUploadedFile) -> SafeText:
-    """Return the media URL for a BaseUploadedFile instance."""
+    """Return the URL to access the file, or a message if the file was removed."""
     if not obj.file_upload or not obj.exists:
         return mark_safe(gettext("File was removed"))
     return format_html('<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name)
