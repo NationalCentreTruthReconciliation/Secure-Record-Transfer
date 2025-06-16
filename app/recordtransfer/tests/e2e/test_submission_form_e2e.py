@@ -3,29 +3,26 @@ from typing import ClassVar
 from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
-from django.conf import settings
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import tag
 from django.urls import reverse
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-from recordtransfer.constants import FORMTITLE
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
 from recordtransfer.views.pre_submission import SubmissionFormWizard
 
+from .selenium_setup import SeleniumLiveServerTestCase
+
 
 def get_section_title(step: SubmissionStep) -> str:
     """Get section title for a given step."""
-    return SubmissionFormWizard._TEMPLATES[step][FORMTITLE]
+    return SubmissionFormWizard._TEMPLATES[step].title
 
 
 @tag("e2e")
-class SubmissionFormWizardTest(StaticLiveServerTestCase):
+class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     """End-to-end tests for the submission form wizard."""
 
     test_data: ClassVar[dict] = {
@@ -84,21 +81,8 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
     }
 
     def setUp(self) -> None:
-        """Set up the web driver and create a test user."""
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--disable-autofill")
-        chrome_options.add_argument("--disable-save-password-bubble")
-        if settings.SELENIUM_TESTS_HEADLESS_MODE:
-            chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--guest")
-        prefs = {"autofill.profile_enabled": False}
-        chrome_options.add_experimental_option("prefs", prefs)
-
-        # Set up the web driver (e.g., Chrome)
-        self.driver = webdriver.Chrome(options=chrome_options)
-
+        """Set up the test case environment."""
+        super().setUp()
         # Create a test user
         self.setUpTestData()
 
@@ -146,27 +130,6 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         )
         if created:
             other_role.save()
-
-    def tearDown(self) -> None:
-        """Close the web driver."""
-        self.driver.quit()
-
-    def login(self) -> None:
-        """Log in the test user."""
-        driver = self.driver
-
-        # Open the login page
-        driver.get(f"{self.live_server_url}/account/login/")
-
-        # Log in
-        username_input = driver.find_element(By.NAME, "username")
-        password_input = driver.find_element(By.NAME, "password")
-        username_input.send_keys("testuser")
-        password_input.send_keys("testpassword")
-        password_input.send_keys(Keys.RETURN)
-
-        # Wait for the login to complete and redirect to the home page
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "logout-btn")))
 
     def go_next_step(self) -> None:
         """Go to the next step in the form."""
@@ -466,7 +429,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
     def complete_form_till_review_step(self) -> None:
         """Complete the form till the review step."""
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -483,7 +446,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
     def test_login(self) -> None:
         """Test that the user can log in."""
-        self.login()
+        self.login("testuser", "testpassword")
         # Verify that the user is logged in by checking the presence of a specific element
         self.assertTrue(self.driver.find_element(By.ID, "logout-btn"))
 
@@ -590,7 +553,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         """Test that the form data is saved when going to the previous step. Uses the Contact
         Information step and the Record Description step as test cases.
         """
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -710,7 +673,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
 
     def test_form_save(self) -> None:
         """Test saving the form at a given step and resuming later."""
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -779,7 +742,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         """Test that the user is warned about unsaved changes through a modal when navigating away
         from an edited form.
         """
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard
@@ -836,7 +799,7 @@ class SubmissionFormWizardTest(StaticLiveServerTestCase):
         already edited form (user has completed at least one step and has navigated back to the
         first step).
         """
-        self.login()
+        self.login("testuser", "testpassword")
         driver = self.driver
 
         # Navigate to the submission form wizard

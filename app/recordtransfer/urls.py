@@ -25,7 +25,7 @@ urlpatterns = [
     ),
     path(
         "error/",
-        login_required(views.home.SystemErrorPage.as_view()),
+        views.home.SystemErrorPage.as_view(),
         name="system_error",
     ),
     path(

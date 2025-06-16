@@ -63,6 +63,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "recordtransfer.context_processors.signup_status",
                 "recordtransfer.context_processors.file_upload_status",
+                "recordtransfer.context_processors.constants_context",
             ],
             "loaders": loaders,
         },

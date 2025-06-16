@@ -9,13 +9,16 @@ permissions:
   contents: read
 
 jobs:
-  lint-recordtransfer-views:
-    name: Lint RecordTransfer Views
+  lint-recordtransfer:
+    name: Lint RecordTransfer Module
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
-          src: "./app/recordtransfer/views"
+          src: >-
+            ./app/recordtransfer/views
+            ./app/recordtransfer/forms
+            ./app/recordtransfer/management
           version-file: "./pyproject.toml"
           args: "--config ./ruff.toml check"
