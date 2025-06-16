@@ -372,10 +372,12 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         )
 
         # Click the button to show the add new group dialog
-        driver.find_element(By.ID, "show-add-new-group-dialog").click()
+        driver.find_element(By.ID, "id_new_submission_group_button").click()
 
         # Wait for the modal to appear
-        WebDriverWait(driver, 2)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "id_submission_group_name"))
+        )
 
         # Fill out the form in the modal
         group_name_input = driver.find_element(By.ID, "id_submission_group_name")
@@ -773,20 +775,20 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "unsaved-submission-form-modal"))
+            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
         )
 
         # Verify the modal is visible
-        modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
+        modal = driver.find_element(By.ID, "unsaved_changes_modal")
         self.assertTrue(modal.is_displayed())
 
         # Wait for the buttons in the modal to be clickable
         WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "unsaved-submission-form-modal-leave"))
+            EC.element_to_be_clickable((By.ID, "unsaved-changes-leave-btn"))
         )
 
         # Click on leave button in the modal
-        leave_button = driver.find_element(By.ID, "unsaved-submission-form-modal-leave")
+        leave_button = driver.find_element(By.ID, "unsaved-changes-leave-btn")
         leave_button.click()
 
         # Verify user is redirected to Home page
@@ -838,17 +840,17 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "unsaved-submission-form-modal"))
+            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
         )
         # Verify the modal is visible
-        modal = driver.find_element(By.ID, "unsaved-submission-form-modal")
+        modal = driver.find_element(By.ID, "unsaved_changes_modal")
         self.assertTrue(modal.is_displayed())
 
         # Wait for the buttons in the modal to be clickable
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-button")))
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-link")))
 
         # Click on save button in the modal
-        save_button = driver.find_element(By.ID, "modal-save-button")
+        save_button = driver.find_element(By.ID, "modal-save-link")
         save_button.click()
 
         # Check that user is redirected to the profile page

@@ -1,3 +1,4 @@
+import json
 import re
 import uuid
 from datetime import datetime, timedelta
@@ -920,6 +921,49 @@ class TestSubmissionGroupModalCreateView(TestCase):
 
         self.assertIn("HX-Trigger", response.headers)
         self.assertIn("showSuccess", response.headers["HX-Trigger"])
+        self.assertNotIn("submissionGroupCreated", response.headers["HX-Trigger"])
+
+    def test_valid_form_submission_from_submit_page(self) -> None:
+        """Test that a valid form submission from the submit page creates a new SubmissionGroup
+        and returns the submissionGroupCreated event.
+        """
+        form_data = {
+            "name": "Test Group From Submission Form",
+            "description": "Test Description",
+        }
+        # Mock the referer to simulate request from Submission Form page
+        response = self.client.post(
+            self.submission_group_modal_url,
+            data=form_data,
+            headers=self.headers,
+            HTTP_REFERER=reverse("recordtransfer:submit"),
+        )
+
+        # Check that submission group was created
+        submission_group = SubmissionGroup.objects.get(name="Test Group From Submission Form")
+        self.assertTrue(submission_group)
+
+        # Check response status and trigger event
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("HX-Trigger", response.headers)
+
+        # Check that the response includes the correct data in the trigger event
+        trigger_data = json.loads(response.headers["HX-Trigger"])
+
+        self.assertEqual(
+            trigger_data,
+            {
+                "submissionGroupCreated": {
+                    "message": "Submission group created successfully.",
+                    "status": "success",
+                    "group": {
+                        "uuid": str(submission_group.uuid),
+                        "name": submission_group.name,
+                        "description": submission_group.description,
+                    },
+                }
+            },
+        )
 
     def test_invalid_form_submission(self) -> None:
         """Test that an invalid form submission does not create a new SubmissionGroup."""

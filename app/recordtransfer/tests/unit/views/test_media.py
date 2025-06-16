@@ -199,7 +199,7 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(response_json["uploadSessionToken"], self.token)
         self.assertEqual(self.session.file_count, 1)
         # Check that no error is raised if the uploaded file is looked up within the session
-        self.session.get_temp_file_by_name("File.pdf")
+        self.session.get_file_by_name("File.pdf")
 
     def test_error_from_invalid_token(self) -> None:
         """Test that a 400 error is received if the token is invalid."""
@@ -353,6 +353,9 @@ class TestUploadedFileView(TestCase):
         """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
+        cls.admin_user = User.objects.create_user(
+            username="admin", password="3&SAjfTYZQ", is_staff=True
+        )
 
     def setUp(self) -> None:
         """Set up test environment."""
@@ -441,6 +444,27 @@ class TestUploadedFileView(TestCase):
         response = self.client.get(self.url)
         self.assertIn("X-Accel-Redirect", response.headers)
         self.assertEqual(response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url())
+
+    def test_admin_can_get_any_uploaded_file(self) -> None:
+        """Test that admin users can get uploaded files from any session."""
+        # Login as admin
+        self.client.logout()
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+
+        # Try to access the file from another user's session
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_admin_can_delete_any_uploaded_file(self) -> None:
+        """Test that admin users can delete uploaded files from any session."""
+        # Login as admin
+        self.client.logout()
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+
+        # Try to delete the file from another user's session
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(TempUploadedFile.objects.filter(name="testfile.txt").exists())
 
     def tearDown(self) -> None:
         """Tear down test environment."""

@@ -25,7 +25,7 @@ urlpatterns = [
     ),
     path(
         "error/",
-        login_required(views.home.SystemErrorPage.as_view()),
+        views.home.SystemErrorPage.as_view(),
         name="system_error",
     ),
     path(
@@ -42,14 +42,9 @@ urlpatterns = [
         name="delete_in_progress_submission_modal",
     ),
     path("about/", views.home.About.as_view(), name="about"),
-    path("help/", views.home.Help.as_view(), name="help"),  # Add this line for the Help page
+    path("help/", views.home.Help.as_view(), name="help"),
     path(
         "user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"
-    ),
-    path(
-        "submission-group/",
-        login_required(views.post_submission.SubmissionGroupCreateView.as_view()),
-        name="submission_group_new",
     ),
     path(
         "submission-group/<uuid:uuid>/",

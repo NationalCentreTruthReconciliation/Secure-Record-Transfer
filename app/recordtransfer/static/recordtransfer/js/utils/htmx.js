@@ -1,4 +1,5 @@
-import { addQueryParam, closeModal, getCurrentTablePage } from "./utils.js";
+import { setupSubmissionGroupForm } from "../forms/forms.js";
+import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
 
 /**
  * Handles the UI and table refresh after a delete request for an in-progress submission.
@@ -43,22 +44,26 @@ export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
 
     // If the request was successful, refresh the table
     if (e.detail.successful) {
-        // Get base refresh URL
-        const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
-        const paginateQueryName = context["PAGINATE_QUERY_NAME"];
-
-        // Get the current page number
-        const currentPage = getCurrentTablePage();
-
-        const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
-
-        window.htmx.ajax("GET",
-            finalUrl,
-            {
-                target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
-                swap: "innerHTML"
-            });
+        refreshSubmissionGroupTable(context);
     }
+};
+
+/**
+ * Handles the after-swap event for submission group forms in HTMX contexts.
+ * Sets up the submission group form when triggered by the new submission group button
+ * and displays the modal after content swap.
+ * @param {Event} e - The HTMX after-swap event object containing request details
+ * @param {object} context - The context object for the current operation
+ * @returns {void}
+ */
+export const handleSubmissionGroupModalFormAfterSwap = (e, context) => {
+    // Sets up the submission group form if the modal content swap was triggered by the
+    // new submission group button
+    if (e.detail.requestConfig.elt.id === "id_new_submission_group_button") {
+        setupSubmissionGroupForm(context);
+    }
+    // Always show the modal after a swap on the modal content container
+    showModal();
 };
 
 /**
@@ -74,25 +79,39 @@ export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
  * @param {string} context.ID_SUBMISSION_GROUP_TABLE - The DOM element ID of the submission group
  * table to update.
  */
-export function handleModalBeforeSwap(e, context) {
+export function handleSubmissionGroupModalFormBeforeSwap(e, context) {
     if (!e.detail.serverResponse && e.detail.requestConfig.elt.id === "submission-group-form") {
         e.preventDefault(); // Stop the event from bubbling up
         closeModal();
-
-        // Refresh the table
-        const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
-        const paginateQueryName = context["PAGINATE_QUERY_NAME"];
-        const currentPage = getCurrentTablePage();
-
-        const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
-
-        window.htmx.ajax("GET",
-            finalUrl,
-            {
-                target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
-                swap: "innerHTML"
-            });
+        // Handler may be used on other pages where the submission group table is not present
+        if (context["ID_SUBMISSION_GROUP_TABLE"] &&
+            document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
+            refreshSubmissionGroupTable(context);
+        }
     }
 }
 
+/**
+ * Refreshes the submission group table by making an HTMX AJAX request
+ * @param {object} context - Configuration object containing URL and element identifiers
+ * @param {string} context.SUBMISSION_GROUP_TABLE_URL - Base URL for fetching submission group
+ * table data
+ * @param {string} context.PAGINATE_QUERY_NAME - Query parameter name used for pagination
+ * @param {string} context.ID_SUBMISSION_GROUP_TABLE - DOM element ID of the submission group table
+ * to update
+ * @returns {void}
+ */
+const refreshSubmissionGroupTable = (context) => {
+    const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
+    const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+    const currentPage = getCurrentTablePage();
 
+    const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
+
+    window.htmx.ajax("GET",
+        finalUrl,
+        {
+            target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
+            swap: "innerHTML"
+        });
+};

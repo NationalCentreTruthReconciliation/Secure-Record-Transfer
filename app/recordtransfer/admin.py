@@ -15,7 +15,7 @@ from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
@@ -68,14 +68,26 @@ def linkify(field_name: str) -> Callable:
 
 @receiver(pre_delete, sender=Job)
 def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
-    """FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
+    """FileFields are not deleted automatically after Django 1.11, instead this receiver does
+    it.
+    """
     instance.attached_file.delete(False)
 
 
 @display(description=gettext("Upload Size"))
 def format_upload_size(obj: BaseUploadedFile) -> str:
     """Format file size of an BaseUploadedFile instance for display."""
+    if not obj.file_upload or not obj.exists:
+        return "N/A"
     return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
+
+@display(description=gettext("File Link"))
+def file_url(obj: BaseUploadedFile) -> SafeText:
+    """Return the URL to access the file, or a message if the file was removed."""
+    if not obj.file_upload or not obj.exists:
+        return mark_safe(gettext("File was removed"))
+    return format_html('<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -128,7 +140,7 @@ class ReadOnlyInline(admin.TabularInline):
         return False
 
 
-@admin.register(TempUploadedFile, PermUploadedFile)
+@admin.register(PermUploadedFile)
 class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model.
 
@@ -138,10 +150,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    class Media:
-        js = ("admin_uploadedfile.bundle.js",)
-
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), file_url]
 
     search_fields = [
         "name",
@@ -170,8 +179,8 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = ["name", format_upload_size, "exists"]
-    readonly_fields = ["exists", format_upload_size]
+    fields = [file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", file_url, format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -185,8 +194,8 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = ["name", format_upload_size, "exists"]
-    readonly_fields = ["exists", format_upload_size]
+    fields = [file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", file_url, format_upload_size]
 
 
 @admin.register(UploadSession)
@@ -223,14 +232,24 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "expires_at",
     ]
 
-    inlines = [
-        TempUploadedFileInline,
-        PermUploadedFileInline,
-    ]
-
     ordering = [
         "-started_at",
     ]
+
+    def get_inlines(self, request, obj=None) -> list:
+        """Return the inlines to display for the UploadSession."""
+        if obj is None:
+            return []
+        if obj.status in {
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+            UploadSession.SessionStatus.EXPIRED,
+        }:
+            return [TempUploadedFileInline]
+        elif obj.status == UploadSession.SessionStatus.STORED:
+            return [PermUploadedFileInline]
+        else:
+            return [TempUploadedFileInline, PermUploadedFileInline]
 
     def file_count(self, obj: UploadSession) -> Union[int, str]:
         """Display the number of files uploaded to the session."""

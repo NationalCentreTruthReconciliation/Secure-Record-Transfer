@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from django.contrib.auth.forms import AuthenticationForm
 from recordtransfer.forms import SignUpForm
 from recordtransfer.tokens import account_activation_token
 
@@ -63,7 +64,7 @@ class TestCreateAccount(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Create a New Account")
         self.assertIsInstance(response.context["form"], SignUpForm)
-        self.assertTemplateUsed(response, "recordtransfer/signupform.html")
+        self.assertTemplateUsed(response, "recordtransfer/signup.html")
 
     def test_get_create_account_authenticated_user_redirected(self) -> None:
         """Test that authenticated users are redirected to homepage."""
@@ -230,6 +231,89 @@ class TestCreateAccount(TestCase):
         self.assertFalse(new_user.is_staff)
         self.assertFalse(new_user.is_superuser)
 
+    def test_htmx_post_valid_form(self) -> None:
+        """Test successful account creation via HTMX request."""
+        initial_user_count = User.objects.count()
+
+        response = self.client.post(
+            self.create_account_url,
+            data=self.valid_form_data,
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Check for HX-Redirect response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers["HX-Redirect"], reverse("recordtransfer:activation_sent")
+        )
+
+        # Check user was created
+        self.assertEqual(User.objects.count(), initial_user_count + 1)
+        new_user = User.objects.get(username="testuser123")
+        self.assertFalse(new_user.is_active)
+
+        # Check activation email was sent
+        self.mock_send_email.assert_called_once_with(new_user)
+
+    def test_htmx_post_invalid_form(self) -> None:
+        """Test form submission with invalid data via HTMX request."""
+        invalid_data = self.valid_form_data.copy()
+        invalid_data["password2"] = "different_password"
+
+        response = self.client.post(
+            self.create_account_url,
+            data=invalid_data,
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Check for HX-Redirect response
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Create a New Account", str(response.content))
+
+        # Test that form is invalid
+
+        form = SignUpForm(data=invalid_data)
+        self.assertFalse(form.is_valid())
+
+        # User should not be created
+        self.assertFalse(User.objects.filter(username="testuser123").exists())
+
+        # Email should not be sent
+        self.mock_send_email.assert_not_called()
+
+    def test_htmx_post_empty_form(self) -> None:
+        """Test HTMX submission with empty form data."""
+        user_count_before_request = User.objects.count()
+        response = self.client.post(
+            self.create_account_url,
+            data={},  # Empty data
+            HTTP_HX_REQUEST="true",
+        )
+
+        # Should return form with errors
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error indicators
+        self.assertIn("alert-error", str(response.content))
+
+        required_fields = {
+            "username": "This field is required",
+            "first_name": "This field is required",
+            "last_name": "This field is required",
+            "email": "This field is required",
+            "password1": "This field is required",
+            "password2": "This field is required",
+        }
+
+        for field, error_message in required_fields.items():
+            # Verify field exists in the response
+            self.assertIn(f"id_{field}", str(response.content))
+            # Verify the specific error message appears for this field
+            self.assertIn(error_message, str(response.content))
+
+        # User should not be created
+        self.assertEqual(User.objects.count(), user_count_before_request)
+
 
 class TestActivateAccount(TestCase):
     """Tests for the ActivateAccount view."""
@@ -381,3 +465,136 @@ class TestActivateAccount(TestCase):
         self.inactive_user.refresh_from_db()
         self.assertFalse(self.inactive_user.is_active)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+
+class TestLogin(TestCase):
+    """Tests for the Login view."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.login_url = reverse("login")
+
+        # Create a test user
+        self.test_user = User.objects.create_user(
+            username="testloginuser",
+            first_name="Test",
+            last_name="Login",
+            email="login@example.com",
+            password="securepassword123",
+            is_active=True,
+        )
+
+        # Create an inactive test user
+        self.inactive_user = User.objects.create_user(
+            username="inactiveloginuser",
+            first_name="Inactive",
+            last_name="User",
+            email="inactive@example.com",
+            password="securepassword123",
+            is_active=False,
+        )
+
+        self.valid_credentials = {
+            "username": "testloginuser",
+            "password": "securepassword123",
+        }
+
+        self.invalid_credentials = {
+            "username": "testloginuser",
+            "password": "wrongpassword",
+        }
+
+        self.inactive_credentials = {
+            "username": "inactiveloginuser",
+            "password": "securepassword123",
+        }
+
+    def test_get_login_page(self) -> None:
+        """Test GET request to login page."""
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request["PATH_INFO"], self.login_url)
+        self.assertIsInstance(response.context["form"], AuthenticationForm)
+
+    def test_login_successful(self) -> None:
+        """Test successful login with valid credentials."""
+        response = self.client.post(self.login_url, self.valid_credentials)
+
+        # Check redirect to default success URL
+        self.assertRedirects(response, reverse("recordtransfer:index"))
+
+        # Check user is authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "testloginuser")
+
+    def test_login_invalid_credentials(self) -> None:
+        """Test login with invalid credentials."""
+        response = self.client.post(self.login_url, self.invalid_credentials)
+
+        self.assertEqual(response.status_code, 200)
+        # Check that we're still at the login URL (not redirected)
+        self.assertEqual(response.request["PATH_INFO"], self.login_url)
+
+        # Should have form errors
+        self.assertTrue(response.context["form"].errors)
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_login_inactive_user(self) -> None:
+        """Test login with inactive user."""
+        response = self.client.post(self.login_url, self.inactive_credentials)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request["PATH_INFO"], self.login_url)
+
+        # Should have form errors
+        self.assertTrue(response.context["form"].errors)
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_htmx_login_successful(self) -> None:
+        """Test HTMX login with valid credentials."""
+        response = self.client.post(self.login_url, self.valid_credentials, HTTP_HX_REQUEST="true")
+
+        # Should be a direct response with HX-Redirect header
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["HX-Redirect"], reverse("recordtransfer:index"))
+
+        # Check user is authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "testloginuser")
+
+    def test_htmx_login_invalid(self) -> None:
+        """Test HTMX login with invalid credentials."""
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error message
+        self.assertIn("alert-error", str(response.content))
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_htmx_login_inactive_user(self) -> None:
+        """Test HTMX login with inactive user."""
+        response = self.client.post(
+            self.login_url, self.inactive_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error message
+        self.assertIn("alert-error", str(response.content))
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_redirect_authenticated_user(self) -> None:
+        """Test that authenticated users are redirected."""
+        self.client.login(username="testloginuser", password="securepassword123")
+        response = self.client.get(self.login_url)
+        # Should redirect to index
+        self.assertRedirects(response, reverse("recordtransfer:index"))

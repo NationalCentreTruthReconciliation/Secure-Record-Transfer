@@ -531,16 +531,47 @@ class TestUploadSession(TestCase):
             self.session.remove_temp_file_by_name("non_existent_file.pdf")
 
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
-    def test_get_temp_file_by_name(self, mock_temp_files: BaseManager) -> None:
-        """Test getting a temp file from the session by name."""
+    def test_get_file_by_name_uploading(self, mock_temp_files: BaseManager) -> None:
+        """Test getting a file from the session by name for UPLOADING state."""
         mock_temp_files.get = MagicMock(return_value=self.test_temp_file)
         self.session.status = UploadSession.SessionStatus.UPLOADING
-        temp_uploaded_file = self.session.get_temp_file_by_name(self.test_temp_file.name)
+        temp_uploaded_file = self.session.get_file_by_name(self.test_temp_file.name)
         self.assertIsNotNone(temp_uploaded_file)
         self.assertEqual(temp_uploaded_file.name, self.test_temp_file.name)
 
-    def test_get_temp_file_by_name_invalid_status(self) -> None:
-        """Test getting a temp file from the session by name raises an exception when the session
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
+    def test_get_file_by_name_stored(self, mock_perm_files: BaseManager) -> None:
+        """Test getting a file from the session by name for STORED state."""
+        mock_perm_files.get = MagicMock(return_value=self.test_perm_file)
+        self.session.status = UploadSession.SessionStatus.STORED
+        perm_uploaded_file = self.session.get_file_by_name(self.test_perm_file.name)
+        self.assertIsNotNone(perm_uploaded_file)
+        self.assertEqual(perm_uploaded_file.name, self.test_perm_file.name)
+
+    @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
+    def test_get_file_by_name_temp_file_not_found(self, mock_temp_files: BaseManager) -> None:
+        """Test get_file_by_name raises FileNotFoundError if temp file does not exist in UPLOADING
+        state.
+        """
+        mock_temp_files.get = MagicMock(side_effect=TempUploadedFile.DoesNotExist())
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        with self.assertRaises(FileNotFoundError) as exc:
+            self.session.get_file_by_name("missing.pdf")
+        self.assertIn("No temporary file with name missing.pdf exists in session", str(exc.exception))
+
+    @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
+    def test_get_file_by_name_perm_file_not_found(self, mock_perm_files: BaseManager) -> None:
+        """Test get_file_by_name raises FileNotFoundError if perm file does not exist in STORED
+        state.
+        """
+        mock_perm_files.get = MagicMock(side_effect=PermUploadedFile.DoesNotExist())
+        self.session.status = UploadSession.SessionStatus.STORED
+        with self.assertRaises(FileNotFoundError) as exc:
+            self.session.get_file_by_name("missing.pdf")
+        self.assertIn("No permanent file with name missing.pdf exists in session", str(exc.exception))
+
+    def test_get_file_by_name_invalid_status(self) -> None:
+        """Test getting a file from the session by name raises an exception when the session
         is in an invalid state.
         """
         self.session.add_temp_file(self.test_file_1)
@@ -549,13 +580,12 @@ class TestUploadSession(TestCase):
             UploadSession.SessionStatus.EXPIRED,
             UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
-            UploadSession.SessionStatus.STORED,
             UploadSession.SessionStatus.COPYING_FAILED,
         ]
         for status in statuses:
             self.session.status = status
             with self.assertRaises(ValueError):
-                self.session.get_temp_file_by_name(self.test_file_1.name)
+                self.session.get_file_by_name(self.test_file_1.name)
 
     @patch("recordtransfer.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_get_temporary_uploads(self, mock_temp_files: BaseManager) -> None:
