@@ -264,23 +264,31 @@ class UploadSession(models.Model):
             self.status = self.SessionStatus.CREATED
             self.save()
 
-    def get_temp_file_by_name(self, name: str) -> TempUploadedFile:
-        """Get an temporary uploaded file in this session by name.
+    def get_file_by_name(self, name: str) -> UploadedFile:
+        """Get an uploaded file in this session by name. The file can be either temporary or
+        permanent.
 
         Args:
             name: The name of the file to find
         """
-        if self.status != self.SessionStatus.UPLOADING:
+        if self.status not in (self.SessionStatus.UPLOADING, self.SessionStatus.STORED):
             raise ValueError(
-                f"Can only get temporary uploaded files from session {self.token} when the "
-                f"session status is {self.SessionStatus.UPLOADING}"
+                f"Can only get uploaded files from session {self.token} when the "
+                f"session status is {self.SessionStatus.UPLOADING} or {self.SessionStatus.STORED}, "
             )
 
         try:
-            return self.tempuploadedfile_set.get(name=name)
+            if self.status == self.SessionStatus.UPLOADING:
+                return self.tempuploadedfile_set.get(name=name)
+            else:
+                return self.permuploadedfile_set.get(name=name)
         except TempUploadedFile.DoesNotExist as exc:
             raise FileNotFoundError(
                 f"No temporary file with name {name} exists in session {self.token}"
+            ) from exc
+        except PermUploadedFile.DoesNotExist as exc:
+            raise FileNotFoundError(
+                f"No permanent file with name {name} exists in session {self.token}"
             ) from exc
 
     def get_temporary_uploads(self) -> list[TempUploadedFile]:
@@ -432,7 +440,6 @@ class UploadSession(models.Model):
         Returns:
             A tuple containing lists of copied and missing files
         """
-
         if self.status == self.SessionStatus.COPYING_IN_PROGRESS:
             raise ValueError(
                 f"Cannot copy files from session {self.token} to {destination} because the "
@@ -590,8 +597,8 @@ class TempUploadedFile(BaseUploadedFile):
     class Meta(BaseUploadedFile.Meta):
         """Meta information."""
 
-        verbose_name = "Temporary uploaded file"
-        verbose_name_plural = "Temporary uploaded files"
+        verbose_name = "File Currently Being Uploaded"
+        verbose_name_plural = "Files Currently Being Uploaded"
 
     file_upload = models.FileField(
         null=True, storage=TempFileStorage, upload_to=session_upload_location
