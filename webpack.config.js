@@ -116,7 +116,7 @@ module.exports = {
                 generator: {
                     filename: "[name][ext]"
                 }
-            }, // Add this new rule for favicon and other icon files
+            },
             {
                 test: /\.ico$/i,
                 type: "asset/resource",
