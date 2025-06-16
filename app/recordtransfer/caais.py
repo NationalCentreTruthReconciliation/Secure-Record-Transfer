@@ -10,23 +10,24 @@ from caais.models import *
 from django.db.models import Model
 from django.utils.translation import gettext
 
+from recordtransfer.enums import SiteSettingKey
 from recordtransfer.models import SiteSetting
 
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def get_setting_key(field_name: str) -> Optional[SiteSetting.Key]:
-    """Generate a SiteSetting.Key enum member for a field name, if it exists.
+def get_setting_key(field_name: str) -> Optional[SiteSettingKey]:
+    """Generate a SiteSettingKey enum member for a field name, if it exists.
 
     Args:
         field_name (str): The name of the field on the model or the form
 
     Returns:
-        Optional[SiteSetting.Key]: A SiteSetting.Key enum member if it exists, None otherwise
+        Optional[SiteSettingKey]: A SiteSettingKey enum member if it exists, None otherwise
     """
     setting_name = f"CAAIS_DEFAULT_{field_name.upper().strip()}"
     try:
-        return SiteSetting.Key(setting_name)
+        return SiteSettingKey(setting_name)
     except ValueError:
         return None
 
@@ -294,7 +295,7 @@ def add_submission_event(metadata: Metadata):
     """
     # The CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is guaranteed to have a value
     submission_type_name = SiteSetting.get_value_str(
-        SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
+        SiteSettingKey.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
     )
 
     event_type, created = EventType.objects.get_or_create(name=submission_type_name)
@@ -306,8 +307,8 @@ def add_submission_event(metadata: Metadata):
             submission_type_name,
         )
 
-    event_agent = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT)
-    event_note = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE)
+    event_agent = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT)
+    event_note = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE)
 
     Event.objects.create(
         metadata=metadata,
@@ -330,7 +331,7 @@ def add_date_of_creation(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_CREATION_TYPE is guaranteed to have a value
-    creation_type_name = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_CREATION_TYPE)
+    creation_type_name = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_CREATION_TYPE)
 
     creation_type, created = CreationOrRevisionType.objects.get_or_create(name=creation_type_name)
 
@@ -341,8 +342,8 @@ def add_date_of_creation(metadata: Metadata):
             creation_type_name,
         )
 
-    creation_agent = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_CREATION_AGENT)
-    creation_note = SiteSetting.get_value_str(SiteSetting.Key.CAAIS_DEFAULT_CREATION_NOTE)
+    creation_agent = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_CREATION_AGENT)
+    creation_note = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_CREATION_NOTE)
 
     DateOfCreationOrRevision.objects.create(
         metadata=metadata,
