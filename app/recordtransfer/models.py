@@ -264,8 +264,9 @@ class UploadSession(models.Model):
             self.status = self.SessionStatus.CREATED
             self.save()
 
-    def get_file_by_name(self, name: str) -> TempUploadedFile:
-        """Get an temporary uploaded file in this session by name.
+    def get_file_by_name(self, name: str) -> UploadedFile:
+        """Get an uploaded file in this session by name. The file can be either temporary or
+        permanent.
 
         Args:
             name: The name of the file to find
