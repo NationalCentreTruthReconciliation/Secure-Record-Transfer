@@ -235,13 +235,13 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         if obj and obj.status in {
             UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.UPLOADING,
-            UploadSession.SessionStatus.COPYING_IN_PROGRESS,
             UploadSession.SessionStatus.EXPIRED,
         }:
             return [TempUploadedFileInline]
         elif obj and obj.status == UploadSession.SessionStatus.STORED:
             return [PermUploadedFileInline]
-        return []
+        else:
+            return [TempUploadedFileInline, PermUploadedFileInline]
 
     def file_count(self, obj: UploadSession) -> Union[int, str]:
         """Display the number of files uploaded to the session."""
