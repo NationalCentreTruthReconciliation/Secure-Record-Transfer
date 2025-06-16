@@ -72,7 +72,7 @@
                     <a href="{% url 'password_reset' %}"
                        class="text-primary hover:text-primary/80">{% trans "Forgot your password?" %}</a>
                 </div>
-               {% if SIGN_UP_ENABLED %}
+                {% if SIGN_UP_ENABLED %}
                     <div class="mt-6 text-center">
                         <p class="text-gray-600">
                             {% trans "Don't have an account?" %}
@@ -81,6 +81,7 @@
                         </p>
                     </div>
                 {% endif %}
+            </div>
         </div>
     </div>
 {% endblock content %}
