@@ -75,13 +75,17 @@ def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
 @display(description=gettext("Upload Size"))
 def format_upload_size(obj: BaseUploadedFile) -> str:
     """Format file size of an BaseUploadedFile instance for display."""
+    if not obj.file_upload or not obj.exists:
+        return "N/A"
     return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
 
 
 @display(description=gettext("File Link"))
 def media_url(obj: BaseUploadedFile) -> SafeText:
     """Return the media URL for a BaseUploadedFile instance."""
-    return format_html('<a href="{}">{}</a>', obj.get_file_access_url(), obj.name)
+    if not obj.file_upload or not obj.exists:
+        return mark_safe(gettext("File was removed"))
+    return format_html('<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
