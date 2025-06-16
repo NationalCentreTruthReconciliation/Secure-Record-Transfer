@@ -232,13 +232,15 @@ class UploadSessionAdmin(ReadOnlyAdmin):
 
     def get_inlines(self, request, obj=None) -> list:
         """Return the inlines to display for the UploadSession."""
-        if obj and obj.status in {
+        if obj is None:
+            return []
+        if obj.status in {
             UploadSession.SessionStatus.CREATED,
             UploadSession.SessionStatus.UPLOADING,
             UploadSession.SessionStatus.EXPIRED,
         }:
             return [TempUploadedFileInline]
-        elif obj and obj.status == UploadSession.SessionStatus.STORED:
+        elif obj.status == UploadSession.SessionStatus.STORED:
             return [PermUploadedFileInline]
         else:
             return [TempUploadedFileInline, PermUploadedFileInline]
