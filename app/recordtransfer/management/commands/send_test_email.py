@@ -39,13 +39,13 @@ class Command(BaseCommand):
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Add command-line arguments to the parser."""
         parser.add_argument(
-            "to_email", type=str, help="The email address to send the test email to."
-        )
-        parser.add_argument(
             "email_id",
             type=str,
             choices=EMAIL_FUNCTIONS.keys(),
             help="The ID of the email to send (email function name).",
+        )
+        parser.add_argument(
+            "to_email", type=str, help="The email address to send the test email to."
         )
 
     def handle(self, *args, **options) -> None:
