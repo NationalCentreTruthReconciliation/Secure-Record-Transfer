@@ -311,7 +311,7 @@ class TestCreateAccount(TestCase):
             self.assertIn(error_message, str(response.content))
 
         # User should not be created
-        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.count(), user_count_before_request)
 
 
 class TestActivateAccount(TestCase):
