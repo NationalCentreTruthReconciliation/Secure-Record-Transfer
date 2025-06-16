@@ -81,7 +81,7 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
 
 
 @display(description=gettext("File Link"))
-def media_url(obj: BaseUploadedFile) -> SafeText:
+def file_url(obj: BaseUploadedFile) -> SafeText:
     """Return the media URL for a BaseUploadedFile instance."""
     if not obj.file_upload or not obj.exists:
         return mark_safe(gettext("File was removed"))
@@ -148,7 +148,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), media_url]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), file_url]
 
     search_fields = [
         "name",
@@ -177,8 +177,8 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = [media_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", media_url, format_upload_size]
+    fields = [file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", file_url, format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -192,8 +192,8 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = [media_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", media_url, format_upload_size]
+    fields = [file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", file_url, format_upload_size]
 
 
 @admin.register(UploadSession)
