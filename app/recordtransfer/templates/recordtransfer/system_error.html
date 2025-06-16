@@ -1,13 +1,39 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "System Error" %}{% endblock %}
-
+{% load static %}
+{% block title %}
+    {% trans "System Error" %}
+{% endblock title %}
 {% block content %}
-{% blocktrans %}
-<div>
-    <p>We're sorry, but this site is experiencing some issues.</p>
-    <p>An administrator has been notified. Please try back later.</p>
-</div>
-{% endblocktrans %}
-{% endblock %}
+    <div class="flex flex-col items-center justify-center min-h-[50vh] text-center py-10 px-4">
+        <div class="bg-white shadow-lg rounded-lg p-8 border border-gray-100 max-w-md w-full">
+                <div class="flex justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-12 w-12 text-primary/60"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+            <div class="text-2xl font-bold text-primary px-4 py-2 ">{% trans "System Error" %}</div>
+            <p class="mb-4 text-gray-700 text-lg font-medium leading-relaxed">
+                {% trans "We're sorry, but this site is experiencing some issues." %}
+            </p>
+            <p class="text-gray-600 text-base leading-relaxed">
+                {% trans "Please try again later. Contact us if you continue to experience issues." %}
+            </p>
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <a href="{% url 'recordtransfer:index' %}"
+                   class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                    <!-- Simple left arrow -->
+                    <span class="mr-2 font-bold">←</span>
+                    {% trans "Return to Home" %}
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
