@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from django.contrib.auth.forms import AuthenticationForm
 from recordtransfer.forms import SignUpForm
 from recordtransfer.tokens import account_activation_token
 
@@ -462,4 +463,92 @@ class TestActivateAccount(TestCase):
         # User should remain inactive and not logged in
         self.inactive_user.refresh_from_db()
         self.assertFalse(self.inactive_user.is_active)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+
+class TestLogin(TestCase):
+    """Tests for the Login view."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.login_url = reverse("login")
+
+        # Create a test user
+        self.test_user = User.objects.create_user(
+            username="testloginuser",
+            first_name="Test",
+            last_name="Login",
+            email="login@example.com",
+            password="securepassword123",
+            is_active=True,
+        )
+
+        # Create an inactive test user
+        self.inactive_user = User.objects.create_user(
+            username="inactiveloginuser",
+            first_name="Inactive",
+            last_name="User",
+            email="inactive@example.com",
+            password="securepassword123",
+            is_active=False,
+        )
+
+        self.valid_credentials = {
+            "username": "testloginuser",
+            "password": "securepassword123",
+        }
+
+        self.invalid_credentials = {
+            "username": "testloginuser",
+            "password": "wrongpassword",
+        }
+
+        self.inactive_credentials = {
+            "username": "inactiveloginuser",
+            "password": "securepassword123",
+        }
+
+    def test_get_login_page(self) -> None:
+        """Test GET request to login page."""
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request["PATH_INFO"], self.login_url)
+        self.assertIsInstance(response.context["form"], AuthenticationForm)
+
+    def test_login_successful(self) -> None:
+        """Test successful login with valid credentials."""
+        response = self.client.post(self.login_url, self.valid_credentials)
+
+        # Check redirect to default success URL
+        self.assertRedirects(response, reverse("recordtransfer:index"))
+
+        # Check user is authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "testloginuser")
+
+    def test_login_invalid_credentials(self) -> None:
+        """Test login with invalid credentials."""
+        response = self.client.post(self.login_url, self.invalid_credentials)
+
+        self.assertEqual(response.status_code, 200)
+        # Check that we're still at the login URL (not redirected)
+        self.assertEqual(response.request["PATH_INFO"], self.login_url)
+
+        # Should have form errors
+        self.assertTrue(response.context["form"].errors)
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_login_inactive_user(self) -> None:
+        """Test login with inactive user."""
+        response = self.client.post(self.login_url, self.inactive_credentials)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request["PATH_INFO"], self.login_url)
+
+        # Should have form errors
+        self.assertTrue(response.context["form"].errors)
+
+        # User should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
