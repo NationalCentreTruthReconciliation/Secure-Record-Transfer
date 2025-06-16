@@ -72,13 +72,15 @@
                     <a href="{% url 'password_reset' %}"
                        class="text-primary hover:text-primary/80">{% trans "Forgot your password?" %}</a>
                 </div>
-                <div class="mt-6 text-center">
-                    <p class="text-gray-600">
-                        {% trans "Already have an account?" %}
-                        <a href="{% url 'recordtransfer:create_account' %}"
-                           class="text-primary hover:text-primary/80 ml-1">{% trans "Sign Up" %}</a>
-                    </p>
-                </div>
+                {% if SIGN_UP_ENABLED %}
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-600">
+                            {% trans "Don't have an account?" %}
+                            <a href="{% url 'recordtransfer:create_account' %}"
+                               class="text-primary hover:text-primary/80 ml-1">{% trans "Sign Up" %}</a>
+                        </p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

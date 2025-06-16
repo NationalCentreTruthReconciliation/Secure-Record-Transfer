@@ -2,7 +2,7 @@ name: Production Smoke Test (via compose.prod.yml)
 
 on:
   pull_request:
-    branches: [master, 640-migrate-ui-components-to-daisyui]
+    branches: [master]
   push:
     branches: [master]
   workflow_dispatch:
