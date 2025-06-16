@@ -590,3 +590,10 @@ class TestLogin(TestCase):
 
         # User should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_redirect_authenticated_user(self) -> None:
+        """Test that authenticated users are redirected."""
+        self.client.login(username="testloginuser", password="securepassword123")
+        response = self.client.get(self.login_url)
+        # Should redirect to index
+        self.assertRedirects(response, reverse("recordtransfer:index"))
