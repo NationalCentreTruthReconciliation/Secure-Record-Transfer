@@ -27,5 +27,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --extra dev
 
+      - name: Build webpack assets
+        run: npm run build
+
       - name: Run unit tests
         run: uv run pytest -k unit
