@@ -552,3 +552,41 @@ class TestLogin(TestCase):
 
         # User should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_htmx_login_successful(self) -> None:
+        """Test HTMX login with valid credentials."""
+        response = self.client.post(self.login_url, self.valid_credentials, HTTP_HX_REQUEST="true")
+
+        # Should be a direct response with HX-Redirect header
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["HX-Redirect"], reverse("recordtransfer:index"))
+
+        # Check user is authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "testloginuser")
+
+    def test_htmx_login_invalid(self) -> None:
+        """Test HTMX login with invalid credentials."""
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error message
+        self.assertIn("alert-error", str(response.content))
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_htmx_login_inactive_user(self) -> None:
+        """Test HTMX login with inactive user."""
+        response = self.client.post(
+            self.login_url, self.inactive_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should contain error message
+        self.assertIn("alert-error", str(response.content))
+
+        # User should not be authenticated
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
