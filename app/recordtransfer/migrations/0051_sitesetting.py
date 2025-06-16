@@ -75,7 +75,7 @@ def populate_site_settings(apps, schema_editor) -> None:
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("recordtransfer", "0049_remove_user_confirmed_email"),
+        ("recordtransfer", "0050_alter_tempuploadedfile_options"),
     ]
 
     operations = [
