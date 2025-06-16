@@ -56,8 +56,6 @@ var/
 *.manifest
 *.spec
 
-# Webpack
-webpack-stats.json
 
 # Installer logs
 pip-log.txt

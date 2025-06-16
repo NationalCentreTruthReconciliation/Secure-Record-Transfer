@@ -309,6 +309,6 @@ SELENIUM_TESTS_HEADLESS_MODE = config("SELENIUM_TESTS_HEADLESS_MODE", default=Fa
 
 WEBPACK_LOADER = {
     "DEFAULT": {
-        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "webpack-stats.json"),
+        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "dist", "webpack-stats.json"),
     },
 }
