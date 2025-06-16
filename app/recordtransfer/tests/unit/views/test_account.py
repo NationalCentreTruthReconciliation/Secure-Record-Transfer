@@ -283,6 +283,7 @@ class TestCreateAccount(TestCase):
 
     def test_htmx_post_empty_form(self) -> None:
         """Test HTMX submission with empty form data."""
+        user_count_before_request = User.objects.count()
         response = self.client.post(
             self.create_account_url,
             data={},  # Empty data
