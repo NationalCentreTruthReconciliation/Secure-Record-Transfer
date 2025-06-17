@@ -61,10 +61,13 @@ class SiteSetting(models.Model):
     To add a new setting to the database, follow these steps:
 
     1. **Add a new entry to the SiteSettingKey enum class**:
-       Add your new setting key to the :class:`SiteSettingKey` enum in `enums.py`.
+
+       Add your new setting key to the :class:`~recordtransfer.models.SiteSetting` enum in
+       `recordtransfer/enums.py`.
        The key should be descriptive and follow existing naming conventions
-       (i.e., all uppercase with underscores). Include a SettingKeyMeta with the
-       value type, description, and optional default value.
+       (i.e., all uppercase with underscores). Include a
+       :class:`~recordtransfer.enums.SettingKeyMeta` with the value type, description, and optional
+       default value.
 
        Example::
 
@@ -75,8 +78,10 @@ class SiteSetting(models.Model):
            )
 
     2. **Create a data migration**:
+
        Create a Django data migration to add the setting to the database. The migration
-       should create a new SiteSetting instance with the required fields:
+       should create a new :class:`~recordtransfer.models.SiteSetting` instance with the required
+       fields:
 
        - ``key``: Must be unique and match the enum name (string)
        - ``value``: The default value as a string (must use the enum's default_value if available)
@@ -94,6 +99,7 @@ class SiteSetting(models.Model):
                    defaults={"value": "Default string value", "value_type": "str"},
                )
 
+
            class Migration(migrations.Migration):
                dependencies = [
                    ("recordtransfer", "XXXX_previous_migration"),
@@ -104,11 +110,16 @@ class SiteSetting(models.Model):
                ]
 
     3. **Validation requirements**:
+
        - The ``key`` field must be unique across all settings
        - For ``value_type`` "int": the ``value`` must be a valid string representation
          of an integer (e.g., "42", "-1", "0")
        - For ``value_type`` "str": the ``value`` can be any string
        - ``change_date`` is auto-generated and ``changed_by`` does not need to be set
+
+    4. **Document the new setting**:
+
+       Add an entry for the new setting to ``docs/admin_guide/site_settings.rst``.
 
     Removing a Setting
     ------------------
@@ -116,10 +127,12 @@ class SiteSetting(models.Model):
     To remove an existing setting from the database:
 
     1. **Remove the key from the SiteSettingKey enum class**:
-       Delete the corresponding enum entry from the :class:`SiteSettingKey` enum
-       in `enums.py`.
+
+       Delete the corresponding enum entry from the :class:`~recordtransfer.models.SiteSetting`
+       enum in `enums.py`.
 
     2. **Create a data migration**:
+
        Create a Django data migration to remove the setting from the database::
 
            from django.db import migrations
@@ -140,7 +153,12 @@ class SiteSetting(models.Model):
                ]
 
     3. **Update code references**:
+
        Remove any code that references the old setting key.
+
+    4. **Update documentation**:
+
+       Remove the setting from ``docs/admin_guide/site_settings.rst``.
 
     Retrieving Settings in Code
     ---------------------------
