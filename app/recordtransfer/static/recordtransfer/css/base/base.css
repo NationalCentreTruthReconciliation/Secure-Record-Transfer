@@ -359,6 +359,13 @@ h2 {
     text-decoration: none;
 }
 
+.logical-rounded {
+    border-start-start-radius: var(--join-ss, var(--radius-field));
+    border-start-end-radius: var(--join-se, var(--radius-field));
+    border-end-start-radius: var(--join-es, var(--radius-field));
+    border-end-end-radius: var(--join-ee, var(--radius-field));
+}
+
 @media (max-width: 1199px) {
 
     .main-header-content,

@@ -187,6 +187,21 @@ pytest -k "e2e"
 # There is currently no way to do this with python manage.py test (yet)
 ```
 
+### Debugging Tests with VSCode
+
+You can debug Python tests directly in VSCode using the pre-configured launch settings in `.vscode/launch.json`. To access these launch settings, open the Run & Debug menu (press `Ctrl+Shift+D` on Windows/Linux or `Cmd+Shift+D` on Mac).
+
+Two useful configurations are provided:
+
+- **Debug Pytest: Current File**
+    Runs and debugs all tests in the currently open file. Open the test file you want to debug, select this configuration from the Run and Debug panel, set desired breakpoints, and press the green play button.
+
+- **Debug Pytest: Specific Test**
+    Prompts you to enter the full test name (e.g., `app/recordtransfer/tests/unit/test_models.py::TestUploadSession::test_new_session_creation`). This allows you to debug a specific test or test case.
+
+While debugging, you can step through your application code in addition to the test code.
+
+
 ## Building the Documentation
 
 The documentation for this repository is built with [Sphinx](https://sphinx-doc.org).

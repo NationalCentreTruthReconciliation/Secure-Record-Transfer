@@ -231,6 +231,7 @@ class SubmissionGroupModalCreateView(CreateView):
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "includes/new_submission_group_modal.html"
+    success_message = gettext("Submission group created successfully.")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -247,9 +248,26 @@ class SubmissionGroupModalCreateView(CreateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         super().form_valid(form)
+        referer = self.request.META.get("HTTP_REFERER", "")
         response = HttpResponse(status=201)
+
+        if reverse("recordtransfer:submit") in referer:
+            return trigger_client_event(
+                response,
+                "submissionGroupCreated",
+                {
+                    "message": self.success_message,
+                    "status": "success",
+                    "group": {
+                        "uuid": str(self.object.uuid),
+                        "name": self.object.name,
+                        "description": self.object.description,
+                    },
+                },
+            )
+
         return trigger_client_event(
-            response, "showSuccess", {"value": gettext("Submission group created.")}
+            response, "showSuccess", {"value": self.success_message}
         )
 
 
