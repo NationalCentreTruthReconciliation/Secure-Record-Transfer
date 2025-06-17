@@ -12,6 +12,7 @@ SECRET_KEY = config("SECRET_KEY", default="q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 INSTALLED_APPS = [
+    "webpack_loader",
     "caais.apps.CaaisConfig",
     "clamav.apps.ClamavConfig",
     "recordtransfer.apps.RecordTransferConfig",
@@ -305,3 +306,9 @@ FIXTURE_DIRS = [
 ]
 
 SELENIUM_TESTS_HEADLESS_MODE = config("SELENIUM_TESTS_HEADLESS_MODE", default=False, cast=bool)
+
+WEBPACK_LOADER = {
+    "DEFAULT": {
+        "STATS_FILE": os.path.join(os.path.dirname(BASE_DIR), "dist", "webpack-stats.json"),
+    },
+}
