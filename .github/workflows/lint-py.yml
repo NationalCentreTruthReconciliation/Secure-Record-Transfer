@@ -2,7 +2,7 @@ name: PR Python Lint Check
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, 639-submission-form-feedback]
     types: [opened, synchronize, reopened]
 
 permissions:
