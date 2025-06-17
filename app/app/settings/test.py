@@ -3,8 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from .base import *
-
+from .base import BASE_DIR, WEBPACK_LOADER
 
 DEBUG = True
 
