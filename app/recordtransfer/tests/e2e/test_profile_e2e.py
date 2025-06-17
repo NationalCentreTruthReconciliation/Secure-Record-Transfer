@@ -1,15 +1,28 @@
-from django.test import tag
+import os
+from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
+
+from django.conf import settings
+from django.test import override_settings, tag
 from django.urls import reverse
-from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from unittest.mock import MagicMock, patch
-from urllib.parse import urlparse
+
+from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
+
 from .selenium_setup import SeleniumLiveServerTestCase
 
 
 @tag("e2e")
+@override_settings(
+    WEBPACK_LOADER={
+        "DEFAULT": {
+            # TODO: This is not working yet!
+            "STATS_FILE": "dist/webpack-stats.json",
+        },
+    }
+)
 class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def setUp(self) -> None:
         """Set up test data and log in the test user."""
