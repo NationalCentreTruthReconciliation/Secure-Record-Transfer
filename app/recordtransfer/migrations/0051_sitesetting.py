@@ -19,7 +19,6 @@ def populate_site_settings(apps, schema_editor) -> None:
         ("CAAIS_UNKNOWN_DATE_TEXT", None, "str"),
         ("CAAIS_UNKNOWN_START_DATE", None, "str"),
         ("CAAIS_UNKNOWN_END_DATE", None, "str"),
-        ("APPROXIMATE_DATE_FORMAT", None, "str"),
         # CAAIS defaults
         ("CAAIS_DEFAULT_REPOSITORY", None, "str"),
         ("CAAIS_DEFAULT_ACCESSION_TITLE", None, "str"),

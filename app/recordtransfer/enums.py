@@ -80,13 +80,6 @@ class SiteSettingKey(Enum):
         SiteSettingType.STR,
         _("Default end date to use for unknown CAAIS date ranges in ISO format (YYYY-MM-DD)"),
     )
-    APPROXIMATE_DATE_FORMAT = SettingKeyMeta(
-        SiteSettingType.STR,
-        _(
-            "A format string for the date to indicate an approximate date. The string "
-            'variable "{date}" must be present for the date format to be used.'
-        ),
-    )
 
     # CAAIS defaults
     CAAIS_DEFAULT_REPOSITORY = SettingKeyMeta(
