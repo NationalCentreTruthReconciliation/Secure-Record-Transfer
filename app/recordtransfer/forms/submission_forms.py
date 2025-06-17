@@ -174,7 +174,6 @@ class ContactInfoForm(SubmissionForm):
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
@@ -239,6 +238,7 @@ class ContactInfoForm(SubmissionForm):
             ("WV", "West Virginia"),
             ("WI", "Wisconsin"),
             ("WY", "Wyoming"),
+            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
         ],
         initial="",
         label="Province or state",
