@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from .base import BASE_DIR, WEBPACK_LOADER
+from .base import *
 
 DEBUG = True
 
@@ -123,4 +123,4 @@ STATICFILES_DIRS = [
     ),
 ]
 
-WEBPACK_LOADER["DEFAULT"]["LOADER_CLASS"] = "webpack_loader.loaders.FakeWebpackLoader"
+WEBPACK_LOADER["DEFAULT"]["LOADER_CLASS"] = "webpack_loader.loader.FakeWebpackLoader"
