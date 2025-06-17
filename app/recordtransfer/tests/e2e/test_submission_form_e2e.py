@@ -27,8 +27,9 @@ def get_section_title(step: SubmissionStep) -> str:
 @override_settings(
     WEBPACK_LOADER={
         "DEFAULT": {
-            # TODO: This is not working yet!
-            "STATS_FILE": "dist/webpack-stats.json",
+            "STATS_FILE": os.path.join(
+                os.path.dirname(settings.APPLICATION_BASE_DIR), "dist", "webpack-stats.json"
+            ),
         },
     }
 )
