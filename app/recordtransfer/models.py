@@ -42,10 +42,59 @@ class User(AbstractUser):
 
     gets_submission_email_updates = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text=_("Phone number in format: +1 (999) 999-9999")
+    )
+    address_line_1 = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=_("Street and street number")
+    )
+    address_line_2 = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=_("Unit number, RPO, PO BOX (optional)")
+    )
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=_("City")
+    )
+    province_or_state = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text=_("Province or state")
+    )
+    other_province_or_state = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text=_("Other province or state if not listed")
+    )
+    postal_or_zip_code = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text=_("Postal code (Canada) or zip code (US)")
+    )
+    country = models.CharField(
+        max_length=2,
+        blank=True,
+        null=True,
+        help_text=_("Country code")
+    )
 
-    def get_full_name(self) -> str:
+    @property
+    def full_name(self) -> str:
         """Return the full name of the user, which is a combination of first and last names."""
-        return self.first_name + " " + self.last_name
+        return f"{self.first_name} {self.last_name}".strip()
 
 
 class UploadSession(models.Model):
