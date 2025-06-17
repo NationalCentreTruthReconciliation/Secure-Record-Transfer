@@ -6,6 +6,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 from recordtransfer.enums import SiteSettingKey, SiteSettingType
@@ -87,7 +88,9 @@ class SiteSettingModelForm(RecordTransferModelForm):
                 key_enum = SiteSettingKey[self.instance.key]
                 description = getattr(key_enum, "description", "")
                 if description:
-                    self.fields["value"].help_text = description
+                    self.fields["value"].help_text = mark_safe(
+                        description.replace("\n", "<br><br>")
+                    )
                 else:
                     self.fields["value"].help_text = "No description available for this setting."
             except KeyError:
