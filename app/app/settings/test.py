@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .base import *
 
+
 DEBUG = True
 
 TESTING = True
@@ -122,3 +123,5 @@ STATICFILES_DIRS = [
         "dist",
     ),
 ]
+
+WEBPACK_LOADER["DEFAULT"]["LOADER_CLASS"] = "webpack_loader.loaders.FakeWebpackLoader"
