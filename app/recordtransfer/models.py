@@ -60,21 +60,26 @@ class SiteSetting(models.Model):
 
     To add a new setting to the database, follow these steps:
 
-    1. **Add a new entry to the Key enum class**:
-       Add your new setting key to the :class:`Key` enum. The key should be descriptive and follow
-       existing naming conventions (i.e., all uppercase with underscores).
+    1. **Add a new entry to the SiteSettingKey enum class**:
+       Add your new setting key to the :class:`SiteSettingKey` enum in `enums.py`.
+       The key should be descriptive and follow existing naming conventions
+       (i.e., all uppercase with underscores). Include a SettingKeyMeta with the
+       value type, description, and optional default value.
 
-    2. **Add a description for the new setting**:
-       Add an entry to the ``_get_descriptions()`` method mapping your new key to a
-       human-readable description. This description will be displayed in the admin interface
-       and should explain what the setting controls.
+       Example::
 
-    3. **Create a data migration**:
+           NEW_SETTING_NAME = SettingKeyMeta(
+               SiteSettingType.STR,
+               _("Description of what this setting controls."),
+               default_value="Default string value",
+           )
+
+    2. **Create a data migration**:
        Create a Django data migration to add the setting to the database. The migration
        should create a new SiteSetting instance with the required fields:
 
-       - ``key``: Must be unique and match the enum value (string)
-       - ``value``: The default value as a string
+       - ``key``: Must be unique and match the enum name (string)
+       - ``value``: The default value as a string (must use the enum's default_value if available)
        - ``value_type``: Either "int" for integers or "str" for strings
 
        Example migration for a string setting::
@@ -89,7 +94,6 @@ class SiteSetting(models.Model):
                    defaults={"value": "Default string value", "value_type": "str"},
                )
 
-
            class Migration(migrations.Migration):
                dependencies = [
                    ("recordtransfer", "XXXX_previous_migration"),
@@ -99,7 +103,7 @@ class SiteSetting(models.Model):
                    migrations.RunPython(add_new_setting),
                ]
 
-    4. **Validation requirements**:
+    3. **Validation requirements**:
        - The ``key`` field must be unique across all settings
        - For ``value_type`` "int": the ``value`` must be a valid string representation
          of an integer (e.g., "42", "-1", "0")
@@ -111,13 +115,11 @@ class SiteSetting(models.Model):
 
     To remove an existing setting from the database:
 
-    1. **Remove the key from the Key enum class**:
-       Delete the corresponding enum entry from the :class:`Key` enum.
+    1. **Remove the key from the SiteSettingKey enum class**:
+       Delete the corresponding enum entry from the :class:`SiteSettingKey` enum
+       in `enums.py`.
 
-    2. **Remove the description**:
-       Remove the corresponding entry from the ``_get_descriptions()`` method.
-
-    3. **Create a data migration**:
+    2. **Create a data migration**:
        Create a Django data migration to remove the setting from the database::
 
            from django.db import migrations
@@ -137,7 +139,7 @@ class SiteSetting(models.Model):
                    migrations.RunPython(remove_old_setting),
                ]
 
-    4. **Update code references**:
+    3. **Update code references**:
        Remove any code that references the old setting key.
 
     Retrieving Settings in Code
@@ -147,11 +149,11 @@ class SiteSetting(models.Model):
 
     - **For string settings**::
 
-        value = SiteSetting.get_value_str(SiteSetting.Key.SETTING_NAME)
+        value = SiteSetting.get_value_str(SiteSettingKey.SETTING_NAME)
 
     - **For integer settings**::
 
-        value = SiteSetting.get_value_int(SiteSetting.Key.SETTING_NAME)
+        value = SiteSetting.get_value_int(SiteSettingKey.SETTING_NAME)
     """
 
     key = models.CharField(max_length=255, unique=True, null=False, editable=False)
