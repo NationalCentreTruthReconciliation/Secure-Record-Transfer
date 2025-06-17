@@ -78,11 +78,19 @@ class SiteSettingKey(Enum):
     )
     CAAIS_DEFAULT_ARCHIVAL_UNIT = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 1.4 - Archival Unit"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 1.4 - Archival Unit.\n"
+            "While the Archival Unit field is repeatable in CAAIS, it is not possible to "
+            "specify multiple archival unit defaults."
+        ),
     )
     CAAIS_DEFAULT_DISPOSITION_AUTHORITY = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 1.6 - Disposition Authority"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 1.6 - Disposition Authority.\n"
+            "While the Disposition Authority field is repeatable, it is not possible to "
+            "specify multiple disposition authority defaults."
+        ),
     )
     CAAIS_DEFAULT_ACQUISITION_METHOD = SettingKeyMeta(
         SiteSettingType.STR,
@@ -90,15 +98,27 @@ class SiteSettingKey(Enum):
     )
     CAAIS_DEFAULT_STATUS = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 1.7 - Status"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 1.7 - Status.\n"
+            "Leave empty, or populate with a term like 'Waiting for review' to signify "
+            "that the metadata has not been reviewed yet."
+        ),
     )
     CAAIS_DEFAULT_SOURCE_CONFIDENTIALITY = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 2.1.6 - Source Confidentiality"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 2.1.6 - Source Confidentiality.\n"
+            "If a default is supplied, the source confidentiality will be applied to every "
+            "source of material received."
+        ),
     )
     CAAIS_DEFAULT_PRELIMINARY_CUSTODIAL_HISTORY = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 2.2 - Preliminary Custodial History"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 2.2 - Preliminary Custodial History.\n"
+            "While the Preliminary Custodial History field is repeatable in CAAIS, it is not "
+            "possible to specify multiple defaults here."
+        ),
     )
     CAAIS_DEFAULT_DATE_OF_MATERIALS = SettingKeyMeta(
         SiteSettingType.STR,
@@ -106,27 +126,51 @@ class SiteSettingKey(Enum):
     )
     CAAIS_DEFAULT_EXTENT_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 3.2.1 - Extent Type"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 3.2.1 - Extent Type.\n"
+            "If a default is supplied, the extent type will be applied to every extent "
+            "statement received."
+        ),
     )
     CAAIS_DEFAULT_QUANTITY_AND_UNIT_OF_MEASURE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 3.2.2 - Quantity and Unit of Measure"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 3.2.2 - Quantity and Unit of Measure.\n"
+            "If a default is supplied, the quantity and unit of measure will be applied to every "
+            "extent statement received."
+        ),
     )
     CAAIS_DEFAULT_CONTENT_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 3.2.3 - Content Type"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 3.2.3 - Content Type.\n"
+            "If a default is supplied, the content type will be applied to every extent "
+            "statement received."
+        ),
     )
     CAAIS_DEFAULT_CARRIER_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 3.2.4 - Carrier Type"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 3.2.4 - Carrier Type.\n"
+            "If a default is supplied, the carrier type will be applied to every extent "
+            "statement received."
+        ),
     )
     CAAIS_DEFAULT_EXTENT_NOTE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 3.2.5 - Extent Note"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 3.2.5 - Extent Note.\n"
+            "If a default is supplied, the extent note will be applied to every extent "
+            "statement received."
+        ),
     )
     CAAIS_DEFAULT_PRELIMINARY_SCOPE_AND_CONTENT = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 3.3 - Preliminary Scope and Content"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 3.3 - Preliminary Scope and "
+            "Content.\nWhile the Preliminary Scope and Content field is repeatable in CAAIS, "
+            "it is not possible to specify multiple defaults here."
+        ),
     )
     CAAIS_DEFAULT_LANGUAGE_OF_MATERIAL = SettingKeyMeta(
         SiteSettingType.STR,
@@ -140,54 +184,69 @@ class SiteSettingKey(Enum):
         SiteSettingType.STR,
         _(
             "Default value to fill in metadata for CAAIS sec. 4.3.1 - Preservation "
-            "Requirements Type"
+            "Requirements Type.\nIf not empty, a default preservation requirements statement "
+            "will be applied to each submission."
         ),
     )
     CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_VALUE = SettingKeyMeta(
         SiteSettingType.STR,
         _(
             "Default value to fill in metadata for CAAIS sec. 4.3.2 - Preservation "
-            "Requirements Value"
+            "Requirements Value.\nIf not empty, a default preservation requirements statement "
+            "will be applied to each submission."
         ),
     )
     CAAIS_DEFAULT_PRESERVATION_REQUIREMENTS_NOTE = SettingKeyMeta(
         SiteSettingType.STR,
         _(
             "Default value to fill in metadata for CAAIS sec. 4.3.3 - Preservation "
-            "Requirements Note"
+            "Requirements Note.\nIf not empty, a default preservation requirements statement "
+            "will be applied to each submission."
         ),
     )
     CAAIS_DEFAULT_APPRAISAL_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 4.4.1 - Appraisal Type"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 4.4.1 - Appraisal Type.\n"
+            "If not empty, a default appraisal statement will be applied to each submission."
+        ),
     )
     CAAIS_DEFAULT_APPRAISAL_VALUE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 4.4.2 - Appraisal Value"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 4.4.2 - Appraisal Value.\n"
+            "If not empty, a default appraisal statement will be applied to each submission."
+        ),
     )
     CAAIS_DEFAULT_APPRAISAL_NOTE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default value to fill in metadata for CAAIS sec. 4.4.3 - Appraisal Note"),
+        _(
+            "Default value to fill in metadata for CAAIS sec. 4.4.3 - Appraisal Note.\n"
+            "If not empty, a default appraisal statement will be applied to each submission."
+        ),
     )
     CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
         _(
             "Default value to fill in metadata for CAAIS sec. 4.5.1 - Associated "
-            "Documentation Type"
+            "Documentation Type.\n"
+            "If not empty, a default associated document will be applied to each submission."
         ),
     )
     CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_TITLE = SettingKeyMeta(
         SiteSettingType.STR,
         _(
             "Default value to fill in metadata for CAAIS sec. 4.5.2 - Associated "
-            "Documentation Title"
+            "Documentation Title.\n"
+            "If not empty, a default associated document will be applied to each submission."
         ),
     )
     CAAIS_DEFAULT_ASSOCIATED_DOCUMENTATION_NOTE = SettingKeyMeta(
         SiteSettingType.STR,
         _(
             "Default value to fill in metadata for CAAIS sec. 4.5.3 - Associated "
-            "Documentation Note"
+            "Documentation Note.\n"
+            "If not empty, a default associated document will be applied to each submission."
         ),
     )
     CAAIS_DEFAULT_GENERAL_NOTE = SettingKeyMeta(
@@ -205,28 +264,55 @@ class SiteSettingKey(Enum):
     # CAAIS event defaults
     CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default submission event type name - related to CAAIS sec. 5.1.1"),
+        _(
+            "Default submission event type name - related to CAAIS sec. 5.1.1.\n"
+            "At the time of receiving a submission, a 'Submission' type event is created "
+            "for the submission. You can control the Event Type name for that event here."
+        ),
     )
     CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default submission event agent - related to CAAIS sec. 5.1.3"),
+        _(
+            "Default submission event agent - related to CAAIS sec. 5.1.3.\n"
+            "At the time of receiving a submission, a 'Submission' type event is created "
+            "for the submission. You can control the Event Agent's name for that event here."
+        ),
     )
     CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default submission event note - related to CAAIS sec. 5.1.4"),
+        _(
+            "Default submission event note - related to CAAIS sec. 5.1.4.\n"
+            "At the time of receiving a submission, a 'Submission' type event is created "
+            "for the submission. You can control whether an Event Note is added for the event here."
+        ),
     )
     # CAAIS creation defaults
     CAAIS_DEFAULT_CREATION_TYPE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default date of creation event name - related to CAAIS sec. 7.2.1"),
+        _(
+            "Default date of creation event name - related to CAAIS sec. 7.2.1.\n"
+            "At the time of receiving a submission, a Date of Creation or Revision is created "
+            "to indicate the date the accession record was created. You can control the name "
+            "of the event here if you do not want to call it 'Creation'."
+        ),
     )
     CAAIS_DEFAULT_CREATION_AGENT = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default date of creation event agent - related to CAAIS sec. 7.2.3"),
+        _(
+            "Default date of creation event agent - related to CAAIS sec. 7.2.3.\n"
+            "At the time of receiving a submission, a Date of Creation or Revision is created "
+            "to indicate the date the accession record was created. You can control the name "
+            "of the event agent here."
+        ),
     )
     CAAIS_DEFAULT_CREATION_NOTE = SettingKeyMeta(
         SiteSettingType.STR,
-        _("Default date of creation event note - related to CAAIS sec. 7.2.4"),
+        _(
+            "Default date of creation event note - related to CAAIS sec. 7.2.4.\n"
+            "At the time of receiving a submission, a Date of Creation or Revision is created "
+            "to indicate the date the accession record was created. You can add a note to that "
+            "event here by setting the value to something other than an empty string."
+        ),
     )
 
     @property
