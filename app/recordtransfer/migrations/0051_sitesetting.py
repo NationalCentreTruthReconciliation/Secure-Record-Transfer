@@ -14,7 +14,7 @@ def populate_site_settings(apps, schema_editor) -> None:
         ("ARCHIVIST_EMAIL", "archivist@example.com", "str"),
         ("DO_NOT_REPLY_USERNAME", None, "str"),
         # Pagination
-        ("PAGINATE_BY", None, "int"),
+        ("PAGINATE_BY", "10", "int"),
         # CAAIS dates
         ("CAAIS_UNKNOWN_DATE_TEXT", None, "str"),
         ("CAAIS_UNKNOWN_START_DATE", None, "str"),

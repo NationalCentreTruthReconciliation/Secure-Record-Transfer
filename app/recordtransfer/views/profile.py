@@ -18,6 +18,7 @@ from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.emails import send_user_account_updated
+from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import (
@@ -157,7 +158,7 @@ def _paginated_table_view(
     if not request.htmx:
         return HttpResponse(status=400)
 
-    paginator = Paginator(queryset, SiteSetting.get_value_int(SiteSetting.Key.PAGINATE_BY))
+    paginator = Paginator(queryset, SiteSetting.get_value_int(SiteSettingKey.PAGINATE_BY))
     page_num = request.GET.get(QueryParameters.PAGINATE_QUERY_NAME, 1)
 
     try:
@@ -271,9 +272,7 @@ class SubmissionGroupModalCreateView(CreateView):
                 },
             )
 
-        return trigger_client_event(
-            response, "showSuccess", {"value": self.success_message}
-        )
+        return trigger_client_event(response, "showSuccess", {"value": self.success_message})
 
 
 @require_http_methods(["GET", "DELETE"])

@@ -8,6 +8,7 @@ from django.core.validators import validate_email
 from django.utils.html import format_html
 from django.utils.translation import gettext
 
+from recordtransfer.enums import SiteSettingKey, SiteSettingType
 from recordtransfer.models import (
     SiteSetting,
     Submission,
@@ -83,9 +84,13 @@ class SiteSettingModelForm(RecordTransferModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.key:
             try:
-                key_enum = SiteSetting.Key(self.instance.key)
-                self.fields["value"].help_text = key_enum.description
-            except ValueError:
+                key_enum = SiteSettingKey[self.instance.key]
+                description = getattr(key_enum, "description", "")
+                if description:
+                    self.fields["value"].help_text = description
+                else:
+                    self.fields["value"].help_text = "No description available for this setting."
+            except KeyError:
                 self.fields["value"].help_text = "No description available for this setting."
 
     def clean_value(self) -> Any:
@@ -96,13 +101,13 @@ class SiteSettingModelForm(RecordTransferModelForm):
         if value is None:
             raise ValueError("Please provide a value.")
 
-        if value_type == SiteSetting.SettingType.STR:
+        if value_type == SiteSettingType.STR:
             if not isinstance(value, str):
                 raise ValidationError("Value must be a text value.")
             if not value.strip():
                 raise ValidationError("Value must be a non-empty text value.")
 
-        elif value_type == SiteSetting.SettingType.INT:
+        elif value_type == SiteSettingType.INT:
             if not isinstance(value, str):
                 raise ValidationError("Value must be a number.")
 
@@ -119,30 +124,34 @@ class SiteSettingModelForm(RecordTransferModelForm):
         """Additional form-level validation."""
         cleaned_data = super().clean()
 
-        key = SiteSetting.Key(self.instance.key)
+        try:
+            key = SiteSettingKey[self.instance.key]
+        except KeyError as exc:
+            raise ValidationError(f"Invalid setting key: {self.instance.key}") from exc
+
         value = cleaned_data.get("value")
 
         if not value:
-            raise ValidationError(f"{key.name} cannot be empty.")
+            raise ValidationError(f"{key.key_name} cannot be empty.")
 
-        if key == SiteSetting.Key.PAGINATE_BY:
+        if key == SiteSettingKey.PAGINATE_BY:
             try:
                 paginate_by = int(cleaned_data.get("value", 0))
                 if paginate_by <= 0:
                     raise ValidationError(
-                        f"{SiteSetting.Key.PAGINATE_BY.name} must be a positive whole number."
+                        f"{SiteSettingKey.PAGINATE_BY.key_name} must be a positive whole number."
                     )
             except (ValueError, TypeError) as exc:
                 raise ValidationError(
-                    f"{SiteSetting.Key.PAGINATE_BY.name} must be a positive whole number."
+                    f"{SiteSettingKey.PAGINATE_BY.key_name} must be a positive whole number."
                 ) from exc
-        elif key == SiteSetting.Key.ARCHIVIST_EMAIL:
+        elif key == SiteSettingKey.ARCHIVIST_EMAIL:
             value = cleaned_data.get("value", "")
             try:
                 validate_email(value)
             except ValidationError as exc:
                 raise ValidationError(
-                    f"{SiteSetting.Key.ARCHIVIST_EMAIL.name} must be a valid email address."
+                    f"{SiteSettingKey.ARCHIVIST_EMAIL.key_name} must be a valid email address."
                 ) from exc
 
         return cleaned_data

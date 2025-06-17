@@ -16,7 +16,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from recordtransfer.enums import SubmissionStep
+from recordtransfer.enums import SiteSettingType, SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
@@ -1139,13 +1139,13 @@ class TestSiteSetting(TestCase):
         self.string_setting = SiteSetting.objects.create(
             key="TEST_STRING_SETTING",
             value="test string value",
-            value_type=SiteSetting.SettingType.STR,
+            value_type=SiteSettingType.STR,
         )
 
         self.int_setting = SiteSetting.objects.create(
             key="TEST_INT_SETTING",
             value="42",
-            value_type=SiteSetting.SettingType.INT,
+            value_type=SiteSettingType.INT,
         )
 
         # Clear cache since creation causes cache to be set. We want to control cache state in
@@ -1175,7 +1175,7 @@ class TestSiteSetting(TestCase):
 
         # Create mock key
         mock_key = MagicMock()
-        mock_key.value = "TEST_STRING_SETTING"
+        mock_key.name = "TEST_STRING_SETTING"
 
         result = SiteSetting.get_value_str(mock_key)
         self.assertEqual(result, "cached value")
@@ -1187,7 +1187,7 @@ class TestSiteSetting(TestCase):
 
         # Mock the Key enum
         mock_key = MagicMock()
-        mock_key.value = "TEST_STRING_SETTING"
+        mock_key.name = "TEST_STRING_SETTING"
 
         with patch.object(SiteSetting.objects, "get", return_value=self.string_setting):
             result = SiteSetting.get_value_str(mock_key)
@@ -1199,7 +1199,7 @@ class TestSiteSetting(TestCase):
         cache.set("TEST_INT_SETTING", 99)
 
         mock_key = MagicMock()
-        mock_key.value = "TEST_INT_SETTING"
+        mock_key.name = "TEST_INT_SETTING"
 
         result = SiteSetting.get_value_int(mock_key)
         self.assertEqual(result, 99)
@@ -1210,7 +1210,7 @@ class TestSiteSetting(TestCase):
         cache.delete("TEST_INT_SETTING")
 
         mock_key = MagicMock()
-        mock_key.value = "TEST_INT_SETTING"
+        mock_key.name = "TEST_INT_SETTING"
 
         with patch.object(SiteSetting.objects, "get", return_value=self.int_setting):
             result = SiteSetting.get_value_int(mock_key)
@@ -1219,7 +1219,7 @@ class TestSiteSetting(TestCase):
     def test_get_value_int_wrong_type_raises_validation_error(self) -> None:
         """Test that getting an int value for a string setting raises ValidationError."""
         mock_key = MagicMock()
-        mock_key.value = "TEST_STRING_SETTING"
+        mock_key.name = "TEST_STRING_SETTING"
 
         with (
             patch.object(SiteSetting.objects, "get", return_value=self.string_setting),
@@ -1232,11 +1232,11 @@ class TestSiteSetting(TestCase):
         invalid_int_setting = SiteSetting.objects.create(
             key="TEST_INVALID_INT",
             value="not a number",
-            value_type=SiteSetting.SettingType.INT,
+            value_type=SiteSettingType.INT,
         )
 
         mock_key = MagicMock()
-        mock_key.value = "TEST_INVALID_INT"
+        mock_key.name = "TEST_INVALID_INT"
 
         with (
             patch.object(SiteSetting.objects, "get", return_value=invalid_int_setting),
@@ -1252,7 +1252,7 @@ class TestSiteSetting(TestCase):
         new_setting = SiteSetting.objects.create(
             key="NEW_STRING_SETTING",
             value="new value",
-            value_type=SiteSetting.SettingType.STR,
+            value_type=SiteSettingType.STR,
         )
 
         # Check that value is NOT cached on creation
@@ -1275,7 +1275,7 @@ class TestSiteSetting(TestCase):
         new_setting = SiteSetting.objects.create(
             key="NEW_INT_SETTING",
             value="789",
-            value_type=SiteSetting.SettingType.INT,
+            value_type=SiteSettingType.INT,
         )
 
         # Check that value is NOT cached on creation
@@ -1297,7 +1297,7 @@ class TestSiteSetting(TestCase):
         new_setting = SiteSetting.objects.create(
             key="INVALID_INT_SETTING",
             value="123",
-            value_type=SiteSetting.SettingType.INT,
+            value_type=SiteSettingType.INT,
         )
 
         with self.assertRaises(ValidationError):

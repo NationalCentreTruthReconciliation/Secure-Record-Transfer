@@ -27,8 +27,8 @@ def get_setting_key(field_name: str) -> Optional[SiteSettingKey]:
     """
     setting_name = f"CAAIS_DEFAULT_{field_name.upper().strip()}"
     try:
-        return SiteSettingKey(setting_name)
-    except ValueError:
+        return SiteSettingKey[setting_name]
+    except KeyError:
         return None
 
 

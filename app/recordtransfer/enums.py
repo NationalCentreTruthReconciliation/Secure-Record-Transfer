@@ -30,17 +30,18 @@ class SiteSettingType(models.TextChoices):
     STR = "str", _("String")
 
 
+class SettingKeyMeta(NamedTuple):
+    """Describes a setting's type, description, and default value."""
+
+    value_type: SiteSettingType
+    description: str
+    default_value: Optional[str] = None
+
+
 class SiteSettingKey(Enum):
     """The keys for the site settings. These keys are used to store and retrieve settings from
     the database.
     """
-
-    class SettingKeyMeta(NamedTuple):
-        """Describes a setting's type, description, and default value."""
-
-        value_type: SiteSettingType
-        description: str
-        default_value: Optional[str] = None
 
     # Emails
     ARCHIVIST_EMAIL = SettingKeyMeta(

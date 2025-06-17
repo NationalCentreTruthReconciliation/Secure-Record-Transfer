@@ -181,7 +181,7 @@ class SiteSetting(models.Model):
         cache.set(self.key, value)
 
     @staticmethod
-    def get_value_str(key: SiteSetting.Key) -> str:
+    def get_value_str(key: SiteSettingKey) -> str:
         """Get the value of a site setting of type :attr:`SettingType.STR` by its key.
 
         Args:
@@ -249,7 +249,7 @@ def update_cache_post_save(
         return
 
     value = instance.value
-    if instance.value_type == SiteSetting.SettingType.INT:
+    if instance.value_type == SiteSettingType.INT:
         try:
             value = int(instance.value)
         except ValueError as exc:
