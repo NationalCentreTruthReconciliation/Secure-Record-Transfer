@@ -67,20 +67,6 @@ class SiteSettingKey(Enum):
         ),
     )
 
-    # CAAIS dates
-    CAAIS_UNKNOWN_DATE_TEXT = SettingKeyMeta(
-        SiteSettingType.STR,
-        _("A string to use in the CAAIS metadata when a user indicates that a date is not known."),
-    )
-    CAAIS_UNKNOWN_START_DATE = SettingKeyMeta(
-        SiteSettingType.STR,
-        _("Default start date to use for unknown CAAIS date ranges in ISO format (YYYY-MM-DD)"),
-    )
-    CAAIS_UNKNOWN_END_DATE = SettingKeyMeta(
-        SiteSettingType.STR,
-        _("Default end date to use for unknown CAAIS date ranges in ISO format (YYYY-MM-DD)"),
-    )
-
     # CAAIS defaults
     CAAIS_DEFAULT_REPOSITORY = SettingKeyMeta(
         SiteSettingType.STR,
