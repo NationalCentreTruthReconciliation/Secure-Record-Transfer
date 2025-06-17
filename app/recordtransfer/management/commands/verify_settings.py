@@ -104,6 +104,7 @@ def verify_storage_folder_settings() -> None:
 
     - BAG_STORAGE_FOLDER
     - UPLOAD_STORAGE_FOLDER
+    - TEMP_STORAGE_FOLDER
 
     Creates the directories if they do not exist.
 
@@ -114,6 +115,7 @@ def verify_storage_folder_settings() -> None:
     for setting_name in [
         "BAG_STORAGE_FOLDER",
         "UPLOAD_STORAGE_FOLDER",
+        "TEMP_STORAGE_FOLDER",
     ]:
         directory = getattr(settings, setting_name)
 
