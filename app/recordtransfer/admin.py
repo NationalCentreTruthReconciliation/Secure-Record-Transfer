@@ -721,7 +721,7 @@ class SiteSettingAdmin(admin.ModelAdmin):
     """
 
     list_display = ["key", "value_type", "value"]
-    search_fields = ["name", "value"]
+    search_fields = ["key", "value"]
     readonly_fields = ["key", "value_type"]
 
     form = SiteSettingModelForm
