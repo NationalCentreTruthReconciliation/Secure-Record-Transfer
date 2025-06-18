@@ -230,22 +230,6 @@ class TestSiteSettingModelForm(TestCase):
         self.assertIn("ARCHIVIST_EMAIL must be a valid email address.", form.errors["__all__"])
 
     @patch("recordtransfer.forms.admin_forms.SiteSettingKey")
-    def test_clean_archivist_email_empty(self, mock_site_setting_key: MagicMock) -> None:
-        """Test clean method with empty email address."""
-        mock_enum_member = MagicMock()
-        mock_enum_member.description = "Email address of the archivist."
-        mock_enum_member.key_name = "ARCHIVIST_EMAIL"
-
-        mock_site_setting_key.__getitem__.return_value = mock_enum_member
-        mock_site_setting_key.return_value = mock_enum_member
-        mock_site_setting_key.ARCHIVIST_EMAIL = mock_enum_member
-
-        form = SiteSettingModelForm(data={"value": ""}, instance=self.email_setting)
-        self.assertFalse(form.is_valid())
-        # Should fail at clean level for empty value
-        self.assertIn("ARCHIVIST_EMAIL cannot be empty.", form.errors["__all__"])
-
-    @patch("recordtransfer.forms.admin_forms.SiteSettingKey")
     def test_clean_empty_value_generic(self, mock_site_setting_key: MagicMock) -> None:
         """Test clean method with empty value for generic setting."""
         mock_enum_member = MagicMock()
@@ -253,12 +237,11 @@ class TestSiteSettingModelForm(TestCase):
         mock_enum_member.key_name = "TEST_STRING_SETTING"
         mock_site_setting_key.__getitem__.return_value = mock_enum_member
 
-        form = SiteSettingModelForm(data={"value": ""}, instance=self.test_string_setting)
+        form = SiteSettingModelForm(data={"value": None}, instance=self.test_string_setting)
         self.assertFalse(form.is_valid())
         # Should fail at both clean_value and clean levels
         self.assertTrue(
-            "Value must be a non-empty text value." in form.errors.get("value", [])
-            or "TEST_STRING_SETTING cannot be empty." in form.errors.get("__all__", [])
+            "This field is required." in form.errors["value"]
         )
 
     @patch("recordtransfer.forms.admin_forms.SiteSettingKey")

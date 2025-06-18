@@ -101,9 +101,6 @@ class SiteSettingModelForm(RecordTransferModelForm):
         value = self.cleaned_data.get("value")
         value_type = self.instance.value_type
 
-        if value is None:
-            raise ValueError("Please provide a value.")
-
         if value_type == SiteSettingType.STR:
             if not isinstance(value, str):
                 raise ValidationError("Value must be a text value.")
@@ -133,9 +130,6 @@ class SiteSettingModelForm(RecordTransferModelForm):
             raise ValidationError(f"Invalid setting key: {self.instance.key}") from exc
 
         value = cleaned_data.get("value")
-
-        if not value:
-            raise ValidationError(f"{key.key_name} cannot be empty.")
 
         if key == SiteSettingKey.PAGINATE_BY:
             try:
