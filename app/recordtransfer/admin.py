@@ -720,9 +720,9 @@ class SiteSettingAdmin(admin.ModelAdmin):
         - delete: Only by superusers
     """
 
-    list_display = ["key", "value_type", "value"]
+    list_display = ["key", "value_type", "value", "change_date"]
     search_fields = ["key", "value"]
-    readonly_fields = ["key", "value_type"]
+    readonly_fields = ["key", "value_type", "change_date", "changed_by"]
 
     form = SiteSettingModelForm
 
