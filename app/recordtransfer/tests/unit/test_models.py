@@ -1361,9 +1361,11 @@ class TestSiteSetting(TestCase):
 
     def test_default_value_property_key_does_not_exist(self) -> None:
         """Test default_value property when key is not found in SiteSettingKey."""
-        with patch(
-            "recordtransfer.models.SiteSettingKey.__getitem__",
-            side_effect=KeyError("TEST_STRING_SETTING"),
+        with (
+            patch(
+                "recordtransfer.models.SiteSettingKey.__getitem__",
+                side_effect=KeyError("TEST_STRING_SETTING"),
+            ),
+            self.assertRaises(ValueError),
         ):
-            result = self.string_setting.default_value
-            self.assertIsNone(result)
+            _ = self.string_setting.default_value
