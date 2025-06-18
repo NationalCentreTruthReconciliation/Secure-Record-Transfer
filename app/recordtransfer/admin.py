@@ -729,16 +729,10 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/sitesetting_change_form.html"
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        """Override to pass the current user to the form."""
-        form_class = super().get_form(request, obj, **kwargs)
-
-        class FormWithUser(form_class):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.user = request.user
-
-        return FormWithUser
+    def save_model(self, request, obj: SiteSetting, form, change):
+        """Override save_model to set the changed_by field."""
+        obj.changed_by = request.user
+        super().save_model(request, obj, form, change)
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         """Add custom context to the change form and skip validation on reset."""

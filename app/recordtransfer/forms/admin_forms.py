@@ -83,7 +83,6 @@ class SiteSettingModelForm(RecordTransferModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user = kwargs.pop("user", None)
         if self.instance and self.instance.key:
             try:
                 key_enum = SiteSettingKey[self.instance.key]
@@ -153,12 +152,3 @@ class SiteSettingModelForm(RecordTransferModelForm):
                 ) from exc
 
         return cleaned_data
-
-    def save(self, commit: bool = True) -> SiteSetting:
-        """Save the SiteSetting instance with change tracking."""
-        instance = super().save(commit=False)
-        if self.user:
-            instance.changed_by = self.user
-        if commit:
-            instance.save()
-        return instance
