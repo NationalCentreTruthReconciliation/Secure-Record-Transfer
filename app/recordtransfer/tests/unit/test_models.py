@@ -557,7 +557,9 @@ class TestUploadSession(TestCase):
         self.session.status = UploadSession.SessionStatus.UPLOADING
         with self.assertRaises(FileNotFoundError) as exc:
             self.session.get_file_by_name("missing.pdf")
-        self.assertIn("No temporary file with name missing.pdf exists in session", str(exc.exception))
+        self.assertIn(
+            "No temporary file with name missing.pdf exists in session", str(exc.exception)
+        )
 
     @patch("recordtransfer.models.UploadSession.permuploadedfile_set", spec=BaseManager)
     def test_get_file_by_name_perm_file_not_found(self, mock_perm_files: BaseManager) -> None:
@@ -568,7 +570,9 @@ class TestUploadSession(TestCase):
         self.session.status = UploadSession.SessionStatus.STORED
         with self.assertRaises(FileNotFoundError) as exc:
             self.session.get_file_by_name("missing.pdf")
-        self.assertIn("No permanent file with name missing.pdf exists in session", str(exc.exception))
+        self.assertIn(
+            "No permanent file with name missing.pdf exists in session", str(exc.exception)
+        )
 
     def test_get_file_by_name_invalid_status(self) -> None:
         """Test getting a file from the session by name raises an exception when the session
@@ -1193,6 +1197,17 @@ class TestSiteSetting(TestCase):
             result = SiteSetting.get_value_str(mock_key)
             self.assertEqual(result, "test string value")
 
+    def test_get_value_str_wrong_type_raises_validation_error(self) -> None:
+        """Test that getting a string value for an integer setting raises ValidationError."""
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        with (
+            patch.object(SiteSetting.objects, "get", return_value=self.int_setting),
+            self.assertRaises(ValidationError),
+        ):
+            SiteSetting.get_value_str(mock_key)
+
     def test_get_value_int_from_cache(self) -> None:
         """Test getting an integer value from cache."""
         # Set cache value
@@ -1304,3 +1319,51 @@ class TestSiteSetting(TestCase):
             # Update with invalid integer value (triggers post_save with created=False)
             new_setting.value = "not a number"
             new_setting.save()
+
+    def test_reset_to_default_with_default_value(self) -> None:
+        """Test reset_to_default method when a default value exists."""
+        # Mock the SiteSettingKey enum to have a default value
+        mock_key = MagicMock()
+        mock_key.default_value = "default test value"
+
+        with patch("recordtransfer.models.SiteSettingKey") as mock_site_setting_key:
+            mock_site_setting_key.__getitem__.return_value = mock_key
+            # Change the setting value
+            self.string_setting.value = "changed value"
+            self.string_setting.save()
+
+            # Reset to default
+            self.string_setting.reset_to_default()
+
+            # Check that it was reset
+            self.assertEqual(self.string_setting.value, "default test value")
+
+    def test_reset_to_default_key_does_not_exist(self) -> None:
+        """Test reset_to_default method when key is not found in SiteSettingKey."""
+        with (
+            patch(
+                "recordtransfer.models.SiteSettingKey.__getitem__",
+                side_effect=KeyError("TEST_STRING_SETTING"),
+            ),
+            self.assertRaises(ValueError),
+        ):
+            self.string_setting.reset_to_default()
+
+    def test_default_value_property_with_default(self) -> None:
+        """Test default_value property when a default value exists."""
+        mock_key = MagicMock()
+        mock_key.default_value = "property default value"
+
+        with patch("recordtransfer.models.SiteSettingKey") as mock_site_setting_key:
+            mock_site_setting_key.__getitem__.return_value = mock_key
+            result = self.string_setting.default_value
+            self.assertEqual(result, "property default value")
+
+    def test_default_value_property_key_does_not_exist(self) -> None:
+        """Test default_value property when key is not found in SiteSettingKey."""
+        with patch(
+            "recordtransfer.models.SiteSettingKey.__getitem__",
+            side_effect=KeyError("TEST_STRING_SETTING"),
+        ):
+            result = self.string_setting.default_value
+            self.assertIsNone(result)

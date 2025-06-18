@@ -174,8 +174,14 @@ class SiteSetting(models.Model):
         value = SiteSetting.get_value_int(SiteSettingKey.SETTING_NAME)
     """
 
-    key = models.CharField(max_length=255, unique=True, null=False, editable=False)
-    value = models.TextField()
+    key = models.CharField(
+        verbose_name=_("Setting Key"), max_length=255, unique=True, null=False, editable=False
+    )
+    value = models.TextField(
+        verbose_name=_("Setting Value"),
+        blank=False,
+        null=True,
+    )
     value_type = models.CharField(
         max_length=8,
         choices=SiteSettingType.choices,
@@ -196,12 +202,12 @@ class SiteSetting(models.Model):
         verbose_name=_("Changed by"),
     )
 
-    def set_cache(self, value: Union[str, int]) -> None:
+    def set_cache(self, value: Optional[Union[str, int]]) -> None:
         """Cache the value of this setting."""
         cache.set(self.key, value)
 
     @staticmethod
-    def get_value_str(key: SiteSettingKey) -> str:
+    def get_value_str(key: SiteSettingKey) -> Optional[str]:
         """Get the value of a site setting of type :attr:`SettingType.STR` by its key.
 
         Args:
@@ -215,15 +221,20 @@ class SiteSetting(models.Model):
             ValidationError: If the setting is not of type :attr:`SettingType.STR`.
         """
         val = cache.get(key.name)
-        if val:
+        if val is not None:
             return val
         obj = SiteSetting.objects.get(key=key.name)
+
+        if obj.value_type != SiteSettingType.STR:
+            raise ValidationError(
+                f"Setting {key.name} is not of type STR, but of type {obj.value_type}"
+            )
 
         obj.set_cache(obj.value)
         return obj.value
 
     @staticmethod
-    def get_value_int(key: SiteSettingKey) -> int:
+    def get_value_int(key: SiteSettingKey) -> Optional[int]:
         """Get the value of a site setting of type :attr:`SettingType.INT` by its key.
 
         Args:
@@ -247,10 +258,30 @@ class SiteSetting(models.Model):
                 f"Setting {key.name} is not of type INT, but of type {obj.value_type}"
             )
 
-        return_value = int(obj.value)
+        return_value = None if obj.value is None else int(obj.value)
 
         obj.set_cache(return_value)
         return return_value
+
+    def reset_to_default(self) -> None:
+        """Reset this setting to its default value as defined in the SiteSettingKey enum."""
+        try:
+            default_value = SiteSettingKey[self.key].default_value
+        except KeyError as exc:
+            raise ValueError(f"{self.key} is not a valid SiteSettingKey") from exc
+
+        self.value = default_value
+        self.save()
+
+    @property
+    def default_value(self) -> Optional[str]:
+        """Get the default value for this setting, if available. The default value is defined in
+        the :class:`~recordtransfer.enums.SiteSettingKey` enum, in the form of a string.
+        """
+        try:
+            return SiteSettingKey[self.key].default_value
+        except KeyError as exc:
+            raise ValueError(f"{self.key} is not a valid SiteSettingKey") from exc
 
     def __str__(self) -> str:
         """Return a human-readable representation of the setting."""
@@ -271,7 +302,8 @@ def update_cache_post_save(
     value = instance.value
     if instance.value_type == SiteSettingType.INT:
         try:
-            value = int(instance.value)
+            if value is not None:
+                value = int(value)
         except ValueError as exc:
             raise ValidationError(
                 f"Value for setting {instance.key} must be an integer, but got '{instance.value}'"
