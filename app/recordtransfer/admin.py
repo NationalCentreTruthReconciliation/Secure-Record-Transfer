@@ -750,7 +750,7 @@ class SiteSettingAdmin(admin.ModelAdmin):
     def reset_to_default(self, request, obj: SiteSetting) -> None:
         """Reset the site setting to its default value."""
         try:
-            obj.reset_to_default()
+            obj.reset_to_default(request.user)
             messages.success(
                 request,
                 f'Setting "{obj.key}" has been reset to its default value.',

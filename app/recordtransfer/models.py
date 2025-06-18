@@ -263,14 +263,22 @@ class SiteSetting(models.Model):
         obj.set_cache(return_value)
         return return_value
 
-    def reset_to_default(self) -> None:
-        """Reset this setting to its default value as defined in the SiteSettingKey enum."""
+    def reset_to_default(self, user: Optional[User] = None) -> None:
+        """Reset this setting to its default value as defined in the
+        :py:class:`~recordtransfer.enums.SiteSettingKey` enum.
+
+        Args:
+            user: The user who initiated the reset operation (optional).
+        """
         try:
             default_value = SiteSettingKey[self.key].default_value
         except KeyError as exc:
             raise ValueError(f"{self.key} is not a valid SiteSettingKey") from exc
 
         self.value = default_value
+        self.change_date = timezone.now()
+        if user:
+            self.changed_by = user
         self.save()
 
     @property
