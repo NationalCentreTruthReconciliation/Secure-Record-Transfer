@@ -726,8 +726,10 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
     form = SiteSettingModelForm
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request) -> bool:
+        """Prevent adding new site settings through the admin interface."""
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Prevent deletion of site settings through the admin interface."""
         return False
