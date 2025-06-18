@@ -25,7 +25,6 @@ class Command(BaseCommand):
             verify_storage_folder_settings()
             verify_max_upload_size()
             verify_accepted_file_formats()
-            verify_caais_defaults()
             verify_upload_session_expiry_settings()
             verify_site_id()
 
@@ -284,21 +283,6 @@ def verify_accepted_file_formats() -> None:
             _validate_extension_format(extension, group_name)
             _check_extension_duplicates(extension, group_name, inverted_formats)
             inverted_formats[extension] = group_name
-
-
-def verify_caais_defaults() -> None:
-    """Verify the settings.
-
-    - CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
-    - CAAIS_DEFAULT_CREATION_TYPE
-
-    Raises:
-        ImproperlyConfigured: If either setting is empty.
-    """
-    if not settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE:
-        raise ImproperlyConfigured("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is not set")
-    if not settings.CAAIS_DEFAULT_CREATION_TYPE:
-        raise ImproperlyConfigured("CAAIS_DEFAULT_CREATION_TYPE is not set")
 
 
 def _validate_cron(cron_str: str) -> None:

@@ -65,6 +65,7 @@ class SiteSettingKey(Enum):
             "This setting controls how many rows of items are shown per page in tables "
             "that support pagination."
         ),
+        default_value="10",
     )
 
     # CAAIS defaults
@@ -269,6 +270,7 @@ class SiteSettingKey(Enum):
             "At the time of receiving a submission, a 'Submission' type event is created "
             "for the submission. You can control the Event Type name for that event here."
         ),
+        default_value="Transfer Submitted",
     )
     CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT = SettingKeyMeta(
         SiteSettingType.STR,
@@ -295,6 +297,7 @@ class SiteSettingKey(Enum):
             "to indicate the date the accession record was created. You can control the name "
             "of the event here if you do not want to call it 'Creation'."
         ),
+        default_value="Creation",
     )
     CAAIS_DEFAULT_CREATION_AGENT = SettingKeyMeta(
         SiteSettingType.STR,

@@ -77,7 +77,7 @@ PAGINATE_BY
 
 **Type:** Integer
 
-**Default:** None
+**Default:** 10
 
 This setting controls how many rows of items are shown per page in tables that
 support pagination. Must be a positive whole number.
@@ -450,7 +450,7 @@ CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
 
 **Type:** String
 
-**Default:** None
+**Default:** "Transfer Submitted"
 
 Default submission event type name - related to CAAIS section 5.1.1.
 
@@ -496,7 +496,7 @@ CAAIS_DEFAULT_CREATION_TYPE
 
 **Type:** String
 
-**Default:** None
+**Default:** "Creation"
 
 Default date of creation event name - related to CAAIS section 7.2.1.
 

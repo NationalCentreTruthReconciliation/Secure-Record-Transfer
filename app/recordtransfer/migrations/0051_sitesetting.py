@@ -46,11 +46,11 @@ def populate_site_settings(apps, schema_editor) -> None:
         ("CAAIS_DEFAULT_RULES_OR_CONVENTIONS", None, "str"),
         ("CAAIS_DEFAULT_LANGUAGE_OF_ACCESSION_RECORD", None, "str"),
         # CAAIS event defaults
-        ("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE", None, "str"),
+        ("CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE", "Transfer Submitted", "str"),
         ("CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT", None, "str"),
         ("CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE", None, "str"),
         # CAAIS creation defaults
-        ("CAAIS_DEFAULT_CREATION_TYPE", None, "str"),
+        ("CAAIS_DEFAULT_CREATION_TYPE", "Creation", "str"),
         ("CAAIS_DEFAULT_CREATION_AGENT", None, "str"),
         ("CAAIS_DEFAULT_CREATION_NOTE", None, "str"),
     ]
