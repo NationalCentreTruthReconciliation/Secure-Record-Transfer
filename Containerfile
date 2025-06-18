@@ -4,12 +4,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-# Create application directories with correct permissions
-RUN mkdir -p ${APP_DIR} && \
-    useradd --create-home myuser && \
-    chown -R myuser:myuser ${PROJ_DIR}
-
-
 WORKDIR ${PROJ_DIR}
 
 # 🔧 Install gettext for makemessages (includes msguniq)
@@ -17,29 +11,27 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gettext && \
     rm -rf /var/lib/apt/lists/*
 
-# Switch to non-root user for application operations
-USER myuser
 # Copy uv-related files, and install Python dependencies
-COPY --chown=myuser:myuser pyproject.toml uv.lock ${PROJ_DIR}
+COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN uv sync
 
 # Install Node.js dependencies
-COPY --chown=myuser:myuser package*.json ${PROJ_DIR}
+COPY package*.json ${PROJ_DIR}
 RUN npm install --no-color
 
 # Copy application code to image
-COPY --chown=myuser:myuser ./app ${APP_DIR}
+COPY ./app ${APP_DIR}
 
 # Make arg passed from compose files into environment variable
 ARG WEBPACK_MODE
 ENV WEBPACK_MODE ${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
-COPY --chown=myuser:myuser webpack.config.js postcss.config.mjs ${PROJ_DIR}
+COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
 RUN npm run build
 
 # Copy entrypoint script to image
-COPY --chown=myuser:myuser ./docker/entrypoint.sh ${PROJ_DIR}
+COPY ./docker/entrypoint.sh ${PROJ_DIR}
 RUN chmod +x ${PROJ_DIR}/entrypoint.sh
 
 
@@ -68,17 +60,12 @@ ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]
 
 FROM base AS builder
 
-# Switch back to root for system package installation
-USER root
 # Install build tools for production dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     default-libmysqlclient-dev \
     pkg-config
-
-# Switch back to non-root user for dependency installation
-USER myuser
 
 # Install production dependencies (e.g., mysqlclient)
 RUN uv sync --extra prod
@@ -90,12 +77,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-# Create non-root user with same UID for consistency
-RUN useradd --create-home --uid 1000 myuser && \
-    mkdir -p ${APP_DIR} && \
-    chown -R myuser:myuser ${PROJ_DIR}
-
-
 # Install required dependencies for mysqlclient
 RUN apt-get update && \
     apt-get install -y --no-install-recommends default-mysql-client && \
@@ -105,13 +86,10 @@ COPY --from=builder ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
 COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
 COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
 COPY --from=builder ${APP_DIR} ${APP_DIR}
-
-
 # Activate virtual environment
 ENV PATH="${PROJ_DIR}/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="${PROJ_DIR}/.venv"
 
 WORKDIR ${APP_DIR}
-USER myuser
 
 ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]
