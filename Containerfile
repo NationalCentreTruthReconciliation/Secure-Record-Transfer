@@ -4,7 +4,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-
 WORKDIR ${PROJ_DIR}
 
 # 🔧 Install gettext for makemessages (includes msguniq)
@@ -94,6 +93,7 @@ COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
 COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
 COPY --from=builder ${APP_DIR} ${APP_DIR}
 
+# Set ownership AFTER copying files
 RUN chown -R myuser:myuser ${PROJ_DIR}
 
 # Activate virtual environment
