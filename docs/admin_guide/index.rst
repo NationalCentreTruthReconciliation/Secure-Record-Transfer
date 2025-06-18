@@ -12,5 +12,8 @@ using command-line interfaces and terminal environments.
     adding_terms
     managing_submissions
     management_commands
+    site_settings
 
-See also: :ref:`Application Settings`.
+.. seealso::
+
+   For environment configuration settings, see :ref:`Application Settings`.

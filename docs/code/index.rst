@@ -15,6 +15,7 @@ part of this application.
     emails
     caais
     models
+    enums
     utils
     decorators
     commands
