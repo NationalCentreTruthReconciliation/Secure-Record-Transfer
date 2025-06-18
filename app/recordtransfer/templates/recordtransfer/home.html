@@ -1,13 +1,15 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
 {% load static %}
 {% block title %}
     {% trans "NCTR Record Transfer Portal" %}
-{% endblock %}
+{% endblock title %}
 {% block focused_content %}
     <div id="main-graphic-container">
         {% include "recordtransfer/header.html" %}
-        <img id="main-graphic" src="{% static 'hero4-scaled.webp' %}">
+        <img id="main-graphic"
+             src="{% static 'hero4-scaled.webp' %}"
+             alt="{% trans "NCTR Record Transfer Portal main graphic" %}">
         <div class="main-graphic-text-container">
             <div class="main-graphic-text">{% trans "Securely Send Your Records to the NCTR" %}</div>
             <div class="hero-button-container">
@@ -27,7 +29,7 @@
             </div>
         </div>
     </div>
-{% endblock %}
+{% endblock focused_content %}
 {% block content %}
     <h1 class="homepage-header">{% trans "Preserve History, Share Truth" %}</h1>
     <p class="lead-text">
@@ -136,4 +138,4 @@
             </div>
         </div>
     </section>
-{% endblock %}
+{% endblock content %}
