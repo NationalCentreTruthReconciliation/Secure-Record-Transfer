@@ -20,8 +20,11 @@ import { setupMessages } from "./base/messages";
 import { setupNavbar } from "./base/navbar";
 import { setupHelpTooltips } from "./base/tooltip";
 import { initializeProfile } from "./profile/index";
-import { setupRegistrationFormValidation , setupLoginFormValidation}
-    from "./registration/form-validation";
+import {
+    setupRegistrationFormValidation,
+    setupLoginFormValidation,
+    setupPasswordResetFormValidation
+} from "./registration/form-validation";
 import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
 
@@ -32,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupMessages();
     setupRegistrationFormValidation();
     setupLoginFormValidation();
+    setupPasswordResetFormValidation();
     initializeProfile();
     initializeSubmissionForm();
     initializeSubmissionGroup();
