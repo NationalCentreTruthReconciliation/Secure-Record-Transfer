@@ -20,10 +20,37 @@ Accessing Site Settings
 To access and modify site settings:
 
 1. Log in to the Django admin interface at ``/admin/``
+
 2. Navigate to **Record Transfer** → **Site Settings**
+
+.. image:: images/admin_site_setting.webp
+    :alt: Selecting Site Settings in admin app
+
 3. Click on the setting you want to modify
+
+.. image:: images/admin_select_site_setting.webp
+    :alt: Site Setting Admin page in admin app
+
 4. Update the **Value** field with your desired configuration
+
+.. image:: images/admin_edit_site_setting.webp
+    :alt: Site Setting edit page in admin app
+
 5. Click **Save** to apply the changes
+
+Resetting to Default
+--------------------
+To reset a site setting to its default value, on the edit page, simply click on the
+**Reset to Default** button. This will restore the setting to its original value as defined
+in the application code.
+
+.. image:: images/admin_reset_site_setting.webp
+    :alt: Reset Site Setting button in admin app
+
+A confirmation dialog will appear to ensure you want to proceed with the reset, which will include the default value for the setting. Click **OK** to confirm.
+
+.. image:: images/admin_confirm_reset_site_setting.webp
+    :alt: Confirm Reset Site Setting button in admin app
 
 .. note::
    Only the **Value** field can be modified. The **Key** and **Value Type** fields
