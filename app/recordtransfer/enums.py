@@ -56,6 +56,7 @@ class SiteSettingKey(Enum):
             "username is combined with the site's base URL to create an email address. "
             "The URL can be set from the admin site."
         ),
+        default_value="do-not-reply",
     )
 
     # Pagination

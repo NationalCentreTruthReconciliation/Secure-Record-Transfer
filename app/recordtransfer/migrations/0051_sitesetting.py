@@ -12,7 +12,7 @@ def populate_site_settings(apps, schema_editor) -> None:
     settings_data = [
         # Emails
         ("ARCHIVIST_EMAIL", "archivist@example.com", "str"),
-        ("DO_NOT_REPLY_USERNAME", None, "str"),
+        ("DO_NOT_REPLY_USERNAME", "do-not-reply", "str"),
         # Pagination
         ("PAGINATE_BY", "10", "int"),
         # CAAIS defaults

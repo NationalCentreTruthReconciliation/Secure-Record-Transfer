@@ -61,7 +61,7 @@ DO_NOT_REPLY_USERNAME
 
 **Type:** String
 
-**Default:** None
+**Default:** "do-not-reply"
 
 A username for the application to send "do not reply" emails from. This username is
 combined with the site's base URL to create an email address. The URL can be set
