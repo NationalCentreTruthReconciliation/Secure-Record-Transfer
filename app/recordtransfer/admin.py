@@ -12,7 +12,7 @@ from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -729,6 +729,17 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/sitesetting_change_form.html"
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        """Override to pass the current user to the form."""
+        form_class = super().get_form(request, obj, **kwargs)
+
+        class FormWithUser(form_class):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.user = request.user
+
+        return FormWithUser
+
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         """Add custom context to the change form and skip validation on reset."""
         extra_context = extra_context or {}
@@ -747,7 +758,7 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def reset_to_default(self, request, obj: SiteSetting) -> None:
+    def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
         """Reset the site setting to its default value."""
         try:
             obj.reset_to_default(request.user)

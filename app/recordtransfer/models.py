@@ -192,7 +192,7 @@ class SiteSetting(models.Model):
     )
 
     change_date = models.DateTimeField(
-        auto_now_add=True, editable=False, verbose_name=_("Change date")
+        auto_now=True, editable=False, verbose_name=_("Change date")
     )
     changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
