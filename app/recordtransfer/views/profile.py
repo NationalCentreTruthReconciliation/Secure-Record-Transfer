@@ -19,7 +19,6 @@ from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, QueryParameters
-from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import ProfileContactInfoForm
@@ -96,7 +95,6 @@ class BaseUserProfileUpdateView(UpdateView):
                 update_session_auth_hash(self.request, form.instance)
             context = self.get_context_data(form=form)
             response = self.render_to_response(context)
-            send_user_account_updated.delay(self.get_object(), context)
             return trigger_client_event(
                 response, "showSuccess", {"value": self.get_success_message()}
             )
