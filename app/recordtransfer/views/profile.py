@@ -1,9 +1,9 @@
 """Views to manage user profile information and view their submission history."""
 
+import logging
 from typing import Any, Optional, cast
 
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
@@ -24,6 +24,8 @@ from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import ProfileContactInfoForm
 from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
+
+LOGGER = logging.getLogger(__name__)
 
 
 class UserProfile(View):
@@ -82,10 +84,22 @@ class AccountInfoUpdateView(UpdateView):
         """Handle valid form submission, return updated form and trigger success event in
         response.
         """
-        super().form_valid(form)
-        context = self.get_context_data(form=form)
-        response = self.render_to_response(context)
-        return trigger_client_event(response, "showSuccess", {"value": "Account details updated."})
+        try:
+            super().form_valid(form)
+            if form.cleaned_data.get("new_password"):
+                update_session_auth_hash(self.request, form.instance)
+            context = self.get_context_data(form=form)
+            response = self.render_to_response(context)
+            send_user_account_updated.delay(self.get_object(), context)
+            return trigger_client_event(
+                response, "showSuccess", {"value": "Account details updated."}
+            )
+        except Exception:
+            LOGGER.exception("Failed to update account information")
+            response = HttpResponse(status=500)
+            return trigger_client_event(
+                response, "showError", {"value": gettext("Failed to update account information.")}
+            )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
