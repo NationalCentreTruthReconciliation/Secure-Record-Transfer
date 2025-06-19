@@ -31,6 +31,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
+    HelpMessages,
     HtmlIds,
     OtherValues,
     QueryParameters,
@@ -115,11 +116,7 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_rights.html",
             title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
-            info_message=gettext(
-                "Depending on the nature of the records you are transferring, there may be specific rights or restrictions that govern access or use. "
-                "Please enter any associated rights or restrictions that apply. You may add multiple entries using the + More button."
-                "If the appropriate type is not listed in the dropdown, you may manually enter another rights or restriction type."
-            ),
+            info_message=gettext(HelpMessages.RIGHTS_INFO),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
