@@ -13,7 +13,7 @@ export function setupFormChangeTracking(form, saveButton) {
         if (element.type === "checkbox" || element.type === "radio") {
             initialValues.set(element.name, element.checked);
         } else {
-            initialValues.set(element.name, element.value);
+            initialValues.set(element.name, element.value || "");
         }
     });
 
@@ -23,9 +23,13 @@ export function setupFormChangeTracking(form, saveButton) {
      */
     function hasFormChanged() {
         for (const element of formElements) {
-            const currentValue = element.type === "checkbox" || element.type === "radio"
-                ? element.checked
-                : element.value;
+            let currentValue;
+            if (element.type === "checkbox" || element.type === "radio") {
+                currentValue = element.checked;
+            } else {
+                currentValue = element.value || "";
+            }
+
             const initialValue = initialValues.get(element.name);
 
             if (currentValue !== initialValue) {
@@ -51,7 +55,7 @@ export function setupFormChangeTracking(form, saveButton) {
 
     // Add event listeners to all form elements
     formElements.forEach(element => {
-        const events = ["input", "change", "keyup", "paste"];
+        const events = ["input", "change"];
         events.forEach(eventType => {
             element.addEventListener(eventType, updateSaveButtonState);
         });
