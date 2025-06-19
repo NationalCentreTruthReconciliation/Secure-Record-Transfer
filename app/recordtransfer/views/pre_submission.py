@@ -113,7 +113,7 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.RIGHTS: SubmissionStepMeta(
             template="recordtransfer/submission_form_rights.html",
-            title=gettext("Record Rights and Restrictions"),
+            title=gettext("Record Rights and Restrictions ) (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=gettext(
                 "Enter any associated rights that apply to the records. Add as many rights "
