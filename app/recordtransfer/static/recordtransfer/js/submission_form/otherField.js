@@ -1,6 +1,6 @@
 /**
  * Conditionally hides/shows an "other" field based on a select field's value. Adds or removes the
- * .hidden-item class to the other field's parent to show/hide the element.
+ * .hidden class to the other field's parent to show/hide the element.
  * @param {string} selectFieldInputId The ID of the select element
  * @param {string} otherFieldInputId The ID of the input to conditionally show
  * @param {string|number} otherValue The value of the select element needed to show the other
@@ -30,5 +30,5 @@ const updateOtherFieldVisibility = (selectField, otherInput, otherValue) => {
         return;
     }
     const shouldShow = selectField.value === String(otherValue);
-    otherInput.parentElement.classList.toggle("hidden-item", !shouldShow);
+    otherInput.parentElement.classList.toggle("hidden", !shouldShow);
 };
