@@ -139,7 +139,7 @@ class SubmissionFormWizard(SessionWizardView):
             title=gettext("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
             info_message=gettext(
-                "If you plan to submit multiple files that together exceed 40 files or 256 MiB, we recommend organizing them into a submission group. "
+                "If you plan to submit multiple files that together exceed 40 files or 256 MiB, we recommend organizing them into a submission group. "
                 "Submission groups allow you to keep related submissions together. To do this, Select an existing group from the dropdown below or Create a new one. "
                 "When creating a new group, consider using a clear and consistent name format, such as YourLastName_YYYY-MM-DD, so you can easily identify and assign related submissions to the same group in the future."
             ),
