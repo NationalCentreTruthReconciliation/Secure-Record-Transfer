@@ -247,7 +247,25 @@ class ProfileContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
             "country",
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = False
+
     def clean(self) -> dict:
         """Clean form data."""
-        cleaned_data = self.clean_address_fields()
+        cleaned_data = super().clean()
+
+        region = cleaned_data.get("province_or_state")
+        other_region = cleaned_data.get("other_province_or_state")
+
+        if region and region.lower() == "other":
+            if not other_region:
+                self.add_error(
+                    "other_province_or_state",
+                    _('This field must be filled out if "Other" province or state is selected'),
+                )
+        else:
+            cleaned_data["other_province_or_state"] = ""
+
         return cleaned_data

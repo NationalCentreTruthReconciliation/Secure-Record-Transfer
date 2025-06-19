@@ -1,5 +1,10 @@
 {% load i18n %}
-<form method="post" action="{% url 'recordtransfer:user_profile' %}">
+<form id="contact-info-form"
+      hx-post="{% url 'recordtransfer:contact_info_update' %}"
+      hx-target="#contact-info-form"
+      hx-swap="innerHTML"
+      hx-select="#contact-info-form"
+      hx-on::after-request>
     {% csrf_token %}
     <!-- Phone Number Section -->
     <div class="flex mb-4 w-full">
@@ -113,6 +118,6 @@
         </div>
     </div>
     <div class="card-actions justify-start md:justify-end mt-8 md:mt-10">
-        <button type="submit" class="btn btn-primary btn-sm md:btn-md btn-wide">{% trans "Save Contact Info" %}</button>
+        <button class="btn btn-primary btn-sm md:btn-md btn-wide">{% trans "Save Contact Info" %}</button>
     </div>
 </form>

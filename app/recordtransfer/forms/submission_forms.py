@@ -98,8 +98,26 @@ class ContactInfoForm(SubmissionForm, ContactInfoFormMixin):
         submission_step = SubmissionStep.CONTACT_INFO
 
     def clean(self) -> dict:
-        """Clean form data."""
-        cleaned_data = self.clean_address_fields()
+        """Ensure that the province_or_state field is filled out if 'Other'
+        is.
+        """
+        cleaned_data = super().clean()
+
+        region = cleaned_data.get("province_or_state")
+        if not region or region.lower() == "":
+            self.add_error(
+                "province_or_state",
+                'You must select a province or state, use "Other" to enter a custom location',
+            )
+        elif region.lower() == "other" and not cleaned_data["other_province_or_state"]:
+            self.add_error(
+                "other_province_or_state",
+                'This field must be filled out if "Other" province or state is selected',
+            )
+        elif region.lower() != "other":
+            cleaned_data["other_province_or_state"] = ""
+            self.fields["other_province_or_state"].label = "hidden"
+
         return cleaned_data
 
     contact_name = forms.CharField(

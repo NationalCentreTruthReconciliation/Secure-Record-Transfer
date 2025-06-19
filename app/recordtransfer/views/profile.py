@@ -107,7 +107,13 @@ class BaseUserProfileUpdateView(UpdateView):
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid form submission."""
-        return super().form_invalid(form)
+        super().form_invalid(form)
+        context = self.get_context_data(form=form)
+        response = self.render_to_response(context)
+        return trigger_client_event(
+            response, "showError", {"value": gettext("Please correct the errors below.")}
+        )
+
 
 
 class AccountInfoUpdateView(BaseUserProfileUpdateView):
