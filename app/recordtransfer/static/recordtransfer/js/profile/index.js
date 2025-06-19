@@ -1,5 +1,4 @@
 import { setupProfileForm } from "../forms/forms.js";
-import { setupContactInfoForm } from "../submission_form/contactInfo.js";
 import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
@@ -7,6 +6,7 @@ import {
     handleSubmissionGroupModalFormAfterSwap
 } from "../utils/htmx.js";
 import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
+import { setupContactInfoForm } from "./contactInfo.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 
 /**

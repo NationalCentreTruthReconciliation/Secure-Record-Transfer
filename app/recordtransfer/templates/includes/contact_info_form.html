@@ -15,7 +15,7 @@
                    name="{{ form.phone_number.name }}"
                    id="{{ form.phone_number.id_for_label }}"
                    value="{{ form.phone_number.value|default:'' }}"
-                   placeholder="{% trans 'Enter phone number' %}">
+                   placeholder="{% trans "Enter phone number" %}">
             {% if form.phone_number.errors %}
                 <p class="text-error text-xs md:text-sm">{% trans form.phone_number.errors.0 %}</p>
             {% endif %}
@@ -43,7 +43,7 @@
                        name="{{ form.address_line_2.name }}"
                        id="{{ form.address_line_2.id_for_label }}"
                        value="{{ form.address_line_2.value|default:'' }}"
-                       placeholder="{% trans 'Apartment, suite, etc. (optional)' %}">
+                       placeholder="{% trans "Apartment, suite, etc." %}">
                 {% if form.address_line_2.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.address_line_2.errors.0 %}</p>
                 {% endif %}
@@ -55,7 +55,7 @@
                        name="{{ form.city.name }}"
                        id="{{ form.city.id_for_label }}"
                        value="{{ form.city.value|default:'' }}"
-                       placeholder="{% trans 'Enter city' %}">
+                       placeholder="{% trans "Enter city" %}">
                 {% if form.city.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.city.errors.0 %}</p>
                 {% endif %}
@@ -84,7 +84,7 @@
                        name="{{ form.other_province_or_state.name }}"
                        id="{{ form.other_province_or_state.id_for_label }}"
                        value="{{ form.other_province_or_state.value|default:'' }}"
-                       placeholder="{% trans 'Enter state/province if not listed above' %}">
+                       placeholder="{% trans "Enter state/province if not listed above" %}">
                 {% if form.other_province_or_state.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.other_province_or_state.errors.0 %}</p>
                 {% endif %}
@@ -96,7 +96,7 @@
                        name="{{ form.postal_or_zip_code.name }}"
                        id="{{ form.postal_or_zip_code.id_for_label }}"
                        value="{{ form.postal_or_zip_code.value|default:'' }}"
-                       placeholder="{% trans 'Enter postal/zip code' %}">
+                       placeholder="{% trans "Enter postal/zip code" %}">
                 {% if form.postal_or_zip_code.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.postal_or_zip_code.errors.0 %}</p>
                 {% endif %}
@@ -118,6 +118,8 @@
         </div>
     </div>
     <div class="card-actions justify-start md:justify-end mt-8 md:mt-10">
-        <button class="btn btn-primary btn-sm md:btn-md btn-wide">{% trans "Save" %}</button>
+        <button id="contact-info-save-btn"
+                class="btn btn-primary btn-sm md:btn-md btn-wide"
+                disabled>{% trans "Save" %}</button>
     </div>
 </form>
