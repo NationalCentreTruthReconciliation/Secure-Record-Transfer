@@ -20,7 +20,7 @@ from recordtransfer.constants import (
     HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.forms.mixins import ContactInfoMixin
+from recordtransfer.forms.mixins import ContactInfoFormMixin
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 
@@ -69,16 +69,25 @@ class AcceptLegal(SubmissionForm):
     )
 
 
-class ContactInfoForm(SubmissionForm, ContactInfoMixin):
+class ContactInfoForm(SubmissionForm, ContactInfoFormMixin):
     """The Contact Information portion of the form. Contains fields from Section 2 of CAAIS."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         field_order = [
-            'contact_name', 'job_title', 'organization', 'phone_number', 'email',
-            'address_line_1', 'address_line_2', 'city', 'province_or_state',
-            'other_province_or_state', 'postal_or_zip_code', 'country'
+            "contact_name",
+            "job_title",
+            "organization",
+            "phone_number",
+            "email",
+            "address_line_1",
+            "address_line_2",
+            "city",
+            "province_or_state",
+            "other_province_or_state",
+            "postal_or_zip_code",
+            "country",
         ]
 
         self.fields = {field: self.fields[field] for field in field_order if field in self.fields}

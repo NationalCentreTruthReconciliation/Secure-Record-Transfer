@@ -6,7 +6,7 @@ from django_countries.widgets import CountrySelectWidget
 from recordtransfer.constants import HtmlIds, OtherValues
 
 
-class ContactInfoMixin(forms.Form):
+class ContactInfoFormMixin(forms.Form):
     """Mixin containing address-related form fields."""
 
     def __init__(self, *args, **kwargs):
