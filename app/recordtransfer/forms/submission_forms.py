@@ -745,6 +745,7 @@ class RightsForm(SubmissionForm):
         .order_by("sort_order_other_first"),
         label=gettext("Type of rights"),
         empty_label=gettext("Please select one"),
+        required=False,
     )
 
     other_rights_type = forms.CharField(
