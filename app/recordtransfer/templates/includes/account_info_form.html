@@ -1,6 +1,10 @@
-
 {% load i18n %}
-<form method="post" action="{% url 'recordtransfer:user_profile' %}">
+<form id="account-info-form"
+      hx-post="{% url 'recordtransfer:account_info_update' %}"
+      hx-target="#account-info-form"
+      hx-swap="innerHTML"
+      hx-select="#account-info-form"
+      hx-on::after-request="setupProfileForm()">
     {% csrf_token %}
     <div class="flex flex-col md:flex-row w-full gap-4">
         <!-- Left Column -->
@@ -92,8 +96,7 @@
         </div>
     </div>
     <div class="card-actions justify-start md:justify-end mt-8 md:mt-10">
-        <button type="submit"
-                class="btn btn-primary btn-sm md:btn-md btn-wide"
+        <button class="btn btn-primary btn-sm md:btn-md btn-wide"
                 id="id_save_button">{% trans "Save" %}</button>
     </div>
 </form>

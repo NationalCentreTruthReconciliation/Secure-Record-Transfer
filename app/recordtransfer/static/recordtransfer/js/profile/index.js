@@ -47,4 +47,8 @@ export const initializeProfile = function() {
     window.handleModalAfterSwap = (e) => {
         return handleSubmissionGroupModalFormAfterSwap(e, context);
     };
+
+    window.setupProfileForm = () => {
+        return setupProfileForm(context);
+    };
 };

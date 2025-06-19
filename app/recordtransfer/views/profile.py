@@ -31,10 +31,10 @@ class UserProfile(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """Render the user profile page."""
-        account_settings_form = UserProfileForm(instance=request.user)
+        account_info_form = UserProfileForm(instance=request.user)
         contact_info_form = ProfileContactInfoForm(instance=request.user)
         context = {
-            "account_settings_form": account_settings_form,
+            "account_info_form": account_info_form,
             "contact_info_form": contact_info_form,
             "js_context": {
                 # Account Info Form
@@ -60,85 +60,36 @@ class UserProfile(View):
         return render(request, "recordtransfer/profile.html", context)
 
 
-# class UserProfile(UpdateView):
-#     """View to show two things:
-#     - The user's profile information
-#     - A list of the Submissions a user has made.
-#     """
+class AccountInfoUpdateView(UpdateView):
+    """View to update user account information such as name and notification preferences."""
 
-#     template_name = "recordtransfer/profile.html"
-#     form_class = UserProfileForm
-#     success_url = reverse_lazy("recordtransfer:user_profile")
-#     success_message = gettext("Preferences updated")
-#     password_change_success_message = gettext("Password updated")
-#     error_message = gettext("There was an error updating your preferences. Please try again.")
+    form_class = UserProfileForm
+    model = User
+    template_name = "includes/account_info_form.html"
+    success_url = reverse_lazy("recordtransfer:user_profile")
 
-#     def get_object(self, queryset: Optional[QuerySet] = None) -> User:
-#         """Get the user object for the current request."""
-#         return cast(User, self.request.user)
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Ensure requests are made with HTMX."""
+        if not request.htmx:
+            raise Http404("Page not found")
+        return super().dispatch(request, *args, **kwargs)
 
-#     def get_context_data(self, **kwargs) -> dict[str, Any]:
-#         """Add context data for the user profile view."""
-#         context = super().get_context_data(**kwargs)
-#         context.update(
-#             {
-#                 "js_context": {
-#                     # User profile form
-#                     "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
-#                     "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
-#                     "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
-#                     "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
-#                     "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
-#                     "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
-#                     # Submission group form
-#                     "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
-#                     # Tables
-#                     "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
-#                     "ID_IN_PROGRESS_SUBMISSION_TABLE": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
-#                     "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
-#                         "recordtransfer:in_progress_submission_table"
-#                     ),
-#                     "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
-#                     "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
-#                 },
-#             }
-#         )
+    def get_object(self, queryset: Optional[QuerySet] = None) -> User:
+        """Get the user object for the current request."""
+        return cast(User, self.request.user)
 
-#         return context
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle valid form submission, return updated form and trigger success event in
+        response.
+        """
+        super().form_valid(form)
+        context = self.get_context_data(form=form)
+        response = self.render_to_response(context)
+        return trigger_client_event(response, "showSuccess", {"value": "Account details updated."})
 
-#     def get_form_kwargs(self) -> dict[str, Any]:
-#         """Pass User instance to form to initialize it."""
-#         kwargs = super().get_form_kwargs()
-#         kwargs["instance"] = self.get_object()
-#         return kwargs
-
-#     def form_valid(self, form: BaseModelForm) -> HttpResponse:
-#         """Handle valid form submission."""
-#         response = super().form_valid(form)
-#         message = self.success_message
-#         if form.cleaned_data.get("new_password"):
-#             update_session_auth_hash(self.request, form.instance)
-#             message = self.password_change_success_message
-
-#             context = {
-#                 "subject": gettext("Password updated"),
-#                 "changed_item": gettext("password"),
-#                 "changed_status": gettext("updated"),
-#             }
-#             send_user_account_updated.delay(self.get_object(), context)
-
-#         messages.success(self.request, message)
-#         return response
-
-#     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-#         """Handle invalid form submission."""
-#         messages.error(
-#             self.request,
-#             self.error_message,
-#         )
-#         profile_form = cast(UserProfileForm, form)
-#         profile_form.reset_form()
-#         return super().form_invalid(profile_form)
+    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+        """Handle invalid form submission."""
+        return super().form_invalid(form)
 
 
 @require_http_methods(["GET", "DELETE"])
