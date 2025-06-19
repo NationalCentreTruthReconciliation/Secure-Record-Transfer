@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.html import escape
 from django.utils.translation import gettext
+from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
@@ -21,88 +22,123 @@ from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
+from recordtransfer.forms.user_forms import ProfileContactInfoForm
 from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
 
 
-class UserProfile(UpdateView):
-    """View to show two things:
-    - The user's profile information
-    - A list of the Submissions a user has made.
-    """
+class UserProfile(View):
+    """Main profile page - handles GET requests only."""
 
-    template_name = "recordtransfer/profile.html"
-    form_class = UserProfileForm
-    success_url = reverse_lazy("recordtransfer:user_profile")
-    success_message = gettext("Preferences updated")
-    password_change_success_message = gettext("Password updated")
-    error_message = gettext("There was an error updating your preferences. Please try again.")
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """Render the user profile page."""
+        account_settings_form = UserProfileForm(instance=request.user)
+        contact_info_form = ProfileContactInfoForm(instance=request.user)
+        context = {
+            "account_settings_form": account_settings_form,
+            "contact_info_form": contact_info_form,
+            "js_context": {
+                # Account Info Form
+                "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
+                "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
+                "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
+                "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
+                "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
+                "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
+                # Submission Group Form
+                "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
+                # Tables
+                "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
+                "ID_IN_PROGRESS_SUBMISSION_TABLE": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
+                "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
+                    "recordtransfer:in_progress_submission_table"
+                ),
+                "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
+                "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
+            },
+        }
 
-    def get_object(self, queryset: Optional[QuerySet] = None) -> User:
-        """Get the user object for the current request."""
-        return cast(User, self.request.user)
+        return render(request, "recordtransfer/profile.html", context)
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        """Add context data for the user profile view."""
-        context = super().get_context_data(**kwargs)
-        context.update(
-            {
-                "js_context": {
-                    # User profile form
-                    "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
-                    "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
-                    "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
-                    "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
-                    "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
-                    "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
-                    # Submission group form
-                    "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
-                    # Tables
-                    "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
-                    "ID_IN_PROGRESS_SUBMISSION_TABLE": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
-                    "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
-                        "recordtransfer:in_progress_submission_table"
-                    ),
-                    "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
-                    "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
-                },
-            }
-        )
 
-        return context
+# class UserProfile(UpdateView):
+#     """View to show two things:
+#     - The user's profile information
+#     - A list of the Submissions a user has made.
+#     """
 
-    def get_form_kwargs(self) -> dict[str, Any]:
-        """Pass User instance to form to initialize it."""
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_object()
-        return kwargs
+#     template_name = "recordtransfer/profile.html"
+#     form_class = UserProfileForm
+#     success_url = reverse_lazy("recordtransfer:user_profile")
+#     success_message = gettext("Preferences updated")
+#     password_change_success_message = gettext("Password updated")
+#     error_message = gettext("There was an error updating your preferences. Please try again.")
 
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle valid form submission."""
-        response = super().form_valid(form)
-        message = self.success_message
-        if form.cleaned_data.get("new_password"):
-            update_session_auth_hash(self.request, form.instance)
-            message = self.password_change_success_message
+#     def get_object(self, queryset: Optional[QuerySet] = None) -> User:
+#         """Get the user object for the current request."""
+#         return cast(User, self.request.user)
 
-            context = {
-                "subject": gettext("Password updated"),
-                "changed_item": gettext("password"),
-                "changed_status": gettext("updated"),
-            }
-            send_user_account_updated.delay(self.get_object(), context)
+#     def get_context_data(self, **kwargs) -> dict[str, Any]:
+#         """Add context data for the user profile view."""
+#         context = super().get_context_data(**kwargs)
+#         context.update(
+#             {
+#                 "js_context": {
+#                     # User profile form
+#                     "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
+#                     "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
+#                     "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
+#                     "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
+#                     "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
+#                     "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
+#                     # Submission group form
+#                     "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
+#                     # Tables
+#                     "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
+#                     "ID_IN_PROGRESS_SUBMISSION_TABLE": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
+#                     "IN_PROGRESS_SUBMISSION_TABLE_URL": reverse(
+#                         "recordtransfer:in_progress_submission_table"
+#                     ),
+#                     "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
+#                     "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
+#                 },
+#             }
+#         )
 
-        messages.success(self.request, message)
-        return response
+#         return context
 
-    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle invalid form submission."""
-        messages.error(
-            self.request,
-            self.error_message,
-        )
-        profile_form = cast(UserProfileForm, form)
-        profile_form.reset_form()
-        return super().form_invalid(profile_form)
+#     def get_form_kwargs(self) -> dict[str, Any]:
+#         """Pass User instance to form to initialize it."""
+#         kwargs = super().get_form_kwargs()
+#         kwargs["instance"] = self.get_object()
+#         return kwargs
+
+#     def form_valid(self, form: BaseModelForm) -> HttpResponse:
+#         """Handle valid form submission."""
+#         response = super().form_valid(form)
+#         message = self.success_message
+#         if form.cleaned_data.get("new_password"):
+#             update_session_auth_hash(self.request, form.instance)
+#             message = self.password_change_success_message
+
+#             context = {
+#                 "subject": gettext("Password updated"),
+#                 "changed_item": gettext("password"),
+#                 "changed_status": gettext("updated"),
+#             }
+#             send_user_account_updated.delay(self.get_object(), context)
+
+#         messages.success(self.request, message)
+#         return response
+
+#     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+#         """Handle invalid form submission."""
+#         messages.error(
+#             self.request,
+#             self.error_message,
+#         )
+#         profile_form = cast(UserProfileForm, form)
+#         profile_form.reset_form()
+#         return super().form_invalid(profile_form)
 
 
 @require_http_methods(["GET", "DELETE"])
@@ -266,9 +302,7 @@ class SubmissionGroupModalCreateView(CreateView):
                 },
             )
 
-        return trigger_client_event(
-            response, "showSuccess", {"value": self.success_message}
-        )
+        return trigger_client_event(response, "showSuccess", {"value": self.success_message})
 
 
 @require_http_methods(["GET", "DELETE"])

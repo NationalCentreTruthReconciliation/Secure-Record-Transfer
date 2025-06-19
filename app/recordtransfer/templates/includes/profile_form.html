@@ -7,13 +7,15 @@
                class="tab"
                aria-label="{% trans "Account" %}"
                checked />
-        <div class="tab-content bg-base-100 border-base-300 p-10">{% include "includes/account_settings_form.html" %}</div>
+        <div class="tab-content bg-base-100 border-base-300 p-10">
+            {% include "includes/account_settings_form.html" with form=account_settings_form %}
+        </div>
         <input type="radio"
                name="profile_tabs"
                class="tab"
                aria-label="{% trans "Contact Information" %}" />
         <div class="tab-content bg-base-100 border-base-300 p-10">
-            {% include "includes/contact_info_settings_form.html" %}
+            {% include "includes/contact_info_form.html" with form=contact_info_form %}
         </div>
     </div>
 </div>

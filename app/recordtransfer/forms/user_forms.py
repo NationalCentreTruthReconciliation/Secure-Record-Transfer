@@ -1,5 +1,5 @@
 import re
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
 from django import forms
 from django.contrib.auth import password_validation
@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django_recaptcha.fields import ReCaptchaField
 
 from recordtransfer.constants import HtmlIds
+from recordtransfer.forms.mixins import ContactInfoFormMixin
 from recordtransfer.models import User
 
 
@@ -226,3 +227,27 @@ class UserProfileForm(forms.ModelForm):
             self.data["current_password"] = ""
             self.data["new_password"] = ""
             self.data["confirm_new_password"] = ""
+
+
+class ProfileContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
+    """ModelForm version of ContactInfoFormMixin for profile editing."""
+
+    class Meta:
+        """Meta class for ProfileContactInfoForm."""
+
+        model = User
+        fields: ClassVar[list[str]] = [
+            "phone_number",
+            "address_line_1",
+            "address_line_2",
+            "city",
+            "province_or_state",
+            "other_province_or_state",
+            "postal_or_zip_code",
+            "country",
+        ]
+
+    def clean(self) -> dict:
+        """Clean form data."""
+        cleaned_data = self.clean_address_fields()
+        return cleaned_data
