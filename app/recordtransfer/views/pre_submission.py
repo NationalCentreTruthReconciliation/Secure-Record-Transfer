@@ -116,9 +116,9 @@ class SubmissionFormWizard(SessionWizardView):
             title=gettext("Record Rights and Restrictions ) (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=gettext(
-                "Enter any associated rights that apply to the records. Add as many rights "
-                "sections as you like using the + More button. You may enter another type of "
-                "rights if the dropdown does not contain the type of rights you're looking for."
+                "Depending on the nature of the records you are transferring, there may be specific rights or restrictions that govern access or use. "
+                "Please enter any associated rights or restrictions that apply. You may add multiple entries using the + More button."
+                "If the appropriate type is not listed in the dropdown, you may manually enter another rights or restriction type."
             ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
