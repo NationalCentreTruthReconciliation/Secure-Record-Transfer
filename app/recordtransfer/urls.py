@@ -52,6 +52,11 @@ urlpatterns = [
         name="account_info_update",
     ),
     path(
+        "user/profile/contact-info/",
+        login_required(views.profile.ContactInfoUpdateView.as_view()),
+        name="contact_info_update",
+    ),
+    path(
         "submission-group/<uuid:uuid>/",
         login_required(views.post_submission.SubmissionGroupDetailView.as_view()),
         name="submission_group_detail",
