@@ -130,8 +130,8 @@ class SubmissionFormWizard(SessionWizardView):
                 extra=1,
             ),
             info_message=gettext(
-                "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, You may enter them here. "
-                "This step is optional, If you do not have any identifiers associated with the records, You may proceed to the next step."
+                "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, you may enter them here. "
+                "This step is optional. If you do not have any identifiers associated with the records, you may proceed to the next step."
             ),
         ),
         SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(
