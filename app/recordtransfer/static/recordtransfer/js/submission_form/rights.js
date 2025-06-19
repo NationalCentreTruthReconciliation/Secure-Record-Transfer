@@ -1,5 +1,5 @@
+import { setupSelectOtherToggle } from "../utils/otherField";
 import { setupFormset } from "./formset";
-import { setupSelectOtherToggle } from "./otherField";
 
 /**
  * Sets up the rights form.
