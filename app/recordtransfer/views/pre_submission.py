@@ -123,7 +123,7 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
-            title=gettext("Other Identifiers (Optional)"),
+            title=gettext("Identifiers (Optional)"),
             form=formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
