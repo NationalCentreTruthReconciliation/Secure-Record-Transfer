@@ -46,7 +46,7 @@ services:
       target: prod
       dockerfile: Containerfile
       args:
-          WEBPACK_MODE: production
+        WEBPACK_MODE: production
     image: secure-record-transfer-prod
     command: python manage.py rqworker default
     restart: unless-stopped
@@ -93,8 +93,8 @@ services:
       - rq-scheduler
       - clamav
     volumes:
-      - static-volume:/opt/secure-record-transfer/app/static/
-      - media-volume:/opt/secure-record-transfer/app/media/
+      - static-volume:/opt/secure-record-transfer/app/static/:uid=1000,gid=1000
+      - media-volume:/opt/secure-record-transfer/app/media/:uid=1000,gid=1000
 
   nginx:
     image: docker.io/nginx:stable
