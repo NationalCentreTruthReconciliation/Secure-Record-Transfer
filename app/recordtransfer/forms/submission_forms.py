@@ -651,20 +651,6 @@ class RecordDescriptionForm(SubmissionForm):
         ),
     )
 
-    condition_assessment = forms.CharField(
-        required=False,
-        min_length=4,
-        max_length=2000,
-        widget=forms.Textarea(
-            attrs={
-                "rows": "6",
-                "placeholder": "e.g., The documents are photocopies ... (optional)",
-            }
-        ),
-        label=gettext("Condition of files"),
-        help_text=gettext("Briefly describe the condition of the files you are submitting."),
-    )
-
 
 class ExtendedRecordDescriptionForm(RecordDescriptionForm):
     """Adds quantity and type of units to record description form. Intended to be used when file

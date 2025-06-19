@@ -54,7 +54,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "date_is_approximated": "✓ Yes",
             "language": "English",
             "description": "Test Description",
-            "condition": "Test Condition",
         },
         SubmissionStep.RIGHTS: {
             "section_title": get_section_title(SubmissionStep.RIGHTS),
@@ -298,13 +297,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         language_input.send_keys(data["language"])
         description_of_contents_input.send_keys(data["description"])
 
-        if not required_only:
-            condition_input = driver.find_element(
-                By.NAME, "recorddescription-condition_assessment"
-            )
-
-            condition_input.send_keys(data["condition"])
-
         self.go_next_step()
 
     def complete_record_rights_step(self, required_only: bool = False) -> None:
@@ -503,7 +495,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Date of materials": data["date_of_materials"],
                     "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
-                    "Condition of files": data["condition"],
                 }
                 self._verify_field_values("recorddescription", fields)
 
