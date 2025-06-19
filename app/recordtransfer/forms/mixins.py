@@ -6,7 +6,7 @@ from django_countries.widgets import CountrySelectWidget
 from recordtransfer.constants import HtmlIds, OtherValues
 
 
-class AddressMixin(forms.Form):
+class ContactInfoMixin(forms.Form):
     """Mixin containing address-related form fields."""
 
     def __init__(self, *args, **kwargs):
@@ -16,6 +16,21 @@ class AddressMixin(forms.Form):
                 f"(forms.Form, forms.ModelForm, etc.) when using AddressMixin"
             )
         super().__init__(*args, **kwargs)
+
+    phone_number = forms.RegexField(
+        regex=r"^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$",
+        error_messages={
+            "required": gettext("This field is required."),
+            "invalid": gettext('Phone number must look like "+1 (999) 999-9999"'),
+        },
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "+1 (999) 999-9999",
+                "class": "reduce-form-field-width",
+            }
+        ),
+        label=gettext("Phone number"),
+    )
 
     address_line_1 = forms.CharField(
         max_length=100,

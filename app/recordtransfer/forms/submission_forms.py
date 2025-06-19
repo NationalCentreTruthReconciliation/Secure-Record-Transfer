@@ -20,7 +20,7 @@ from recordtransfer.constants import (
     HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.forms.mixins import AddressMixin
+from recordtransfer.forms.mixins import ContactInfoMixin
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 
@@ -69,27 +69,19 @@ class AcceptLegal(SubmissionForm):
     )
 
 
-class ContactInfoForm(SubmissionForm, AddressMixin):
+class ContactInfoForm(SubmissionForm, ContactInfoMixin):
     """The Contact Information portion of the form. Contains fields from Section 2 of CAAIS."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        address_fields = {}
-        for field_name in [
-            "address_line_1",
-            "address_line_2",
-            "city",
-            "province_or_state",
-            "other_province_or_state",
-            "postal_or_zip_code",
-            "country",
-        ]:
-            if field_name in self.fields:
-                address_fields[field_name] = self.fields.pop(field_name)
+        field_order = [
+            'contact_name', 'job_title', 'organization', 'phone_number', 'email',
+            'address_line_1', 'address_line_2', 'city', 'province_or_state',
+            'other_province_or_state', 'postal_or_zip_code', 'country'
+        ]
 
-        # Re-add address fields at the end
-        self.fields.update(address_fields)
+        self.fields = {field: self.fields[field] for field in field_order if field in self.fields}
 
     class Meta:
         """Meta information for the form."""
@@ -120,21 +112,6 @@ class ContactInfoForm(SubmissionForm, AddressMixin):
         min_length=2,
         required=False,
         label=gettext("Organization"),
-    )
-
-    phone_number = forms.RegexField(
-        regex=r"^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$",
-        error_messages={
-            "required": gettext("This field is required."),
-            "invalid": gettext('Phone number must look like "+1 (999) 999-9999"'),
-        },
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "+1 (999) 999-9999",
-                "class": "reduce-form-field-width",
-            }
-        ),
-        label=gettext("Phone number"),
     )
 
     email = forms.EmailField(
