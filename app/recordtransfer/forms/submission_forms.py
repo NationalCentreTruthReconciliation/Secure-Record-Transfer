@@ -688,7 +688,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
 
 
 class RightsFormSet(BaseFormSet):
-    """Special formset to enforce at least one rights form to have a value."""
+    """Formset for rights information (optional)."""
 
     class Meta:
         """Meta information for the form."""
@@ -697,7 +697,7 @@ class RightsFormSet(BaseFormSet):
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
-        self.forms[0].empty_permitted = False
+        self.forms[0].empty_permitted = True  # Changed to True to make it optional
 
 
 class RightsForm(SubmissionForm):
