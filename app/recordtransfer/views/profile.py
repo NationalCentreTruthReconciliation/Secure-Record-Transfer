@@ -18,7 +18,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import HtmlIds, QueryParameters
+from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import ProfileContactInfoForm
@@ -45,6 +45,10 @@ class UserProfile(View):
                 "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
                 "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
                 "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
+                # Contact Info Form
+                "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
+                "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+                "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
                 # Submission Group Form
                 "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
                 # Tables

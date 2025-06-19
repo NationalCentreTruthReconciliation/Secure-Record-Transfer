@@ -1,4 +1,5 @@
 import { setupProfileForm } from "../forms/forms.js";
+import { setupContactInfoForm } from "../submission_form/contactInfo.js";
 import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
@@ -26,6 +27,7 @@ export const initializeProfile = function() {
     }
 
     setupProfileForm(context);
+    setupContactInfoForm(context);
     initTabListeners();
     restoreTab();
     setupToastNotifications();
@@ -50,5 +52,9 @@ export const initializeProfile = function() {
 
     window.setupProfileForm = () => {
         return setupProfileForm(context);
+    };
+
+    window.setupContactInfoForm = () => {
+        return setupContactInfoForm(context);
     };
 };
