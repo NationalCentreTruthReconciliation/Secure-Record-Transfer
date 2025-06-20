@@ -351,8 +351,13 @@ class SubmissionFormWizard(SessionWizardView):
         """Render next step of form. Overrides parent method to clear errors from the form."""
         # Check if we just completed contact info step and user needs prompting
         user = cast(User, self.request.user)
-        if self.current_step == SubmissionStep.CONTACT_INFO and not user.has_contact_info:
+        if (
+            self.current_step == SubmissionStep.CONTACT_INFO
+            and not user.has_contact_info
+            and not self.storage.extra_data.get("save_contact_info_prompted", False)
+        ):
             form = cast(forms.ContactInfoForm, form)
+            self.storage.extra_data["save_contact_info_prompted"] = True
             return self.trigger_contact_info_save_prompt(form)
 
         # get the form instance based on the data from the storage backend
@@ -649,6 +654,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                     "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                     "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
+                    "account_info_update_url": reverse("recordtransfer:contact_info_update"),
                 }
             )
 
