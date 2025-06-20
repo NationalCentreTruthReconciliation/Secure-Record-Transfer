@@ -62,7 +62,31 @@ jobs:
             exit 1
           fi
           echo "Application is ready!"
+      - name: Inspect running containers
+        run: |
+            echo "List of all containers:"
+            podman ps -a
 
+            echo "Container network information:"
+            podman network ls
+            podman network inspect podman-compose_default || echo "Default network not found"
+
+      - name: Check app container status
+        run: |
+            CONTAINER_ID=$(podman ps -a --filter name=app --format "{{.ID}}")
+            if [ -z "$CONTAINER_ID" ]; then
+            echo "App container not found!"
+            else
+            echo "App container state:"
+            podman inspect $CONTAINER_ID --format "{{.State.Status}}"
+            echo "App container exit code:"
+            podman inspect $CONTAINER_ID --format "{{.State.ExitCode}}"
+
+            if [ "$(podman inspect $CONTAINER_ID --format '{{.State.Status}}')" != "running" ]; then
+                echo "Container exit reason:"
+                podman inspect $CONTAINER_ID --format "{{.State.Error}}"
+            fi
+            fi
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
         run: |
