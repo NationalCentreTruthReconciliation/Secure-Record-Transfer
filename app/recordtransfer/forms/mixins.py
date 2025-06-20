@@ -65,7 +65,6 @@ class ContactInfoFormMixin(forms.Form):
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
@@ -130,6 +129,8 @@ class ContactInfoFormMixin(forms.Form):
             ("WV", "West Virginia"),
             ("WI", "Wisconsin"),
             ("WY", "Wyoming"),
+            # Other values
+            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
         ],
         initial="",
         label="Province or state",
