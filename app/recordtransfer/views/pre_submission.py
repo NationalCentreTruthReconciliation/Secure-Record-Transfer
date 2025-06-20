@@ -25,7 +25,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.views.generic import TemplateView
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import forms
@@ -349,6 +349,12 @@ class SubmissionFormWizard(SessionWizardView):
 
     def render_next_step(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
+        # Check if we just completed contact info step and user needs prompting
+        user = cast(User, self.request.user)
+        if self.current_step == SubmissionStep.CONTACT_INFO and not user.has_contact_info:
+            form = cast(forms.ContactInfoForm, form)
+            return self.trigger_contact_info_save_prompt(form)
+
         # get the form instance based on the data from the storage backend
         # (if available).
         next_step = self.steps.next
@@ -365,6 +371,30 @@ class SubmissionFormWizard(SessionWizardView):
         # change the stored current step
         self.storage.current_step = next_step
         return self.render(new_form, **kwargs)
+
+    def trigger_contact_info_save_prompt(self, form: forms.ContactInfoForm) -> HttpResponse:
+        """Trigger a prompt to save contact info using HTMX."""
+        response = HttpResponse(status=200)
+        data = form.cleaned_data
+        return trigger_client_event(
+            response,
+            "promptSaveContactInfo",
+            {
+                "message": gettext(
+                    "Would you like to save your contact information to your profile?"
+                ),
+                "contactInfo": {
+                    "phone_number": data.get("phone_number", ""),
+                    "address_line_1": data.get("address_line_1", ""),
+                    "address_line_2": data.get("address_line_2", ""),
+                    "city": data.get("city", ""),
+                    "province_or_state": data.get("province_or_state", ""),
+                    "other_province_or_state": data.get("other_province_or_state", ""),
+                    "postal_or_zip_code": data.get("postal_or_zip_code", ""),
+                    "country": data.get("country", ""),
+                },
+            },
+        )
 
     @classmethod
     def format_step_data(cls, step: SubmissionStep, data: QueryDict) -> Union[dict, list[dict]]:

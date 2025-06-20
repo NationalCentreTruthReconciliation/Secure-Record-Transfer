@@ -1,0 +1,55 @@
+{% load i18n %}
+{% load static %}
+<dialog id="save_contact_info_modal" class="modal">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <div>
+            <h3 class="text-xl font-bold mb-5">{% trans "Would you like to save your contact information to your profile?" %}</h3>
+            <div class="bg-base-200 p-4 rounded-lg mb-4">
+                <div class="space-y-4">
+                    <div class="text-sm">
+                        <div class="flex">
+                            <span class="font-medium w-32">{% trans "Phone:" %}</span>
+                            <span id="modal-phone-number" class="text-base-content/70"></span>
+                        </div>
+                    </div>
+                    <div class="text-sm">
+                        <div class="flex">
+                            <span class="font-medium w-32">{% trans "Address:" %}</span>
+                            <span id="modal-address-line-1" class="text-base-content/70"></span>
+                        </div>
+                        <div class="flex">
+                            <span class="font-medium w-32"></span>
+                            <span id="modal-address-line-2" class="text-base-content/70"></span>
+                        </div>
+                        <div class="flex">
+                            <span class="font-medium w-32">{% trans "City:" %}</span>
+                            <span id="modal-city" class="text-base-content/70"></span>
+                        </div>
+                        <div class="flex">
+                            <span class="font-medium w-32">{% trans "Province/State:" %}</span>
+                            <span id="modal-province-or-state" class="text-base-content/70"></span>
+                        </div>
+                        <div class="flex">
+                            <span class="font-medium w-32">{% trans "Postal/Zip:" %}</span>
+                            <span id="modal-postal-or-zip-code" class="text-base-content/70"></span>
+                        </div>
+                        <div class="flex">
+                            <span class="font-medium w-32">{% trans "Country:" %}</span>
+                            <span id="modal-country" class="text-base-content/70"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm mb-4">
+                {% trans "Saving your contact information will make future submissions easier by pre-populating these fields in this step." %}
+            </p>
+            <div class="modal-action">
+                <button id="modal-continue-without-saving" class="btn">{% trans "Continue without saving" %}</button>
+                <button id="modal-save-contact-info" class="btn btn-primary">{% trans "Save" %}</button>
+            </div>
+        </div>
+    </div>
+</dialog>
