@@ -470,6 +470,14 @@ class SubmissionFormWizard(SessionWizardView):
             user = cast(User, self.request.user)
             initial["contact_name"] = self.get_name_of_user(user)
             initial["email"] = str(user.email)
+            initial["phone_number"] = user.phone_number or ""
+            initial["address_line_1"] = user.address_line_1 or ""
+            initial["address_line_2"] = user.address_line_2 or ""
+            initial["city"] = user.city or ""
+            initial["province_or_state"] = user.province_or_state or ""
+            initial["other_province_or_state"] = user.other_province_or_state or ""
+            initial["postal_or_zip_code"] = user.postal_or_zip_code or ""
+            initial["country"] = user.country or ""
 
         return initial
 
