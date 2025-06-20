@@ -15,7 +15,8 @@
                    name="{{ form.phone_number.name }}"
                    id="{{ form.phone_number.id_for_label }}"
                    value="{{ form.phone_number.value|default:'' }}"
-                   placeholder="{% trans "Enter phone number" %}">
+                   placeholder="{% trans "Enter phone number" %}"
+                   required>
             {% if form.phone_number.errors %}
                 <p class="text-error text-xs md:text-sm">{% trans form.phone_number.errors.0 %}</p>
             {% endif %}
@@ -31,7 +32,8 @@
                           name="{{ form.address_line_1.name }}"
                           id="{{ form.address_line_1.id_for_label }}"
                           rows="3"
-                          placeholder="{% trans 'Enter street address' %}">{{ form.address_line_1.value|default:'' }}</textarea>
+                          placeholder="{% trans 'Enter street address' %}"
+                          required>{{ form.address_line_1.value|default:'' }}</textarea>
                 {% if form.address_line_1.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.address_line_1.errors.0 %}</p>
                 {% endif %}
@@ -55,7 +57,8 @@
                        name="{{ form.city.name }}"
                        id="{{ form.city.id_for_label }}"
                        value="{{ form.city.value|default:'' }}"
-                       placeholder="{% trans "Enter city" %}">
+                       placeholder="{% trans "Enter city" %}"
+                       required>
                 {% if form.city.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.city.errors.0 %}</p>
                 {% endif %}
@@ -67,7 +70,8 @@
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.province_or_state.label %}</legend>
                 <select class="select select-bordered select-sm md:select-md w-full"
                         name="{{ form.province_or_state.name }}"
-                        id="{{ form.province_or_state.id_for_label }}">
+                        id="{{ form.province_or_state.id_for_label }}"
+                        required>
                     {% for value, label in form.province_or_state.field.choices %}
                         <option value="{{ value }}"
                                 {% if form.province_or_state.value == value %}selected{% endif %}>{{ label }}</option>
@@ -96,7 +100,8 @@
                        name="{{ form.postal_or_zip_code.name }}"
                        id="{{ form.postal_or_zip_code.id_for_label }}"
                        value="{{ form.postal_or_zip_code.value|default:'' }}"
-                       placeholder="{% trans "Enter postal/zip code" %}">
+                       placeholder="{% trans "Enter postal/zip code" %}"
+                       required>
                 {% if form.postal_or_zip_code.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.postal_or_zip_code.errors.0 %}</p>
                 {% endif %}
@@ -105,7 +110,8 @@
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.country.label %}</legend>
                 <select class="select select-bordered select-sm md:select-md w-full"
                         name="{{ form.country.name }}"
-                        id="{{ form.country.id_for_label }}">
+                        id="{{ form.country.id_for_label }}"
+                        required>
                     {% for value, label in form.country.field.choices %}
                         <option value="{{ value }}"
                                 {% if form.country.value == value %}selected{% endif %}>{{ label }}</option>

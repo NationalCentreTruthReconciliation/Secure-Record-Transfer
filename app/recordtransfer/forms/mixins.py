@@ -175,3 +175,34 @@ class ContactInfoFormMixin(forms.Form):
         ),
         label=gettext("Country"),
     )
+
+    def clean_address_fields(self) -> dict:
+        """Ensure that the province_or_state field is filled out if 'Other' is selected."""
+        cleaned_data = self.cleaned_data or {}
+        region = cleaned_data.get("province_or_state", "").lower()
+        other_region = cleaned_data.get("other_province_or_state", "")
+        address_line_1 = cleaned_data.get("address_line_1", "").strip()
+        address_line_2 = cleaned_data.get("address_line_2", "").strip()
+
+        if address_line_2 and not address_line_1:
+            self.add_error(
+                "address_line_1",
+                gettext("Address line 1 is required if address line 2 is provided."),
+            )
+
+        if not region:
+            self.add_error(
+                "province_or_state",
+                'You must select a province or state, use "Other" to enter a custom location',
+            )
+        elif region == "other":
+            if not other_region:
+                self.add_error(
+                    "other_province_or_state",
+                    'This field must be filled out if "Other" province or state is selected',
+                )
+        else:
+            cleaned_data["other_province_or_state"] = ""
+            self.fields["other_province_or_state"].label = "hidden"
+
+        return cleaned_data
