@@ -31,4 +31,5 @@ const updateOtherFieldVisibility = (selectField, otherInput, otherValue) => {
     }
     const shouldShow = selectField.value === String(otherValue);
     otherInput.parentElement.classList.toggle("hidden", !shouldShow);
+    otherInput.required = shouldShow;
 };
