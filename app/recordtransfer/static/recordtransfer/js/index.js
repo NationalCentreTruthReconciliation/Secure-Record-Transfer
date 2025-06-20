@@ -24,10 +24,12 @@ import { setupRegistrationFormValidation , setupLoginFormValidation}
     from "./registration/form-validation";
 import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
+import { setupBaseHtmxEventListeners } from "./utils/htmx";
 
 
 window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
+    setupBaseHtmxEventListeners();
     setupNavbar();
     setupMessages();
     setupRegistrationFormValidation();
@@ -39,10 +41,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener("load", () => {
     setupHelpTooltips();
-});
-
-document.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id === "main-container") {
-        initializeSubmissionForm();
-    }
 });
