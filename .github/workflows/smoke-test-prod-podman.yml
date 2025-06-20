@@ -36,6 +36,13 @@ jobs:
         run: |
           echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
 
+
+
+      - name: Build application image
+        run: |
+            podman build -t localhost/secure-record-transfer-prod:latest -f Containerfile --target prod --build-arg WEBPACK_MODE=production .
+            podman images  # Verify image was built successfully
+
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d
 
