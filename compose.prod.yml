@@ -13,7 +13,7 @@ services:
     command: /usr/local/etc/redis/redis.conf
     restart: unless-stopped
     healthcheck:
-      test: redis-cli --raw incr ping
+      test: [ "CMD", "sh", "-c", "redis-cli --raw incr ping" ]
       interval: 1m00s
       timeout: 5s
       retries: 5
@@ -28,7 +28,7 @@ services:
     command: --defaults-extra-file=/etc/mysql/mysqld.cnf
     restart: unless-stopped
     healthcheck:
-      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "$MYSQL_USER", "--password=$MYSQL_PASSWORD" ]
       interval: 1m00s
       timeout: 5s
       retries: 5
@@ -41,13 +41,8 @@ services:
       - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:z
 
   rq:
-    build:
-      context: .
-      target: prod
-      dockerfile: Containerfile
-      args:
-          WEBPACK_MODE: production
-    image: secure-record-transfer-prod
+
+    image: localhost/secure-record-transfer-prod:latest
     command: python manage.py rqworker default
     restart: unless-stopped
     env_file:
