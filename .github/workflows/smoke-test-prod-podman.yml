@@ -24,12 +24,10 @@ jobs:
           # Verify installation
           podman --version
 
-      - name: Install Podman Compose plugin
+      - name: Install Python-based podman-compose
         run: |
-          # Install the podman compose plugin
-          pip3 install podman compose
-          # Verify installation
-          podman compose --version
+                sudo pip3 install podman-compose
+                podman-compose --version
 
       - name: Copy environment file
         run: cp example.prod.env .prod.env
