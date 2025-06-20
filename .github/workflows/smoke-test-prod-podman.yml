@@ -36,12 +36,17 @@ jobs:
         run: |
           echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
 
+      - name: Build application image
+        run: |
+           podman build -t localhost/secure-record-transfer-prod:latest -f Containerfile --target prod --build-arg WEBPACK_MODE=production .
+
+
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d
 
       - name: Wait for app to start
         run: |
-          timeout=60
+          timeout=30
           elapsed=0
           echo "Waiting for application to be ready (will time out after ${timeout}s)..."
           until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
