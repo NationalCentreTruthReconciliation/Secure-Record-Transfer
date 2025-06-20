@@ -25,6 +25,7 @@ import { setupRegistrationFormValidation , setupLoginFormValidation}
 import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
 import { setupBaseHtmxEventListeners } from "./utils/htmx";
+import { setupToastNotifications, displayStoredToast } from "./utils/toast.js";
 
 
 window.htmx = htmx;
@@ -32,6 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupBaseHtmxEventListeners();
     setupNavbar();
     setupMessages();
+    setupToastNotifications();
+    displayStoredToast();
     setupRegistrationFormValidation();
     setupLoginFormValidation();
     initializeProfile();
