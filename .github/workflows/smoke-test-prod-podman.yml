@@ -1,0 +1,75 @@
+name: Production Smoke Test Podman (via compose.prod.yml)
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman python3 python3-pip
+          # Verify installation
+          podman --version
+
+      - name: Install Podman Compose plugin
+        run: |
+          # Install the podman-compose plugin
+          pip3 install podman-compose
+          # Verify installation
+          podman-compose --version
+
+      - name: Copy environment file
+        run: cp example.prod.env .prod.env
+
+      - name: Add SECRET_KEY to environment file
+        run: |
+          echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
+
+      - name: Start containers
+        run: podman-compose -f compose.prod.yml up -d
+
+      - name: Wait for app to start
+        run: |
+          timeout=30
+          elapsed=0
+          echo "Waiting for application to be ready (will time out after ${timeout}s)..."
+          until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
+            sleep 5
+            elapsed=$((elapsed+5))
+            echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
+          done
+          if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. Application did not start properly."
+            podman-compose -f compose.prod.yml logs app
+            exit 1
+          fi
+          echo "Application is ready!"
+
+      # The port number is set in the compose.prod.yml file
+      - name: Check homepage status
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
+          if [ $response -eq 200 ]; then
+            echo "Homepage is returning 200 OK in production configuration"
+            exit 0
+          else
+            echo "Homepage returned status code $response in production configuration"
+            exit 1
+          fi
+
+      - name: Stop containers
+        if: always()
+        run: podman-compose -f compose.prod.yml down -v
