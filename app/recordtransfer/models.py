@@ -96,6 +96,28 @@ class User(AbstractUser):
         """Return the full name of the user, which is a combination of first and last names."""
         return f"{self.first_name} {self.last_name}".strip()
 
+    @property
+    def has_contact_info(self) -> bool:
+        """Check if user has complete contact information."""
+        required_fields = [
+            self.phone_number,
+            self.address_line_1,
+            self.city,
+            self.province_or_state,
+            self.postal_or_zip_code,
+            self.country,
+        ]
+
+        # Check if all required fields have values
+        if not all(field for field in required_fields):
+            return False
+
+        # If "Other" is selected for province/state, check if other_province_or_state is filled
+        if self.province_or_state and self.province_or_state.lower() == "other":
+            return bool(self.other_province_or_state)
+
+        return True
+
 
 class UploadSession(models.Model):
     """Represents a file upload session. This model is used to track the files that a
