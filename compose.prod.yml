@@ -28,7 +28,8 @@ services:
     command: --defaults-extra-file=/etc/mysql/mysqld.cnf
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "$MYSQL_USER", "--password=$MYSQL_PASSWORD"]      interval: 1m00s
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "$MYSQL_USER", "--password=$MYSQL_PASSWORD" ]
+      interval: 1m00s
       timeout: 5s
       retries: 5
       start_period: 30s
