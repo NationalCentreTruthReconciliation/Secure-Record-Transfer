@@ -41,12 +41,7 @@ services:
       - ./docker/mysql/mysqld.cnf:/etc/mysql/mysqld.cnf:z
 
   rq:
-    build:
-      context: .
-      target: prod
-      dockerfile: Containerfile
-      args:
-        WEBPACK_MODE: production
+
     image: secure-record-transfer-prod
     command: python manage.py rqworker default
     restart: unless-stopped

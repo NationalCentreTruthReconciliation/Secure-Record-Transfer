@@ -46,42 +46,7 @@ jobs:
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d
 
-      - name: Inspect running containers
-        run: |
-            echo "List of all containers:"
-            podman ps -a
 
-            echo "Container network information:"
-            podman network ls
-            podman network inspect podman-compose_default || echo "Default network not found"
-
-      - name: Check app container status
-        run: |
-            CONTAINER_ID=$(podman ps -a --filter name=app --format "{{.ID}}")
-            if [ -z "$CONTAINER_ID" ]; then
-            echo "App container not found!"
-            else
-            echo "App container state:"
-            podman inspect $CONTAINER_ID --format "{{.State.Status}}"
-            echo "App container exit code:"
-            podman inspect $CONTAINER_ID --format "{{.State.ExitCode}}"
-
-            if [ "$(podman inspect $CONTAINER_ID --format '{{.State.Status}}')" != "running" ]; then
-                echo "Container exit reason:"
-                podman inspect $CONTAINER_ID --format "{{.State.Error}}"
-            fi
-            fi
-      # The port number is set in the compose.prod.yml file
-      - name: Check homepage status
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
-          if [ $response -eq 200 ]; then
-            echo "Homepage is returning 200 OK in production configuration"
-            exit 0
-          else
-            echo "Homepage returned status code $response in production configuration"
-            exit 1
-          fi
       - name: Wait for app to start
         run: |
           timeout=30
@@ -98,7 +63,17 @@ jobs:
             exit 1
           fi
           echo "Application is ready!"
-
+      # The port number is set in the compose.prod.yml file
+      - name: Check homepage status
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
+          if [ $response -eq 200 ]; then
+            echo "Homepage is returning 200 OK in production configuration"
+            exit 0
+          else
+            echo "Homepage returned status code $response in production configuration"
+            exit 1
+          fi
 
       - name: Stop containers
         if: always()
