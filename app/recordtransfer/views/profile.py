@@ -119,7 +119,6 @@ class BaseUserProfileUpdateView(UpdateView):
         )
 
 
-
 class AccountInfoUpdateView(BaseUserProfileUpdateView):
     """View to update user account information such as name and notification preferences."""
 
