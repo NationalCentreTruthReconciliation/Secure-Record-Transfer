@@ -383,7 +383,7 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.RadioSelect(
             attrs={"id": HtmlIds.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
         ),
-        label=gettext("Submitting on behalf of an organization/another person"),
+        label=gettext("Fill out this section?"),
         initial="no",
     )
 
