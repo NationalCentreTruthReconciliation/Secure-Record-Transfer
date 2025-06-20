@@ -5,7 +5,7 @@ import { setupSelectOtherToggle } from "../utils/otherField";
  * Sets up the contact info form.
  * @param {object} context - The form context containing references to form elements.
  */
-export function setupContactInfoForm(context) {
+export function setupProfileContactInfoForm(context) {
     const form = document.getElementById("contact-info-form");
     const saveButton = document.getElementById("contact-info-save-btn");
 
