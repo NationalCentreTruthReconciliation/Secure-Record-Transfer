@@ -12,7 +12,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.first_name.label %}</legend>
                 <input type="text"
-                       class="input input-bordered input-sm md:input-md validator w-full"
+                       class="input input-bordered input-sm md:input-md validator w-full bg-gray-50 text-gray-600"
                        name="{{ form.first_name.name }}"
                        id="{{ form.first_name.id_for_label }}"
                        value="{{ form.first_name.value }}"
@@ -24,7 +24,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.last_name.label %}</legend>
                 <input type="text"
-                       class="input input-bordered input-sm md:input-md validator w-full"
+                       class="input input-bordered input-sm md:input-md validator w-full bg-gray-50 text-gray-600"
                        name="{{ form.last_name.name }}"
                        id="{{ form.last_name.id_for_label }}"
                        value="{{ form.last_name.value }}"
@@ -65,7 +65,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.current_password.label %}</legend>
                 <input type="password"
-                       class="input input-bordered input-sm md:input-md w-full"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
                        name="{{ form.current_password.name }}"
                        id="{{ form.current_password.id_for_label }}"
                        autocomplete="off">
@@ -76,7 +76,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.new_password.label %}</legend>
                 <input type="password"
-                       class="input input-bordered input-sm md:input-md w-full"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
                        name="{{ form.new_password.name }}"
                        id="{{ form.new_password.id_for_label }}">
                 {% if form.new_password.errors %}
@@ -86,7 +86,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.confirm_new_password.label %}</legend>
                 <input type="password"
-                       class="input input-bordered input-sm md:input-md w-full"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
                        name="{{ form.confirm_new_password.name }}"
                        id="{{ form.confirm_new_password.id_for_label }}">
                 {% if form.confirm_new_password.errors %}
