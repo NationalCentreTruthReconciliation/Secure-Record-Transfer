@@ -26,10 +26,10 @@ jobs:
 
       - name: Install Podman Compose plugin
         run: |
-          # Install the podman-compose plugin
-          pip3 install podman-compose
+          # Install the podman compose plugin
+          pip3 install podman compose
           # Verify installation
-          podman-compose --version
+          podman compose --version
 
       - name: Copy environment file
         run: cp example.prod.env .prod.env
@@ -39,21 +39,21 @@ jobs:
           echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
 
       - name: Start containers
-        run: podman-compose -f compose.prod.yml up -d
+        run: podman compose -f compose.prod.yml up -d
 
       - name: Wait for app to start
         run: |
-          timeout=30
+          timeout=60
           elapsed=0
           echo "Waiting for application to be ready (will time out after ${timeout}s)..."
-          until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
+          until [ $elapsed -ge $timeout ] || podman compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
             sleep 5
             elapsed=$((elapsed+5))
             echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
           done
           if [ $elapsed -ge $timeout ]; then
             echo "Timeout reached. Application did not start properly."
-            podman-compose -f compose.prod.yml logs app
+            podman compose -f compose.prod.yml logs app
             exit 1
           fi
           echo "Application is ready!"
@@ -72,4 +72,4 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: podman-compose -f compose.prod.yml down -v
+        run: podman compose -f compose.prod.yml down -v
