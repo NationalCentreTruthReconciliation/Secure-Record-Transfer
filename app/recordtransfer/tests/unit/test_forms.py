@@ -334,6 +334,7 @@ class RecordDescriptionFormTest(TestCase):
             "date_of_materials": "2020-01-01",
             "language_of_material": "English",
             "preliminary_scope_and_content": "Test content description",
+            "preliminary_custodial_history": "History note.",
         }
 
     def test_valid_single_date(self) -> None:
