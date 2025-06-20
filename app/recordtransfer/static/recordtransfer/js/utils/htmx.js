@@ -122,16 +122,6 @@ const refreshSubmissionGroupTable = (context) => {
  * This should be called once in the main application entry point.
  */
 export function setupBaseHtmxEventListeners() {
-    document.body.addEventListener("htmx:beforeSwap", function(evt) {
-        if (evt.detail.xhr.status === 422) {
-            // allow 422 responses to swap as we are using this as a signal that
-            // a form was submitted with bad data and want to rerender with the
-            // errors
-            // set isError to false to avoid error logging in console
-            evt.detail.shouldSwap = true;
-            evt.detail.isError = false;
-        }
-    });
     document.addEventListener("htmx:afterSwap", (event) => {
         if (event.detail.target.id === "main-container") {
             initializeSubmissionForm();
