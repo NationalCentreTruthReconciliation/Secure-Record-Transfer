@@ -6,7 +6,7 @@ import {
     handleSubmissionGroupModalFormAfterSwap
 } from "../utils/htmx.js";
 import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
-import { setupContactInfoForm } from "./contactInfo.js";
+import { setupProfileContactInfoForm } from "./contactInfo.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 
 /**
@@ -27,7 +27,7 @@ export const initializeProfile = function() {
     }
 
     setupProfileForm(context);
-    setupContactInfoForm(context);
+    setupProfileContactInfoForm(context);
     initTabListeners();
     restoreTab();
     setupToastNotifications();
@@ -54,7 +54,7 @@ export const initializeProfile = function() {
         return setupProfileForm(context);
     };
 
-    window.setupContactInfoForm = () => {
-        return setupContactInfoForm(context);
+    window.setupProfileContactInfoForm = () => {
+        return setupProfileContactInfoForm(context);
     };
 };
