@@ -26,6 +26,10 @@ class Help(TemplateView):
         context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
         context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
         context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
+
+        context["MAX_TOTAL_UPLOAD_SIZE_MB"] = settings.MAX_TOTAL_UPLOAD_SIZE_MB
+        context["MAX_TOTAL_UPLOAD_COUNT"] = settings.MAX_TOTAL_UPLOAD_COUNT
+
         return context
 
 
