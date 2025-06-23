@@ -133,7 +133,7 @@ class ContactInfoFormMixin(forms.Form):
             ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
         ],
         initial="",
-        label="Province or state",
+        label=gettext("Province or state"),
     )
 
     other_province_or_state = forms.CharField(
