@@ -1,0 +1,18 @@
+{% load static %}
+{% load i18n %}
+<!-- DaisyUI Collapse Component for Accepted File Types -->
+<p class="text-sm text-gray-600 mb-2">
+    {%blocktrans%}
+                The following are the types of files that donors can submit using this application.
+                {% endblocktrans %}
+</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+    {% for category, extensions in ACCEPTED_FILE_FORMATS.items %}
+        <div class="bg-base-200 p-3 rounded-lg">
+            <div class="uppercase font-semibold opacity-60 text-primary text-sm mb-1">{{ category }}</div>
+            <div class="flex flex-wrap gap-1">
+                {% for ext in extensions %}<span class="badge badge-sm">{{ ext }}</span>{% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
