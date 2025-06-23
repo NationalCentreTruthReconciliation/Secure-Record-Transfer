@@ -32,17 +32,8 @@
                     {% endblocktrans %}
                 </div>
             </div>
-            <div class="flex-med-width-item mb-4">
-                <div class="collapse collapse-arrow border border-base-300 rounded-lg bg-base-100">
-                    <input type="checkbox"
-                           class="peer"
-                           aria-label="{% trans "Toggle accepted file types" %}" />
-                    <div class="collapse-title text-base font-medium flex items-center">
-                        <div class="text-2xl text-primary mb-4 mt-8">{% trans "Accepted File Types" %}</div>
-                    </div>
-                    {% include "includes/collapsable_accepted_file_formats.html" %}
-                </div>
-            </div>
+            <div class="text-2xl text-primary mb-4 mt-8">{% trans "Accepted File Types" %}</div>
+            {% include "includes/accepted_file_formats.html" %}
         {% endif %}
     </div>
 {% endblock content %}
