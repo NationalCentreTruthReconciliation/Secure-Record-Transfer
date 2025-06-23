@@ -6,8 +6,6 @@ from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.views.generic import TemplateView
 
-from recordtransfer.constants import HelpMessages
-
 
 class Index(TemplateView):
     """The homepage."""
@@ -28,7 +26,6 @@ class Help(TemplateView):
         context["source_types"] = SourceType.objects.all().exclude(name="Other").order_by("name")
         context["source_roles"] = SourceRole.objects.all().exclude(name="Other").order_by("name")
         context["rights_types"] = RightsType.objects.all().exclude(name="Other").order_by("name")
-        context["help_messages"] = HelpMessages.RIGHTS_INFO
         return context
 
 
