@@ -122,3 +122,8 @@ STATICFILES_DIRS = [
         "dist",
     ),
 ]
+
+# The E2E tests need access to the real base directory of the app
+APPLICATION_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+WEBPACK_LOADER["DEFAULT"]["LOADER_CLASS"] = "webpack_loader.loaders.FakeWebpackLoader"

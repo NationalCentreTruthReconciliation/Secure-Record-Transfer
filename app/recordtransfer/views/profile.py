@@ -19,10 +19,17 @@ from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
+from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import UserProfileForm
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import ProfileContactInfoForm
-from recordtransfer.models import InProgressSubmission, Submission, SubmissionGroup, User
+from recordtransfer.models import (
+    InProgressSubmission,
+    SiteSetting,
+    Submission,
+    SubmissionGroup,
+    User,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -196,7 +203,7 @@ def _paginated_table_view(
     if not request.htmx:
         return HttpResponse(status=400)
 
-    paginator = Paginator(queryset, settings.PAGINATE_BY)
+    paginator = Paginator(queryset, SiteSetting.get_value_int(SiteSettingKey.PAGINATE_BY))
     page_num = request.GET.get(QueryParameters.PAGINATE_QUERY_NAME, 1)
 
     try:

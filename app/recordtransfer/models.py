@@ -13,10 +13,11 @@ from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -25,7 +26,7 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from recordtransfer.enums import SubmissionStep
+from recordtransfer.enums import SiteSettingKey, SiteSettingType, SubmissionStep
 from recordtransfer.managers import (
     InProgressSubmissionManager,
     SubmissionQuerySet,
@@ -117,6 +118,276 @@ class User(AbstractUser):
             return bool(self.other_province_or_state)
 
         return True
+
+
+class SiteSetting(models.Model):
+    """A model to store configurable site settings that administrators can modify
+    through the Django admin interface without requiring code changes.
+
+    This model supports caching of settings values for improved performance.
+
+    Adding a New Setting
+    --------------------
+
+    To add a new setting to the database, follow these steps:
+
+    1. **Add a new entry to the SiteSettingKey enum class**:
+
+       Add your new setting key to the :class:`~recordtransfer.models.SiteSetting` enum in
+       `recordtransfer/enums.py`.
+       The key should be descriptive and follow existing naming conventions
+       (i.e., all uppercase with underscores). Include a
+       :class:`~recordtransfer.enums.SettingKeyMeta` with the value type, description, and optional
+       default value.
+
+       Example::
+
+           NEW_SETTING_NAME = SettingKeyMeta(
+               SiteSettingType.STR,
+               _("Description of what this setting controls."),
+               default_value="Default string value",
+           )
+
+    2. **Create a data migration**:
+
+       Create a Django data migration to add the setting to the database. The migration
+       should create a new :class:`~recordtransfer.models.SiteSetting` instance with the required
+       fields:
+
+       - ``key``: Must be unique and match the enum name (string)
+       - ``value``: The default value as a string (must use the enum's default_value if available)
+       - ``value_type``: Either "int" for integers or "str" for strings
+
+       Example migration for a string setting::
+
+           from django.db import migrations
+
+
+           def add_new_setting(apps, schema_editor):
+               SiteSetting = apps.get_model("recordtransfer", "SiteSetting")
+               SiteSetting.objects.get_or_create(
+                   key="NEW_SETTING_NAME",
+                   defaults={"value": "Default string value", "value_type": "str"},
+               )
+
+
+           class Migration(migrations.Migration):
+               dependencies = [
+                   ("recordtransfer", "XXXX_previous_migration"),
+               ]
+
+               operations = [
+                   migrations.RunPython(add_new_setting),
+               ]
+
+    3. **Validation requirements**:
+
+       - The ``key`` field must be unique across all settings
+       - For ``value_type`` "int": the ``value`` must be a valid string representation
+         of an integer (e.g., "42", "-1", "0")
+       - For ``value_type`` "str": the ``value`` can be any string
+       - ``change_date`` is auto-generated and ``changed_by`` does not need to be set
+
+    4. **Document the new setting**:
+
+       Add an entry for the new setting to ``docs/admin_guide/site_settings.rst``.
+
+    Removing a Setting
+    ------------------
+
+    To remove an existing setting from the database:
+
+    1. **Remove the key from the SiteSettingKey enum class**:
+
+       Delete the corresponding enum entry from the :class:`~recordtransfer.models.SiteSetting`
+       enum in `enums.py`.
+
+    2. **Create a data migration**:
+
+       Create a Django data migration to remove the setting from the database::
+
+           from django.db import migrations
+
+
+           def remove_old_setting(apps, schema_editor):
+               SiteSetting = apps.get_model("recordtransfer", "SiteSetting")
+               SiteSetting.objects.filter(key="OLD_SETTING_NAME").delete()
+
+
+           class Migration(migrations.Migration):
+               dependencies = [
+                   ("recordtransfer", "XXXX_previous_migration"),
+               ]
+
+               operations = [
+                   migrations.RunPython(remove_old_setting),
+               ]
+
+    3. **Update code references**:
+
+       Remove any code that references the old setting key.
+
+    4. **Update documentation**:
+
+       Remove the setting from ``docs/admin_guide/site_settings.rst``.
+
+    Retrieving Settings in Code
+    ---------------------------
+
+    Once a setting has been added to the database, retrieve it using the appropriate static method:
+
+    - **For string settings**::
+
+        value = SiteSetting.get_value_str(SiteSettingKey.SETTING_NAME)
+
+    - **For integer settings**::
+
+        value = SiteSetting.get_value_int(SiteSettingKey.SETTING_NAME)
+    """
+
+    key = models.CharField(
+        verbose_name=_("Setting Key"), max_length=255, unique=True, null=False, editable=False
+    )
+    value = models.TextField(
+        verbose_name=_("Setting Value"),
+        blank=False,
+        null=True,
+    )
+    value_type = models.CharField(
+        max_length=8,
+        choices=SiteSettingType.choices,
+        default=SiteSettingType.STR,
+        verbose_name=_("Setting value type"),
+        null=False,
+        editable=False,
+    )
+
+    change_date = models.DateTimeField(
+        auto_now=True, editable=False, verbose_name=_("Change date")
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        editable=False,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Changed by"),
+    )
+
+    def set_cache(self, value: Optional[Union[str, int]]) -> None:
+        """Cache the value of this setting."""
+        cache.set(self.key, value)
+
+    @staticmethod
+    def get_value_str(key: SiteSettingKey) -> Optional[str]:
+        """Get the value of a site setting of type :attr:`SettingType.STR` by its key.
+
+        Args:
+            key: The key of the setting to retrieve.
+
+        Returns:
+            The value of the setting as a string, cached if available, or fetched from the
+            database.
+
+        Raises:
+            ValidationError: If the setting is not of type :attr:`SettingType.STR`.
+        """
+        val = cache.get(key.name)
+        if val is not None:
+            return val
+        obj = SiteSetting.objects.get(key=key.name)
+
+        if obj.value_type != SiteSettingType.STR:
+            raise ValidationError(
+                f"Setting {key.name} is not of type STR, but of type {obj.value_type}"
+            )
+
+        obj.set_cache(obj.value)
+        return obj.value
+
+    @staticmethod
+    def get_value_int(key: SiteSettingKey) -> Optional[int]:
+        """Get the value of a site setting of type :attr:`SettingType.INT` by its key.
+
+        Args:
+            key: The key of the setting to retrieve.
+
+        Returns:
+            The value of the setting as an integer, cached if available, or fetched from the
+            database.
+
+        Raises:
+            ValidationError: If the setting is not of type :attr:`SettingType.INT`.
+        """
+        val = cache.get(key.name)
+        if val is not None:
+            return val
+
+        obj = SiteSetting.objects.get(key=key.name)
+
+        if obj.value_type != SiteSettingType.INT:
+            raise ValidationError(
+                f"Setting {key.name} is not of type INT, but of type {obj.value_type}"
+            )
+
+        return_value = None if obj.value is None else int(obj.value)
+
+        obj.set_cache(return_value)
+        return return_value
+
+    def reset_to_default(self, user: Optional[User] = None) -> None:
+        """Reset this setting to its default value as defined in the
+        :py:class:`~recordtransfer.enums.SiteSettingKey` enum.
+
+        Args:
+            user: The user who initiated the reset operation (optional).
+        """
+        try:
+            default_value = SiteSettingKey[self.key].default_value
+        except KeyError as exc:
+            raise ValueError(f"{self.key} is not a valid SiteSettingKey") from exc
+
+        self.value = default_value
+        self.change_date = timezone.now()
+        if user:
+            self.changed_by = user
+        self.save()
+
+    @property
+    def default_value(self) -> Optional[str]:
+        """Get the default value for this setting, if available. The default value is defined in
+        the :class:`~recordtransfer.enums.SiteSettingKey` enum, in the form of a string.
+        """
+        try:
+            return SiteSettingKey[self.key].default_value
+        except KeyError as exc:
+            raise ValueError(f"{self.key} is not a valid SiteSettingKey") from exc
+
+    def __str__(self) -> str:
+        """Return a human-readable representation of the setting."""
+        try:
+            return f"{self.key.replace('_', ' ').title()}"
+        except ValueError:
+            return f"Setting: {self.key}"
+
+
+@receiver(post_save, sender=SiteSetting)
+def update_cache_post_save(
+    sender: SiteSetting, instance: SiteSetting, created: bool, **kwargs
+) -> None:
+    """Update cached value when setting is saved, but not on creation."""
+    if created:
+        return
+
+    value = instance.value
+    if instance.value_type == SiteSettingType.INT:
+        try:
+            if value is not None:
+                value = int(value)
+        except ValueError as exc:
+            raise ValidationError(
+                f"Value for setting {instance.key} must be an integer, but got '{instance.value}'"
+            ) from exc
+    instance.set_cache(value)
 
 
 class UploadSession(models.Model):

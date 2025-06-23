@@ -1,9 +1,11 @@
+import os
 import tempfile
 from typing import ClassVar
 from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
-from django.test import tag
+from django.conf import settings
+from django.test import override_settings, tag
 from django.urls import reverse
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,6 +24,15 @@ def get_section_title(step: SubmissionStep) -> str:
 
 
 @tag("e2e")
+@override_settings(
+    WEBPACK_LOADER={
+        "DEFAULT": {
+            "STATS_FILE": os.path.join(
+                os.path.dirname(settings.APPLICATION_BASE_DIR), "dist", "webpack-stats.json"
+            ),
+        },
+    }
+)
 class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     """End-to-end tests for the submission form wizard."""
 

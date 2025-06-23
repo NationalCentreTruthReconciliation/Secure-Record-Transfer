@@ -59,3 +59,10 @@ export function setupRegistrationFormValidation() {
 export function setupLoginFormValidation() {
     setupFormValidation("id_login_button");
 }
+
+/**
+ * Initializes validation for the password reset form.
+ */
+export function setupPasswordResetFormValidation() {
+    setupFormValidation("id_reset_password_button");
+}
