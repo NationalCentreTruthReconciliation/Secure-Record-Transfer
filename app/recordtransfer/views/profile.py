@@ -18,6 +18,7 @@ from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
+from recordtransfer.emails import send_user_account_updated
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import ProfileContactInfoForm, SubmissionGroupForm, UserProfileForm
 from recordtransfer.models import (
@@ -95,6 +96,13 @@ class BaseUserProfileUpdateView(UpdateView):
             super().form_valid(form)
             if form.cleaned_data.get("new_password"):
                 update_session_auth_hash(self.request, form.instance)
+                context = {
+                    "subject": gettext("Password updated"),
+                    "changed_item": gettext("password"),
+                    "changed_status": gettext("updated"),
+                }
+                send_user_account_updated.delay(self.get_object(), context)
+
             context = self.get_context_data(form=form)
             response = self.render_to_response(context)
             return trigger_client_event(
