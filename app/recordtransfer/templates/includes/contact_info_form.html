@@ -32,10 +32,10 @@
                        class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
                        name="{{ form.address_line_1.name }}"
                        id="{{ form.address_line_1.id_for_label }}"
+                       value="{{ form.address_line_1.value|default:'' }}"
                        rows="3"
                        placeholder="{% trans "Enter street address" %}"
                        required>
-                {{ form.address_line_1.value|default:'' }}
                 {% if form.address_line_1.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.address_line_1.errors.0 %}</p>
                 {% endif %}
