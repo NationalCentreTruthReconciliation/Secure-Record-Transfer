@@ -74,6 +74,8 @@ class BaseUserProfileUpdateView(UpdateView):
 
     model = User
     success_url = reverse_lazy("recordtransfer:user_profile")
+    update_success_message = gettext("Updated successfully")
+    update_error_message = gettext("Could not update")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -84,14 +86,6 @@ class BaseUserProfileUpdateView(UpdateView):
     def get_object(self, queryset: Optional[QuerySet] = None) -> User:
         """Get the user object for the current request."""
         return cast(User, self.request.user)
-
-    def get_success_message(self) -> str:
-        """Return the success message for the specific form type."""
-        raise NotImplementedError("Subclasses must implement get_success_message")
-
-    def get_error_message(self) -> str:
-        """Return the error message for the specific form type."""
-        raise NotImplementedError("Subclasses must implement get_error_message")
 
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission, return updated form and trigger success event in
@@ -104,13 +98,13 @@ class BaseUserProfileUpdateView(UpdateView):
             context = self.get_context_data(form=form)
             response = self.render_to_response(context)
             return trigger_client_event(
-                response, "showSuccess", {"value": self.get_success_message()}
+                response, "showSuccess", {"value": self.update_success_message}
             )
         except Exception:
             LOGGER.exception("Failed to update user information for user %s", self.request.user.id)
             response = HttpResponse(status=500)
             return trigger_client_event(
-                response, "showError", {"value": gettext(self.get_error_message())}
+                response, "showError", {"value": gettext(self.update_error_message)}
             )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
@@ -128,14 +122,8 @@ class AccountInfoUpdateView(BaseUserProfileUpdateView):
 
     form_class = UserProfileForm
     template_name = "includes/account_info_form.html"
-
-    def get_success_message(self) -> str:
-        """Return a success message for account information updates."""
-        return "Account details updated."
-
-    def get_error_message(self) -> str:
-        """Return an error message for account information updates."""
-        return "Failed to update account information."
+    update_success_message = gettext("Account details updated.")
+    update_error_message = gettext("Failed to update account information.")
 
 
 class ContactInfoUpdateView(BaseUserProfileUpdateView):
@@ -143,14 +131,8 @@ class ContactInfoUpdateView(BaseUserProfileUpdateView):
 
     form_class = ProfileContactInfoForm
     template_name = "includes/contact_info_form.html"
-
-    def get_success_message(self) -> str:
-        """Return a success message for contact information updates."""
-        return "Contact information updated."
-
-    def get_error_message(self) -> str:
-        """Return an error message for contact information updates."""
-        return "Failed to update contact information."
+    update_success_message = gettext("Contact information updated.")
+    update_error_message = gettext("Failed to update contact information.")
 
 
 @require_http_methods(["GET", "DELETE"])
