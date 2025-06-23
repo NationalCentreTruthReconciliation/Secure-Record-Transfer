@@ -1,3 +1,4 @@
+import { setupHelpTooltips } from "../base/tooltip";
 import { setupFormset } from "./formset";
 import { setupSelectOtherToggle } from "./otherField";
 
@@ -22,6 +23,8 @@ export function setupRightsForm(context) {
             selectElement.id,
             `id_rights-${index}-rights_value`
         );
+
+        setupHelpTooltips();
 
         // Reset the selected value upon form creation
         selectElement.value = "";
