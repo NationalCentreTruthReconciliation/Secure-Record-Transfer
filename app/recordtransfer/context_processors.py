@@ -11,12 +11,12 @@ def signup_status(request: HttpRequest) -> dict[str, Any]:
     return {"SIGN_UP_ENABLED": settings.SIGN_UP_ENABLED}
 
 
-def file_upload_status(request: HttpRequest) -> dict[str, str]:
+def file_upload_status(request: HttpRequest) -> dict[str, Any]:
     """Add file upload status to template context."""
     return {"FILE_UPLOAD_ENABLED": settings.FILE_UPLOAD_ENABLED}
 
 
-def constants_context(request: HttpRequest) -> dict[str, Any]:
+def constants_context(request: HttpRequest) -> dict[str, str]:
     """Make constants available globally in all templates."""
     return {
         **constants.HtmlIds().asdict(),
