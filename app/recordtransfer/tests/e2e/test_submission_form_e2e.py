@@ -55,6 +55,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "description": "Test Description",
             "condition": "Test Condition",
             "preliminary_custodial_history": "Test Custodial History",
+
         },
         SubmissionStep.RIGHTS: {
             "section_title": get_section_title(SubmissionStep.RIGHTS),
@@ -305,6 +306,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             condition_input.send_keys(data["condition"])
             preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
+
         self.go_next_step()
 
     def complete_record_rights_step(self, required_only: bool = False) -> None:
@@ -504,6 +506,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
                     "Custodial history": data["preliminary_custodial_history"],
+
                 }
                 self._verify_field_values("recorddescription", fields)
 
