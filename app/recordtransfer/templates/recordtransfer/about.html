@@ -32,29 +32,17 @@
                     {% endblocktrans %}
                 </div>
             </div>
-            <div class="text-2xl text-primary mb-4 mt-8">{% trans "Accepted File Types" %}</div>
-            <p class="text-sm">
-                {% blocktrans %}
-                The following are the types of files that donors can submit using this application.
-                {% endblocktrans %}
-            </p>
-            <ul class="list bg-base-100 rounded-box shadow-md mt-5">
-                {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
-                    {% if extensions %}
-                        <li class="list-row">
-                            <div class="list-col-grow">
-                                <div class="uppercase font-semibold opacity-60">{{ group }} Files</div>
-                                <p class="list-col-wrap">
-                                    {% for extension in extensions %}
-                                        {{ extension }}
-                                        {% if not forloop.last %},{% endif %}
-                                    {% endfor %}
-                                </p>
-                            </div>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
+            <div class="flex-med-width-item mb-4">
+                <div class="collapse collapse-arrow border border-base-300 rounded-lg bg-base-100">
+                    <input type="checkbox"
+                           class="peer"
+                           aria-label="{% trans "Toggle accepted file types" %}" />
+                    <div class="collapse-title text-base font-medium flex items-center">
+                        <div class="text-2xl text-primary mb-4 mt-8">{% trans "Accepted File Types" %}</div>
+                    </div>
+                    {% include "includes/collapsable_accepted_file_formats.html" %}
+                </div>
+            </div>
         {% endif %}
     </div>
 {% endblock content %}
