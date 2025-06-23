@@ -28,12 +28,14 @@
         <div class="flex-1 space-y-3 md:space-y-4">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.address_line_1.label %}</legend>
-                <textarea class="textarea textarea-bordered textarea-sm md:textarea-md w-full bg-gray-50 text-gray-600"
-                          name="{{ form.address_line_1.name }}"
-                          id="{{ form.address_line_1.id_for_label }}"
-                          rows="3"
-                          placeholder="{% trans 'Enter street address' %}"
-                          required>{{ form.address_line_1.value|default:'' }}</textarea>
+                <input type="text"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                       name="{{ form.address_line_1.name }}"
+                       id="{{ form.address_line_1.id_for_label }}"
+                       rows="3"
+                       placeholder="{% trans "Enter street address" %}"
+                       required>
+                {{ form.address_line_1.value|default:'' }}
                 {% if form.address_line_1.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.address_line_1.errors.0 %}</p>
                 {% endif %}
