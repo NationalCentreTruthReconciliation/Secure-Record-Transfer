@@ -63,16 +63,3 @@ class OtherValues:
     def asdict(self) -> dict[str, str]:
         """Return the dataclass as a dictionary."""
         return dataclasses.asdict(self)
-
-
-@dataclasses.dataclass(frozen=True)
-class HelpMessages:
-    """Class to hold help messages used throughout the application."""
-
-    # Rights form help message
-    RIGHTS_INFO: str = (
-        " Depending on the records you are submitting, there may be specific rights that govern "
-        "the access of your records. The following is a brief description about the types of "
-        " rights that are available to be used. If none suit your needs, select Other in"
-        "the rights dropdown."
-    )
