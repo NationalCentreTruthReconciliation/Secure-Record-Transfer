@@ -53,8 +53,6 @@ export function setupRightsForm(context) {
 function setupRightsNoteToggle(rightsTypeId, rightsValueId) {
     const rightsTypeField = document.getElementById(rightsTypeId);
     const rightsValueField = document.getElementById(rightsValueId);
-
-    // Find the containing form element to properly handle the field visibility
     const formContainer = rightsValueField ? rightsValueField.closest(".flex-item") : null;
 
     /**
@@ -63,10 +61,8 @@ function setupRightsNoteToggle(rightsTypeId, rightsValueId) {
      */
     function updateVisibility() {
         if (rightsTypeField && rightsTypeField.value) {
-            // Show the value field when rights type has a selection
             if (formContainer) {formContainer.style.display = "";}
         } else {
-            // Hide the value field when no rights type is selected
             if (formContainer) {formContainer.style.display = "none";}
         }
     }
@@ -76,6 +72,5 @@ function setupRightsNoteToggle(rightsTypeId, rightsValueId) {
         rightsTypeField.addEventListener("change", updateVisibility);
     }
 
-    // Initialize visibility on page load
     updateVisibility();
 }
