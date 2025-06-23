@@ -138,12 +138,7 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_groupsubmission.html",
             title=gettext("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
-            info_message=gettext(
-                f"If you plan to submit multiple files that together exceed {settings.MAX_TOTAL_UPLOAD_COUNT} "
-                f"files or {settings.MAX_TOTAL_UPLOAD_SIZE_MB} MB, we recommend organizing them into a submission group. "
-                "Submission groups allow you to keep related submissions together. To do this, Select an existing group from the dropdown below or Create a new one. "
-                "When creating a new group, consider using a clear and consistent name format, such as YourLastName_YYYY-MM-DD, so you can easily identify and assign related submissions to the same group in the future."
-            ),
+            info_message=gettext(""),
         ),
         **(
             {
