@@ -18,6 +18,11 @@ export function setupRightsForm(context) {
             context["other_rights_type_id"],
         );
 
+        setupRightsNoteToggle(
+            selectElement.id,
+            `id_rights-${index}-rights_value`
+        );
+
         // Reset the selected value upon form creation
         selectElement.value = "";
         selectElement.dispatchEvent(new Event("change"));
@@ -30,5 +35,47 @@ export function setupRightsForm(context) {
             `id_rights-${index}-other_rights_type`,
             context["other_rights_type_id"],
         );
+
+        // Setup notes toggle for this specific form
+        setupRightsNoteToggle(
+            element.id,
+            `id_rights-${index}-rights_value`
+        );
     });
+}
+
+/**
+ * Sets up toggling the visibility of the rights value field based on the value of
+ * the rights type field with the same index.
+ * @param {string} rightsTypeId - The ID of the rights type select element.
+ * @param {string} rightsValueId - The ID of the rights value textarea element.
+ */
+function setupRightsNoteToggle(rightsTypeId, rightsValueId) {
+    const rightsTypeField = document.getElementById(rightsTypeId);
+    const rightsValueField = document.getElementById(rightsValueId);
+
+    // Find the containing form element to properly handle the field visibility
+    const formContainer = rightsValueField ? rightsValueField.closest(".flex-item") : null;
+
+    /**
+     * Updates the visibility of the rights value field based on whether
+     * the rights type field has a value.
+     */
+    function updateVisibility() {
+        if (rightsTypeField && rightsTypeField.value) {
+            // Show the value field when rights type has a selection
+            if (formContainer) {formContainer.style.display = "";}
+        } else {
+            // Hide the value field when no rights type is selected
+            if (formContainer) {formContainer.style.display = "none";}
+        }
+    }
+
+    // Add event listener for the rights type field
+    if (rightsTypeField) {
+        rightsTypeField.addEventListener("change", updateVisibility);
+    }
+
+    // Initialize visibility on page load
+    updateVisibility();
 }
