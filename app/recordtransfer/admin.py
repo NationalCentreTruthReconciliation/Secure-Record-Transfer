@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 from caais.export import ExportVersion
 from django.conf import settings
@@ -10,24 +10,25 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
-from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext
 
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
     SubmissionModelForm,
 )
+from recordtransfer.forms.admin_forms import SiteSettingModelForm
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
     BaseUploadedFile,
     Job,
     PermUploadedFile,
+    SiteSetting,
     Submission,
     SubmissionGroup,
     TempUploadedFile,
@@ -67,14 +68,26 @@ def linkify(field_name: str) -> Callable:
 
 @receiver(pre_delete, sender=Job)
 def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
-    """FileFields are not deleted automatically after Django 1.11, instead this receiver does it."""
+    """FileFields are not deleted automatically after Django 1.11, instead this receiver does
+    it.
+    """
     instance.attached_file.delete(False)
 
 
 @display(description=gettext("Upload Size"))
 def format_upload_size(obj: BaseUploadedFile) -> str:
     """Format file size of an BaseUploadedFile instance for display."""
+    if not obj.file_upload or not obj.exists:
+        return "N/A"
     return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
+
+@display(description=gettext("File Link"))
+def file_url(obj: BaseUploadedFile) -> SafeText:
+    """Return the URL to access the file, or a message if the file was removed."""
+    if not obj.file_upload or not obj.exists:
+        return mark_safe(gettext("File was removed"))
+    return format_html('<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name)
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -127,7 +140,7 @@ class ReadOnlyInline(admin.TabularInline):
         return False
 
 
-@admin.register(TempUploadedFile, PermUploadedFile)
+@admin.register(PermUploadedFile)
 class UploadedFileAdmin(ReadOnlyAdmin):
     """Admin for the UploadedFile model.
 
@@ -137,10 +150,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    class Media:
-        js = ("admin_uploadedfile.bundle.js",)
-
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), "file_upload"]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), file_url]
 
     search_fields = [
         "name",
@@ -169,8 +179,8 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = ["name", format_upload_size, "exists"]
-    readonly_fields = ["exists", format_upload_size]
+    fields = [file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", file_url, format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -184,8 +194,8 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = ["name", format_upload_size, "exists"]
-    readonly_fields = ["exists", format_upload_size]
+    fields = [file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", file_url, format_upload_size]
 
 
 @admin.register(UploadSession)
@@ -222,14 +232,24 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "expires_at",
     ]
 
-    inlines = [
-        TempUploadedFileInline,
-        PermUploadedFileInline,
-    ]
-
     ordering = [
         "-started_at",
     ]
+
+    def get_inlines(self, request, obj=None) -> list:
+        """Return the inlines to display for the UploadSession."""
+        if obj is None:
+            return []
+        if obj.status in {
+            UploadSession.SessionStatus.CREATED,
+            UploadSession.SessionStatus.UPLOADING,
+            UploadSession.SessionStatus.EXPIRED,
+        }:
+            return [TempUploadedFileInline]
+        elif obj.status == UploadSession.SessionStatus.STORED:
+            return [PermUploadedFileInline]
+        else:
+            return [TempUploadedFileInline, PermUploadedFileInline]
 
     def file_count(self, obj: UploadSession) -> Union[int, str]:
         """Display the number of files uploaded to the session."""
@@ -689,3 +709,67 @@ class CustomUserAdmin(UserAdmin):
                     gettext("Staff privileges have been removed from your account.")
                 )
         return message_list
+
+
+@admin.register(SiteSetting)
+class SiteSettingAdmin(admin.ModelAdmin):
+    """Admin for the SiteSetting model.
+
+    Permissions:
+        - add: Not allowed
+        - change: Allowed
+        - delete: Only by superusers
+    """
+
+    list_display = ["key", "value_type", "value", "change_date"]
+    search_fields = ["key", "value"]
+    readonly_fields = ["key", "value_type", "change_date", "changed_by"]
+
+    form = SiteSettingModelForm
+
+    change_form_template = "admin/sitesetting_change_form.html"
+
+    def save_model(self, request, obj: SiteSetting, form, change):
+        """Override save_model to set the changed_by field."""
+        obj.changed_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        """Add custom context to the change form and skip validation on reset."""
+        extra_context = extra_context or {}
+        if object_id:
+            obj: Optional[SiteSetting] = self.get_object(request, object_id)
+            if obj:
+                extra_context["setting_default_value"] = obj.default_value
+
+        # Skip form validation if "_reset" is in POST
+        if request.method == "POST" and "_reset" in request.POST:
+            if object_id:
+                obj = self.get_object(request, object_id)
+                if obj:
+                    self.reset_to_default(request, obj)
+            return HttpResponseRedirect(request.get_full_path())
+
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
+        """Reset the site setting to its default value."""
+        try:
+            obj.reset_to_default(request.user)
+            messages.success(
+                request,
+                f'Setting "{obj.key}" has been reset to its default value.',
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                f'Failed to reset setting "{obj.key}": {e!s}',
+            )
+
+    def has_add_permission(self, request) -> bool:
+        """Prevent adding new site settings through the admin interface."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Prevent deletion of site settings through the admin interface."""
+        return False

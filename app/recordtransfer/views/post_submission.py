@@ -1,7 +1,6 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
 import logging
-import warnings
 from typing import Any, Optional
 
 from caais.export import ExportVersion
@@ -17,7 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds
@@ -157,58 +156,6 @@ class SubmissionGroupDetailView(UpdateView):
                 "value": gettext("There was an error updating the group"),
             },
         )
-
-
-class SubmissionGroupCreateView(CreateView):
-    """Creates a new submission group.
-
-    .. deprecated::
-        This class will be deprecated soon. Use
-        views.profile.SubmissionGroupModalCreateView instead to create new submission groups.
-    """
-
-    model = SubmissionGroup
-    form_class = SubmissionGroupForm
-    template_name = "includes/submission_group_form.html"
-    success_message = gettext("Group created")
-    error_message = gettext("There was an error creating the group")
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.http_method_names = ["post"]
-        warnings.warn(
-            "SubmissionGroupCreateView is deprecated and will be removed soon. "
-            "Use views.profile.SubmissionGroupModalCreateView instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-    def get_form_kwargs(self) -> dict[str, Any]:
-        """Pass User instance to form to initialize it."""
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle valid form submission."""
-        super().form_valid(form)
-        return JsonResponse(
-            {
-                "message": self.success_message,
-                "status": "success",
-                "group": {
-                    "uuid": str(self.object.uuid),
-                    "name": self.object.name,
-                    "description": self.object.description,
-                },
-            },
-            status=200,
-        )
-
-    def form_invalid(self, form: BaseModelForm) -> HttpResponse:
-        """Handle invalid form submission."""
-        error_message = next(iter(form.errors.values()))[0]
-        return JsonResponse({"message": error_message, "status": "error"}, status=400)
 
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:

@@ -4,39 +4,57 @@
     {% trans "About" %}
 {% endblock title %}
 {% block content %}
-    <div class="title-text">{% trans "About" %}</div>
-    <p>
-        {% blocktrans %}
-        The NCTR Record Transfer Portal allows people to send records to the National Centre for Truth
-        and Reconciliation (NCTR) Archives securely over the internet. For small record submissions, this
-        is the preferred method of sending records to the NCTR Archives.
-        {% endblocktrans %}
-    </p>
-    {% if FILE_UPLOAD_ENABLED %}
-        <div class="title-text margin-top-25px">{% trans "Maximum Submission Size" %}</div>
-        <p>
-            {% blocktrans %}
-            Submissions made through the transfer portal are subject to the maximum submission size.
-            You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
-            {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB of files</b>. Any <b>one file may not exceed
-            {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. If you would like to submit <i>more</i> than this
-            amount, please split your submission into multiple parts, and use the group form to group similar
-            submissions together so our archivists know your submissions are related.
-            {% endblocktrans %}
-        </p>
-        <div class="title-text margin-top-25px">{% trans "Accepted File Types" %}</div>
-        <p>
-            {% blocktrans %}
-            The following are the types of files that donors can submit using this application.
-            {% endblocktrans %}
-        </p>
-        {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
-            {% if extensions %}
-                <div class="medium-text">{{ group }} Files</div>
-                <ul>
-                    {% for extension in extensions %}<li>{{ extension }}</li>{% endfor %}
-                </ul>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="mb-2 text-4xl text-primary">{% trans "About" %}</div>
+        <div class="card">
+            <div class="card-body">
+                <p class="text-lg leading-relaxed text-base-content">
+                    {% blocktrans %}
+                    The NCTR Record Transfer Portal allows people to send records to the National Centre for Truth
+                    and Reconciliation (NCTR) Archives securely over the internet. For small record submissions, this
+                    is the preferred method of sending records to the NCTR Archives.
+                    {% endblocktrans %}
+                </p>
+            </div>
+        </div>
+        {% if FILE_UPLOAD_ENABLED %}
+            <div class="text-2xl text-primary mb-4 mt-8">{% trans "Maximum Submission Size" %}</div>
+            <div class="alert !p-5">
+                <i class="fas fa-info-circle pointer-events-none"></i>
+                <div class="text-sm">
+                    {% blocktrans %}
+                    Submissions made through the transfer portal are subject to the maximum submission size.
+                    You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
+                    {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB of files</b>. Any <b>one file may not exceed
+                    {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. If you would like to submit <i>more</i> than this
+                    amount, please split your submission into multiple parts, and use the group form to group similar
+                    submissions together so our archivists know your submissions are related.
+                    {% endblocktrans %}
+                </div>
+            </div>
+            <div class="text-2xl text-primary mb-4 mt-8">{% trans "Accepted File Types" %}</div>
+            <p class="text-sm">
+                {% blocktrans %}
+                The following are the types of files that donors can submit using this application.
+                {% endblocktrans %}
+            </p>
+            <ul class="list bg-base-100 rounded-box shadow-md mt-5">
+                {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
+                    {% if extensions %}
+                        <li class="list-row">
+                            <div class="list-col-grow">
+                                <div class="uppercase font-semibold opacity-60">{{ group }} Files</div>
+                                <p class="list-col-wrap">
+                                    {% for extension in extensions %}
+                                        {{ extension }}
+                                        {% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 {% endblock content %}
