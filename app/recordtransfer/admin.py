@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 from caais.export import ExportVersion
 from django.conf import settings
@@ -12,7 +12,7 @@ from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -22,11 +22,13 @@ from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
     SubmissionModelForm,
 )
+from recordtransfer.forms.admin_forms import SiteSettingModelForm
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
     BaseUploadedFile,
     Job,
     PermUploadedFile,
+    SiteSetting,
     Submission,
     SubmissionGroup,
     TempUploadedFile,
@@ -707,3 +709,67 @@ class CustomUserAdmin(UserAdmin):
                     gettext("Staff privileges have been removed from your account.")
                 )
         return message_list
+
+
+@admin.register(SiteSetting)
+class SiteSettingAdmin(admin.ModelAdmin):
+    """Admin for the SiteSetting model.
+
+    Permissions:
+        - add: Not allowed
+        - change: Allowed
+        - delete: Only by superusers
+    """
+
+    list_display = ["key", "value_type", "value", "change_date"]
+    search_fields = ["key", "value"]
+    readonly_fields = ["key", "value_type", "change_date", "changed_by"]
+
+    form = SiteSettingModelForm
+
+    change_form_template = "admin/sitesetting_change_form.html"
+
+    def save_model(self, request, obj: SiteSetting, form, change):
+        """Override save_model to set the changed_by field."""
+        obj.changed_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        """Add custom context to the change form and skip validation on reset."""
+        extra_context = extra_context or {}
+        if object_id:
+            obj: Optional[SiteSetting] = self.get_object(request, object_id)
+            if obj:
+                extra_context["setting_default_value"] = obj.default_value
+
+        # Skip form validation if "_reset" is in POST
+        if request.method == "POST" and "_reset" in request.POST:
+            if object_id:
+                obj = self.get_object(request, object_id)
+                if obj:
+                    self.reset_to_default(request, obj)
+            return HttpResponseRedirect(request.get_full_path())
+
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
+        """Reset the site setting to its default value."""
+        try:
+            obj.reset_to_default(request.user)
+            messages.success(
+                request,
+                f'Setting "{obj.key}" has been reset to its default value.',
+            )
+        except Exception as e:
+            messages.error(
+                request,
+                f'Failed to reset setting "{obj.key}": {e!s}',
+            )
+
+    def has_add_permission(self, request) -> bool:
+        """Prevent adding new site settings through the admin interface."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Prevent deletion of site settings through the admin interface."""
+        return False
