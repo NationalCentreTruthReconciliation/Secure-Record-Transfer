@@ -3,7 +3,6 @@
 import logging
 from typing import Any, Optional, cast
 
-from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
@@ -20,9 +19,7 @@ from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
 from recordtransfer.enums import SiteSettingKey
-from recordtransfer.forms import UserProfileForm
-from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.user_forms import ProfileContactInfoForm
+from recordtransfer.forms import ProfileContactInfoForm, SubmissionGroupForm, UserProfileForm
 from recordtransfer.models import (
     InProgressSubmission,
     SiteSetting,
