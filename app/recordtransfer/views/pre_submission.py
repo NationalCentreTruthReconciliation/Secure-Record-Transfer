@@ -587,6 +587,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    "ACCEPTED_FILE_FORMATS": settings.ACCEPTED_FILE_FORMATS,
                 }
             )
 

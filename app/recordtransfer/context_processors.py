@@ -21,5 +21,4 @@ def constants_context(request: HttpRequest) -> dict[str, Any]:
     return {
         **constants.HtmlIds().asdict(),
         **constants.QueryParameters().asdict(),
-        "ACCEPTED_FILE_FORMATS": settings.ACCEPTED_FILE_FORMATS,
     }
