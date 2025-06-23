@@ -56,7 +56,7 @@ class User(AbstractUser):
     )
     address_line_2 = models.CharField(
         max_length=100,
-        blank=False,
+        blank=True,
         null=True,
         help_text=_("Unit number, RPO, PO BOX (optional)")
     )
