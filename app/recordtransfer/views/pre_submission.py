@@ -97,10 +97,10 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.SOURCE_INFO: SubmissionStepMeta(
             template="recordtransfer/submission_form_sourceinfo.html",
-            title=gettext("Source Information (Optional)"),
+            title=gettext("Record Source Information (Optional)"),
             form=forms.SourceInfoForm,
             info_message=gettext(
-                "Select Yes if you would like to manually enter source information"
+                "Are you submitting records on behalf of another person or organization? Select Yes to enter information about them."
             ),
         ),
         SubmissionStep.RECORD_DESCRIPTION: SubmissionStepMeta(

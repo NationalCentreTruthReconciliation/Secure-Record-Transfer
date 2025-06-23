@@ -45,7 +45,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "source_type": "Individual",
             "source_role": "Donor",
             "source_note": "Test Source Note",
-            "preliminary_custodial_history": "Test Custodial History",
         },
         SubmissionStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(SubmissionStep.RECORD_DESCRIPTION),
@@ -54,6 +53,9 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "date_is_approximated": "✓ Yes",
             "language": "English",
             "description": "Test Description",
+            "condition": "Test Condition",
+            "preliminary_custodial_history": "Test Custodial History",
+
         },
         SubmissionStep.RIGHTS: {
             "section_title": get_section_title(SubmissionStep.RIGHTS),
@@ -226,12 +228,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         if not required_only:
             source_note_input = driver.find_element(By.NAME, "sourceinfo-source_note")
-            preliminary_custodial_history = driver.find_element(
-                By.NAME, "sourceinfo-preliminary_custodial_history"
-            )
 
             source_note_input.send_keys(data["source_note"])
-            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
         self.go_next_step()
 
@@ -296,6 +294,18 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         language_input.send_keys(data["language"])
         description_of_contents_input.send_keys(data["description"])
+
+        if not required_only:
+            condition_input = driver.find_element(
+                By.NAME, "recorddescription-condition_assessment"
+            )
+            preliminary_custodial_history = driver.find_element(
+                By.NAME, "recorddescription-preliminary_custodial_history"
+            )
+
+            condition_input.send_keys(data["condition"])
+            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
+
 
         self.go_next_step()
 
@@ -484,7 +494,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Source type": "Individual",
                     "Source role": "Donor",
                     "Source notes": data["source_note"],
-                    "Custodial history": data["preliminary_custodial_history"],
                 }
                 self._verify_field_values("sourceinfo", fields)
 
@@ -495,6 +504,9 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Date of materials": data["date_of_materials"],
                     "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
+                    "Condition of files": data["condition"],
+                    "Custodial history": data["preliminary_custodial_history"],
+
                 }
                 self._verify_field_values("recorddescription", fields)
 
