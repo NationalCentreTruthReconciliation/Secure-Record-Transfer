@@ -698,7 +698,7 @@ class RightsFormSet(BaseFormSet):
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
-        self.forms[0].empty_permitted = True  # Changed to True to make it optional
+        self.forms[0].empty_permitted = True
 
 
 class RightsForm(SubmissionForm):
