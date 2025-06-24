@@ -3,8 +3,6 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const glob = require("glob");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const sharp = require("sharp");
-const BundleTracker = require("webpack-bundle-tracker");
-
 
 console.info("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE);
 
@@ -67,7 +65,7 @@ module.exports = {
     },
     entry: {
         images: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}") // eslint-disable-line
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.js",
@@ -95,11 +93,8 @@ module.exports = {
         admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
     },
     output: {
-        filename: "js/[name].[chunkhash:8].js",
-        chunkFilename: "js/[name].[chunkhash:8].chunk.js",
-        path: path.resolve(__dirname, "dist/"),
-        publicPath: "/static/",
-
+        filename: "[name].bundle.js", // Output JS files
+        path: path.resolve(__dirname, "dist/")
     },
     module: {
         rules: [
@@ -113,28 +108,16 @@ module.exports = {
                 generator: {
                     filename: "[name][ext]"
                 }
-            }, // Add this new rule for favicon and other icon files
-            {
-                test: /\.ico$/i,
-                type: "asset/resource",
-                generator: {
-                    filename: "[name][ext]" // Match your template path
-                }
             },
         ]
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: "css/[name].[contenthash:8].css",
+            filename: "[name].css" // Output CSS file
         }),
-
         new WebPConverterPlugin({
             quality: 80
         }),
-        new BundleTracker({
-            path: path.resolve(__dirname, "dist"),
-            filename: "webpack-stats.json"
-        })
     ],
     optimization: {
         minimizer: [

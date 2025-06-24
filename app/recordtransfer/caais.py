@@ -7,29 +7,23 @@ import logging
 from typing import Optional, Type
 
 from caais.models import *
+from django.conf import settings
 from django.db.models import Model
 from django.utils.translation import gettext
-
-from recordtransfer.enums import SiteSettingKey
-from recordtransfer.models import SiteSetting
 
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def get_setting_key(field_name: str) -> Optional[SiteSettingKey]:
-    """Generate a SiteSettingKey enum member for a field name, if it exists.
+get_setting_name = lambda field_name: f"CAAIS_DEFAULT_{field_name.upper().strip()}"
+get_setting_name.__doc__ = """Generates a setting name in the :py:data:`django.conf.settings`
+object that may contain a default value for some field.
 
-    Args:
-        field_name (str): The name of the field on the model or the form
+Args:
+    field_name (str): The name of the field on the model or the form
 
-    Returns:
-        Optional[SiteSettingKey]: A SiteSettingKey enum member if it exists, None otherwise
-    """
-    setting_name = f"CAAIS_DEFAULT_{field_name.upper().strip()}"
-    try:
-        return SiteSettingKey[setting_name]
-    except KeyError:
-        return None
+Returns:
+    (str): A setting name for the default value, in the form CAAIS_DEFAULT_FIELD_NAME
+"""
 
 
 def map_form_to_metadata(form_data: dict) -> Metadata:
@@ -294,9 +288,7 @@ def add_submission_event(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE is guaranteed to have a value
-    submission_type_name = SiteSetting.get_value_str(
-        SiteSettingKey.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
-    )
+    submission_type_name = settings.CAAIS_DEFAULT_SUBMISSION_EVENT_TYPE
 
     event_type, created = EventType.objects.get_or_create(name=submission_type_name)
 
@@ -307,8 +299,8 @@ def add_submission_event(metadata: Metadata):
             submission_type_name,
         )
 
-    event_agent = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT)
-    event_note = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE)
+    event_agent = getattr(settings, "CAAIS_DEFAULT_SUBMISSION_EVENT_AGENT", "")
+    event_note = getattr(settings, "CAAIS_DEFAULT_SUBMISSION_EVENT_NOTE", "")
 
     Event.objects.create(
         metadata=metadata,
@@ -331,7 +323,7 @@ def add_date_of_creation(metadata: Metadata):
         metadata (Metadata): The top-level metadata object to link any new objects to
     """
     # The CAAIS_DEFAULT_CREATION_TYPE is guaranteed to have a value
-    creation_type_name = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_CREATION_TYPE)
+    creation_type_name = settings.CAAIS_DEFAULT_CREATION_TYPE
 
     creation_type, created = CreationOrRevisionType.objects.get_or_create(name=creation_type_name)
 
@@ -342,8 +334,8 @@ def add_date_of_creation(metadata: Metadata):
             creation_type_name,
         )
 
-    creation_agent = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_CREATION_AGENT)
-    creation_note = SiteSetting.get_value_str(SiteSettingKey.CAAIS_DEFAULT_CREATION_NOTE)
+    creation_agent = getattr(settings, "CAAIS_DEFAULT_CREATION_AGENT", "")
+    creation_note = getattr(settings, "CAAIS_DEFAULT_CREATION_NOTE", "")
 
     DateOfCreationOrRevision.objects.create(
         metadata=metadata,
@@ -368,6 +360,10 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model):
 
     If the model has relational fields that are not to a metadata object or to
     an :py:class:`~caais.models.AbstractTerm`, then a :code:`ValueError` is thrown.
+
+    Default values can be set by creating settings in
+    the module set by DJANGO_SETTINGS_MODULE named CAAIS_DEFAULT_FIELD_NAME, where
+    FIELD_NAME is the uppercase-d field name of the model and the form field.
 
     Args:
         form_data (dict): The cleaned form data dictionary
@@ -405,10 +401,9 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model):
     CaaisModel.objects.create(metadata=metadata, **model_field_data)
 
 
-def str_or_default(form_data: dict, field_name: str, default: str = "") -> str:
-    """Return form data if it exists, or the setting from
-    :py:class:`~recordtransfer.models.SiteSetting` if it exists, or the default value, in that
-    order of priority.
+def str_or_default(form_data: dict, field_name: str, default: str = ""):
+    """Return form data if it exists, or the setting in the :py:data:`django.conf.settings` object
+    if it exists, or the default value, in that order of priority.
 
     Args:
         form_data (dict):
@@ -420,18 +415,15 @@ def str_or_default(form_data: dict, field_name: str, default: str = "") -> str:
             or is empty, and if the setting also does not exist or is empty.
 
     Returns:
-        str:
+        (str):
             The data from the form, or the value from the setting, or the default
-            value, in order of priority.
+            value, in order of priority returned.
     """
-    setting_value = ""
-    setting_key = get_setting_key(field_name)
-    if setting_key:
-        try:
-            setting_value = SiteSetting.get_value_str(setting_key)
-        except SiteSetting.DoesNotExist:
-            setting_value = ""
-    return form_data.get(field_name, "") or setting_value or default
+    return (
+        form_data.get(field_name, "")
+        or getattr(settings, get_setting_name(field_name), "")
+        or default
+    )
 
 
 def term_or_default(
@@ -441,10 +433,10 @@ def term_or_default(
     default: Optional[AbstractTerm] = None,
 ) -> Optional[AbstractTerm]:
     """If the name of a term can be found in the form data or in the
-    :py:class:`~recordtransfer.models.SiteSetting` model, return an instance of the term for the
-    given TermClass with that name. If the term did not exist, it is created.
+    :py:data:`django.conf.settings` object, return an instance of the term for the given
+    TermClass with that name. If the term did not exist, it is created.
 
-    If no name can be found in the form data or in :py:class:`~recordtransfer.models.SiteSetting`,
+    If no name can be found in the form data or in :py:data:`django.conf.settings`,
     the default value is returned.
 
     Args:
@@ -457,7 +449,7 @@ def term_or_default(
             settings
         default (Optional[AbstractTerm]):
             A term (or None) to return if there is no form data or there is no
-            default set in :py:class:`~recordtransfer.models.SiteSetting`
+            default set in :code:`django.conf.settings`
 
     Returns:
         (Optional[AbstractTerm]):

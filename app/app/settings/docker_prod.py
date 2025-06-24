@@ -97,3 +97,9 @@ LOGGING = {
         },
     },
 }
+
+# Storage settings
+# Hash static files for cache busting
+STORAGES["staticfiles"] = {
+    "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+}

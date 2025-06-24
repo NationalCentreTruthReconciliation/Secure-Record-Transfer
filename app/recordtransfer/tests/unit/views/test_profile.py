@@ -441,8 +441,8 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertNotIn("fa-exclamation-circle text-warning", content)
         self.assertNotIn("Submission is expiring soon", content)
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
-    def test_in_progress_submission_table_display(self, mock_get_value_int: MagicMock) -> None:
+    @override_settings(PAGINATE_BY=3)
+    def test_in_progress_submission_table_display(self) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
         """
@@ -455,8 +455,8 @@ class TestInProgressSubmissionTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
-    def test_in_progress_submission_table_pagination(self, mock_get_value_int: MagicMock) -> None:
+    @override_settings(PAGINATE_BY=2)
+    def test_in_progress_submission_table_pagination(self) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
         for i in range(3):
@@ -514,8 +514,8 @@ class TestSubmissionGroupTableView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
-    def test_submission_group_table_display(self, mock_get_value_int: MagicMock) -> None:
+    @override_settings(PAGINATE_BY=3)
+    def test_submission_group_table_display(self) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
         for i in range(3):
@@ -530,8 +530,8 @@ class TestSubmissionGroupTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
-    def test_submission_group_table_pagination(self, mock_get_value_int: MagicMock) -> None:
+    @override_settings(PAGINATE_BY=2)
+    def test_submission_group_table_pagination(self) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups
         for i in range(3):

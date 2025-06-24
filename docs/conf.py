@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath("../app"))
 os.environ["DJANGO_SETTINGS_MODULE"] = "app.settings.test"
 os.environ["BAG_STORAGE_FOLDER"] = tempfile.gettempdir()
 os.environ["UPLOAD_STORAGE_FOLDER"] = tempfile.gettempdir()
+os.environ["ARCHIVIST_EMAIL"] = "archivist@example.com"
 django.setup()
 
 
