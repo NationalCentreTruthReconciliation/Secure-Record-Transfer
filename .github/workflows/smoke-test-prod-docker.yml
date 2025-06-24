@@ -1,4 +1,4 @@
-name: Production Smoke Test (via compose.prod.yml)
+name: Production Smoke Test Docker (via compose.prod.yml)
 
 on:
   pull_request:
