@@ -142,7 +142,8 @@ class SignUpFormTest(TestCase):
 class UserAccountInfoFormTest(TestCase):
     """Tests for the UserAccountInfoForm."""
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """Set up test data."""
         self.test_username = "testuser"
         self.test_first_name = "Test"
         self.test_last_name = "User"
@@ -159,7 +160,8 @@ class UserAccountInfoFormTest(TestCase):
             gets_notification_emails=self.test_gets_notification_emails,
         )
 
-    def test_form_valid_name_change(self):
+    def test_form_valid_name_change(self) -> None:
+        """Test that the form can change the user's name successfully."""
         form_data = {
             "first_name": "New",
             "last_name": "Name",
@@ -170,7 +172,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertEqual(user.first_name, "New")
         self.assertEqual(user.last_name, "Name")
 
-    def test_form_accented_name_change(self):
+    def test_form_accented_name_change(self) -> None:
+        """Test that the form can handle accented characters in names."""
         form_data = {
             "first_name": "Áccéntéd",
             "last_name": "Námé",
@@ -181,7 +184,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertEqual(user.first_name, "Áccéntéd")
         self.assertEqual(user.last_name, "Námé")
 
-    def test_form_invalid_first_name(self):
+    def test_form_invalid_first_name(self) -> None:
+        """Test that the form rejects invalid first names."""
         form_data = {
             "first_name": "123",
             "last_name": self.test_last_name,
@@ -190,7 +194,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("first_name", form.errors)
 
-    def test_form_invalid_last_name(self):
+    def test_form_invalid_last_name(self) -> None:
+        """Test that the form rejects invalid last names."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": "123",
@@ -199,7 +204,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("last_name", form.errors)
 
-    def test_form_valid_password_change(self):
+    def test_form_valid_password_change(self) -> None:
+        """Test that the form can change the user's password successfully."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -212,7 +218,8 @@ class UserAccountInfoFormTest(TestCase):
         user = form.save()
         self.assertTrue(user.check_password("new_password123"))
 
-    def test_form_invalid_current_password(self):
+    def test_form_invalid_current_password(self) -> None:
+        """Test that the form rejects an invalid current password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -224,7 +231,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("current_password", form.errors)
 
-    def test_form_new_passwords_do_not_match(self):
+    def test_form_new_passwords_do_not_match(self) -> None:
+        """Test that the form rejects new passwords that do not match."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -236,7 +244,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
-    def test_form_missing_current_password(self):
+    def test_form_missing_current_password(self) -> None:
+        """Test that the form requires the current password for password changes."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -247,7 +256,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("current_password", form.errors)
 
-    def test_form_missing_new_password(self):
+    def test_form_missing_new_password(self) -> None:
+        """Test that the form requires a new password for password changes."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -258,7 +268,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("new_password", form.errors)
 
-    def test_form_missing_confirm_new_password(self):
+    def test_form_missing_confirm_new_password(self) -> None:
+        """Test that the form requires confirmation of the new password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -269,7 +280,8 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
-    def test_form_new_password_is_same_as_old_password(self):
+    def test_form_new_password_is_same_as_old_password(self) -> None:
+        """Test that the form rejects a new password that is the same as the old password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -281,13 +293,15 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("new_password", form.errors)
 
-    def test_form_empty(self):
+    def test_form_empty(self) -> None:
+        """Test that the form is invalid when no data is provided."""
         form_data = {}
         form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("Form is empty.", form.errors["__all__"])
 
-    def test_form_email_notification_initial_false(self):
+    def test_form_email_notification_initial_false(self) -> None:
+        """"Test that the form can set email notification preference to False."""
         self.user.gets_notification_emails = False
         self.user.save()
 
@@ -301,7 +315,8 @@ class UserAccountInfoFormTest(TestCase):
         user = form.save()
         self.assertTrue(user.gets_notification_emails)
 
-    def test_form_email_notification_initial_true(self):
+    def test_form_email_notification_initial_true(self) -> None:
+        """Test that the form can set email notification preference to True."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -312,7 +327,8 @@ class UserAccountInfoFormTest(TestCase):
         user = form.save()
         self.assertFalse(user.gets_notification_emails)
 
-    def test_form_no_changes(self):
+    def test_form_no_changes(self) -> None:
+        """Test that the form raises an error when no fields have been changed."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
