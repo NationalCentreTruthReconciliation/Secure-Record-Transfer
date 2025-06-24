@@ -62,14 +62,15 @@ jobs:
           timeout=30
           elapsed=0
           echo "Waiting for application to be ready (will time out after ${timeout}s)..."
-          until [ $elapsed -ge $timeout ] || docker compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
+          podman-compose -f compose.prod.yml logs app > app_logs.txt 2>&1
+          until [ $elapsed -ge $timeout ] || grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || grep -q "Booting worker with pid" app_logs.txt; do
             sleep 5
             elapsed=$((elapsed+5))
             echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
           done
           if [ $elapsed -ge $timeout ]; then
             echo "Timeout reached. Application did not start properly."
-            docker compose -f compose.prod.yml logs app
+            podman-compose -f compose.prod.yml logs app
             exit 1
           fi
           echo "Application is ready!"
