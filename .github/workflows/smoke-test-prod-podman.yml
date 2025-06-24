@@ -26,16 +26,9 @@ jobs:
 
       - name: Set up Podman and dependencies
         run: |
-            # Add the official Podman repository for latest version
-            . /etc/os-release
-            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-            curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key" | sudo apt-key add -
-
-            # Update and install Podman
             sudo apt-get update
             sudo apt-get -y install podman
 
-            # Install uv and use it to install dependencies including podman-compose
             pip install uv
             uv sync --extra dev --extra podman
 
@@ -43,10 +36,7 @@ jobs:
             podman --version
             podman-compose --version
 
-            # Configure Podman
             echo -e "[engine]\nvolumes_dir=\"/home/runner/.local/share/containers/storage/volumes\"" | sudo tee /etc/containers/containers.conf
-
-            # Test Podman
             podman info
 
       - name: Start containers
