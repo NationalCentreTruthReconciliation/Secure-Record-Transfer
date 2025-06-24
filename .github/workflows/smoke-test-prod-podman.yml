@@ -42,6 +42,27 @@ jobs:
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d
 
+      - name: Wait for database to be ready
+        run: |
+            echo "Waiting for database to be ready..."
+            timeout=90
+            elapsed=0
+
+            # Wait for database to start accepting connections
+            until [ $elapsed -ge $timeout ] || podman exec $(podman ps -q --filter name=db) mysql --no-defaults -u records-user -precords-password -e "SELECT 1" &>/dev/null; do
+            sleep 10
+            elapsed=$((elapsed+10))
+            echo "Database still initializing... ($elapsed/$timeout seconds)"
+            done
+
+            if [ $elapsed -ge $timeout ]; then
+            echo "Database initialization timed out"
+            podman-compose -f compose.prod.yml logs db
+            exit 1
+            fi
+
+            echo "Database is ready"
+
       - name: Wait for app to start
         run: |
           # Increased timeout for Podman which may be slightly slower
