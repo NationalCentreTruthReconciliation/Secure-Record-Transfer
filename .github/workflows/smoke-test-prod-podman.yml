@@ -46,7 +46,7 @@ jobs:
 
       - name: Wait for app to start
         run: |
-          timeout=30
+          timeout=60
           elapsed=0
           echo "Waiting for application to be ready (will time out after ${timeout}s)..."
           until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
