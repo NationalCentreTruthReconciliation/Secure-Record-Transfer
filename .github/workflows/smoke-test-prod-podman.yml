@@ -24,29 +24,28 @@ jobs:
         run: |
           echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
 
-      - name: Set up Podman and dependencies
+      - name: Set up Podman
         run: |
-            sudo apt-get update
-            sudo apt-get -y install podman
+          sudo apt-get update
+          sudo apt-get -y install podman
 
-            pip install uv
-            uv sync --extra dev --extra podman
-            # Install podman-compose directly and make sure it's in PATH
-            pip install podman-compose==1.3.0
+          # Install podman-compose
+          pip install podman-compose
 
-            # Verify installations
-            podman --version
-            podman-compose --version
+          # Add to PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-            echo -e "[engine]\nvolumes_dir=\"/home/runner/.local/share/containers/storage/volumes\"" | sudo tee /etc/containers/containers.conf
-            podman info
+          # Verify installations
+          podman --version
+          which podman-compose
 
       - name: Start containers
-        run: podman-compose -f compose.prod.yml up -d --build
+        run: podman-compose -f compose.prod.yml up -d
 
       - name: Wait for app to start
         run: |
-          timeout=60
+          # Increased timeout for Podman which may be slightly slower
+          timeout=45
           elapsed=0
           echo "Waiting for application to be ready (will time out after ${timeout}s)..."
           until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
