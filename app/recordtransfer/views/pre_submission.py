@@ -97,10 +97,10 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.SOURCE_INFO: SubmissionStepMeta(
             template="recordtransfer/submission_form_sourceinfo.html",
-            title=gettext("Source Information (Optional)"),
+            title=gettext("Record Source Information (Optional)"),
             form=forms.SourceInfoForm,
             info_message=gettext(
-                "Select Yes if you would like to manually enter source information"
+                "Are you submitting records on behalf of another person or organization? Select Yes to enter information about them."
             ),
         ),
         SubmissionStep.RECORD_DESCRIPTION: SubmissionStepMeta(
@@ -123,15 +123,15 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
-            title=gettext("Other Identifiers (Optional)"),
+            title=gettext("Identifiers (Optional)"),
             form=formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
                 extra=1,
             ),
             info_message=gettext(
-                "This step is optional, if you do not have any other IDs associated with the "
-                "records, go to the next step"
+                "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, you may enter them here. "
+                "This step is optional. If you do not have any identifiers associated with the records, you may proceed to the next step."
             ),
         ),
         SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(

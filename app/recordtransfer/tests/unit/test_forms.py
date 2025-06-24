@@ -334,6 +334,7 @@ class RecordDescriptionFormTest(TestCase):
             "date_of_materials": "2020-01-01",
             "language_of_material": "English",
             "preliminary_scope_and_content": "Test content description",
+            "preliminary_custodial_history": "History note.",
         }
 
     def test_valid_single_date(self) -> None:
@@ -457,7 +458,6 @@ class SourceInfoFormTest(TestCase):
                 "enter_manual_source_info": "no",
                 "source_name": "My New Name",
                 "source_note": "This is a test note that will be overwritten.",
-                "preliminary_custodial_history": "Preliminary history note.",
             },
             defaults=self.form_defaults,
         )
@@ -466,7 +466,6 @@ class SourceInfoFormTest(TestCase):
         self.assertEqual(form.cleaned_data["source_type"], self.source_type)
         self.assertEqual(form.cleaned_data["source_role"], self.source_role)
         self.assertEqual(form.cleaned_data["source_note"], "")
-        self.assertEqual(form.cleaned_data["preliminary_custodial_history"], "")
 
     def test_valid_manual_source_info(self) -> None:
         """Case where the user manually enters valid source information."""
@@ -480,7 +479,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": new_source_role.pk,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -489,7 +487,6 @@ class SourceInfoFormTest(TestCase):
         self.assertEqual(form.cleaned_data["source_type"], new_source_type)
         self.assertEqual(form.cleaned_data["source_role"], new_source_role)
         self.assertEqual(form.cleaned_data["source_note"], "Test Note")
-        self.assertEqual(form.cleaned_data["preliminary_custodial_history"], "History note.")
 
     def test_valid_manual_source_info_with_other(self) -> None:
         """Case where the user manually enters valid source information including Other fields."""
@@ -505,7 +502,6 @@ class SourceInfoFormTest(TestCase):
                 "source_role": other_source_role.pk,
                 "other_source_role": "My Other Source Role",
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -516,7 +512,6 @@ class SourceInfoFormTest(TestCase):
         self.assertEqual(form.cleaned_data["source_role"], other_source_role)
         self.assertEqual(form.cleaned_data["other_source_role"], "My Other Source Role")
         self.assertEqual(form.cleaned_data["source_note"], "Test Note")
-        self.assertEqual(form.cleaned_data["preliminary_custodial_history"], "History note.")
 
     def test_invalid_name(self) -> None:
         """Case where the user forgot to specify a name."""
@@ -530,7 +525,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": new_source_role.pk,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -549,7 +543,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": None,
                 "source_role": new_source_role.pk,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -568,7 +561,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": None,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
