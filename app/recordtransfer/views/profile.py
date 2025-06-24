@@ -112,7 +112,7 @@ class BaseUserProfileUpdateView(UpdateView):
             LOGGER.exception("Failed to update user information for user %s", self.request.user.id)
             response = HttpResponse(status=500)
             return trigger_client_event(
-                response, "showError", {"value": gettext(self.update_error_message)}
+                response, "showError", {"value": self.update_error_message}
             )
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
