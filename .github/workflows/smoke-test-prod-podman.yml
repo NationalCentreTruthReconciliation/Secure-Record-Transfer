@@ -79,16 +79,15 @@ jobs:
 
             echo "App initialization detected, waiting for Gunicorn to start..."
 
-            # Wait additional time for Gunicorn to start after seeing ">> Starting app"
             sleep 15
 
             podman-compose -f compose.prod.yml logs app > app_logs.txt 2>&1
 
             if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || grep -q "Booting worker with pid" app_logs.txt; then
-            echo "Application is ready!"
-            exit 0
+                echo "Application is ready!"
+                exit 0
             else
-            echo "Application startup could not be confirmed."
+                echo "Application startup could not be confirmed."
             exit 1
             fi
 
