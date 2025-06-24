@@ -89,4 +89,4 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: docker compose -f compose.prod.yml down -v
+        run: podman-compose -f compose.prod.yml down -v
