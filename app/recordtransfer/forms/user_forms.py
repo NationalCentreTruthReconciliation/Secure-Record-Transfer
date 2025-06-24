@@ -229,11 +229,11 @@ class UserAccountInfoForm(forms.ModelForm):
             self.data["confirm_new_password"] = ""
 
 
-class ProfileContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
+class UserContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
     """ModelForm version of ContactInfoFormMixin for profile editing."""
 
     class Meta:
-        """Meta class for ProfileContactInfoForm."""
+        """Meta class for UserContactInfoForm."""
 
         model = User
         fields: ClassVar[list[str]] = [

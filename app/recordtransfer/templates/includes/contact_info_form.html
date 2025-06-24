@@ -4,7 +4,7 @@
       hx-target="#contact-info-form"
       hx-swap="innerHTML"
       hx-select="#contact-info-form"
-      hx-on::after-request="setupProfileContactInfoForm(event);">
+      hx-on::after-request="setupUserContactInfoForm(event);">
     {% csrf_token %}
     <!-- Phone Number Section -->
     <div class="flex mb-4 w-full">

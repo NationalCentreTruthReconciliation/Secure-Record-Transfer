@@ -5,7 +5,7 @@ import {
     handleSubmissionGroupModalFormBeforeSwap,
     handleSubmissionGroupModalFormAfterSwap
 } from "../utils/htmx.js";
-import { setupProfileContactInfoForm } from "./contactInfo.js";
+import { setupUserContactInfoForm } from "./contactInfo.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 
 /**
@@ -26,7 +26,7 @@ export const initializeProfile = function() {
     }
 
     setupProfileForm(context);
-    setupProfileContactInfoForm(context);
+    setupUserContactInfoForm(context);
     initTabListeners();
     restoreTab();
 
@@ -51,7 +51,7 @@ export const initializeProfile = function() {
         return setupProfileForm(context);
     };
 
-    window.setupProfileContactInfoForm = () => {
-        return setupProfileContactInfoForm(context);
+    window.setupUserContactInfoForm = () => {
+        return setupUserContactInfoForm(context);
     };
 };

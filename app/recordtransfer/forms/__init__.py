@@ -20,7 +20,7 @@ from recordtransfer.forms.submission_forms import (
 )
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import (
-    ProfileContactInfoForm,
+    UserContactInfoForm,
     SignUpForm,
     UserAccountInfoForm,
 )
@@ -33,7 +33,7 @@ __all__ = [
     "GroupSubmissionForm",
     "OtherIdentifiersForm",
     "OtherIdentifiersFormSet",
-    "ProfileContactInfoForm",
+    "UserContactInfoForm",
     "RecordDescriptionForm",
     "ReviewForm",
     "RightsForm",

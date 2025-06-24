@@ -21,7 +21,7 @@ from django_htmx.http import trigger_client_event
 from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
-    ProfileContactInfoForm,
+    UserContactInfoForm,
     SubmissionGroupForm,
     UserAccountInfoForm,
 )
@@ -41,7 +41,7 @@ class UserProfile(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         """Render the user profile page."""
         account_info_form = UserAccountInfoForm(instance=request.user)
-        contact_info_form = ProfileContactInfoForm(instance=request.user)
+        contact_info_form = UserContactInfoForm(instance=request.user)
         context = {
             "account_info_form": account_info_form,
             "contact_info_form": contact_info_form,
@@ -140,7 +140,7 @@ class AccountInfoUpdateView(BaseUserProfileUpdateView):
 class ContactInfoUpdateView(BaseUserProfileUpdateView):
     """View to update user contact information such as email and phone number."""
 
-    form_class = ProfileContactInfoForm
+    form_class = UserContactInfoForm
     template_name = "includes/contact_info_form.html"
     update_success_message = gettext("Contact information updated.")
     update_error_message = gettext("Failed to update contact information.")
