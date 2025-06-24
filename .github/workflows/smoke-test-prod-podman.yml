@@ -60,22 +60,50 @@ jobs:
 
       - name: Wait for app to start
         run: |
-          timeout=30
-          elapsed=0
-          echo "Waiting for application to be ready (will time out after ${timeout}s)..."
-          podman-compose -f compose.prod.yml logs app > app_logs.txt 2>&1
-          until [ $elapsed -ge $timeout ] || grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || grep -q "Booting worker with pid" app_logs.txt; do
+            timeout=60
+            elapsed=0
+            echo "Waiting for application to be ready (will time out after ${timeout}s)..."
+            # First wait for ">> Starting app" which appears early
+            until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q ">> Starting app"; do
+
             sleep 5
             elapsed=$((elapsed+5))
-            echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
-          done
-          if [ $elapsed -ge $timeout ]; then
-            echo "Timeout reached. Application did not start properly."
+            echo "Waiting for initial app startup... ($elapsed/$timeout seconds elapsed)"
+            done
+            if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. Application did not start initialization."
             podman-compose -f compose.prod.yml logs app
-            exit 1
-          fi
-          echo "Application is ready!"
 
+            exit 1
+            fi
+            echo "✅ App initialization detected, waiting for Gunicorn to start..."
+            # Wait additional time for Gunicorn to start after seeing ">> Starting app"
+            sleep 15
+            # Now capture logs which should include Gunicorn startup messages
+            # Using 2>&1 to capture both stdout and stderr
+            podman-compose -f compose.prod.yml logs app > app_logs.txt 2>&1
+
+            # Check if Gunicorn messages are present in the captured logs
+            if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || grep -q "Booting worker with pid" app_logs.txt; then
+            echo "✅ Gunicorn is listening on port 8000"
+            echo "Application is ready!"
+            exit 0
+            else
+            # If log detection fails, fall back to HTTP check
+            echo "⚠️ Gunicorn startup messages not found in logs, trying HTTP check..."
+            # Show what we captured for debugging
+            echo "Contents of log file (last 20 lines):"
+            tail -20 app_logs.txt
+            if curl -s --connect-timeout 2 http://localhost:1337/ > /dev/null; then
+                echo "✅ Application is responding to HTTP requests!"
+                echo "Application is ready!"
+                exit 0
+            else
+                echo "Timeout reached. Application did not start properly."
+                cat app_logs.txt
+                exit 1
+            fi
+            fi
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
         run: |
