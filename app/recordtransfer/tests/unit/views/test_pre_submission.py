@@ -160,7 +160,7 @@ class SubmissionFormWizardTests(TestCase):
             response = self.client.post(self.url, submit_data, follow=True)
             self.assertEqual(200, response.status_code)
 
-            if "form" in response.context:
+            if response.context and "form" in response.context:
                 self.assertFalse(response.context["form"].errors)
         self.assertTrue(self.user.submission_set.exists())
         if response:

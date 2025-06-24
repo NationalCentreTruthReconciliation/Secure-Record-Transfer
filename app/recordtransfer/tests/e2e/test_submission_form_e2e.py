@@ -152,6 +152,20 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver = self.driver
         driver.find_element(By.ID, "form-previous-button").click()
 
+    def continue_without_saving_contact_info_modal(self) -> None:
+        """Click on "Continue without saving" in the Contact Information modal."""
+        driver = self.driver
+        # Wait for the modal to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
+        )
+        # Wait for the continue without saving button to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
+        )
+        # Click the button to continue without saving
+        driver.find_element(By.ID, "modal-continue-without-saving").click()
+
     def go_to_review_step(self) -> None:
         """Go to the review step in the form."""
         driver = self.driver
@@ -450,6 +464,10 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
+
+        # Continue without saving contact info to profile when prompted
+        self.continue_without_saving_contact_info_modal()
+
         self.complete_source_information_step()
         self.complete_record_description_step()
         self.complete_record_rights_step()
@@ -634,6 +652,9 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         # Go to Source Information step
         self.go_next_step()
+
+        # Continue without saving contact info to profile when prompted
+        self.continue_without_saving_contact_info_modal()
 
         # Wait for the next step to load
         WebDriverWait(driver, 5).until(
