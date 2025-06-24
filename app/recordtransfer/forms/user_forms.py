@@ -230,7 +230,7 @@ class UserAccountInfoForm(forms.ModelForm):
 
 
 class UserContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
-    """ModelForm version of ContactInfoFormMixin for profile editing."""
+    """ModelForm version of ContactInfoFormMixin for editing a User's contact information."""
 
     class Meta:
         """Meta class for UserContactInfoForm."""
