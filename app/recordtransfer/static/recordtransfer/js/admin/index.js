@@ -1,6 +1,8 @@
 import { setupSelectOtherToggle } from "../utils/otherField.js";
 import { setupPhoneNumberMask } from "../utils/phoneNumberMask.js";
 
+console.log("Initializing admin page setup...");
+
 document.addEventListener("DOMContentLoaded", () => {
     let context = null;
     const contextElement = document.getElementById("py_context_admin");
@@ -11,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     context = JSON.parse(contextElement.textContent);
     if (!context) {
-        console.error("Context not available to set up admin page.");
         return;
     }
 

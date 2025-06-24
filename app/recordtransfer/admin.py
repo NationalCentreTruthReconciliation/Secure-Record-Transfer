@@ -652,6 +652,12 @@ class CustomUserAdmin(UserAdmin):
         SubmissionGroupInline,
     ]
 
+    class Media:
+        js = (
+            "vendors.bundle.js",
+            "admin_recordtransfer.bundle.js",
+        )
+
     def has_change_permission(self, request, obj=None):
         if not obj:
             return True
