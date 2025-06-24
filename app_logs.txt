@@ -414,3 +414,7 @@ Deleting 'recordtransfer/img/uofm_logo.svg'
 
 410 static files copied to '/opt/secure-record-transfer/app/static'.
 >> Starting app
+[2025-06-24 16:58:05 +0000] [1] [INFO] Starting gunicorn 23.0.0
+[2025-06-24 16:58:05 +0000] [1] [INFO] Listening at: http://0.0.0.0:8000 (1)
+[2025-06-24 16:58:05 +0000] [1] [INFO] Using worker: sync
+[2025-06-24 16:58:05 +0000] [4] [INFO] Booting worker with pid: 4

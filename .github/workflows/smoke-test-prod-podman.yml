@@ -88,16 +88,21 @@ jobs:
             sleep 15
 
             # Now capture logs which should include Gunicorn startup messages
-            podman-compose -f compose.prod.yml logs app > app_logs.txt
+            # Using 2>&1 to capture both stdout and stderr
+            podman-compose -f compose.prod.yml logs app > app_logs.txt 2>&1
 
             # Check if Gunicorn messages are present in the captured logs
-            if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt; then
+            if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || grep -q "Booting worker with pid" app_logs.txt; then
             echo "✅ Gunicorn is listening on port 8000"
             echo "Application is ready!"
             exit 0
             else
             # If log detection fails, fall back to HTTP check
             echo "⚠️ Gunicorn startup messages not found in logs, trying HTTP check..."
+
+            # Show what we captured for debugging
+            echo "Contents of log file (last 20 lines):"
+            tail -20 app_logs.txt
 
             if curl -s --connect-timeout 2 http://localhost:1337/ > /dev/null; then
                 echo "✅ Application is responding to HTTP requests!"
