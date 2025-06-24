@@ -44,74 +44,9 @@ jobs:
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d --build
 
-      - name: Wait for database to be ready
-        run: |
-            echo "Waiting for database to initialize..."
-            timeout=180  # Increased to 3 minutes
-            elapsed=0
-            db_ready=false
-
-            until [ $elapsed -ge $timeout ] || [ "$db_ready" = true ]; do
-            # Check if MySQL shows "ready for start up" message first
-            if podman-compose -f compose.prod.yml logs db | grep -q "MySQL init process done. Ready for start up"; then
-                echo "✅ MySQL initialization complete, waiting for container to be fully running..."
-
-                # Keep waiting until the container status changes from (starting) to fully running
-                until podman ps --filter name=db | grep -q "Up" && ! podman ps --filter name=db | grep -q "(starting)"; do
-                echo "⏳ MySQL container still in starting state, waiting..."
-                sleep 10
-                elapsed=$((elapsed+10))
-
-                if [ $elapsed -ge $timeout ]; then
-                    echo "❌ Timeout waiting for MySQL to fully start"
-                    break
-                fi
-                done
-
-                echo "✅ MySQL container is now fully running"
-
-                # Give MySQL a moment to start accepting connections after container is fully up
-                echo "Waiting 10 more seconds for MySQL to be ready for connections..."
-                sleep 10
-                db_ready=true
-                break
-            fi
-
-            sleep 5
-            elapsed=$((elapsed+5))
-            echo "DB still initializing... ($elapsed/$timeout seconds)"
-            done
-
-            if [ $elapsed -ge $timeout ]; then
-            echo "❌ Database initialization timed out. Logs:"
-            podman-compose -f compose.prod.yml logs db
-            podman ps -a
-            exit 1
-            fi
-
-            # Quick check to see if MySQL is responding
-            echo "Testing MySQL connection..."
-            max_attempts=5
-            for attempt in $(seq 1 $max_attempts); do
-            echo "Connection attempt $attempt/$max_attempts"
-            if podman exec secure-record-transfer_db_1 mysqladmin ping -h localhost -u root --silent; then
-                echo "✅ MySQL is responding to ping requests!"
-                break
-            elif [ $attempt -eq $max_attempts ]; then
-                echo "❌ MySQL is not responding after $max_attempts attempts"
-                podman-compose -f compose.prod.yml logs db
-                exit 1
-            else
-                echo "⚠️ MySQL ping failed, retrying in 5 seconds..."
-                sleep 5
-            fi
-            done
-
-            echo "✅ Database is ready! Proceeding to app startup."
-
       - name: Wait for app to start
         run: |
-          timeout=30
+          timeout=60
           elapsed=0
           echo "Waiting for application to be ready (will time out after ${timeout}s)..."
           until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
