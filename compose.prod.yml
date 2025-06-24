@@ -16,7 +16,7 @@ services:
       test: redis-cli --raw incr ping
       interval: 1m00s
       timeout: 5s
-      retries: 5x
+      retries: 5
       start_period: 30s
     volumes:
       - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:z
@@ -46,7 +46,7 @@ services:
       target: prod
       dockerfile: Containerfile
       args:
-        WEBPACK_MODE: production
+          WEBPACK_MODE: production
     image: secure-record-transfer-prod
     command: python manage.py rqworker default
     restart: unless-stopped
