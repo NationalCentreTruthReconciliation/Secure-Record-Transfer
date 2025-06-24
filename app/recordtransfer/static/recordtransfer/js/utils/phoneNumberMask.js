@@ -12,10 +12,9 @@ export function setupPhoneNumberMask() {
     );
 
     phoneInputs.forEach(input => {
-        // Create IMask instance for phone number
         IMask(input, {
             mask: "+0 (000) 000-0000",
-            lazy: false, // Show mask immediately
+            lazy: true, // Only show mask when user starts typing
             placeholderChar: "_"
         });
     });
