@@ -66,13 +66,18 @@ jobs:
       - name: Wait for app to start
         run: |
             # Increased timeout for Podman which may be slightly slower
-            timeout=60  # Increased from 45
+            timeout=60
             elapsed=0
             echo "Waiting for application to be ready (will time out after ${timeout}s)..."
 
             # Try different patterns to detect app startup
             until [ $elapsed -ge $timeout ]; do
-            if podman-compose -f compose.prod.yml logs app | grep -E '(Listening at: http://0.0.0.0:8000|Booting worker with pid)' > /dev/null; then
+            # Capture logs in a variable
+            app_logs=$(podman-compose -f compose.prod.yml logs app)
+
+            # Check for startup patterns
+            if echo "$app_logs" | grep -q "Listening at: http://0.0.0.0:8000" || \
+                echo "$app_logs" | grep -q "Booting worker with pid"; then
                 echo "✅ Application startup detected!"
 
                 # Wait a moment for the app to fully initialize
@@ -91,6 +96,14 @@ jobs:
                 fi
             fi
 
+            # After 30 seconds, try an alternative detection approach
+            if [ $elapsed -ge 30 ]; then
+                if curl -s --connect-timeout 2 http://localhost:1337/ > /dev/null; then
+                echo "✅ Application is responding to HTTP requests despite log detection failure!"
+                exit 0
+                fi
+            fi
+
             sleep 5
             elapsed=$((elapsed+5))
             echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
@@ -105,7 +118,6 @@ jobs:
             echo "Timeout reached. Application did not start properly."
             podman-compose -f compose.prod.yml logs app
             exit 1
-
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
         run: |
