@@ -23,47 +23,42 @@ class UserAdminForm(ContactInfoFormMixin, UserChangeForm):
         model = User
         fields = "__all__"
 
+    CONTACT_FIELDS: ClassVar[list[str]] = [
+        "phone_number",
+        "address_line_1",
+        "city",
+        "province_or_state",
+        "postal_or_zip_code",
+        "country",
+    ]
+
+    READONLY_FIELDS: ClassVar[list[str]] = ["date_joined", "last_login"]
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         # Make contact info fields not required for admin
-        for field_name in [
-            "phone_number",
-            "address_line_1",
-            "city",
-            "province_or_state",
-            "postal_or_zip_code",
-            "country",
-        ]:
+        for field_name in self.CONTACT_FIELDS:
             if field_name in self.fields:
                 self.fields[field_name].required = False
+
+        # Set readonly fields
+        for field_name in self.READONLY_FIELDS:
+            self.fields[field_name].disabled = True
+            self.fields[field_name].widget = forms.DateTimeInput(attrs={"readonly": True})
+            self.fields[field_name].required = False
 
     def clean(self) -> dict[str, Any]:
         """Override clean to call both parent clean methods and enforce group validation."""
         cleaned_data = super().clean()
 
-        # Required contact fields that must all be present if any are present
-        required_contact_fields = [
-            "phone_number",
-            "address_line_1",
-            "city",
-            "province_or_state",
-            "postal_or_zip_code",
-            "country",
-        ]
-
         # All contact fields (including optional ones)
-        all_contact_fields = [
-            *required_contact_fields,
-            "address_line_2",
-            "other_province_or_state",
-        ]
+        all_contact_fields = [*self.CONTACT_FIELDS, "address_line_2", "other_province_or_state"]
 
         # Check if any contact field has a value
-        has_any_contact_data = any(cleaned_data.get(field) for field in all_contact_fields)
-
-        if has_any_contact_data:
-            # If any contact field is filled, all required fields must be filled
-            for field_name in required_contact_fields:
+        if any(cleaned_data.get(field) for field in all_contact_fields):
+            # Validate required contact fields
+            for field_name in self.CONTACT_FIELDS:
                 if not cleaned_data.get(field_name):
                     self.add_error(
                         field_name,
