@@ -3,6 +3,7 @@
 import logging
 from typing import Any, Optional, cast
 
+from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet

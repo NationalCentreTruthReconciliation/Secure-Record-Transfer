@@ -1,6 +1,6 @@
 """Forms specific to the recordtransfer admin site."""
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
