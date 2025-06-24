@@ -47,22 +47,41 @@ jobs:
       - name: Wait for database to be ready
         run: |
             echo "Waiting for database to initialize..."
-            timeout=60
+            timeout=90  # Increased timeout
             elapsed=0
-            until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs db | grep -q "port: 3306.*ready for connections"; do
+            db_ready=false
+
+            until [ $elapsed -ge $timeout ] || [ "$db_ready" = true ]; do
+            # Check for either of the MySQL ready messages
+            if podman-compose -f compose.prod.yml logs db | grep -q "MySQL init process done. Ready for start up" || \
+                podman-compose -f compose.prod.yml logs db | grep -q "port: 3306.*ready for connections"; then
+                echo "✅ Database initialization detected!"
+                db_ready=true
+                # Wait a couple of seconds for MySQL to actually start listening
+                sleep 5
+                break
+            fi
+
             sleep 5
             elapsed=$((elapsed+5))
             echo "DB still initializing... ($elapsed/$timeout seconds)"
             done
 
             if [ $elapsed -ge $timeout ]; then
-            echo "Database initialization timed out. Logs:"
+            echo "❌ Database initialization timed out. Logs:"
             podman-compose -f compose.prod.yml logs db
             exit 1
             fi
 
-            echo "Database is ready!"
+            # Verify the database is actually accepting connections
+            echo "Testing database connection..."
+            if ! podman exec $(podman ps -q --filter name=db) mysql -u records-user -p'records-password' -h localhost -e "SELECT 1;" > /dev/null 2>&1; then
+            echo "❌ Database is not accepting connections. Additional logs:"
+            podman-compose -f compose.prod.yml logs db
+            exit 1
+            fi
 
+            echo "✅ Database is ready and accepting connections!"
       - name: Wait for app to start
         run: |
             echo "Waiting for application to be ready (checking actual container status)..."
