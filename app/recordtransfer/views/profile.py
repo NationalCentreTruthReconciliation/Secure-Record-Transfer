@@ -21,9 +21,9 @@ from django_htmx.http import trigger_client_event
 from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
-    UserContactInfoForm,
     SubmissionGroupForm,
     UserAccountInfoForm,
+    UserContactInfoForm,
 )
 from recordtransfer.models import (
     InProgressSubmission,
