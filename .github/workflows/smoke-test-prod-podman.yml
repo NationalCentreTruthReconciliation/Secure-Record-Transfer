@@ -47,7 +47,7 @@ jobs:
       - name: Wait for database to be ready
         run: |
             echo "Waiting for database to initialize..."
-            timeout=90
+            timeout=120  # Increased timeout
             elapsed=0
             db_ready=false
 
@@ -57,9 +57,9 @@ jobs:
                 podman-compose -f compose.prod.yml logs db | grep -q "port: 3306.*ready for connections"; then
                 echo "✅ Database initialization detected!"
                 db_ready=true
-                # Wait a longer time for MySQL to actually start listening (increased from 5s to 20s)
+                # Wait a longer time for MySQL to actually start listening
                 echo "Waiting for MySQL to start accepting connections..."
-                sleep 20
+                sleep 30  # Even longer wait time
                 break
             fi
 
@@ -74,8 +74,17 @@ jobs:
             exit 1
             fi
 
+            # Check if MySQL service is actually running
+            echo "Checking if MySQL service is running..."
+            if ! podman-compose -f compose.prod.yml ps | grep -q "db.*Up"; then
+            echo "❌ MySQL container is not running properly:"
+            podman-compose -f compose.prod.yml ps
+            podman-compose -f compose.prod.yml logs db
+            exit 1
+            fi
+
             # Multiple connection attempts with backoff
-            max_attempts=5
+            max_attempts=10  # Increased attempts
             attempt=0
             connected=false
 
@@ -84,7 +93,7 @@ jobs:
             attempt=$((attempt+1))
             echo "Connection attempt $attempt of $max_attempts..."
 
-            if podman exec $(podman ps -q --filter name=db) mysql -u records-user -p'records-password' -h localhost -e "SELECT 1;" > /dev/null 2>&1; then
+            if podman exec $(podman ps -q --filter name=db) mysql --no-defaults -u records-user -p'records-password' -h localhost -e "SELECT 1;" > /dev/null 2>&1; then
                 echo "✅ Database connection successful!"
                 connected=true
             else
@@ -96,12 +105,16 @@ jobs:
             if [ "$connected" = false ]; then
             echo "❌ Database is not accepting connections after $max_attempts attempts. Additional logs:"
             podman-compose -f compose.prod.yml logs db
-            podman exec $(podman ps -q --filter name=db) ps aux
-            podman network inspect $(podman network ls -q)
+            echo "Container listing:"
+            podman ps -a
+            echo "Network information:"
+            podman network ls
+            echo "Docker container IP addresses:"
+            podman inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(podman ps -q)
             exit 1
             fi
 
-            echo "✅ Database is ready and accepting connections!"      # The port number is set in the compose.prod.yml file
+            echo "✅ Database is ready and accepting connections!"
       - name: Check homepage status
         run: |
             response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
