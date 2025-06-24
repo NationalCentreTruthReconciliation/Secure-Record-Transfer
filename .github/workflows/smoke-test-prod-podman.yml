@@ -35,7 +35,7 @@ jobs:
           which podman-compose
 
       - name: Start containers
-        run: docker compose -f compose.prod.yml up -d
+        run: podman-compose -f compose.prod.yml up -d
 
       - name: Wait for database to be ready
         run: |
