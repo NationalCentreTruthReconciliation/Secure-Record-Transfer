@@ -65,106 +65,50 @@ jobs:
 
       - name: Wait for app to start
         run: |
-            # Increased timeout for Podman which may be slightly slower
             timeout=60
             elapsed=0
             echo "Waiting for application to be ready (will time out after ${timeout}s)..."
 
-            # First, try to detect the ">> Starting app" message which appears early
-            until [ $elapsed -ge 20 ]; do
-            app_logs=$(podman-compose -f compose.prod.yml logs app)
-            if echo "$app_logs" | grep -q ">> Starting app"; then
-                echo "✅ Found initial '>> Starting app' message, waiting for Gunicorn..."
-
-                # Start capturing logs with follow to get new log entries in real-time
-                echo "Starting log capture with follow..."
-                podman-compose -f compose.prod.yml logs -f app > app_logs_follow.txt &
-                LOG_PID=$!
-
-                # Wait for Gunicorn to start after seeing this message
-                echo "Waiting 15 seconds for Gunicorn to start..."
-                sleep 15
-
-                # Stop the log capture
-                kill $LOG_PID || true
-
-                # Check if we captured Gunicorn logs
-                if grep -q "Listening at: http://0.0.0.0:8000" app_logs_follow.txt || \
-                grep -q "Booting worker with pid" app_logs_follow.txt; then
-                echo "✅ Gunicorn startup detected in follow logs!"
-
-                # Wait a moment for the app to fully initialize
-                echo "Waiting 10 more seconds for app to stabilize..."
-                sleep 10
-
-                # Try a simple curl check to confirm the app is responding
-                if curl -s -m 5 http://localhost:1337/ > /dev/null; then
-                    echo "✅ Application is responding to HTTP requests!"
-                    echo "Application is ready!"
-                    exit 0
-                else
-                    echo "⚠️ Application started but not responding yet. Continuing anyway..."
-                    echo "Application is ready (but not yet responding to HTTP requests)!"
-                    exit 0
-                fi
-                fi
-
-                # If we didn't find Gunicorn logs in the follow, break and continue with normal flow
-                echo "Didn't find Gunicorn logs in follow, continuing with normal flow..."
-                break
-            fi
+            # First wait for ">> Starting app" which appears early
+            until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q ">> Starting app"; do
             sleep 5
             elapsed=$((elapsed+5))
-            echo "Waiting for initial app startup... ($elapsed/20 seconds elapsed)"
+            echo "Waiting for initial app startup... ($elapsed/$timeout seconds elapsed)"
             done
 
-            # Reset and continue with main detection loop
-            elapsed=0
-            while [ $elapsed -le $timeout ]; do
-            # Try curl check first as it's more reliable
-            if [ $elapsed -ge 20 ] && curl -s --connect-timeout 2 http://localhost:1337/ > /dev/null; then
-                echo "✅ Application is responding to HTTP requests!"
-                exit 0
+            if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. Application did not start initialization."
+            podman-compose -f compose.prod.yml logs app
+            exit 1
             fi
 
-            # Get the latest logs
+            echo "✅ App initialization detected, waiting for Gunicorn to start..."
+
+            # Wait additional time for Gunicorn to start after seeing ">> Starting app"
+            sleep 15
+
+            # Now capture logs which should include Gunicorn startup messages
             podman-compose -f compose.prod.yml logs app > app_logs.txt
 
-            # Check for Gunicorn startup patterns
-            if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || \
-                grep -q "Booting worker with pid" app_logs.txt; then
-                echo "✅ Gunicorn startup detected in logs!"
+            # Check if Gunicorn messages are present in the captured logs
+            if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt; then
+            echo "✅ Gunicorn is listening on port 8000"
+            echo "Application is ready!"
+            exit 0
+            else
+            # If log detection fails, fall back to HTTP check
+            echo "⚠️ Gunicorn startup messages not found in logs, trying HTTP check..."
 
-                # Wait a moment for the app to fully initialize
-                echo "Waiting 10 more seconds for app to stabilize..."
-                sleep 10
-
-                # Try a simple curl check to confirm the app is responding
-                if curl -s -m 5 http://localhost:1337/ > /dev/null; then
+            if curl -s --connect-timeout 2 http://localhost:1337/ > /dev/null; then
                 echo "✅ Application is responding to HTTP requests!"
                 echo "Application is ready!"
                 exit 0
-                else
-                echo "⚠️ Application started but not responding yet. Continuing anyway..."
-                echo "Application is ready (but not yet responding to HTTP requests)!"
-                exit 0
-                fi
+            else
+                echo "Timeout reached. Application did not start properly."
+                cat app_logs.txt
+                exit 1
             fi
-
-            sleep 5
-            elapsed=$((elapsed+5))
-            echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
-
-            # Every 20 seconds, show the current logs
-            if [ $((elapsed % 20)) -eq 0 ]; then
-                echo "Current app logs:"
-                tail -20 app_logs.txt
             fi
-            done
-
-            echo "Timeout reached. Application did not start properly."
-            cat app_logs.txt
-            exit 1
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
         run: |
