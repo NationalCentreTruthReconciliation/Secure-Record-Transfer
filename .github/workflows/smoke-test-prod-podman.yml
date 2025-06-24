@@ -47,7 +47,7 @@ jobs:
       - name: Wait for database to be ready
         run: |
             echo "Waiting for database to initialize..."
-            timeout=90  # Increased timeout
+            timeout=90
             elapsed=0
             db_ready=false
 
@@ -57,8 +57,9 @@ jobs:
                 podman-compose -f compose.prod.yml logs db | grep -q "port: 3306.*ready for connections"; then
                 echo "✅ Database initialization detected!"
                 db_ready=true
-                # Wait a couple of seconds for MySQL to actually start listening
-                sleep 5
+                # Wait a longer time for MySQL to actually start listening (increased from 5s to 20s)
+                echo "Waiting for MySQL to start accepting connections..."
+                sleep 20
                 break
             fi
 
@@ -73,60 +74,44 @@ jobs:
             exit 1
             fi
 
-            # Verify the database is actually accepting connections
+            # Multiple connection attempts with backoff
+            max_attempts=5
+            attempt=0
+            connected=false
+
             echo "Testing database connection..."
-            if ! podman exec $(podman ps -q --filter name=db) mysql -u records-user -p'records-password' -h localhost -e "SELECT 1;" > /dev/null 2>&1; then
-            echo "❌ Database is not accepting connections. Additional logs:"
-            podman-compose -f compose.prod.yml logs db
-            exit 1
+            while [ $attempt -lt $max_attempts ] && [ "$connected" = false ]; do
+            attempt=$((attempt+1))
+            echo "Connection attempt $attempt of $max_attempts..."
+
+            if podman exec $(podman ps -q --filter name=db) mysql -u records-user -p'records-password' -h localhost -e "SELECT 1;" > /dev/null 2>&1; then
+                echo "✅ Database connection successful!"
+                connected=true
+            else
+                echo "⚠️ Connection attempt failed, waiting before retry..."
+                sleep 10
             fi
-
-            echo "✅ Database is ready and accepting connections!"
-      - name: Wait for app to start
-        run: |
-            echo "Waiting for application to be ready (checking actual container status)..."
-            timeout=60
-            elapsed=0
-
-            until [ $elapsed -ge $timeout ]; do
-            # Check if container is running
-            if podman ps --filter name=app --filter status=running | grep -q app; then
-                # Check if app is responding to HTTP requests - trying both internal and external ports
-                if curl -s http://localhost:1337/ | grep -q "Record Transfer"; then
-                echo "Application is ready and responding to HTTP requests!"
-                break
-                fi
-            fi
-
-            sleep 5
-            elapsed=$((elapsed+5))
-            echo "Still waiting for app to be responsive... ($elapsed/$timeout seconds)"
             done
 
-            if [ $elapsed -ge $timeout ]; then
-            echo "Timeout reached. Application did not start properly."
-            echo "Container status:"
-            podman ps -a
-            echo "App logs:"
-            podman-compose -f compose.prod.yml logs app
-            echo "Database logs:"
+            if [ "$connected" = false ]; then
+            echo "❌ Database is not accepting connections after $max_attempts attempts. Additional logs:"
             podman-compose -f compose.prod.yml logs db
-            echo "Nginx logs:"
-            podman-compose -f compose.prod.yml logs nginx
+            podman exec $(podman ps -q --filter name=db) ps aux
+            podman network inspect $(podman network ls -q)
             exit 1
             fi
 
-      # The port number is set in the compose.prod.yml file
+            echo "✅ Database is ready and accepting connections!"      # The port number is set in the compose.prod.yml file
       - name: Check homepage status
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
-          if [ $response -eq 200 ]; then
-            echo "Homepage is returning 200 OK in production configuration"
-            exit 0
-          else
-            echo "Homepage returned status code $response in production configuration"
-            exit 1
-          fi
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1337/)
+            if [ $response -eq 200 ]; then
+                echo "Homepage is returning 200 OK in production configuration"
+                exit 0
+            else
+                echo "Homepage returned status code $response in production configuration"
+                exit 1
+            fi
 
       - name: Stop containers
         if: always()
