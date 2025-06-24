@@ -31,6 +31,8 @@ jobs:
 
             pip install uv
             uv sync --extra dev --extra podman
+            # Install podman-compose directly and make sure it's in PATH
+            pip install podman-compose==1.3.0
 
             # Verify installations
             podman --version
