@@ -68,6 +68,7 @@ class ContactInfoFormMixin(forms.Form):
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
+            ("NB", "New Brunswick"),
             ("NL", "Newfoundland and Labrador"),
             ("NT", "Northwest Territories"),
             ("NS", "Nova Scotia"),
