@@ -65,21 +65,60 @@ jobs:
 
       - name: Wait for app to start
         run: |
-          # Increased timeout for Podman which may be slightly slower
-          timeout=45
-          elapsed=0
-          echo "Waiting for application to be ready (will time out after ${timeout}s)..."
-          until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
+            # Increased timeout for Podman which may be slightly slower
+            timeout=60  # Increased from 45s
+            elapsed=0
+            echo "Waiting for application to be ready (will time out after ${timeout}s)..."
+            app_ready=false
+
+            until [ $elapsed -ge $timeout ] || [ "$app_ready" = true ]; do
+            # Check for ANY of these success signals
+            if podman-compose -f compose.prod.yml logs app | grep -q "Booting worker with pid"; then
+                echo "✅ Worker boot detected - app is starting!"
+                app_ready=true
+                break
+            fi
+
             sleep 5
             elapsed=$((elapsed+5))
             echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
-          done
-          if [ $elapsed -ge $timeout ]; then
-            echo "Timeout reached. Application did not start properly."
+
+            # If we're halfway through, try an alternative check
+            if [ $elapsed -ge 30 ] && ! [ "$app_ready" = true ]; then
+                echo "Trying alternative detection method..."
+                if podman exec $(podman ps -q --filter name=app) ps aux | grep -q gunicorn; then
+                echo "✅ Found gunicorn process running in app container!"
+                app_ready=true
+                break
+                fi
+            fi
+            done
+
+            if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. Application did not start properly. Final logs:"
             podman-compose -f compose.prod.yml logs app
             exit 1
-          fi
-          echo "Application is ready!"
+            fi
+
+            # Wait a bit longer to ensure app is fully initialized
+            echo "Application process detected! Waiting 10 seconds for initialization to complete..."
+            sleep 10
+
+            echo "Checking if app is responding to web requests..."
+            max_attempts=3
+            for attempt in $(seq 1 $max_attempts); do
+            if curl -s http://localhost:1337 | grep -q "Record Transfer"; then
+                echo "✅ Application is responding to web requests!"
+                break
+            elif [ $attempt -eq $max_attempts ]; then
+                echo "⚠️ Application started but not responding to web requests yet. Proceeding anyway..."
+            else
+                echo "Waiting for app to respond to web requests (attempt $attempt/$max_attempts)"
+                sleep 5
+            fi
+            done
+
+            echo "Application is ready!"
 
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
