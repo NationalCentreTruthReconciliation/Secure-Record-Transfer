@@ -70,15 +70,33 @@ jobs:
             elapsed=0
             echo "Waiting for application to be ready (will time out after ${timeout}s)..."
 
-            # Try different patterns to detect app startup
-            until [ $elapsed -ge $timeout ]; do
-            # Capture logs in a variable
+            # First, try to detect the ">> Starting app" message which appears early
+            until [ $elapsed -ge 20 ]; do
+            app_logs=$(podman-compose -f compose.prod.yml logs app)
+            if echo "$app_logs" | grep -q ">> Starting app"; then
+                echo "✅ Found initial '>> Starting app' message, waiting for Gunicorn..."
+                # Wait for Gunicorn to start after seeing this message
+                sleep 15
+                break
+            fi
+            sleep 5
+            elapsed=$((elapsed+5))
+            echo "Waiting for initial app startup... ($elapsed/20 seconds elapsed)"
+            done
+
+            # Reset and continue with main detection loop to catch Gunicorn messages
+            elapsed=0
+            while [ $elapsed -le $timeout ]; do
+            # Capture logs with enough time for Gunicorn to start outputting
             app_logs=$(podman-compose -f compose.prod.yml logs app)
 
-            # Check for startup patterns
-            if echo "$app_logs" | grep -q "Listening at: http://0.0.0.0:8000" || \
-                echo "$app_logs" | grep -q "Booting worker with pid"; then
-                echo "✅ Application startup detected!"
+            # Save logs to a file for inspection
+            echo "$app_logs" > app_logs.txt
+
+            # Check for Gunicorn startup patterns
+            if grep -q "Listening at: http://0.0.0.0:8000" app_logs.txt || \
+                grep -q "Booting worker with pid" app_logs.txt; then
+                echo "✅ Gunicorn startup detected in logs!"
 
                 # Wait a moment for the app to fully initialize
                 echo "Waiting 10 more seconds for app to stabilize..."
@@ -111,12 +129,12 @@ jobs:
             # Every 20 seconds, show the current logs
             if [ $((elapsed % 20)) -eq 0 ]; then
                 echo "Current app logs:"
-                podman-compose -f compose.prod.yml logs --tail=10 app
+                tail -10 app_logs.txt
             fi
             done
 
             echo "Timeout reached. Application did not start properly."
-            podman-compose -f compose.prod.yml logs app
+            cat app_logs.txt
             exit 1
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
