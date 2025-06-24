@@ -44,22 +44,58 @@ jobs:
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d --build
 
-      - name: Wait for app to start
+      - name: Wait for database to be ready
         run: |
-          timeout=60
-          elapsed=0
-          echo "Waiting for application to be ready (will time out after ${timeout}s)..."
-          until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs app | grep -q "Listening at: http://0.0.0.0:8000"; do
+            echo "Waiting for database to initialize..."
+            timeout=60
+            elapsed=0
+            until [ $elapsed -ge $timeout ] || podman-compose -f compose.prod.yml logs db | grep -q "port: 3306.*ready for connections"; do
             sleep 5
             elapsed=$((elapsed+5))
-            echo "Still waiting... ($elapsed/$timeout seconds elapsed)"
-          done
-          if [ $elapsed -ge $timeout ]; then
-            echo "Timeout reached. Application did not start properly."
-            podman-compose -f compose.prod.yml logs app
+            echo "DB still initializing... ($elapsed/$timeout seconds)"
+            done
+
+            if [ $elapsed -ge $timeout ]; then
+            echo "Database initialization timed out. Logs:"
+            podman-compose -f compose.prod.yml logs db
             exit 1
-          fi
-          echo "Application is ready!"
+            fi
+
+            echo "Database is ready!"
+
+      - name: Wait for app to start
+        run: |
+            echo "Waiting for application to be ready (checking actual container status)..."
+            timeout=60
+            elapsed=0
+
+            until [ $elapsed -ge $timeout ]; do
+            # Check if container is running
+            if podman ps --filter name=app --filter status=running | grep -q app; then
+                # Check if app is responding to HTTP requests - trying both internal and external ports
+                if curl -s http://localhost:1337/ | grep -q "Record Transfer"; then
+                echo "Application is ready and responding to HTTP requests!"
+                break
+                fi
+            fi
+
+            sleep 5
+            elapsed=$((elapsed+5))
+            echo "Still waiting for app to be responsive... ($elapsed/$timeout seconds)"
+            done
+
+            if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. Application did not start properly."
+            echo "Container status:"
+            podman ps -a
+            echo "App logs:"
+            podman-compose -f compose.prod.yml logs app
+            echo "Database logs:"
+            podman-compose -f compose.prod.yml logs db
+            echo "Nginx logs:"
+            podman-compose -f compose.prod.yml logs nginx
+            exit 1
+            fi
 
       # The port number is set in the compose.prod.yml file
       - name: Check homepage status
