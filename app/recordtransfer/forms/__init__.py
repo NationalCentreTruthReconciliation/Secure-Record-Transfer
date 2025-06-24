@@ -19,7 +19,11 @@ from recordtransfer.forms.submission_forms import (
     clear_form_errors,
 )
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.user_forms import ProfileContactInfoForm, SignUpForm, UserProfileForm
+from recordtransfer.forms.user_forms import (
+    ProfileContactInfoForm,
+    SignUpForm,
+    UserAccountInfoForm,
+)
 
 __all__ = [
     "AcceptLegal",
@@ -40,6 +44,6 @@ __all__ = [
     "SubmissionGroupForm",
     "SubmissionModelForm",
     "UploadFilesForm",
-    "UserProfileForm",
+    "UserAccountInfoForm",
     "clear_form_errors",
 ]

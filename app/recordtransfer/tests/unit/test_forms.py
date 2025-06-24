@@ -6,7 +6,7 @@ from caais.models import SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from recordtransfer.forms import UserProfileForm
+from recordtransfer.forms import UserAccountInfoForm
 from recordtransfer.forms.submission_forms import (
     RecordDescriptionForm,
     SourceInfoForm,
@@ -139,7 +139,9 @@ class SignUpFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
 
-class UserProfileFormTest(TestCase):
+class UserAccountInfoFormTest(TestCase):
+    """Tests for the UserAccountInfoForm."""
+
     def setUp(self):
         self.test_username = "testuser"
         self.test_first_name = "Test"
@@ -162,7 +164,7 @@ class UserProfileFormTest(TestCase):
             "first_name": "New",
             "last_name": "Name",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertEqual(user.first_name, "New")
@@ -173,7 +175,7 @@ class UserProfileFormTest(TestCase):
             "first_name": "Áccéntéd",
             "last_name": "Námé",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertEqual(user.first_name, "Áccéntéd")
@@ -184,7 +186,7 @@ class UserProfileFormTest(TestCase):
             "first_name": "123",
             "last_name": self.test_last_name,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("first_name", form.errors)
 
@@ -193,7 +195,7 @@ class UserProfileFormTest(TestCase):
             "first_name": self.test_first_name,
             "last_name": "123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("last_name", form.errors)
 
@@ -205,7 +207,7 @@ class UserProfileFormTest(TestCase):
             "new_password": self.test_new_password,
             "confirm_new_password": self.test_new_password,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertTrue(user.check_password("new_password123"))
@@ -218,7 +220,7 @@ class UserProfileFormTest(TestCase):
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("current_password", form.errors)
 
@@ -230,7 +232,7 @@ class UserProfileFormTest(TestCase):
             "new_password": "new_password123",
             "confirm_new_password": "different_password",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
@@ -241,7 +243,7 @@ class UserProfileFormTest(TestCase):
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("current_password", form.errors)
 
@@ -252,7 +254,7 @@ class UserProfileFormTest(TestCase):
             "current_password": self.test_password,
             "confirm_new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("new_password", form.errors)
 
@@ -263,7 +265,7 @@ class UserProfileFormTest(TestCase):
             "current_password": self.test_password,
             "new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
@@ -275,13 +277,13 @@ class UserProfileFormTest(TestCase):
             "new_password": self.test_password,
             "confirm_new_password": self.test_password,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("new_password", form.errors)
 
     def test_form_empty(self):
         form_data = {}
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("Form is empty.", form.errors["__all__"])
 
@@ -294,7 +296,7 @@ class UserProfileFormTest(TestCase):
             "last_name": self.test_last_name,
             "gets_notification_emails": True,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertTrue(user.gets_notification_emails)
@@ -305,7 +307,7 @@ class UserProfileFormTest(TestCase):
             "last_name": self.test_last_name,
             "gets_notification_emails": False,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertFalse(user.gets_notification_emails)
@@ -319,7 +321,7 @@ class UserProfileFormTest(TestCase):
             "new_password": "",
             "confirm_new_password": "",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("No fields have been changed.", form.errors["__all__"])
 

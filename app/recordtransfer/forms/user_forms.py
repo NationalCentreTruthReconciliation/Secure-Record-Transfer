@@ -64,8 +64,8 @@ class SignUpForm(UserCreationForm):
     captcha = ReCaptchaField()
 
 
-class UserProfileForm(forms.ModelForm):
-    """Form for editing user profile."""
+class UserAccountInfoForm(forms.ModelForm):
+    """Form for updating a user's account information."""
 
     NAME_PATTERN = re.compile(
         r"""^[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u01FF]+([ \-']{0,1}[a-zA-Z\u00C0-\u00D6
