@@ -1,16 +1,21 @@
+from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
+
 from django.test import tag
 from django.urls import reverse
-from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from unittest.mock import MagicMock, patch
-from urllib.parse import urlparse
+
+from recordtransfer.models import InProgressSubmission, Metadata, Submission, SubmissionGroup, User
+
 from .selenium_setup import SeleniumLiveServerTestCase
 
 
 @tag("e2e")
 class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
+    """Test the profile password reset functionality."""
+
     def setUp(self) -> None:
         """Set up test data and log in the test user."""
         super().setUp()
@@ -401,8 +406,8 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 5).until(lambda d: "submission-group" in d.current_url)
 
         # Assert that the current URL is the expected one
-        exoected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_group_detail', kwargs={'uuid': str(self.submission_group.uuid)})}"
-        self.assertEqual(driver.current_url, exoected_url)
+        expected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_group_detail', kwargs={'uuid': str(self.submission_group.uuid)})}"
+        self.assertEqual(driver.current_url, expected_url)
 
     def test_delete_submission_group(self) -> None:
         """Test deleting a submission group from the profile page."""
