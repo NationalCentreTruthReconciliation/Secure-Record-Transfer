@@ -954,6 +954,11 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
 
+        # Wait for previous button to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "form-previous-button"))
+        )
+
         # Go back to previous step (Contact Information step)
         self.go_previous_step()
 
