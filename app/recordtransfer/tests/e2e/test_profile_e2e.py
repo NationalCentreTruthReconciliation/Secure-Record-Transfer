@@ -167,6 +167,25 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
 
     # Tests for the contact information form
+    def test_save_contact_info_button(self) -> None:
+        """Test that the save button for contact information is not clickable unless at least one
+        contact info field has changed.
+        """
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        self.switch_to_contact_info_tab()
+
+        # Initially, the save button should not be clickable
+        save_button = driver.find_element(By.ID, "contact-info-save-btn")
+        self.assertFalse(save_button.is_enabled(), "Save button should not be enabled initially")
+
+        # Fill in a contact info field to enable the save button
+        driver.find_element(By.ID, "id_phone_number").send_keys("+1 (555) 123-4567")
+        self.assertTrue(
+            save_button.is_enabled(), "Save button should be enabled after filling a field"
+        )
+
     def test_required_contact_info_fields(self) -> None:
         """Check that some contact information fields are required."""
         driver = self.driver
