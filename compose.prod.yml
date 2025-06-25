@@ -78,7 +78,7 @@ services:
 
   app:
     image: secure-record-transfer-prod
-    container_name: secure-record-transfer_app
+    container_name: secure-record-transfer-app
     command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
     expose:
