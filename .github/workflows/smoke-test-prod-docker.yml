@@ -1,4 +1,4 @@
-name: Production Smoke Test (via compose.prod.yml)
+name: Production Smoke Test Docker (via compose.prod.yml)
 
 on:
   pull_request:
@@ -33,7 +33,7 @@ jobs:
           elapsed=0
           echo "Waiting for application to be healthy (will time out after ${timeout}s)..."
           while [ $elapsed -lt $timeout ]; do
-            if docker compose -f compose.prod.yml ps app | grep -q "healthy"; then
+            if docker compose -f compose.prod.yml ps -f recordtransfer_django_app | grep -q "healthy"; then
               echo "Application is healthy!"
               break
             fi
