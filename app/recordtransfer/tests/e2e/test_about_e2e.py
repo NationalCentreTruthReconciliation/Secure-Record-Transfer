@@ -34,3 +34,29 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.ID, "about-page-heading"))
         )
         self.assertIn("About", page_heading.text)
+
+    @override_settings(
+        FILE_UPLOAD_ENABLED=True,
+        MAX_TOTAL_UPLOAD_COUNT=100,
+        MAX_TOTAL_UPLOAD_SIZE_MB=144,
+        MAX_SINGLE_UPLOAD_SIZE_MB=12,
+    )
+    def test_file_upload_info_shown_when_enabled(self) -> None:
+        """Test that file upload info is displayed when uploads are enabled."""
+        driver = self.driver
+        about_url = reverse("recordtransfer:about")
+        driver.get(f"{self.live_server_url}{about_url}")
+
+        # Check that file size limitations are displayed
+        max_size_heading = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//div[contains(text(), 'Maximum Submission Size')]")
+            )
+        )
+        self.assertIsNotNone(max_size_heading)
+
+        # Check specific values
+        page_content = driver.page_source
+        self.assertIn("maximum of 100 files", page_content)
+        self.assertIn("144 MB of files", page_content)
+        self.assertIn("12 MB", page_content)
