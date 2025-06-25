@@ -40,7 +40,9 @@ jobs:
           elapsed=0
           echo "Waiting for application to be healthy (will time out after ${timeout}s)..."
           while [ $elapsed -lt $timeout ]; do
-            if podman-compose -f compose.prod.yml ps | grep "secure-record-transfer-app" | grep -q "healthy"; then
+            echo "Checking container status..."
+            podman-compose -f compose.prod.yml ps | grep "secure-record-transfer_app" || echo "App container not found yet"
+            if podman-compose -f compose.prod.yml ps | grep "secure-record-transfer_app" | grep -q "healthy"; then
               echo "Application is healthy!"
               break
             fi
@@ -50,8 +52,10 @@ jobs:
           done
           if [ $elapsed -ge $timeout ]; then
             echo "Timeout reached. Application did not become healthy."
-            podman-compose -f compose.prod.yml logs app
+            echo "Final container status:"
             podman-compose -f compose.prod.yml ps
+            echo "App logs:"
+            podman-compose -f compose.prod.yml logs app
             exit 1
           fi
 
