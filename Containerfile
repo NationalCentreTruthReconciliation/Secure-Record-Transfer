@@ -77,9 +77,9 @@ ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-# Install required dependencies for mysqlclient
+# Install required dependencies for mysqlclient and curl for health checks
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-mysql-client && \
+    apt-get install -y --no-install-recommends default-mysql-client curl && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
