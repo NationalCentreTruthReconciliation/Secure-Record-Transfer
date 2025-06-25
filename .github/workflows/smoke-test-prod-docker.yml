@@ -33,7 +33,7 @@ jobs:
           elapsed=0
           echo "Waiting for application to be healthy (will time out after ${timeout}s)..."
           while [ $elapsed -lt $timeout ]; do
-            if docker compose -f compose.prod.yml | grep "recordtransfer_django_app" | grep -q "healthy"; then
+            if docker compose -f compose.prod.yml | grep "secure-record-transfer_app" | grep -q "healthy"; then
               echo "Application is healthy!"
               break
             fi
