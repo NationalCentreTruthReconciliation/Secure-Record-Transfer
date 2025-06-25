@@ -55,7 +55,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "description": "Test Description",
             "condition": "Test Condition",
             "preliminary_custodial_history": "Test Custodial History",
-
         },
         SubmissionStep.RIGHTS: {
             "section_title": get_section_title(SubmissionStep.RIGHTS),
@@ -320,7 +319,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             condition_input.send_keys(data["condition"])
             preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
-
         self.go_next_step()
 
     def complete_record_rights_step(self, required_only: bool = False) -> None:
@@ -524,7 +522,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
                     "Custodial history": data["preliminary_custodial_history"],
-
                 }
                 self._verify_field_values("recorddescription", fields)
 
@@ -881,3 +878,124 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
         )
+
+    def test_contact_info_modal_prompt_without_saving(self) -> None:
+        """Test that the user is prompted to save contact information to their profile when
+        completing the Contact Information step. Clicking on "Continue without saving"
+        should display the Source Information step.
+        """
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out the Contact Information step
+        self.complete_contact_information_step()
+
+        # Wait for the modal to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
+        )
+
+        # Wait for the "Continue without saving" button to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
+        )
+
+        # Click on the button to continue without saving
+        driver.find_element(By.ID, "modal-continue-without-saving").click()
+
+        # Verify that the user is redirected to the Source Information step
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
+    def test_contact_info_modal_prompt_save_and_continue(self) -> None:
+        """Test that the user is prompted to save contact information to their profile when
+        completing the Contact Information step. Clicking on "Save and Continue" should save the
+        contact information and display the Source Information step.
+        """
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out the Contact Information step
+        self.complete_contact_information_step()
+
+        # Wait for the modal to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
+        )
+
+        # Wait for the "Save and Continue" button to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "modal-save-contact-info"))
+        )
+
+        # Click on the button to save and continue
+        driver.find_element(By.ID, "modal-save-contact-info").click()
+
+        # Verify that the user is displayed the Source Information step
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
+        # Check that success toast is displayed
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Go back to previous step (Contact Information step)
+        self.go_previous_step()
+
+        # Check that clicking on "Next Step" button does not prompt the modal again
+        self.go_next_step()
+
+        # Verify that the user is displayed the Source Information step
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
+        # Open Profile page on new tab
+        driver.execute_script(
+            "window.open(arguments[0], '_blank');",
+            urljoin(self.live_server_url, reverse("recordtransfer:user_profile")),
+        )
+
+        # Switch to the new tab
+        driver.switch_to.window(driver.window_handles[1])
+
+        # Wait for the profile page to load
+        contact_info_radio = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_contact_info_tab"))
+        )
+        contact_info_radio.click()
+
+        # Check that the contact information is saved
+        phone_number_input = driver.find_element(By.ID, "id_phone_number")
+        address_line_1_input = driver.find_element(By.ID, "id_address_line_1")
+        city_input = driver.find_element(By.ID, "id_city")
+        province_or_state_input = driver.find_element(By.ID, "id_contactinfo-province_or_state")
+        postal_or_zip_code_input = driver.find_element(By.ID, "id_postal_or_zip_code")
+        country_input = driver.find_element(By.ID, "id_country")
+
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Verify that the contact information is saved
+        self.assertEqual(phone_number_input.get_attribute("value"), data["phone_number"])
+        self.assertEqual(address_line_1_input.get_attribute("value"), data["address_line_1"])
+        self.assertEqual(city_input.get_attribute("value"), data["city"])
+        self.assertEqual(province_or_state_input.get_attribute("value"), data["province_or_state"])
+        self.assertEqual(
+            postal_or_zip_code_input.get_attribute("value"), data["postal_or_zip_code"]
+        )
+        self.assertEqual(country_input.get_attribute("value"), data["country"])
