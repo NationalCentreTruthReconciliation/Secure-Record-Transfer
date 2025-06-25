@@ -134,12 +134,14 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     def go_next_step(self) -> None:
         """Go to the next step in the form."""
         driver = self.driver
-        driver.find_element(By.ID, "form-next-button").click()
+        button = driver.find_element(By.ID, "form-next-button")
+        driver.execute_script("arguments[0].click();", button)
 
     def go_previous_step(self) -> None:
         """Go to the previous step in the form."""
         driver = self.driver
-        driver.find_element(By.ID, "form-previous-button").click()
+        button = driver.find_element(By.ID, "form-previous-button")
+        driver.execute_script("arguments[0].click();", button)
 
     def continue_without_saving_contact_info_modal(self) -> None:
         """Click on "Continue without saving" in the Contact Information modal."""
