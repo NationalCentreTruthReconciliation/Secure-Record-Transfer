@@ -62,3 +62,25 @@ class HelpPageTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.ID, "help-page-heading"))
         )
         self.assertIn("help", driver.current_url)
+
+    def test_help_section_components(self) -> None:
+        """Test that help sections have the right component structure."""
+        driver = self.driver
+        help_url = reverse("recordtransfer:help")
+        driver.get(f"{self.live_server_url}{help_url}")
+
+        for section_id in ["source-types", "source-roles", "rights-types"]:
+            section = driver.find_element(By.ID, section_id)
+
+            # Check that section has a card container
+            card = section.find_element(
+                By.XPATH, "./ancestor::div[contains(@class, 'rounded-box')]"
+            )
+
+            # Check that section has a collapsible component
+            self.assertTrue(card.find_element(By.CSS_SELECTOR, ".collapse").is_displayed())
+
+            # Check that section has a list of items
+            collapse_content = card.find_element(By.CSS_SELECTOR, ".collapse-content")
+            lists = collapse_content.find_elements(By.TAG_NAME, "ul")
+            self.assertTrue(len(lists) > 0, f"Section {section_id} should have at least one list")
