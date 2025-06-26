@@ -1,0 +1,133 @@
+{% load i18n %}
+<form id="contact-info-form"
+      hx-post="{% url 'recordtransfer:contact_info_update' %}"
+      hx-target="#contact-info-form"
+      hx-swap="innerHTML"
+      hx-select="#contact-info-form"
+      hx-on::after-request="setupUserContactInfoForm(event);">
+    {% csrf_token %}
+    <!-- Phone Number Section -->
+    <div class="flex mb-4 w-full">
+        <fieldset class="fieldset w-1/2">
+            <legend class="fieldset-legend text-sm md:text-md">{% trans form.phone_number.label %}</legend>
+            <input type="tel"
+                   class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                   name="{{ form.phone_number.name }}"
+                   id="{{ form.phone_number.id_for_label }}"
+                   value="{{ form.phone_number.value|default:'' }}"
+                   placeholder="{% trans "Enter phone number" %}"
+                   required>
+            {% if form.phone_number.errors %}
+                <p class="text-error text-xs md:text-sm">{% trans form.phone_number.errors.0 %}</p>
+            {% endif %}
+        </fieldset>
+    </div>
+    <!-- Address Section -->
+    <div class="flex flex-col md:flex-row w-full gap-4">
+        <!-- Left Column -->
+        <div class="flex-1 space-y-3 md:space-y-4">
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.address_line_1.label %}</legend>
+                <input type="text"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                       name="{{ form.address_line_1.name }}"
+                       id="{{ form.address_line_1.id_for_label }}"
+                       value="{{ form.address_line_1.value|default:'' }}"
+                       rows="3"
+                       placeholder="{% trans "Enter street address" %}"
+                       required>
+                {% if form.address_line_1.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.address_line_1.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.address_line_2.label %}</legend>
+                <input type="text"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                       name="{{ form.address_line_2.name }}"
+                       id="{{ form.address_line_2.id_for_label }}"
+                       value="{{ form.address_line_2.value|default:'' }}"
+                       placeholder="{% trans "Apartment, suite, etc." %}">
+                {% if form.address_line_2.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.address_line_2.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.city.label %}</legend>
+                <input type="text"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                       name="{{ form.city.name }}"
+                       id="{{ form.city.id_for_label }}"
+                       value="{{ form.city.value|default:'' }}"
+                       placeholder="{% trans "Enter city" %}"
+                       required>
+                {% if form.city.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.city.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+        </div>
+        <!-- Right Column -->
+        <div class="flex-1 space-y-3 md:space-y-4">
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.province_or_state.label %}</legend>
+                <select class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
+                        name="{{ form.province_or_state.name }}"
+                        id="{{ form.province_or_state.id_for_label }}"
+                        required>
+                    {% for value, label in form.province_or_state.field.choices %}
+                        <option value="{{ value }}"
+                                {% if form.province_or_state.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.province_or_state.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.province_or_state.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.other_province_or_state.label %}</legend>
+                <input type="text"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                       name="{{ form.other_province_or_state.name }}"
+                       id="{{ form.other_province_or_state.id_for_label }}"
+                       value="{{ form.other_province_or_state.value|default:'' }}"
+                       placeholder="{% trans "Enter state/province if not listed above" %}">
+                {% if form.other_province_or_state.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.other_province_or_state.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.postal_or_zip_code.label %}</legend>
+                <input type="text"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                       name="{{ form.postal_or_zip_code.name }}"
+                       id="{{ form.postal_or_zip_code.id_for_label }}"
+                       value="{{ form.postal_or_zip_code.value|default:'' }}"
+                       placeholder="{% trans "Enter postal/zip code" %}"
+                       required>
+                {% if form.postal_or_zip_code.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.postal_or_zip_code.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.country.label %}</legend>
+                <select class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
+                        name="{{ form.country.name }}"
+                        id="{{ form.country.id_for_label }}"
+                        required>
+                    {% for value, label in form.country.field.choices %}
+                        <option value="{{ value }}"
+                                {% if form.country.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.country.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.country.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
+        </div>
+    </div>
+    <div class="card-actions justify-start md:justify-end mt-8 md:mt-10">
+        <button id="contact-info-save-btn"
+                class="btn btn-primary btn-sm md:btn-md btn-wide"
+                disabled>{% trans "Save" %}</button>
+    </div>
+</form>

@@ -5,7 +5,7 @@ import {
     handleSubmissionGroupModalFormBeforeSwap,
     handleSubmissionGroupModalFormAfterSwap
 } from "../utils/htmx.js";
-import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
+import { setupUserContactInfoForm } from "./contactInfo.js";
 import { initTabListeners, restoreTab } from "./tab.js";
 
 /**
@@ -26,10 +26,9 @@ export const initializeProfile = function() {
     }
 
     setupProfileForm(context);
+    setupUserContactInfoForm(context);
     initTabListeners();
     restoreTab();
-    setupToastNotifications();
-    displayStoredToast();
 
     // Wrapper functions to provide context to HTMX event handlers
     window.handleDeleteIpSubmissionAfterRequest = (e) => {
@@ -46,5 +45,13 @@ export const initializeProfile = function() {
 
     window.handleModalAfterSwap = (e) => {
         return handleSubmissionGroupModalFormAfterSwap(e, context);
+    };
+
+    window.setupProfileForm = () => {
+        return setupProfileForm(context);
+    };
+
+    window.setupUserContactInfoForm = () => {
+        return setupUserContactInfoForm(context);
     };
 };

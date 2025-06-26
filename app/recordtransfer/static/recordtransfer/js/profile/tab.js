@@ -4,7 +4,7 @@
 export const restoreTab = () => {
     const storedTab = localStorage.getItem("activeProfileTab");
     if (storedTab) {
-        const tabInputs = document.querySelectorAll(".tabs input[name='profile_tabs']");
+        const tabInputs = document.querySelectorAll(".tabs input[name='table_tabs']");
         const tabIndex = Number(storedTab);
 
         const isValidIndex =
@@ -24,7 +24,7 @@ export const restoreTab = () => {
  * Stores the index of the active tab in localStorage when changed.
  */
 export const initTabListeners = () => {
-    const tabs = document.querySelectorAll(".tabs input[name='profile_tabs']");
+    const tabs = document.querySelectorAll(".tabs input[name='table_tabs']");
     tabs.forEach((tab, index) => {
         tab.addEventListener("change", () => {
             if (tab.checked) {
