@@ -4,17 +4,52 @@
     <h3 class="text-lg font-bold mb-5">
         {% if current_group %}
             {% blocktrans %}
-                Change Submission Group for Submission "{{ title }}"
+                Change submission group for submission "{{ title }}"
             {% endblocktrans %}
         {% else %}
             {% blocktrans %}
-                Assign Submission Group for Submission "{{ title }}"
+                Assign submission group for submission "{{ title }}"
             {% endblocktrans %}
         {% endif %}
     </h3>
     <form method="dialog">
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">Submission groups</legend>
+            <select class="select" id="group_select" onchange="updateGroupDescription()">
+                <option disabled selected>{% trans "Pick a group" %}</option>
+                {% for group in groups %}
+                    <option value="{{ group.uuid }}"
+                            data-description="{% if group.description %}{{ group.description }}{% else %}{% trans "No description available" %}{% endif %}"
+                            {% if current_group and group.uuid == current_group.uuid %}selected{% endif %}>
+                        {{ group.name }}
+                        {% if current_group and group.uuid == current_group.uuid %}
+                            {% trans "(current)" %}
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <span class="label" id="group_description_display">
+                {% if current_group %}
+                    {% trans "Description" %}:
+                    {% if current_group.description %}
+                        {{ current_group.description }}
+                    {% else %}
+                        {% trans "No description available" %}
+                    {% endif %}
+                {% else %}
+                    {% trans "Select a group to see its description" %}
+                {% endif %}
+            </span>
+        </fieldset>
         <div class="modal-action">
             <button class="btn">{% trans "Cancel" %}</button>
+            {% if current_group %}
+                <button id="unassign_group_btn"
+                        hx-post=""
+                        hx-vals='{"group_uuid": ""}'
+                        hx-on::after-request=""
+                        class="btn btn-outline btn-warning">{% trans "Unassign Group" %}</button>
+            {% endif %}
             <button id="change_group_btn"
                     hx-post=""
                     hx-on::after-request=""
@@ -27,4 +62,18 @@
             </button>
         </div>
     </form>
+    <script>
+        function updateGroupDescription() {
+            const selectElement = document.getElementById('group_select');
+            const descriptionDisplay = document.getElementById('group_description_display');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            if (selectedOption && selectedOption.value) {
+                const description = selectedOption.getAttribute('data-description');
+                descriptionDisplay.textContent = description;
+            } else {
+                descriptionDisplay.textContent = 'Select a group to see its description';
+            }
+        }
+    </script>
 {% endblock modal_content %}
