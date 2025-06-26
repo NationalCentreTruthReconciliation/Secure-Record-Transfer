@@ -531,7 +531,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
 
 
 class RightsFormSet(BaseFormSet):
-    """Special formset to enforce at least one rights form to have a value."""
+    """Formset for rights information (optional)."""
 
     class Meta:
         """Meta information for the form."""
@@ -540,7 +540,7 @@ class RightsFormSet(BaseFormSet):
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
-        self.forms[0].empty_permitted = False
+        self.forms[0].empty_permitted = True
 
 
 class RightsForm(SubmissionForm):
@@ -587,7 +587,8 @@ class RightsForm(SubmissionForm):
         )
         .order_by("sort_order_other_first"),
         label=gettext("Type of rights"),
-        empty_label=gettext("Please select one"),
+        empty_label=gettext("Select a rights type (optional)"),
+        required=False,
     )
 
     other_rights_type = forms.CharField(

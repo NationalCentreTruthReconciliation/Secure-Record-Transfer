@@ -881,6 +881,33 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
         )
 
+    def test_optional_rights_step_bypass(self) -> None:
+        """Test that a user can bypass the Rights step without entering any information."""
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/")
+
+        # Complete required steps before Rights step
+        self.complete_legal_agreement_step()
+        self.complete_contact_information_step()
+        self.complete_source_information_step()
+        self.complete_record_description_step()
+
+        # Wait for Rights step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "rights-0-rights_type"))
+        )
+        # Click Next without filling anything
+        self.go_next_step()
+
+        # Verify we moved to the next step (Other Identifiers)
+        identifiers_page = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "otheridentifiers-0-other_identifier_type"))
+        )
+        self.assertTrue(identifiers_page)
+
     def test_contact_info_modal_prompt_without_saving(self) -> None:
         """Test that the user is prompted to save contact information to their profile when
         completing the Contact Information step. Clicking on "Continue without saving"
