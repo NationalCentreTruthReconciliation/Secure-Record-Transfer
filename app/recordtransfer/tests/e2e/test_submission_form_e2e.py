@@ -892,6 +892,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         # Complete required steps before Rights step
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
+        self.continue_without_saving_contact_info_modal()
         self.complete_source_information_step()
         self.complete_record_description_step()
 
