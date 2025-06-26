@@ -81,6 +81,11 @@ urlpatterns = [
         login_required(views.profile.delete_submission_group),
         name="delete_submission_group_modal",
     ),
+    path(
+        "change-submission-group-modal/<uuid:uuid>/",
+        login_required(views.profile.change_submission_group),
+        name="change_submission_group_modal",
+    ),
 ]
 
 if settings.DEBUG:

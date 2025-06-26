@@ -21,6 +21,16 @@
                        id="view_submission_report_{{ forloop.counter }}">
                         <i class="fas fa-file-alt"></i>
                     </a>
+                    <a hx-get="{% url 'recordtransfer:change_submission_group_modal' uuid=submission.uuid %}"
+                       hx-target="#modal-content-container"
+                       hx-swap="innerHTML"
+                       hx-select="#modal-content"
+                       hx-trigger="click"
+                       class="link link-warning tooltip"
+                       data-tip="{% trans "Change/assign group" %}"
+                       id="edit_submission_group_{{ forloop.counter }}">
+                        <i class="fas fa-edit"></i>
+                    </a>
                     <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"
                        class="link link-success tooltip"
                        data-tip="{% trans "Download CSV" %}"

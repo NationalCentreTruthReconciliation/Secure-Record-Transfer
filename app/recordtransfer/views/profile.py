@@ -310,3 +310,58 @@ def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
         return trigger_client_event(
             response, "showError", {"value": gettext("Failed to delete submission group.")}
         )
+
+
+@require_http_methods(["GET"])
+def change_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Display a modal that shows the submission group currently assigned to a submission and all
+    available submission groups for the user.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        uuid (str): The UUID of the submission.
+    """
+    if not request.htmx:
+        return HttpResponse(status=400)
+
+    submission = get_object_or_404(Submission, uuid=uuid, user=request.user)
+    groups = SubmissionGroup.objects.filter(created_by=request.user).order_by("name")
+
+    context = {
+        "groups": groups,
+        "current_group": submission.part_of_group,
+        "title": submission.metadata.accession_title if submission.metadata else "",
+        "js_context": {
+            "groups": [
+                {
+                    "uuid": str(group.uuid),
+                    "name": group.name,
+                    "description": group.description,
+                }
+                for group in groups
+            ],
+        },
+    }
+    return render(request, "includes/change_submission_group_modal.html", context)
+
+
+# @require_http_methods(["POST"])
+# def assign_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
+#     """Handle GET (show modal) and POST (change or assign submission group) requests for a
+#     submission. Both requests must be made by HTMX.
+#     """
+#     if not request.htmx:
+#         return HttpResponse(status=400)
+
+#     submission = get_object_or_404(Submission, uuid=uuid, user=request.user)
+#     form = SubmissionGroupForm(request.POST, user=request.user, instance=submission.part_of_group)
+#     if form.is_valid():
+#         form.save()
+#         response = HttpResponse(status=204)
+#         return trigger_client_event(
+#             response,
+#             "showSuccess",
+#             {"value": gettext("Submission group changed successfully.")},
+#         )
+#     else:
+#         return render(request, "includes/change_submission_group_modal.html", {"form": form})
