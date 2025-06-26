@@ -1,4 +1,4 @@
-import { setupSubmissionGroupForm } from "../forms/forms.js";
+import { setupSubmissionGroupForm, setupChangeSubmissionGroupForm } from "../forms/forms.js";
 import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
 
 /**
@@ -49,18 +49,19 @@ export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
 };
 
 /**
- * Handles the after-swap event for submission group forms in HTMX contexts.
- * Sets up the submission group form when triggered by the new submission group button
- * and displays the modal after content swap.
+ * Handles the after-swap event for the modal.
+ * This function is triggered after the modal content has been swapped in.
  * @param {Event} e - The HTMX after-swap event object containing request details
  * @param {object} context - The context object for the current operation
  * @returns {void}
  */
-export const handleSubmissionGroupModalFormAfterSwap = (e, context) => {
-    // Sets up the submission group form if the modal content swap was triggered by the
-    // new submission group button
-    if (e.detail.requestConfig.elt.id === "id_new_submission_group_button") {
+export const handleModalAfterSwap = (e, context) => {
+    const triggeredBy = e.detail.requestConfig.elt.id;
+    // Check if swap was triggered by the new submission group button
+    if (triggeredBy === "id_new_submission_group_button") {
         setupSubmissionGroupForm(context);
+    } else if (triggeredBy.startsWith("change_submission_group_")) {
+        setupChangeSubmissionGroupForm();
     }
     // Always show the modal after a swap on the modal content container
     showModal();

@@ -28,7 +28,7 @@
                        hx-trigger="click"
                        class="link link-warning tooltip"
                        data-tip="{% trans "Change/assign group" %}"
-                       id="edit_submission_group_{{ forloop.counter }}">
+                       id="change_submission_group_{{ forloop.counter }}">
                         <i class="fas fa-edit"></i>
                     </a>
                     <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"

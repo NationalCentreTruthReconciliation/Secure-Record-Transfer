@@ -72,3 +72,27 @@ export const setupSubmissionGroupForm = (context) => {
     groupName.addEventListener("input", checkForChanges);
     checkForChanges();
 };
+
+export const setupChangeSubmissionGroupForm = () => {
+    const selectElement = document.getElementById("group_select");
+    const descriptionDisplay = document.getElementById("group_description_display");
+
+    if (!selectElement || !descriptionDisplay) {
+        return;
+    }
+
+    selectElement.addEventListener("change", () => {
+        updateGroupDescription(selectElement, descriptionDisplay);
+    });
+
+    updateGroupDescription(selectElement, descriptionDisplay);
+};
+
+const updateGroupDescription = (selectElement, descriptionDisplay) => {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const description = selectedOption.getAttribute("data-description");
+
+    if (description) {
+        descriptionDisplay.textContent = description;
+    }
+};
