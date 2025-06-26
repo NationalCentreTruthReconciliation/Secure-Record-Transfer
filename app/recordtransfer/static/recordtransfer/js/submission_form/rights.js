@@ -1,5 +1,5 @@
-import { setupSelectOtherToggle } from "../utils/otherField";
 import { setupHelpTooltips } from "../base/tooltip";
+import { setupSelectOtherToggle } from "../utils/otherField";
 import { setupFormset } from "./formset";
 
 /**
