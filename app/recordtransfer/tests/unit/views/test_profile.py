@@ -1,3 +1,4 @@
+import json
 import re
 import uuid
 from datetime import datetime, timedelta
@@ -7,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.messages import get_messages
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
@@ -434,8 +435,8 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertNotIn("fa-exclamation-circle text-warning", content)
         self.assertNotIn("Submission is expiring soon", content)
 
-    @override_settings(PAGINATE_BY=3)
-    def test_in_progress_submission_table_display(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_display(self, mock_get_value_int: MagicMock) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
         """
@@ -448,8 +449,8 @@ class TestInProgressSubmissionTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @override_settings(PAGINATE_BY=2)
-    def test_in_progress_submission_table_pagination(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
+    def test_in_progress_submission_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
         for i in range(3):
@@ -507,8 +508,8 @@ class TestSubmissionGroupTableView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @override_settings(PAGINATE_BY=3)
-    def test_submission_group_table_display(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_display(self, mock_get_value_int: MagicMock) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
         for i in range(3):
@@ -523,8 +524,8 @@ class TestSubmissionGroupTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @override_settings(PAGINATE_BY=2)
-    def test_submission_group_table_pagination(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
+    def test_submission_group_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups
         for i in range(3):
@@ -920,6 +921,49 @@ class TestSubmissionGroupModalCreateView(TestCase):
 
         self.assertIn("HX-Trigger", response.headers)
         self.assertIn("showSuccess", response.headers["HX-Trigger"])
+        self.assertNotIn("submissionGroupCreated", response.headers["HX-Trigger"])
+
+    def test_valid_form_submission_from_submit_page(self) -> None:
+        """Test that a valid form submission from the submit page creates a new SubmissionGroup
+        and returns the submissionGroupCreated event.
+        """
+        form_data = {
+            "name": "Test Group From Submission Form",
+            "description": "Test Description",
+        }
+        # Mock the referer to simulate request from Submission Form page
+        response = self.client.post(
+            self.submission_group_modal_url,
+            data=form_data,
+            headers=self.headers,
+            HTTP_REFERER=reverse("recordtransfer:submit"),
+        )
+
+        # Check that submission group was created
+        submission_group = SubmissionGroup.objects.get(name="Test Group From Submission Form")
+        self.assertTrue(submission_group)
+
+        # Check response status and trigger event
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("HX-Trigger", response.headers)
+
+        # Check that the response includes the correct data in the trigger event
+        trigger_data = json.loads(response.headers["HX-Trigger"])
+
+        self.assertEqual(
+            trigger_data,
+            {
+                "submissionGroupCreated": {
+                    "message": "Submission group created successfully.",
+                    "status": "success",
+                    "group": {
+                        "uuid": str(submission_group.uuid),
+                        "name": submission_group.name,
+                        "description": submission_group.description,
+                    },
+                }
+            },
+        )
 
     def test_invalid_form_submission(self) -> None:
         """Test that an invalid form submission does not create a new SubmissionGroup."""

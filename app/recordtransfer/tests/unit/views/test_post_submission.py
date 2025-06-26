@@ -1,103 +1,10 @@
 from unittest.mock import MagicMock, patch
 
-from django.contrib.messages import get_messages
 from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
-from django.utils.translation import gettext
 
 from recordtransfer.models import Submission, SubmissionGroup, User
-
-
-class TestSubmissionGroupCreateView(TestCase):
-    """Tests for SubmissionGroupCreateView."""
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        """Set up test data."""
-        cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.create_group_url = reverse("recordtransfer:submission_group_new")
-
-    def setUp(self) -> None:
-        """Set up test environment."""
-        self.client.login(username="testuser", password="password")
-
-    def test_get_failure(self) -> None:
-        """Test that a GET request to the create view returns a 405 Method Not Allowed."""
-        response = self.client.get(self.create_group_url)
-        self.assertEqual(response.status_code, 405)
-
-    def test_unauthenticated_user_access(self) -> None:
-        """Test that an unauthenticated user is redirected to the login page."""
-        self.client.logout()
-        form_data = {
-            "name": "Test Group",
-            "description": "Test Description",
-        }
-        response = self.client.post(self.create_group_url, data=form_data)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.create_group_url}")
-
-    def test_valid_form_submission(self) -> None:
-        """Test that a valid form submission creates a new SubmissionGroup."""
-        form_data = {
-            "name": "Test Group",
-            "description": "Test Description",
-        }
-        response = self.client.post(self.create_group_url, data=form_data)
-        # Check that JSON response returns success
-        self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        self.assertEqual(response_json["status"], "success")
-        self.assertEqual(response_json["group"]["name"], "Test Group")
-        self.assertEqual(response_json["group"]["description"], "Test Description")
-        created_group = SubmissionGroup.objects.get(name="Test Group")
-        self.assertEqual(response_json["group"]["uuid"], str(created_group.uuid))
-        self.assertTrue(SubmissionGroup.objects.filter(name="Test Group").exists())
-
-    def test_invalid_form_submission(self) -> None:
-        """Test that an invalid form submission does not create a new SubmissionGroup."""
-        form_data = {
-            "name": "",
-            "description": "Test Description",
-        }
-        response = self.client.post(self.create_group_url, data=form_data)
-        self.assertEqual(response.status_code, 400)
-        response_json = response.json()
-        self.assertEqual(response_json["status"], "error")
-        self.assertTrue(response_json["message"])
-        self.assertFalse(SubmissionGroup.objects.filter(description="Test Description").exists())
-
-    def test_form_valid_json_response(self) -> None:
-        """Test that a JsonResponse is returned when the form is valid and submitted from the
-        submission form page.
-        """
-        form_data = {
-            "name": "Test Group",
-            "description": "Test Description",
-        }
-        response = self.client.post(
-            self.create_group_url, data=form_data, HTTP_REFERER="submission/"
-        )
-        self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        self.assertEqual(response_json["message"], gettext("Group created"))
-        self.assertEqual(response_json["status"], "success")
-
-    def test_form_invalid_json_response(self) -> None:
-        """Test that a JsonResponse is returned when the form is invalid and submitted from the
-        submission form page.
-        """
-        form_data = {
-            "name": "",
-            "description": "Test Description",
-        }
-        response = self.client.post(
-            self.create_group_url, data=form_data, HTTP_REFERER="submission/"
-        )
-        self.assertEqual(response.status_code, 400)
-        response_json = response.json()
-        self.assertEqual(response_json["message"], "This field is required.")
-        self.assertEqual(response_json["status"], "error")
 
 
 class TestSubmissionGroupDetailView(TestCase):

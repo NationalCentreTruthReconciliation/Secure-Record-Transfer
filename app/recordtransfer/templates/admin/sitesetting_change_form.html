@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block submit_buttons_bottom %}
+    <div class="submit-row">
+        <input type="submit" value="{% trans "Save" %}" class="default" name="_save">
+        <input type="submit"
+               value="{% trans "Save and continue editing" %}"
+               name="_continue">
+        <input type="submit"
+               value="{% trans "Reset to default" %}"
+               name="_reset"
+               class="button"
+               onclick="return confirm('{% trans "Are you sure you want to reset this setting to its default value" %} ({{ setting_default_value }})?')">
+    </div>
+{% endblock submit_buttons_bottom %}

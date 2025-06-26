@@ -647,7 +647,7 @@ class SubmissionFormWizard(SessionWizardView):
         elif step == SubmissionStep.GROUP_SUBMISSION:
             js_context.update(
                 {
-                    "id_submission_group_name": HtmlIds.ID_SUBMISSION_GROUP_NAME,
+                    "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
                     "id_submission_group_description": HtmlIds.ID_SUBMISSION_GROUP_DESCRIPTION,
                     "id_display_group_description": HtmlIds.ID_DISPLAY_GROUP_DESCRIPTION,
                     "id_submission_group_selection": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
