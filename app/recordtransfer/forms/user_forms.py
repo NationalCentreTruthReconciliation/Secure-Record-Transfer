@@ -237,11 +237,11 @@ class AsyncPasswordResetForm(PasswordResetForm):
         subject_template_name: str,
         email_template_name: str,
         context: dict[str, Any],
-        from_email: str | None,
+        from_email: Optional[str],
         to_email: str,
         html_email_template_name: Optional[str] = None,
     ) -> None:
-        """Send password reset email asynchronously using django_rq.
+        """Override parent method to send password reset email asynchronously using django_rq.
 
         Args:
             to_email: Recipient email address
