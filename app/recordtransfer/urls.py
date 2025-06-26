@@ -82,9 +82,14 @@ urlpatterns = [
         name="delete_submission_group_modal",
     ),
     path(
-        "change-submission-group-modal/<uuid:uuid>/",
-        login_required(views.profile.change_submission_group),
-        name="change_submission_group_modal",
+        "assign-submission-group-modal/<uuid:uuid>/",
+        login_required(views.profile.assign_submission_group_modal),
+        name="assign_submission_group_modal",
+    ),
+    path(
+        "assign-submission-group/<uuid:submission_uuid>/<uuid:group_uuid>/",
+        login_required(views.profile.assign_submission_group),
+        name="assign_submission_group",
     ),
 ]
 

@@ -313,9 +313,9 @@ def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
 
 
 @require_http_methods(["GET"])
-def change_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
+def assign_submission_group_modal(request: HttpRequest, uuid: str) -> HttpResponse:
     """Display a modal that shows the submission group currently assigned to a submission and all
-    available submission groups for the user.
+    available submission groups which the submission can be assigned to.
 
     Args:
         request (HttpRequest): The HTTP request object.
@@ -342,26 +342,46 @@ def change_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
             ],
         },
     }
-    return render(request, "includes/change_submission_group_modal.html", context)
+    return render(request, "includes/assign_submission_group_modal.html", context)
 
 
-# @require_http_methods(["POST"])
-# def assign_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
-#     """Handle GET (show modal) and POST (change or assign submission group) requests for a
-#     submission. Both requests must be made by HTMX.
-#     """
-#     if not request.htmx:
-#         return HttpResponse(status=400)
+@require_http_methods(["POST"])
+def assign_submission_group(
+    request: HttpRequest, submission_uuid: str, group_uuid: str
+) -> HttpResponse:
+    """Assign a submission to a submission group."""
+    if not request.htmx:
+        return HttpResponse(status=400)
 
-#     submission = get_object_or_404(Submission, uuid=uuid, user=request.user)
-#     form = SubmissionGroupForm(request.POST, user=request.user, instance=submission.part_of_group)
-#     if form.is_valid():
-#         form.save()
-#         response = HttpResponse(status=204)
-#         return trigger_client_event(
-#             response,
-#             "showSuccess",
-#             {"value": gettext("Submission group changed successfully.")},
-#         )
-#     else:
-#         return render(request, "includes/change_submission_group_modal.html", {"form": form})
+    try:
+        try:
+            submission = Submission.objects.get(uuid=submission_uuid, user=request.user)
+            group = SubmissionGroup.objects.get(uuid=group_uuid, created_by=request.user)
+        except (Submission.DoesNotExist, SubmissionGroup.DoesNotExist):
+            response = HttpResponse(status=404)
+            return trigger_client_event(
+                response, "showError", {"value": gettext("Submission or group not found")}
+            )
+        submission.part_of_group = group
+        submission.save()
+        response = HttpResponse(status=204)
+        return trigger_client_event(
+            response,
+            "showSuccess",
+            {
+                "value": gettext('Submission "%(title)s" assigned to group "%(group_name)s"')
+                % {
+                    "title": escape(submission.metadata.accession_title)
+                    if submission.metadata
+                    else "",
+                    "group_name": escape(group.name),
+                }
+            },
+        )
+    except Exception:
+        response = HttpResponse(status=500)
+        return trigger_client_event(
+            response,
+            "showError",
+            {"value": gettext("Failed to assign submission to group")},
+        )

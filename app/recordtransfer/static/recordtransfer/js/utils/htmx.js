@@ -60,7 +60,7 @@ export const handleModalAfterSwap = (e, context) => {
     // Check if swap was triggered by the new submission group button
     if (triggeredBy === "id_new_submission_group_button") {
         setupSubmissionGroupForm(context);
-    } else if (triggeredBy.startsWith("change_submission_group_")) {
+    } else if (triggeredBy.startsWith("assign_submission_group_")) {
         setupChangeSubmissionGroupForm();
     }
     // Always show the modal after a swap on the modal content container
