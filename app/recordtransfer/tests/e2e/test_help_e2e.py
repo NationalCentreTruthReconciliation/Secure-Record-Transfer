@@ -84,3 +84,32 @@ class HelpPageTest(SeleniumLiveServerTestCase):
             collapse_content = card.find_element(By.CSS_SELECTOR, ".collapse-content")
             lists = collapse_content.find_elements(By.TAG_NAME, "ul")
             self.assertTrue(len(lists) > 0, f"Section {section_id} should have at least one list")
+
+    def test_page_responsiveness(self) -> None:
+        """Test that the About page is responsive at different viewport sizes."""
+        driver = self.driver
+        help_url = reverse("recordtransfer:help")
+
+        # Test desktop size
+        driver.set_window_size(1200, 800)
+        driver.get(f"{self.live_server_url}{help_url}")
+        desktop_element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".card"))
+        )
+        self.assertTrue(desktop_element.is_displayed())
+
+        # Test tablet size
+        driver.set_window_size(768, 1024)
+        driver.get(f"{self.live_server_url}{help_url}")
+        tablet_element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".card"))
+        )
+        self.assertTrue(tablet_element.is_displayed())
+
+        # Test mobile size
+        driver.set_window_size(375, 667)
+        driver.get(f"{self.live_server_url}{help_url}")
+        mobile_element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".card"))
+        )
+        self.assertTrue(mobile_element.is_displayed())
