@@ -73,26 +73,40 @@ export const setupSubmissionGroupForm = (context) => {
     checkForChanges();
 };
 
+/**
+ * Sets up the change submission group form by enabling dynamic group description updates
+ * and controlling the change button state based on selection changes.
+ * @returns {void}
+ */
 export const setupChangeSubmissionGroupForm = () => {
     const selectElement = document.getElementById("group_select");
     const descriptionDisplay = document.getElementById("group_description_display");
+    const changeGroupButton = document.getElementById("change_group_btn");
+    const initialSelectedIndex = selectElement.selectedIndex;
+
+    const updateGroupDescription = () => {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const description = selectedOption.getAttribute("data-description");
+
+        if (description) {
+            descriptionDisplay.textContent = description;
+        }
+    };
+
+    const updateChangeGroupButtonState = () => {
+        const selectedIndex = selectElement.selectedIndex;
+        changeGroupButton.disabled = selectedIndex === initialSelectedIndex;
+    };
 
     if (!selectElement || !descriptionDisplay) {
         return;
     }
 
     selectElement.addEventListener("change", () => {
-        updateGroupDescription(selectElement, descriptionDisplay);
+        updateGroupDescription();
+        updateChangeGroupButtonState();
     });
 
-    updateGroupDescription(selectElement, descriptionDisplay);
-};
-
-const updateGroupDescription = (selectElement, descriptionDisplay) => {
-    const selectedOption = selectElement.options[selectElement.selectedIndex];
-    const description = selectedOption.getAttribute("data-description");
-
-    if (description) {
-        descriptionDisplay.textContent = description;
-    }
+    updateGroupDescription();
+    updateChangeGroupButtonState();
 };

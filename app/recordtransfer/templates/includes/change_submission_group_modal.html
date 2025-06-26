@@ -15,7 +15,7 @@
     <form method="dialog">
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Submission groups</legend>
-            <select class="select" id="group_select" onchange="updateGroupDescription()">
+            <select class="select" id="group_select">
                 <option value=""
                         data-description="{% trans "Select a group to see its description" %}"
                         disabled
@@ -45,7 +45,8 @@
             <button id="change_group_btn"
                     hx-post=""
                     hx-on::after-request=""
-                    class="btn btn-primary">
+                    class="btn btn-primary"
+                    disabled>
                 {% if current_group %}
                     {% trans "Change Group" %}
                 {% else %}
