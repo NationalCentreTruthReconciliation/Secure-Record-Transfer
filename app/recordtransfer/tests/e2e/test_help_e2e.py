@@ -4,6 +4,8 @@ from django.conf import settings
 from django.test import override_settings, tag
 from django.urls import reverse
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from recordtransfer.tests.e2e.selenium_setup import SeleniumLiveServerTestCase
 
@@ -43,3 +45,20 @@ class HelpPageTest(SeleniumLiveServerTestCase):
         for section_id in help_sections:
             section = driver.find_element(By.ID, section_id)
             self.assertTrue(section.is_displayed(), f"Section {section_id} should be visible")
+
+    def test_navigation_to_help_page(self) -> None:
+        """Test navigating to the Help page from the homepage."""
+        driver = self.driver
+        # Start at homepage
+        driver.get(f"{self.live_server_url}/")
+
+        # Find and click the Help link in the navigation
+
+        help_link = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.ID, "nav-help")))
+        help_link.click()
+
+        # Verify we're on the Help page
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "help-page-heading"))
+        )
+        self.assertIn("help", driver.current_url)
