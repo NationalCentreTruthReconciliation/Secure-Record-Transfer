@@ -1058,10 +1058,12 @@ class Submission(models.Model):
         algorithms: Iterable[str] = ("sha512",),
         file_perms: str = "644",
     ) -> bagit.Bag:
-        """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
-        is determined by self.location. Checks the validity of the Bag post-creation to ensure that
-        integrity is maintained. The data payload files come from the UploadSession associated with
-        this submission.
+        """Create a BagIt bag on the file system for this Submission. Checks the validity of the
+        Bag post-creation to ensure that integrity is maintained. The data payload files come from
+        the UploadSession associated with this submission.
+
+        If given a location to an existing Bag, this function will check whether the Bag can be
+        updated in-place. If not, the Bag will be completely re-generated again.
 
         Raises:
             ValueError: If any required state is incorrect (e.g., no upload session)
