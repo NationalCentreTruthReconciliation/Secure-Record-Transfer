@@ -1259,6 +1259,64 @@ class TestSiteSetting(TestCase):
         ):
             SiteSetting.get_value_int(mock_key)
 
+    def test_get_value_str_with_cached_none_value(self) -> None:
+        """Test that get_value_str doesn't query database when None is cached."""
+        cache.set("TEST_STRING_SETTING", None)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        # Mock the database query to ensure it's not called
+        with patch.object(SiteSetting.objects, "get") as mock_get:
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertIsNone(result)
+            # Verify database was not queried
+            mock_get.assert_not_called()
+
+    def test_get_value_int_with_cached_none_value(self) -> None:
+        """Test that get_value_int doesn't query database when None is cached."""
+        cache.set("TEST_INT_SETTING", None)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        # Mock the database query to ensure it's not called
+        with patch.object(SiteSetting.objects, "get") as mock_get:
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertIsNone(result)
+            # Verify database was not queried
+            mock_get.assert_not_called()
+
+    def test_get_value_str_cache_miss_queries_database(self) -> None:
+        """Test that get_value_str queries database when value is not cached."""
+        # Clear cache to ensure cache miss
+        cache.delete("TEST_STRING_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        # Mock the database query
+        with patch.object(SiteSetting.objects, "get", return_value=self.string_setting) as mock_get:
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertEqual(result, "test string value")
+            # Verify database was queried exactly once
+            mock_get.assert_called_once_with(key="TEST_STRING_SETTING")
+
+    def test_get_value_int_cache_miss_queries_database(self) -> None:
+        """Test that get_value_int queries database when value is not cached."""
+        # Clear cache to ensure cache miss
+        cache.delete("TEST_INT_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        # Mock the database query
+        with patch.object(SiteSetting.objects, "get", return_value=self.int_setting) as mock_get:
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertEqual(result, 42)
+            # Verify database was queried exactly once
+            mock_get.assert_called_once_with(key="TEST_INT_SETTING")
+
     def test_post_save_signal_updates_cache_string(self) -> None:
         """Test that the post_save signal updates cache for string values on update, not
         creation.
