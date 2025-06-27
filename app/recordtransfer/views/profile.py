@@ -16,7 +16,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import HtmlIds, QueryParameters
+from recordtransfer.constants import FormFieldNames, HtmlIds, QueryParameters
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import UserProfileForm
@@ -334,6 +334,11 @@ def assign_submission_group_modal(request: HttpRequest, uuid: str) -> HttpRespon
         "current_group": submission.part_of_group,
         "submission_title": submission.metadata.accession_title if submission.metadata else "",
         "submission_uuid": submission.uuid,
+        "form_field_names": {
+            "SUBMISSION_UUID": FormFieldNames.SUBMISSION_UUID,
+            "GROUP_UUID": FormFieldNames.GROUP_UUID,
+            "UNASSIGN": FormFieldNames.UNASSIGN,
+        },
     }
     return render(request, "includes/assign_submission_group_modal.html", context)
 
@@ -345,9 +350,9 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
         return HttpResponse(status=400)
 
     try:
-        submission_uuid = request.POST.get("submission_uuid")
-        group_uuid = request.POST.get("group_uuid")
-        unassign = "unassign" in request.POST
+        submission_uuid = request.POST.get(FormFieldNames.SUBMISSION_UUID)
+        group_uuid = request.POST.get(FormFieldNames.GROUP_UUID)
+        unassign = FormFieldNames.UNASSIGN in request.POST
 
         if not submission_uuid:
             raise ValueError("Submission UUID is required.")

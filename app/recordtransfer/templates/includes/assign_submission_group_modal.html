@@ -17,7 +17,9 @@
         {% csrf_token %}
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Submission groups</legend>
-            <select id="group_select" name="group_uuid" class="select">
+            <select id="group_select"
+                    name="{{ form_field_names.GROUP_UUID }}"
+                    class="select">
                 <option value=""
                         data-description="{% trans "Select a group to see its description" %}"
                         disabled
@@ -35,7 +37,7 @@
             </select>
             <span class="label" id="group_description_display"></span>
             <input id="submission_uuid"
-                   name="submission_uuid"
+                   name="{{ form_field_names.SUBMISSION_UUID }}"
                    value="{{ submission_uuid }}"
                    type="hidden">
         </fieldset>
@@ -43,7 +45,7 @@
             <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
             {% if current_group %}
                 <button id="unassign_group_btn"
-                        name="unassign"
+                        name="{{ form_field_names.UNASSIGN }}"
                         class="btn btn-outline btn-warning"
                         type="submit">{% trans "Unassign Group" %}</button>
             {% endif %}
