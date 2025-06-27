@@ -174,7 +174,6 @@ class ContactInfoForm(SubmissionForm):
         choices=[
             ("", gettext("Select your province")),
             # Canada
-            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
             ("MB", "Manitoba"),
@@ -239,6 +238,7 @@ class ContactInfoForm(SubmissionForm):
             ("WV", "West Virginia"),
             ("WI", "Wisconsin"),
             ("WY", "Wyoming"),
+            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
         ],
         initial="",
         label="Province or state",
@@ -331,7 +331,6 @@ class SourceInfoForm(SubmissionForm):
                     "other_source_type": "",
                     "other_source_role": "",
                     "source_note": "",
-                    "preliminary_custodial_history": "",
                 }
             )
             for field in ["other_source_type", "other_source_role"]:
@@ -383,7 +382,7 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.RadioSelect(
             attrs={"id": HtmlIds.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
         ),
-        label=gettext("Submitting on behalf of an organization/another person"),
+        label=gettext("Fill out this section?"),
         initial="no",
     )
 
@@ -485,23 +484,6 @@ class SourceInfoForm(SubmissionForm):
         ),
         label=gettext("Source notes"),
         help_text=gettext("e.g., The donor wishes to remain anonymous"),
-    )
-
-    preliminary_custodial_history = forms.CharField(
-        required=False,
-        max_length=2000,
-        widget=forms.Textarea(
-            attrs={
-                "rows": "4",
-                "placeholder": gettext(
-                    "Enter any information you have on the history of who has had "
-                    "custody of the records or who has kept the records in the past "
-                    "(optional)"
-                ),
-            }
-        ),
-        label=gettext("Custodial history"),
-        help_text=gettext("e.g., John Doe held these records before donating them in 1960"),
     )
 
 
@@ -665,6 +647,23 @@ class RecordDescriptionForm(SubmissionForm):
         help_text=gettext("Briefly describe the condition of the files you are submitting."),
     )
 
+    preliminary_custodial_history = forms.CharField(
+        required=False,
+        max_length=2000,
+        widget=forms.Textarea(
+            attrs={
+                "rows": "4",
+                "placeholder": gettext(
+                    "Enter any information you have on the history of who has had "
+                    "custody of the records or who has kept the records in the past "
+                    "(optional)"
+                ),
+            }
+        ),
+        label=gettext("Custodial history"),
+        help_text=gettext("e.g., John Doe held these records before donating them in 1960"),
+    )
+
 
 class ExtendedRecordDescriptionForm(RecordDescriptionForm):
     """Adds quantity and type of units to record description form. Intended to be used when file
@@ -689,7 +688,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
 
 
 class RightsFormSet(BaseFormSet):
-    """Special formset to enforce at least one rights form to have a value."""
+    """Formset for rights information (optional)."""
 
     class Meta:
         """Meta information for the form."""
@@ -698,7 +697,7 @@ class RightsFormSet(BaseFormSet):
 
     def __init__(self, *args, **kwargs):
         super(RightsFormSet, self).__init__(*args, **kwargs)
-        self.forms[0].empty_permitted = False
+        self.forms[0].empty_permitted = True
 
 
 class RightsForm(SubmissionForm):
@@ -745,7 +744,8 @@ class RightsForm(SubmissionForm):
         )
         .order_by("sort_order_other_first"),
         label=gettext("Type of rights"),
-        empty_label=gettext("Please select one"),
+        empty_label=gettext("Select a rights type (optional)"),
+        required=False,
     )
 
     other_rights_type = forms.CharField(

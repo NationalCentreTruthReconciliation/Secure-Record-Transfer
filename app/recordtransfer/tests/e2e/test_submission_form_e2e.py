@@ -45,7 +45,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "source_type": "Individual",
             "source_role": "Donor",
             "source_note": "Test Source Note",
-            "preliminary_custodial_history": "Test Custodial History",
         },
         SubmissionStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(SubmissionStep.RECORD_DESCRIPTION),
@@ -55,6 +54,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "language": "English",
             "description": "Test Description",
             "condition": "Test Condition",
+            "preliminary_custodial_history": "Test Custodial History",
+
         },
         SubmissionStep.RIGHTS: {
             "section_title": get_section_title(SubmissionStep.RIGHTS),
@@ -227,12 +228,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         if not required_only:
             source_note_input = driver.find_element(By.NAME, "sourceinfo-source_note")
-            preliminary_custodial_history = driver.find_element(
-                By.NAME, "sourceinfo-preliminary_custodial_history"
-            )
 
             source_note_input.send_keys(data["source_note"])
-            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
         self.go_next_step()
 
@@ -302,8 +299,13 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             condition_input = driver.find_element(
                 By.NAME, "recorddescription-condition_assessment"
             )
+            preliminary_custodial_history = driver.find_element(
+                By.NAME, "recorddescription-preliminary_custodial_history"
+            )
 
             condition_input.send_keys(data["condition"])
+            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
+
 
         self.go_next_step()
 
@@ -492,7 +494,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Source type": "Individual",
                     "Source role": "Donor",
                     "Source notes": data["source_note"],
-                    "Custodial history": data["preliminary_custodial_history"],
                 }
                 self._verify_field_values("sourceinfo", fields)
 
@@ -504,6 +505,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
                     "Condition of files": data["condition"],
+                    "Custodial history": data["preliminary_custodial_history"],
+
                 }
                 self._verify_field_values("recorddescription", fields)
 
@@ -857,3 +860,30 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
         )
+
+    def test_optional_rights_step_bypass(self) -> None:
+        """Test that a user can bypass the Rights step without entering any information."""
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(f"{self.live_server_url}/submission/")
+
+        # Complete required steps before Rights step
+        self.complete_legal_agreement_step()
+        self.complete_contact_information_step()
+        self.complete_source_information_step()
+        self.complete_record_description_step()
+
+        # Wait for Rights step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "rights-0-rights_type"))
+        )
+        # Click Next without filling anything
+        self.go_next_step()
+
+        # Verify we moved to the next step (Other Identifiers)
+        identifiers_page = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "otheridentifiers-0-other_identifier_type"))
+        )
+        self.assertTrue(identifiers_page)

@@ -97,10 +97,10 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.SOURCE_INFO: SubmissionStepMeta(
             template="recordtransfer/submission_form_sourceinfo.html",
-            title=gettext("Source Information (Optional)"),
+            title=gettext("Record Source Information (Optional)"),
             form=forms.SourceInfoForm,
             info_message=gettext(
-                "Select Yes if you would like to manually enter source information"
+                "Are you submitting records on behalf of another person or organization? Select Yes to enter information about them."
             ),
         ),
         SubmissionStep.RECORD_DESCRIPTION: SubmissionStepMeta(
@@ -113,35 +113,32 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.RIGHTS: SubmissionStepMeta(
             template="recordtransfer/submission_form_rights.html",
-            title=gettext("Record Rights"),
+            title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=gettext(
-                "Enter any associated rights that apply to the records. Add as many rights "
-                "sections as you like using the + More button. You may enter another type of "
-                "rights if the dropdown does not contain the type of rights you're looking for."
+                "Depending on the records you are submitting, there may be specific rights that govern "
+                "the access of your records. The following is a brief description about the types of "
+                "rights that are available to be used. If none suit your needs, select Other in "
+                "the rights dropdown. "
             ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
-            title=gettext("Other Identifiers (Optional)"),
+            title=gettext("Identifiers (Optional)"),
             form=formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
                 extra=1,
             ),
             info_message=gettext(
-                "This step is optional, if you do not have any other IDs associated with the "
-                "records, go to the next step"
+                "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, you may enter them here. "
+                "This step is optional. If you do not have any identifiers associated with the records, you may proceed to the next step."
             ),
         ),
         SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(
             template="recordtransfer/submission_form_groupsubmission.html",
             title=gettext("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
-            info_message=gettext(
-                "If this submission belongs in a group with other submissions you have made or will "
-                "make, select the group it belongs in in the dropdown below, or create a new group"
-            ),
         ),
         **(
             {
@@ -587,6 +584,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    "ACCEPTED_FILE_FORMATS": settings.ACCEPTED_FILE_FORMATS,
                 }
             )
 
