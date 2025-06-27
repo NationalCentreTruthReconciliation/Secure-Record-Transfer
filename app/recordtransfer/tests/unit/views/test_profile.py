@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
-from recordtransfer.constants import QueryParameters
+from recordtransfer.constants import FormFieldNames, QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
@@ -1179,3 +1179,281 @@ class TestAssignSubmissionGroupModalView(TestCase):
         expected_order = ["A First Group", "Test Group 1", "Test Group 2"]
         self.assertEqual(group_names, expected_order)
 
+
+class TestAssignSubmissionGroupView(TestCase):
+    """Tests for the assign_submission_group view."""
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.other_user = User.objects.create_user(
+            username="otheruser", email="other@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+
+        # Create test submissions
+        self.submission = Submission.objects.create(
+            user=self.user,
+            raw_form=b"test_form_data",
+            bag_name="test-bag",
+            uuid=uuid.uuid4(),
+        )
+        self.other_submission = Submission.objects.create(
+            user=self.other_user,
+            raw_form=b"test_form_data",
+            bag_name="other-test-bag",
+            uuid=uuid.uuid4(),
+        )
+
+        # Create test submission groups
+        self.group1 = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Test Group 1",
+            description="First test group",
+            uuid=uuid.uuid4(),
+        )
+        self.group2 = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Test Group 2",
+            description="Second test group",
+            uuid=uuid.uuid4(),
+        )
+        self.other_group = SubmissionGroup.objects.create(
+            created_by=self.other_user,
+            name="Other User Group",
+            description="Group by other user",
+            uuid=uuid.uuid4(),
+        )
+
+        self.assign_url = reverse("recordtransfer:assign_submission_group")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        Submission.objects.all().delete()
+        SubmissionGroup.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_assign_requires_htmx_request(self) -> None:
+        """Test that the assign view requires HTMX headers."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+        }
+        response = self.client.post(self.assign_url, data=post_data)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
+
+    def test_assign_submission_to_group_success(self) -> None:
+        """Test successful assignment of submission to group."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Verify assignment in database
+        self.submission.refresh_from_db()
+        self.assertEqual(self.submission.part_of_group, self.group1)
+
+    def test_unassign_submission_from_group_success(self) -> None:
+        """Test successful unassignment of submission from group."""
+        # First assign submission to group
+        self.submission.part_of_group = self.group1
+        self.submission.save()
+
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.UNASSIGN: "true",
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 204)
+
+        # Check that HTMX showSuccess event is included
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Verify unassignment in database
+        self.submission.refresh_from_db()
+        self.assertIsNone(self.submission.part_of_group)
+
+    def test_assign_missing_submission_uuid(self) -> None:
+        """Test that missing submission UUID returns error."""
+        post_data = {
+            FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_assign_missing_group_uuid_without_unassign(self) -> None:
+        """Test that missing group UUID without unassign flag returns error."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_assign_nonexistent_submission(self) -> None:
+        """Test assignment with nonexistent submission UUID."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(uuid.uuid4()),
+            FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_assign_nonexistent_group(self) -> None:
+        """Test assignment with nonexistent group UUID."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.GROUP_UUID: str(uuid.uuid4()),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_cannot_assign_other_users_submission(self) -> None:
+        """Test that user cannot assign another user's submission."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.other_submission.uuid),
+            FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_cannot_assign_to_other_users_group(self) -> None:
+        """Test that user cannot assign submission to another user's group."""
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.GROUP_UUID: str(self.other_group.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_unassign_submission_not_in_group(self) -> None:
+        """Test unassigning submission that is not assigned to any group."""
+        # Ensure submission is not assigned to any group
+        self.submission.part_of_group = None
+        self.submission.save()
+
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.UNASSIGN: "true",
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_reassign_submission_to_different_group(self) -> None:
+        """Test reassigning submission from one group to another."""
+        # First assign to group1
+        self.submission.part_of_group = self.group1
+        self.submission.save()
+
+        # Then reassign to group2
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.GROUP_UUID: str(self.group2.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showSuccess", response.headers["HX-Trigger"])
+
+        # Verify reassignment in database
+        self.submission.refresh_from_db()
+        self.assertEqual(self.submission.part_of_group, self.group2)
+
+    def test_login_required(self) -> None:
+        """Test that login is required to access the view."""
+        self.client.logout()
+
+        post_data = {
+            FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+            FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+        }
+
+        response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+
+    def test_get_method_not_allowed(self) -> None:
+        """Test that GET method is not allowed for this view."""
+        response = self.client.get(self.assign_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 405)
+
+    def test_database_error_during_assign(self) -> None:
+        """Test that database errors during assignment are handled."""
+        with patch("recordtransfer.views.profile.Submission.save") as mock_save:
+            mock_save.side_effect = Exception("Database error")
+
+            post_data = {
+                FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+                FormFieldNames.GROUP_UUID: str(self.group1.uuid),
+            }
+
+            response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+            self.assertEqual(response.status_code, 500)
+            self.assertIn("HX-Trigger", response.headers)
+            self.assertIn("showError", response.headers["HX-Trigger"])
+
+    def test_database_error_during_unassign(self) -> None:
+        """Test that database errors during unassignment are handled."""
+        # First assign submission to group
+        self.submission.part_of_group = self.group1
+        self.submission.save()
+
+        # Mock save to raise exception AFTER the initial assignment
+        with patch("recordtransfer.views.profile.Submission.save") as mock_save:
+            mock_save.side_effect = Exception("Database error")
+
+            post_data = {
+                FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
+                FormFieldNames.UNASSIGN: "true",
+            }
+
+            response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
+
+            self.assertEqual(response.status_code, 500)
+            self.assertIn("HX-Trigger", response.headers)
+            self.assertIn("showError", response.headers["HX-Trigger"])
