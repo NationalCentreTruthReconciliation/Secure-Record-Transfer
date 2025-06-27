@@ -134,6 +134,9 @@ More information about the rights in this step can be found on :ref:`Adding Righ
 .. image:: images/submission_step_5.webp
     :alt: Step 5 of the submission form
 
+.. image:: images/submission_step_5_notes.webp
+    :alt: Step 5 of the submission form notes
+
 
 Step 6: Other Identifiers
 #########################
