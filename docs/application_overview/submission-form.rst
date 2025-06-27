@@ -152,7 +152,7 @@ Once you associate a right with the submission, you can also add Notes for that 
     :alt: Step 5 of the submission form notes
 
 
-Step 6: Other Identifiers
+Step 6: Identifiers
 #########################
 
 If the donor has other identifiers that apply to their records, such as an ISBN, or a barcode
