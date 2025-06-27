@@ -42,7 +42,10 @@
         <div class="modal-action">
             <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
             {% if current_group %}
-                <button id="unassign_group_btn" class="btn btn-outline btn-warning">{% trans "Unassign Group" %}</button>
+                <button id="unassign_group_btn"
+                        name="unassign"
+                        class="btn btn-outline btn-warning"
+                        type="submit">{% trans "Unassign Group" %}</button>
             {% endif %}
             <button id="change_group_btn" class="btn btn-primary" type="submit" disabled>
                 {% if current_group %}

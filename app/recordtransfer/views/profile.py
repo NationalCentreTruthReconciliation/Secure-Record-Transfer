@@ -340,24 +340,24 @@ def assign_submission_group_modal(request: HttpRequest, uuid: str) -> HttpRespon
 
 @require_http_methods(["POST"])
 def assign_submission_group(request: HttpRequest) -> HttpResponse:
-    """Assign a submission to a submission group."""
+    """Assign a submission to a submission group or unassign it."""
     if not request.htmx:
         return HttpResponse(status=400)
 
     try:
         submission_uuid = request.POST.get("submission_uuid")
         group_uuid = request.POST.get("group_uuid")
-        unassign = request.POST.get("unassign")
+        unassign = "unassign" in request.POST
 
         if not submission_uuid:
             raise ValueError("Submission UUID is required.")
-
         if not group_uuid and not unassign:
             raise ValueError("Group UUID is required.")
 
-        group = None
         try:
             submission = Submission.objects.get(uuid=submission_uuid, user=request.user)
+            group = None
+            # We only need the group if we are assigning to it
             if not unassign:
                 group = SubmissionGroup.objects.get(uuid=group_uuid, created_by=request.user)
         except (Submission.DoesNotExist, SubmissionGroup.DoesNotExist):
@@ -366,39 +366,16 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
                 response, "showError", {"value": gettext("Submission or group not found")}
             )
 
+        submission_title = (
+            escape(submission.metadata.accession_title) if submission.metadata else ""
+        )
+
         if unassign:
-            submission.part_of_group = None
-            submission.save()
-            response = HttpResponse(status=204)
-            return trigger_client_event(
-                response,
-                "showSuccess",
-                {
-                    "value": gettext('Submission "%(title)s" unassigned from group')
-                    % {
-                        "title": escape(submission.metadata.accession_title)
-                        if submission.metadata
-                        else "",
-                    }
-                },
-            )
-        else:
-            submission.part_of_group = group
-            submission.save()
-            response = HttpResponse(status=204)
-            return trigger_client_event(
-                response,
-                "showSuccess",
-                {
-                    "value": gettext('Submission "%(title)s" assigned to group "%(group_name)s"')
-                    % {
-                        "title": escape(submission.metadata.accession_title)
-                        if submission.metadata
-                        else "",
-                        "group_name": escape(group.name) if group else "",
-                    }
-                },
-            )
+            return _handle_unassign_submission(submission, submission_title)
+
+        assert group is not None, "Group should not be None in assign case"
+        return _handle_assign_submission(submission, group, submission_title)
+
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
@@ -406,3 +383,47 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
             "showError",
             {"value": gettext("Failed to assign submission to group")},
         )
+
+
+def _handle_unassign_submission(submission: Submission, submission_title: str) -> HttpResponse:
+    """Handle unassigning a submission from its group."""
+    original_group = submission.part_of_group
+
+    # Early return for case where submission is not part of any group
+    if not original_group:
+        response = HttpResponse(status=400)
+        return trigger_client_event(
+            response,
+            "showError",
+            {
+                "value": gettext('Submission "%(title)s" is not assigned to any group')
+                % {"title": submission_title}
+            },
+        )
+
+    submission.part_of_group = None
+    submission.save()
+
+    success_message = gettext('Submission "%(title)s" unassigned from group "%(group_name)s"') % {
+        "title": submission_title,
+        "group_name": escape(original_group.name),
+    }
+
+    response = HttpResponse(status=204)
+    return trigger_client_event(response, "showSuccess", {"value": success_message})
+
+
+def _handle_assign_submission(
+    submission: Submission, group: SubmissionGroup, submission_title: str
+) -> HttpResponse:
+    """Handle assigning a submission to a group."""
+    submission.part_of_group = group
+    submission.save()
+
+    success_message = gettext('Submission "%(title)s" assigned to group "%(group_name)s"') % {
+        "title": submission_title,
+        "group_name": escape(group.name) if group else "",
+    }
+
+    response = HttpResponse(status=204)
+    return trigger_client_event(response, "showSuccess", {"value": success_message})
