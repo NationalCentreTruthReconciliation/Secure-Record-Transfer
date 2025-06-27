@@ -176,6 +176,8 @@ here. They can select previous groups from the dropdown, or create a new one by 
 .. image:: images/submission_step_7.webp
     :alt: Step 7 of the submission form
 
+If you are not sure about the purpose of creating these groups, you can click on the link provided at the bottom of the form saying "Why would I want to make a group?" This will take you to a FAQ section that explains the benefits and use cases for grouping submissions.
+
 .. image:: images/submission_step_7_faq_help.webp
     :alt: Step 7 of the submission form FAQ help
 
