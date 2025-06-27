@@ -330,54 +330,73 @@ def assign_submission_group_modal(request: HttpRequest, uuid: str) -> HttpRespon
     context = {
         "groups": groups,
         "current_group": submission.part_of_group,
-        "title": submission.metadata.accession_title if submission.metadata else "",
-        "js_context": {
-            "groups": [
-                {
-                    "uuid": str(group.uuid),
-                    "name": group.name,
-                    "description": group.description,
-                }
-                for group in groups
-            ],
-        },
+        "submission_title": submission.metadata.accession_title if submission.metadata else "",
+        "submission_uuid": submission.uuid,
     }
     return render(request, "includes/assign_submission_group_modal.html", context)
 
 
 @require_http_methods(["POST"])
-def assign_submission_group(
-    request: HttpRequest, submission_uuid: str, group_uuid: str
-) -> HttpResponse:
+def assign_submission_group(request: HttpRequest) -> HttpResponse:
     """Assign a submission to a submission group."""
     if not request.htmx:
         return HttpResponse(status=400)
 
     try:
+        submission_uuid = request.POST.get("submission_uuid")
+        group_uuid = request.POST.get("group_uuid")
+        unassign = request.POST.get("unassign")
+
+        if not submission_uuid:
+            raise ValueError("Submission UUID is required.")
+
+        if not group_uuid and not unassign:
+            raise ValueError("Group UUID is required.")
+
+        group = None
         try:
             submission = Submission.objects.get(uuid=submission_uuid, user=request.user)
-            group = SubmissionGroup.objects.get(uuid=group_uuid, created_by=request.user)
+            if not unassign:
+                group = SubmissionGroup.objects.get(uuid=group_uuid, created_by=request.user)
         except (Submission.DoesNotExist, SubmissionGroup.DoesNotExist):
             response = HttpResponse(status=404)
             return trigger_client_event(
                 response, "showError", {"value": gettext("Submission or group not found")}
             )
-        submission.part_of_group = group
-        submission.save()
-        response = HttpResponse(status=204)
-        return trigger_client_event(
-            response,
-            "showSuccess",
-            {
-                "value": gettext('Submission "%(title)s" assigned to group "%(group_name)s"')
-                % {
-                    "title": escape(submission.metadata.accession_title)
-                    if submission.metadata
-                    else "",
-                    "group_name": escape(group.name),
-                }
-            },
-        )
+
+        if unassign:
+            submission.part_of_group = None
+            submission.save()
+            response = HttpResponse(status=204)
+            return trigger_client_event(
+                response,
+                "showSuccess",
+                {
+                    "value": gettext('Submission "%(title)s" unassigned from group')
+                    % {
+                        "title": escape(submission.metadata.accession_title)
+                        if submission.metadata
+                        else "",
+                    }
+                },
+            )
+        else:
+            submission.part_of_group = group
+            submission.save()
+            response = HttpResponse(status=204)
+            return trigger_client_event(
+                response,
+                "showSuccess",
+                {
+                    "value": gettext('Submission "%(title)s" assigned to group "%(group_name)s"')
+                    % {
+                        "title": escape(submission.metadata.accession_title)
+                        if submission.metadata
+                        else "",
+                        "group_name": escape(group.name) if group else "",
+                    }
+                },
+            )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(

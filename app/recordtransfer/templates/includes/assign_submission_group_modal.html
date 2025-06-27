@@ -4,18 +4,21 @@
     <h3 class="text-lg font-bold mb-5">
         {% if current_group %}
             {% blocktrans %}
-                Change submission group for submission "{{ title }}"
+                Change submission group for submission "{{ submission_title }}"
             {% endblocktrans %}
         {% else %}
             {% blocktrans %}
-                Assign submission group for submission "{{ title }}"
+                Assign submission group for submission "{{ submission_title }}"
             {% endblocktrans %}
         {% endif %}
     </h3>
-    <form method="dialog">
+    <form hx-post="{% url "recordtransfer:assign_submission_group" %}"
+          hx-on::after-request="base_modal.close()"
+          id="assign-submission-group-form">
+        {% csrf_token %}
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Submission groups</legend>
-            <select class="select" id="group_select">
+            <select id="group_select" name="group_uuid" class="select">
                 <option value=""
                         data-description="{% trans "Select a group to see its description" %}"
                         disabled
@@ -32,21 +35,17 @@
                 {% endfor %}
             </select>
             <span class="label" id="group_description_display"></span>
+            <input id="submission_uuid"
+                   name="submission_uuid"
+                   value="{{ submission_uuid }}"
+                   type="hidden">
         </fieldset>
         <div class="modal-action">
-            <button class="btn">{% trans "Cancel" %}</button>
+            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
             {% if current_group %}
-                <button id="unassign_group_btn"
-                        hx-post=""
-                        hx-vals='{"group_uuid": ""}'
-                        hx-on::after-request=""
-                        class="btn btn-outline btn-warning">{% trans "Unassign Group" %}</button>
+                <button id="unassign_group_btn" class="btn btn-outline btn-warning">{% trans "Unassign Group" %}</button>
             {% endif %}
-            <button id="change_group_btn"
-                    hx-post=""
-                    hx-on::after-request=""
-                    class="btn btn-primary"
-                    disabled>
+            <button id="change_group_btn" class="btn btn-primary" type="submit" disabled>
                 {% if current_group %}
                     {% trans "Change Group" %}
                 {% else %}

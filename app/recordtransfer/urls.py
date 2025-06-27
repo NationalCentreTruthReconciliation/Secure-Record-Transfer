@@ -87,7 +87,7 @@ urlpatterns = [
         name="assign_submission_group_modal",
     ),
     path(
-        "assign-submission-group/<uuid:submission_uuid>/<uuid:group_uuid>/",
+        "assign-submission-group",
         login_required(views.profile.assign_submission_group),
         name="assign_submission_group",
     ),
