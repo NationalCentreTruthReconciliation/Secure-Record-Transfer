@@ -79,7 +79,7 @@ On the profile page, fill out your contact information in the "Contact Informati
     :alt: Contact information section on the profile page
 
 
-Step 3: Source information
+Step 3: Record Source information
 ##########################
 
 Here, the donor inputs information about who is submitting the records. If the donor is submitting
@@ -92,7 +92,7 @@ organization/another person" field and simply click **Next Step**.
 If the donor is submitting the records on behalf of another person or an institution, they can
 select "Yes" for that field instead. This will reveal additional fields where they can provide
 information about the organization or person they are submitting the records for. CAAIS includes
-fields for adding notes about the source, as well as custodial history. If the donor feels inclined
+fields for adding notes about the source. If the donor feels inclined
 to include this information, they can do so in the relevant optional fields.
 
 .. image:: images/submission_step_3_on_behalf.webp
