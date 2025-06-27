@@ -162,6 +162,10 @@ here. They can select previous groups from the dropdown, or create a new one by 
 .. image:: images/submission_step_7.webp
     :alt: Step 7 of the submission form
 
+.. image:: images/submission_step_7_faq_help.webp
+    :alt: Step 7 of the submission form FAQ help
+
+
 Clicking on the **Add New Group** button will open a modal where the donor can enter a name and
 description for the group.
 
