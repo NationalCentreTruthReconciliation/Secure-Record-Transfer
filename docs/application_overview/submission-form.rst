@@ -62,6 +62,9 @@ This step gathers contact information from the donor.
 .. image:: images/submission_step_2.webp
     :alt: Step 2 of the submission form
 
+.. image:: images/submission_step_2_prefilled.webp
+    :alt: Step 2 of the submission form prefilled
+
 
 Step 3: Source information
 ##########################
@@ -74,7 +77,7 @@ organization/another person" field and simply click **Next Step**.
     :alt: Step 3 of the submission form, not submitting on behalf of another person or organization
 
 If the donor is submitting the records on behalf of another person or an institution, they can
-select "Yes" for that field instead. This will reveal additional fields where they can provide 
+select "Yes" for that field instead. This will reveal additional fields where they can provide
 information about the organization or person they are submitting the records for. CAAIS includes
 fields for adding notes about the source, as well as custodial history. If the donor feels inclined
 to include this information, they can do so in the relevant optional fields.
@@ -157,7 +160,7 @@ here. They can select previous groups from the dropdown, or create a new one by 
     :alt: Step 7 of the submission form
 
 Clicking on the **Add New Group** button will open a modal where the donor can enter a name and
-description for the group. 
+description for the group.
 
 .. image:: images/submission_step_7_add_group.webp
     :alt: Step 7 of the submission form, adding a new group
