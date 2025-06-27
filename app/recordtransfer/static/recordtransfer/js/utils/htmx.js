@@ -19,23 +19,8 @@ import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./uti
 export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
     closeModal();
 
-    // If the request was successful, refresh the table
     if (e.detail.successful) {
-        // Get base refresh URL
-        const refreshUrl = context["IN_PROGRESS_SUBMISSION_TABLE_URL"];
-        const paginateQueryName = context["PAGINATE_QUERY_NAME"];
-
-        // Get the current page number
-        const currentPage = getCurrentTablePage();
-
-        const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
-
-        window.htmx.ajax("GET",
-            finalUrl,
-            {
-                target: "#" + context["ID_IN_PROGRESS_SUBMISSION_TABLE"],
-                swap: "innerHTML"
-            });
+        refreshIPSubmissionTable(context);
     }
 };
 
@@ -93,26 +78,34 @@ export function handleSubmissionGroupModalFormBeforeSwap(e, context) {
 }
 
 /**
- * Refreshes the submission group table by making an HTMX AJAX request
- * @param {object} context - Configuration object containing URL and element identifiers
- * @param {string} context.SUBMISSION_GROUP_TABLE_URL - Base URL for fetching submission group
- * table data
- * @param {string} context.PAGINATE_QUERY_NAME - Query parameter name used for pagination
- * @param {string} context.ID_SUBMISSION_GROUP_TABLE - DOM element ID of the submission group table
- * to update
+ * Generic function to refresh a table by making an HTMX AJAX request
+ * @param {string} tableUrl - Base URL for fetching table data
+ * @param {string} paginateQueryName - Query parameter name used for pagination
+ * @param {string} tableElementId - DOM element ID of the table to update
  * @returns {void}
  */
-const refreshSubmissionGroupTable = (context) => {
-    const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
-    const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+const refreshTable = (tableUrl, paginateQueryName, tableElementId) => {
     const currentPage = getCurrentTablePage();
+    const finalUrl = addQueryParam(tableUrl, paginateQueryName, currentPage);
 
-    const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
+    window.htmx.ajax("GET", finalUrl, {
+        target: "#" + tableElementId,
+        swap: "innerHTML"
+    });
+};
 
-    window.htmx.ajax("GET",
-        finalUrl,
-        {
-            target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
-            swap: "innerHTML"
-        });
+const refreshSubmissionGroupTable = (context) => {
+    refreshTable(
+        context["SUBMISSION_GROUP_TABLE_URL"],
+        context["PAGINATE_QUERY_NAME"],
+        context["ID_SUBMISSION_GROUP_TABLE"]
+    );
+};
+
+const refreshIPSubmissionTable = (context) => {
+    refreshTable(
+        context["IN_PROGRESS_SUBMISSION_TABLE_URL"],
+        context["PAGINATE_QUERY_NAME"],
+        context["ID_IN_PROGRESS_SUBMISSION_TABLE"]
+    );
 };
