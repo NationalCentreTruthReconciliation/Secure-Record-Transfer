@@ -31,7 +31,7 @@ Contact Information
 ------------------
 The Contact Information tab allows users to store their contact details including phone number and address. This information is stored in your profile for convenience.
 
-.. image:: images/profile_contact_information.webp
+.. image:: images/profile_contact_populate.webp
     :alt: User profile contact information
 
 To save changes made to contact information, click on the "Save" button.
