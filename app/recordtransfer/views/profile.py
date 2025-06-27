@@ -70,6 +70,8 @@ class UserProfile(UpdateView):
                     ),
                     "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
                     "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
+                    "ID_SUBMISSION_TABLE": HtmlIds.ID_SUBMISSION_TABLE,
+                    "SUBMISSION_TABLE_URL": reverse("recordtransfer:submission_table"),
                 },
             }
         )

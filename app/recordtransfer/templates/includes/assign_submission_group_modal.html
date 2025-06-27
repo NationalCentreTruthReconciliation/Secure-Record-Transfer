@@ -13,7 +13,6 @@
         {% endif %}
     </h3>
     <form hx-post="{% url "recordtransfer:assign_submission_group" %}"
-          hx-on::after-request="base_modal.close()"
           id="assign-submission-group-form">
         {% csrf_token %}
         <fieldset class="fieldset">

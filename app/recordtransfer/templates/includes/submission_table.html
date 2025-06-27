@@ -3,6 +3,9 @@
 {% block table_headers %}
     <th>{% trans "Date Submitted" %}</th>
     <th>{% trans "Submission Title" %}</th>
+    {% if not IN_GROUP %}
+        <th>{% trans "Submission Group" %}</th>
+    {% endif %}
     <th>{% trans "Files Submitted" %}</th>
     <th>{% trans "Actions" %}</th>
 {% endblock table_headers %}
@@ -11,6 +14,17 @@
         <tr class="hover:bg-base-300">
             <td>{{ submission.submission_date }}</td>
             <td>{{ submission.metadata.accession_title }}</td>
+            {% if not IN_GROUP %}
+                <td>
+                    {% if submission.part_of_group %}
+                        <a href="{% url 'recordtransfer:submission_group_detail' uuid=submission.part_of_group.uuid %}"
+                           class="link link-primary"
+                           id="submission_group_{{ forloop.counter }}">{{ submission.part_of_group.name }}</a>
+                    {% else %}
+                        <span class="text-gray-500" id="submission_group_{{ forloop.counter }}">{% trans "N/A" %}</span>
+                    {% endif %}
+                </td>
+            {% endif %}
             <td>{{ submission.extent_statements }}</td>
             <td>
                 <div class="flex flex-row gap-4">
