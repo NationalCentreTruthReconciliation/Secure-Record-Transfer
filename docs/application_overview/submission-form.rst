@@ -131,14 +131,12 @@ By default, a date widget is used to select the start and end dates. To allow do
 manually, the date widget can be disabled by modifying :ref:`USE_DATE_WIDGETS`.
 
 
-Step 5: Record Rights
+Step 5: Record Rights and Restrictions
 #####################
 
-Here, the donor will enter the rights applying to their records. They must select at least one type
-of rights that apply to their records. If the type is not present in the dropdown, they can select
-Other and type in their own type of right. If they want to add multiple rights if, for example,
-there are different rights for different records, they can click the **+ Add** button to add more.
-Alternately, they can remove rights with the **- Remove** button.
+This optional step allows the donor to enter any rights applying to their records. Unlike other sections, donors can skip this step if they're unsure about the rights status of their materials.
+
+If donors wish to provide rights information, they can select one or more types of rights from the dropdown menu. If the appropriate type isn't listed, they can select "Other" and specify their own type. The **+ More** button allows adding multiple rights (useful when different rights apply to different records), and the **- Remove** button can remove entries.
 
 If the donor is unsure about which right/(s) apply for their records, they can click on a link
 found at the top of the form, which will open up a description for each type of right on a new tab.
