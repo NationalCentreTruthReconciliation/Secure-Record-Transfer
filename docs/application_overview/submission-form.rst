@@ -196,8 +196,7 @@ This is where the donor can add files to their submission. They must include at 
 make a submission. They can add files to the file drop zone by clicking on "browse files" or by
 dragging and dropping files into it. Only accepted file formats can be uploaded.
 
-To see more about how to change what files are accepted, go to the section on
-:ref:`ACCEPTED_FILE_FORMATS`.
+Users can open the dropdown button labeled "Accepted File Formats" to see which file types are supported for upload.
 
 .. image:: images/submission_step_8_accepted_file_types.webp
     :alt: Step 8 of the submission form accepted file types
