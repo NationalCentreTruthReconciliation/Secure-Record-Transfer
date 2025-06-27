@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
+from caais.models import Metadata
 from recordtransfer.constants import FormFieldNames, QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
@@ -1008,13 +1009,16 @@ class TestAssignSubmissionGroupModalView(TestCase):
         )
         self.client.force_login(self.user)
 
+        metadata = Metadata.objects.create(accession_title="Test Title")
         # Create test submissions
         self.submission = Submission.objects.create(
             user=self.user,
+            metadata=metadata,
             raw_form=b"test_form_data",
             bag_name="test-bag",
             uuid=uuid.uuid4(),
         )
+
         self.other_submission = Submission.objects.create(
             user=self.other_user,
             raw_form=b"test_form_data",
@@ -1108,14 +1112,11 @@ class TestAssignSubmissionGroupModalView(TestCase):
 
     def test_modal_submission_with_metadata_title(self) -> None:
         """Test modal display shows submission title from metadata when available."""
-        # This test would require creating metadata, but since we don't have
-        # the Metadata model imported and it might be complex to create,
-        # we'll test the empty title case which is already covered in the view
         response = self.client.get(self.assign_modal_url, headers=self.htmx_headers)
 
         self.assertEqual(response.status_code, 200)
         context = response.context
-        self.assertEqual(context["submission_title"], "")  # No metadata, so empty string
+        self.assertEqual(context["submission_title"], "Test Title")
 
     def test_modal_filters_groups_by_user(self) -> None:
         """Test that modal only shows groups created by the current user."""

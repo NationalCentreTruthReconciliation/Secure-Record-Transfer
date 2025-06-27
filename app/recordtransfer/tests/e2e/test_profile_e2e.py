@@ -536,6 +536,19 @@ class ChangeSubmissionGroupTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.ID, "group_select"))
         )
 
+    def test_submission_title_present(self) -> None:
+        """Test that the submission title is present in the submission group change modal."""
+        driver = self.driver
+        self._click_assign_group_button()
+
+        WebDriverWait(driver, 5).until(
+            EC.visibility_of_element_located((By.ID, "assign-group-modal-heading"))
+        )
+
+        # Check that the submission title is present in the modal
+        modal_title = driver.find_element(By.ID, "assign-group-modal-heading")
+        self.assertIn("Test Title", modal_title.text)
+
     def test_assign_submission_group(self) -> None:
         """Test assigning a submission to a submission group from the profile page."""
         driver = self.driver
