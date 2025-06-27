@@ -145,6 +145,9 @@ More information about the rights in this step can be found on :ref:`Adding Righ
 .. image:: images/submission_step_5.webp
     :alt: Step 5 of the submission form
 
+
+Once you associate a right with the submission, you can also add Notes for that specific right to provide additional context or clarification about how it applies to your records.
+
 .. image:: images/submission_step_5_notes.webp
     :alt: Step 5 of the submission form notes
 
