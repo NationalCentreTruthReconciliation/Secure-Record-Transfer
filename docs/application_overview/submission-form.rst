@@ -183,6 +183,9 @@ dragging and dropping files into it. Only accepted file formats can be uploaded.
 To see more about how to change what files are accepted, go to the section on
 :ref:`ACCEPTED_FILE_FORMATS`.
 
+.. image:: images/submission_step_8_accepted_file_types.webp
+    :alt: Step 8 of the submission form accepted file types
+
 Any additional notes that did not fit in the previous steps can be added in the "Other Notes"
 field.
 
