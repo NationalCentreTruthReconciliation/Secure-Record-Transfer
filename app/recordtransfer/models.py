@@ -37,6 +37,9 @@ from recordtransfer.utils import get_human_readable_file_count, get_human_readab
 
 LOGGER = logging.getLogger("recordtransfer")
 
+# Sentinel object to distinguish between cache miss and cached None values
+NOT_CACHED = object()
+
 
 class User(AbstractUser):
     """The main User object used to authenticate users."""
@@ -220,8 +223,8 @@ class SiteSetting(models.Model):
         Raises:
             ValidationError: If the setting is not of type :attr:`SettingType.STR`.
         """
-        val = cache.get(key.name)
-        if val is not None:
+        val = cache.get(key.name, default=NOT_CACHED)
+        if val is not NOT_CACHED:
             return val
         obj = SiteSetting.objects.get(key=key.name)
 
@@ -247,8 +250,8 @@ class SiteSetting(models.Model):
         Raises:
             ValidationError: If the setting is not of type :attr:`SettingType.INT`.
         """
-        val = cache.get(key.name)
-        if val is not None:
+        val = cache.get(key.name, default=NOT_CACHED)
+        if val is not NOT_CACHED:
             return val
 
         obj = SiteSetting.objects.get(key=key.name)
