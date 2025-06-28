@@ -77,6 +77,12 @@ ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
+# Create non-root user with same UID for consistency
+RUN useradd --create-home --uid 1000 myuser && \
+    mkdir -p ${APP_DIR} && \
+    chown -R myuser:myuser ${PROJ_DIR}
+
+
 # Install required dependencies for mysqlclient and curl for health checks
 RUN apt-get update && \
     apt-get install -y --no-install-recommends default-mysql-client curl && \
@@ -86,10 +92,15 @@ COPY --from=builder ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
 COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
 COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
 COPY --from=builder ${APP_DIR} ${APP_DIR}
+
+# Set ownership AFTER copying files
+RUN chown -R myuser:myuser ${PROJ_DIR}
+
 # Activate virtual environment
 ENV PATH="${PROJ_DIR}/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="${PROJ_DIR}/.venv"
 
 WORKDIR ${APP_DIR}
+USER myuser
 
 ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]

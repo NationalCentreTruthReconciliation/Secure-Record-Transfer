@@ -1,4 +1,16 @@
 services:
+  init-volumes:
+    image: secure-record-transfer-prod
+    command: >
+      sh -c "chown -R myuser:myuser /opt/secure-record-transfer/app/static/ &&
+            chown -R myuser:myuser /opt/secure-record-transfer/app/media/ &&
+            chmod -R 775 /opt/secure-record-transfer/app/static/ &&
+            chmod -R 775 /opt/secure-record-transfer/app/media/"
+    user: root
+    volumes:
+      - static-volume:/opt/secure-record-transfer/app/static/
+      - media-volume:/opt/secure-record-transfer/app/media/
+
   clamav:
     image: docker.io/clamav/clamav-debian
     restart: unless-stopped
@@ -46,7 +58,7 @@ services:
       target: prod
       dockerfile: Containerfile
       args:
-          WEBPACK_MODE: production
+        WEBPACK_MODE: production
     image: secure-record-transfer-prod
     command: python manage.py rqworker default
     restart: unless-stopped
@@ -59,6 +71,7 @@ services:
     depends_on:
       - db
       - redis
+      - init-volumes
     volumes:
       - static-volume:/opt/secure-record-transfer/app/static/
       - media-volume:/opt/secure-record-transfer/app/media/
@@ -99,6 +112,8 @@ services:
       - rq
       - rq-scheduler
       - clamav
+      - init-volumes
+
     volumes:
       - static-volume:/opt/secure-record-transfer/app/static/
       - media-volume:/opt/secure-record-transfer/app/media/
