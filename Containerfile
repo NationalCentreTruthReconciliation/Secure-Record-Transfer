@@ -93,8 +93,15 @@ COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
 COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
 COPY --from=builder ${APP_DIR} ${APP_DIR}
 
-# Set ownership AFTER copying files
-RUN chown -R myuser:myuser ${PROJ_DIR}
+# Set ownership and secure permissions AFTER copying files
+RUN chown -R myuser:myuser ${PROJ_DIR} && \
+    find ${PROJ_DIR} -type d -exec chmod 755 {} + && \
+    find ${PROJ_DIR} -type f -exec chmod 644 {} + && \
+    chmod +x ${PROJ_DIR}/entrypoint.sh && \
+    chmod +x ${PROJ_DIR}/.venv/bin/* && \
+    mkdir -p ${APP_DIR}/static ${APP_DIR}/media && \
+    chown myuser:myuser ${APP_DIR}/static ${APP_DIR}/media && \
+    chmod 775 ${APP_DIR}/static ${APP_DIR}/media
 
 # Activate virtual environment
 ENV PATH="${PROJ_DIR}/.venv/bin:$PATH"
