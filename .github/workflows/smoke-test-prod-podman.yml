@@ -23,14 +23,15 @@ jobs:
       - name: Add SECRET_KEY to environment file
         run: |
           echo -e "\nSECRET_KEY=${{ secrets.SECRET_KEY }}" >> .prod.env
+
       - name: Set up Podman
         run: |
           sudo apt-get update
           sudo apt-get -y install podman
           pip install podman-compose
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          podman --version
-          which podman-compose
+          podman-compose --version
+
       - name: Start containers
         run: podman-compose -f compose.prod.yml up -d
 
