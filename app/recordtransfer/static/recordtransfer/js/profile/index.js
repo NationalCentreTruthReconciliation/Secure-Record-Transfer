@@ -3,7 +3,8 @@ import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
     handleSubmissionGroupModalFormBeforeSwap,
-    handleSubmissionGroupModalFormAfterSwap
+    handleAssignSubmissionGroupModalBeforeSwap,
+    handleModalAfterSwap
 } from "../utils/htmx.js";
 import { setupToastNotifications, displayStoredToast } from "../utils/toast.js";
 import { initTabListeners, restoreTab } from "./tab.js";
@@ -41,10 +42,11 @@ export const initializeProfile = function() {
     };
 
     window.handleModalBeforeSwap = (e) => {
-        return handleSubmissionGroupModalFormBeforeSwap(e, context);
+        handleSubmissionGroupModalFormBeforeSwap(e, context);
+        handleAssignSubmissionGroupModalBeforeSwap(e, context);
     };
 
     window.handleModalAfterSwap = (e) => {
-        return handleSubmissionGroupModalFormAfterSwap(e, context);
+        return handleModalAfterSwap(e, context);
     };
 };
