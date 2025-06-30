@@ -80,7 +80,7 @@ On the profile page, fill out your contact information in the "Contact Informati
 
 
 Step 3: Record Source information
-##########################
+#################################
 
 Here, the donor inputs information about who is submitting the records. If the donor is submitting
 records themselves, they can leave the default "No" selected for the "Submitting on behalf of an
@@ -138,7 +138,7 @@ manually, the date widget can be disabled by modifying :ref:`USE_DATE_WIDGETS`.
 
 
 Step 5: Record Rights and Restrictions
-#####################
+######################################
 
 This optional step allows the donor to enter any rights applying to their records. Unlike other sections, donors can skip this step if they're unsure about the rights status of their materials.
 
@@ -159,7 +159,7 @@ Once you associate a right with the submission, you can also add Notes for that 
 
 
 Step 6: Identifiers
-#########################
+###################
 
 If the donor has other identifiers that apply to their records, such as an ISBN, or a barcode
 number, they can put those here. They are not required to enter any here, so can skip to the next
