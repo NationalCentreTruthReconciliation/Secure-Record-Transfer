@@ -1,160 +1,144 @@
-{% extends 'recordtransfer/base.html' %}
+{% extends "recordtransfer/base.html" %}
 {% load i18n %}
 {% load static %}
-
-{% block title %}{% trans "NCTR Record Transfer Portal" %}{% endblock %}
-
+{% block title %}
+    {% trans "NCTR Record Transfer Portal" %}
+{% endblock title %}
 {% block focused_content %}
-<div id="main-graphic-container">
-    {% include "recordtransfer/header.html" %}
-    <img id="main-graphic" src="{% static 'hero4-scaled.webp' %}">
-    <div class="main-graphic-text-container">
-        <div class="main-graphic-text">
-            {% trans "Securely Send Your Records to the NCTR" %}
-        </div>
-        <div class="hero-button-container">
-            <div class="hero-button">
-                <a href="{% url 'recordtransfer:submit' %}">
-                    {% trans "Submit Your Records" %}
-                </a>
-            </div>
-            {% if not user.is_authenticated %}
-                {% if SIGN_UP_ENABLED %}
+    <div id="main-graphic-container">
+        {% include "recordtransfer/header.html" %}
+        <img id="main-graphic"
+             src="{% static 'hero4-scaled.webp' %}"
+             alt="{% trans "NCTR Record Transfer Portal main graphic" %}">
+        <div class="main-graphic-text-container">
+            <div class="main-graphic-text">{% trans "Securely Send Your Records to the NCTR" %}</div>
+            <div class="hero-button-container">
                 <div class="hero-button">
-                    <a href="{% url 'recordtransfer:create_account' %}">
-                        {% trans "Sign up Now" %}
-                    </a>
+                    <a href="{% url 'recordtransfer:submit' %}">{% trans "Submit Your Records" %}</a>
                 </div>
+                {% if not user.is_authenticated %}
+                    {% if SIGN_UP_ENABLED %}
+                        <div class="hero-button">
+                            <a href="{% url 'recordtransfer:create_account' %}">{% trans "Sign up Now" %}</a>
+                        </div>
+                    {% endif %}
+                    <div class="hero-button">
+                        <a href="{% url 'login' %}">{% trans "Log In" %}</a>
+                    </div>
                 {% endif %}
-                <div class="hero-button">
-                    <a href="{% url 'login' %}">
-                        {% trans "Log In" %}
-                    </a>
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
-
+{% endblock focused_content %}
 {% block content %}
-
-<h1 class="homepage-header">{% trans "Preserve History, Share Truth" %}</h1>
-<p class="lead-text">
-    {% blocktrans %}
+    <div style="font-family: 'Merriweather', serif"
+         class="text-4xl mb-4 text-primary text-center mt-4">{% trans "Preserve History, Share Truth" %}</div>
+    <p class="lead-text">
+        {% blocktrans %}
     Join us in building a comprehensive digital archive that honors and preserves vital historical records.
     Our secure transfer portal makes it simple to contribute to this important collection.
     {% endblocktrans %}
-</p>
-
-<div class="features-grid">
-    <div class="feature-box">
-        <h2>{% trans "Simple &amp; Secure" %}</h2>
-        <p>
-            {% blocktrans %}
+    </p>
+    <div class="features-grid">
+        <div class="feature-box">
+            <div style="font-family: 'Merriweather', serif"
+                 class="text-2xl mb-4 text-primary">{% trans "Simple &amp; Secure" %}</div>
+            <p>
+                {% blocktrans %}
             Upload your digital records with confidence through our encrypted, user-friendly
             platform.
             {% endblocktrans %}
-        </p>
-    </div>
-
-    <div class="feature-box">
-        <h2>{% trans "Standards-Based" %}</h2>
-        <p>
-            {% blocktrans %}
+            </p>
+        </div>
+        <div class="feature-box">
+            <div style="font-family: 'Merriweather', serif"
+                 class="text-2xl mb-4 text-primary">{% trans "Standards-Based" %}</div>
+            <p>
+                {% blocktrans %}
             Your contributions are preserved following CAAIS (Canadian Archival Accession
             Information Standard), ensuring long-term accessibility and value.
             {% endblocktrans %}
-        </p>
-    </div>
-
-    <div class="feature-box">
-        <h2>{% trans "Make an Impact" %}</h2>
-        <p>
-            {% blocktrans %}
+            </p>
+        </div>
+        <div class="feature-box">
+            <div style="font-family: 'Merriweather', serif"
+                 class="text-2xl mb-4 text-primary">{% trans "Make an Impact" %}</div>
+            <p>
+                {% blocktrans %}
             Every record shared helps build a more complete historical narrative for future
             generations.
             {% endblocktrans %}
-        </p>
+            </p>
+        </div>
     </div>
-</div>
-
-<section class="cta-section">
-    <h2>{% trans "Ready to Contribute?" %}</h2>
-    <p>
-        {% blocktrans %}
+    <section class="cta-section">
+        <div style="font-family: 'Merriweather', serif"
+             class="text-2xl mb-4 text-primary">{% trans "Ready to Contribute?" %}</div>
+        <p>
+            {% blocktrans %}
         We welcome both individual and organizational contributions. For large-scale donations or
         physical records, please get in contact with us.
         {% endblocktrans %}
-    </p>
-    <div class="cta-buttons">
-        {% if user.is_authenticated %}
-            <a href="{% url 'recordtransfer:submit' %}" class="primary-button">
-                {% trans "Submit Your Records" %}
-            </a>
-        {% elif SIGN_UP_ENABLED %}
-            <a href="{% url 'recordtransfer:create_account' %}" class="primary-button">
-                {% trans "Sign Up Now" %}
-            </a>
-        {% endif %}
-        <a href="https://nctr.ca/contact/" class="secondary-button">
-            {% trans "Contact Us" %}
-        </a>
-    </div>
-</section>
-
-<section class="related-section">
-    <div class="related-content">
-        <div class="related-links">
-            <h2>{% trans "More NCTR Resources" %}</h2>
-            <div class="links-list">
-                <a href="https://nctr.ca/records/view-your-records/" class="link-item">
-                    <span class="link-title">
-                        {% trans "View Your Records" %}
-                    </span>
-                    <span class="link-description">
-                        {% trans "Access your personal or family records held in the NCTR archives" %}
-                    </span>
-                </a>
-                <a href="https://nctr.ca/about" class="link-item">
-                    <span class="link-title">{% trans "About NCTR" %}</span>
-                    <span class="link-description">
-                        {% trans "Learn about our mission, mandate and the work we do" %}
-                    </span>
-                </a>
-                <a href="https://archives.nctr.ca" class="link-item">
-                    <span class="link-title">{% trans "Public Records" %}</span>
-                    <span class="link-description">
-                        {% trans "Browse our public collection of records" %}
-                    </span>
-                </a>
+        </p>
+        <div class="cta-buttons">
+            {% if user.is_authenticated %}
+                <a href="{% url 'recordtransfer:submit' %}" class="primary-button">{% trans "Submit Your Records" %}</a>
+            {% elif SIGN_UP_ENABLED %}
+                <a href="{% url 'recordtransfer:create_account' %}"
+                   class="primary-button">{% trans "Sign Up Now" %}</a>
+            {% endif %}
+            <a href="https://nctr.ca/contact/" class="secondary-button">{% trans "Contact Us" %}</a>
+        </div>
+    </section>
+    <section class="related-section">
+        <div class="related-content">
+            <div class="related-links">
+                <div style="font-family: 'Merriweather', serif"
+                     class="text-2xl mb-4 text-primary">{% trans "More NCTR Resources" %}</div>
+                <div class="links-list">
+                    <a href="https://nctr.ca/records/view-your-records/" class="link-item">
+                        <span class="link-title">{% trans "View Your Records" %}</span>
+                        <span class="link-description">{% trans "Access your personal or family records held in the NCTR archives" %}</span>
+                    </a>
+                    <a href="https://nctr.ca/about" class="link-item">
+                        <span class="link-title">{% trans "About NCTR" %}</span>
+                        <span class="link-description">{% trans "Learn about our mission, mandate and the work we do" %}</span>
+                    </a>
+                    <a href="https://archives.nctr.ca" class="link-item">
+                        <span class="link-title">{% trans "Public Records" %}</span>
+                        <span class="link-description">{% trans "Browse our public collection of records" %}</span>
+                    </a>
+                </div>
+            </div>
+            <div class="related-image">
+                <img src="{% static 'PHABNE_00281.webp' %}"
+                     alt="Individuals making a donation to the Bentwood Box">
             </div>
         </div>
-        <div class="related-image">
-            <img src="{% static 'PHABNE_00281.webp' %}" alt="Individuals making a donation to the Bentwood Box">
-        </div>
-    </div>
-</section>
-
-<section class="github-section">
-    <h2>{% trans "Fully Open Source" %}</h2>
-    <div class="github-container">
-        <div class="github-content">
-            <p>
-                {% blocktrans %}
+    </section>
+    <section class="github-section">
+        <div class="github-container">
+            <div class="flex flex-col">
+                <div style="font-family: 'Merriweather', serif"
+                     class="text-2xl mb-4 text-primary">{% trans "Fully Open Source" %}</div>
+                <div class="github-content">
+                    <p>
+                        {% blocktrans %}
                 This project is open source, demonstrating our commitment to transparency and
                 collaboration. Join our community on GitHub to explore the code, contribute
                 improvements, or adapt it for your organization's needs.
                 {% endblocktrans %}
-            </p>
-            <a href="https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer" class="github-button">
+                    </p>
+                    <a href="https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer"
+                       class="github-button">
+                        <i class="fab fa-github"></i>
+                        {% trans "View on GitHub" %}
+                    </a>
+                </div>
+            </div>
+            <div class="github-graphic">
                 <i class="fab fa-github"></i>
-                {% trans "View on GitHub" %}
-            </a>
+            </div>
         </div>
-        <div class="github-graphic">
-            <i class="fab fa-github"></i>
-        </div>
-    </div>
-</section>
-{% endblock %}
+    </section>
+{% endblock content %}

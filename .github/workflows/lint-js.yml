@@ -2,7 +2,7 @@ name: PR JS Lint Check
 
 on:
   pull_request:
-    branches: [master, 639-submission-form-feedback]
+    branches: [master]
     types: [opened, synchronize, reopened]
 
 permissions:

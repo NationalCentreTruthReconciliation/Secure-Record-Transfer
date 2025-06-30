@@ -2,13 +2,13 @@ import json
 import re
 import uuid
 from datetime import datetime, timedelta
+from gettext import gettext
 from typing import Optional, cast
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
-from django.contrib.messages import get_messages
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
@@ -22,42 +22,27 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
+from recordtransfer.views.profile import AccountInfoUpdateView, ContactInfoUpdateView
 
 
-@patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
-@freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
 class TestUserProfileView(TestCase):
     """Tests for the UserProfile view."""
 
     def setUp(self) -> None:
         """Set up the test case with a user and initial data."""
-        self.test_username = "testuser"
-        self.test_first_name = "Test"
-        self.test_last_name = "User"
-        self.test_email = "testuser@example.com"
-        self.test_current_password = "old_password"
-        self.test_gets_notification_emails = True
-        self.test_new_password = "new_password123"
         self.user = User.objects.create_user(
-            username=self.test_username,
-            first_name=self.test_first_name,
-            last_name=self.test_last_name,
-            email=self.test_email,
-            password=self.test_current_password,
-            gets_notification_emails=self.test_gets_notification_emails,
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            email="testuser@example.com",
+            password="testpassword",
+            gets_notification_emails=True,
         )
-        self.client.login(username="testuser", password="old_password")
+        self.client.force_login(self.user)
         self.url = reverse("recordtransfer:user_profile")
-        self.error_message = "There was an error updating your preferences. Please try again."
-        self.success_message = "Preferences updated"
-        self.password_change_success_message = "Password updated"
 
     def tearDown(self) -> None:
         """Clean up after each test."""
-        UploadSession.objects.all().delete()
-        InProgressSubmission.objects.all().delete()
-        SubmissionGroup.objects.all().delete()
-        Submission.objects.all().delete()
         User.objects.all().delete()
 
     def test_access_authenticated_user(self) -> None:
@@ -72,225 +57,244 @@ class TestUserProfileView(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
-    ### Tests for Profile Details ###
+    def test_context_contains_forms(self) -> None:
+        """Test that the profile page contains the expected forms in context."""
+        response = self.client.get(self.url)
+        self.assertIn("account_info_form", response.context)
+        self.assertIn("contact_info_form", response.context)
+        self.assertIn("js_context", response.context)
 
-    def test_valid_name_change(self) -> None:
-        """Test that a valid name change updates the user's first and last name."""
+    def test_post_not_allowed(self) -> None:
+        """Test that POST requests to the profile page are not allowed."""
+        response = self.client.post(self.url, data={})
+        self.assertEqual(response.status_code, 405)
+
+
+@patch("recordtransfer.emails.send_user_account_updated.delay", lambda a, b: None)
+@freeze_time(datetime(2025, 1, 1, 9, 0, 0, tzinfo=ZoneInfo(settings.TIME_ZONE)))
+class TestAccountInfoUpdateView(TestCase):
+    """Tests for the AccountInfoUpdateView (HTMX account info updates)."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user and initial data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            email="testuser@example.com",
+            password="testpassword",
+            gets_notification_emails=True,
+        )
+        self.client.force_login(self.user)
+        self.url = reverse("recordtransfer:account_info_update")
+        self.htmx_headers = {"HX-Request": "true"}
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        User.objects.all().delete()
+
+    def test_requires_htmx_request(self) -> None:
+        """Test that non-HTMX requests return 404."""
+        response = self.client.post(self.url, data={})
+        self.assertEqual(response.status_code, 404)
+
+    def test_valid_account_info_change(self) -> None:
+        """Test that a valid account information change updates the user's information and returns
+        the right response.
+        """
         form_data = {
             "first_name": "New",
             "last_name": "Name",
         }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), self.success_message)
+        response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "includes/account_info_form.html")
 
-    def test_accented_name_change(self) -> None:
-        """Test that accented characters in names are handled correctly."""
-        form_data = {
-            "first_name": "Áccéntéd",
-            "last_name": "Námé",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), self.success_message)
+        # Check that user was updated
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, "New")
+        self.assertEqual(self.user.last_name, "Name")
 
-    def test_invalid_first_name(self) -> None:
-        """Test that an invalid first name (e.g., numeric) returns an error message."""
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        trigger_data = json.loads(response.headers["HX-Trigger"])
+        self.assertEqual(
+            trigger_data["showSuccess"]["value"], AccountInfoUpdateView.update_success_message
+        )
+
+    def test_invalid_account_info_change(self) -> None:
+        """Test that an invalid account information change (e.g., numerical first name) returns an
+        error.
+        """
         form_data = {
             "first_name": "123",
-            "last_name": self.test_last_name,
+            "last_name": "User",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
+        self.assertContains(response, "error")
 
-    def test_invalid_last_name(self) -> None:
-        """Test that an invalid last name (e.g., numeric) returns an error message."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": "123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_valid_notification_setting_change(self) -> None:
-        """Test that a valid notification setting change updates the user's preference."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": False,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), self.success_message)
-
-    def test_valid_password_change(self) -> None:
-        """Test that a valid password change updates the user's password."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertRedirects(response, self.url)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "Password updated")
+        # Check that user was not updated
         self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password("new_password123"))
+        self.assertNotEqual(self.user.first_name, "123")
 
-    def test_wrong_password(self) -> None:
-        """Test that providing the wrong current password returns an error message."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": "wrong_password",
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        trigger_data = json.loads(response.headers["HX-Trigger"])
         self.assertEqual(
-            str(messages[0]),
-            self.error_message,
+            trigger_data["showError"]["value"], gettext("Please correct the errors below.")
         )
 
-    def test_passwords_do_not_match(self) -> None:
-        """Test that if the new password and confirmation do not match, an error message is
-        shown.
+    def test_password_change(self) -> None:
+        """Test that a valid password change updates the user's password, also calling the
+        necessary side effects.
         """
         form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "new_password": "new_password123",
-            "confirm_new_password": "different_password",
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_same_password(self) -> None:
-        """Test that if the new password is the same as the current password, an error message is
-        shown.
-        """
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "new_password": self.test_current_password,
-            "confirm_new_password": self.test_current_password,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
-
-    def test_missing_current_password(self) -> None:
-        """Test that if the current password is not provided, an error message is shown."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
+            "first_name": "Test",
+            "last_name": "User",
+            "current_password": "testpassword",
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
+        with (
+            patch("recordtransfer.views.profile.update_session_auth_hash") as mock_update_session,
+            patch(
+                "recordtransfer.views.profile.send_user_account_updated.delay"
+            ) as mock_send_email,
+        ):
+            response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
+            self.assertEqual(response.status_code, 200)
+            self.user.refresh_from_db()
+            self.assertTrue(self.user.check_password("new_password123"))
 
-    def test_missing_new_password(self) -> None:
-        """Test that if the new password is not provided, an error message is shown."""
+            # Verify the methods were called
+            mock_update_session.assert_called_once_with(response.wsgi_request, self.user)
+            mock_send_email.assert_called_once()
+
+            # Verify the email context
+            call_args = mock_send_email.call_args
+            self.assertEqual(call_args[0][0], self.user)
+            email_context = call_args[0][1]
+            self.assertEqual(email_context["subject"], gettext("Password updated"))
+            self.assertEqual(email_context["changed_item"], gettext("password"))
+            self.assertEqual(email_context["changed_status"], gettext("updated"))
+
+    def test_exception_handling(self) -> None:
+        """Test that an exception during account info update returns an error."""
+        with patch("recordtransfer.views.profile.User.save") as mock_save:
+            mock_save.side_effect = Exception("Database error")
+            form_data = {
+                "first_name": "New",
+                "last_name": "Name",
+            }
+            response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
+            self.assertEqual(response.status_code, 500)
+
+            # Check that HTMX showError event is included in the response
+            self.assertIn("HX-Trigger", response.headers)
+            trigger_data = json.loads(response.headers["HX-Trigger"])
+            self.assertEqual(
+                trigger_data["showError"]["value"], AccountInfoUpdateView.update_error_message
+            )
+
+
+class TestContactInfoUpdateView(TestCase):
+    """Tests for the ContactInfoUpdateView (HTMX contact info updates)."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user and initial data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.force_login(self.user)
+        self.url = reverse("recordtransfer:contact_info_update")
+        self.htmx_headers = {"HX-Request": "true"}
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        User.objects.all().delete()
+
+    def test_requires_htmx_request(self) -> None:
+        """Test that non-HTMX requests return 404."""
+        response = self.client.post(self.url, data={})
+        self.assertEqual(response.status_code, 404)
+
+    def test_valid_contact_info_change(self) -> None:
+        """Test that valid contact info updates the user's contact information."""
         form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_current_password,
-            "confirm_new_password": "new_password123",
+            "phone_number": "+1 (555) 123-4567",
+            "address_line_1": "123 Test Street",
+            "city": "Test City",
+            "province_or_state": "ON",
+            "postal_or_zip_code": "K1A 0A6",
+            "country": "CA",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
+        self.assertTemplateUsed(response, "includes/contact_info_form.html")
+
+        # Check that user was updated
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.phone_number, "+1 (555) 123-4567")
+        self.assertEqual(self.user.address_line_1, "123 Test Street")
+        self.assertEqual(self.user.city, "Test City")
+        self.assertEqual(self.user.province_or_state, "ON")
+        self.assertEqual(self.user.postal_or_zip_code, "K1A 0A6")
+        self.assertEqual(self.user.country, "CA")
+
+        # Check that HTMX showSuccess event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        trigger_data = json.loads(response.headers["HX-Trigger"])
         self.assertEqual(
-            str(messages[0]),
-            self.error_message,
+            trigger_data["showSuccess"]["value"], ContactInfoUpdateView.update_success_message
         )
 
-    def test_missing_confirm_new_password(self) -> None:
-        """Test that if the confirm new password is not provided, an error message is shown."""
+    def test_invalid_contact_info_change(self) -> None:
+        """Test that an invalid contact info format returns an error."""
         form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": True,
-            "current_password": self.test_current_password,
-            "new_password": "new_password123",
+            "phone_number": "555-1234",  # Invalid format
+            "address_line_1": "123 Test Street",
+            "city": "Test City",
+            "province_or_state": "ON",
+            "postal_or_zip_code": "K1A 0A6",
+            "country": "CA",
         }
-        response = self.client.post(self.url, data=form_data)
+        response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
+        self.assertContains(response, "error")
+
+        # Check that HTMX showError event is included in the response
+        self.assertIn("HX-Trigger", response.headers)
+        trigger_data = json.loads(response.headers["HX-Trigger"])
         self.assertEqual(
-            str(messages[0]),
-            self.error_message,
+            trigger_data["showError"]["value"], gettext("Please correct the errors below.")
         )
 
-    def test_no_changes(self) -> None:
-        """Test that if no changes are made to the profile, an error message is shown."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": self.test_gets_notification_emails,
-        }
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
+    def test_exception_handling(self) -> None:
+        """Test that an exception during contact info update returns an error."""
+        with patch("recordtransfer.views.profile.User.save") as mock_save:
+            mock_save.side_effect = Exception("Database error")
+            form_data = {
+                "phone_number": "+1 (555) 123-4567",
+                "address_line_1": "123 Test Street",
+                "city": "Test City",
+                "province_or_state": "ON",
+                "postal_or_zip_code": "K1A 0A6",
+                "country": "CA",
+            }
+            response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
+            self.assertEqual(response.status_code, 500)
 
-    def test_empty_form_submission(self) -> None:
-        """Test that submitting an empty form returns an error message."""
-        form_data = {}
-        response = self.client.post(self.url, data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/profile.html")
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            self.error_message,
-        )
+            # Check that HTMX showError event is included in the response
+            self.assertIn("HX-Trigger", response.headers)
+            trigger_data = json.loads(response.headers["HX-Trigger"])
+            self.assertEqual(
+                trigger_data["showError"]["value"], ContactInfoUpdateView.update_error_message
+            )
 
 
 class TestInProgressSubmissionTableView(TestCase):
@@ -375,7 +379,9 @@ class TestInProgressSubmissionTableView(TestCase):
         self._create_in_progress_submission(upload_session=upload_session)
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         local_tz = ZoneInfo(settings.TIME_ZONE)
-        expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(
+        # Check that expires_at is not None before accessing it
+        self.assertIsNotNone(upload_session.expires_at)
+        expiry_date = upload_session.expires_at.astimezone(local_tz).strftime(  # type: ignore
             "%a %b %d, %Y @ %H:%M"
         )
         # Strip leading zeroes from start of day and month
@@ -435,8 +441,8 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertNotIn("fa-exclamation-circle text-warning", content)
         self.assertNotIn("Submission is expiring soon", content)
 
-    @override_settings(PAGINATE_BY=3)
-    def test_in_progress_submission_table_display(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_display(self, mock_get_value_int: MagicMock) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
         """
@@ -449,8 +455,8 @@ class TestInProgressSubmissionTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @override_settings(PAGINATE_BY=2)
-    def test_in_progress_submission_table_pagination(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
+    def test_in_progress_submission_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
         for i in range(3):
@@ -508,8 +514,8 @@ class TestSubmissionGroupTableView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @override_settings(PAGINATE_BY=3)
-    def test_submission_group_table_display(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_display(self, mock_get_value_int: MagicMock) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
         for i in range(3):
@@ -524,8 +530,8 @@ class TestSubmissionGroupTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @override_settings(PAGINATE_BY=2)
-    def test_submission_group_table_pagination(self) -> None:
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
+    def test_submission_group_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups
         for i in range(3):
