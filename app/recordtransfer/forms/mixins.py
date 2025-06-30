@@ -9,14 +9,6 @@ from recordtransfer.constants import HtmlIds, OtherValues
 class ContactInfoFormMixin(forms.Form):
     """Mixin containing address-related form fields."""
 
-    def __init__(self, *args, **kwargs):
-        if not isinstance(self, forms.BaseForm):
-            raise TypeError(
-                f"{self.__class__.__name__} must inherit from a Django Form class "
-                f"(forms.Form, forms.ModelForm, etc.) when using AddressMixin"
-            )
-        super().__init__(*args, **kwargs)
-
     phone_number = forms.RegexField(
         regex=r"^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$",
         error_messages={
