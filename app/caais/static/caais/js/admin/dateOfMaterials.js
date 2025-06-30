@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     // Get the placeholder elements used to indicate that the date is approximate
     const approxDatePlaceholders = $(".approx-date-wrapper");
-  
+
     const masks = {
         singleDate: {
             pattern: "Y000-00-00",
@@ -53,7 +53,7 @@ $(document).ready(function() {
      */
     function applyAppropriateRangeMask() {
         const value = dateField.val();
-    
+
         if (value && value.includes(" - ")) {
             // Apply range mask if a dash is detected
             dateField.mask(masks.dateRange.pattern, masks.dateRange.options);
@@ -61,14 +61,14 @@ $(document).ready(function() {
             dateField.mask(masks.singleDate.pattern, masks.singleDate.options);
         }
     }
-  
+
     applyAppropriateRangeMask();
     toggleApproxDatePlaceholders();
-  
+
     // Apply appropriate mask when user types
     dateField.on("keyup", function(e) {
         const value = $(this).val();
-    
+
         // Check if user has entered a complete single date and is trying to add a space
         if (value.length === 10 && e.key === " ") {
             // Remove the current mask to allow space entry

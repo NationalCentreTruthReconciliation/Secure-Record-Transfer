@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% load render_bundle from webpack_loader %}
+{% block extrahead %}
+    {{ block.super }}
+    {{ js_context|json_script:"py_context_admin" }}
+    {% render_bundle 'admin_caais' 'css' %}
+{% endblock extrahead %}
+{# The JS bundle is loaded in extrabody rather than extrahead to ensure Django's built-in jQuery library loads first. #}
+{% block extrabody %}
+    {{ block.super }}
+    {% render_bundle 'admin_caais' 'js' %}
+{% endblock extrabody %}
