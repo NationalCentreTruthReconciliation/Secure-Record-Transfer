@@ -2,7 +2,7 @@ name: Run E2E Tests
 
 on:
   pull_request:
-    branches: [master, 639-submission-form-feedback]
+    branches: [master]
   push:
     branches: [master]
   workflow_dispatch:
