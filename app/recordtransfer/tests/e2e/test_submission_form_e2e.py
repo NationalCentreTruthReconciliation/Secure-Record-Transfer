@@ -972,11 +972,11 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         )
 
         # Wait for the "Save and Continue" button to be clickable
-        save_button = WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "modal-save-contact-info"))
         )
-
-        # Click on the button to save and continue
+        # Re-fetch the button just before clicking to avoid staleness
+        save_button = driver.find_element(By.ID, "modal-save-contact-info")
         driver.execute_script("arguments[0].click();", save_button)
         # Verify that the user is displayed the Source Information step
         WebDriverWait(driver, 10).until(
