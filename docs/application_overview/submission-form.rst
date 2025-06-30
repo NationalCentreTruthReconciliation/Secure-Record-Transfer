@@ -68,15 +68,6 @@ If you wish to avoid entering your contact details repeatedly across multiple su
     :alt: Step 2 of the submission form prefilled
 
 
-You can access your profile page by clicking on "Profile" in the navigation bar. If you are not logged in, you will be prompted to log in first. Once logged in, you can find the "Profile" link in the navigation bar.
-
-.. image:: images/user_profile_on_navbar.webp
-    :alt: How to access the profile page
-
-On the profile page, fill out your contact information in the "Contact Information" section and click "Save".
-
-.. image:: images/profile_contact_populate.webp
-    :alt: Contact information section on the profile page
 
 
 Step 3: Record Source information
