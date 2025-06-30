@@ -3,7 +3,6 @@
 import logging
 from typing import Any, Optional, cast
 
-from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
@@ -20,6 +19,7 @@ from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, OtherValues, QueryParameters
 from recordtransfer.emails import send_user_account_updated
+from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import (
     SubmissionGroupForm,
     UserAccountInfoForm,
@@ -27,6 +27,7 @@ from recordtransfer.forms import (
 )
 from recordtransfer.models import (
     InProgressSubmission,
+    SiteSetting,
     Submission,
     SubmissionGroup,
     User,
@@ -193,7 +194,7 @@ def _paginated_table_view(
     if not request.htmx:
         return HttpResponse(status=400)
 
-    paginator = Paginator(queryset, settings.PAGINATE_BY)
+    paginator = Paginator(queryset, SiteSetting.get_value_int(SiteSettingKey.PAGINATE_BY))
     page_num = request.GET.get(QueryParameters.PAGINATE_QUERY_NAME, 1)
 
     try:

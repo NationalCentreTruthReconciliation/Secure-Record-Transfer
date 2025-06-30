@@ -77,19 +77,37 @@ ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
-# Install required dependencies for mysqlclient
+# Create non-root user with same UID for consistency
+RUN useradd --create-home --uid 1000 myuser && \
+    mkdir -p ${APP_DIR} && \
+    chown -R myuser:myuser ${PROJ_DIR}
+
+
+# Install required dependencies for mysqlclient and curl for health checks
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-mysql-client && \
+    apt-get install -y --no-install-recommends default-mysql-client curl && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
 COPY --from=builder ${PROJ_DIR}/.venv ${PROJ_DIR}/.venv
 COPY --from=builder ${PROJ_DIR}/dist ${PROJ_DIR}/dist
 COPY --from=builder ${APP_DIR} ${APP_DIR}
+
+# Set ownership and secure permissions AFTER copying files
+RUN chown -R myuser:myuser ${PROJ_DIR} && \
+    find ${PROJ_DIR} -type d -exec chmod 755 {} + && \
+    find ${PROJ_DIR} -type f -exec chmod 644 {} + && \
+    chmod +x ${PROJ_DIR}/entrypoint.sh && \
+    chmod +x ${PROJ_DIR}/.venv/bin/* && \
+    mkdir -p ${APP_DIR}/static ${APP_DIR}/media && \
+    chown myuser:myuser ${APP_DIR}/static ${APP_DIR}/media && \
+    chmod 775 ${APP_DIR}/static ${APP_DIR}/media
+
 # Activate virtual environment
 ENV PATH="${PROJ_DIR}/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="${PROJ_DIR}/.venv"
 
 WORKDIR ${APP_DIR}
+USER myuser
 
 ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]

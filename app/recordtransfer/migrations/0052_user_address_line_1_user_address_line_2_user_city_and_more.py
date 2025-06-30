@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordtransfer', '0050_alter_tempuploadedfile_options'),
+        ('recordtransfer', '0051_sitesetting'),
     ]
 
     operations = [

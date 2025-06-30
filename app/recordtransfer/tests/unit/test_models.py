@@ -8,6 +8,7 @@ from typing import Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
 from django.forms import ValidationError
@@ -15,10 +16,11 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from recordtransfer.enums import SubmissionStep
+from recordtransfer.enums import SiteSettingType, SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
+    SiteSetting,
     TempUploadedFile,
     UploadSession,
     User,
@@ -1130,6 +1132,301 @@ class TestInProgressSubmission(TestCase):
             f"(Title: {self.in_progress.title} | Session: {session_token})"
         )
         self.assertEqual(str(self.in_progress), expected_str)
+
+
+class TestSiteSetting(TestCase):
+    """Tests for the SiteSetting model."""
+
+    def setUp(self) -> None:
+        """Set up test."""
+        # Create test settings
+        self.string_setting = SiteSetting.objects.create(
+            key="TEST_STRING_SETTING",
+            value="test string value",
+            value_type=SiteSettingType.STR,
+        )
+
+        self.int_setting = SiteSetting.objects.create(
+            key="TEST_INT_SETTING",
+            value="42",
+            value_type=SiteSettingType.INT,
+        )
+
+        # Clear cache since creation causes cache to be set. We want to control cache state in
+        # tests.
+        cache.clear()
+
+    def test_set_cache_string_value(self) -> None:
+        """Test caching a string value."""
+        test_value = "cached string value"
+        self.string_setting.set_cache(test_value)
+
+        cached_value = cache.get(self.string_setting.key)
+        self.assertEqual(cached_value, test_value)
+
+    def test_set_cache_int_value(self) -> None:
+        """Test caching an integer value."""
+        test_value = 123
+        self.int_setting.set_cache(test_value)
+
+        cached_value = cache.get(self.int_setting.key)
+        self.assertEqual(cached_value, test_value)
+
+    def test_get_value_str_from_cache(self) -> None:
+        """Test getting a string value from cache."""
+        # Set cache value directly
+        cache.set("TEST_STRING_SETTING", "cached value")
+
+        # Create mock key
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        result = SiteSetting.get_value_str(mock_key)
+        self.assertEqual(result, "cached value")
+
+    def test_get_value_str_from_database(self) -> None:
+        """Test getting a string value from database when not cached."""
+        # Ensure cache is empty
+        cache.delete("TEST_STRING_SETTING")
+
+        # Mock the Key enum
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        with patch.object(SiteSetting.objects, "get", return_value=self.string_setting):
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertEqual(result, "test string value")
+
+    def test_get_value_str_wrong_type_raises_validation_error(self) -> None:
+        """Test that getting a string value for an integer setting raises ValidationError."""
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        with (
+            patch.object(SiteSetting.objects, "get", return_value=self.int_setting),
+            self.assertRaises(ValidationError),
+        ):
+            SiteSetting.get_value_str(mock_key)
+
+    def test_get_value_int_from_cache(self) -> None:
+        """Test getting an integer value from cache."""
+        # Set cache value
+        cache.set("TEST_INT_SETTING", 99)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        result = SiteSetting.get_value_int(mock_key)
+        self.assertEqual(result, 99)
+
+    def test_get_value_int_from_database(self) -> None:
+        """Test getting an integer value from database when not cached."""
+        # Ensure cache is empty
+        cache.delete("TEST_INT_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        with patch.object(SiteSetting.objects, "get", return_value=self.int_setting):
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertEqual(result, 42)
+
+    def test_get_value_int_wrong_type_raises_validation_error(self) -> None:
+        """Test that getting an int value for a string setting raises ValidationError."""
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        with (
+            patch.object(SiteSetting.objects, "get", return_value=self.string_setting),
+            self.assertRaises(ValidationError),
+        ):
+            SiteSetting.get_value_int(mock_key)
+
+    def test_get_value_int_invalid_string_value(self) -> None:
+        """Test getting int value when database contains invalid integer string."""
+        invalid_int_setting = SiteSetting.objects.create(
+            key="TEST_INVALID_INT",
+            value="not a number",
+            value_type=SiteSettingType.INT,
+        )
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INVALID_INT"
+
+        with (
+            patch.object(SiteSetting.objects, "get", return_value=invalid_int_setting),
+            self.assertRaises(ValueError),
+        ):
+            SiteSetting.get_value_int(mock_key)
+
+    def test_get_value_str_with_cached_none_value(self) -> None:
+        """Test that get_value_str doesn't query database when None is cached."""
+        cache.set("TEST_STRING_SETTING", None)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        # Mock the database query to ensure it's not called
+        with patch.object(SiteSetting.objects, "get") as mock_get:
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertIsNone(result)
+            # Verify database was not queried
+            mock_get.assert_not_called()
+
+    def test_get_value_int_with_cached_none_value(self) -> None:
+        """Test that get_value_int doesn't query database when None is cached."""
+        cache.set("TEST_INT_SETTING", None)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        # Mock the database query to ensure it's not called
+        with patch.object(SiteSetting.objects, "get") as mock_get:
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertIsNone(result)
+            # Verify database was not queried
+            mock_get.assert_not_called()
+
+    def test_get_value_str_cache_miss_queries_database(self) -> None:
+        """Test that get_value_str queries database when value is not cached."""
+        # Clear cache to ensure cache miss
+        cache.delete("TEST_STRING_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        # Mock the database query
+        with patch.object(SiteSetting.objects, "get", return_value=self.string_setting) as mock_get:
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertEqual(result, "test string value")
+            # Verify database was queried exactly once
+            mock_get.assert_called_once_with(key="TEST_STRING_SETTING")
+
+    def test_get_value_int_cache_miss_queries_database(self) -> None:
+        """Test that get_value_int queries database when value is not cached."""
+        # Clear cache to ensure cache miss
+        cache.delete("TEST_INT_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        # Mock the database query
+        with patch.object(SiteSetting.objects, "get", return_value=self.int_setting) as mock_get:
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertEqual(result, 42)
+            # Verify database was queried exactly once
+            mock_get.assert_called_once_with(key="TEST_INT_SETTING")
+
+    def test_post_save_signal_updates_cache_string(self) -> None:
+        """Test that the post_save signal updates cache for string values on update, not
+        creation.
+        """
+        # Create a new setting (triggers post_save with created=True)
+        new_setting = SiteSetting.objects.create(
+            key="NEW_STRING_SETTING",
+            value="new value",
+            value_type=SiteSettingType.STR,
+        )
+
+        # Check that value is NOT cached on creation
+        cached_value = cache.get("NEW_STRING_SETTING")
+        self.assertIsNone(cached_value)
+
+        # Update the setting (triggers post_save with created=False)
+        new_setting.value = "updated value"
+        new_setting.save()
+
+        # Check that value is cached on update
+        cached_value = cache.get("NEW_STRING_SETTING")
+        self.assertEqual(cached_value, "updated value")
+
+    def test_post_save_signal_updates_cache_int(self) -> None:
+        """Test that the post_save signal updates cache for integer values on update, not
+        creation.
+        """
+        # Create a new setting (triggers post_save with created=True)
+        new_setting = SiteSetting.objects.create(
+            key="NEW_INT_SETTING",
+            value="789",
+            value_type=SiteSettingType.INT,
+        )
+
+        # Check that value is NOT cached on creation
+        cached_value = cache.get("NEW_INT_SETTING")
+        self.assertIsNone(cached_value)
+
+        # Update the setting (triggers post_save with created=False)
+        new_setting.value = "456"
+        new_setting.save()
+
+        # Check that value is cached as integer on update
+        cached_value = cache.get("NEW_INT_SETTING")
+        self.assertEqual(cached_value, 456)
+        self.assertIsInstance(cached_value, int)
+
+    def test_post_save_signal_with_invalid_int_raises_error(self) -> None:
+        """Test that post_save signal with an invalid integer raises a ValidationError."""
+        # Create setting with valid integer value
+        new_setting = SiteSetting.objects.create(
+            key="INVALID_INT_SETTING",
+            value="123",
+            value_type=SiteSettingType.INT,
+        )
+
+        with self.assertRaises(ValidationError):
+            # Update with invalid integer value (triggers post_save with created=False)
+            new_setting.value = "not a number"
+            new_setting.save()
+
+    def test_reset_to_default_with_default_value(self) -> None:
+        """Test reset_to_default method when a default value exists."""
+        # Mock the SiteSettingKey enum to have a default value
+        mock_key = MagicMock()
+        mock_key.default_value = "default test value"
+
+        with patch("recordtransfer.models.SiteSettingKey") as mock_site_setting_key:
+            mock_site_setting_key.__getitem__.return_value = mock_key
+            # Change the setting value
+            self.string_setting.value = "changed value"
+            self.string_setting.save()
+
+            # Reset to default
+            self.string_setting.reset_to_default()
+
+            # Check that it was reset
+            self.assertEqual(self.string_setting.value, "default test value")
+
+    def test_reset_to_default_key_does_not_exist(self) -> None:
+        """Test reset_to_default method when key is not found in SiteSettingKey."""
+        with (
+            patch(
+                "recordtransfer.models.SiteSettingKey.__getitem__",
+                side_effect=KeyError("TEST_STRING_SETTING"),
+            ),
+            self.assertRaises(ValueError),
+        ):
+            self.string_setting.reset_to_default()
+
+    def test_default_value_property_with_default(self) -> None:
+        """Test default_value property when a default value exists."""
+        mock_key = MagicMock()
+        mock_key.default_value = "property default value"
+
+        with patch("recordtransfer.models.SiteSettingKey") as mock_site_setting_key:
+            mock_site_setting_key.__getitem__.return_value = mock_key
+            result = self.string_setting.default_value
+            self.assertEqual(result, "property default value")
+
+    def test_default_value_property_key_does_not_exist(self) -> None:
+        """Test default_value property when key is not found in SiteSettingKey."""
+        with (
+            patch(
+                "recordtransfer.models.SiteSettingKey.__getitem__",
+                side_effect=KeyError("TEST_STRING_SETTING"),
+            ),
+            self.assertRaises(ValueError),
+        ):
+            _ = self.string_setting.default_value
 
 
 class TestUser(TestCase):

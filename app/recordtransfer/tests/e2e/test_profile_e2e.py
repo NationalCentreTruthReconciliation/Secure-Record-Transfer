@@ -1,7 +1,9 @@
+import os
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse
 
-from django.test import tag
+from django.conf import settings
+from django.test import override_settings, tag
 from django.urls import reverse
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,6 +15,15 @@ from .selenium_setup import SeleniumLiveServerTestCase
 
 
 @tag("e2e")
+@override_settings(
+    WEBPACK_LOADER={
+        "DEFAULT": {
+            "STATS_FILE": os.path.join(
+                os.path.dirname(settings.APPLICATION_BASE_DIR), "dist", "webpack-stats.json"
+            ),
+        },
+    }
+)
 class ProfileFormsTest(SeleniumLiveServerTestCase):
     """Test the forms on the profile page."""
 
@@ -288,6 +299,15 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
 
 
 @tag("e2e")
+@override_settings(
+    WEBPACK_LOADER={
+        "DEFAULT": {
+            "STATS_FILE": os.path.join(
+                os.path.dirname(settings.APPLICATION_BASE_DIR), "dist", "webpack-stats.json"
+            ),
+        },
+    }
+)
 class SubmissionTablesTest(SeleniumLiveServerTestCase):
     """Test the submission tables on the profile page."""
 
