@@ -1,7 +1,7 @@
 {% extends "recordtransfer/submission_form_formset.html" %}
 {% load i18n %}
 {% block form_explanation %}
-    <p>
+    <p class="mb-5 mt-5">
         {% url "recordtransfer:help" as help_url %}
         {% blocktrans %}
         <a class="non-nav-link link link-primary" target="_blank" href="{{ help_url }}#rights-types">Click here</a>
