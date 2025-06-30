@@ -492,7 +492,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         for step, data in self.test_data.items():
             section_title = driver.find_element(
                 By.XPATH,
-                f"//h2[contains(@class, 'section-title') and contains(text(), '{data['section_title']}')]",
+                f"//div[contains(@class, 'section-title') and contains(text(), '{data['section_title']}')]",
             )
             self.assertTrue(section_title.is_displayed())
 
