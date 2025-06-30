@@ -202,7 +202,6 @@ ACCEPTED_FILE_FORMATS = config(
 )
 
 # Media file storage locations
-BAG_STORAGE_FOLDER = config("BAG_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "bags"))
 UPLOAD_STORAGE_FOLDER = config(
     "UPLOAD_STORAGE_FOLDER", default=os.path.join(MEDIA_ROOT, "uploaded_files")
 )
