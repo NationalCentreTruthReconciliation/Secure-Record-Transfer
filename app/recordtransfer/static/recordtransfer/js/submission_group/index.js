@@ -1,7 +1,6 @@
 import {
     handleSubmissionGroupModalFormBeforeSwap
 } from "../utils/htmx.js";
-import { setupToastNotifications } from "../utils/toast.js";
 import { showModal, isValidUrl } from "../utils/utils.js";
 
 /**
@@ -12,7 +11,6 @@ export const initializeSubmissionGroup = function () {
     const context = getContext();
     if (!context) {return;}
 
-    setupToastNotifications();
     setupSubmissionGroupForm(context);
 
     window.handleModalBeforeSwap = (e) => {

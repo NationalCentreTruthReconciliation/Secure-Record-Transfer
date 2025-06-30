@@ -1427,3 +1427,58 @@ class TestSiteSetting(TestCase):
             self.assertRaises(ValueError),
         ):
             _ = self.string_setting.default_value
+
+
+class TestUser(TestCase):
+    """Tests for the User model."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            password="testpassword123",
+        )
+
+    def test_full_name_property(self) -> None:
+        """Test the full_name property."""
+        self.assertEqual(self.user.full_name, "Test User")
+
+        self.user.first_name = ""
+        self.assertEqual(self.user.full_name, "User")
+
+        self.user.first_name = "Test"
+        self.user.last_name = ""
+        self.assertEqual(self.user.full_name, "Test")
+
+    def test_has_contact_info_false_when_missing_fields(self) -> None:
+        """Test has_contact_info returns False when fields are missing."""
+        self.assertFalse(self.user.has_contact_info)
+
+    def test_has_contact_info_true_with_complete_info(self) -> None:
+        """Test has_contact_info returns True with complete contact info."""
+        self.user.phone_number = "+1 (555) 123-4567"
+        self.user.address_line_1 = "123 Test Street"
+        self.user.city = "Test City"
+        self.user.province_or_state = "ON"
+        self.user.postal_or_zip_code = "K1A 0A6"
+        self.user.country = "CA"
+        self.assertTrue(self.user.has_contact_info)
+
+    def test_has_contact_info_with_other_province(self) -> None:
+        """Test has_contact_info with 'Other' province selection."""
+        self.user.phone_number = "+1 (555) 123-4567"
+        self.user.address_line_1 = "123 Test Street"
+        self.user.city = "Test City"
+        self.user.province_or_state = "Other"
+        self.user.postal_or_zip_code = "12345"
+        self.user.country = "US"
+
+        # Should be False without other_province_or_state
+        self.assertFalse(self.user.has_contact_info)
+
+        # Should be True with other_province_or_state filled
+        self.user.other_province_or_state = "Custom Province"
+        self.assertTrue(self.user.has_contact_info)

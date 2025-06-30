@@ -25,7 +25,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.views.generic import TemplateView
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import forms
@@ -97,10 +97,10 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.SOURCE_INFO: SubmissionStepMeta(
             template="recordtransfer/submission_form_sourceinfo.html",
-            title=gettext("Source Information (Optional)"),
+            title=gettext("Record Source Information (Optional)"),
             form=forms.SourceInfoForm,
             info_message=gettext(
-                "Select Yes if you would like to manually enter source information"
+                "Are you submitting records on behalf of another person or organization? Select Yes to enter information about them."
             ),
         ),
         SubmissionStep.RECORD_DESCRIPTION: SubmissionStepMeta(
@@ -113,35 +113,32 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.RIGHTS: SubmissionStepMeta(
             template="recordtransfer/submission_form_rights.html",
-            title=gettext("Record Rights"),
+            title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=gettext(
-                "Enter any associated rights that apply to the records. Add as many rights "
-                "sections as you like using the + More button. You may enter another type of "
-                "rights if the dropdown does not contain the type of rights you're looking for."
+                "Depending on the records you are submitting, there may be specific rights that govern "
+                "the access of your records. The following is a brief description about the types of "
+                "rights that are available to be used. If none suit your needs, select Other in "
+                "the rights dropdown. "
             ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
-            title=gettext("Other Identifiers (Optional)"),
+            title=gettext("Identifiers (Optional)"),
             form=formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
                 extra=1,
             ),
             info_message=gettext(
-                "This step is optional, if you do not have any other IDs associated with the "
-                "records, go to the next step"
+                "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, you may enter them here. "
+                "This step is optional. If you do not have any identifiers associated with the records, you may proceed to the next step."
             ),
         ),
         SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(
             template="recordtransfer/submission_form_groupsubmission.html",
             title=gettext("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
-            info_message=gettext(
-                "If this submission belongs in a group with other submissions you have made or will "
-                "make, select the group it belongs in in the dropdown below, or create a new group"
-            ),
         ),
         **(
             {
@@ -349,6 +346,17 @@ class SubmissionFormWizard(SessionWizardView):
 
     def render_next_step(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
+        # Check if we just completed contact info step and user needs prompting
+        user = cast(User, self.request.user)
+        if (
+            self.current_step == SubmissionStep.CONTACT_INFO
+            and not user.has_contact_info
+            and not self.storage.extra_data.get("save_contact_info_prompted", False)
+        ):
+            form = cast(forms.ContactInfoForm, form)
+            self.storage.extra_data["save_contact_info_prompted"] = True
+            return self.trigger_contact_info_save_prompt(form)
+
         # get the form instance based on the data from the storage backend
         # (if available).
         next_step = self.steps.next
@@ -365,6 +373,30 @@ class SubmissionFormWizard(SessionWizardView):
         # change the stored current step
         self.storage.current_step = next_step
         return self.render(new_form, **kwargs)
+
+    def trigger_contact_info_save_prompt(self, form: forms.ContactInfoForm) -> HttpResponse:
+        """Trigger a prompt to save contact info using HTMX."""
+        response = HttpResponse(status=200)
+        data = form.cleaned_data
+        return trigger_client_event(
+            response,
+            "promptSaveContactInfo",
+            {
+                "message": gettext(
+                    "Would you like to save your contact information to your profile?"
+                ),
+                "contactInfo": {
+                    "phone_number": data.get("phone_number", ""),
+                    "address_line_1": data.get("address_line_1", ""),
+                    "address_line_2": data.get("address_line_2", ""),
+                    "city": data.get("city", ""),
+                    "province_or_state": data.get("province_or_state", ""),
+                    "other_province_or_state": data.get("other_province_or_state", ""),
+                    "postal_or_zip_code": data.get("postal_or_zip_code", ""),
+                    "country": data.get("country", ""),
+                },
+            },
+        )
 
     @classmethod
     def format_step_data(cls, step: SubmissionStep, data: QueryDict) -> Union[dict, list[dict]]:
@@ -470,6 +502,14 @@ class SubmissionFormWizard(SessionWizardView):
             user = cast(User, self.request.user)
             initial["contact_name"] = self.get_name_of_user(user)
             initial["email"] = str(user.email)
+            initial["phone_number"] = user.phone_number or ""
+            initial["address_line_1"] = user.address_line_1 or ""
+            initial["address_line_2"] = user.address_line_2 or ""
+            initial["city"] = user.city or ""
+            initial["province_or_state"] = user.province_or_state or ""
+            initial["other_province_or_state"] = user.other_province_or_state or ""
+            initial["postal_or_zip_code"] = user.postal_or_zip_code or ""
+            initial["country"] = user.country or ""
 
         return initial
 
@@ -587,6 +627,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
+                    "ACCEPTED_FILE_FORMATS": settings.ACCEPTED_FILE_FORMATS,
                 }
             )
 
@@ -611,6 +652,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                     "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                     "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
+                    "account_info_update_url": reverse("recordtransfer:contact_info_update"),
                 }
             )
 
