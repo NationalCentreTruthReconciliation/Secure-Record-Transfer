@@ -16,8 +16,7 @@ The Profile page has two tabs: "Account" and "Contact Information".
 Account
 --------------------
 In the Account tab, users can view and edit their personal information. This includes
-their name, email address and email notification preference. Users can also change their password
-here.
+their name, email address and email notification preference, however, the email address field is read-only and cannot be changed from the Profile page. Users can also change their password here.
 
 The "Receive notification emails?" checkbox allows users to control whether they want to receive
 email notifications for new submissions. By default, this checkbox is checked.
