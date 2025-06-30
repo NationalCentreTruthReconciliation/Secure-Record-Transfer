@@ -91,7 +91,8 @@ module.exports = {
             ...glob.sync("./app/recordtransfer/static/" +
                 "recordtransfer/css/admin/job.css")
                 .map(file => "./" + path.relative(__dirname, file)),
-        ]
+        ],
+        admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
     },
     output: {
         filename: "js/[name].[chunkhash:8].js",

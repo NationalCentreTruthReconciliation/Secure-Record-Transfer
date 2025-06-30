@@ -1,0 +1,65 @@
+{% load i18n %}
+<!-- FAQ Section -->
+<div class="mb-8 mt-10">
+    <div class="mb-6 text-4xl text-primary" id="faq">{% trans "Frequently Asked Questions" %}</div>
+    <!-- Submission Groups FAQ -->
+    <div class="collapse collapse-arrow bg-base-100 shadow-sm rounded-box mb-6">
+        <input type="checkbox" class="peer" />
+        <div class="collapse-title text-xl tracking-wide border-b-2 border-primary/20 pb-2"
+             id="why-create-groups">{% trans "Why would I want to make a submission group?" %}</div>
+        <div class="collapse-content prose max-w-none">
+            <div class="pt-4">
+                <p class="font-medium text-lg mb-4">{% trans "Submission groups are useful when:" %}</p>
+                <ul class="list-disc pl-6 space-y-3">
+                    <li>
+                        <span class="font-semibold">{% trans "You have large collections" %}</span>
+                        {% blocktrans %}
+                        — If you have too many files for a single submission (exceeding {{ MAX_TOTAL_UPLOAD_COUNT }}
+                        files or {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB), you can split them into multiple submissions
+                        within the same group.
+                        {% endblocktrans %}
+                    </li>
+                    <li>
+                        <span class="font-semibold">{% trans "You want logical organization" %}</span>
+                        {% blocktrans %}
+                        — You can organize related records by theme, time period, or project, even if
+                        they're submitted at different times.
+                        {% endblocktrans %}
+                    </li>
+                    <li>
+                        <span class="font-semibold">{% trans "You need easier tracking" %}</span>
+                        {% blocktrans %}
+                        — Grouping helps you and archivists track related submissions through the
+                        processing workflow.
+                        {% endblocktrans %}
+                    </li>
+                    <li>
+                        <span class="font-semibold">{% trans "You want consistent metadata" %}</span>
+                        {% blocktrans %}
+                        — Groups ensure related submissions are cataloged with consistent metadata.
+                        {% endblocktrans %}
+                    </li>
+                </ul>
+                <div class="bg-base-200 p-4 rounded-lg mt-6">
+                    <p class="font-medium mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-5 h-5 inline-block mr-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        {% trans "Pro Tip:" %}
+                    </p>
+                    <p>
+                        {% blocktrans %}
+                        When creating a new group, use a descriptive naming convention (e.g., "Smith Research Project 2025"
+                        or "Financial Records 2020-2025") to easily identify it for future submissions.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

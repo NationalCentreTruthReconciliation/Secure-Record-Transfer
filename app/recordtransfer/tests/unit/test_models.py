@@ -1562,6 +1562,64 @@ class TestSiteSetting(TestCase):
         ):
             SiteSetting.get_value_int(mock_key)
 
+    def test_get_value_str_with_cached_none_value(self) -> None:
+        """Test that get_value_str doesn't query database when None is cached."""
+        cache.set("TEST_STRING_SETTING", None)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        # Mock the database query to ensure it's not called
+        with patch.object(SiteSetting.objects, "get") as mock_get:
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertIsNone(result)
+            # Verify database was not queried
+            mock_get.assert_not_called()
+
+    def test_get_value_int_with_cached_none_value(self) -> None:
+        """Test that get_value_int doesn't query database when None is cached."""
+        cache.set("TEST_INT_SETTING", None)
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        # Mock the database query to ensure it's not called
+        with patch.object(SiteSetting.objects, "get") as mock_get:
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertIsNone(result)
+            # Verify database was not queried
+            mock_get.assert_not_called()
+
+    def test_get_value_str_cache_miss_queries_database(self) -> None:
+        """Test that get_value_str queries database when value is not cached."""
+        # Clear cache to ensure cache miss
+        cache.delete("TEST_STRING_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_STRING_SETTING"
+
+        # Mock the database query
+        with patch.object(SiteSetting.objects, "get", return_value=self.string_setting) as mock_get:
+            result = SiteSetting.get_value_str(mock_key)
+            self.assertEqual(result, "test string value")
+            # Verify database was queried exactly once
+            mock_get.assert_called_once_with(key="TEST_STRING_SETTING")
+
+    def test_get_value_int_cache_miss_queries_database(self) -> None:
+        """Test that get_value_int queries database when value is not cached."""
+        # Clear cache to ensure cache miss
+        cache.delete("TEST_INT_SETTING")
+
+        mock_key = MagicMock()
+        mock_key.name = "TEST_INT_SETTING"
+
+        # Mock the database query
+        with patch.object(SiteSetting.objects, "get", return_value=self.int_setting) as mock_get:
+            result = SiteSetting.get_value_int(mock_key)
+            self.assertEqual(result, 42)
+            # Verify database was queried exactly once
+            mock_get.assert_called_once_with(key="TEST_INT_SETTING")
+
     def test_post_save_signal_updates_cache_string(self) -> None:
         """Test that the post_save signal updates cache for string values on update, not
         creation.
@@ -1672,3 +1730,58 @@ class TestSiteSetting(TestCase):
             self.assertRaises(ValueError),
         ):
             _ = self.string_setting.default_value
+
+
+class TestUser(TestCase):
+    """Tests for the User model."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            password="testpassword123",
+        )
+
+    def test_full_name_property(self) -> None:
+        """Test the full_name property."""
+        self.assertEqual(self.user.full_name, "Test User")
+
+        self.user.first_name = ""
+        self.assertEqual(self.user.full_name, "User")
+
+        self.user.first_name = "Test"
+        self.user.last_name = ""
+        self.assertEqual(self.user.full_name, "Test")
+
+    def test_has_contact_info_false_when_missing_fields(self) -> None:
+        """Test has_contact_info returns False when fields are missing."""
+        self.assertFalse(self.user.has_contact_info)
+
+    def test_has_contact_info_true_with_complete_info(self) -> None:
+        """Test has_contact_info returns True with complete contact info."""
+        self.user.phone_number = "+1 (555) 123-4567"
+        self.user.address_line_1 = "123 Test Street"
+        self.user.city = "Test City"
+        self.user.province_or_state = "ON"
+        self.user.postal_or_zip_code = "K1A 0A6"
+        self.user.country = "CA"
+        self.assertTrue(self.user.has_contact_info)
+
+    def test_has_contact_info_with_other_province(self) -> None:
+        """Test has_contact_info with 'Other' province selection."""
+        self.user.phone_number = "+1 (555) 123-4567"
+        self.user.address_line_1 = "123 Test Street"
+        self.user.city = "Test City"
+        self.user.province_or_state = "Other"
+        self.user.postal_or_zip_code = "12345"
+        self.user.country = "US"
+
+        # Should be False without other_province_or_state
+        self.assertFalse(self.user.has_contact_info)
+
+        # Should be True with other_province_or_state filled
+        self.user.other_province_or_state = "Custom Province"
+        self.assertTrue(self.user.has_contact_info)

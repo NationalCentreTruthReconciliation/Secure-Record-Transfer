@@ -40,6 +40,9 @@ LOGGER = logging.getLogger(__name__)
 # Sentinel object to distinguish between cache miss and cached None values
 NOT_CACHED = object()
 
+# Sentinel object to distinguish between cache miss and cached None values
+NOT_CACHED = object()
+
 
 class User(AbstractUser):
     """The main User object used to authenticate users."""

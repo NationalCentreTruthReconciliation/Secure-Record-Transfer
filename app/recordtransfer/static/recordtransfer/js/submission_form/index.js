@@ -29,6 +29,7 @@ const _setupWithContext = () => {
         break;
     case "rights":
         setupRightsForm(context);
+
         break;
     case "otheridentifiers":
         setupOtherIdentifiersForm(context);
