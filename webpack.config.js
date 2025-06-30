@@ -80,14 +80,13 @@ module.exports = {
         ],
 
         // Admin Site static assets
-        admin_metadata: [
+        admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
+        admin_caais: [
             ...glob.sync("./app/caais/static/caais/css/base/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
             ...glob.sync("./app/caais/static/caais/js/admin/*.js")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-
-        admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
     },
     output: {
         filename: "js/[name].[chunkhash:8].js",
