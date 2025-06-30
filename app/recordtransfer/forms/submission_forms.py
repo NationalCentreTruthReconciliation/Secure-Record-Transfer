@@ -896,7 +896,7 @@ class ReviewForm(SubmissionForm):
 
         if all_empty and isinstance(form, OtherIdentifiersFormSet):
             note = gettext("No identifiers were provided.")
-        elif isinstance(form, RightsFormSet):
+        elif all_empty and isinstance(form, RightsFormSet):
             note = gettext("No record rights or restrictions were provided.")
 
         return formset_data, note
