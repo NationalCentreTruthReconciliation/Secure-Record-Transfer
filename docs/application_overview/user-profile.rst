@@ -27,6 +27,8 @@ email notifications for new submissions. By default, this checkbox is checked.
 
 To save changes made to personal information, click on the "Save" button.
 
+.. _user-profile-contact-info:
+
 Contact Information Tab
 -----------------------
 The Contact Information tab allows users to store their contact details including phone number and address. This information is stored in your profile for convenience.
