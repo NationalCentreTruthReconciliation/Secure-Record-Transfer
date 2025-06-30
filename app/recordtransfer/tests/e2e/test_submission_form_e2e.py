@@ -977,7 +977,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         )
 
         # Click on the button to save and continue
-        save_button.click()
+        driver.execute_script("arguments[0].click();", save_button)
         # Verify that the user is displayed the Source Information step
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
