@@ -64,7 +64,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "date_is_approximated": "✓ Yes",
             "language": "English",
             "description": "Test Description",
-            "condition": "Test Condition",
             "preliminary_custodial_history": "Test Custodial History",
         },
         SubmissionStep.RIGHTS: {
@@ -322,14 +321,10 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         description_of_contents_input.send_keys(data["description"])
 
         if not required_only:
-            condition_input = driver.find_element(
-                By.NAME, "recorddescription-condition_assessment"
-            )
             preliminary_custodial_history = driver.find_element(
                 By.NAME, "recorddescription-preliminary_custodial_history"
             )
 
-            condition_input.send_keys(data["condition"])
             preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
         self.go_next_step()
@@ -533,7 +528,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Date of materials": data["date_of_materials"],
                     "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
-                    "Condition of files": data["condition"],
                     "Custodial history": data["preliminary_custodial_history"],
                 }
                 self._verify_field_values("recorddescription", fields)

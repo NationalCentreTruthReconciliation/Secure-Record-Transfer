@@ -476,20 +476,6 @@ class RecordDescriptionForm(SubmissionForm):
         ),
     )
 
-    condition_assessment = forms.CharField(
-        required=False,
-        min_length=4,
-        max_length=2000,
-        widget=forms.Textarea(
-            attrs={
-                "rows": "6",
-                "placeholder": "e.g., The documents are photocopies ... (optional)",
-            }
-        ),
-        label=gettext("Condition of files"),
-        help_text=gettext("Briefly describe the condition of the files you are submitting."),
-    )
-
     preliminary_custodial_history = forms.CharField(
         required=False,
         max_length=2000,
