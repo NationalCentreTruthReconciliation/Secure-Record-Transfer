@@ -67,6 +67,14 @@ If you wish to avoid entering your contact details repeatedly across multiple su
 .. image:: images/submission_step_2_prefilled.webp
     :alt: Step 2 of the submission form prefilled
 
+During the submission process, when you complete the Contact Information step, you will also be prompted with an option to "Save and Continue." Choosing this will save your contact information to your profile, so it can be auto-filled for future submissions.
+
+If you prefer not to save your contact information at this time, you can simply click "Continue without saving." You will still have the option to add or update your contact information later through your profile page. Additionally, the next time you make a submission, you will be prompted again to save your contact information if it is not already stored in your profile.
+
+
+.. image:: images/submission_step_2_save_modal.webp
+    :alt: Step 2 of the submission form save modal
+
 
 
 
