@@ -23,8 +23,8 @@ from recordtransfer.enums import SiteSettingType, SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
     PermUploadedFile,
-    Submission,
     SiteSetting,
+    Submission,
     TempUploadedFile,
     UploadSession,
     User,
