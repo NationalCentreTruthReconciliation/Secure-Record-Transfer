@@ -36,7 +36,7 @@ The Contact Information tab allows users to store their contact details includin
 
 To save changes made to contact information, click on the "Save" button.
 
-By completing this information once in your profile, these details will be automatically populated whenever you create a new submission in the Contact Information step of the submission form. This saves time for users who make multiple submissions, as they won't need to re-enter their contact information for each submission.
+By completing this information once in your profile, these details will be automatically populated whenever you create a new submission in :ref:`Step 2: Contact information` of the Submission Form.  This saves time for users who make multiple submissions, as they won't need to re-enter their contact information for each submission.
 
 .. image:: images/submission_step_2_prefilled.webp
     :alt: Auto Populate step 2 of submission form
