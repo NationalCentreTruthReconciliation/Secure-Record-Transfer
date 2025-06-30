@@ -15,7 +15,7 @@
             {% endfor %}
         {% endif %}
         {% if field.label != 'hidden' %}
-            <div class="flex-item {% if field.name != 'enter_manual_source_info' %}initially-hidden hidden-item{% endif %}">
+            <div class="flex-item {% if field.name != 'enter_manual_source_info' %}initially-hidden hidden{% endif %}">
                 <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
                 {{ field }}
                 {# Help tooltip #}
@@ -32,12 +32,12 @@
         {% endif %}
         {% url 'recordtransfer:help' as help_url %}
         {% if field.name == "other_source_type" %}
-            <div class="flex-item initially-hidden hidden-item">
+            <div class="flex-item initially-hidden hidden">
                 <label></label>
                 <div>
                     <i>
                         {% blocktrans %}
-                        <a class="non-nav-link" target="_blank" href="{{ help_url }}#source-types">Click here</a>
+                        <a class="non-nav-link link link-primary" target="_blank" href="{{ help_url }}#source-types">Click here</a>
                         for an explanation of the different types of source types.
                         {% endblocktrans %}
                     </i>
@@ -45,12 +45,12 @@
                 <br>
             </div>
         {% elif field.name == "other_source_role" %}
-            <div class="flex-item initially-hidden hidden-item">
+            <div class="flex-item initially-hidden hidden">
                 <label></label>
                 <div>
                     <i>
                         {% blocktrans %}
-                        <a class="non-nav-link" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
+                        <a class="non-nav-link link link-primary" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
                         {% endblocktrans %}
                     </i>
