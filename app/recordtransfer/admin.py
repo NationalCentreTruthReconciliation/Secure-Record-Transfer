@@ -552,9 +552,6 @@ class JobAdmin(ReadOnlyAdmin):
 
     ordering = ["-start_time"]
 
-    class Media:
-        css = {"all": ("admin_job.css",)}
-
     def has_delete_permission(self, request, obj=None):
         return obj and (request.user == obj.user_triggered or request.user.is_superuser)
 
@@ -652,12 +649,6 @@ class CustomUserAdmin(UserAdmin):
         SubmissionInline,
         SubmissionGroupInline,
     ]
-
-    class Media:
-        js = (
-            "vendors.bundle.js",
-            "admin_recordtransfer.bundle.js",
-        )
 
     def has_change_permission(self, request, obj=None):
         if not obj:
