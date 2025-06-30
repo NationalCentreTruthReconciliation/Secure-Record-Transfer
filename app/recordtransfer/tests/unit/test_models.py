@@ -1082,7 +1082,6 @@ class TestSubmission(TestCase):
             metadata=self.metadata,
             uuid="2a7262f5-07a4-49a3-a351-dc1269d7822b",
             upload_session=self.upload_session,
-            bag_name="the-bag",
         )
 
     def tearDown(self) -> None:

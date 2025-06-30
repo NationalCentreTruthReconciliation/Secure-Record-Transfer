@@ -1047,9 +1047,6 @@ class Submission(models.Model):
             are disabled, this will always be NULL/None
         uuid (UUIDField):
             A unique ID for the submission
-        bag_name (str):
-            A name that is used when the Submission is to be dumped to the file
-            system as a BagIt bag
     """
 
     submission_date = models.DateTimeField(auto_now_add=True)
@@ -1065,12 +1062,16 @@ class Submission(models.Model):
     )
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
-    bag_name = models.CharField(max_length=256, null=True)
 
     objects = SubmissionQuerySet.as_manager()
 
-    def generate_bag_name(self) -> str:
-        """Generate a name suitable for a submission bag.
+    @property
+    def bag_name(self) -> str:
+        """Get a name suitable for a submission bag.
+
+        The bag name contains the username, the date this submission was made, and the title of the
+        metadata. This file name is properly sanitized to be used as a directory or part of a file
+        name.
 
         Raises:
             ValueError: If there is no metadata or no user associated with this submission.
@@ -1158,10 +1159,6 @@ class Submission(models.Model):
             raise ValueError(
                 "This submission has no associated upload session, this is required to make a bag"
             )
-
-        if not self.bag_name:
-            self.bag_name = self.generate_bag_name()
-            self.save()
 
         if location.exists() and (location / "data").exists():
             LOGGER.info('Bag already exists. Updating it in-place at "%s"', location)
