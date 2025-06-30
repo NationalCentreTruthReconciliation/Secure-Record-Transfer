@@ -10,7 +10,7 @@ user profile page is accessible by clicking on "Profile" on the navigation bar.
 
 
 The Profile page has two tabs: "Account" and "Contact Information".
-.. image:: images/user_profile_tabs.webp
+.. image:: images/profile_tabs.webp
     :alt: User profile tabs
 
 Account
