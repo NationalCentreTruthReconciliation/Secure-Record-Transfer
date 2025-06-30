@@ -196,7 +196,7 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
         template_name="recordtransfer/email/in_progress_submission_expiring.html",
         context={
             "username": in_progress.user.username,
-            "full_name": in_progress.user.get_full_name(),
+            "full_name": in_progress.user.full_name,
             "base_url": Site.objects.get_current().domain,
             "in_progress_title": in_progress.title,
             "in_progress_expiration_date": timezone.localtime(

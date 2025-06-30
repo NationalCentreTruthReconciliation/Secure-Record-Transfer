@@ -18,10 +18,12 @@ from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext
 
+from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
     SubmissionModelForm,
 )
+from recordtransfer.forms.admin_forms import UserAdminForm
 from recordtransfer.jobs import create_downloadable_bag
 from recordtransfer.models import (
     BaseUploadedFile,
@@ -618,10 +620,27 @@ class CustomUserAdmin(UserAdmin):
         - delete: Allowed by superusers
     """
 
+    form = UserAdminForm
+
     fieldsets = (
         *UserAdmin.fieldsets,  # original form fieldsets, expanded
-        (  # New fieldset added on to the bottom
-            "Email Updates",  # Group heading of your choice. set to None for a blank space
+        (
+            "Contact Information",
+            {
+                "fields": (
+                    "phone_number",
+                    "address_line_1",
+                    "address_line_2",
+                    "city",
+                    "province_or_state",
+                    "other_province_or_state",
+                    "postal_or_zip_code",
+                    "country",
+                ),
+            },
+        ),
+        (
+            "Email Updates",
             {
                 "fields": ("gets_submission_email_updates",),
             },
@@ -633,6 +652,12 @@ class CustomUserAdmin(UserAdmin):
         SubmissionGroupInline,
     ]
 
+    class Media:
+        js = (
+            "vendors.bundle.js",
+            "admin_recordtransfer.bundle.js",
+        )
+
     def has_change_permission(self, request, obj=None):
         if not obj:
             return True
@@ -640,6 +665,20 @@ class CustomUserAdmin(UserAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        """Add JS context for contact info form."""
+        extra_context = extra_context or {}
+
+        # Create context for JavaScript
+        extra_context["js_context"] = {
+            # Contact Info Form
+            "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
+            "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
+            "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
+        }
+
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     @sensitive_post_parameters_m
     def user_change_password(self, request, id, form_url=""):

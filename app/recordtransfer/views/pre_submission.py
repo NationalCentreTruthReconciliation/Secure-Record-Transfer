@@ -25,7 +25,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.views.generic import TemplateView
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from formtools.wizard.views import SessionWizardView
 
 from recordtransfer import forms
@@ -346,6 +346,17 @@ class SubmissionFormWizard(SessionWizardView):
 
     def render_next_step(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> HttpResponse:
         """Render next step of form. Overrides parent method to clear errors from the form."""
+        # Check if we just completed contact info step and user needs prompting
+        user = cast(User, self.request.user)
+        if (
+            self.current_step == SubmissionStep.CONTACT_INFO
+            and not user.has_contact_info
+            and not self.storage.extra_data.get("save_contact_info_prompted", False)
+        ):
+            form = cast(forms.ContactInfoForm, form)
+            self.storage.extra_data["save_contact_info_prompted"] = True
+            return self.trigger_contact_info_save_prompt(form)
+
         # get the form instance based on the data from the storage backend
         # (if available).
         next_step = self.steps.next
@@ -362,6 +373,30 @@ class SubmissionFormWizard(SessionWizardView):
         # change the stored current step
         self.storage.current_step = next_step
         return self.render(new_form, **kwargs)
+
+    def trigger_contact_info_save_prompt(self, form: forms.ContactInfoForm) -> HttpResponse:
+        """Trigger a prompt to save contact info using HTMX."""
+        response = HttpResponse(status=200)
+        data = form.cleaned_data
+        return trigger_client_event(
+            response,
+            "promptSaveContactInfo",
+            {
+                "message": gettext(
+                    "Would you like to save your contact information to your profile?"
+                ),
+                "contactInfo": {
+                    "phone_number": data.get("phone_number", ""),
+                    "address_line_1": data.get("address_line_1", ""),
+                    "address_line_2": data.get("address_line_2", ""),
+                    "city": data.get("city", ""),
+                    "province_or_state": data.get("province_or_state", ""),
+                    "other_province_or_state": data.get("other_province_or_state", ""),
+                    "postal_or_zip_code": data.get("postal_or_zip_code", ""),
+                    "country": data.get("country", ""),
+                },
+            },
+        )
 
     @classmethod
     def format_step_data(cls, step: SubmissionStep, data: QueryDict) -> Union[dict, list[dict]]:
@@ -467,6 +502,14 @@ class SubmissionFormWizard(SessionWizardView):
             user = cast(User, self.request.user)
             initial["contact_name"] = self.get_name_of_user(user)
             initial["email"] = str(user.email)
+            initial["phone_number"] = user.phone_number or ""
+            initial["address_line_1"] = user.address_line_1 or ""
+            initial["address_line_2"] = user.address_line_2 or ""
+            initial["city"] = user.city or ""
+            initial["province_or_state"] = user.province_or_state or ""
+            initial["other_province_or_state"] = user.other_province_or_state or ""
+            initial["postal_or_zip_code"] = user.postal_or_zip_code or ""
+            initial["country"] = user.country or ""
 
         return initial
 
@@ -609,6 +652,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                     "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
                     "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
+                    "account_info_update_url": reverse("recordtransfer:contact_info_update"),
                 }
             )
 
