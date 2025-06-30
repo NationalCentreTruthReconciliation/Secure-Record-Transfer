@@ -45,7 +45,6 @@ class UserAdminForm(ContactInfoFormMixin, UserChangeForm):
         # Set readonly fields
         for field_name in self.READONLY_FIELDS:
             self.fields[field_name].disabled = True
-            self.fields[field_name].widget = forms.DateTimeInput(attrs={"readonly": True})
             self.fields[field_name].required = False
 
     def clean(self) -> dict[str, Any]:
