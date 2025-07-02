@@ -10,6 +10,7 @@ from django.urls import reverse
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException
 
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
@@ -975,9 +976,15 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "modal-save-contact-info"))
         )
-        # Re-fetch the button just before clicking to avoid staleness
-        save_button = driver.find_element(By.ID, "modal-save-contact-info")
-        driver.execute_script("arguments[0].click();", save_button)
+
+        # Retry loop for clicking the button
+        for _ in range(3):
+            try:
+                save_button = driver.find_element(By.ID, "modal-save-contact-info")
+                driver.execute_script("arguments[0].click();", save_button)
+                break
+            except StaleElementReferenceException:
+                continue
         # Verify that the user is displayed the Source Information step
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
