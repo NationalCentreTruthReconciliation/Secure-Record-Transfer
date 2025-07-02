@@ -161,12 +161,19 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
         )
-        # Wait for the continue without saving button to be clickable
-        WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
-        )
-        # Click the button to continue without saving
-        driver.find_element(By.ID, "modal-continue-without-saving").click()
+
+        # Retry loop for clicking the button
+        for _ in range(3):
+            try:
+                # Wait for the continue without saving button to be clickable
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
+                )
+                # Click the button to continue without saving
+                driver.find_element(By.ID, "modal-continue-without-saving").click()
+                break
+            except StaleElementReferenceException:
+                continue
 
     def go_to_review_step(self) -> None:
         """Go to the review step in the form."""
