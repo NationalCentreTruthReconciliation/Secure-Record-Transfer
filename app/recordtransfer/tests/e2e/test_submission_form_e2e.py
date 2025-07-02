@@ -972,19 +972,19 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
         )
 
-        # Wait for the "Save and Continue" button to be clickable
-        WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "modal-save-contact-info"))
-        )
-
         # Retry loop for clicking the button
         for _ in range(3):
             try:
+                # Wait for the "Save and Continue" button to be clickable
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "modal-save-contact-info"))
+                )
                 save_button = driver.find_element(By.ID, "modal-save-contact-info")
                 driver.execute_script("arguments[0].click();", save_button)
                 break
             except StaleElementReferenceException:
                 continue
+
         # Verify that the user is displayed the Source Information step
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
