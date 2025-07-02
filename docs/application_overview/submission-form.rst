@@ -62,7 +62,7 @@ This step gathers contact information from the donor.
 .. image:: images/submission_step_2.webp
     :alt: Step 2 of the submission form
 
-If you wish to avoid entering your contact details repeatedly across multiple submissions, you may add this information to your :ref:`Contact Information Tab` on your profile page. Once saved in your profile, these fields will be automatically populated each time you start a new submission.
+If you wish to avoid entering your contact details repeatedly across multiple submissions, you may add this information to your profile on the :ref:`Contact Information Tab` of the Profile page. Once saved in your profile, these fields will be automatically populated each time you start a new submission.
 
 .. image:: images/submission_step_2_prefilled.webp
     :alt: Step 2 of the submission form prefilled
