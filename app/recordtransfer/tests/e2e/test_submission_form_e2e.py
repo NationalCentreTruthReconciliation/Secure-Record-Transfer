@@ -937,13 +937,18 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
         )
 
-        # Wait for the "Continue without saving" button to be clickable
-        WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
-        )
+        for _ in range(3):
+            try:
+                # Wait for the "Continue without saving" button to be clickable
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
+                )
 
-        # Click on the button to continue without saving
-        driver.find_element(By.ID, "modal-continue-without-saving").click()
+                continue_button = driver.find_element(By.ID, "modal-continue-without-saving")
+                continue_button.click()
+                break
+            except StaleElementReferenceException:
+                continue
 
         # Verify that the user is redirected to the Source Information step
         WebDriverWait(driver, 10).until(
