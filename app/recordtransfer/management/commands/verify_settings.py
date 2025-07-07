@@ -85,7 +85,6 @@ def verify_checksum_settings() -> None:
 def verify_storage_folder_settings() -> None:
     """Verify the settings.
 
-    - BAG_STORAGE_FOLDER
     - UPLOAD_STORAGE_FOLDER
     - TEMP_STORAGE_FOLDER
 
@@ -96,7 +95,6 @@ def verify_storage_folder_settings() -> None:
         exception if the directories could not be created, or if they already exist but as file.
     """
     for setting_name in [
-        "BAG_STORAGE_FOLDER",
         "UPLOAD_STORAGE_FOLDER",
         "TEMP_STORAGE_FOLDER",
     ]:
