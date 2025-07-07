@@ -1,10 +1,13 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
+{% load render_bundle from webpack_loader %}
 {% block extrahead %}
     {{ block.super }}
     <link rel="icon" href="{% static 'recordtransfer/img/favicon.ico' %}" />
     {{ js_context|json_script:"py_context_admin" }}
-{% endblock %}
+    {% render_bundle 'admin_recordtransfer' 'js' %}
+    {% render_bundle 'admin_recordtransfer' 'css' %}
+{% endblock extrahead %}
 {% block extrastyle %}
     {{ block.super }}
     <style>

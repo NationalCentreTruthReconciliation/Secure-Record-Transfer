@@ -1,5 +1,6 @@
 import { setupSelectOtherToggle } from "../utils/otherField.js";
 import { setupPhoneNumberMask } from "../utils/phoneNumberMask.js";
+import "../../css/admin/job.css";
 
 document.addEventListener("DOMContentLoaded", () => {
     let context = null;
