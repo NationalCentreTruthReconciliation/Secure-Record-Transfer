@@ -44,9 +44,14 @@ def get_arg_parser() -> argparse.ArgumentParser:
 def update_node_version_files(version: str) -> bool:
     """Update version in package.json and package-lock.json files."""
     changed = False
+    package_name = ""
+
     for file_path in [PACKAGE_JSON, PACKAGE_LOCK_JSON]:
         with open(file_path, "r") as f:
             data = json.load(f)
+
+        if file_path == PACKAGE_JSON:
+            package_name = data.get("name", "")
 
         if version == data["version"]:
             logging.info("Version in %s is already %s", file_path.name, version)
@@ -55,6 +60,12 @@ def update_node_version_files(version: str) -> bool:
         logging.info("Updating version in %s to %s", file_path.name, version)
 
         data["version"] = version
+
+        # Update the version of this package in package-lock.json
+        if file_path == PACKAGE_LOCK_JSON and "" in data.get("packages", {}):
+            this_package = data["packages"][""]
+            if this_package["name"] == package_name:
+                this_package["version"] = version
 
         with open(file_path, "w") as f:
             json.dump(data, f, indent=4)
