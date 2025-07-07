@@ -1,13 +1,11 @@
+/* global django */
+
 /**
  * Apply date mask to the date of materials field using jQuery Mask plugin.
  * Supports both single date (YYYY-MM-DD) and date range (YYYY-MM-DD - YYYY-MM-DD) formats.
  */
-
-/* global django */
-
-const $ = django.jQuery;
-
-$(document).ready(function() {
+export function setupDateOfMaterials() {
+    const $ = django.jQuery;
     const dateField = $("#id_date_of_materials");
 
     // Get the placeholder elements used to indicate that the date is approximate
@@ -87,4 +85,4 @@ $(document).ready(function() {
     });
 
     $("#id_date_is_approximate").on("change", toggleApproxDatePlaceholders);
-});
+}
