@@ -245,3 +245,20 @@ podman-compose -f compose.dev.yml exec app python manage.py reset --seed
 
 An admin user will be created with the username `admin` and password `123`, , along with test
 submissions and a test submission group.
+
+## Updating the Application Version
+
+For each new release of this application, the version string in these files needs to be updated:
+
+- `package.json`
+- `package-lock.json`
+- `pyproject.toml`
+- `uv.lock`
+
+To make it easy to update these files, a script can be run to update these files with the same version. From the root of the repository, you can update the version of the application like this:
+
+```shell
+python scripts/update_version.py "2025.07.07"
+```
+
+This project uses [Calendar versioning](https://calver.org/), and version strings should match the format YYYY.MM.DD. The update script accepts zero-padded months and days (e.g., 2025.07.07), but it will strip leading zeros, so the actual version used will have non-padded month and day numbers (e.g., 2025.7.7).
