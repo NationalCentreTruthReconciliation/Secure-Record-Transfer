@@ -81,18 +81,19 @@ def update_python_version_files(version: str) -> bool:
     """Update version in pyproject.toml file."""
     content = PYPROJECT_TOML.read_text()
 
-    # Find the version line in [project] section
-    version_pattern = r'(version\s*=\s*")[^"\s]*(")'
+    version_pattern = r'version\s*=\s*"(?P<version>[^"\s]+)"'
+
     match = re.search(version_pattern, content)
 
     if match:
-        old_version = content[match.start(1) + len('version = "') : match.end(2) - 1]
+        old_version = match.group("version")
+
         if version == old_version:
             logging.info("Version in %s is already %s", PYPROJECT_TOML.name, version)
             return False
 
         logging.info("Updating version in %s to %s", PYPROJECT_TOML.name, version)
-        new_content = re.sub(version_pattern, rf"\g<1>{version}\g<2>", content)
+        new_content = re.sub(version_pattern, f'version = "{version}"', content)
         PYPROJECT_TOML.write_text(new_content)
 
         subprocess.run(["uv", "lock"])
