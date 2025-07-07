@@ -122,10 +122,7 @@ enter four pieces of information:
 - A brief description of what the records contain
 
 
-Additionally, there are two optional fields that provide valuable context about the records:
-
-- Condition - Where donors can describe the physical condition of the materials (e.g., "photocopies", "water damaged", "fragile bindings")
-- Custodial History - Where donors can provide information about who has had custody or ownership of the records in the past before the current transfer
+Donors can optionally provide information about who has had custody or ownership of the records in the past before the current submission in the **Custodial History** field.
 
 .. image:: images/submission_step_4.webp
     :alt: Step 4 of the submission form
