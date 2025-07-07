@@ -7,20 +7,12 @@ Call it like:
 """
 
 import argparse
-import json
 import logging
 import re
+import shutil
 import subprocess
-from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-
-BASE_DIR = Path(__file__).parent.parent
-
-PACKAGE_JSON = BASE_DIR / "package.json"
-PACKAGE_LOCK_JSON = BASE_DIR / "package-lock.json"
-PYPROJECT_TOML = BASE_DIR / "pyproject.toml"
 
 
 def calver(version_string: str) -> str:
@@ -42,67 +34,35 @@ def get_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def update_node_version_files(version: str) -> bool:
+def update_node_version_files(version: str) -> None:
     """Update version in package.json and package-lock.json files."""
-    changed = False
-    package_name = ""
+    npm = shutil.which("npm") or "npm"
 
-    for file_path in [PACKAGE_JSON, PACKAGE_LOCK_JSON]:
-        with open(file_path, "r") as f:
-            data = json.load(f)
+    result = subprocess.run(
+        args=[npm, "version", "--no-git-tag-version", version],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
-        if file_path == PACKAGE_JSON:
-            package_name = data.get("name", "")
+    changed = "Version not changed" not in result.stderr.decode()
 
-        if version == data["version"]:
-            logging.info("Version in %s is already %s", file_path.name, version)
-            continue
-
-        logging.info("Updating version in %s to %s", file_path.name, version)
-
-        data["version"] = version
-
-        # Update the version of this package in package-lock.json
-        if file_path == PACKAGE_LOCK_JSON and "" in data.get("packages", {}):
-            this_package = data["packages"][""]
-            if this_package["name"] == package_name:
-                this_package["version"] = version
-
-        with open(file_path, "w") as f:
-            json.dump(data, f, indent=4)
-            f.write("\n")
-
-        changed = True
-
-    return changed
-
-
-def update_python_version_files(version: str) -> bool:
-    """Update version in pyproject.toml file."""
-    content = PYPROJECT_TOML.read_text()
-
-    version_pattern = r'version\s*=\s*"(?P<version>[^"\s]+)"'
-
-    match = re.search(version_pattern, content)
-
-    if match:
-        old_version = match.group("version")
-
-        if version == old_version:
-            logging.info("Version in %s is already %s", PYPROJECT_TOML.name, version)
-            return False
-
-        logging.info("Updating version in %s to %s", PYPROJECT_TOML.name, version)
-        new_content = re.sub(version_pattern, f'version = "{version}"', content)
-        PYPROJECT_TOML.write_text(new_content)
-
-        subprocess.run(["uv", "lock"])
-
-        return True
-
+    if changed:
+        logging.info("Updated package.json and package-lock.json version to %s", version)
     else:
-        logging.error("Could not find version field in %s", PYPROJECT_TOML.name)
-        return False
+        logging.info("Version in package.json and package-lock.json is already %s", version)
+
+
+def update_python_version_files(version: str) -> None:
+    """Update version in pyproject.toml file."""
+    uv = shutil.which("uv") or "uv"
+
+    subprocess.run(
+        args=[uv, "version", version],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    logging.info("Updated version in pyproject.toml and uv.lock to %s", version)
 
 
 def main() -> None:
@@ -111,19 +71,11 @@ def main() -> None:
 
     parsed = arg_parser.parse_args()
 
-    changed = update_node_version_files(parsed.version)
-    changed = update_python_version_files(parsed.version) or changed
+    update_node_version_files(parsed.version)
+    update_python_version_files(parsed.version)
 
-    if changed:
-        logging.info("Version(s) updated, you can commit the updated files now")
+    logging.info("Version files updated, you can commit the updated files now")
 
 
 if __name__ == "__main__":
-    err = False
-    for file in (PACKAGE_JSON, PACKAGE_LOCK_JSON, PYPROJECT_TOML):
-        if not file.exists():
-            logging.error("Could not find %s", file)
-            err = True
-
-    if not err:
-        main()
+    main()
