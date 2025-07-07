@@ -10,6 +10,7 @@ import argparse
 import json
 import logging
 import re
+import subprocess
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -93,6 +94,9 @@ def update_python_version_files(version: str) -> bool:
         logging.info("Updating version in %s to %s", PYPROJECT_TOML.name, version)
         new_content = re.sub(version_pattern, rf"\g<1>{version}\g<2>", content)
         PYPROJECT_TOML.write_text(new_content)
+
+        subprocess.run(["uv", "lock"])
+
         return True
 
     else:
