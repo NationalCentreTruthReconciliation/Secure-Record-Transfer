@@ -261,4 +261,4 @@ To make it easy to update these files, a script can be run to update these files
 python scripts/update_version.py "2025.07.07"
 ```
 
-This project uses [Calendar versioning](https://calver.org/), and version strings should match the format `YYYY.MM.DD`.
+This project uses [Calendar versioning](https://calver.org/), and version strings should match the format YYYY.MM.DD. The update script accepts zero-padded months and days (e.g., 2025.07.07), but it will strip leading zeros, so the actual version used will have non-padded month and day numbers (e.g., 2025.7.7).
