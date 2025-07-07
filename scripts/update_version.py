@@ -37,7 +37,7 @@ def get_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Update version in package.json, package-lock.json, and pyproject.toml"
     )
-    parser.add_argument("version", type=calver, help="Version string to set (e.g., '2025-07-07')")
+    parser.add_argument("version", type=calver, help="Version string to set (e.g., '2025.07.07')")
     return parser
 
 
