@@ -24,11 +24,11 @@ PYPROJECT_TOML = BASE_DIR / "pyproject.toml"
 
 
 def calver(version_string: str) -> str:
-    """Validate that version string matches YYYY-MM-DD format."""
+    """Validate that version string matches YYYY.MM.DD format."""
     pattern = r"\d{4}\.\d{2}\.\d{2}"
     if not re.match(pattern, version_string):
         raise argparse.ArgumentTypeError(
-            f"Version must match format YYYY-MM-DD, got: {version_string}"
+            f"Version must match format YYYY.MM.DD, got: {version_string}"
         )
     return version_string
 
