@@ -134,7 +134,7 @@ manually, the date widget can be disabled by modifying :ref:`USE_DATE_WIDGETS`.
 Step 5: Record Rights and Restrictions
 ######################################
 
-This optional step allows the donor to enter any rights applying to their records. Unlike other sections, donors can skip this step if they're unsure about the rights status of their materials.
+This optional step allows the donor to enter any rights applying to their records. Unlike previous sections, donors can skip this step if they're unsure about the rights status of their materials.
 
 If donors wish to provide rights information, they can select one or more types of rights from the dropdown menu. If the appropriate type isn't listed, they can select "Other" and specify their own type. The **+ More** button allows adding multiple rights (useful when different rights apply to different records), and the **- Remove** button can remove entries.
 
@@ -183,7 +183,9 @@ If you are not sure about the purpose of creating these groups, you can click on
 
 
 Clicking on the **Add New Group** button will open a modal where the donor can enter a name and
-description for the group.
+description for the group. Clicking **Create** will create a new group and auto-select it in the **Assigned group** dropdown.
+
+Groups can also be accessed later from the :ref:`Submission Groups` table on the user profile page.
 
 .. image:: images/submission_step_7_add_group.webp
     :alt: Step 7 of the submission form, adding a new group
