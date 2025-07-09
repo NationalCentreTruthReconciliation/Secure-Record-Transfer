@@ -20,5 +20,6 @@ jobs:
             ./app/recordtransfer/views
             ./app/recordtransfer/forms
             ./app/recordtransfer/management
+            ./app/recordtransfer/models.py
           version-file: "./pyproject.toml"
           args: "--config ./ruff.toml check"
