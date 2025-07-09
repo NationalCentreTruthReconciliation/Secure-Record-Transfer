@@ -12,7 +12,6 @@ const noDescription = "No description available";
  * @param {object} context - The context object containing URLs and element IDs for the form.
  */
 export async function setupSubmissionGroupForm(context) {
-    console.log("Setting up submission group form with context:", context);
     const selectField = document.getElementById(context["id_submission_group_selection"]);
     const groupDescDisplay = document.getElementById(context["id_display_group_description"]);
 
