@@ -5,6 +5,10 @@ on:
     - cron: "0 0 * * 0" # Runs every week
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   sync-file:
     runs-on: ubuntu-latest
