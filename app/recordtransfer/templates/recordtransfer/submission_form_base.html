@@ -42,7 +42,7 @@
         {% block messages %}
             {% include "includes/messages.html" %}
         {% endblock messages %}
-        <div class="card bg-base-100 border border-base-300 shadow-sm mb-6">
+        <div class="card bg-base-100 border border-base-300 shadow-sm mb-6 p-4">
             <div class="card-body p-6">
                 {% block form_explanation %}
                 {% endblock form_explanation %}
@@ -89,7 +89,7 @@
                             <button id="form-review-button"
                                     name="wizard_goto_step"
                                     value="{{ wizard.steps.last }}"
-                                    class="green-button">
+                                    class="green-button btn btn-outline">
                                 {% if wizard.steps.step1 == wizard.steps.count|add:"-1" %}
                                     {% trans "Review" %}
                                 {% else %}
