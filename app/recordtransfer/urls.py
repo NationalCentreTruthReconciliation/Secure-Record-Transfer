@@ -10,7 +10,7 @@ urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     path(
         "submission/<uuid:uuid>/csv/",
-        login_required(views.post_submission.SubmissionCsvView.as_view()),
+        login_required(views.post_submission.submission_csv_export),
         name="submission_csv",
     ),
     path(

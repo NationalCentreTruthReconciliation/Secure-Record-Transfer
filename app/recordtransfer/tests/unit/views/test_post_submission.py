@@ -144,8 +144,8 @@ class TestSubmissionDetailView(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class TestSubmissionCsvView(TestCase):
-    """Tests for SubmissionCsvView."""
+class TestSubmissionCsvExport(TestCase):
+    """Tests for the submission_csv_export view function."""
 
     def setUp(self) -> None:
         """Set up test environment."""

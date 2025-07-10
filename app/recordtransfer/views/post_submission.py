@@ -58,34 +58,29 @@ class SubmissionDetailView(DetailView):
         return context
 
 
-class SubmissionCsvView(DetailView):
-    """Generates a CSV containing the submission and downloads that CSV."""
+def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Generate and download a CSV for a specific submission."""
+    # Get base queryset with permission filtering
+    if request.user.is_staff:
+        queryset = Submission.objects.all()
+    else:
+        queryset = Submission.objects.filter(user=request.user)
 
-    model = Submission
+    # Filter to the specific submission
+    submission_queryset = queryset.filter(uuid=uuid)
 
-    def get_queryset(self) -> QuerySet[Submission]:
-        """Return queryset filtered by user permissions."""
-        queryset = super().get_queryset()
+    # Check if submission exists and user has permission
+    if not submission_queryset.exists():
+        raise Http404("Submission not found")
 
-        if self.request.user.is_staff:
-            return queryset
-        else:
-            return queryset.filter(user=self.request.user)
+    # Get submission for filename prefix
+    submission = submission_queryset.first()
+    if submission and submission.user:
+        prefix = slugify(submission.user.username) + "_export-"
+    else:
+        prefix = "export-"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle GET request to generate and download the CSV."""
-        uuid = self.kwargs.get("uuid")
-
-        # Get queryset containing just the submission with the given UUID
-        queryset = self.get_queryset().filter(uuid=uuid)
-
-        submission = queryset.first()
-        # Invalid UUID or user does not have permission to access this submission
-        if not submission:
-            raise Http404("Submission not found")
-        prefix = slugify(submission.user.username) + "_export-" if submission.user else "export-"
-
-        return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+    return submission_queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
 class SubmissionGroupDetailView(UpdateView):
