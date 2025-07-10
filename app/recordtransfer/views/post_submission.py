@@ -7,6 +7,7 @@ from caais.export import ExportVersion
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import (
+    Http404,
     HttpRequest,
     HttpResponse,
     JsonResponse,
@@ -62,14 +63,7 @@ class SubmissionCsvView(DetailView):
 
     model = Submission
 
-    def get_object(self, queryset: Optional[QuerySet] = None) -> Submission:
-        """Retrieve the Submission object based on the UUID in the URL."""
-        if queryset is None:
-            queryset = self.get_queryset()
-
-        return get_object_or_404(queryset, uuid=self.kwargs.get("uuid"))
-
-    def get_queryset(self) -> QuerySet[SubmissionGroup]:
+    def get_queryset(self) -> QuerySet[Submission]:
         """Return queryset filtered by user permissions."""
         queryset = super().get_queryset()
 
@@ -80,9 +74,17 @@ class SubmissionCsvView(DetailView):
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle GET request to generate and download the CSV."""
-        self.get_object()
-        queryset = self.get_queryset()
-        prefix = slugify(queryset.first().user.username) + "_export-"
+        uuid = self.kwargs.get("uuid")
+
+        # Get queryset containing just the submission with the given UUID
+        queryset = self.get_queryset().filter(uuid=uuid)
+
+        submission = queryset.first()
+        # Invalid UUID or user does not have permission to access this submission
+        if not submission:
+            raise Http404("Submission not found")
+        prefix = slugify(submission.user.username) + "_export-" if submission.user else "export-"
+
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
