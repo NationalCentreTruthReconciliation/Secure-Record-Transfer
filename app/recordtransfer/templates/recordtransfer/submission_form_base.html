@@ -19,100 +19,142 @@
 {% endblock theme %}
 {% block content %}
     <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="mb-2 text-4xl text-primary">
+        <div class="mb-6 text-4xl text-primary">
             {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
-            {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
-        {% endblocktrans %}
+                {{ form_title }}
+            {% endblocktrans %}
         </div>
-        {# Basic DaisyUI Progress Bar #}
-        <div class="w-full mb-6 mt-10">
-            <progress class="progress progress-primary w-full h-3"
-                      value="{% widthratio wizard.steps.step1 wizard.steps.count 100 %}"
-                      max="100"></progress>
-            <div class="text-center mt-2">
-                <span class="text-sm">{% widthratio wizard.steps.step1 wizard.steps.count 100 %}% Complete</span>
-            </div>
-        </div>
-        {% if info_message %}
-            <div class="alert !p-5">
-                <i class="fas fa-info-circle pointer-events-none"></i>
-                <div class="text-sm">{{ info_message }}</div>
-            </div>
-        {% endif %}
-        {% block messages %}
-            {% include "includes/messages.html" %}
-        {% endblock messages %}
-        <div class="card bg-base-100 border border-base-300 shadow-sm mb-6 p-4">
-            <div class="card-body p-6">
-                {% block form_explanation %}
-                {% endblock form_explanation %}
-            </div>
-            <form id="submission-form"
-                  hx-post="{{ request.get_full_path }}"
-                  hx-target="#main-container"
-                  hx-select="#main-container"
-                  hx-swap="outerHTML"
-                  method="POST">
-                {% csrf_token %}
-                {{ wizard.management_form }}
-                {{ wizard.form.management_form }}
-                {% block formfields %}{# !!! Add the form fields here !!! #}{% endblock %}
-                <div class="{% block buttonarrayclass %}{% endblock buttonarrayclass %}">
-                    <label></label>
-                    <div class="button-array">
-                        {% if wizard.steps.prev %}
-                            {# Without formnovalidate, you cannot go to the previous step without valid data #}
-                            {# Which kind of defeats the purpose of going back to the previous step! #}
-                            <button id="form-previous-button"
-                                    formnovalidate="formnovalidate"
-                                    name="wizard_goto_step"
-                                    value="{{ wizard.steps.prev }}"
-                                    class="btn btn-outline btn-primary margin-right-10px">
-                                {% trans "Previous Step" %}
-                            </button>
-                        {% endif %}
-                        {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
-                            {# Button is "next" by default but the id for a "submit" button can be overridden using this block #}
-                            <button {% block submitbuttonattributes %}
-                                    id="form-next-button"
-                                    {% endblock submitbuttonattributes %}
-                                    type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                                    class="btn btn-primary margin-right-30px">
-                                {% if wizard.steps.step1 == wizard.steps.count %}
-                                    {% trans "Submit" %}
-                                {% else %}
-                                    {% trans "Next Step" %}
-                                {% endif %}
-                            </button>
-                        {% endif %}
-                        {% if SHOW_REVIEW_BUTTON %}
-                            <button id="form-review-button"
-                                    name="wizard_goto_step"
-                                    value="{{ wizard.steps.last }}"
-                                    class="green-button btn btn-outline">
-                                {% if wizard.steps.step1 == wizard.steps.count|add:"-1" %}
-                                    {% trans "Review" %}
-                                {% else %}
-                                    {% trans "Return to Review" %}
-                                {% endif %}
-                            </button>
-                        {% endif %}
+        {# Two-column layout: Steps on left, Form on right #}
+        <div class="flex flex-col md:flex-row gap-6">
+            {# Vertical Steps Column - Left #}
+            <div class="md:w-1/4 mb-6 md:mb-0">
+                <div class="card bg-base-100 shadow-sm p-4 sticky top-4">
+                    <div class="card-body p-2">
+                        <h3 class="text-lg font-medium mb-4">Progress</h3>
+                        <ul class="steps steps-vertical">
+                            {% with ""|center:wizard.steps.count as range %}
+                                {% for _ in range %}
+                                    <li class="step {% if forloop.counter <= wizard.steps.step1 %}step-primary{% endif %} mb-2">
+                                        <div class="flex items-center">
+                                            {% if forloop.counter < wizard.steps.step1 %}
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                     fill="none"
+                                                     viewBox="0 0 24 24"
+                                                     stroke-width="2"
+                                                     stroke="currentColor"
+                                                     class="w-5 h-5 text-white">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                </svg>
+                                            {% else %}
+                                                <span>Step {{ forloop.counter }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            {% endwith %}
+                        </ul>
+                        <div class="mt-4 text-center text-sm">
+                            <span class="badge badge-primary">{{ wizard.steps.step1 }} of {{ wizard.steps.count }}</span>
+                            <div class="mt-2 text-base-content/70">{% widthratio wizard.steps.step1 wizard.steps.count 100 %}% Complete</div>
+                        </div>
                     </div>
                 </div>
-                <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
-                    <label></label>
-                    {% if SHOW_SAVE_BUTTON %}
-                        <button id="form-save-button"
-                                class="link link-primary"
-                                formnovalidate="formnovalidate"
-                                name="save_form_step"
-                                value="{{ wizard.steps.current }}">
-                            <i class="fa fa-save me-2" aria-hidden="true"></i>
-                            {% trans "Click to save form and resume later" %}
-                        </button>
-                    {% endif %}
+            </div>
+            {# Form Column - Right #}
+            <div class="md:w-3/4">
+                {% if info_message %}
+                    <div class="alert alert-info bg-info/10 text-info-content mb-6 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-6 h-6 stroke-info flex-shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <div class="text-sm">{{ info_message }}</div>
+                    </div>
+                {% endif %}
+                {% block messages %}
+                    {% include "includes/messages.html" %}
+                {% endblock messages %}
+                <div class="card bg-base-100 border border-base-300 shadow-sm mb-6">
+                    <div class="card-body p-6">
+                        {% block form_explanation %}
+                        {% endblock form_explanation %}
+                    </div>
+                    <form id="submission-form"
+                          hx-post="{{ request.get_full_path }}"
+                          hx-target="#main-container"
+                          hx-select="#main-container"
+                          hx-swap="outerHTML"
+                          method="POST"
+                          class="p-6 pt-0">
+                        {% csrf_token %}
+                        {{ wizard.management_form }}
+                        {{ wizard.form.management_form }}
+                        <div class="space-y-4 mb-8">
+                            {% block formfields %}{# !!! Add the form fields here !!! #}{% endblock %}
+                        </div>
+                        <div class="{% block buttonarrayclass %}border-t border-base-300 pt-6 mt-6{% endblock buttonarrayclass %}">
+                            <div class="flex flex-wrap justify-between items-center">
+                                {# Left side - Previous button #}
+                                <div>
+                                    {% if wizard.steps.prev %}
+                                        <button id="form-previous-button"
+                                                formnovalidate="formnovalidate"
+                                                name="wizard_goto_step"
+                                                value="{{ wizard.steps.prev }}"
+                                                class="btn btn-outline btn-primary">
+                                            <i class="fa fa-arrow-left me-2" aria-hidden="true"></i>
+                                            {% trans "Previous" %}
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                {# Right side - Next/Submit and Review buttons #}
+                                <div class="flex flex-wrap gap-3">
+                                    {% if SHOW_REVIEW_BUTTON %}
+                                        <button id="form-review-button"
+                                                name="wizard_goto_step"
+                                                value="{{ wizard.steps.last }}"
+                                                class="btn btn-outline btn-accent">
+                                            <i class="fa fa-eye me-2" aria-hidden="true"></i>
+                                            {% trans "Review" %}
+                                        </button>
+                                    {% endif %}
+                                    {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
+                                        <button {% block submitbuttonattributes %}
+                                                id="form-next-button"
+                                                {% endblock submitbuttonattributes %}
+                                                type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
+                                                class="btn btn-primary">
+                                            {% if wizard.steps.step1 == wizard.steps.count %}
+                                                {% trans "Submit" %}
+                                            {% else %}
+                                                {% trans "Next" %}
+                                                <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
+                                            {% endif %}
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {# Save link - centered and separated #}
+                            <div class="{% block savelinkclass %}mt-6 text-center pt-4 border-t border-base-200{% endblock savelinkclass %}">
+                                {% if SHOW_SAVE_BUTTON %}
+                                    <button id="form-save-button"
+                                            class="link link-primary"
+                                            formnovalidate="formnovalidate"
+                                            name="save_form_step"
+                                            value="{{ wizard.steps.current }}">
+                                        <i class="fa fa-save me-2" aria-hidden="true"></i>
+                                        {% trans "Save progress and resume later" %}
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
     {% include "includes/unsaved_changes_modal.html" %}
