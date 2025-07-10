@@ -87,7 +87,10 @@
                         class="link link-primary"
                         formnovalidate="formnovalidate"
                         name="save_form_step"
-                        value="{{ wizard.steps.current }}">{% trans "Click to save form and resume later" %}</button>
+                        value="{{ wizard.steps.current }}">
+                    <i class="fa fa-save me-2" aria-hidden="true"></i>
+                    {% trans "Click to save form and resume later" %}
+                </button>
             {% endif %}
         </div>
     </form>
