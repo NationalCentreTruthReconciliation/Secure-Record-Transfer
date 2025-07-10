@@ -20,6 +20,15 @@
             {{ form_title }} - Step {{ currentstep }} of {{ totalsteps }}
         {% endblocktrans %}
     </div>
+    {# Basic DaisyUI Progress Bar #}
+    <div class="w-full mb-6">
+        <progress class="progress progress-primary w-full"
+                  value="{% widthratio wizard.steps.step1 wizard.steps.count 100 %}"
+                  max="100"></progress>
+        <div class="text-center mt-2">
+            <span class="text-sm">{% widthratio wizard.steps.step1 wizard.steps.count 100 %}% Complete</span>
+        </div>
+    </div>
     {% if info_message %}
         <p class="mb-5">
             <b>{{ info_message }}</b>
