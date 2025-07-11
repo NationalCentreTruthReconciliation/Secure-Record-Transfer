@@ -19,6 +19,7 @@ dependencies = [
     "django-recaptcha>=4.0.0,<5",
     "django-rq>=3.0.0,<4",
     "django-webpack-loader>=3.2.1,<4",
+    "django-widget-tweaks>=1.4.12,<2",
     "python-decouple~=3.8",
     "rq-scheduler>=0.14.0,<0.15",
     "setuptools~=78.1.1",
