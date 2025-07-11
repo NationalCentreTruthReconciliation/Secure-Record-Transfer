@@ -8,7 +8,10 @@
             {% if field.field.required %}<span class="text-error ml-1">*</span>{% endif %}
         </legend>
 
-        {% if field.field.widget.input_type == 'textarea' %}
+        {% if field.field.widget.input_type == 'radio' %}
+            {# Render radio field with DaisyUI styling and labels beside buttons #}
+            {{ field|add_class:"flex gap-4 text-lg" }}
+        {% elif field.field.widget.input_type == 'textarea' %}
             {{ field|add_class:"textarea textarea-bordered w-full bg-gray-50 text-gray-600" }}
         {% elif field.field.widget.input_type == 'select' %}
             {{ field|add_class:"select select-bordered w-full bg-gray-50 text-gray-600" }}
@@ -18,7 +21,7 @@
                 <span class="ml-2 text-sm">{{ field.label }}</span>
             </label>
         {% else %}
-            {{ field|add_class:"input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600" }}
+            {{ field|add_class:"input input-bordered w-full bg-gray-50 text-gray-600" }}
         {% endif %}
 
         {% if field.errors %}
