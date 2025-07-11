@@ -1,42 +1,30 @@
 {% load i18n %}
-<div class="form-control w-full">
-    <label class="label" for="{{ field.id_for_label }}">
-        <span class="label-text">{{ field.label }}</span>
-    </label>
-    {% if field.field.widget.input_type == 'textarea' %}
-        <textarea name="{{ field.name }}"
-                  id="{{ field.id_for_label }}"
-                  class="textarea textarea-bordered w-full"
-                  {% if field.field.required %}required{% endif %}>{{ field.value|default:'' }}</textarea>
-    {% elif field.field.widget.input_type == 'select' %}
-        <select name="{{ field.name }}"
-                id="{{ field.id_for_label }}"
-                class="select select-bordered w-full"
-                {% if field.field.required %}required{% endif %}>
-            {% for choice in field.field.choices %}
-                <option value="{{ choice.0 }}"
-                        {% if choice.0 == field.value %}selected{% endif %}>{{ choice.1 }}</option>
+{% load widget_tweaks %}
+
+{% if not field.field.widget.is_hidden %}
+    <fieldset class="fieldset mb-4">
+        <legend class="fieldset-legend text-sm md:text-md">
+            {{ field.label }}
+            {% if field.field.required %}<span class="text-error ml-1">*</span>{% endif %}
+        </legend>
+
+        {% if field.field.widget.input_type == 'textarea' %}
+            {{ field|add_class:"textarea textarea-bordered w-full bg-gray-50 text-gray-600" }}
+        {% elif field.field.widget.input_type == 'select' %}
+            {{ field|add_class:"select select-bordered w-full bg-gray-50 text-gray-600" }}
+        {% elif field.field.widget.input_type == 'checkbox' %}
+            <label class="label pb-2 cursor-pointer" for="{{ field.id_for_label }}">
+                {{ field|add_class:"checkbox checkbox-primary" }}
+                <span class="ml-2 text-sm">{{ field.label }}</span>
+            </label>
+        {% else %}
+            {{ field|add_class:"input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600" }}
+        {% endif %}
+
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <p class="text-error text-xs md:text-sm mt-1">{{ error }}</p>
             {% endfor %}
-        </select>
-    {% elif field.field.widget.input_type == 'checkbox' %}
-        <input type="checkbox"
-               name="{{ field.name }}"
-               id="{{ field.id_for_label }}"
-               class="checkbox checkbox-primary"
-               {% if field.value %}checked{% endif %} />
-    {% else %}
-        <input type="{{ field.field.widget.input_type|default:'text' }}"
-               name="{{ field.name }}"
-               id="{{ field.id_for_label }}"
-               class="input input-bordered w-full"
-               value="{{ field.value|default:'' }}"
-               {% if field.field.required %}required{% endif %} />
-    {% endif %}
-    {% if field.errors %}
-        {% for error in field.errors %}
-            <div class="label">
-                <span class="label-text-alt text-error">{{ error }}</span>
-            </div>
-        {% endfor %}
-    {% endif %}
-</div>
+        {% endif %}
+    </fieldset>
+{% endif %}
