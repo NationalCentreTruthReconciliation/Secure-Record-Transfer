@@ -4,7 +4,7 @@
 {% block formfields %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for field in wizard.form.visible_fields %}
-            {% include "recordtransfer/submission_form_field.html" %}
+            {% include "includes/submission_form_field.html" %}
         {% endfor %}
     </div>
     {# Render hidden fields separately #}
