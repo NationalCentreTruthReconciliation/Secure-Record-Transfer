@@ -2,9 +2,9 @@ name: Production Smoke Test Podman (via compose.prod.yml)
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
   push:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
   workflow_dispatch:
 
 permissions:
