@@ -9,7 +9,7 @@
         </legend>
 
         {% if field.field.widget.input_type == 'radio' %}
-            {# Render radio field with DaisyUI styling and labels beside buttons #}
+            {# Render radio field directly to maintain original ID structure #}
             {{ field|add_class:"flex gap-4 text-lg" }}
         {% elif field.field.widget.input_type == 'textarea' %}
             {{ field|add_class:"textarea textarea-bordered w-full bg-gray-50 text-gray-600" }}
