@@ -20,7 +20,7 @@
             {# Help tooltip #}
             {% if field.help_text %}
                 <div tooltip-content="{{ field.help_text }}"
-                    class="help-tooltip help-icon">
+                    class="help-tooltip help-icon mt-6">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </div>
             {% endif %}
@@ -32,7 +32,7 @@
         {% url 'recordtransfer:help' as help_url %}
         {% if field.name == "other_source_type" %}
             <div class="initially-hidden hidden">
-                <div class="alert !p-5">
+                <div class="alert mt-2">
                     <i class="fas fa-info-circle pointer-events-none"></i>
                     <div class="text-sm">
                         {% blocktrans %}
@@ -44,9 +44,9 @@
             </div>
         {% elif field.name == "other_source_role" %}
             <div class="initially-hidden hidden">
-                <div class="alert !p-5">
+                <div class="alert">
                     <i class="fas fa-info-circle pointer-events-none"></i>
-                    <div class="text-sm">
+                    <div class="text-sm mt-2">
                         {% blocktrans %}
                         <a class="link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
