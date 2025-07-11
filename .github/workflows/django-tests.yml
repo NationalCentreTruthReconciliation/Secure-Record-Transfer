@@ -2,9 +2,9 @@ name: Run Django Unit Tests
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
   push:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
 
 jobs:
   unit-tests:
