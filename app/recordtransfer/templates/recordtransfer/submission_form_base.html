@@ -30,7 +30,7 @@
                                 <li class="step {% if forloop.counter <= wizard.steps.step1 %}step-primary {% endif %} mb-2">
                                     <div class="flex items-center gap-2">
                                         {% if forloop.counter < wizard.steps.step1 %}{% endif %}
-                                        <span class="text-sm text-left">{{ step_titles_dict|dict_get:step_name }}</span>
+                                        <span class="text-sm text-left ml-4">{{ step_titles_dict|dict_get:step_name }}</span>
                                     </div>
                                 </li>
                             {% endfor %}
