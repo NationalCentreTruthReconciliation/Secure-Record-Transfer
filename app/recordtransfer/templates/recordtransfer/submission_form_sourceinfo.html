@@ -31,30 +31,28 @@
         {% endif %}
         {% url 'recordtransfer:help' as help_url %}
         {% if field.name == "other_source_type" %}
-            <div class="flex-item initially-hidden hidden">
-                <label></label>
-                <div>
-                    <i>
+            <div class="initially-hidden hidden">
+                <div class="alert !p-5">
+                    <i class="fas fa-info-circle pointer-events-none"></i>
+                    <div class="text-sm">
                         {% blocktrans %}
-                        <a class="non-nav-link link link-primary" target="_blank" href="{{ help_url }}#source-types">Click here</a>
+                        <a class="link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-types">Click here</a>
                         for an explanation of the different types of source types.
                         {% endblocktrans %}
-                    </i>
+                    </div>
                 </div>
-                <br>
             </div>
         {% elif field.name == "other_source_role" %}
-            <div class="flex-item initially-hidden hidden">
-                <label></label>
-                <div>
-                    <i>
+            <div class="initially-hidden hidden">
+                <div class="alert !p-5">
+                    <i class="fas fa-info-circle pointer-events-none"></i>
+                    <div class="text-sm">
                         {% blocktrans %}
-                        <a class="non-nav-link link link-primary" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
+                        <a class="link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
                         {% endblocktrans %}
-                    </i>
+                    </div>
                 </div>
-                <br>
             </div>
         {% endif %}
     {% endfor %}
