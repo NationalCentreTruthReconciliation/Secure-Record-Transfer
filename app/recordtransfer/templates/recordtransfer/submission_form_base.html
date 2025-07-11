@@ -17,7 +17,7 @@
 {% endblock stylesheet %}
 {% block content %}
     <div class="max-w-4xl mx-auto px-4 py-8">
-<div class="mb-6 text-4xl text-primary">{% trans form_title %}</div>
+        <div class="mb-6 text-4xl text-primary">{% trans form_title %}</div>
         {# Two-column layout: Steps on left, Form on right #}
         <div class="flex flex-col md:flex-row gap-6">
             {# Vertical Steps Column - Left #}
@@ -91,6 +91,16 @@
                                             {% trans "Previous" %}
                                         </button>
                                     {% endif %}
+                                    {% if SHOW_REVIEW_BUTTON %}
+                                        <button id="form-review-button"
+                                                name="wizard_goto_step"
+                                                value="{{ wizard.steps.last }}"
+                                                class="btn btn-accent">
+                                            {% trans "Review" %}
+                                                                                            <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
+
+                                        </button>
+                                    {% endif %}
                                     {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
                                         <button {% block submitbuttonattributes %}
                                                 id="form-next-button"
@@ -103,16 +113,6 @@
                                                 {% trans "Next" %}
                                                 <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
                                             {% endif %}
-                                        </button>
-                                    {% endif %}
-                                    {% if SHOW_REVIEW_BUTTON %}
-                                        <button id="form-review-button"
-                                                name="wizard_goto_step"
-                                                value="{{ wizard.steps.last }}"
-                                                class="btn btn-accent">
-                                            {% trans "Review" %}
-                                            <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
-
                                         </button>
                                     {% endif %}
                                 </div>
