@@ -15,23 +15,16 @@
 {% block stylesheet %}
     {{ block.super }}
 {% endblock stylesheet %}
-{% block theme %}
-    nctr
-{% endblock theme %}
 {% block content %}
     <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="mb-6 text-4xl text-primary">
-            {% blocktrans with currentstep=wizard.steps.step1 totalsteps=wizard.steps.count%}
-                {{ form_title }}
-            {% endblocktrans %}
-        </div>
+<div class="mb-6 text-4xl text-primary">{% trans form_title %}</div>
         {# Two-column layout: Steps on left, Form on right #}
         <div class="flex flex-col md:flex-row gap-6">
             {# Vertical Steps Column - Left #}
             <div class="md:w-1/3 mb-6 md:mb-0">
                 <div class="card bg-base-100 border border-base-300 shadow-sm p-4 sticky top-4">
                     <div class="card-body p-2">
-                        <div class="text-lg font-medium mb-4">Progress</div>
+                        <div class="text-lg font-medium mb-4">{% trans "Progress" %}</div>
                         <ul class="steps steps-vertical">
                             {% for step_name in wizard.steps.all %}
                                 <li class="step {% if forloop.counter == wizard.steps.step1 %}step-primary{% elif forloop.counter < wizard.steps.step1 %}step-success {% endif %} mb-2">
@@ -42,9 +35,6 @@
                                 </li>
                             {% endfor %}
                         </ul>
-                        <div class="mt-4 text-center text-sm">
-                            <span class="badge badge-primary">{{ wizard.steps.step1 }} of {{ wizard.steps.count }}</span>
-                        </div>
                     </div>
                 </div>
             </div>
