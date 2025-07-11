@@ -27,7 +27,7 @@
                         <div class="text-lg font-medium mb-4">{% trans "Progress" %}</div>
                         <ul class="steps steps-vertical">
                             {% for step_name in wizard.steps.all %}
-                                <li class="step {% if forloop.counter == wizard.steps.step1 %}step-primary{% elif forloop.counter < wizard.steps.step1 %}step-success {% endif %} mb-2">
+                                <li class="step {% if forloop.counter <= wizard.steps.step1 %}step-primary {% endif %} mb-2">
                                     <div class="flex items-center gap-2">
                                         {% if forloop.counter < wizard.steps.step1 %}{% endif %}
                                         <span class="text-sm text-left">{{ step_titles_dict|dict_get:step_name }}</span>
