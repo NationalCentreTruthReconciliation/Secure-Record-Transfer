@@ -62,6 +62,11 @@ urlpatterns = [
         name="submission_group_detail",
     ),
     path(
+        "submission-group/<uuid:uuid>/csv/",
+        login_required(views.post_submission.submission_group_bulk_csv_export),
+        name="submission_group_bulk_csv",
+    ),
+    path(
         "user/<int:user_id>/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",

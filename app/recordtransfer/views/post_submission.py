@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
+from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
 
@@ -57,7 +58,7 @@ class SubmissionDetailView(DetailView):
         context["metadata"] = context["submission"].metadata
         return context
 
-
+@require_http_methods(["GET"])
 def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
     """Generate and download a CSV for a specific submission."""
     # Get base queryset with permission filtering
@@ -81,6 +82,44 @@ def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
         prefix = "export-"
 
     return submission_queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+
+require_http_methods(["GET"])
+def submission_group_bulk_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
+    """Generate and download a CSV for all submissions in a submission group."""
+    # Get base queryset with permission filtering
+    if request.user.is_staff:
+        queryset = SubmissionGroup.objects.all()
+    else:
+        queryset = SubmissionGroup.objects.filter(created_by=request.user)
+
+    # Filter to the specific submission group
+    submission_group_queryset = queryset.filter(uuid=uuid)
+
+    # Check if submission group exists and user has permission
+    if not submission_group_queryset.exists():
+        raise Http404("Submission group not found")
+
+    # Get submission group for filename prefix
+    submission_group = submission_group_queryset.first()
+    if submission_group and submission_group.name:
+        prefix = slugify(submission_group.name) + "_export-"
+    else:
+        prefix = "bulk_export-"
+
+    # Get submissions in this group that the user has permission to see
+    if request.user.is_staff:
+        related_submissions = Submission.objects.filter(
+            part_of_group__in=submission_group_queryset
+        )
+    else:
+        related_submissions = Submission.objects.filter(
+            part_of_group__in=submission_group_queryset, user=request.user
+        )
+
+    if not related_submissions.exists():
+        raise Http404("No submissions found in this group")
+
+    return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
 
 class SubmissionGroupDetailView(UpdateView):
