@@ -11,8 +11,9 @@
         {% if field.field.widget.input_type == 'radio' %}
             {# Render radio field directly to maintain original ID structure #}
             {{ field|add_class:"flex gap-4 text-lg" }}
-        {% elif field.field.widget.input_type == 'textarea' %}
-            {{ field|add_class:"textarea textarea-bordered w-full bg-gray-50 text-gray-600" }}
+        {% elif field|widget_type == 'textarea' %}
+            {# Check for textarea widgets #}
+            {{ field|add_class:"textarea textarea-bordered w-full h-32 bg-gray-50 text-gray-600 resize-y" }}
         {% elif field.field.widget.input_type == 'select' %}
             {{ field|add_class:"select select-bordered w-full bg-gray-50 text-gray-600" }}
         {% elif field.field.widget.input_type == 'checkbox' %}
