@@ -2,7 +2,7 @@ name: PR Python Lint Check
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
     types: [opened, synchronize, reopened]
 
 permissions:

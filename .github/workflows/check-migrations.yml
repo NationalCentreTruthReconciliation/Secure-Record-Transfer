@@ -2,9 +2,9 @@ name: Check for Unmigrated Model Changes
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
   push:
-    branches: [master]
+    branches: [master,510-modernize-submission-form-ui]
 
 permissions:
   contents: read

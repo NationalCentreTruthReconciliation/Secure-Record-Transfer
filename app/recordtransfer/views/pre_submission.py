@@ -581,6 +581,8 @@ class SubmissionFormWizard(SessionWizardView):
             dict: A dictionary of context data to be used to render the form template.
         """
         context = super().get_context_data(form, **kwargs)
+        step_titles_dict = {step.value: meta.title for step, meta in self._TEMPLATES.items()}
+        context["step_titles_dict"] = step_titles_dict
 
         context.update(
             {
