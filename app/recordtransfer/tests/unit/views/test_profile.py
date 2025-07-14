@@ -1021,14 +1021,12 @@ class TestAssignSubmissionGroupModalView(TestCase):
             user=self.user,
             metadata=metadata,
             raw_form=b"test_form_data",
-            bag_name="test-bag",
             uuid=uuid.uuid4(),
         )
 
         self.other_submission = Submission.objects.create(
             user=self.other_user,
             raw_form=b"test_form_data",
-            bag_name="other-test-bag",
             uuid=uuid.uuid4(),
         )
 
@@ -1204,13 +1202,11 @@ class TestAssignSubmissionGroupView(TestCase):
         self.submission = Submission.objects.create(
             user=self.user,
             raw_form=b"test_form_data",
-            bag_name="test-bag",
             uuid=uuid.uuid4(),
         )
         self.other_submission = Submission.objects.create(
             user=self.other_user,
             raw_form=b"test_form_data",
-            bag_name="other-test-bag",
             uuid=uuid.uuid4(),
         )
 
