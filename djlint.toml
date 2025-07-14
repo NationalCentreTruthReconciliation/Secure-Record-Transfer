@@ -1,4 +1,5 @@
 # Find the rules here:
 # https://www.djlint.com/docs/linter/#rules
 
+profile = "django"
 ignore = "H006,H020,H021,H029,H031"
