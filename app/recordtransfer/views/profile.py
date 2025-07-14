@@ -41,8 +41,9 @@ class UserProfile(View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """Render the user profile page."""
-        account_info_form = UserAccountInfoForm(instance=request.user)
-        contact_info_form = UserContactInfoForm(instance=request.user)
+        user = cast(User, request.user)
+        account_info_form = UserAccountInfoForm(instance=user)
+        contact_info_form = UserContactInfoForm(instance=user)
         context = {
             "account_info_form": account_info_form,
             "contact_info_form": contact_info_form,
