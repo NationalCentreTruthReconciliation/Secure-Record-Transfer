@@ -11,24 +11,20 @@
     flex-med-width-item
 {% endblock savelinkclass %}
 {% block formfields %}
-    {% for field in wizard.form %}
-        {% include "includes/submission_form_field.html" %}
-    {% endfor %}
+    {{ block.super }}
     <p class="flex-med-width-item margin-top-25px">
-        Upload your files
+        <i>Upload your files</i>
     </p>
-    <div class="flex-med-width-item">
-        <div class="alert !p-5">
-            <i class="fas fa-info-circle pointer-events-none"></i>
-            <div class="text-sm">
-                {% blocktrans %}
-                You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
-                {{ MAX_TOTAL_UPLOAD_SIZE_MB }}MB of files</b>. Any <b>one file may not exceed
-                {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. Note that large submissions may take a few
-                minutes, so please do not reload the web page when your files are being uploaded.
-                {% endblocktrans %}
-            </div>
-        </div>
+  <div class="alert !p-5">
+        <i class="fas fa-info-circle pointer-events-none"></i>
+        <p class="flex-med-width-item">
+            {% blocktrans %}
+            You may upload a <b>maximum of {{ MAX_TOTAL_UPLOAD_COUNT }} files</b>, and <b>at most
+            {{ MAX_TOTAL_UPLOAD_SIZE_MB }}MB of files</b>. Any <b>one file may not exceed
+            {{ MAX_SINGLE_UPLOAD_SIZE_MB }} MB</b>. Note that large submissions may take a few
+            minutes, so please do not reload the web page when your files are being uploaded.
+            {% endblocktrans %}
+        </p>
     </div>
     <div class="flex-med-width-item mb-4">
         <div class="collapse collapse-arrow border border-base-300 rounded-lg bg-base-100">
