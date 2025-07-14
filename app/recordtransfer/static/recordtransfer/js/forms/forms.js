@@ -74,11 +74,11 @@ export const setupSubmissionGroupForm = (context) => {
 };
 
 /**
- * Sets up the change submission group form by enabling dynamic group description updates
+ * Sets up the assign submission group form by enabling dynamic group description updates
  * and controlling the change button state based on selection changes.
  * @returns {void}
  */
-export const setupChangeSubmissionGroupForm = () => {
+export const setupAssignSubmissionGroupForm = () => {
     const selectElement = document.getElementById("group_select");
     const descriptionDisplay = document.getElementById("group_description_display");
     const changeGroupButton = document.getElementById("change_group_btn");

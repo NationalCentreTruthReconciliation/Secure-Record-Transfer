@@ -1,4 +1,4 @@
-import { setupSubmissionGroupForm, setupChangeSubmissionGroupForm } from "../forms/forms.js";
+import { setupSubmissionGroupForm, setupAssignSubmissionGroupForm } from "../forms/forms.js";
 import { initializeSubmissionForm } from "../submission_form/index";
 import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
 
@@ -47,7 +47,7 @@ export const handleModalAfterSwap = (e, context) => {
     if (triggeredBy === "id_new_submission_group_button") {
         setupSubmissionGroupForm(context);
     } else if (triggeredBy.startsWith("assign_submission_group_")) {
-        setupChangeSubmissionGroupForm();
+        setupAssignSubmissionGroupForm();
     }
     // Always show the modal after a swap on the modal content container
     showModal();
