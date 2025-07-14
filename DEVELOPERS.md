@@ -59,6 +59,8 @@ You'll be prompted to install recommended extensions specified in `.vscode/exten
 - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): JavaScript linting and formatting
 - [Even Better TOML](https://marketplace.visualstudio.com/items/?itemName=tamasfe.even-better-toml): TOML file formatting
 - [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss): Tailwind CSS support
+- [djLint](https://marketplace.visualstudio.com/items?itemName=monosans.djlint): Django template linting and formatting
+
 
 If you're not automatically prompted, you can install recommended extensions manually by:
 
