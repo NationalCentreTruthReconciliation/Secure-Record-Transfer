@@ -25,6 +25,9 @@ jobs:
       - name: Install djlint
         run: pip install djlint
 
+      - name: Display djlint version
+        run: djlint --version
+
       - name: Run linting check
         run: djlint ./ --lint
 
