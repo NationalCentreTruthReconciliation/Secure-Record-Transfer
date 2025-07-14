@@ -1,59 +1,52 @@
 {% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
+
 {% block buttonarrayclass %}
     flex-item
 {% endblock buttonarrayclass %}
+
 {% block formfields %}
     {% for field in wizard.form %}
-        {% if field.errors %}
-            {% for error in field.errors %}
-                <div class="flex-error">
-                    <label for="nothing"></label>
-                    <div class="field-error">{{ error }}</div>
-                </div>
-            {% endfor %}
-        {% endif %}
-        <div class="flex-item">
-            <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
-            {{ field }}
-            {# Help tooltip #}
-            {% if field.help_text %}
-                <div tooltip-content="{{ field.help_text }}"
-                     class="help-tooltip help-icon">
-                    <i class="fa fa-info-circle" aria-hidden="true"></i>
-                </div>
-            {% endif %}
-            {% if field.name == "group_uuid" %}
+        {% include "includes/submission_form_field.html" %}
+        {% if field.name == "group_uuid" %}
+            <div class="mt-3 mb-4">
                 <button hx-get="{% url 'recordtransfer:create_submission_group_modal' %}"
                         hx-target="#modal-content-container"
                         hx-swap="innerHTML"
                         hx-select="#modal-content"
                         id="id_new_submission_group_button"
-                        class="btn btn-sm">
-                    <span class="hidden md:inline">{% trans "New submission group" %}</span>
-                    <i class="fa fa-plus" aria-hidden="true"></i>
+                        class="btn btn-outline btn-primary border-primary btn-sm gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-primary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span class="hidden text-primary md:inline">{% trans "New submission group" %}</span>
                 </button>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     {% endfor %}
-    <div class="flex-item">
-        <label for="group_description">Group Description</label>
-        <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}">Describe the group and its purpose.</p>
+
+    {# Group Description Display #}
+    <div class="form-group mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            {% trans "Group Description" %}
+        </label>
+        <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
+            <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}" class="text-sm text-gray-600">
+                {% trans "Describe the group and its purpose." %}
+            </p>
+        </div>
     </div>
-    <div class="flex-item">
-        <a class="non-nav-link link link-primary flex items-center text-sm"
-           href="{% url 'recordtransfer:help' %}#why-create-groups"
-           target="_blank">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 fill="none"
-                 viewBox="0 0 24 24"
-                 stroke-width="1.5"
-                 stroke="currentColor"
-                 class="w-4 h-4 mr-1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-            </svg>
-            {% trans "Why would I want to make a group?" %}
-        </a>
+
+    {# Help Link #}
+    <div class="form-group mb-6">
+        <div class="alert">
+            <i class="fas fa-info-circle pointer-events-none"></i>
+            <span class="text-sm">
+                <a class="link link-primary font-semibold" href="{% url 'recordtransfer:help' %}#why-create-groups" target="_blank">
+                    {% trans "Why would I want to make a group?" %}
+                </a>
+            </span>
+        </div>
     </div>
 {% endblock formfields %}
