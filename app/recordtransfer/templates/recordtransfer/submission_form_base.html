@@ -82,13 +82,14 @@
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
             <label></label>
-            {% if SHOW_SAVE_BUTTON %}
-                <button id="form-save-button"
-                        class="link link-primary"
-                        formnovalidate="formnovalidate"
-                        name="save_form_step"
-                        value="{{ wizard.steps.current }}">{% trans "Click to save form and resume later" %}</button>
-            {% endif %}
+            <button id="form-save-button"
+                    class="link link-primary"
+                    formnovalidate="formnovalidate"
+                    name="save_form_step"
+                    value="{{ wizard.steps.current }}"
+                    {% if not SHOW_SAVE_BUTTON %}hidden{% endif %}>
+                {% trans "Click to save form and resume later" %}
+            </button>
         </div>
     </form>
     {% include "includes/unsaved_changes_modal.html" %}

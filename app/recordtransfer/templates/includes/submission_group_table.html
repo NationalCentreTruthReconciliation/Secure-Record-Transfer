@@ -20,6 +20,12 @@
                        id="view_submission_group_{{ forloop.counter }}">
                         <i class="fas fa-eye"></i>
                     </a>
+                    <a href="{% url 'recordtransfer:submission_group_bulk_csv' uuid=group.uuid %}"
+                       class="link link-success tooltip"
+                       data-tip="{% trans "Export Submissions as CSV" %}"
+                       id="export_submission_group_{{ forloop.counter }}">
+                        <i class="fas fa-download"></i>
+                    </a>
                     <a hx-get="{{ group.get_delete_url }}"
                        hx-target="#modal-content-container"
                        hx-swap="innerHTML"

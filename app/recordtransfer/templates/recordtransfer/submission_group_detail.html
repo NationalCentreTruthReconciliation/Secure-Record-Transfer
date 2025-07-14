@@ -11,9 +11,6 @@
 {% block title %}
     {% blocktrans with name=group.name %}Submission Group: {{ name }}{% endblocktrans %}
 {% endblock title %}
-{% block theme %}
-    nctr
-{% endblock theme %}
 {% block content %}
     <div class="mb-8">
         <a href="{% url 'recordtransfer:user_profile' %}"
@@ -41,8 +38,15 @@
             </div>
             <!-- Table Section -->
             <div class="lg:col-span-3 bg-base-100 border border-base-300 rounded-lg p-6">
-                <div class="mb-4">
+                <div class="mb-4 flex justify-between items-center">
                     <h2 class="text-lg font-semibold">{% trans "Submissions in Group" %}</h2>
+                    {% if group.number_of_submissions_in_group > 1 %}
+                        <a href="{% url 'recordtransfer:submission_group_bulk_csv' uuid=group.uuid %}"
+                           class="btn btn-sm"
+                           id="export_submission_group">
+                            {% trans "Export Submissions as CSV" %}
+                        </a>
+                    {% endif %}
                 </div>
                 <div hx-get="{% url 'recordtransfer:submission_table' %}?{{ SUBMISSION_GROUP_QUERY_NAME }}={{ group.uuid }}"
                      hx-trigger="load"
