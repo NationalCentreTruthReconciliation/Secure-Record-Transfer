@@ -89,15 +89,6 @@
                                             {% trans "Previous" %}
                                         </button>
                                     {% endif %}
-                                    {% if SHOW_REVIEW_BUTTON %}
-                                        <button id="form-review-button"
-                                                name="wizard_goto_step"
-                                                value="{{ wizard.steps.last }}"
-                                                class="btn btn-accent">
-                                            {% trans "Review" %}
-                                            <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
-                                        </button>
-                                    {% endif %}
                                     {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
                                         <button {% block submitbuttonattributes %}
                                                 id="form-next-button"
@@ -110,6 +101,15 @@
                                                 {% trans "Next" %}
                                                 <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
                                             {% endif %}
+                                        </button>
+                                    {% endif %}
+                                    {% if SHOW_REVIEW_BUTTON %}
+                                        <button id="form-review-button"
+                                                name="wizard_goto_step"
+                                                value="{{ wizard.steps.last }}"
+                                                class="btn btn-accent">
+                                            {% trans "Review" %}
+                                            <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
                                         </button>
                                     {% endif %}
                                 </div>
