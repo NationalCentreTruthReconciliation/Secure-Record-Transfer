@@ -21,7 +21,7 @@
         {% endblocktrans %}
     </div>
     {% if info_message %}
-        <p>
+        <p class="mb-5">
             <b>{{ info_message }}</b>
         </p>
     {% endif %}
@@ -92,5 +92,6 @@
         </div>
     </form>
     {% include "includes/unsaved_changes_modal.html" %}
+    {% include "includes/save_contact_info_modal.html" %}
     {% include "includes/base_modal.html" %}
 {% endblock content %}

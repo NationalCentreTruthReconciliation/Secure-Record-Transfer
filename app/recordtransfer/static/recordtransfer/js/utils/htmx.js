@@ -1,4 +1,5 @@
 import { setupSubmissionGroupForm, setupChangeSubmissionGroupForm } from "../forms/forms.js";
+import { initializeSubmissionForm } from "../submission_form/index";
 import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
 
 /**
@@ -100,6 +101,18 @@ export function handleAssignSubmissionGroupModalBeforeSwap(e, context) {
             refreshSubmissionTable(context);
         }
     }
+}
+
+/**
+ * Sets up global HTMX event listeners for application-wide behavior.
+ * This should be called once in the main application entry point.
+ */
+export function setupBaseHtmxEventListeners() {
+    document.addEventListener("htmx:afterSwap", (event) => {
+        if (event.detail.target.id === "main-container") {
+            initializeSubmissionForm();
+        }
+    });
 }
 
 /**

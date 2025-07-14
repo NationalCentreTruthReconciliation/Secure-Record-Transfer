@@ -3,7 +3,7 @@
 import logging
 import re
 import smtplib
-from typing import List
+from typing import List, Optional
 
 import django_rq
 from django.contrib.sites.models import Site
@@ -21,12 +21,13 @@ from recordtransfer.utils import html_to_text
 LOGGER = logging.getLogger("rq.worker")
 
 __all__ = [
-    "send_submission_creation_success",
+    "send_password_reset_email",
     "send_submission_creation_failure",
+    "send_submission_creation_success",
     "send_thank_you_for_your_submission",
-    "send_your_submission_did_not_go_through",
-    "send_user_activation_email",
     "send_user_account_updated",
+    "send_user_activation_email",
+    "send_your_submission_did_not_go_through",
 ]
 
 
@@ -196,7 +197,7 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
         template_name="recordtransfer/email/in_progress_submission_expiring.html",
         context={
             "username": in_progress.user.username,
-            "full_name": in_progress.user.get_full_name(),
+            "full_name": in_progress.user.full_name,
             "base_url": Site.objects.get_current().domain,
             "in_progress_title": in_progress.title,
             "in_progress_expiration_date": timezone.localtime(
@@ -204,6 +205,28 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
             ).strftime("%Y-%m-%d %H:%M:%S"),
             "in_progress_url": in_progress.get_resume_url(),
         },
+    )
+
+
+@django_rq.job
+def send_password_reset_email(
+    context: dict,
+    to_email: str,
+) -> None:
+    """Send a password reset email asynchronously using django_rq.
+
+    Args:
+        context: Template context variables
+        to_email: Recipient email address
+    """
+    subject = "Password Reset on NCTR Record Transfer Portal"
+
+    _send_mail_with_logs(
+        recipients=[to_email],
+        from_email=_get_do_not_reply_email_address(),
+        subject=subject,
+        template_name="registration/password_reset_email.html",
+        context=context,
     )
 
 

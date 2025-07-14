@@ -24,7 +24,293 @@ from .selenium_setup import SeleniumLiveServerTestCase
         },
     }
 )
-class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
+class ProfileFormsTest(SeleniumLiveServerTestCase):
+    """Test the forms on the profile page."""
+
+    def setUp(self) -> None:
+        """Set up test data and log in the test user."""
+        super().setUp()
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="testpassword",
+            first_name="Test",
+            last_name="User",
+        )
+        self.login("testuser", "testpassword")
+
+    def switch_to_contact_info_tab(self) -> None:
+        """Switch to the contact information tab on the profile page."""
+        driver = self.driver
+
+        contact_info_radio = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_contact_info_tab"))
+        )
+        contact_info_radio.click()
+
+    # Tests for the account information form
+    @patch("recordtransfer.views.profile.send_user_account_updated")
+    def test_valid_reset_password(self, email_mock: MagicMock) -> None:
+        """Test resetting the password from the profile page."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
+
+        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
+        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        from django.contrib.auth import get_user_model
+
+        user = get_user_model().objects.get(username="testuser")
+        self.assertTrue(user.check_password("newsecurepassword"))
+
+    def test_password_change_wrong_current_password(self) -> None:
+        """Test error when the current password is wrong."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
+
+        driver.find_element(By.NAME, "current_password").send_keys("wrongpassword")
+        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        error_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        alert_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
+        )
+        self.assertTrue(error_present and alert_present)
+
+    def test_password_change_mismatched_new_passwords(self) -> None:
+        """Test error when new passwords do not match."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
+
+        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
+        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("differentpassword")
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        error_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        alert_present = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
+        )
+        self.assertTrue(error_present and alert_present)
+
+    def test_account_info_update(self) -> None:
+        """Test updating of account information for non-password fields."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        # First two fields: should be editable
+        first_name_input = driver.find_element(By.ID, "id_first_name")
+        last_name_input = driver.find_element(By.ID, "id_last_name")
+        # Last two fields: should NOT be editable/clickable
+        email_input = driver.find_element(By.ID, "id_email")
+        username_input = driver.find_element(By.ID, "id_username")
+        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
+
+        # Check first two are enabled and editable
+        self.assertTrue(first_name_input.is_enabled())
+        self.assertTrue(last_name_input.is_enabled())
+        first_name_input.clear()
+        last_name_input.clear()
+        first_name_input.send_keys("EditedFirst")
+        last_name_input.send_keys("EditedLast")
+        initial_state = notifications_checkbox.is_selected()
+
+        # Toggle the checkbox
+        notifications_checkbox.click()
+
+        # Check last two are disabled (not editable/clickable)
+        self.assertFalse(email_input.is_enabled())
+        self.assertFalse(username_input.is_enabled())
+
+        # Click save
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        # Wait for success alert
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Check if the changes persisted
+        first_name_input = driver.find_element(By.ID, "id_first_name")
+        last_name_input = driver.find_element(By.ID, "id_last_name")
+        self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
+        self.assertEqual(last_name_input.get_attribute("value"), "EditedLast")
+
+        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
+        self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
+
+    # Tests for the contact information form
+    def test_save_contact_info_button(self) -> None:
+        """Test that the save button for contact information is not clickable unless at least one
+        contact info field has changed.
+        """
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        self.switch_to_contact_info_tab()
+
+        # Initially, the save button should not be clickable
+        save_button = driver.find_element(By.ID, "contact-info-save-btn")
+        self.assertFalse(save_button.is_enabled(), "Save button should not be enabled initially")
+
+        # Fill in a contact info field to enable the save button
+        driver.find_element(By.ID, "id_phone_number").send_keys("+1 (555) 123-4567")
+        self.assertTrue(
+            save_button.is_enabled(), "Save button should be enabled after filling a field"
+        )
+
+    def test_required_contact_info_fields(self) -> None:
+        """Check that some contact information fields are required."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        self.switch_to_contact_info_tab()
+
+        # Check that the required fields are marked as such
+        required_fields = [
+            "id_phone_number",
+            "id_address_line_1",
+            "id_city",
+            "id_contactinfo-province_or_state",
+            "id_postal_or_zip_code",
+            "id_country",
+        ]
+        for field_id in required_fields:
+            field = driver.find_element(By.ID, field_id)
+            self.assertEqual(
+                "true", field.get_attribute("required"), f"Field '{field_id}' should be required"
+            )
+
+    def test_non_required_contact_info_fields(self) -> None:
+        """Check that some contact information fields are not required."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        self.switch_to_contact_info_tab()
+
+        # Check that the non-required fields are not marked as such
+        non_required_fields = [
+            "id_address_line_2",
+            "id_contactinfo-other_province_or_state",
+        ]
+        for field_id in non_required_fields:
+            field = driver.find_element(By.ID, field_id)
+            self.assertNotEqual(
+                "true",
+                field.get_attribute("required"),
+                f"Field '{field_id}' should not be required",
+            )
+
+    def test_valid_contact_info_update(self) -> None:
+        """Test updating contact information with valid data."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        self.switch_to_contact_info_tab()
+
+        # Fill in the contact information fields
+        driver.find_element(By.ID, "id_phone_number").send_keys("+1 (555) 123-4567")
+        driver.find_element(By.ID, "id_address_line_1").send_keys("123 Test Street")
+        driver.find_element(By.ID, "id_city").send_keys("Test City")
+        driver.find_element(By.ID, "id_contactinfo-province_or_state").send_keys("ON")
+        driver.find_element(By.ID, "id_postal_or_zip_code").send_keys("K1A 0A6")
+        driver.find_element(By.ID, "id_country").send_keys("CA")
+
+        # Click save
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "contact-info-save-btn"))
+        )
+        save_button.click()
+
+        # Wait for success alert
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+    def test_other_province_or_state(self) -> None:
+        """Test that the 'Other' province or state field is shown and required when 'Other' is
+        selected.
+        """
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        self.switch_to_contact_info_tab()
+
+        # Select 'Other' from the province/state dropdown
+        province_select = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_contactinfo-province_or_state"))
+        )
+        province_select.click()
+        other_option = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, "//option[text()='Other']"))
+        )
+        other_option.click()
+
+        # Check that the 'Other' input field is now visible
+        other_input = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "id_contactinfo-other_province_or_state"))
+        )
+        self.assertTrue(other_input.is_displayed())
+
+        # Check that the 'Other' input field is required
+        self.assertEqual(
+            "true",
+            other_input.get_attribute("required"),
+            "Other province/state field should be required",
+        )
+
+
+@tag("e2e")
+@override_settings(
+    WEBPACK_LOADER={
+        "DEFAULT": {
+            "STATS_FILE": os.path.join(
+                os.path.dirname(settings.APPLICATION_BASE_DIR), "dist", "webpack-stats.json"
+            ),
+        },
+    }
+)
+class SubmissionTablesTest(SeleniumLiveServerTestCase):
+    """Test the submission tables on the profile page."""
+
     def setUp(self) -> None:
         """Set up test data and log in the test user."""
         super().setUp()
@@ -48,8 +334,8 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         )
         self.login("testuser", "testpassword")
 
-    def move_to_in_progress_submission(self) -> None:
-        """Help method to move to an in-progress submission."""
+    def move_to_in_progress_submission_tab(self) -> None:
+        """Help method to move to an in-progress submission tab."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
@@ -97,8 +383,8 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         assert submission is not None
         return submission
 
-    def move_to_submission_groups(self) -> None:
-        """Help method to move to an in-progress submission."""
+    def move_to_submission_groups_tab(self) -> None:
+        """Help method to move to an in-progress submission tab."""
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
@@ -108,84 +394,6 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
             EC.element_to_be_clickable((By.XPATH, "//label[input[@id='id_submission_group_tab']]"))
         )
         submission_group_label.click()
-
-    @patch("recordtransfer.views.profile.send_user_account_updated")
-    def test_reset_password_from_profile(self, email_mock: MagicMock) -> None:
-        """Test resetting the password from the profile page."""
-        driver = self.driver
-        profile_url = reverse("recordtransfer:user_profile")
-        driver.get(f"{self.live_server_url}{profile_url}")
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.NAME, "current_password"))
-        )
-
-        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
-
-        save_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "id_save_button"))
-        )
-        save_button.click()
-
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
-        )
-
-        from django.contrib.auth import get_user_model
-
-        user = get_user_model().objects.get(username="testuser")
-        self.assertTrue(user.check_password("newsecurepassword"))
-
-    def test_profile_password_change_wrong_current_password(self) -> None:
-        """Test error when the current password is wrong."""
-        driver = self.driver
-        profile_url = reverse("recordtransfer:user_profile")
-        driver.get(f"{self.live_server_url}{profile_url}")
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.NAME, "current_password"))
-        )
-
-        driver.find_element(By.NAME, "current_password").send_keys("wrongpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
-        save_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "id_save_button"))
-        )
-        save_button.click()
-
-        error_present = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
-        )
-        alert_present = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
-        )
-        self.assertTrue(error_present and alert_present)
-
-    def test_profile_password_change_mismatched_new_passwords(self) -> None:
-        """Test error when new passwords do not match."""
-        driver = self.driver
-        profile_url = reverse("recordtransfer:user_profile")
-        driver.get(f"{self.live_server_url}{profile_url}")
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.NAME, "current_password"))
-        )
-
-        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("differentpassword")
-        save_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "id_save_button"))
-        )
-        save_button.click()
-
-        error_present = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
-        )
-        alert_present = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-error"))
-        )
-        self.assertTrue(error_present and alert_present)
 
     def test_submission_view_from_profile(self) -> None:
         """Test that the submission view can be accessed from the profile page."""
@@ -248,61 +456,11 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
 
         self.assertEqual(current_url, expected_url)
 
-    def test_edit_profile_settings(self) -> None:
-        """Test editing profile settings from the profile page."""
-        driver = self.driver
-        profile_url = reverse("recordtransfer:user_profile")
-        driver.get(f"{self.live_server_url}{profile_url}")
-
-        # First two fields: should be editable
-        first_name_input = driver.find_element(By.ID, "id_first_name")
-        last_name_input = driver.find_element(By.ID, "id_last_name")
-        # Last two fields: should NOT be editable/clickable
-        email_input = driver.find_element(By.ID, "id_email")
-        username_input = driver.find_element(By.ID, "id_username")
-        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
-
-        # Check first two are enabled and editable
-        self.assertTrue(first_name_input.is_enabled())
-        self.assertTrue(last_name_input.is_enabled())
-        first_name_input.clear()
-        last_name_input.clear()
-        first_name_input.send_keys("EditedFirst")
-        last_name_input.send_keys("EditedLast")
-        initial_state = notifications_checkbox.is_selected()
-
-        # Toggle the checkbox
-        notifications_checkbox.click()
-
-        # Check last two are disabled (not editable/clickable)
-        self.assertFalse(email_input.is_enabled())
-        self.assertFalse(username_input.is_enabled())
-
-        # Click save
-        save_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "id_save_button"))
-        )
-        save_button.click()
-
-        # Wait for success alert
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
-        )
-
-        # Check if the changes persisted
-        first_name_input = driver.find_element(By.ID, "id_first_name")
-        last_name_input = driver.find_element(By.ID, "id_last_name")
-        self.assertEqual(first_name_input.get_attribute("value"), "EditedFirst")
-        self.assertEqual(last_name_input.get_attribute("value"), "EditedLast")
-
-        notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
-        self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
-
     def test_resume_in_progress_submission(self) -> None:
         """Test resuming an in-progress submission from the profile page."""
         driver = self.driver
         self.in_progress_submission = self.create_in_progress_submission()
-        self.move_to_in_progress_submission()
+        self.move_to_in_progress_submission_tab()
 
         # Wait for the resume button to be present
         resume_button = WebDriverWait(driver, 5).until(
@@ -323,7 +481,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         """Test that resuming an in-progress submission does not create a duplicate."""
         driver = self.driver
         self.create_in_progress_submission()
-        self.move_to_in_progress_submission()
+        self.move_to_in_progress_submission_tab()
 
         resume_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "resume_in_progress_1"))
@@ -345,7 +503,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         """Test deleting an in-progress submission from the profile page."""
         driver = self.driver
         self.in_progress_submission = self.create_in_progress_submission()
-        self.move_to_in_progress_submission()
+        self.move_to_in_progress_submission_tab()
         # Click the delete button in that row (adjust class or selector if needed)
         delete_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "delete_in_progress_1"))
@@ -370,7 +528,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def test_new_submission_group(self) -> None:
         """Test creating a new submission group from the profile page."""
         driver = self.driver
-        self.move_to_submission_groups()
+        self.move_to_submission_groups_tab()
 
         # Click the new submission group button
         new_group_button = WebDriverWait(driver, 5).until(
@@ -402,7 +560,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def test_view_submission_group(self) -> None:
         """Test viewing a submission group from the profile page."""
         driver = self.driver
-        self.move_to_submission_groups()
+        self.move_to_submission_groups_tab()
 
         # Click the link to view the submission group
         group_link = WebDriverWait(driver, 5).until(
@@ -415,13 +573,13 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 5).until(lambda d: "submission-group" in d.current_url)
 
         # Assert that the current URL is the expected one
-        exoected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_group_detail', kwargs={'uuid': str(self.submission_group.uuid)})}"
-        self.assertEqual(driver.current_url, exoected_url)
+        expected_url = f"{self.live_server_url}{reverse('recordtransfer:submission_group_detail', kwargs={'uuid': str(self.submission_group.uuid)})}"
+        self.assertEqual(driver.current_url, expected_url)
 
     def test_delete_submission_group(self) -> None:
         """Test deleting a submission group from the profile page."""
         driver = self.driver
-        self.move_to_submission_groups()
+        self.move_to_submission_groups_tab()
 
         # Click the delete button in that row (adjust class or selector if needed)
         delete_button = WebDriverWait(driver, 5).until(
@@ -446,7 +604,7 @@ class ProfilePasswordResetTest(SeleniumLiveServerTestCase):
     def test_duplicate_submission_group_name_not_allowed(self) -> None:
         """Test that creating a submission group with a duplicate name is not allowed."""
         driver = self.driver
-        self.move_to_submission_groups()
+        self.move_to_submission_groups_tab()
 
         # Try to create a duplicate group with the same name as in setUp
         new_group_button = WebDriverWait(driver, 5).until(

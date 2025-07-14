@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 import uuid
 from itertools import chain
 from pathlib import Path
-from typing import ClassVar, Optional, Union
+from typing import ClassVar, Iterable, Optional, Union
 
 import bagit
 from caais.export import ExportVersion
@@ -35,7 +34,10 @@ from recordtransfer.managers import (
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
-LOGGER = logging.getLogger("recordtransfer")
+LOGGER = logging.getLogger(__name__)
+
+# Sentinel object to distinguish between cache miss and cached None values
+NOT_CACHED = object()
 
 
 class User(AbstractUser):
@@ -43,10 +45,81 @@ class User(AbstractUser):
 
     gets_submission_email_updates = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
+    phone_number = models.CharField(
+        max_length=20,
+        blank=False,
+        null=True,
+        help_text=_("Phone number in format: +1 (999) 999-9999"),
+    )
+    address_line_1 = models.CharField(
+        max_length=100,
+        blank=False,
+        null=True,
+        help_text=_("Street and street number"),
+    )
+    address_line_2 = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=_("Unit number, RPO, PO BOX (optional)"),
+    )
+    city = models.CharField(
+        max_length=100,
+        blank=False,
+        null=True,
+        help_text=_("City"),
+    )
+    province_or_state = models.CharField(
+        max_length=64,
+        blank=False,
+        null=True,
+        help_text=_("Province or state"),
+    )
+    other_province_or_state = models.CharField(
+        max_length=64,
+        blank=False,
+        null=True,
+        help_text=_("Other province or state if not listed"),
+    )
+    postal_or_zip_code = models.CharField(
+        max_length=20,
+        blank=False,
+        null=True,
+        help_text=_("Postal code (Canada) or zip code (US)"),
+    )
+    country = models.CharField(
+        max_length=2,
+        blank=False,
+        null=True,
+        help_text=_("Country code"),
+    )
 
-    def get_full_name(self) -> str:
+    @property
+    def full_name(self) -> str:
         """Return the full name of the user, which is a combination of first and last names."""
-        return self.first_name + " " + self.last_name
+        return f"{self.first_name} {self.last_name}".strip()
+
+    @property
+    def has_contact_info(self) -> bool:
+        """Check if user has complete contact information."""
+        required_fields = [
+            self.phone_number,
+            self.address_line_1,
+            self.city,
+            self.province_or_state,
+            self.postal_or_zip_code,
+            self.country,
+        ]
+
+        # Check if all required fields have values
+        if not all(field for field in required_fields):
+            return False
+
+        # If "Other" is selected for province/state, check if other_province_or_state is filled
+        if self.province_or_state and self.province_or_state.lower() == "other":
+            return bool(self.other_province_or_state)
+
+        return True
 
 
 class SiteSetting(models.Model):
@@ -220,8 +293,8 @@ class SiteSetting(models.Model):
         Raises:
             ValidationError: If the setting is not of type :attr:`SettingType.STR`.
         """
-        val = cache.get(key.name)
-        if val is not None:
+        val = cache.get(key.name, default=NOT_CACHED)
+        if val is not NOT_CACHED:
             return val
         obj = SiteSetting.objects.get(key=key.name)
 
@@ -247,8 +320,8 @@ class SiteSetting(models.Model):
         Raises:
             ValidationError: If the setting is not of type :attr:`SettingType.INT`.
         """
-        val = cache.get(key.name)
-        if val is not None:
+        val = cache.get(key.name, default=NOT_CACHED)
+        if val is not NOT_CACHED:
             return val
 
         obj = SiteSetting.objects.get(key=key.name)
@@ -665,7 +738,6 @@ class UploadSession(models.Model):
 
     def make_uploads_permanent(self) -> None:
         """Make all temporary uploaded files associated with this session permanent."""
-
         if self.status == self.SessionStatus.STORED:
             LOGGER.info(
                 "All uploaded files in session %s are already in permanent storage", self.token
@@ -760,8 +832,8 @@ class UploadSession(models.Model):
         """Create a human-readable statement of how many files are in this session.
 
         If the session is in the state UPLOADING, returns a count of temp files. If the session is
-        in the state STORED, returns a count of permanent files. If the session is in the state CREATED,
-        returns an appropriate value that indicates the lack of files.
+        in the state STORED, returns a count of permanent files. If the session is in the state
+        CREATED, returns an appropriate value that indicates the lack of files.
 
         Uses the :ref:`ACCEPTED_FILE_FORMATS` setting to group file types together.
 
@@ -795,7 +867,7 @@ class UploadSession(models.Model):
         return f"{self.token} ({self.started_at}) | {self.status}"
 
 
-def session_upload_location(instance, filename: str) -> str:
+def session_upload_location(instance: TempUploadedFile, filename: str) -> str:
     """Generate the upload location for a session file."""
     if instance.session:
         return "{0}/{1}".format(instance.session.token, filename)
@@ -810,6 +882,8 @@ class BaseUploadedFile(models.Model):
     file_upload = models.FileField(null=True)
 
     class Meta:
+        """Meta information for the BaseUploadedFile model."""
+
         abstract = True
 
     @property
@@ -936,7 +1010,8 @@ class SubmissionGroup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
 
     @property
-    def number_of_submissions_in_group(self):
+    def number_of_submissions_in_group(self) -> int:
+        """Get the number of submissions in this group."""
         return len(self.submission_set.all())
 
     def get_absolute_url(self) -> str:
@@ -948,6 +1023,7 @@ class SubmissionGroup(models.Model):
         return reverse("recordtransfer:delete_submission_group_modal", kwargs={"uuid": self.uuid})
 
     def __str__(self):
+        """Return a string representation of this object."""
         return f"{self.name} ({self.created_by})"
 
 
@@ -973,9 +1049,6 @@ class Submission(models.Model):
             are disabled, this will always be NULL/None
         uuid (UUIDField):
             A unique ID for the submission
-        bag_name (str):
-            A name that is used when the Submission is to be dumped to the file
-            system as a BagIt bag
     """
 
     submission_date = models.DateTimeField(auto_now_add=True)
@@ -991,19 +1064,20 @@ class Submission(models.Model):
     )
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
-    bag_name = models.CharField(max_length=256, null=True)
 
     objects = SubmissionQuerySet.as_manager()
 
-    def generate_bag_name(self) -> None:
-        """Generate a name suitable for a submission bag, and set self.bag_name to that name.
+    @property
+    def bag_name(self) -> str:
+        """Get a name suitable for a submission bag.
+
+        The bag name contains the username, the date this submission was made, and the title of the
+        metadata. This file name is properly sanitized to be used as a directory or part of a file
+        name.
 
         Raises:
             ValueError: If there is no metadata or no user associated with this submission.
         """
-        if self.bag_name:
-            return
-
         if not self.metadata:
             raise ValueError(
                 "There is no metadata associated with this submission, cannot generate a bag name"
@@ -1014,44 +1088,14 @@ class Submission(models.Model):
         title = self.metadata.accession_title or "No title"
         abbrev_title = title if len(title) <= 20 else title[0:20]
 
-        bag_name = "{username}_{datetime}_{title}".format(
+        return "{username}_{datetime}_{title}".format(
             username=slugify(self.user.username),
-            datetime=timezone.localtime(timezone.now()).strftime(r"%Y%m%d-%H%M%S"),
+            datetime=self.submission_date.strftime(r"%Y%m%d-%H%M%S"),
             title=slugify(abbrev_title),
         )
 
-        self.bag_name = bag_name
-        self.save()
-
     @property
-    def user_folder(self) -> str:
-        """Get the location of the submission user's bag storage folder.
-
-        Raises:
-            FileNotFoundError: If BAG_STORAGE_FOLDER is not set.
-            ValueError: If there is no user associated with this submission.
-        """
-        if not settings.BAG_STORAGE_FOLDER:
-            raise FileNotFoundError("BAG_STORAGE_FOLDER is not set")
-        if not self.user:
-            raise ValueError("There is no user associated with this submission")
-        return os.path.join(str(settings.BAG_STORAGE_FOLDER), slugify(self.user.username))
-
-    @property
-    def location(self) -> str:
-        """Get the location on the file system for the BagIt bag for this submission.
-
-        Raises:
-            ValueError: If there is no user associated with this submission.
-        """
-        if not self.user:
-            raise ValueError("There is no user associated with this submission")
-        if not self.bag_name:
-            self.generate_bag_name()
-        return os.path.join(self.user_folder, self.bag_name)  # type: ignore
-
-    @property
-    def extent_statements(self):
+    def extent_statements(self) -> str:
         """Return the first extent statement for this submission."""
         return (
             next(
@@ -1061,147 +1105,203 @@ class Submission(models.Model):
             else ""
         )
 
-    def get_admin_metadata_change_url(self):
-        """Get the URL to change the metadata object in the admin"""
+    def get_admin_metadata_change_url(self) -> str:
+        """Get the URL to change the metadata object in the admin."""
+        if not self.metadata:
+            raise ValueError("Cannot create a URL for non-existent metadata")
         view_name = "admin:{0}_{1}_change".format(
             self.metadata._meta.app_label, self.metadata._meta.model_name
         )
         return reverse(view_name, args=(self.metadata.pk,))
 
-    def get_admin_metadata_change_url(self):
-        """Get the URL to change the metadata object in the admin"""
-        view_name = "admin:{0}_{1}_change".format(
-            self.metadata._meta.app_label, self.metadata._meta.model_name
-        )
-        return reverse(view_name, args=(self.metadata.pk,))
-
-    def get_admin_change_url(self):
-        """Get the URL to change this object in the admin"""
+    def get_admin_change_url(self) -> str:
+        """Get the URL to change this object in the admin."""
         view_name = "admin:{0}_{1}_change".format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-    def get_admin_report_url(self):
-        """Get the URL to generate a report for this object in the admin"""
+    def get_admin_report_url(self) -> str:
+        """Get the URL to generate a report for this object in the admin."""
         view_name = "admin:{0}_{1}_report".format(self._meta.app_label, self._meta.model_name)
         return reverse(view_name, args=(self.pk,))
 
-    def get_admin_zip_url(self):
-        """Get the URL to generate a zipped bag for this object in the admin"""
+    def get_admin_zip_url(self) -> str:
+        """Get the URL to generate a zipped bag for this object in the admin."""
         view_name = f"admin:{self._meta.app_label}_{self._meta.model_name}_zip"
         return reverse(view_name, args=(self.pk,))
 
-    def __str__(self):
-        return f"Submission by {self.user} at {self.submission_date}"
+    def make_bag(
+        self,
+        location: Path,
+        algorithms: Iterable[str] = ("sha512",),
+        file_perms: str = "644",
+    ) -> bagit.Bag:
+        """Create a BagIt bag on the file system for this Submission. Checks the validity of the
+        Bag post-creation to ensure that integrity is maintained. The data payload files come from
+        the UploadSession associated with this submission.
 
-    def make_bag(self, algorithms: Union[str, list] = "sha512", file_perms: str = "644"):
-        """Create a BagIt bag on the file system for this Submission. The location of the BagIt bag
-        is determined by self.location. Checks the validity of the Bag post-creation to ensure that
-        integrity is maintained. The data payload files come from the UploadSession associated with
-        this submission.
+        If given a location to an existing Bag, this function will check whether the Bag can be
+        updated in-place. If not, the Bag will be completely re-generated again.
+
+        Raises:
+            ValueError: If any required state is incorrect (e.g., no upload session)
+            FileNotFoundError: If any files are missing when copying to temp location
+            FileExistsError: If the Bag at self.location already exists
+            bagit.BagValidationError: If the Bag is created, but it's invalid
 
         Args:
-            algorithms (Union[str, list]): The algorithms to generate the BagIt bag with
+            location (Path): The path to make the Bag at
+            algorithms (Iterable[str]): The checksum algorithms to generate the BagIt bag with
             file_perms (str): A string-based octal "chmod" number
         """
-
-        if not algorithms:
-            raise ValueError("algorithms cannot be empty")
-
-        if not self.upload_session:
-            raise ValueError("This submission has no associated upload session")
-
         if not self.metadata:
-            raise ValueError("This submission has no associated metadata")
-
-        if isinstance(algorithms, str):
-            algorithms = [a.strip() for a in algorithms.split(",")]
-
-        for algorithm in algorithms:
-            if algorithm not in bagit.CHECKSUM_ALGOS:
-                raise ValueError("{0} is not a valid checksum algorithm".format(algorithm))
-
-        if not os.path.exists(settings.BAG_STORAGE_FOLDER) or not os.path.isdir(
-            settings.BAG_STORAGE_FOLDER
-        ):
-            LOGGER.error(
-                'The BAG_STORAGE_FOLDER "%s" does not exist!', settings.BAG_STORAGE_FOLDER
+            raise ValueError(
+                "This submission has no associated metadata, this is required to make a bag"
             )
-            return {
-                "missing_files": [],
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
+        if not self.upload_session:
+            raise ValueError(
+                "This submission has no associated upload session, this is required to make a bag"
+            )
 
-        if not os.path.exists(self.user_folder) or not os.path.isdir(self.user_folder):
-            os.mkdir(self.user_folder)
-            LOGGER.info('Created new user folder at "%s"', self.user_folder)
+        if location.exists() and (location / "data").exists():
+            LOGGER.info('Bag already exists. Updating it in-place at "%s"', location)
+            bag = self._update_existing_bag(location, algorithms, file_perms)
+        else:
+            LOGGER.info('Bag does not exist, creating a new one at "%s"', location)
+            bag = self._create_new_bag(location, algorithms, file_perms)
 
-        if os.path.exists(self.location):
-            LOGGER.warning('A bag already exists at "%s"', self.location)
-            return {
-                "missing_files": [],
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
-
-        os.mkdir(self.location)
-        LOGGER.info('Created new bag folder at "%s"', self.user_folder)
-
-        copied, missing = self.upload_session.copy_session_uploads(self.location, logger)
-
-        if missing:
-            LOGGER.error("One or more uploaded files is missing!")
-            LOGGER.info('Removing bag at "%s" due to missing files', self.location)
-            self.remove_bag()
-            return {
-                "missing_files": missing,
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
-
-        LOGGER.info('Creating BagIt bag at "%s"', self.location)
-        LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
-
-        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
-        bag = bagit.make_bag(self.location, bagit_info, checksums=algorithms)
-
-        LOGGER.info("Setting file mode for bag payload files to %s", file_perms)
-        perms = int(file_perms, 8)
-        for payload_file in bag.payload_files():
-            payload_file_path = os.path.join(self.location, payload_file)
-            os.chmod(payload_file_path, perms)
-
-        LOGGER.info('Validating the bag created at "%s"', self.location)
+        LOGGER.info('Validating the bag at "%s"', location)
         valid = bag.is_valid()
 
         if not valid:
             LOGGER.error("Bag is INVALID!")
-            LOGGER.info('Removing bag at "%s" since it\'s invalid', self.location)
-            self.remove_bag()
-            return {
-                "missing_files": [],
-                "bag_created": False,
-                "bag_valid": False,
-                "time_created": None,
-            }
+            LOGGER.info('Removing bag at "%s" since it\'s invalid', location)
+            self.remove_bag(location)
+            raise bagit.BagValidationError("Bag was invalid!")
 
         LOGGER.info("Bag is VALID")
-        current_time = timezone.now()
+        return bag
 
-        return {
-            "missing_files": [],
-            "bag_created": True,
-            "bag_valid": True,
-            "time_created": current_time,
-        }
+    def _update_existing_bag(
+        self,
+        location: Path,
+        algorithms: Iterable[str],
+        file_perms: str = "644",
+    ) -> bagit.Bag:
+        """Update the Bag if it exists.
 
-    def remove_bag(self):
-        """Remove the BagIt bag if it exists."""
-        if os.path.exists(self.location):
-            shutil.rmtree(self.location)
+        If there are any files missing or any extra files, the Bag is re-generated.
+        """
+        assert self.upload_session, "This submission has no upload session!"
+        assert self.metadata, "This submission has no associated metadata!"
+
+        bag = None
+
+        try:
+            bag = bagit.Bag(str(location))
+        except bagit.BagError as exc:
+            LOGGER.warning("Encountered BagError for existing location. Error was: '%s'", exc)
+            LOGGER.info("Re-generating Bag due to error")
+            return self._create_new_bag(location, algorithms, file_perms)
+
+        if set(bag.algorithms) != set(algorithms):
+            LOGGER.info(
+                "Checksum algorithms differ (current=%s, desired=%s), re-generating Bag",
+                ",".join(bag.algorithms),
+                ",".join(algorithms),
+            )
+            return self._create_new_bag(location, algorithms, file_perms)
+
+        payload_file_set = {Path(payload_file).name for payload_file in bag.payload_files()}
+        perm_file_set = {file.name for file in self.upload_session.get_permanent_uploads()}
+
+        files_not_in_payload = perm_file_set - payload_file_set
+        files_not_in_uploads = payload_file_set - perm_file_set
+
+        if files_not_in_uploads or files_not_in_payload:
+            if files_not_in_uploads:
+                LOGGER.warning(
+                    "Found %d extra file(s) in Bag not in the Upload session!",
+                    len(files_not_in_uploads),
+                )
+            if files_not_in_payload:
+                LOGGER.warning(
+                    "Found %d extra file(s) in Upload session not in the Bag!",
+                    len(files_not_in_payload),
+                )
+            LOGGER.warning("Re-generating Bag due to file count mismatch")
+            return self._create_new_bag(location, algorithms, file_perms)
+
+        # Update metadata since no files or algorithms changed, but the metadata model might have
+        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
+        bag.info.update(bagit_info)
+        bag.save()
+
+        return bag
+
+    def _create_new_bag(
+        self,
+        location: Path,
+        algorithms: Iterable[str],
+        file_perms: str = "644",
+    ) -> bagit.Bag:
+        """Create a new Bag if it does not exist."""
+        assert self.upload_session, "This submission has no upload session!"
+        assert self.metadata, "This submission has no associated metadata!"
+
+        if not location.exists():
+            location.mkdir(parents=True)
+
+        # Clear any items in the location first
+        self.remove_bag_contents(location)
+
+        copied, missing = self.upload_session.copy_session_uploads(str(location))
+
+        if missing:
+            LOGGER.error("One or more uploaded files is missing!")
+            LOGGER.info('Removing bag at "%s" due to missing files', location)
+            self.remove_bag(location)
+            raise FileNotFoundError(f"Could not create Bag due to {len(missing)} file(s) missing")
+
+        LOGGER.info('Creating BagIt bag at "%s"', location)
+        LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
+
+        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
+        bag = bagit.make_bag(str(location), bagit_info, checksums=algorithms)
+
+        LOGGER.info("Setting file mode for bag payload files to %s", file_perms)
+        perms = int(file_perms, 8)
+        for payload_file in bag.payload_files():
+            payload_file_path = location / payload_file
+            payload_file_path.chmod(perms)
+
+        return bag
+
+    def remove_bag(self, location: Path) -> None:
+        """Remove everything in the Bag, including the Bag folder itself."""
+        if not location.exists():
+            return
+        self.remove_bag_contents(location)
+        location.rmdir()
+
+    def remove_bag_contents(self, location: Path) -> None:
+        """Remove everything in the Bag, but not the Bag directory itself."""
+        if not location.exists():
+            return
+        for item in location.iterdir():
+            if item.is_file():
+                item.unlink()
+            else:
+                shutil.rmtree(item)
+
+    def __str__(self) -> str:
+        """Get a string representation of this submission."""
+        return f"Submission by {self.user} at {self.submission_date}"
+
+    def __repr__(self) -> str:
+        """Get a detailed string representation of this submission."""
+        user = f"'{self.user.username}'" if self.user else "None"
+        session = f"'{self.upload_session.token[0:8]}...'" if self.upload_session else "None"
+        return f"<Submission(uuid='{self.uuid}', submission_date='{self.submission_date}' user={user}, upload_session={session})>"
 
 
 class Job(models.Model):

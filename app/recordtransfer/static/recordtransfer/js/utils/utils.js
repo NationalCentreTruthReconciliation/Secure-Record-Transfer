@@ -5,7 +5,7 @@
 export function getCurrentTablePage() {
     // Find the active tab
     const activeTabInput = document.querySelector(
-        ".tabs input[name=\"profile_tabs\"]:checked"
+        ".tabs input[name=\"table_tabs\"]:checked"
     );
     const activeTabContent = activeTabInput
         ? activeTabInput.closest(".tab").nextElementSibling
