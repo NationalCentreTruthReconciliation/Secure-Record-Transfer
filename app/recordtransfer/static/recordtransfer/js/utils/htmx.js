@@ -99,6 +99,7 @@ export function handleAssignSubmissionGroupModalBeforeSwap(e, context) {
         if (context["ID_SUBMISSION_TABLE"] &&
             document.getElementById(context["ID_SUBMISSION_TABLE"])) {
             refreshSubmissionTable(context);
+            refreshSubmissionGroupTable(context);
         }
     }
 }
