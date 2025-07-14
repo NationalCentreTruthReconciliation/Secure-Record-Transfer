@@ -1,0 +1,32 @@
+name: PR HTML Template Lint Check
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Run HTML Template Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install djlint
+        run: pip install djlint
+
+      - name: Run linting check
+        run: djlint ./ --lint
+
+      - name: Run formatting check
+        run: djlint ./ --check
