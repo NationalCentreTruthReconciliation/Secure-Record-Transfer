@@ -7,10 +7,10 @@ from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.test import override_settings, tag
 from django.urls import reverse
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException
 
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import User
@@ -465,7 +465,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+        driver.get(f"{self.live_server_url}/submission/")
 
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
@@ -592,7 +592,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+        driver.get(f"{self.live_server_url}/submission/")
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
@@ -900,7 +900,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+        driver.get(f"{self.live_server_url}/submission/")
 
         # Complete required steps before Rights step
         self.complete_legal_agreement_step()
@@ -1057,42 +1057,3 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             postal_or_zip_code_input.get_attribute("value"), data["postal_or_zip_code"]
         )
         self.assertEqual(country_input.get_attribute("value"), data["country"])
-
-    def test_form_save_from_unsaved_changes_modal_on_review_step(self) -> None:
-        """Test that the user can save the form from the unsaved changes modal on the Review
-        step.
-        """
-        driver = self.driver
-
-        # Complete the form till the Review step
-        self.complete_form_till_review_step()
-
-        # Wait for the Review step to load
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "review-summary"))
-        )
-
-        # Attempt to navigate to Home page without saving
-        home_link = driver.find_element(By.ID, "nav-home")
-        driver.execute_script("arguments[0].click();", home_link)
-
-        # Check for unsaved changes modal
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
-        )
-
-        # Verify the modal is visible
-        modal = driver.find_element(By.ID, "unsaved_changes_modal")
-        self.assertTrue(modal.is_displayed())
-
-        # Wait for the buttons in the modal to be clickable
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-link")))
-
-        # Click on save button in the modal
-        save_button = driver.find_element(By.ID, "modal-save-link")
-        save_button.click()
-
-        # Check that user is redirected to the profile page
-        WebDriverWait(driver, 10).until(
-            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
-        )

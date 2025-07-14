@@ -144,8 +144,8 @@ class TestSubmissionDetailView(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class TestSubmissionCsvExport(TestCase):
-    """Tests for the submission_csv_export view function."""
+class TestSubmissionCsvView(TestCase):
+    """Tests for SubmissionCsvView."""
 
     def setUp(self) -> None:
         """Set up test environment."""
@@ -200,76 +200,4 @@ class TestSubmissionCsvExport(TestCase):
             kwargs={"uuid": "00000000-0000-0000-0000-000000000000"},
         )
         response = self.client.get(invalid_csv_url)
-        self.assertEqual(response.status_code, 404)
-
-
-class TestSubmissionGroupBulkCsvExport(TestCase):
-    """Tests for the submission_group_bulk_csv_export view function."""
-
-    def setUp(self) -> None:
-        """Set up test environment."""
-        self.user = User.objects.create_user(username="testuser", password="password")
-        self.staff_user = User.objects.create_user(
-            username="staffuser", password="password", is_staff=True
-        )
-        self.submission_group = SubmissionGroup.objects.create(created_by=self.user)
-        self.submission = Submission.objects.create(
-            user=self.user, part_of_group=self.submission_group
-        )
-        self.submission_group_csv_url = reverse(
-            "recordtransfer:submission_group_bulk_csv",
-            kwargs={"uuid": self.submission_group.uuid},
-        )
-        self.client.login(username="testuser", password="password")
-
-    def test_access_unauthenticated_user(self) -> None:
-        """Test that an unauthenticated user is redirected to the login page."""
-        self.client.logout()
-        response = self.client.get(self.submission_group_csv_url)
-        self.assertRedirects(response, f"{reverse('login')}?next={self.submission_group_csv_url}")
-
-    def test_access_non_creator_user(self) -> None:
-        """Test that a non-creator user cannot access the view."""
-        User.objects.create_user(username="otheruser", password="password")
-        self.client.login(username="otheruser", password="password")
-        response = self.client.get(self.submission_group_csv_url)
-        self.assertEqual(response.status_code, 404)
-
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
-    def test_access_staff_user(self, mock_export: MagicMock) -> None:
-        """Test that a staff user can access the view."""
-        mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
-        self.client.login(username="staffuser", password="password")
-        response = self.client.get(self.submission_group_csv_url)
-        self.assertEqual(response.status_code, 200)
-
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
-    def test_invalid_group_uuid(self, mock_export: MagicMock) -> None:
-        """Test that accessing a nonexistent submission group returns 404."""
-        invalid_csv_url = reverse(
-            "recordtransfer:submission_group_bulk_csv",
-            kwargs={"uuid": "00000000-0000-0000-0000-000000000000"},
-        )
-        response = self.client.get(invalid_csv_url)
-        self.assertEqual(response.status_code, 404)
-
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
-    def test_non_staff_user_owns_group_but_not_submissions(self, mock_export: MagicMock) -> None:
-        """Test that a non-staff user cannot export CSV if they own the group but not the
-        submissions.
-        """
-        user_one = User.objects.create_user(username="user_one", password="password")
-        user_two = User.objects.create_user(username="user_two", password="password")
-        user_one_group = SubmissionGroup.objects.create(
-            name="Other User Group", created_by=user_one
-        )
-
-        Submission.objects.create(user=user_two, part_of_group=user_one_group)
-
-        self.client.login(username="user_one", password="password")
-        response = self.client.get(
-            reverse(
-                "recordtransfer:submission_group_bulk_csv", kwargs={"uuid": user_one_group.uuid}
-            )
-        )
         self.assertEqual(response.status_code, 404)

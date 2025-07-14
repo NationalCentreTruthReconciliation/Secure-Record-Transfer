@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import uuid
 from itertools import chain
@@ -738,6 +739,7 @@ class UploadSession(models.Model):
 
     def make_uploads_permanent(self) -> None:
         """Make all temporary uploaded files associated with this session permanent."""
+
         if self.status == self.SessionStatus.STORED:
             LOGGER.info(
                 "All uploaded files in session %s are already in permanent storage", self.token
@@ -832,8 +834,8 @@ class UploadSession(models.Model):
         """Create a human-readable statement of how many files are in this session.
 
         If the session is in the state UPLOADING, returns a count of temp files. If the session is
-        in the state STORED, returns a count of permanent files. If the session is in the state
-        CREATED, returns an appropriate value that indicates the lack of files.
+        in the state STORED, returns a count of permanent files. If the session is in the state CREATED,
+        returns an appropriate value that indicates the lack of files.
 
         Uses the :ref:`ACCEPTED_FILE_FORMATS` setting to group file types together.
 
@@ -867,7 +869,7 @@ class UploadSession(models.Model):
         return f"{self.token} ({self.started_at}) | {self.status}"
 
 
-def session_upload_location(instance: TempUploadedFile, filename: str) -> str:
+def session_upload_location(instance, filename: str) -> str:
     """Generate the upload location for a session file."""
     if instance.session:
         return "{0}/{1}".format(instance.session.token, filename)
@@ -882,8 +884,6 @@ class BaseUploadedFile(models.Model):
     file_upload = models.FileField(null=True)
 
     class Meta:
-        """Meta information for the BaseUploadedFile model."""
-
         abstract = True
 
     @property
@@ -1010,8 +1010,7 @@ class SubmissionGroup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
 
     @property
-    def number_of_submissions_in_group(self) -> int:
-        """Get the number of submissions in this group."""
+    def number_of_submissions_in_group(self):
         return len(self.submission_set.all())
 
     def get_absolute_url(self) -> str:
@@ -1023,7 +1022,6 @@ class SubmissionGroup(models.Model):
         return reverse("recordtransfer:delete_submission_group_modal", kwargs={"uuid": self.uuid})
 
     def __str__(self):
-        """Return a string representation of this object."""
         return f"{self.name} ({self.created_by})"
 
 

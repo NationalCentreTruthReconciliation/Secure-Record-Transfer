@@ -36,7 +36,7 @@ export async function setupSubmissionGroupForm(context) {
 
     // Select the default group at first
     selectGroup(context["default_group_uuid"], selectField);
-    updateGroupDescription(selectField, groupDescDisplay);
+
 }
 
 /**
@@ -73,21 +73,23 @@ const updateGroupDescription = (selectField, groupDescDisplay) => {
  * @param {object} context - The context object containing the URL to fetch group descriptions.
  */
 const fetchSubmissionGroups = async (context) => {
-    const response = await fetch(context["fetch_group_descriptions_url"], {
+    fetch(context["fetch_group_descriptions_url"], {
         method: "GET"
-    });
+    })
+        .then(response => {
+            if (!response.ok) {
+                return Promise.reject(response);
+            }
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const groups = await response.json();
-
-    // Populate the select option data-attributes with the fetched group descriptions
-    groups.forEach(function (group) {
-        document.querySelector(`option[value='${group.uuid}']`)
-            .setAttribute("data-description", group.description);
-    });
+            return response.json();
+        })
+        .then(groups => {
+            // Apply the group description to the data-description attribute of each option
+            groups.forEach(function (group) {
+                document.querySelector(`option[value='${group.uuid}']`)
+                    .setAttribute("data-description", group.description);
+            });
+        });
 };
 
 /**
