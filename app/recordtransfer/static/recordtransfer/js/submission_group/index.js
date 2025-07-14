@@ -1,5 +1,5 @@
 import {
-    handleSubmissionGroupModalFormBeforeSwap
+    handleModalBeforeSwap
 } from "../utils/htmx.js";
 import { showModal, isValidUrl } from "../utils/utils.js";
 
@@ -14,7 +14,7 @@ export const initializeSubmissionGroup = function () {
     setupSubmissionGroupForm(context);
 
     window.handleModalBeforeSwap = (e) => {
-        return handleSubmissionGroupModalFormBeforeSwap(e, context);
+        return handleModalBeforeSwap(e, context);
     };
 
     window.handleModalAfterSwap = () => {

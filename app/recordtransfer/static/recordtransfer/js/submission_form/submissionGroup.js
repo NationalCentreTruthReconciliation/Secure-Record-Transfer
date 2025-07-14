@@ -1,5 +1,5 @@
 import {
-    handleSubmissionGroupModalFormBeforeSwap,
+    handleModalBeforeSwap,
     handleModalAfterSwap
 } from "../utils/htmx.js";
 
@@ -20,7 +20,7 @@ export async function setupSubmissionGroupForm(context) {
     );
 
     window.handleModalBeforeSwap = (e) => {
-        return handleSubmissionGroupModalFormBeforeSwap(e, context);
+        return handleModalBeforeSwap(e, context);
     };
     window.handleModalAfterSwap = (e) => {
         return handleModalAfterSwap(e, context);

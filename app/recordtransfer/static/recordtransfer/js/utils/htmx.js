@@ -55,54 +55,35 @@ export const handleModalAfterSwap = (e, context) => {
 
 /**
  * Handles the modal swap event before content is replaced.
- * Closes the modal if the server response is empty, which occurs when the submission group is
- * successfully created.
- * @param {CustomEvent} e - The event object containing the server response.
+ * This function is triggered before the modal content is swapped and handles successful form
+ * submissions by closing the modal and refreshing appropriate tables.
+ * @param {CustomEvent} e - The event object containing the server response and request details.
  * @param {object} context - Context object with URLs and element IDs for table refresh.
- * @param {string} context.SUBMISSION_GROUP_TABLE_URL - The URL to refresh the submission group
- * table.
- * @param {string} context.PAGINATE_QUERY_NAME - The query parameter name for pagination
- * (e.g., "p").
- * @param {string} context.ID_SUBMISSION_GROUP_TABLE - The DOM element ID of the submission group
- * table to update.
  */
-export function handleSubmissionGroupModalFormBeforeSwap(e, context) {
-    if (!e.detail.serverResponse && e.detail.requestConfig.elt.id === "submission-group-form") {
-        e.preventDefault(); // Stop the event from bubbling up
-        closeModal();
-        // Handler may be used on other pages where the submission group table is not present
-        if (context["ID_SUBMISSION_GROUP_TABLE"] &&
-            document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
-            refreshSubmissionGroupTable(context);
-        }
-    }
-}
+export const handleModalBeforeSwap = (e, context) => {
+    // Only proceed if there's no server response (indicates successful form submission)
+    if (!e.detail.serverResponse) {
+        const triggeredBy = e.detail.requestConfig.elt.id;
 
-/**
- * Handles the modal swap event before content is replaced for assign submission group forms.
- * Closes the modal if the server response is empty, which occurs when the submission group is
- * successfully assigned.
- * @param {CustomEvent} e - The event object containing the server response.
- * @param {object} context - Context object with URLs and element IDs for table refresh.
- * @param {string} context.SUBMISSION_TABLE_URL - The URL to refresh the submission table.
- * @param {string} context.PAGINATE_QUERY_NAME - The query parameter name for pagination
- * (e.g., "p").
- * @param {string} context.ID_SUBMISSION_TABLE - The DOM element ID of the submission table
- * to update.
- */
-export function handleAssignSubmissionGroupModalBeforeSwap(e, context) {
-    // If the server response is empty, close the modal
-    if (!e.detail.serverResponse &&
-        e.detail.requestConfig.elt.id === "assign-submission-group-form") {
-        e.preventDefault(); // Stop the event from bubbling up
-        closeModal();
-        if (context["ID_SUBMISSION_TABLE"] &&
-            document.getElementById(context["ID_SUBMISSION_TABLE"])) {
-            refreshSubmissionTable(context);
-            refreshSubmissionGroupTable(context);
+        if (triggeredBy === "submission-group-form") {
+            e.preventDefault(); // Stop the event from bubbling up
+            closeModal();
+            // Handler may be used on other pages where the submission group table is not present
+            if (context["ID_SUBMISSION_GROUP_TABLE"] &&
+                document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
+                refreshSubmissionGroupTable(context);
+            }
+        } else if (triggeredBy === "assign-submission-group-form") {
+            e.preventDefault();
+            closeModal();
+            if (context["ID_SUBMISSION_TABLE"] &&
+                document.getElementById(context["ID_SUBMISSION_TABLE"])) {
+                refreshSubmissionTable(context);
+                refreshSubmissionGroupTable(context);
+            }
         }
     }
-}
+};
 
 /**
  * Sets up global HTMX event listeners for application-wide behavior.
