@@ -1082,7 +1082,6 @@ class TestAssignSubmissionGroupModalView(TestCase):
         self.assertIn("current_group", context)
         self.assertIn("submission_title", context)
         self.assertIn("submission_uuid", context)
-        self.assertIn("form_field_names", context)
 
         # Verify groups are filtered by user and ordered by name
         groups = list(context["groups"])
@@ -1094,11 +1093,6 @@ class TestAssignSubmissionGroupModalView(TestCase):
         self.assertIsNone(context["current_group"])
         self.assertEqual(context["submission_uuid"], self.submission.uuid)
 
-        # Check form field names are present
-        form_field_names = context["form_field_names"]
-        self.assertIn("SUBMISSION_UUID", form_field_names)
-        self.assertIn("GROUP_UUID", form_field_names)
-        self.assertIn("UNASSIGN", form_field_names)
 
     def test_modal_success_with_current_group(self) -> None:
         """Test successful modal display when submission has a current group."""
@@ -1277,7 +1271,7 @@ class TestAssignSubmissionGroupView(TestCase):
 
         post_data = {
             FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
-            FormFieldNames.UNASSIGN: "true",
+            FormFieldNames.UNASSIGN_GROUP: "true",
         }
 
         response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
@@ -1376,7 +1370,7 @@ class TestAssignSubmissionGroupView(TestCase):
 
         post_data = {
             FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
-            FormFieldNames.UNASSIGN: "true",
+            FormFieldNames.UNASSIGN_GROUP: "true",
         }
 
         response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)
@@ -1452,7 +1446,7 @@ class TestAssignSubmissionGroupView(TestCase):
 
             post_data = {
                 FormFieldNames.SUBMISSION_UUID: str(self.submission.uuid),
-                FormFieldNames.UNASSIGN: "true",
+                FormFieldNames.UNASSIGN_GROUP: "true",
             }
 
             response = self.client.post(self.assign_url, data=post_data, headers=self.htmx_headers)

@@ -371,11 +371,6 @@ def assign_submission_group_modal(request: HttpRequest, uuid: str) -> HttpRespon
         "current_group": submission.part_of_group,
         "submission_title": submission.metadata.accession_title if submission.metadata else "",
         "submission_uuid": submission.uuid,
-        "form_field_names": {
-            "SUBMISSION_UUID": FormFieldNames.SUBMISSION_UUID,
-            "GROUP_UUID": FormFieldNames.GROUP_UUID,
-            "UNASSIGN": FormFieldNames.UNASSIGN,
-        },
     }
     return render(request, "includes/assign_submission_group_modal.html", context)
 
@@ -389,7 +384,7 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
     try:
         submission_uuid = request.POST.get(FormFieldNames.SUBMISSION_UUID)
         group_uuid = request.POST.get(FormFieldNames.GROUP_UUID)
-        unassign = FormFieldNames.UNASSIGN in request.POST
+        unassign = FormFieldNames.UNASSIGN_GROUP in request.POST
 
         if not submission_uuid:
             raise ValueError("Submission UUID is required.")

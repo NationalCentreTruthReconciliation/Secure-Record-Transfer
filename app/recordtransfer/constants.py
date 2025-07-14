@@ -72,7 +72,7 @@ class FormFieldNames:
     # Submission Group Assignment Form Field Names
     SUBMISSION_UUID: str = "submission_uuid"
     GROUP_UUID: str = "group_uuid"
-    UNASSIGN: str = "unassign"
+    UNASSIGN_GROUP: str = "unassign_group"
 
     def asdict(self) -> dict[str, str]:
         """Return the dataclass as a dictionary."""
