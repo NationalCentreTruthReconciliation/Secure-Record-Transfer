@@ -48,14 +48,24 @@
     <div class="flex-med-width-item">
         <div id="uppy-dashboard"></div>
     </div>
-    <div class="flex-med-width-item">
-        <div>
-            {% trans "Total size of transfer:" %}
-            <span id="total-size">0</span> {% trans "MB" %}
-        </div>
-        <div>
-            {% trans "Remaining size allowed:" %}
-            <span id="remaining-size">{{ MAX_TOTAL_UPLOAD_SIZE_MB }}</span> {% trans "MB" %}
+   <div class="flex-med-width-item mt-4">
+        <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">{% trans "Total size of transfer:" %}</span>
+                    <div class="flex items-center gap-1">
+                        <span id="total-size" class="text-lg font-semibold text-blue-600">0</span>
+                        <span class="text-sm text-gray-500">{% trans "MB" %}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">{% trans "Remaining size allowed:" %}</span>
+                    <div class="flex items-center gap-1">
+                        <span id="remaining-size" class="text-lg font-semibold text-green-600">{{ MAX_TOTAL_UPLOAD_SIZE_MB }}</span>
+                        <span class="text-sm text-gray-500">{% trans "MB" %}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock formfields %}
