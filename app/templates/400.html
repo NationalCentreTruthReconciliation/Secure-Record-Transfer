@@ -1,6 +1,10 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE }}">
     <head>
+        <meta name="description"
+              content="400 Bad Request - The received request was invalid.">
         <title>400: Bad Request</title>
         <style type="text/css">
             html {
@@ -25,9 +29,7 @@
     </head>
     <body>
         <div class="title">400: Bad Request</div>
-        <p class="message">
-            The received request was invalid.
-        </p>
+        <p class="message">The received request was invalid.</p>
         <p class="message">
             <a href="/">Home</a>
         </p>
