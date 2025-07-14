@@ -43,8 +43,8 @@
         "type": "git",
         "url": "git+https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "Daniel Lovegrove <Daniel.Lovegrove@umanitoba.ca>",
+    "license": "GPL-3.0-or-later",
     "bugs": {
         "url": "https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer/issues"
     },
