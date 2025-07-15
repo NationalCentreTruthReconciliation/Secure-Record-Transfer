@@ -37,11 +37,31 @@
                                 <dd>
                                     {% if label == "Uploaded files" %}
                                         {% for file in value %}
-                                            <div class="file-entry mb-2 flex items-center gap-2">
-                                                <i class="fas fa-file text-primary"></i>
-                                                <a class="non-nav-link text-primary font-medium underline hover:text-blue-700 transition"
-                                                   href="{{ file.url }}" target="_blank">{{ file.name }}</a>
-                                            </div>
+                                            {% if forloop.counter <= 5 %}
+                                                <div class="file-entry mb-2 flex items-center gap-2">
+                                                    <i class="fas fa-file text-primary"></i>
+                                                    <a class="non-nav-link text-primary font-medium underline hover:text-blue-700 transition"
+                                                    href="{{ file.url }}" target="_blank">{{ file.name }}</a>
+                                                </div>
+                                            {% elif forloop.counter == 6 %}
+                                                <div>
+                                                    <button type="button"
+                                                            class="text-sm text-primary underline hover:text-blue-700"
+                                                            onclick="this.nextElementSibling.classList.toggle('hidden'); this.classList.toggle('hidden');">
+                                                        +{{ value|length|add:'-5' }} more
+                                                    </button>
+                                                    <div class="hidden" id="more-files-{{ forloop.parentloop.counter }}">
+                                            {% endif %}
+                                            {% if forloop.counter > 5 %}
+                                                <div class="file-entry mb-2 flex items-center gap-2">
+                                                    <i class="fas fa-file text-primary"></i>
+                                                    <a class="non-nav-link text-primary font-medium underline hover:text-blue-700 transition"
+                                                    href="{{ file.url }}" target="_blank">{{ file.name }}</a>
+                                                </div>
+                                            {% endif %}
+                                            {% if forloop.last and forloop.counter > 5 %}
+                                                    </div>
+                                            {% endif %}
                                         {% endfor %}
                                     {% elif value == True %}
                                         ✓ {% trans "Yes" %}
