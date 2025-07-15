@@ -608,7 +608,7 @@ class UploadSession(models.Model):
             self.status = self.SessionStatus.CREATED
             self.save()
 
-    def get_file_by_name(self, name: str) -> UploadedFile:
+    def get_file_by_name(self, name: str) -> BaseUploadedFile:
         """Get an uploaded file in this session by name. The file can be either temporary or
         permanent.
 
@@ -1315,6 +1315,7 @@ class Job(models.Model):
         COMPLETE = "CP", _("Complete")
         FAILED = "FD", _("Failed")
 
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(null=True)
     name = models.CharField(max_length=256, null=True)
@@ -1327,6 +1328,20 @@ class Job(models.Model):
         upload_to="jobs/attachments", storage=OverwriteStorage, blank=True, null=True
     )
     message_log = models.TextField(null=True)
+
+    def has_file(self) -> bool:
+        """Determine if this job has an attached file."""
+        return self.attached_file is not None
+
+    def get_file_media_url(self) -> str:
+        """Generate the media URL to this file.
+
+        Raises:
+            FileNotFoundError if the file does not exist.
+        """
+        if self.has_file():
+            return self.attached_file.url
+        raise FileNotFoundError(f"{self.name} does not exist in job {self.uuid}")
 
     def __str__(self) -> str:
         """Return a string representation of this object."""
