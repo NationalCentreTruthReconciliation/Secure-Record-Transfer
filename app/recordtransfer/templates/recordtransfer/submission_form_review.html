@@ -19,7 +19,7 @@
         {% for form in form_list %}
         <div class="bg-base-100 border border-base-300 rounded-lg mb-4 p-6 transition-all duration-200 hover:shadow-xl hover:scale-[1.02]">
             <div class="text-xl font-medium flex justify-between items-center section-header mb-4">
-                <span>{{ form.step_title }}</span>
+                <span class="section-title">{{ form.step_title }}</span>
                 <button id="goto_step_{{ form.step_name }}_link"
                         class="step-link link text-primary hover:text-blue-700"
                         formnovalidate="formnovalidate"
@@ -37,7 +37,7 @@
                                 <dd>
                                     {% if label == "Uploaded files" %}
                                         {% for file in value %}
-                                            <div class="file-entry mb-2 flex items-center gap-2">
+                                            <div class="form-group mb-2 flex items-center gap-2">
                                                 <i class="fas fa-file text-primary"></i>
                                                 <a class="non-nav-link text-primary font-medium underline hover:text-blue-700 transition"
                                                    href="{{ file.url }}" target="_blank">{{ file.name }}</a>
