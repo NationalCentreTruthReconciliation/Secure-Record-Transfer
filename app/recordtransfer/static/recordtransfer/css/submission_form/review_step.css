@@ -27,7 +27,8 @@ dd {
     color: #212529;
 }
 
-.empty-value, .section-note {
+.empty-value,
+.section-note {
     color: #6c757d;
     font-style: italic;
 }
@@ -41,7 +42,7 @@ dd {
     padding: 1rem;
     background: white;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .file-entry {
@@ -61,7 +62,6 @@ dd {
 }
 
 .file-entry a {
-    color: #007bff;
     text-decoration: none;
 }
 
