@@ -72,6 +72,11 @@ urlpatterns = [
         name="get_user_submission_groups",
     ),
     path(
+        "job/<uuid:job_uuid>/file/",
+        login_required(views.media.job_file),
+        name="job_file",
+    ),
+    path(
         "submission-group-table/",
         login_required(views.profile.submission_group_table),
         name="submission_group_table",

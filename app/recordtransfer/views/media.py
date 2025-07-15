@@ -20,7 +20,7 @@ from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 
 from recordtransfer.decorators import validate_upload_access
-from recordtransfer.models import UploadSession, User
+from recordtransfer.models import Job, UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
 LOGGER = logging.getLogger(__name__)
@@ -49,6 +49,33 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
     del response["Expires"]
 
     return response
+
+
+def _serve_file_response(file_url: str) -> HttpResponse:
+    """Create appropriate file response for development or production.
+
+    Args:
+        file_url: The media URL to serve
+
+    Returns:
+        HttpResponse: Direct redirect in development (DEBUG) mode, X-Accel-Redirect in production
+    """
+    if settings.DEBUG:
+        return HttpResponseRedirect(file_url)
+    else:
+        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
+        # Remove headers that nginx will handle
+        for header in [
+            "Content-Type",
+            "Content-Disposition",
+            "Accept-Ranges",
+            "Set-Cookie",
+            "Cache-Control",
+            "Expires",
+        ]:
+            if header in response.headers:
+                del response[header]
+        return response
 
 
 @validate_upload_access
@@ -253,17 +280,33 @@ def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpRes
         )
 
     file_url = uploaded_file.get_file_media_url()
-    if settings.DEBUG:
-        return HttpResponseRedirect(file_url)
-    else:
-        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
-        for header in [
-            "Content-Type",
-            "Content-Disposition",
-            "Accept-Ranges",
-            "Set-Cookie",
-            "Cache-Control",
-            "Expires",
-        ]:
-            del response[header]
-        return response
+    return _serve_file_response(file_url)
+
+
+def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
+    """View to access the attached file associated with a job.
+
+    Args:
+        request: The HTTP request
+        job_uuid: The UUID of the job
+
+    Returns:
+        HttpResponse: Redirects to the file's media path if the job has an associated file.
+    """
+    try:
+        try:
+            job = Job.objects.get(uuid=job_uuid)
+        except Job.DoesNotExist:
+            return HttpResponseNotFound("Job not found")
+
+        if not job.attached_file:
+            return HttpResponseNotFound("File not found for this job")
+
+        file_url = job.get_file_media_url()
+        return _serve_file_response(file_url)
+    except Exception as exc:
+        LOGGER.error("Error accessing job attached file: %s", str(exc), exc_info=exc)
+        return HttpResponse(
+            "There was an internal server error. Please try again.",
+            status=500,
+        )
