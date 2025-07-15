@@ -11,8 +11,6 @@ from django.core.exceptions import ValidationError
 from django.http import (
     HttpRequest,
     HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
     HttpResponseRedirect,
     JsonResponse,
 )
@@ -24,6 +22,7 @@ from recordtransfer.models import UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
 LOGGER = logging.getLogger(__name__)
+
 
 @validate_upload_access
 @require_http_methods(["POST"])
