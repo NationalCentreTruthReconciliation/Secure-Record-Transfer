@@ -339,11 +339,6 @@ h2 {
     transition: color 0.2s;
 }
 
-.step-link:hover,
-.back-to-btn:hover {
-    color: #0056b3;
-}
-
 .step-link i,
 .back-to-btn i {
     font-size: 0.8rem;

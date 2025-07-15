@@ -17,19 +17,18 @@
     {{ block.super }}
     <div class="review-summary">
         {% for form in form_list %}
-        <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg mb-4 transition-all duration-200 hover:shadow-xl hover:scale-[1.02]">
-            <input type="checkbox" class="peer" id="collapse-{{ forloop.counter }}" {% if forloop.first %}checked{% endif %}>
-            <div class="collapse-title text-xl font-medium flex justify-between items-center section-header">
+        <div class="bg-base-100 border border-base-300 rounded-lg mb-4 p-6 transition-all duration-200 hover:shadow-xl hover:scale-[1.02]">
+            <div class="text-xl font-medium flex justify-between items-center section-header mb-4">
                 <span>{{ form.step_title }}</span>
                 <button id="goto_step_{{ form.step_name }}_link"
-                        class="step-link link text-primary"
+                        class="step-link link text-primary hover:text-blue-700"
                         formnovalidate="formnovalidate"
                         name="wizard_goto_step"
                         value="{{ form.step_name }}">
                     {% trans "Go to step" %} <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
-            <div class="collapse-content section-content">
+            <div class="section-content">
                 {% if form.fields|length > 0 %}
                     {% if form.fields.items %}
                         <dl id="field-list-{{ form.step_name }}" class="field-list">
