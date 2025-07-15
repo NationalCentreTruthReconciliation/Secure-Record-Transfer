@@ -37,7 +37,7 @@
                                 <dd>
                                     {% if label == "Uploaded files" %}
                                         {% for file in value %}
-                                            <div class="form-group mb-2 flex items-center gap-2">
+                                            <div class="file-entry mb-2 flex items-center gap-2">
                                                 <i class="fas fa-file text-primary"></i>
                                                 <a class="non-nav-link text-primary font-medium underline hover:text-blue-700 transition"
                                                    href="{{ file.url }}" target="_blank">{{ file.name }}</a>
