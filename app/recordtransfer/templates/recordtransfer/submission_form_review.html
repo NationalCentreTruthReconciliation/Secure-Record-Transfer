@@ -31,16 +31,16 @@
                 {% if form.fields|length > 0 %}
                     <div class="section-content">
                         {% if form.fields.items %}
-                            {# Regular form fields #}
                             <dl id="field-list-{{ form.step_name }}" class="field-list">
                                 {% for label, value in form.fields.items %}
                                     <dt {% if label == "Uploaded files" %}class="align-center"{% endif %}>{{ label }}</dt>
                                     <dd>
                                         {% if label == "Uploaded files" %}
                                             {% for file in value %}
-                                                <div class="file-entry">
-                                                    <i class="fas fa-file"></i>
-                                                    <a class="non-nav-link text-primary" href="{{ file.url }}" target="_blank">{{ file.name }}</a>
+                                                <div class="form-group mb-2 flex items-center gap-2">
+                                                    <i class="fas fa-file text-primary"></i>
+                                                    <a class="non-nav-link text-primary font-medium underline hover:text-blue-700 transition"
+                                                       href="{{ file.url }}" target="_blank">{{ file.name }}</a>
                                                 </div>
                                             {% endfor %}
                                         {% elif value == True %}
