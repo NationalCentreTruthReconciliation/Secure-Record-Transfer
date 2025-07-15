@@ -1,19 +1,13 @@
 {% load i18n %}
 {% load widget_tweaks %}
-
 {% if not field.field.widget.is_hidden %}
     <div class="form-group mb-2">
-        <label class="block text-lg font-semibold text-primary/60 mb-2">
+        <label class="block text-lg font-semibold text-primary mb-2">
             {{ field.label }}
-            {% if field.field.required %}
-                <span class="text-red-500 ml-1">*</span>
-            {% endif %}
+            {% if field.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
         </label>
-
         {% if field.field.widget.input_type == 'radio' %}
-            <div class="flex items-center gap-6 mt-3">
-                {{ field|add_class:"flex gap-6" }}
-            </div>
+            <div class="flex items-center gap-6 mt-3">{{ field|add_class:"flex gap-6" }}</div>
         {% elif field|widget_type == 'textarea' %}
             {{ field|add_class:"textarea textarea-bordered w-full h-32 bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y" }}
         {% elif field.field.widget.input_type == 'select' %}
@@ -31,7 +25,7 @@
                 {% for error in field.errors %}
                     <p class="text-sm text-red-600 flex items-center">
                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
                         {{ error }}
                     </p>
