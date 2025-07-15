@@ -1328,16 +1328,6 @@ class Job(models.Model):
     )
     message_log = models.TextField(null=True)
 
-    def get_admin_change_url(self) -> str:
-        """Get the URL to change this object in the admin."""
-        view_name = "admin:{0}_{1}_change".format(self._meta.app_label, self._meta.model_name)
-        return reverse(view_name, args=(self.pk,))
-
-    def get_admin_download_url(self) -> str:
-        """Get the URL to download the attached file from the admin."""
-        view_name = "admin:{0}_{1}_download".format(self._meta.app_label, self._meta.model_name)
-        return reverse(view_name, args=(self.pk,))
-
     def __str__(self) -> str:
         """Return a string representation of this object."""
         return f"{self.name} (Created by {self.user_triggered})"

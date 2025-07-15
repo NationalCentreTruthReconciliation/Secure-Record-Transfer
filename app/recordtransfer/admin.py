@@ -522,17 +522,13 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(ReadOnlyAdmin):
-    """Admin for the Job model. Adds a view to download the file associated
-    with the job, if there is a file. The file download view can be accessed at
-    code:`job/<id>/download/`.
+    """Admin for the Job model.
 
     Permissions:
         - add: Not allowed
         - change: Not allowed
         - delete: Only if current user created job
     """
-
-    change_form_template = "admin/job_change_form.html"
 
     list_display = [
         "name",
@@ -554,59 +550,6 @@ class JobAdmin(ReadOnlyAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return obj and (request.user == obj.user_triggered or request.user.is_superuser)
-
-    def get_urls(self):
-        """Add download/ view to admin"""
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        report_url = [
-            path(
-                "<path:object_id>/download/",
-                self.admin_site.admin_view(self.download_file),
-                name="%s_%s_download" % info,
-            ),
-        ]
-        return report_url + urls
-
-    def download_file(self, request, object_id):
-        """Download an application/x-zip-compressed file for the job, if the
-        file and the job exist
-
-        Args:
-            request: The originating request
-            object_id: The ID for the job
-        """
-        job = Job.objects.filter(id=object_id).first()
-        if job and job.attached_file:
-            file_path = Path(settings.MEDIA_ROOT) / job.attached_file.name
-            file_handle = open(file_path, "rb")
-            response = HttpResponse(file_handle, content_type="application/x-zip-compressed")
-            response["Content-Disposition"] = f'attachment; filename="{file_path.name}"'
-            return response
-        if job:
-            msg = gettext("Could not find a file attached to the Job with ID “%(key)s”") % {
-                "key": object_id
-            }
-            self.message_user(request, msg, messages.WARNING)
-            return HttpResponseRedirect("../")
-        # Error response
-        msg = gettext("Job with ID “%(key)s” doesn’t exist. Perhaps it was deleted?") % {
-            "key": object_id,
-        }
-        self.message_user(request, msg, messages.WARNING)
-        url = reverse("admin:index", current_app=self.admin_site.name)
-        return HttpResponseRedirect(url)
-
-    def get_fields(self, request, obj=None):
-        """Hide the attached file field, the user is not allowed to interact
-        directly with it. If a user wants this file, they should use the
-        download/ view.
-        """
-        fields = list(super().get_fields(request, obj))
-        exclude_set = set()
-        if obj:
-            exclude_set.add("attached_file")
-        return [f for f in fields if f not in exclude_set]
 
 
 @admin.register(User)
