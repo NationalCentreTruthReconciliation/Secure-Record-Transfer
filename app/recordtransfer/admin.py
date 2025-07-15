@@ -1,7 +1,7 @@
 """Custom administration code for the admin site."""
 
 import logging
-from typing import Callable, ClassVar, Optional, Union
+from typing import Callable, Optional, Union
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
@@ -82,7 +82,7 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
 
 
 @display(description=gettext("File Link"))
-def file_url(obj: BaseUploadedFile) -> SafeText:
+def uploaded_file_url(obj: BaseUploadedFile) -> SafeText:
     """Return the URL to access the file, or a message if the file was removed."""
     if not obj.file_upload or not obj.exists:
         return mark_safe(gettext("File was removed"))
@@ -149,7 +149,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), file_url]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), uploaded_file_url]
 
     search_fields = [
         "name",
@@ -178,8 +178,8 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = [file_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", file_url, format_upload_size]
+    fields = [uploaded_file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", uploaded_file_url, format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -193,8 +193,8 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = [file_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", file_url, format_upload_size]
+    fields = [uploaded_file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", uploaded_file_url, format_upload_size]
 
 
 @admin.register(UploadSession)
