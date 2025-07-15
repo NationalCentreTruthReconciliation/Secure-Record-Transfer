@@ -101,11 +101,6 @@ urlpatterns = [
 if settings.DEBUG:
     # Serve media files directly without nginx in development
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # Check permissions and serve through nginx in production
-    urlpatterns.append(
-        re_path(r"media/(?P<path>.*)", login_required(views.media.media_request), name="media")
-    )
 
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
