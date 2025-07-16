@@ -22,7 +22,5 @@ jobs:
             ./app/recordtransfer/management
             ./app/recordtransfer/models.py
             ./app/recordtransfer/admin.py
-            ./app/recordtransfer/apps.py
-            ./app/recordtransfer/caais.py
           version-file: "./pyproject.toml"
           args: "--config ./ruff.toml check"

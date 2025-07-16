@@ -10,6 +10,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
+from django.db.models import QuerySet
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -48,7 +49,7 @@ def linkify(field_name: str) -> Callable:
     Link will be admin url for the admin url for obj.parent.id:change
     """
 
-    def _linkify(obj):
+    def _linkify(obj: object):
         try:
             linked_obj = getattr(obj, field_name)
             if not linked_obj:
@@ -99,23 +100,10 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         - delete: Not allowed
     """
 
-    readonly_fields = []
+    readonly_fields: Sequence[Union[str, Callable]] = []
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[object] = None) -> list[str]:
-        """Return a list of all readonly field names for the given object.
-
-        Parameters
-        ----------
-        request : HttpRequest
-            The current request object.
-        obj : Optional[object]
-            The model instance being viewed or changed.
-
-        Returns
-        -------
-        list[str]
-            A list of readonly field names.
-        """
+        """Return a list of all readonly field names for the given object."""
         readonly = list(self.readonly_fields)
         from django.db import models
 
@@ -124,39 +112,16 @@ class ReadOnlyAdmin(admin.ModelAdmin):
             readonly += [field.name for field in obj._meta.many_to_many]
         return [field for field in readonly if isinstance(field, str)]
 
-    def has_add_permission(self, request) -> bool:
-        """Return False to prevent adding new objects via the admin interface.
-
-        Parameters
-        ----------
-        request : HttpRequest
-            The current request object.
-
-        Returns
-        -------
-        bool
-            Always returns False to disable add permission.
-        """
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Return False to prevent adding new objects via the admin interface."""
         return False
 
-    def has_change_permission(self, request, obj=None) -> bool:
-        """Return False to prevent changing objects via the admin interface.
-
-        Parameters
-        ----------
-        request : HttpRequest
-            The current request object.
-        obj : Optional[object]
-            The model instance being viewed or changed.
-
-        Returns
-        -------
-        bool
-            Always returns False to disable change permission.
-        """
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return False to prevent changing objects via the admin interface."""
         return False
 
-    def has_delete_permission(self, request, obj=None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return False to prevent deletion of objects via the admin interface."""
         return False
 
 
@@ -172,13 +137,16 @@ class ReadOnlyInline(admin.TabularInline):
     max_num = 0
     show_change_link = True
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return False to prevent adding new objects via the admin interface."""
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return True to allow changing objects via the admin interface."""
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return False to prevent deletion of objects via the admin interface."""
         return False
 
 
@@ -192,7 +160,14 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), file_url]
+    fields = [
+        "id",
+        "name",
+        format_upload_size,
+        "exists",
+        linkify("session"),
+        file_url,
+    ]
 
     search_fields = [
         "name",
@@ -374,8 +349,11 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "export_atom_2_1_csv",
     ]
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Return True if the current user is a superuser and the object exists,
+        otherwise False.
+        """
+        return bool(obj and request.user.is_superuser)
 
     @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
     def export_caais_csv(self, request, queryset):
@@ -478,16 +456,21 @@ class SubmissionAdmin(admin.ModelAdmin):
             file_count = "n/a"
         return file_count
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Return False to prevent adding new objects via the admin interface."""
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return True to allow changing objects via the admin interface."""
         return True
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Return True if the object exists and the current user is a superuser,
+        otherwise False.
+        """
+        return bool(obj and request.user.is_superuser)
 
-    def get_urls(self):
+    def get_urls(self) -> list:
         """Add extra views to admin."""
         return [
             path(
@@ -495,7 +478,8 @@ class SubmissionAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.create_zipped_bag),
                 name=f"{self.model._meta.app_label}_{self.model._meta.model_name}_zip",
             ),
-        ] + super().get_urls()
+            *super().get_urls(),
+        ]
 
     def create_zipped_bag(self, request, object_id) -> HttpResponseRedirect:
         """Start a background job to create a downloadable bag.
@@ -544,23 +528,28 @@ class SubmissionAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(admin_url)
 
     @admin.action(description=gettext("Export CAAIS 1.0 CSV for Selected"))
-    def export_caais_csv(self, request, queryset):
+    def export_caais_csv(self, request: HttpRequest, queryset) -> HttpResponse:
+        """Export selected submissions as a CAAIS 1.0 CSV file."""
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
 
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Selected"))
-    def export_atom_2_6_csv(self, request, queryset):
+    def export_atom_2_6_csv(self, request: HttpRequest, queryset) -> HttpResponse:
+        """Export selected submissions as an AtoM 2.6 Accession CSV file."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_6)
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Selected"))
-    def export_atom_2_3_csv(self, request, queryset):
+    def export_atom_2_3_csv(self, request: HttpRequest, queryset) -> HttpResponse:
+        """Export selected submissions as an AtoM 2.3 Accession CSV file."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_3)
 
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Selected"))
-    def export_atom_2_2_csv(self, request, queryset):
+    def export_atom_2_2_csv(self, request: HttpRequest, queryset) -> HttpResponse:
+        """Export selected submissions as an AtoM 2.2 Accession CSV file."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_2)
 
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Selected"))
-    def export_atom_2_1_csv(self, request, queryset):
+    def export_atom_2_1_csv(self, request: HttpRequest, queryset) -> HttpResponse:
+        """Export selected submissions as an AtoM 2.1 Accession CSV file."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_1)
 
 
@@ -599,8 +588,8 @@ class JobAdmin(ReadOnlyAdmin):
     def has_delete_permission(self, request, obj=None):
         return obj and (request.user == obj.user_triggered or request.user.is_superuser)
 
-    def get_urls(self):
-        """Add download/ view to admin"""
+    def get_urls(self) -> list:
+        """Add download/ view to admin."""
         urls = super().get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
         report_url = [
@@ -612,9 +601,8 @@ class JobAdmin(ReadOnlyAdmin):
         ]
         return report_url + urls
 
-    def download_file(self, request, object_id):
-        """Download an application/x-zip-compressed file for the job, if the
-        file and the job exist
+    def download_file(self, request: HttpRequest, object_id: int) -> HttpResponse:
+        """Download an application/x-zip-compressed file for the job, if the file and job exist.
 
         Args:
             request: The originating request
