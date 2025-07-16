@@ -601,9 +601,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         # Wait until submit button is clickable
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "submit-form-btn")))
 
-        # Debug: Print current URL before submission
-        print(f"Before submission: {driver.current_url}")
-
         # Click the submit button
         driver.find_element(By.ID, "submit-form-btn").click()
 
