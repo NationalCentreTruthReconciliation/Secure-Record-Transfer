@@ -4,7 +4,9 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    """Remove job attachment files older than a specified number of days (based on job.end_time)."""
+    """Remove job attachment files older than a specified number of days
+    (based on job.end_time).
+    """
 
     def add_arguments(self, parser: "argparse.ArgumentParser") -> None:
         """Add command-line arguments for the management command.
