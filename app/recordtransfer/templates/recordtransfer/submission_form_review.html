@@ -17,7 +17,7 @@
     {{ block.super }}
     <div class="review-summary">
         {% for form in form_list %}
-            <div class="bg-base-100 border border-base-300 rounded-lg mb-4 p-6 transition-all duration-200 hover:shadow-xl hover:scale-[1.02]">
+            <div class="bg-base-100 border border-base-300 rounded-lg mb-4 p-6">
                 <div class="text-xl font-semibold text-primary flex justify-between items-center section-header mb-4">
                     <span class="section-title">{{ form.step_title }}</span>
                     <button id="goto_step_{{ form.step_name }}_link"
