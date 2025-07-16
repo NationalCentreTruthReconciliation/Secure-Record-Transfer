@@ -1,6 +1,7 @@
 import os
 import tempfile
 from typing import ClassVar
+from unittest.mock import MagicMock, patch
 from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
@@ -583,6 +584,37 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                 xpath = f"//dt[text()='{label}']/following-sibling::dd[1]"
                 element = self.driver.find_element(By.XPATH, xpath)
                 self.assertEqual(element.text, expected_value)
+
+    @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
+    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
+    def test_submit_form(
+        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock
+    ) -> None:
+        """Test that the form can be submitted successfully."""
+        # Mock the email tasks to prevent them from running
+        mock_thank_you.return_value = None
+        mock_creation_success.return_value = None
+
+        self.complete_form_till_review_step()
+        driver = self.driver
+
+        # Wait until submit button is clickable
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "submit-form-btn")))
+
+        # Click the submit button
+        driver.find_element(By.ID, "submit-form-btn").click()
+
+        # Wait for redirect to submission sent page
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:submission_sent")))
+        )
+
+        # Verify the submission success message is displayed
+        self.assertIn("Thank you for your Submission", driver.page_source)
+
+        # Verify the email tasks were called
+        mock_thank_you.assert_called_once()
+        mock_creation_success.assert_called_once()
 
     def test_previous_saves_form(self) -> None:
         """Test that the form data is saved when going to the previous step. Uses the Contact
