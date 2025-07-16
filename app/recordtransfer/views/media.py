@@ -297,7 +297,7 @@ def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpRes
         )
 
     file_url = uploaded_file.get_file_media_url()
-    return _serve_file_response(file_url)
+    return serve_media_file(file_url)
 
 
 def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
@@ -319,4 +319,4 @@ def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
         raise Http404("File not found for this job")
 
     file_url = job.get_file_media_url()
-    return _serve_file_response(file_url)
+    return serve_media_file(file_url)
