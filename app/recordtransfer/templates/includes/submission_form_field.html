@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% if not field.field.widget.is_hidden %}
     <div class="form-group mb-2">
-        <label class="block text-lg font-semibold text-primary mb-2">
+        <label class="block text-lg text-primary mb-2">
             {{ field.label }}
             {% if field.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
         </label>
