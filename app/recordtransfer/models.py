@@ -1331,7 +1331,7 @@ class Job(models.Model):
 
     def has_file(self) -> bool:
         """Determine if this job has an attached file."""
-        return self.attached_file is not None
+        return bool(self.attached_file)
 
     def get_file_media_url(self) -> str:
         """Generate the media URL to this file.
