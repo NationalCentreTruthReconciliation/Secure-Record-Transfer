@@ -1,10 +1,11 @@
 import {
-    handleModalBeforeSwap
+    handleModalBeforeSwap,
+    handleModalAfterSwap,
 } from "../utils/htmx.js";
-import { showModal, isValidUrl } from "../utils/utils.js";
+import { isValidUrl } from "../utils/utils.js";
 
 /**
- * Initializes the submission group page functionality including form setup,
+ * Initializes the submission group detail page functionality including form setup,
  * toast notifications, and modal handlers
  */
 export const initializeSubmissionGroup = function () {
@@ -17,8 +18,8 @@ export const initializeSubmissionGroup = function () {
         return handleModalBeforeSwap(e, context);
     };
 
-    window.handleModalAfterSwap = () => {
-        showModal();
+    window.handleModalAfterSwap = (e) => {
+        return handleModalAfterSwap(e, context);
     };
 
     window.handleSubmissionGroupFormAfterSwap = () => {

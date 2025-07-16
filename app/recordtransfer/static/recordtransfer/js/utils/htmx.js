@@ -79,6 +79,9 @@ export const handleModalBeforeSwap = (e, context) => {
             if (context["ID_SUBMISSION_TABLE"] &&
                 document.getElementById(context["ID_SUBMISSION_TABLE"])) {
                 refreshSubmissionTable(context);
+            }
+            if (context["ID_SUBMISSION_GROUP_TABLE"] &&
+                document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
                 refreshSubmissionGroupTable(context);
             }
         }
