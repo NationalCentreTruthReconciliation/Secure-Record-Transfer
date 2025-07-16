@@ -74,7 +74,7 @@ urlpatterns = [
     ),
     path(
         "job/<uuid:job_uuid>/file/",
-        staff_member_required(views.media.job_file),
+        login_required(views.media.job_file),
         name="job_file",
     ),
     path(

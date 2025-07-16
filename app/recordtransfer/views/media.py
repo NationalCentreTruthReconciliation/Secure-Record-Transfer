@@ -9,6 +9,7 @@ from clamav.scan import check_for_malware
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import (
+    Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
@@ -16,6 +17,7 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 
@@ -293,20 +295,13 @@ def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
     Returns:
         HttpResponse: Redirects to the file's media path if the job has an associated file.
     """
-    try:
-        try:
-            job = Job.objects.get(uuid=job_uuid)
-        except Job.DoesNotExist:
-            return HttpResponseNotFound("Job not found")
+    if not request.user.is_staff:
+        raise Http404("The requested resource could not be found")
 
-        if not job.attached_file:
-            return HttpResponseNotFound("File not found for this job")
+    job = get_object_or_404(Job, uuid=job_uuid)
 
-        file_url = job.get_file_media_url()
-        return _serve_file_response(file_url)
-    except Exception as exc:
-        LOGGER.error("Error accessing job attached file: %s", str(exc), exc_info=exc)
-        return HttpResponse(
-            "There was an internal server error. Please try again.",
-            status=500,
-        )
+    if not job.attached_file:
+        raise Http404("File not found for this job")
+
+    file_url = job.get_file_media_url()
+    return _serve_file_response(file_url)
