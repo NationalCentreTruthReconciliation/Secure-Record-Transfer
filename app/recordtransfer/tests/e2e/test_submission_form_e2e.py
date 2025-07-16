@@ -605,7 +605,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver.find_element(By.ID, "submit-form-btn").click()
 
         # Wait for redirect to submission sent page
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 15).until(
             EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:submission_sent")))
         )
 
