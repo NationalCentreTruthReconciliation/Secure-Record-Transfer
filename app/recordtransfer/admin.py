@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Callable, ClassVar, List, Optional, Union, Sequence
+from typing import Callable, Optional, Sequence, Union
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
