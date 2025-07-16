@@ -8,9 +8,12 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
+from django.db.models import QuerySet
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.http import HttpRequest, HttpResponseRedirect
+from django.forms import ModelForm
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -100,20 +103,23 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
     readonly_fields = []
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request: HttpRequest, obj: object = None):
         return (
             list(self.readonly_fields)
             + [field.name for field in obj._meta.fields]
             + [field.name for field in obj._meta.many_to_many]
         )
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Determine whether add permission is granted for this model admin."""
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether change permission is granted for this model admin."""
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this model admin."""
         return False
 
 
@@ -129,13 +135,16 @@ class ReadOnlyInline(admin.TabularInline):
     max_num = 0
     show_change_link = True
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether add permission is granted for this model admin."""
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether change permission is granted for this model admin."""
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this model admin."""
         return False
 
 
@@ -289,8 +298,11 @@ class SubmissionInline(ReadOnlyInline):
 
     ordering = ["-submission_date"]
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this inline admin.
+        Returns True if the object exists and the requesting user is a superuser, otherwise False.
+        """
+        return bool(obj and request.user.is_superuser)
 
 
 @admin.register(SubmissionGroup)
@@ -328,31 +340,55 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "export_atom_2_1_csv",
     ]
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this model admin.
+        Returns True if the object exists and the requesting user is a superuser, otherwise False.
+        """
+        return bool(obj and request.user.is_superuser)
 
     @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
-    def export_caais_csv(self, request, queryset):
+    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
+        """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
 
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
-    def export_atom_2_6_csv(self, request, queryset):
+    def export_atom_2_6_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
-    def export_atom_2_3_csv(self, request, queryset):
+    def export_atom_2_3_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.3 Accession CSV for submissions in the selected queryset.
+
+        Args:
+            request: The originating request.
+            queryset: The selected SubmissionGroup queryset.
+
+        Returns:
+            HttpResponseRedirect: Redirects to the CSV export.
+        """
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
 
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
-    def export_atom_2_2_csv(self, request, queryset):
+    def export_atom_2_2_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
 
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
-    def export_atom_2_1_csv(self, request, queryset):
+    def export_atom_2_1_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
 
@@ -432,16 +468,19 @@ class SubmissionAdmin(admin.ModelAdmin):
             file_count = "n/a"
         return file_count
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Determine whether add permission is granted for this model admin."""
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether change permission is granted for this model admin."""
         return True
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this model admin."""
+        return bool(obj and request.user.is_superuser)
 
-    def get_urls(self):
+    def get_urls(self) -> list:
         """Add extra views to admin."""
         return [
             path(
@@ -497,25 +536,43 @@ class SubmissionAdmin(admin.ModelAdmin):
         admin_url = reverse("admin:index", current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
 
-    @admin.action(description=gettext("Export CAAIS 1.0 CSV for Selected"))
-    def export_caais_csv(self, request, queryset):
-        return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
+    @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
+    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
+        """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
+        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
+        return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
 
-    @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Selected"))
-    def export_atom_2_6_csv(self, request, queryset):
-        return queryset.export_csv(version=ExportVersion.ATOM_2_6)
+    @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
+    def export_atom_2_6_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
+        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
 
-    @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Selected"))
-    def export_atom_2_3_csv(self, request, queryset):
-        return queryset.export_csv(version=ExportVersion.ATOM_2_3)
+    @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
+    def export_atom_2_3_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
+        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
 
-    @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Selected"))
-    def export_atom_2_2_csv(self, request, queryset):
-        return queryset.export_csv(version=ExportVersion.ATOM_2_2)
+    @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
+    def export_atom_2_2_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
+        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
 
-    @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Selected"))
-    def export_atom_2_1_csv(self, request, queryset):
-        return queryset.export_csv(version=ExportVersion.ATOM_2_1)
+    @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
+    def export_atom_2_1_csv(
+        self, request: HttpRequest, queryset: QuerySet
+    ) -> HttpResponseRedirect:
+        """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
+        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
+        return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
 
 
 @admin.register(Job)
@@ -571,8 +628,9 @@ class JobAdmin(ReadOnlyAdmin):
             obj.attached_file.name,
         )
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and (request.user == obj.user_triggered or request.user.is_superuser)
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this model admin."""
+        return bool(obj and (request.user == obj.user_triggered or request.user.is_superuser))
 
 
 @admin.register(User)
@@ -616,15 +674,23 @@ class CustomUserAdmin(UserAdmin):
         SubmissionGroupInline,
     ]
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether change permission is granted for this user admin."""
         if not obj:
             return True
-        return obj and (request.user.is_superuser or obj == request.user)
+        return bool(request.user.is_superuser or obj == request.user)
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Determine whether delete permission is granted for this user admin."""
+        return bool(obj and request.user.is_superuser)
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+    def changeform_view(
+        self,
+        request: HttpRequest,
+        object_id: Optional[str] = None,
+        form_url: str = "",
+        extra_context: Optional[dict] = None,
+    ) -> TemplateResponse:
         """Add JS context for contact info form."""
         extra_context = extra_context or {}
 
@@ -639,7 +705,9 @@ class CustomUserAdmin(UserAdmin):
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     @sensitive_post_parameters_m
-    def user_change_password(self, request, id, form_url=""):
+    def user_change_password(
+        self, request: HttpRequest, id: str, form_url: str = ""
+    ) -> HttpResponse:
         """Send a notification email when a user's password is changed."""
         response = super().user_change_password(request, id, form_url)
         user = self.get_object(request, unquote(id))
@@ -653,7 +721,7 @@ class CustomUserAdmin(UserAdmin):
             send_user_account_updated.delay(user, context)
         return response
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request: HttpRequest, obj: object, form: ModelForm, change: bool) -> None:
         """Enforce superuser permissions checks and send notification emails
         for other account updates.
         """
@@ -724,12 +792,20 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/sitesetting_change_form.html"
 
-    def save_model(self, request, obj: SiteSetting, form, change):
+    def save_model(
+        self, request: HttpRequest, obj: SiteSetting, form: ModelForm, change: bool
+    ) -> None:
         """Override save_model to set the changed_by field."""
         obj.changed_by = request.user
         super().save_model(request, obj, form, change)
 
-    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+    def changeform_view(
+        self,
+        request: HttpRequest,
+        object_id: Optional[str] = None,
+        form_url: Optional[str] = "",
+        extra_context: Optional[dict] = None,
+    ) -> TemplateResponse:
         """Add custom context to the change form and skip validation on reset."""
         extra_context = extra_context or {}
         if object_id:
@@ -743,7 +819,10 @@ class SiteSettingAdmin(admin.ModelAdmin):
                 obj = self.get_object(request, object_id)
                 if obj:
                     self.reset_to_default(request, obj)
-            return HttpResponseRedirect(request.get_full_path())
+            # Instead of returning HttpResponseRedirect, raise it to ensure TemplateResponse return type
+            from django.http import HttpResponseRedirect
+
+            raise HttpResponseRedirect(request.get_full_path())
 
         return super().changeform_view(request, object_id, form_url, extra_context)
 
