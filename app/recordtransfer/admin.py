@@ -2,11 +2,12 @@
 
 import logging
 from datetime import datetime
-from typing import Callable, Optional, Sequence, Union
+from typing import Callable, Optional, Sequence, Union, Any
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
 from django.contrib.admin import display
+from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import QuerySet
@@ -160,22 +161,30 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), uploaded_file_url]
+    fields: Sequence[Union[str, Sequence[str]]] = [
+        "id",
+        "name",
+        format_upload_size,
+        "exists",
+        linkify("session"),
+        uploaded_file_url,
+    ]
 
-    search_fields = [
+    list_display: Sequence[Union[str, Callable]] = [
+        "name",
+        format_upload_size,
+        "exists",
+        linkify("session"),
+        uploaded_file_url,
+    ]
+
+    search_fields: Sequence[str] = [
         "name",
         "session__token",
         "session__user__username",
     ]
 
-    list_display = [
-        "name",
-        format_upload_size,
-        "exists",
-        linkify("session"),
-    ]
-
-    ordering = ["-pk"]
+    ordering: Sequence[str] | None = ["-pk"]
 
 
 class TempUploadedFileInline(ReadOnlyInline):
@@ -189,8 +198,12 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = [uploaded_file_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", uploaded_file_url, format_upload_size]
+    fields: Sequence[Union[str, Sequence[str]]] = [uploaded_file_url, format_upload_size, "exists"]
+    readonly_fields: Sequence[Union[str, Callable]] = [
+        "exists",
+        uploaded_file_url,
+        format_upload_size,
+    ]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -204,8 +217,12 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = [uploaded_file_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", uploaded_file_url, format_upload_size]
+    fields: Sequence[Union[str, Sequence[str]]] = [uploaded_file_url, format_upload_size, "exists"]
+    readonly_fields: Sequence[Union[str, Callable]] = [
+        "exists",
+        uploaded_file_url,
+        format_upload_size,
+    ]
 
 
 @admin.register(UploadSession)
@@ -218,7 +235,9 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = [
+    from typing import ClassVar
+
+    fields: Sequence[Union[str, Sequence[str]]] = [
         "token",
         linkify("user"),
         "started_at",
@@ -229,8 +248,8 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "is_expired",
         "expires_at",
     ]
-    search_fields = ["token", "user__username"]
-    list_display = [
+    search_fields: Sequence[str] = ["token", "user__username"]
+    list_display: Sequence[Union[str, Callable]] = [
         "token",
         linkify("user"),
         "started_at",
@@ -242,7 +261,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "expires_at",
     ]
 
-    ordering = [
+    ordering: Sequence[str] | None = [
         "-started_at",
     ]
 
@@ -296,9 +315,12 @@ class SubmissionInline(ReadOnlyInline):
     """
 
     model = Submission
-    fields = ["uuid", "metadata"]
 
-    ordering = ["-submission_date"]
+    fields: Sequence[str | Sequence[str]] = ["uuid", "metadata"]
+
+    from typing import ClassVar
+
+    ordering: Sequence[str] | None = ["-submission_date"]
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this inline admin.
@@ -317,24 +339,29 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         - delete: Only by superusers
     """
 
-    list_display = [
+    list_display: Sequence[str | Callable] = [
         "name",
         linkify("created_by"),
         "number_of_submissions_in_group",
     ]
 
-    inlines = [SubmissionInline]
+    inlines: Sequence[type[InlineModelAdmin[Any]]] = [SubmissionInline]
 
-    search_fields = [
+    search_fields: Sequence[str] = [
         "name",
         "uuid",
     ]
 
-    ordering = [
+    ordering: Sequence[str] | None = [
         "-created_by",
     ]
 
-    actions = [
+    from typing import Callable
+
+    actions: (
+        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
+        | None
+    ) = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
@@ -405,9 +432,13 @@ class SubmissionGroupInline(ReadOnlyInline):
     """
 
     model = SubmissionGroup
-    fields = ["name", "description", "number_of_submissions_in_group"]
+    fields: Sequence[str | Sequence[str]] = [
+        "name",
+        "description",
+        "number_of_submissions_in_group",
+    ]
     # Tells Django this is a computed field
-    readonly_fields = ["number_of_submissions_in_group"]
+    readonly_fields: Sequence[str | Callable[..., Any]] = ["number_of_submissions_in_group"]
 
 
 @admin.register(Submission)
@@ -424,7 +455,10 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     form = SubmissionModelForm
 
-    actions = [
+    actions: (
+        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
+        | None
+    ) = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
@@ -432,14 +466,14 @@ class SubmissionAdmin(admin.ModelAdmin):
         "export_atom_2_1_csv",
     ]
 
-    search_fields = [
+    search_fields: Sequence[str] = [
         "uuid",
         "metadata__accession_title",
         "user__username",
         "user__email",
     ]
 
-    list_display = [
+    list_display: Sequence[Union[str, Callable]] = [
         "submission_date",
         "uuid",
         "file_count",
@@ -447,11 +481,11 @@ class SubmissionAdmin(admin.ModelAdmin):
         linkify("user"),
     ]
 
-    ordering = [
+    ordering: Sequence[str] | None = [
         "-submission_date",
     ]
 
-    readonly_fields = [
+    readonly_fields: Sequence[Union[str, Callable[..., Any]]] = [
         "submission_date",
         "user",
         "upload_session",
@@ -587,7 +621,7 @@ class JobAdmin(ReadOnlyAdmin):
         - delete: Only if current user created job
     """
 
-    fields = [
+    fields: Sequence[str | Sequence[str]] = [
         "uuid",
         "name",
         "description",
@@ -599,14 +633,14 @@ class JobAdmin(ReadOnlyAdmin):
         "message_log",
     ]
 
-    list_display = [
+    list_display: Sequence[str | Callable] = [
         "name",
         "start_time",
         "user_triggered",
         "job_status",
     ]
 
-    search_fields = [
+    search_fields: Sequence[str] = [
         "name",
         "description",
         "user_triggered__username",
@@ -615,7 +649,7 @@ class JobAdmin(ReadOnlyAdmin):
         "user_triggered__last_name",
     ]
 
-    ordering = ["-start_time"]
+    ordering: Sequence[str] | None = ["-start_time"]
 
     @display(description=gettext("File Link"))
     def file_url(self, obj: Job) -> SafeText:
@@ -671,7 +705,7 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    inlines = [
+    inlines: Sequence[type[InlineModelAdmin[Any]]] = [
         SubmissionInline,
         SubmissionGroupInline,
     ]
@@ -786,9 +820,9 @@ class SiteSettingAdmin(admin.ModelAdmin):
         - delete: Only by superusers
     """
 
-    list_display = ["key", "value_type", "value", "change_date"]
-    search_fields = ["key", "value"]
-    readonly_fields = ["key", "value_type", "change_date", "changed_by"]
+    list_display: Sequence[str | Callable] = ["key", "value_type", "value", "change_date"]
+    search_fields: Sequence[str] = ["key", "value"]
+    readonly_fields: Sequence[str | Callable] = ["key", "value_type", "change_date", "changed_by"]
 
     form = SiteSettingModelForm
 
