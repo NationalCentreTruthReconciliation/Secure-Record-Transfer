@@ -28,7 +28,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
-        """Delete job attachment files for jobs whose end_time is older than the specified number of days.
+        """Delete job attachment files for jobs whose end_time is older than the
+        specified number of days.
 
         Parameters
         ----------
