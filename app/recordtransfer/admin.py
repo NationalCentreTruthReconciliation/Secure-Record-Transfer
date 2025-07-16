@@ -1,6 +1,7 @@
 """Custom administration code for the admin site."""
 
 import logging
+from datetime import datetime
 from typing import Callable, Optional, Union
 
 from caais.export import ExportVersion
@@ -49,7 +50,7 @@ def linkify(field_name: str) -> Callable:
     Link will be admin url for the admin url for obj.parent.id:change
     """
 
-    def _linkify(obj):
+    def _linkify(obj: object):
         try:
             linked_obj = getattr(obj, field_name)
             if not linked_obj:
@@ -103,11 +104,12 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
     readonly_fields = []
 
-    def get_readonly_fields(self, request: HttpRequest, obj: object = None):
+    def get_readonly_fields(self, request: HttpRequest, obj: object = None) -> tuple:
+        """Return all fields as read-only for this model admin."""
         return (
-            list(self.readonly_fields)
-            + [field.name for field in obj._meta.fields]
-            + [field.name for field in obj._meta.many_to_many]
+            tuple(self.readonly_fields)
+            + tuple(field.name for field in obj._meta.fields)
+            + tuple(field.name for field in obj._meta.many_to_many)
         )
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -244,7 +246,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "-started_at",
     ]
 
-    def get_inlines(self, request, obj=None) -> list:
+    def get_inlines(self, request: HttpRequest, obj: object = None) -> list:
         """Return the inlines to display for the UploadSession."""
         if obj is None:
             return []
@@ -279,7 +281,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         return upload_size
 
     @admin.display(description="Last upload at")
-    def last_upload_at(self, obj: UploadSession):
+    def last_upload_at(self, obj: UploadSession) -> datetime:
         """Display the last time a file was uploaded to the session."""
         return obj.last_upload_interaction_time
 
@@ -490,7 +492,7 @@ class SubmissionAdmin(admin.ModelAdmin):
             ),
         ] + super().get_urls()
 
-    def create_zipped_bag(self, request, object_id) -> HttpResponseRedirect:
+    def create_zipped_bag(self, request: HttpRequest, object_id: str) -> HttpResponseRedirect:
         """Start a background job to create a downloadable bag.
 
         Args:
@@ -819,7 +821,8 @@ class SiteSettingAdmin(admin.ModelAdmin):
                 obj = self.get_object(request, object_id)
                 if obj:
                     self.reset_to_default(request, obj)
-            # Instead of returning HttpResponseRedirect, raise it to ensure TemplateResponse return type
+            # Instead of returning HttpResponseRedirect, raise it
+            # to ensure TemplateResponse return type
             from django.http import HttpResponseRedirect
 
             raise HttpResponseRedirect(request.get_full_path())
@@ -840,10 +843,10 @@ class SiteSettingAdmin(admin.ModelAdmin):
                 f'Failed to reset setting "{obj.key}": {e!s}',
             )
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         """Prevent adding new site settings through the admin interface."""
         return False
 
-    def has_delete_permission(self, request, obj=None) -> bool:
+    def has_delete_permission(self, request: object, obj: object = None) -> bool:
         """Prevent deletion of site settings through the admin interface."""
         return False
