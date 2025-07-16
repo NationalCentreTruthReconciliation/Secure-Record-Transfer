@@ -10,12 +10,6 @@
     border-radius: 8px;
 }
 
-.section-title {
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-}
-
 .field-list {
     display: grid;
     grid-template-columns: 30% 70%;

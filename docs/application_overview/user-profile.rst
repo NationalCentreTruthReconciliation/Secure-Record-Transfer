@@ -9,19 +9,37 @@ user profile page is accessible by clicking on "Profile" on the navigation bar.
     :alt: User profile on the navigation bar
 
 
-Personal Information
---------------------
-In this section of the page, users can view and edit their personal information. This includes
-their name, email address and email notification preference. Users can also change their password
-here.
+The Profile page has two tabs: "Account" and "Contact Information".
+
+.. image:: images/user_profile_tabs.webp
+    :alt: User profile tabs
+
+Account Tab
+-----------
+In the Account tab, users can view and edit their personal information. This includes
+their name, email address and email notification preference, however, the email address field is read-only and cannot be changed from the Profile page. Users can also change their password here.
 
 The "Receive notification emails?" checkbox allows users to control whether they want to receive
 email notifications for new submissions. By default, this checkbox is checked.
 
-.. image:: images/user_profile_personal_info.webp
+.. image:: images/profile_account_populate.webp
     :alt: User profile personal information
 
 To save changes made to personal information, click on the "Save" button.
+
+Contact Information Tab
+-----------------------
+The Contact Information tab allows users to store their contact details including phone number and address. This information is stored in your profile for convenience.
+
+.. image:: images/profile_contact_populate.webp
+    :alt: User profile contact information
+
+To save changes made to contact information, click on the "Save" button.
+
+By completing this information once in your profile, these details will be automatically populated whenever you create a new submission in :ref:`Step 2: Contact information` of the Submission Form.  This saves time for users who make multiple submissions, as they won't need to re-enter their contact information for each submission.
+
+.. image:: images/submission_step_2_prefilled.webp
+    :alt: Auto Populate step 2 of submission form
 
 In-Progress Submissions
 -----------------------

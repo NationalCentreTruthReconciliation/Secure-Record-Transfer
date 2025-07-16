@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.urls import path, re_path
 
@@ -10,7 +11,7 @@ urlpatterns = [
     path("", views.home.Index.as_view(), name="index"),
     path(
         "submission/<uuid:uuid>/csv/",
-        login_required(views.post_submission.SubmissionCsvView.as_view()),
+        login_required(views.post_submission.submission_csv_export),
         name="submission_csv",
     ),
     path(
@@ -47,14 +48,34 @@ urlpatterns = [
         "user/profile/", login_required(views.profile.UserProfile.as_view()), name="user_profile"
     ),
     path(
+        "user/profile/account-info/",
+        login_required(views.profile.AccountInfoUpdateView.as_view()),
+        name="account_info_update",
+    ),
+    path(
+        "user/profile/contact-info/",
+        login_required(views.profile.ContactInfoUpdateView.as_view()),
+        name="contact_info_update",
+    ),
+    path(
         "submission-group/<uuid:uuid>/",
         login_required(views.post_submission.SubmissionGroupDetailView.as_view()),
         name="submission_group_detail",
     ),
     path(
+        "submission-group/<uuid:uuid>/csv/",
+        login_required(views.post_submission.submission_group_bulk_csv_export),
+        name="submission_group_bulk_csv",
+    ),
+    path(
         "user/<int:user_id>/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
+    ),
+    path(
+        "job/<uuid:job_uuid>/file/",
+        login_required(views.media.job_file),
+        name="job_file",
     ),
     path(
         "submission-group-table/",

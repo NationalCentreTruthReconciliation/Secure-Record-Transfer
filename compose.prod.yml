@@ -46,7 +46,7 @@ services:
       target: prod
       dockerfile: Containerfile
       args:
-          WEBPACK_MODE: production
+        WEBPACK_MODE: production
     image: secure-record-transfer-prod
     command: python manage.py rqworker default
     restart: unless-stopped
@@ -78,10 +78,17 @@ services:
 
   app:
     image: secure-record-transfer-prod
+    container_name: secure-record-transfer-app
     command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --enable-stdio-inheritance
     restart: unless-stopped
     expose:
       - 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     env_file:
       - .prod.env
     environment:
@@ -92,6 +99,7 @@ services:
       - rq
       - rq-scheduler
       - clamav
+
     volumes:
       - static-volume:/opt/secure-record-transfer/app/static/
       - media-volume:/opt/secure-record-transfer/app/media/

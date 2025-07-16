@@ -62,9 +62,22 @@ This step gathers contact information from the donor.
 .. image:: images/submission_step_2.webp
     :alt: Step 2 of the submission form
 
+If you wish to avoid entering your contact details repeatedly across multiple submissions, you may add this information to your profile on the :ref:`Contact Information Tab` of the Profile page. Once saved in your profile, these fields will be automatically populated each time you start a new submission.
 
-Step 3: Source information
-##########################
+.. image:: images/submission_step_2_prefilled.webp
+    :alt: Step 2 of the submission form prefilled
+
+During the submission process, when you complete the Contact Information step, you will also be prompted with an option to "Save and Continue." Choosing this will save your contact information to your profile, so it can be auto-filled for future submissions.
+
+If you prefer not to save your contact information at this time, you can simply click "Continue without saving." You will still have the option to add or update your contact information later through your profile page. Additionally, the next time you make a submission, you will be prompted again to save your contact information if it is not already stored in your profile.
+
+
+.. image:: images/submission_step_2_save_modal.webp
+    :alt: Step 2 of the submission form save modal
+
+
+Step 3: Record Source information
+#################################
 
 Here, the donor inputs information about who is submitting the records. If the donor is submitting
 records themselves, they can leave the default "No" selected for the "Submitting on behalf of an
@@ -74,9 +87,9 @@ organization/another person" field and simply click **Next Step**.
     :alt: Step 3 of the submission form, not submitting on behalf of another person or organization
 
 If the donor is submitting the records on behalf of another person or an institution, they can
-select "Yes" for that field instead. This will reveal additional fields where they can provide 
+select "Yes" for that field instead. This will reveal additional fields where they can provide
 information about the organization or person they are submitting the records for. CAAIS includes
-fields for adding notes about the source, as well as custodial history. If the donor feels inclined
+fields for adding notes about the source. If the donor feels inclined
 to include this information, they can do so in the relevant optional fields.
 
 .. image:: images/submission_step_3_on_behalf.webp
@@ -108,6 +121,9 @@ enter four pieces of information:
 - The languages of the records
 - A brief description of what the records contain
 
+
+Donors can optionally provide information about who has had custody or ownership of the records in the past before the current submission in the **Custodial History** field.
+
 .. image:: images/submission_step_4.webp
     :alt: Step 4 of the submission form
 
@@ -115,14 +131,12 @@ By default, a date widget is used to select the start and end dates. To allow do
 manually, the date widget can be disabled by modifying :ref:`USE_DATE_WIDGETS`.
 
 
-Step 5: Record Rights
-#####################
+Step 5: Record Rights and Restrictions
+######################################
 
-Here, the donor will enter the rights applying to their records. They must select at least one type
-of rights that apply to their records. If the type is not present in the dropdown, they can select
-Other and type in their own type of right. If they want to add multiple rights if, for example,
-there are different rights for different records, they can click the **+ Add** button to add more.
-Alternately, they can remove rights with the **- Remove** button.
+This optional step allows the donor to enter any rights applying to their records. Unlike previous sections, donors can skip this step if they're unsure about the rights status of their materials.
+
+If donors wish to provide rights information, they can select one or more types of rights from the dropdown menu. If the appropriate type isn't listed, they can select "Other" and specify their own type. The **+ More** button allows adding multiple rights (useful when different rights apply to different records), and the **- Remove** button can remove entries.
 
 If the donor is unsure about which right/(s) apply for their records, they can click on a link
 found at the top of the form, which will open up a description for each type of right on a new tab.
@@ -132,8 +146,14 @@ More information about the rights in this step can be found on :ref:`Adding Righ
     :alt: Step 5 of the submission form
 
 
-Step 6: Other Identifiers
-#########################
+Once you associate a right with the submission, you can also add Notes for that specific right to provide additional context or clarification about how it applies to your records.
+
+.. image:: images/submission_step_5_notes.webp
+    :alt: Step 5 of the submission form notes
+
+
+Step 6: Identifiers
+###################
 
 If the donor has other identifiers that apply to their records, such as an ISBN, or a barcode
 number, they can put those here. They are not required to enter any here, so can skip to the next
@@ -156,8 +176,16 @@ here. They can select previous groups from the dropdown, or create a new one by 
 .. image:: images/submission_step_7.webp
     :alt: Step 7 of the submission form
 
+If you are not sure about the purpose of creating these groups, you can click on the link provided at the bottom of the form saying "Why would I want to make a group?" This will take you to a FAQ section that explains the benefits and use cases for grouping submissions.
+
+.. image:: images/submission_step_7_faq_help.webp
+    :alt: Step 7 of the submission form FAQ help
+
+
 Clicking on the **Add New Group** button will open a modal where the donor can enter a name and
-description for the group. 
+description for the group. Clicking **Create** will create a new group and auto-select it in the **Assigned group** dropdown.
+
+Groups can also be accessed later from the :ref:`Submission Groups` table on the user profile page.
 
 .. image:: images/submission_step_7_add_group.webp
     :alt: Step 7 of the submission form, adding a new group
@@ -170,8 +198,10 @@ This is where the donor can add files to their submission. They must include at 
 make a submission. They can add files to the file drop zone by clicking on "browse files" or by
 dragging and dropping files into it. Only accepted file formats can be uploaded.
 
-To see more about how to change what files are accepted, go to the section on
-:ref:`ACCEPTED_FILE_FORMATS`.
+Users can open the dropdown button labeled "Accepted File Formats" to see which file types are supported for upload.
+
+.. image:: images/submission_step_8_accepted_file_types.webp
+    :alt: Step 8 of the submission form accepted file types
 
 Any additional notes that did not fit in the previous steps can be added in the "Other Notes"
 field.

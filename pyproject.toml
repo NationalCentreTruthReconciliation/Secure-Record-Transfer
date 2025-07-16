@@ -1,12 +1,14 @@
 [project]
 name = "secure-record-transfer"
-version = "2025.05.30"
+version = "2025.7.7"
 description = "Transfer files and metadata to an archive based on accession standards"
 authors = [
     { name = "Daniel Lovegrove", email = "Daniel.Lovegrove@umanitoba.ca" },
 ]
 requires-python = "~=3.9, <3.11"
 readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 dependencies = [
     "bagit>=1.8.1,<2",
     "clamd>=1.0.2,<2",
