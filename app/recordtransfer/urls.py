@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.urls import path, re_path
 
@@ -73,7 +74,7 @@ urlpatterns = [
     ),
     path(
         "job/<uuid:job_uuid>/file/",
-        login_required(views.media.job_file),
+        staff_member_required(views.media.job_file),
         name="job_file",
     ),
     path(
