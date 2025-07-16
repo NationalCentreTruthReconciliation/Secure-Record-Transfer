@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Callable, Optional, Union, Sequence
+from typing import Callable, Optional, Sequence, Union
 
 from caais.export import ExportVersion
 from django.conf import settings
@@ -124,13 +124,39 @@ class ReadOnlyAdmin(admin.ModelAdmin):
             readonly += [field.name for field in obj._meta.many_to_many]
         return [field for field in readonly if isinstance(field, str)]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request) -> bool:
+        """Return False to prevent adding new objects via the admin interface.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The current request object.
+
+        Returns
+        -------
+        bool
+            Always returns False to disable add permission.
+        """
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Return False to prevent changing objects via the admin interface.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The current request object.
+        obj : Optional[object]
+            The model instance being viewed or changed.
+
+        Returns
+        -------
+        bool
+            Always returns False to disable change permission.
+        """
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
 
@@ -306,8 +332,11 @@ class SubmissionInline(ReadOnlyInline):
 
     ordering = ["-submission_date"]
 
-    def has_delete_permission(self, request, obj=None):
-        return obj and request.user.is_superuser
+    from typing import Literal
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> Literal[False]:
+        """Override to always return False, matching base class signature."""
+        return False
 
 
 @admin.register(SubmissionGroup)
