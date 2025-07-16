@@ -5,10 +5,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext
+from freezegun import freeze_time
 
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import TempUploadedFile, UploadSession, User
+from recordtransfer.models import Job, TempUploadedFile, UploadSession, User
 
 
 class TestCreateUploadSessionView(TestCase):
@@ -419,3 +421,109 @@ class TestUploadedFileView(TestCase):
         """Tear down test environment."""
         TempUploadedFile.objects.all().delete()
         UploadSession.objects.all().delete()
+
+
+@freeze_time("2024-01-15 10:30:00")
+class TestJobFileView(TestCase):
+    """Tests for recordtransfer:job_file view."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Disable logging."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Create user accounts."""
+        cls.staff_user = User.objects.create_user(
+            username="staff", password="1X<ISRUkw+tuK", is_staff=True
+        )
+        cls.regular_user = User.objects.create_user(
+            username="regular", password="1X<ISRUkw+tuK", is_staff=False
+        )
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.job_with_file = Job.objects.create(
+            name="Test Job with File",
+            description="A test job with an attached file",
+            start_time=timezone.now(),
+            user_triggered=self.staff_user,
+            job_status=Job.JobStatus.COMPLETE,
+        )
+
+        self.job_without_file = Job.objects.create(
+            name="Test Job without File",
+            description="A test job without an attached file",
+            start_time=timezone.now(),
+            user_triggered=self.staff_user,
+            job_status=Job.JobStatus.COMPLETE,
+        )
+
+        # Create and attach a file to job_with_file
+        mock_file = SimpleUploadedFile(
+            "test_report.pdf", b"test content", content_type="application/pdf"
+        )
+        self.job_with_file.attached_file.save("test_report.pdf", mock_file)
+
+    def tearDown(self) -> None:
+        """Clean up test data."""
+        # Clean up any uploaded files
+        for job in Job.objects.all():
+            if job.attached_file:
+                job.attached_file.delete()
+
+        Job.objects.all().delete()
+
+    def test_job_file_requires_staff_permission(self) -> None:
+        """Test that the job_file view requires staff permission."""
+        # Test with regular user (should be forbidden)
+        self.client.login(username="regular", password="1X<ISRUkw+tuK")
+        url = reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_with_file.uuid})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_job_file_requires_authentication(self) -> None:
+        """Test that the job_file view requires authentication."""
+        # Test without login (should redirect to login)
+        url = reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_with_file.uuid})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+
+    def test_job_file_not_found(self) -> None:
+        """Test accessing a non-existent job."""
+        self.client.login(username="staff", password="1X<ISRUkw+tuK")
+        import uuid
+
+        non_existent_uuid = uuid.uuid4()
+        url = reverse("recordtransfer:job_file", kwargs={"job_uuid": non_existent_uuid})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_job_file_no_attached_file(self) -> None:
+        """Test accessing a job that has no attached file."""
+        self.client.login(username="staff", password="1X<ISRUkw+tuK")
+        url = reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_without_file.uuid})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    @patch("recordtransfer.views.media.settings.DEBUG", True)
+    def test_job_file_success_debug_mode(self) -> None:
+        """Test successful file access in DEBUG mode."""
+        self.client.login(username="staff", password="1X<ISRUkw+tuK")
+        url = reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_with_file.uuid})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirect to file URL in debug mode
+        # Check that the redirect URL contains the filename
+        self.assertIn("test_report.pdf", response["Location"])
+
+    @patch("recordtransfer.views.media.settings.DEBUG", False)
+    def test_job_file_success_production_mode(self) -> None:
+        """Test successful file access in production mode."""
+        self.client.login(username="staff", password="1X<ISRUkw+tuK")
+        url = reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_with_file.uuid})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("X-Accel-Redirect", response.headers)
+        self.assertTrue(response.headers["X-Accel-Redirect"].endswith("test_report.pdf"))
