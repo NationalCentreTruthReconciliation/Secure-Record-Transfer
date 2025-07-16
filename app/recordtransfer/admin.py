@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Callable, Optional, Union
+from typing import Callable, ClassVar, List, Optional, Union, Sequence
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
@@ -102,7 +102,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         - delete: Not allowed
     """
 
-    readonly_fields = []
+    readonly_fields: Sequence[Union[str, Callable]] = []
 
     def get_readonly_fields(self, request: HttpRequest, obj: object = None) -> tuple:
         """Return all fields as read-only for this model admin."""
