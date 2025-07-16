@@ -48,5 +48,5 @@ class Command(BaseCommand):
             self.stdout.write(f"Deleted: {file_path}")
 
         self.stdout.write(
-            self.style.SUCCESS(f"Deleted {len(jobs_with_files)} old job attachment file(s).")
+            self.style.SUCCESS(f"Deleted {len(jobs_with_old_files)} old job attachment file(s).")
         )
