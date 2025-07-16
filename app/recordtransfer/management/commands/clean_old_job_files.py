@@ -24,6 +24,9 @@ class Command(BaseCommand):
             required=True,
             help="Delete job attachment files for jobs whose end_time is older than this many days.",
         )
+        parser.add_argument(
+            "--no-confirm", action="store_true", help="Delete files without confirmation."
+        )
 
     def handle(self, *args, **options) -> None:
         """Delete job attachment files for jobs whose end_time is older than the specified number
@@ -41,6 +44,15 @@ class Command(BaseCommand):
         if not jobs_with_old_files:
             self.stdout.write("Did not find any old job attachment files to delete.")
             return
+
+        if not options.get("no_confirm", False):
+            self.stdout.write(
+                f"About to delete {len(jobs_with_old_files)} old job attachment file(s)."
+            )
+            confirm = input("Are you sure you want to continue? [y/n]: ").strip().lower()
+            if confirm != "y":
+                self.stdout.write("Aborted deletion.")
+                return
 
         for job in jobs_with_old_files:
             file_path = job.attached_file.path
