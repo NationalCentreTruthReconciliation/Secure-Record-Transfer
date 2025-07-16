@@ -421,6 +421,15 @@ class RecordDescriptionForm(SubmissionForm):
         label=gettext("Title"),
     )
 
+    language_of_material = forms.CharField(
+        required=True,
+        min_length=2,
+        max_length=100,
+        widget=forms.TextInput(attrs={"placeholder": gettext("English, French")}),
+        help_text=gettext("Enter all relevant languages here"),
+        label=gettext("Language(s)"),
+    )
+
     date_of_materials = forms.RegexField(
         regex=DATE_REGEX,
         min_length=10,
@@ -451,15 +460,6 @@ class RecordDescriptionForm(SubmissionForm):
         help_text=gettext(
             "Check this box if the date is approximate, or if you are unsure of the date."
         ),
-    )
-
-    language_of_material = forms.CharField(
-        required=True,
-        min_length=2,
-        max_length=100,
-        widget=forms.TextInput(attrs={"placeholder": gettext("English, French")}),
-        help_text=gettext("Enter all relevant languages here"),
-        label=gettext("Language(s)"),
     )
 
     preliminary_scope_and_content = forms.CharField(
