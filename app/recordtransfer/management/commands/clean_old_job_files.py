@@ -1,10 +1,6 @@
 import argparse
-from datetime import timedelta
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
-
-from recordtransfer.models import Job
 
 
 class Command(BaseCommand):
