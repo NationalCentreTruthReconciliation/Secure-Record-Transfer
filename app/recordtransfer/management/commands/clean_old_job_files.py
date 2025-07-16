@@ -28,6 +28,19 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
+        """Delete job attachment files for jobs whose end_time is older than the specified number of days.
+
+        Parameters
+        ----------
+        *args : tuple
+            Variable length argument list.
+        **options : dict
+            Command-line options, expects 'older_than_days' key.
+
+        Returns
+        -------
+        None
+        """
         days = options["older_than_days"]
         cutoff = timezone.now() - timedelta(days=days)
         jobs = Job.objects.filter(end_time__lt=cutoff, attached_file__isnull=False)
