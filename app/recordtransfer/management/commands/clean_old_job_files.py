@@ -4,6 +4,8 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from recordtransfer.models import Job
+
 
 class Command(BaseCommand):
     """Remove job attachment files older than a specified number of days
@@ -28,3 +30,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options) -> None:
         days = options["older_than_days"]
         cutoff = timezone.now() - timedelta(days=days)
+        jobs = Job.objects.filter(end_time__lt=cutoff, attached_file__isnull=False)
+        count = 0
+        for job in jobs:
+            if job.attached_file:
+                file_path = job.attached_file.path
+                job.attached_file.delete(save=True)
+                self.stdout.write(f"Deleted: {file_path}")
+                count += 1
+        self.stdout.write(self.style.SUCCESS(f"Deleted {count} old job attachment file(s)."))
