@@ -9,6 +9,7 @@ from clamav.scan import check_for_malware
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import (
+    Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseForbidden,
@@ -16,11 +17,12 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 
 from recordtransfer.decorators import validate_upload_access
-from recordtransfer.models import UploadSession, User
+from recordtransfer.models import Job, UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
 LOGGER = logging.getLogger(__name__)
@@ -49,6 +51,48 @@ def media_request(request: HttpRequest, path: str) -> HttpResponse:
     del response["Expires"]
 
     return response
+
+
+def serve_media_file(file_url: str) -> HttpResponse:
+    """Create a response that allows a client to download a media file.
+
+    In development, the development server serves media files directly, so a re-direct to the
+    file's URL is returned.
+
+    In production, NGINX is used, and it serves media files. The media URL is locked down with an
+    "internal" directive, and NGINX must receive an X-Accel-Redirect from the application to tell
+    it that it's OK to serve the file.
+
+    For more info, see:
+    `NGINX docs <https://nginx.org/en/docs/http/ngx_http_core_module.html#internal>`_
+
+    .. note::
+
+       This function does not do any permission checking. Make sure the client that is asking for a
+       file has the proper permission before calling this function.
+
+    Args:
+        file_url: The media URL to serve
+
+    Returns:
+        HttpResponse: Direct redirect in development (DEBUG) mode, X-Accel-Redirect in production
+    """
+    if settings.DEBUG:
+        return HttpResponseRedirect(file_url)
+    else:
+        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
+        # Remove headers that nginx will handle
+        for header in [
+            "Content-Type",
+            "Content-Disposition",
+            "Accept-Ranges",
+            "Set-Cookie",
+            "Cache-Control",
+            "Expires",
+        ]:
+            if header in response.headers:
+                del response[header]
+        return response
 
 
 @validate_upload_access
@@ -253,17 +297,26 @@ def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpRes
         )
 
     file_url = uploaded_file.get_file_media_url()
-    if settings.DEBUG:
-        return HttpResponseRedirect(file_url)
-    else:
-        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
-        for header in [
-            "Content-Type",
-            "Content-Disposition",
-            "Accept-Ranges",
-            "Set-Cookie",
-            "Cache-Control",
-            "Expires",
-        ]:
-            del response[header]
-        return response
+    return serve_media_file(file_url)
+
+
+def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
+    """View to access the attached file associated with a job.
+
+    Args:
+        request: The HTTP request
+        job_uuid: The UUID of the job
+
+    Returns:
+        HttpResponse: Redirects to the file's media path if the job has an associated file.
+    """
+    if not request.user.is_staff:
+        raise Http404("The requested resource could not be found")
+
+    job = get_object_or_404(Job, uuid=job_uuid)
+
+    if not job.has_file():
+        raise Http404("File not found for this job")
+
+    file_url = job.get_file_media_url()
+    return serve_media_file(file_url)
