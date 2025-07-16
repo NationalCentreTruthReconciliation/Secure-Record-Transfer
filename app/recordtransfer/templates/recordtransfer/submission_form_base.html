@@ -57,7 +57,7 @@
                     <button {% block submitbuttonattributes %}
                             id="form-next-button"
                             {% endblock submitbuttonattributes %}
-                            type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
+                            type="submit"
                             class="btn btn-primary margin-right-30px">
                         {% if wizard.steps.step1 == wizard.steps.count %}
                             {% trans "Submit" %}
