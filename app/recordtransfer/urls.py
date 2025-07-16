@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.urls import path, re_path
 
@@ -70,6 +71,11 @@ urlpatterns = [
         "user/<int:user_id>/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
+    ),
+    path(
+        "job/<uuid:job_uuid>/file/",
+        login_required(views.media.job_file),
+        name="job_file",
     ),
     path(
         "submission-group-table/",
