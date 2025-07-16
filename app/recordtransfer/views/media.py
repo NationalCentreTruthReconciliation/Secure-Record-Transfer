@@ -300,7 +300,7 @@ def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
 
     job = get_object_or_404(Job, uuid=job_uuid)
 
-    if not job.attached_file:
+    if not job.has_file():
         raise Http404("File not found for this job")
 
     file_url = job.get_file_media_url()
