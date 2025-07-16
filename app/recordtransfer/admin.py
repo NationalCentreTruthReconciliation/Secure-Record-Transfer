@@ -1,18 +1,16 @@
 """Custom administration code for the admin site."""
 
 import logging
-from pathlib import Path
 from typing import Callable, Optional, Union
 
 from caais.export import ExportVersion
-from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -84,7 +82,7 @@ def format_upload_size(obj: BaseUploadedFile) -> str:
 
 
 @display(description=gettext("File Link"))
-def file_url(obj: BaseUploadedFile) -> SafeText:
+def uploaded_file_url(obj: BaseUploadedFile) -> SafeText:
     """Return the URL to access the file, or a message if the file was removed."""
     if not obj.file_upload or not obj.exists:
         return mark_safe(gettext("File was removed"))
@@ -151,7 +149,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields = ["id", "name", format_upload_size, "exists", linkify("session"), file_url]
+    fields = ["id", "name", format_upload_size, "exists", linkify("session"), uploaded_file_url]
 
     search_fields = [
         "name",
@@ -180,8 +178,8 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields = [file_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", file_url, format_upload_size]
+    fields = [uploaded_file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", uploaded_file_url, format_upload_size]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
@@ -195,8 +193,8 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields = [file_url, format_upload_size, "exists"]
-    readonly_fields = ["exists", file_url, format_upload_size]
+    fields = [uploaded_file_url, format_upload_size, "exists"]
+    readonly_fields = ["exists", uploaded_file_url, format_upload_size]
 
 
 @admin.register(UploadSession)
@@ -522,9 +520,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(ReadOnlyAdmin):
-    """Admin for the Job model. Adds a view to download the file associated
-    with the job, if there is a file. The file download view can be accessed at
-    code:`job/<id>/download/`.
+    """Admin for the Job model.
 
     Permissions:
         - add: Not allowed
@@ -532,7 +528,17 @@ class JobAdmin(ReadOnlyAdmin):
         - delete: Only if current user created job
     """
 
-    change_form_template = "admin/job_change_form.html"
+    fields = [
+        "uuid",
+        "name",
+        "description",
+        "start_time",
+        "end_time",
+        "user_triggered",
+        "job_status",
+        "file_url",
+        "message_log",
+    ]
 
     list_display = [
         "name",
@@ -552,61 +558,21 @@ class JobAdmin(ReadOnlyAdmin):
 
     ordering = ["-start_time"]
 
+    @display(description=gettext("File Link"))
+    def file_url(self, obj: Job) -> SafeText:
+        """Return the URL to access the file, or a message if there is no file associated with the
+        job.
+        """
+        if not obj.has_file():
+            return mark_safe(gettext("No file attached"))
+        return format_html(
+            '<a target="_blank" href="{}">{}</a>',
+            reverse("recordtransfer:job_file", args=[obj.uuid]),
+            obj.attached_file.name,
+        )
+
     def has_delete_permission(self, request, obj=None):
         return obj and (request.user == obj.user_triggered or request.user.is_superuser)
-
-    def get_urls(self):
-        """Add download/ view to admin"""
-        urls = super().get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        report_url = [
-            path(
-                "<path:object_id>/download/",
-                self.admin_site.admin_view(self.download_file),
-                name="%s_%s_download" % info,
-            ),
-        ]
-        return report_url + urls
-
-    def download_file(self, request, object_id):
-        """Download an application/x-zip-compressed file for the job, if the
-        file and the job exist
-
-        Args:
-            request: The originating request
-            object_id: The ID for the job
-        """
-        job = Job.objects.filter(id=object_id).first()
-        if job and job.attached_file:
-            file_path = Path(settings.MEDIA_ROOT) / job.attached_file.name
-            file_handle = open(file_path, "rb")
-            response = HttpResponse(file_handle, content_type="application/x-zip-compressed")
-            response["Content-Disposition"] = f'attachment; filename="{file_path.name}"'
-            return response
-        if job:
-            msg = gettext("Could not find a file attached to the Job with ID “%(key)s”") % {
-                "key": object_id
-            }
-            self.message_user(request, msg, messages.WARNING)
-            return HttpResponseRedirect("../")
-        # Error response
-        msg = gettext("Job with ID “%(key)s” doesn’t exist. Perhaps it was deleted?") % {
-            "key": object_id,
-        }
-        self.message_user(request, msg, messages.WARNING)
-        url = reverse("admin:index", current_app=self.admin_site.name)
-        return HttpResponseRedirect(url)
-
-    def get_fields(self, request, obj=None):
-        """Hide the attached file field, the user is not allowed to interact
-        directly with it. If a user wants this file, they should use the
-        download/ view.
-        """
-        fields = list(super().get_fields(request, obj))
-        exclude_set = set()
-        if obj:
-            exclude_set.add("attached_file")
-        return [f for f in fields if f not in exclude_set]
 
 
 @admin.register(User)

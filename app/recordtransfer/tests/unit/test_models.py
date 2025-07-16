@@ -22,6 +22,7 @@ from django.utils import timezone
 from recordtransfer.enums import SiteSettingType, SubmissionStep
 from recordtransfer.models import (
     InProgressSubmission,
+    Job,
     PermUploadedFile,
     SiteSetting,
     Submission,
@@ -1599,7 +1600,9 @@ class TestSiteSetting(TestCase):
         mock_key.name = "TEST_STRING_SETTING"
 
         # Mock the database query
-        with patch.object(SiteSetting.objects, "get", return_value=self.string_setting) as mock_get:
+        with patch.object(
+            SiteSetting.objects, "get", return_value=self.string_setting
+        ) as mock_get:
             result = SiteSetting.get_value_str(mock_key)
             self.assertEqual(result, "test string value")
             # Verify database was queried exactly once
@@ -1785,3 +1788,71 @@ class TestUser(TestCase):
         # Should be True with other_province_or_state filled
         self.user.other_province_or_state = "Custom Province"
         self.assertTrue(self.user.has_contact_info)
+
+
+class TestJob(TestCase):
+    """Tests for the Job model."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            password="testpassword123",
+        )
+
+        self.job = Job.objects.create(
+            name="Test Job",
+            description="A test job for unit testing",
+            start_time=timezone.now(),
+            user_triggered=self.user,
+            job_status=Job.JobStatus.NOT_STARTED,
+        )
+
+    def tearDown(self) -> None:
+        """Clean up test data."""
+        # Clean up any uploaded files
+        if self.job.attached_file:
+            self.job.attached_file.delete()
+
+        Job.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_has_file_without_attached_file(self) -> None:
+        """Test has_file method when no file is attached."""
+        self.assertFalse(self.job.has_file())
+
+    def test_has_file_with_attached_file(self) -> None:
+        """Test has_file method when a file is attached."""
+        # Create a mock file
+        mock_file = SimpleUploadedFile("test.txt", b"test content", content_type="text/plain")
+
+        self.job.attached_file.save("test.txt", mock_file)
+
+        self.assertTrue(self.job.has_file())
+
+    def test_get_file_media_url_with_file(self) -> None:
+        """Test get_file_media_url method when a file is attached."""
+        mock_file = SimpleUploadedFile("test.txt", b"test content", content_type="text/plain")
+
+        self.job.attached_file.save("test.txt", mock_file)
+
+        # The method should return the URL of the attached file
+        url = self.job.get_file_media_url()
+        self.assertIsInstance(url, str)
+        self.assertTrue(url.endswith("test.txt"))
+
+    def test_get_file_media_url_without_file(self) -> None:
+        """Test get_file_media_url method when no file is attached."""
+        with self.assertRaises(FileNotFoundError) as context:
+            self.job.get_file_media_url()
+
+        expected_message = f"{self.job.name} does not exist in job {self.job.uuid}"
+        self.assertEqual(str(context.exception), expected_message)
+
+    def test_str_representation(self) -> None:
+        """Test the string representation of the Job model."""
+        expected_str = f"{self.job.name} (Created by {self.job.user_triggered})"
+        self.assertEqual(str(self.job), expected_str)
