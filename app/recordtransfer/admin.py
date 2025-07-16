@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, Sequence
 
 from caais.export import ExportVersion
 from django.conf import settings
@@ -63,8 +63,7 @@ def linkify(field_name: str) -> Callable:
         except AttributeError:
             return "-"
 
-    _linkify.short_description = field_name.replace("_", " ")  # Sets column name
-    return _linkify
+    return admin.display(description=field_name.replace("_", " "))(_linkify)
 
 
 @receiver(pre_delete, sender=Job)
@@ -102,12 +101,28 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
     readonly_fields = []
 
-    def get_readonly_fields(self, request, obj=None):
-        return (
-            list(self.readonly_fields)
-            + [field.name for field in obj._meta.fields]
-            + [field.name for field in obj._meta.many_to_many]
-        )
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[object] = None) -> list[str]:
+        """Return a list of all readonly field names for the given object.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The current request object.
+        obj : Optional[object]
+            The model instance being viewed or changed.
+
+        Returns
+        -------
+        list[str]
+            A list of readonly field names.
+        """
+        readonly = list(self.readonly_fields)
+        from django.db import models
+
+        if obj is not None and isinstance(obj, models.Model):
+            readonly += [field.name for field in obj._meta.fields]
+            readonly += [field.name for field in obj._meta.many_to_many]
+        return [field for field in readonly if isinstance(field, str)]
 
     def has_add_permission(self, request):
         return False
