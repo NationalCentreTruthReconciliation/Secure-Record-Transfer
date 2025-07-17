@@ -38,6 +38,8 @@ def get_section_title(step: SubmissionStep) -> str:
 class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     """End-to-end tests for the submission form wizard."""
 
+    serialized_rollback = True
+
     test_data: ClassVar[dict] = {
         SubmissionStep.CONTACT_INFO: {
             "section_title": get_section_title(SubmissionStep.CONTACT_INFO),
@@ -93,49 +95,9 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     }
 
     def setUp(self) -> None:
-        """Set up the test case environment."""
+        """Set up test data."""
         super().setUp()
         self.user = User.objects.create_user(username="testuser", password="testpassword")
-
-        ### This section restores the database to the state after migrations ###
-
-        # Create rights types
-        for name, description in (
-            ("Other", "A type of rights not listed elsewhere"),
-            ("Unknown", "Use when it is not known what type of rights pertain to the material"),
-            ("Cultural Rights", "Accss to material is limited according to cultural protocols"),
-            ("Statute", "Access to material is limited according to law or legislation"),
-            ("License", "Access to material is limited by a licensing agreement"),
-            (
-                "Access",
-                "Access to material is restricted to a certain entity or group of entities",
-            ),
-            (
-                "Copyright",
-                "Access to material is based on fair dealing OR material is in the public domain",
-            ),
-        ):
-            rights_type, created = RightsType.objects.get_or_create(
-                name=name,
-                description=description,
-            )
-            if created:
-                rights_type.save()
-
-        # Create Source Information types
-        other_type, created = SourceType.objects.get_or_create(
-            name="Other",
-            description="Placeholder right to allow user to specify unique source type",
-        )
-        if created:
-            other_type.save()
-
-        other_role, created = SourceRole.objects.get_or_create(
-            name="Other",
-            description="Placeholder right to allow user to specify unique source role",
-        )
-        if created:
-            other_role.save()
 
     def go_next_step(self) -> None:
         """Go to the next step in the form."""
@@ -606,9 +568,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         # Wait for redirect to submission sent page
         WebDriverWait(driver, 10).until(
-            EC.url_to_be(
-                urljoin(self.live_server_url, reverse("recordtransfer:submission_sent"))
-            )
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:submission_sent")))
         )
 
         # Verify the submission success message is displayed
