@@ -1,11 +1,9 @@
 {% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
-
 {% block buttonarrayclass %}
     flex-item
 {% endblock buttonarrayclass %}
-
 {% block formfields %}
     {% for field in wizard.form %}
         {% include "includes/submission_form_field.html" %}
@@ -16,8 +14,13 @@
                         hx-swap="innerHTML"
                         hx-select="#modal-content"
                         id="id_new_submission_group_button"
-                        class="btn btn-outline btn-white border-primary btn-sm gap-2 transition-transform duration-150 hover:scale-105" >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-primary">
+                        class="btn btn-outline btn-white border-primary btn-sm gap-2 transition-transform duration-150 hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke-width="1.5"
+                         stroke="currentColor"
+                         class="w-4 h-4 text-primary">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                     <span class="hidden text-primary md:inline">{% trans "New submission group" %}</span>
@@ -25,27 +28,23 @@
             </div>
         {% endif %}
     {% endfor %}
-
     {# Group Description Display #}
     <div class="form-group mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-            {% trans "Group Description" %}
-        </label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Group Description" %}</label>
         <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
             <p id="{{ ID_DISPLAY_GROUP_DESCRIPTION }}" class="text-sm text-gray-600">
                 {% trans "Describe the group and its purpose." %}
             </p>
         </div>
     </div>
-
     {# Help Link #}
     <div class="form-group mb-6">
         <div class="alert">
-            <i class="fas fa-info-circle pointer-events-none"></i>
+            <i class="fas fa-exclamation-triangle pointer-events-none"></i>
             <span class="text-sm">
-                <a class="link link-primary font-semibold" href="{% url 'recordtransfer:help' %}#why-create-groups" target="_blank">
-                    {% trans "Why would I want to make a group?" %}
-                </a>
+                <a class="link link-primary font-semibold"
+                   href="{% url 'recordtransfer:help' %}#why-create-groups"
+                   target="_blank">{% trans "Why would I want to make a group?" %}</a>
             </span>
         </div>
     </div>
