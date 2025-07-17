@@ -337,7 +337,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         - delete: Only by superusers
     """
 
-    list_display: Sequence[str | Callable] = [
+    list_display: Sequence[Union[str, Callable]] = [
         "name",
         linkify("created_by"),
         "number_of_submissions_in_group",
@@ -430,13 +430,13 @@ class SubmissionGroupInline(ReadOnlyInline):
     """
 
     model = SubmissionGroup
-    fields: Sequence[str | Sequence[str]] = [
+    fields: Sequence[Union[str, Sequence[str]]] = [
         "name",
         "description",
         "number_of_submissions_in_group",
     ]
     # Tells Django this is a computed field
-    readonly_fields: Sequence[str | Callable[..., Any]] = ["number_of_submissions_in_group"]
+    readonly_fields: Sequence[Union[str, Callable[..., Any]]] = ["number_of_submissions_in_group"]
 
 
 @admin.register(Submission)
@@ -818,9 +818,9 @@ class SiteSettingAdmin(admin.ModelAdmin):
         - delete: Only by superusers
     """
 
-    list_display: Sequence[str | Callable] = ["key", "value_type", "value", "change_date"]
+    list_display: Sequence[Union[str, Callable]] = ["key", "value_type", "value", "change_date"]
     search_fields: Sequence[str] = ["key", "value"]
-    readonly_fields: Sequence[str | Callable] = ["key", "value_type", "change_date", "changed_by"]
+    readonly_fields: Sequence[Union[str, Callable]] = ["key", "value_type", "change_date", "changed_by"]
 
     form = SiteSettingModelForm
 
