@@ -10,7 +10,7 @@ from django.contrib.admin import display
 from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
-from django.db.models import QuerySet
+from django.db.models import Model, QuerySet
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ModelForm
@@ -66,8 +66,7 @@ def linkify(field_name: str) -> Callable:
         except AttributeError:
             return "-"
 
-    _linkify.short_description = field_name.replace("_", " ")  # Sets column name
-    return _linkify
+    return admin.display(description=field_name.replace("_", " "))(_linkify)
 
 
 @receiver(pre_delete, sender=Job)
@@ -107,10 +106,11 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request: HttpRequest, obj: object = None) -> tuple:
         """Return all fields as read-only for this model admin."""
+        meta = obj._meta if isinstance(obj, Model) else self.model._meta
         return (
             tuple(self.readonly_fields)
-            + tuple(field.name for field in obj._meta.fields)
-            + tuple(field.name for field in obj._meta.many_to_many)
+            + tuple(field.name for field in meta.fields)
+            + tuple(field.name for field in meta.many_to_many)
         )
 
     def has_add_permission(self, request: HttpRequest) -> bool:
