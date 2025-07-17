@@ -408,8 +408,8 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model) -
         if field.is_relation:
             if not issubclass(field.related_model, AbstractTerm):
                 raise ValueError(
-                    f"Could not handle related model {repr(field.related_model)}! "
-                    f"Can only handle {repr(AbstractTerm)}"
+                    f"Could not handle related model {field.related_model!r}! "
+                    f"Can only handle {AbstractTerm!r}"
                 )
 
             term = term_or_default(
@@ -536,7 +536,7 @@ def coalesce_other_term_field(
         except TermClass.DoesNotExist:
             if isinstance(notes, list):
                 notes.append(
-                    gettext(f"{TermClass._meta.verbose_name} was noted as {repr(other_term)}")
+                    gettext(f"{TermClass._meta.verbose_name} was noted as {other_term!r}")
                 )
 
     return term
