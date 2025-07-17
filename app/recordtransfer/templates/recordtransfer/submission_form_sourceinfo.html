@@ -7,16 +7,16 @@
 {% block formfields %}
     {% for field in wizard.form %}
         {% if field.label != 'hidden' %}
-        <div class="flex-item {% if field.name != 'enter_manual_source_info' %}initially-hidden hidden{% endif %}">
-            {% include "includes/submission_form_field.html" %}
-            {# Help tooltip #}
-            {% if field.help_text %}
-                <div tooltip-content="{{ field.help_text }}"
-                    class="help-tooltip help-icon mt-6">
-                    <i class="fa fa-info-circle" aria-hidden="true"></i>
-                </div>
-            {% endif %}
-        </div>
+            <div class="flex-item {% if field.name != 'enter_manual_source_info' %}initially-hidden hidden{% endif %}">
+                {% include "includes/submission_form_field.html" %}
+                {# Help tooltip #}
+                {% if field.help_text %}
+                    <div tooltip-content="{{ field.help_text }}"
+                         class="help-tooltip help-icon mt-6">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                    </div>
+                {% endif %}
+            </div>
         {% else %}
             {# Render hidden field #}
             {{ field }}
@@ -28,7 +28,7 @@
                     <i class="fas fa-info-circle pointer-events-none"></i>
                     <div class="text-sm">
                         {% blocktrans %}
-                        <a class="link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-types">Click here</a>
+                        <a class="non-nav-link link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-types">Click here</a>
                         for an explanation of the different types of source types.
                         {% endblocktrans %}
                     </div>
@@ -40,7 +40,7 @@
                     <i class="fas fa-info-circle pointer-events-none"></i>
                     <div class="text-sm">
                         {% blocktrans %}
-                        <a class="link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
+                        <a class="non-nav-link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
                         {% endblocktrans %}
                     </div>
