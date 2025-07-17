@@ -190,26 +190,19 @@ export async function setupUppy(context) {
     }
 
 
-    // Disable review button when uploads start or are in progress
-    uppy.on("upload", disableReviewButton);
-    uppy.on("upload-progress", disableReviewButton);
-
-
-
-    // Enable review button when all uploads are complete
-    uppy.on("complete", () => {
-        if (reviewButton) {
-            reviewButton.disabled = false;
-        }
-    });
 
     /**
-     * Disables the review button to prevent form submission during uploads.
+     * Enables or disables the review button.
+     * @param {boolean} disable - Whether the review button should be disabled
      */
-    function disableReviewButton() {
+    function setReviewButtonDisabled(disable) {
         if (reviewButton) {
-            reviewButton.disabled = true;
+            reviewButton.disabled = disable;
         }
     }
+
+    uppy.on("upload", () => setReviewButtonDisabled(true));
+    uppy.on("upload-progress", () => setReviewButtonDisabled(true));
+    uppy.on("complete", () => setReviewButtonDisabled(false));
 
 }
