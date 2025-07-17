@@ -197,7 +197,12 @@ class TempUploadedFileInline(ReadOnlyInline):
     """
 
     model = TempUploadedFile
-    fields: Sequence[Union[str, Sequence[str]]] = [uploaded_file_url, format_upload_size, "exists"]
+
+    fields: Sequence[Union[str, Sequence[str]]] = [
+        uploaded_file_url,
+        format_upload_size,
+        "exists",
+    ]
     readonly_fields: Sequence[Union[str, Callable]] = [
         "exists",
         uploaded_file_url,
@@ -216,7 +221,13 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields: Sequence[Union[str, Sequence[str]]] = [uploaded_file_url, format_upload_size, "exists"]
+    from typing import ClassVar
+
+    fields: Sequence[Union[str, Sequence[str]]] = [
+        uploaded_file_url,
+        format_upload_size,
+        "exists",
+    ]
     readonly_fields: Sequence[Union[str, Callable]] = [
         "exists",
         uploaded_file_url,
@@ -233,8 +244,6 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - change: Not allowed
         - delete: Not allowed
     """
-
-    from typing import ClassVar
 
     fields: Sequence[Union[str, Sequence[str]]] = [
         "token",
