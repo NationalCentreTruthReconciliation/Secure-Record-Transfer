@@ -205,7 +205,7 @@ def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
         region = form_data.get("province_or_state", "")
 
     postal_or_zip_code = form_data.get("postal_or_zip_code", "")
-    country = form_data.get("country", None)
+    country = form_data.get("country")
 
     source_confidentiality = term_or_default(
         form_data, "source_confidentiality", SourceConfidentiality
@@ -255,7 +255,7 @@ def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
     )
 
 
-def add_rights(form_data: dict, metadata: Metadata):
+def add_rights(form_data: dict, metadata: Metadata) -> None:
     """Populate metadata with Rights objects.
 
     No related CAAIS defaults.
@@ -308,7 +308,7 @@ def add_rights(form_data: dict, metadata: Metadata):
             LOGGER.warning("Duplicate rights were ignored: %s", repr(id_tuple))
 
 
-def add_submission_event(metadata: Metadata):
+def add_submission_event(metadata: Metadata) -> None:
     """Populate metadata with a new Submission-type Event object.
 
     Related CAAIS defaults:
@@ -345,7 +345,7 @@ def add_submission_event(metadata: Metadata):
     )
 
 
-def add_date_of_creation(metadata: Metadata):
+def add_date_of_creation(metadata: Metadata) -> None:
     """Populate metadata with a new Creation-type DateOfCreationOrRevision object.
 
     Related CAAIS defaults:
@@ -386,7 +386,7 @@ def add_date_of_creation(metadata: Metadata):
 #
 
 
-def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model):
+def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model) -> None:
     """Add up to one related model to the metadata object by mapping the
     model's fields to the form's fields. For every field on the model that is
     not named "metadata" or "id," a field with the same name is searched in the
@@ -511,7 +511,7 @@ def coalesce_other_term_field(
     - term is the Other Term, and other_term is filled
     - term is not the Other Term
     """
-    term = form_data.get(field_name, None)
+    term = form_data.get(field_name)
     other_term = form_data.get(f"other_{field_name}", "")
 
     if not term and not other_term:
