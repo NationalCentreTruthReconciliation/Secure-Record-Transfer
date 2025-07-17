@@ -2,11 +2,12 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Callable, Optional, Sequence, Union
+from typing import Any, Callable, Optional, Sequence, Type, Union
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
 from django.contrib.admin import display
+from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import QuerySet
@@ -324,7 +325,7 @@ class SubmissionInline(ReadOnlyInline):
 
     model = Submission
 
-    fields = ["uuid", "metadata"]
+    fields: Sequence[Union[str, Sequence[str]]] = ["uuid", "metadata"]
 
     ordering: Optional[Sequence[str]] = ["-submission_date"]
 
@@ -351,7 +352,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "number_of_submissions_in_group",
     ]
 
-    inlines = [SubmissionInline]
+    inlines: Sequence[Type[InlineModelAdmin]] = [SubmissionInline]
 
     search_fields: Sequence[str] = [
         "name",
@@ -710,7 +711,7 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    inlines = [
+    inlines: Sequence[Type[InlineModelAdmin]] = [
         SubmissionInline,
         SubmissionGroupInline,
     ]
