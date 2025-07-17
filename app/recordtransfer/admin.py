@@ -8,9 +8,10 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
+from django.db.models import QuerySet
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
@@ -331,30 +332,50 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
     def has_delete_permission(self, request, obj=None):
         return obj and request.user.is_superuser
 
+    def _export_submissions_csv(
+        self, request: HttpRequest, queryset: QuerySet[SubmissionGroup], version: ExportVersion
+    ) -> Optional[HttpResponse]:
+        """Export submissions from selected groups with validation.
+
+        Args:
+            request: The HTTP request object
+            queryset: QuerySet of selected SubmissionGroup objects
+            version: The export version to use
+
+        Returns:
+            HttpResponse with CSV file or None if no submissions found
+        """
+        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
+        if not related_submissions.exists():
+            self.message_user(
+                request,
+                gettext(
+                    "The selected submission group(s) do not contain any submissions to export."
+                ),
+                messages.WARNING,
+            )
+            return
+        return related_submissions.export_csv(version=version)
+
     @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
     def export_caais_csv(self, request, queryset):
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
+        return self._export_submissions_csv(request, queryset, ExportVersion.CAAIS_1_0)
 
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
     def export_atom_2_6_csv(self, request, queryset):
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_6)
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
     def export_atom_2_3_csv(self, request, queryset):
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_3)
 
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
     def export_atom_2_2_csv(self, request, queryset):
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_2)
 
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
     def export_atom_2_1_csv(self, request, queryset):
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_1)
 
 
 class SubmissionGroupInline(ReadOnlyInline):
