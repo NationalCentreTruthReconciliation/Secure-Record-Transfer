@@ -156,24 +156,6 @@ export async function setupUppy(context) {
         submissionForm.submit();
     });
 
-    // Disable review button when uploads start or are in progress
-    uppy.on("upload", () => {
-        if (reviewButton) {
-            reviewButton.disabled = true;
-        }
-    });
-    uppy.on("upload-progress", () => {
-        if (reviewButton) {
-            reviewButton.disabled = true;
-        }
-    });
-    // Enable review button when all uploads are complete
-    uppy.on("complete", () => {
-        if (reviewButton) {
-            reviewButton.disabled = false;
-        }
-    });
-
     // Set the endpoint for file upload dynamically, based on the current upload session token
     uppy.addPreProcessor(async () => {
         let sessionToken = getSessionToken();
@@ -206,4 +188,28 @@ export async function setupUppy(context) {
 
         });
     }
+
+
+    // Disable review button when uploads start or are in progress
+    uppy.on("upload", disableReviewButton);
+    uppy.on("upload-progress", disableReviewButton);
+
+
+
+    // Enable review button when all uploads are complete
+    uppy.on("complete", () => {
+        if (reviewButton) {
+            reviewButton.disabled = false;
+        }
+    });
+
+    /**
+     * Disables the review button to prevent form submission during uploads.
+     */
+    function disableReviewButton() {
+        if (reviewButton) {
+            reviewButton.disabled = true;
+        }
+    }
+
 }
