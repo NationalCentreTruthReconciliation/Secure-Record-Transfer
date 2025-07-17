@@ -356,10 +356,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
 
     from typing import Callable
 
-    actions: (
-        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
-        | None
-    ) = [
+    actions: Optional[Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]] = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
@@ -453,10 +450,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     form = SubmissionModelForm
 
-    actions: (
-        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
-        | None
-    ) = [
+    actions: Optional[Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]] = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
