@@ -6,7 +6,34 @@ To set default values, refer to :ref:`Data Formatting and Defaults`.
 import logging
 from typing import Optional, Type
 
-from caais.models import *
+from caais.models import (
+    AbstractTerm,
+    AcquisitionMethod,
+    Appraisal,
+    ArchivalUnit,
+    AssociatedDocumentation,
+    CreationOrRevisionType,
+    DateOfCreationOrRevision,
+    DispositionAuthority,
+    Event,
+    EventType,
+    ExtentStatement,
+    GeneralNote,
+    Identifier,
+    LanguageOfMaterial,
+    Metadata,
+    PreliminaryCustodialHistory,
+    PreliminaryScopeAndContent,
+    PreservationRequirements,
+    Rights,
+    RightsType,
+    SourceConfidentiality,
+    SourceOfMaterial,
+    SourceRole,
+    SourceType,
+    Status,
+    StorageLocation,
+)
 from django.db.models import Model
 from django.utils.translation import gettext
 
@@ -136,7 +163,7 @@ def add_identifiers(form_data: dict, metadata: Metadata) -> None:
 
 
 def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
-    """Populate metadata with :py:class:`SourceOfMaterial` objects
+    """Populate metadata with :py:class:`SourceOfMaterial` objects.
 
     Related CAAIS defaults:
 
@@ -229,7 +256,7 @@ def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
 
 
 def add_rights(form_data: dict, metadata: Metadata):
-    """Populate metadata with Rights objects
+    """Populate metadata with Rights objects.
 
     No related CAAIS defaults.
 
@@ -282,7 +309,7 @@ def add_rights(form_data: dict, metadata: Metadata):
 
 
 def add_submission_event(metadata: Metadata):
-    """Populate metadata with a new Submission-type Event object
+    """Populate metadata with a new Submission-type Event object.
 
     Related CAAIS defaults:
 
@@ -319,7 +346,7 @@ def add_submission_event(metadata: Metadata):
 
 
 def add_date_of_creation(metadata: Metadata):
-    """Populate metadata with a new Creation-type DateOfCreationOrRevision object
+    """Populate metadata with a new Creation-type DateOfCreationOrRevision object.
 
     Related CAAIS defaults:
 
