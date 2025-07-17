@@ -386,7 +386,7 @@ def add_date_of_creation(metadata: Metadata) -> None:
 #
 
 
-def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model) -> None:
+def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: type[Model]) -> None:
     """Add up to one related model to the metadata object by mapping the
     model's fields to the form's fields. For every field on the model that is
     not named "metadata" or "id," a field with the same name is searched in the
@@ -406,7 +406,7 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model) -
     for field in filter(lambda f: f.name not in ("id", "metadata"), CaaisModel._meta.get_fields()):
         # Populate terms
         if field.is_relation:
-            if not issubclass(field.related_model, AbstractTerm):
+            if field.related_model is None or not issubclass(field.related_model, AbstractTerm):
                 raise ValueError(
                     f"Could not handle related model {field.related_model!r}! "
                     f"Can only handle {AbstractTerm!r}"
@@ -517,7 +517,7 @@ def coalesce_other_term_field(
     if not term and not other_term:
         return None
 
-    if term.name.lower().strip() != "other" and other_term:
+    if term is not None and term.name.lower().strip() != "other" and other_term:
         LOGGER.warning(
             ("Both %s (%s) and other_%s (%s) were specified. Ignoring the latter"),
             field_name,
