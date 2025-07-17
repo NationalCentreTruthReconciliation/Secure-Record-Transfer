@@ -356,7 +356,9 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
 
     from typing import Callable
 
-    actions: Optional[Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]] = [
+    actions: Optional[
+        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
+    ] = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
@@ -450,7 +452,9 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     form = SubmissionModelForm
 
-    actions: Optional[Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]] = [
+    actions: Optional[
+        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
+    ] = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
@@ -613,7 +617,7 @@ class JobAdmin(ReadOnlyAdmin):
         - delete: Only if current user created job
     """
 
-    fields: Sequence[str | Sequence[str]] = [
+    fields: Sequence[Union[str, Sequence[str]]] = [
         "uuid",
         "name",
         "description",
@@ -625,7 +629,7 @@ class JobAdmin(ReadOnlyAdmin):
         "message_log",
     ]
 
-    list_display: Sequence[str | Callable] = [
+    list_display: Sequence[Union[str, Callable]] = [
         "name",
         "start_time",
         "user_triggered",
@@ -814,7 +818,12 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
     list_display: Sequence[Union[str, Callable]] = ["key", "value_type", "value", "change_date"]
     search_fields: Sequence[str] = ["key", "value"]
-    readonly_fields: Sequence[Union[str, Callable]] = ["key", "value_type", "change_date", "changed_by"]
+    readonly_fields: Sequence[Union[str, Callable]] = [
+        "key",
+        "value_type",
+        "change_date",
+        "changed_by",
+    ]
 
     form = SiteSettingModelForm
 
