@@ -189,8 +189,6 @@ export async function setupUppy(context) {
         });
     }
 
-
-
     /**
      * Enables or disables the review button.
      * @param {boolean} disable - Whether the review button should be disabled
