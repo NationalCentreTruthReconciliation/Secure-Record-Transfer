@@ -261,7 +261,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "expires_at",
     ]
 
-    ordering: Sequence[str] | None = [
+    ordering: Optional[Sequence[str]] = [
         "-started_at",
     ]
 
