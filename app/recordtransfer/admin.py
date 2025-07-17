@@ -345,7 +345,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "number_of_submissions_in_group",
     ]
 
-    inlines: Sequence[type[InlineModelAdmin[Any]]] = [SubmissionInline]
+    inlines = [SubmissionInline]
 
     search_fields: Sequence[str] = [
         "name",
