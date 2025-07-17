@@ -705,7 +705,7 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    inlines: Sequence[type[InlineModelAdmin[Any]]] = [
+    inlines = [
         SubmissionInline,
         SubmissionGroupInline,
     ]
