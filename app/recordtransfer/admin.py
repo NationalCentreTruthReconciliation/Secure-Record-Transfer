@@ -222,8 +222,6 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    from typing import ClassVar
-
     fields: Sequence[Union[str, Sequence[str]]] = [
         uploaded_file_url,
         format_upload_size,
