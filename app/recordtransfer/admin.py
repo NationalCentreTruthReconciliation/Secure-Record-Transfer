@@ -272,7 +272,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "-started_at",
     ]
 
-    def get_inlines(self, request: HttpRequest, obj: object = None) -> list:
+    def get_inlines(self, request: HttpRequest, obj: Optional[UploadSession] = None) -> list:
         """Return the inlines to display for the UploadSession."""
         if obj is None:
             return []
@@ -397,15 +397,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
     def export_atom_2_3_csv(
         self, request: HttpRequest, queryset: QuerySet
     ) -> HttpResponseRedirect:
-        """Export AtoM 2.3 Accession CSV for submissions in the selected queryset.
-
-        Args:
-            request: The originating request.
-            queryset: The selected SubmissionGroup queryset.
-
-        Returns:
-            HttpResponseRedirect: Redirects to the CSV export.
-        """
+        """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
         return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
 
@@ -476,7 +468,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         "user__email",
     ]
 
-    list_display: Sequence[Union[str, Callable]] = [
+    list_display: Sequence[Union[str, Callable[..., Any]]] = [
         "submission_date",
         "uuid",
         "file_count",
@@ -540,7 +532,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         submission = Submission.objects.filter(id=object_id).first()
 
         if submission and submission.upload_session:
-            create_downloadable_bag.delay(submission, request.user)
+            create_downloadable_bag.delay(submission, User.objects.get(pk=request.user.pk))
 
             self.message_user(
                 request,
@@ -670,7 +662,10 @@ class JobAdmin(ReadOnlyAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this model admin."""
-        return bool(obj and (request.user == obj.user_triggered or request.user.is_superuser))
+        return bool(
+            obj
+            and (request.user == getattr(obj, "user_triggered", None) or request.user.is_superuser)
+        )
 
 
 @admin.register(User)
@@ -742,7 +737,7 @@ class CustomUserAdmin(UserAdmin):
             "other_province_or_state_value": OtherValues.PROVINCE_OR_STATE,
         }
 
-        return super().changeform_view(request, object_id, form_url, extra_context)
+        return super().changeform_view(request, object_id, form_url or "", extra_context)
 
     @sensitive_post_parameters_m
     def user_change_password(
@@ -752,7 +747,7 @@ class CustomUserAdmin(UserAdmin):
         response = super().user_change_password(request, id, form_url)
         user = self.get_object(request, unquote(id))
         form = self.change_password_form(user, request.POST)
-        if form.is_valid() and request.method == "POST":
+        if form.is_valid() and request.method == "POST" and user is not None:
             context = {
                 "subject": gettext("Password updated"),
                 "changed_item": gettext("password"),
@@ -761,7 +756,7 @@ class CustomUserAdmin(UserAdmin):
             send_user_account_updated.delay(user, context)
         return response
 
-    def save_model(self, request: HttpRequest, obj: object, form: ModelForm, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: User, form: ModelForm, change: bool) -> None:
         """Enforce superuser permissions checks and send notification emails
         for other account updates.
         """
@@ -870,12 +865,15 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
             raise HttpResponseRedirect(request.get_full_path())
 
-        return super().changeform_view(request, object_id, form_url, extra_context)
+        return super().changeform_view(request, object_id, form_url or "", extra_context)
 
     def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
         """Reset the site setting to its default value."""
         try:
-            obj.reset_to_default(request.user)
+            from recordtransfer.models import User
+
+            user = User.objects.get(pk=request.user.pk)
+            obj.reset_to_default(user)
             messages.success(
                 request,
                 f'Setting "{obj.key}" has been reset to its default value.',
