@@ -318,7 +318,7 @@ class SubmissionInline(ReadOnlyInline):
 
     fields = ["uuid", "metadata"]
 
-    ordering: Sequence[str] | None = ["-submission_date"]
+    ordering: Optional[Sequence[str]] = ["-submission_date"]
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this inline admin.
@@ -350,7 +350,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "uuid",
     ]
 
-    ordering: Sequence[str] | None = [
+    ordering: Optional[Sequence[str]] = [
         "-created_by",
     ]
 
@@ -479,7 +479,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         linkify("user"),
     ]
 
-    ordering: Sequence[str] | None = [
+    ordering: Optional[Sequence[str]] = [
         "-submission_date",
     ]
 
@@ -647,7 +647,7 @@ class JobAdmin(ReadOnlyAdmin):
         "user_triggered__last_name",
     ]
 
-    ordering: Sequence[str] | None = ["-start_time"]
+    ordering: Optional[Sequence[str]] = ["-start_time"]
 
     @display(description=gettext("File Link"))
     def file_url(self, obj: Job) -> SafeText:
