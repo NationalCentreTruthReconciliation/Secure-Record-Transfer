@@ -316,9 +316,7 @@ class SubmissionInline(ReadOnlyInline):
 
     model = Submission
 
-    fields: Sequence[str | Sequence[str]] = ["uuid", "metadata"]
-
-    from typing import ClassVar
+    fields = ["uuid", "metadata"]
 
     ordering: Sequence[str] | None = ["-submission_date"]
 
