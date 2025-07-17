@@ -38,8 +38,6 @@ def get_section_title(step: SubmissionStep) -> str:
 class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     """End-to-end tests for the submission form wizard."""
 
-    serialized_rollback = True
-
     test_data: ClassVar[dict] = {
         SubmissionStep.CONTACT_INFO: {
             "section_title": get_section_title(SubmissionStep.CONTACT_INFO),
