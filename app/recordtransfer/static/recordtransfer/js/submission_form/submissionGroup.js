@@ -1,6 +1,6 @@
 import {
-    handleSubmissionGroupModalFormBeforeSwap,
-    handleSubmissionGroupModalFormAfterSwap
+    handleModalBeforeSwap,
+    handleModalAfterSwap
 } from "../utils/htmx.js";
 
 const noDescription = "No description available";
@@ -20,10 +20,10 @@ export async function setupSubmissionGroupForm(context) {
     );
 
     window.handleModalBeforeSwap = (e) => {
-        return handleSubmissionGroupModalFormBeforeSwap(e, context);
+        return handleModalBeforeSwap(e, context);
     };
     window.handleModalAfterSwap = (e) => {
-        return handleSubmissionGroupModalFormAfterSwap(e, context);
+        return handleModalAfterSwap(e, context);
     };
     setupSubmissionGroupCreatedEventListener(selectField);
 
