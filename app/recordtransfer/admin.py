@@ -2,12 +2,11 @@
 
 import logging
 from datetime import datetime
-from typing import Callable, Optional, Sequence, Union, Any
+from typing import Any, Callable, Optional, Sequence, Union
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
 from django.contrib.admin import display
-from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
 from django.db.models import QuerySet
@@ -520,7 +519,8 @@ class SubmissionAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.create_zipped_bag),
                 name=f"{self.model._meta.app_label}_{self.model._meta.model_name}_zip",
             ),
-        ] + super().get_urls()
+            *super().get_urls(),
+        ]
 
     def create_zipped_bag(self, request: HttpRequest, object_id: str) -> HttpResponseRedirect:
         """Start a background job to create a downloadable bag.
