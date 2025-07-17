@@ -184,7 +184,7 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         "session__user__username",
     ]
 
-    ordering: Sequence[str] | None = ["-pk"]
+    ordering: Optional[Sequence[str]] = ["-pk"]
 
 
 class TempUploadedFileInline(ReadOnlyInline):
