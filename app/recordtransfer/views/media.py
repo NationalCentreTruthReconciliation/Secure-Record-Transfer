@@ -12,8 +12,6 @@ from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
     HttpResponseRedirect,
     JsonResponse,
 )
@@ -26,31 +24,6 @@ from recordtransfer.models import Job, UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
 LOGGER = logging.getLogger(__name__)
-
-
-def media_request(request: HttpRequest, path: str) -> HttpResponse:
-    """Respond to whether a media request is allowed or not."""
-    if not request.user.is_authenticated:
-        return HttpResponseForbidden("You do not have permission to access this resource.")
-
-    if not path:
-        return HttpResponseNotFound("The requested resource could not be found")
-
-    user = cast(User, request.user)
-    if not user.is_staff:
-        return HttpResponseForbidden("You do not have permission to access this resource.")
-
-    response = HttpResponse(headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")})
-
-    # Nginx will assign its own headers for the following:
-    del response["Content-Type"]
-    del response["Content-Disposition"]
-    del response["Accept-Ranges"]
-    del response["Set-Cookie"]
-    del response["Cache-Control"]
-    del response["Expires"]
-
-    return response
 
 
 def serve_media_file(file_url: str) -> HttpResponse:
