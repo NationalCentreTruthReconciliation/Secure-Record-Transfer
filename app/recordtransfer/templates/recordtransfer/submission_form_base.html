@@ -50,10 +50,11 @@
                     {% block messages %}
                         {% include "includes/messages.html" %}
                     {% endblock messages %}
-                    <div class="card-body p-6">
-                        {% block form_explanation %}
-                        {% endblock form_explanation %}
-                    </div>
+                    {% block form_explanation %}
+                        {% if block.super or form_explanation %}
+                            <div class="card-body p-6">{{ block.super }}{{ form_explanation|default:'' }}</div>
+                        {% endif %}
+                    {% endblock form_explanation %}
                     <form id="submission-form"
                           hx-post="{{ request.get_full_path }}"
                           hx-target="#main-container"
