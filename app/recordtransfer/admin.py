@@ -361,8 +361,6 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "-created_by",
     ]
 
-    from typing import Callable
-
     actions: Optional[
         Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
     ] = [
@@ -379,43 +377,63 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         """
         return bool(obj and request.user.is_superuser)
 
-    @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
-    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
-        """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
+    def _export_submissions_csv(
+        self, request: HttpRequest, queryset: QuerySet[SubmissionGroup], version: ExportVersion
+    ) -> Optional[HttpResponse]:
+        """Export submissions from selected groups with validation.
+
+        Args:
+            request: The HTTP request object
+            queryset: QuerySet of selected SubmissionGroup objects
+            version: The export version to use
+
+        Returns:
+            HttpResponse with CSV file or None if no submissions found
+        """
         related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0)
+        if not related_submissions.exists():
+            self.message_user(
+                request,
+                gettext(
+                    "The selected submission group(s) do not contain any submissions to export."
+                ),
+                messages.WARNING,
+            )
+            return None
+        return related_submissions.export_csv(version=version)
+
+    @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
+    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> Optional[HttpResponse]:
+        """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
+        return self._export_submissions_csv(request, queryset, ExportVersion.CAAIS_1_0)
 
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
     def export_atom_2_6_csv(
         self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    ) -> Optional[HttpResponse]:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_6)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_6)
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
     def export_atom_2_3_csv(
         self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    ) -> Optional[HttpResponse]:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_3)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_3)
 
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
     def export_atom_2_2_csv(
         self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    ) -> Optional[HttpResponse]:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_2)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_2)
 
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
     def export_atom_2_1_csv(
         self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    ) -> Optional[HttpResponse]:
         """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
-        related_submissions = Submission.objects.filter(part_of_group__in=queryset)
-        return related_submissions.export_csv(version=ExportVersion.ATOM_2_1)
+        return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_1)
 
 
 class SubmissionGroupInline(ReadOnlyInline):
