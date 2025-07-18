@@ -728,8 +728,7 @@ CAAIS_DEFAULT_UPDATE_TYPE
         =======  =========
 
     When metadata records are updated through the Django admin interface, a DateOfCreationOrRevision
-    entry is automatically created to maintain CAAIS compliance. This setting controls the name of
-    the creation/revision type used for these updates.
+    entry is automatically created to track changes. This setting controls the name of the creation/revision type used for these updates.
 
     **.env Example:**
 
@@ -753,8 +752,9 @@ CAAIS_DEFAULT_UPDATE_AGENT
         =======  =========
 
     When metadata records are updated through the Django admin interface, this setting specifies
-    the default agent name to record in the DateOfCreationOrRevision entry. If empty, the username
-    of the admin user making the change will be used.
+    the default agent name to record in the DateOfCreationOrRevision entry. By default, the name
+    of the agent who modified the CAAIS metadata is used, but if none is provided, this value will
+    be used instead.
 
     **.env Example:**
 
