@@ -2,8 +2,8 @@
 {% load widget_tweaks %}
 {% if not field.field.widget.is_hidden %}
     <div class="form-group mb-2">
-        <label class="block text-lg text-primary mb-2">
-            {{ field.label }}
+        <label class="flex items-center gap-2 text-lg text-primary mb-2">
+            <span>{{ field.label }}</span>
             {% if field.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
         </label>
         {% if field.field.widget.input_type == 'radio' %}
@@ -19,6 +19,18 @@
             </div>
         {% else %}
             {{ field|add_class:"input input-bordered w-full bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" }}
+        {% endif %}
+        {% if field.help_text %}
+            <div class="mt-2 flex items-center">
+                <div class="relative inline-block">
+                    <i class="fa fa-info-circle h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help peer mr-1"
+                       aria-hidden="true"></i>
+                    <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 peer-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                        {{ field.help_text }}
+                    </span>
+                </div>
+                <span class="text-gray-500 text-xs ml-1">Help</span>
+            </div>
         {% endif %}
         {% if field.errors %}
             <div class="mt-2">
