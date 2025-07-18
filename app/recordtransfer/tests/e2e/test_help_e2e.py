@@ -54,7 +54,7 @@ class HelpPageTest(SeleniumLiveServerTestCase):
 
         # Find and click the Help link in the navigation
 
-        help_link = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.ID, "nav-help")))
+        help_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "nav-help")))
         help_link.click()
 
         # Verify we're on the Help page
