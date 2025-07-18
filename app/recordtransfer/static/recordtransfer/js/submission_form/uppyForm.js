@@ -191,7 +191,7 @@ export async function setupUppy(context) {
 
     /**
      * Enables or disables the review button.
-     * @param {boolean} enable - Whether the review button should be disabled
+     * @param {boolean} enable - Whether the review button should be enabled
      */
     function enableReviewButtonState(enable) {
         if (reviewButton) {
