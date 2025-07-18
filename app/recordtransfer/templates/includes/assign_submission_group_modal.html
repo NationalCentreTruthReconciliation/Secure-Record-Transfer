@@ -1,0 +1,61 @@
+{% extends "includes/base_modal.html" %}
+{% load i18n %}
+{% block modal_content %}
+    <h3 id="assign-group-modal-heading" class="text-lg font-bold mb-5">
+        {% if current_group %}
+            {% blocktrans %}
+                Change submission group for submission "{{ submission_title }}"
+            {% endblocktrans %}
+        {% else %}
+            {% blocktrans %}
+                Assign submission group for submission "{{ submission_title }}"
+            {% endblocktrans %}
+        {% endif %}
+    </h3>
+    <form hx-post="{% url "recordtransfer:assign_submission_group" %}"
+          id="assign-submission-group-form">
+        {% csrf_token %}
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">Submission groups</legend>
+            <select id="group_select"
+                    name="{{ GROUP_UUID }}"
+                    class="select">
+                <option value=""
+                        data-description="{% trans "Select a group to see its description" %}"
+                        disabled
+                        {% if not current_group %}selected{% endif %}>{% trans "Choose a group" %}</option>
+                {% for group in groups %}
+                    <option value="{{ group.uuid }}"
+                            data-description="{% if group.description %}{{ group.description }}{% else %}{% trans "No description available" %}{% endif %}"
+                            {% if current_group and group.uuid == current_group.uuid %}selected{% endif %}>
+                        {{ group.name }}
+                        {% if current_group and group.uuid == current_group.uuid %}
+                            {% trans "(current)" %}
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <span class="label" id="group_description_display"></span>
+            <input id="submission_uuid"
+                   name="{{ SUBMISSION_UUID }}"
+                   value="{{ submission_uuid }}"
+                   type="hidden">
+        </fieldset>
+        <div class="modal-action">
+            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
+            {% if current_group %}
+                <button id="unassign_group_btn"
+                        name="{{ UNASSIGN_GROUP }}"
+                        class="btn btn-outline btn-primary"
+                        type="submit">{% trans "Unassign Group" %}</button>
+            {% endif %}
+            <button id="change_group_btn" class="btn btn-primary" type="submit" disabled>
+                {% if current_group %}
+                    {% trans "Change Group" %}
+                {% else %}
+                    {% trans "Assign Group" %}
+                {% endif %}
+            </button>
+        </div>
+    </form>
+{% endblock modal_content %}

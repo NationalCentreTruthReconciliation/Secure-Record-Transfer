@@ -12,6 +12,9 @@
     align-items: center;
 }
 
+/* Used to increase the specificity of the hidden class since flex-item also specifies a display property */
+.flex-item.hidden { display: none; }
+
 .flex-item {
     margin-bottom: 15px;
 }
@@ -123,10 +126,6 @@
         border-radius: 3px;
         transition: 120ms ease-in-out;
     }
-}
-
-.hidden-item {
-    display: none !important;
 }
 
 .required-field:after,

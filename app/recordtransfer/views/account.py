@@ -2,7 +2,7 @@
 
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -15,6 +15,7 @@ from django.views.generic import FormView, TemplateView
 
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm
+from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
 
@@ -131,3 +132,10 @@ class Login(LoginView):
             )
             return HttpResponse(html)
         return super().form_invalid(form)
+
+class AsyncPasswordResetView(PasswordResetView):
+    """The page a user sees when they request a password reset."""
+
+    email_template_name="registration/password_reset_email.txt"
+    html_email_template_name="registration/password_reset_email.html"
+    form_class = AsyncPasswordResetForm

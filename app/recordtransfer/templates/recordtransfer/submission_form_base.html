@@ -21,7 +21,7 @@
         {% endblocktrans %}
     </div>
     {% if info_message %}
-        <p>
+        <p class="mb-5">
             <b>{{ info_message }}</b>
         </p>
     {% endif %}
@@ -57,7 +57,7 @@
                     <button {% block submitbuttonattributes %}
                             id="form-next-button"
                             {% endblock submitbuttonattributes %}
-                            type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
+                            type="submit"
                             class="btn btn-primary margin-right-30px">
                         {% if wizard.steps.step1 == wizard.steps.count %}
                             {% trans "Submit" %}
@@ -82,15 +82,17 @@
         </div>
         <div class="{% block savelinkclass %}flex-item{% endblock savelinkclass %}">
             <label></label>
-            {% if SHOW_SAVE_BUTTON %}
-                <button id="form-save-button"
-                        class="link link-primary"
-                        formnovalidate="formnovalidate"
-                        name="save_form_step"
-                        value="{{ wizard.steps.current }}">{% trans "Click to save form and resume later" %}</button>
-            {% endif %}
+            <button id="form-save-button"
+                    class="link link-primary"
+                    formnovalidate="formnovalidate"
+                    name="save_form_step"
+                    value="{{ wizard.steps.current }}"
+                    {% if not SHOW_SAVE_BUTTON %}hidden{% endif %}>
+                {% trans "Click to save form and resume later" %}
+            </button>
         </div>
     </form>
     {% include "includes/unsaved_changes_modal.html" %}
+    {% include "includes/save_contact_info_modal.html" %}
     {% include "includes/base_modal.html" %}
 {% endblock content %}

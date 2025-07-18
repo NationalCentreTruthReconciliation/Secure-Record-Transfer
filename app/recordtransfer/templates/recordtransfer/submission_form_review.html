@@ -1,29 +1,30 @@
-{% extends 'recordtransfer/submission_form_standard.html' %}
+{% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
-
-{% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
-{% block submitbuttontype %}button{% endblock %}
-{% block savelinkclass %}flex-med-width-item{% endblock savelinkclass %}
-{% block buttonarrayclass %}flex-med-width-item{% endblock buttonarrayclass %}
-
+{% block submitbuttonattributes %}
+    id="submit-form-btn"
+{% endblock submitbuttonattributes %}
+{% block savelinkclass %}
+    flex-med-width-item
+{% endblock savelinkclass %}
+{% block buttonarrayclass %}
+    flex-med-width-item
+{% endblock buttonarrayclass %}
 {% block formfields %}
     {{ block.super }}
     <div class="review-summary">
         {% for form in form_list %}
             <div class="review-section">
                 <div class="section-header">
-                    <h2 class="section-title">{{ form.step_title }}</h2>
-                    <button 
-                        id="goto_step_{{ form.step_name }}_link"
-                        class="step-link" 
-                        formnovalidate="formnovalidate" 
-                        name="wizard_goto_step" 
-                        value="{{ form.step_name }}">
+                    <div class="text-xl section-title">{{ form.step_title }}</div>
+                    <button id="goto_step_{{ form.step_name }}_link"
+                            class="step-link"
+                            formnovalidate="formnovalidate"
+                            name="wizard_goto_step"
+                            value="{{ form.step_name }}">
                         {% trans "Go to step" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
-                
                 {% if form.fields|length > 0 %}
                     <div class="section-content">
                         {% if form.fields.items %}
@@ -36,9 +37,7 @@
                                             {% for file in value %}
                                                 <div class="file-entry">
                                                     <i class="fas fa-file"></i>
-                                                    <a class="non-nav-link" href="{{ file.url }}" target="_blank">
-                                                        {{ file.name }}
-                                                    </a>
+                                                    <a class="non-nav-link" href="{{ file.url }}" target="_blank">{{ file.name }}</a>
                                                 </div>
                                             {% endfor %}
                                         {% elif value == True %}
@@ -62,7 +61,13 @@
                                     <dl class="field-list">
                                         {% for label, value in entry.items %}
                                             <dt>{{ label }}</dt>
-                                            <dd>{{ value|default:_("<span class='empty-value'>Not provided</span>")|safe }}</dd>
+                                            <dd>
+                                                {% if value %}
+                                                    {{ value }}
+                                                {% else %}
+                                                    <span class="empty-value">{% trans "Not provided" %}</span>
+                                                {% endif %}
+                                            </dd>
                                         {% endfor %}
                                     </dl>
                                 </div>
@@ -70,13 +75,8 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                {% if form.note %}
-                    <div class="section-note">
-                        {{ form.note }}
-                    </div>
-                {% endif %}
+                {% if form.note %}<div class="section-note">{{ form.note }}</div>{% endif %}
             </div>
         {% endfor %}
     </div>
-
 {% endblock formfields %}

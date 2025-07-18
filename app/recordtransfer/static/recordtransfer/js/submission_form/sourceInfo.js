@@ -1,4 +1,4 @@
-import { setupSelectOtherToggle } from "./otherField";
+import { setupSelectOtherToggle } from "../utils/otherField";
 
 /**
  * Sets up the expandable source info form.
@@ -42,7 +42,7 @@ export function setupSourceInfoForm(context) {
 
         if (selected === "yes") {
             document.querySelectorAll(".initially-hidden").forEach((el) => {
-                el.classList.remove("hidden-item");
+                el.classList.remove("hidden");
             });
 
             // Dispatch events to update "other" fields if they were just shown by accident
@@ -51,7 +51,7 @@ export function setupSourceInfoForm(context) {
         }
         else {
             document.querySelectorAll(".initially-hidden").forEach((el) => {
-                el.classList.add("hidden-item");
+                el.classList.add("hidden");
             });
         }
     });

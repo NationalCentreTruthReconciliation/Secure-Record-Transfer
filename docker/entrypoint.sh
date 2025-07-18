@@ -21,6 +21,11 @@ elif [ "$SERVICE_NAME" = 'rq-scheduler' ]; then
 
 elif [ "$SERVICE_NAME" = 'app' ]; then
   if [ "$ENV" != 'dev' ]; then
+    echo ">> Fixing volume permissions."
+    sudo chown -R myuser:myuser /opt/secure-record-transfer/app/static/
+    sudo chown -R myuser:myuser /opt/secure-record-transfer/app/media/
+    echo "OK"
+
     echo ">> Collecting static files."
     python manage.py collectstatic --no-input --clear \
       --ignore "recordtransfer/**/*.js" \
