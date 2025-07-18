@@ -191,16 +191,16 @@ export async function setupUppy(context) {
 
     /**
      * Enables or disables the review button.
-     * @param {boolean} disable - Whether the review button should be disabled
+     * @param {boolean} enable - Whether the review button should be disabled
      */
-    function setReviewButtonState(disable) {
+    function enableReviewButtonState(enable) {
         if (reviewButton) {
-            reviewButton.disabled = disable;
+            reviewButton.disabled = !enable;
         }
     }
 
-    uppy.on("upload", () => setReviewButtonState(true));
-    uppy.on("upload-progress", () => setReviewButtonState(true));
-    uppy.on("complete", () => setReviewButtonState(false));
+    uppy.on("upload", () => enableReviewButtonState(false));
+    uppy.on("upload-progress", () => enableReviewButtonState(false));
+    uppy.on("complete", () => enableReviewButtonState(true));
 
 }
