@@ -32,7 +32,9 @@ __all__ = [
 
 
 @django_rq.job
-def send_submission_creation_success(form_data: dict, submission: Submission) -> None:
+def send_submission_creation_success(
+    form_data: dict, submission: Submission, recipient_emails: Optional[List[str]] = None
+) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there were no errors.
 
@@ -40,6 +42,7 @@ def send_submission_creation_success(form_data: dict, submission: Submission) ->
         form_data (dict): A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
+        recipient_emails (List[str], optional): A list of recipient email addresses to send the notification to. If not provided, admin recipients will be used.
     """
     subject = "New Submission Ready for Review"
 
@@ -49,11 +52,20 @@ def send_submission_creation_success(form_data: dict, submission: Submission) ->
     )
     LOGGER.info("Generated submission change URL: %s", submission_url)
 
-    recipient_emails = _get_admin_recipient_list(subject)
+    admin_recipients = _get_admin_recipient_list(subject)
+    if admin_recipients:
+        used_recipients = admin_recipients
+    elif recipient_emails:
+        used_recipients = recipient_emails
+    else:
+        LOGGER.warning(
+            "No admin recipients found for submission creation success email. Skipping send."
+        )
+        return
 
     user_submitted = submission.user
     _send_mail_with_logs(
-        recipients=recipient_emails,
+        recipients=used_recipients,
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
         template_name="recordtransfer/email/submission_submit_success.html",
@@ -69,7 +81,9 @@ def send_submission_creation_success(form_data: dict, submission: Submission) ->
 
 
 @django_rq.job
-def send_submission_creation_failure(form_data: dict, user_submitted: User) -> None:
+def send_submission_creation_failure(
+    form_data: dict, user_submitted: User, recipient_emails: Optional[List[str]] = None
+) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there WERE errors.
 
@@ -77,12 +91,21 @@ def send_submission_creation_failure(form_data: dict, user_submitted: User) -> N
         form_data (dict): A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
+        recipient_emails (List[str], optional): A list of recipient email addresses to send the notification to. If not provided, admin recipients will be used.
     """
     subject = "Submission Failed"
-    recipient_emails = _get_admin_recipient_list(subject)
-
+    admin_recipients = _get_admin_recipient_list(subject)
+    if admin_recipients:
+        used_recipients = admin_recipients
+    elif recipient_emails:
+        used_recipients = recipient_emails
+    else:
+        LOGGER.warning(
+            "No admin recipients found for submission creation success email. Skipping send."
+        )
+        return
     _send_mail_with_logs(
-        recipients=recipient_emails,
+        recipients=used_recipients,
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
         template_name="recordtransfer/email/submission_submit_failure.html",
