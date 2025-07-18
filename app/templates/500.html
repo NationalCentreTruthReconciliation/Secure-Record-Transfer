@@ -1,6 +1,10 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE }}">
     <head>
+        <meta name="description"
+              content="Internal server error page - An error occurred while processing your request.">
         <title>500: Internal Server Error</title>
         <style type="text/css">
             html {
@@ -25,11 +29,9 @@
     </head>
     <body>
         <div class="title">500: Internal Server Error</div>
+        <p class="message">An error occurred on the server.</p>
         <p class="message">
-            An error occurred on the server.
-        </p>
-        <p class="message">
-            <a href="/">Home</a>
+            <a href="{% url 'recordtransfer:index' %}">Home</a>
         </p>
     </body>
 </html>

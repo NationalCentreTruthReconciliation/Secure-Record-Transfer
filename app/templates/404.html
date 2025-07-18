@@ -1,7 +1,11 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE }}">
     <head>
         <title>404: Not Found</title>
+        <meta name="description"
+              content="404 error page - The requested page could not be found.">
         <style type="text/css">
             html {
                 font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -25,11 +29,9 @@
     </head>
     <body>
         <div class="title">404: Not Found</div>
+        <p class="message">The requested page does not exist.</p>
         <p class="message">
-            The requested page does not exist.
-        </p>
-        <p class="message">
-            <a href="/">Home</a>
+            <a href="{% url 'recordtransfer:index' %}">Home</a>
         </p>
     </body>
 </html>

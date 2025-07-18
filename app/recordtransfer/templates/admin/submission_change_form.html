@@ -1,6 +1,5 @@
 {% extends "admin/change_form.html" %}
 {% load i18n %}
-
 {% block extrahead %}
     {{ block.super }}
     {# textarea overflow fix #}
@@ -13,8 +12,7 @@
             width: 98%;
         }
     </style>
-{% endblock %}
-
+{% endblock extrahead %}
 {% block submit_buttons_bottom %}
     {{ block.super }}
     <div class="submit-row">
@@ -22,4 +20,4 @@
         <a href="{% url "recordtransfer:submission_csv" uuid=original.uuid %}">{% trans "Click to download CSV export" %}</a> |
         <a href="{{ original.get_admin_zip_url }}">{% trans "Click to create a downloadable bag" %}</a>
     </div>
-{% endblock %}
+{% endblock submit_buttons_bottom %}

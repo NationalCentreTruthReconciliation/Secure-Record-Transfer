@@ -1,32 +1,34 @@
-{% extends 'recordtransfer/submission_form_base.html' %}
+{% extends "recordtransfer/submission_form_base.html" %}
 {% load static %}
 {% load i18n %}
-
-{% block buttonarrayclass %}flex-item{% endblock %}
+{% block buttonarrayclass %}
+    flex-item
+{% endblock buttonarrayclass %}
 {% block formfields %}
     {% for form in wizard.form.forms %}
         {# Row to duplicate to add more forms #}
         <div class="form-row">
-        {% for field in form %}
-            {% if field.errors %}
-                {% for error in field.errors %}
-                <div class="flex-error">
-                    <label for="nothing"></label>
-                    <div class="field-error">{{ error }}</div>
-                </div>
-                {% endfor %}
-            {% endif %}
-            <div class="flex-item">
-                <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
-                {{ field }}
-                {# Help tooltip #}
-                {% if field.help_text %}
-                    <div tooltip-content="{{ field.help_text }}" class="help-tooltip help-icon">
-                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                    </div>
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div class="flex-error">
+                            <label for="nothing"></label>
+                            <div class="field-error">{{ error }}</div>
+                        </div>
+                    {% endfor %}
                 {% endif %}
-            </div>
-        {% endfor %}
+                <div class="flex-item">
+                    <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
+                    {{ field }}
+                    {# Help tooltip #}
+                    {% if field.help_text %}
+                        <div tooltip-content="{{ field.help_text }}"
+                             class="help-tooltip help-icon">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
     {% endfor %}
     <div class="flex-item">
@@ -37,4 +39,4 @@
         </div>
     </div>
     <br>
-{% endblock %}
+{% endblock formfields %}

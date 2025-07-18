@@ -1,9 +1,10 @@
 {% load static %}
 {% load i18n %}
 {% load render_bundle from webpack_loader %}
-
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en" data-theme={% block theme %}nctr{% endblock theme %}>
+<html lang="{{ LANGUAGE_CODE }}"
+      data-theme="{% block theme %}nctr{% endblock theme %}">
     <head hx-head="merge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Secure Record Transfer Application">

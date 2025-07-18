@@ -82,10 +82,12 @@
             float: left;
         }
     </style>
-{% endblock %}
+{% endblock extrastyle %}
 {% block branding %}
-    <img height="40" src="{% static 'nctrlogo_flame_150x150px.webp' %}">
+    <img height="40"
+         src="{% static 'nctrlogo_flame_150x150px.webp' %}"
+         alt="NCTR Logo" />
     <h1 style="line-height: 40px;" id="site-name">
-        <a href="/admin/">NCTR Transfer App Administration</a>
+        <a href="{% url 'admin:index' %}">NCTR Transfer App Administration</a>
     </h1>
-{% endblock %}
+{% endblock branding %}
