@@ -42,8 +42,8 @@
             <div class="md:w-2/3">
                 <div class="card bg-base-100 border border-base-300 mb-6 p-3">
                     {% if info_message %}
-                        <div class="alert !p-5">
-                            <i class="fas fa-exclamation-triangle pointer-events-none text-gray-400"></i>
+                        <div class="alert !p-5 flex flex-col">
+                            <div class="text-lg text-left self-start">Overview</div>
                             <div class="text-sm">{{ info_message }}</div>
                         </div>
                     {% endif %}
