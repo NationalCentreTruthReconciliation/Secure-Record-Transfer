@@ -1,7 +1,10 @@
 """CAAIS metadata administrator"""
 
 from django.contrib import admin
+from django.forms import ModelForm
+from django.http import HttpRequest
 
+from caais import settings as caais_settings
 from caais.forms import (
     InlineAppraisalForm,
     InlineArchivalUnitForm,
@@ -28,6 +31,8 @@ from caais.models import (
     AssociatedDocumentationType,
     CarrierType,
     ContentType,
+    CreationOrRevisionType,
+    DateOfCreationOrRevision,
     DispositionAuthority,
     ExtentStatement,
     ExtentType,
@@ -231,6 +236,43 @@ class MetadataAdmin(admin.ModelAdmin):
         AssociatedDocumentationInlineAdmin,
         GeneralNoteInlineAdmin,
     ]
+
+    def save_model(
+        self, request: HttpRequest, obj: Metadata, form: ModelForm, change: bool
+    ) -> None:
+        """Override save_model to automatically create DateOfCreationOrRevision entries for updates.
+
+        This method ensures CAAIS compliance by automatically tracking when metadata
+        records are updated through the admin interface.
+        """
+        super().save_model(request, obj, form, change)
+
+        if change:  # Only for updates, not initial creation
+            self._create_update_revision_entry(obj, request.user.username)
+
+    def _create_update_revision_entry(self, metadata: Metadata, agent_name: str) -> None:
+        """Create a DateOfCreationOrRevision entry for metadata updates.
+
+        Args:
+            metadata: The Metadata object that was updated
+            agent_name: The username of the user who made the update
+        """
+        update_type_name = caais_settings.CAAIS_DEFAULT_UPDATE_TYPE
+
+        update_type, _ = CreationOrRevisionType.objects.get_or_create(
+            name=update_type_name,
+            defaults={"description": "Metadata record updated via admin interface"},
+        )
+
+        update_agent = caais_settings.CAAIS_DEFAULT_UPDATE_AGENT or agent_name
+        update_note = caais_settings.CAAIS_DEFAULT_UPDATE_NOTE
+
+        DateOfCreationOrRevision.objects.create(
+            metadata=metadata,
+            creation_or_revision_type=update_type,
+            creation_or_revision_agent=update_agent,
+            creation_or_revision_note=update_note,
+        )
 
 
 @admin.register(AcquisitionMethod)
