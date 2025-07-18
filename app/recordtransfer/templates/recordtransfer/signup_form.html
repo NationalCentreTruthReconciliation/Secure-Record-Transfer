@@ -7,10 +7,14 @@
         <!-- Error Message -->
         {% if form.non_field_errors %}
             <div class="alert alert-error animate-error-appear">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-6 w-6 shrink-0 stroke-current"
+                     fill="none"
+                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-            {% trans "The form was not valid." %}</div>
+                {% trans "The form was not valid." %}
+            </div>
         {% endif %}
         <!-- Form -->
         <form hx-post="{% url 'recordtransfer:create_account' %}"
@@ -20,11 +24,17 @@
             {% csrf_token %}
             {% for field in form %}
                 {% if field.errors %}
-                    {% for error in field.errors %}<div class="alert alert-error animate-error-appear">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    {{ error }}</div>{% endfor %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-error animate-error-appear">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-6 w-6 shrink-0 stroke-current"
+                                 fill="none"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
                 {% endif %}
                 <div class="mb-4">
                     <label for="{{ field.id_for_label }}"
@@ -102,13 +112,9 @@
                     {% if field.help_text %}
                         <div class="mt-1 flex items-center">
                             <div class="relative inline-block">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help peer"
-                                     viewBox="0 0 20 20"
-                                     fill="currentColor">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 peer-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                                <i class="fa fa-info-circle h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help peer"
+                                   aria-hidden="true"></i>
+                                <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-sm rounded py-2 px-3 opacity-0 peer-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
                                     {{ field.help_text }}
                                 </span>
                             </div>

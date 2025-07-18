@@ -115,12 +115,6 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_rights.html",
             title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
-            info_message=gettext(
-                "Depending on the records you are submitting, there may be specific rights that govern "
-                "the access of your records. The following is a brief description about the types of "
-                "rights that are available to be used. If none suit your needs, select Other in "
-                "the rights dropdown. "
-            ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
@@ -132,7 +126,7 @@ class SubmissionFormWizard(SessionWizardView):
             ),
             info_message=gettext(
                 "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, you may enter them here. "
-                "This step is optional. If you do not have any identifiers associated with the records, you may proceed to the next step."
+                "<b> This step is optional</b>. If you do not have any identifiers associated with the records, you may proceed to the next step."
             ),
         ),
         SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(
