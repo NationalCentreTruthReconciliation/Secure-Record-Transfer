@@ -240,7 +240,8 @@ class MetadataAdmin(admin.ModelAdmin):
     def save_model(
         self, request: HttpRequest, obj: Metadata, form: ModelForm, change: bool
     ) -> None:
-        """Override save_model to automatically create DateOfCreationOrRevision entries for updates.
+        """Override save_model to automatically create DateOfCreationOrRevision entries for
+        updates.
 
         This method ensures CAAIS compliance by automatically tracking when metadata
         records are updated through the admin interface.
