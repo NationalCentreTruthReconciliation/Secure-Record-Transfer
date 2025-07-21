@@ -14,8 +14,8 @@
             {{ field|add_class:"select select-bordered w-full bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" }}
         {% elif field.field.widget.input_type == 'checkbox' %}
             <div class="flex items-center">
-                {{ field|add_class:"checkbox checkbox-primary mr-3" }}
-                <span class="text-sm text-gray-700">{{ field.label }}</span>
+                {{ field|add_class:"checkbox checkbox-primary mr-3 mt-2" }}
+                <span class="text-sm text-gray-700 mt-2">{{ field.label }}</span>
             </div>
         {% else %}
             {{ field|add_class:"input input-bordered w-full bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" }}
