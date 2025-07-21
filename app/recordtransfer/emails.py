@@ -42,7 +42,8 @@ def send_submission_creation_success(
         form_data (dict): A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
-        recipient_emails (List[str], optional): A list of recipient email addresses to send the notification to. If not provided, admin recipients will be used.
+        recipient_emails (List[str], optional): A list of recipient email addresses to send the
+            notification to. If not provided, admin recipients will be used.
     """
     subject = "New Submission Ready for Review"
 
@@ -91,7 +92,8 @@ def send_submission_creation_failure(
         form_data (dict): A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
-        recipient_emails (List[str], optional): A list of recipient email addresses to send the notification to. If not provided, admin recipients will be used.
+        recipient_emails (List[str], optional): A list of recipient email addresses to send the
+            notification to. If not provided, admin recipients will be used.
     """
     subject = "Submission Failed"
     admin_recipients = _get_admin_recipient_list(subject)
@@ -124,8 +126,8 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission) 
     """Send a submission success email to the user who made the submission.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the submission form. This is NOT
-            the CAAIS tree version of the form.
+        form_data (dict): A dictionary of the cleaned form data from the submission form.
+            This is NOT the CAAIS tree version of the form.
         submission (Submission): The new submission that was created.
     """
     if submission.user.gets_notification_emails:
