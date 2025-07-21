@@ -9,7 +9,7 @@
              hx-on::after-swap="handleModalAfterSwap(event)"
              hx-on::before-swap="handleModalBeforeSwap(event)">
             {# after-swap listener is on the parent to persist after swaps #}
-            <div id="modal-content" class="p-2">
+            <div id="modal-content">
                 {% block modal_content %}
                 {% endblock modal_content %}
             </div>

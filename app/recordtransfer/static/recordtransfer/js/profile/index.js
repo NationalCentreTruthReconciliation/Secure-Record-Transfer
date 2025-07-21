@@ -2,8 +2,8 @@ import { setupProfileForm } from "../forms/forms.js";
 import {
     handleDeleteIpSubmissionAfterRequest,
     handleDeleteSubmissionGroupAfterRequest,
-    handleModalBeforeSwap,
-    handleModalAfterSwap
+    handleSubmissionGroupModalFormBeforeSwap,
+    handleSubmissionGroupModalFormAfterSwap
 } from "../utils/htmx.js";
 import { setupUserContactInfoForm } from "./contactInfo.js";
 import { initTabListeners, restoreTab } from "./tab.js";
@@ -40,11 +40,11 @@ export const initializeProfile = function() {
     };
 
     window.handleModalBeforeSwap = (e) => {
-        handleModalBeforeSwap(e, context);
+        return handleSubmissionGroupModalFormBeforeSwap(e, context);
     };
 
     window.handleModalAfterSwap = (e) => {
-        return handleModalAfterSwap(e, context);
+        return handleSubmissionGroupModalFormAfterSwap(e, context);
     };
 
     window.setupProfileForm = () => {

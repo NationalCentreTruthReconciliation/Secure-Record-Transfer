@@ -6,34 +6,7 @@ To set default values, refer to :ref:`Data Formatting and Defaults`.
 import logging
 from typing import Optional, Type
 
-from caais.models import (
-    AbstractTerm,
-    AcquisitionMethod,
-    Appraisal,
-    ArchivalUnit,
-    AssociatedDocumentation,
-    CreationOrRevisionType,
-    DateOfCreationOrRevision,
-    DispositionAuthority,
-    Event,
-    EventType,
-    ExtentStatement,
-    GeneralNote,
-    Identifier,
-    LanguageOfMaterial,
-    Metadata,
-    PreliminaryCustodialHistory,
-    PreliminaryScopeAndContent,
-    PreservationRequirements,
-    Rights,
-    RightsType,
-    SourceConfidentiality,
-    SourceOfMaterial,
-    SourceRole,
-    SourceType,
-    Status,
-    StorageLocation,
-)
+from caais.models import *
 from django.db.models import Model
 from django.utils.translation import gettext
 
@@ -163,7 +136,7 @@ def add_identifiers(form_data: dict, metadata: Metadata) -> None:
 
 
 def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
-    """Populate metadata with :py:class:`SourceOfMaterial` objects.
+    """Populate metadata with :py:class:`SourceOfMaterial` objects
 
     Related CAAIS defaults:
 
@@ -205,7 +178,7 @@ def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
         region = form_data.get("province_or_state", "")
 
     postal_or_zip_code = form_data.get("postal_or_zip_code", "")
-    country = form_data.get("country")
+    country = form_data.get("country", None)
 
     source_confidentiality = term_or_default(
         form_data, "source_confidentiality", SourceConfidentiality
@@ -255,8 +228,8 @@ def add_source_of_materials(form_data: dict, metadata: Metadata) -> None:
     )
 
 
-def add_rights(form_data: dict, metadata: Metadata) -> None:
-    """Populate metadata with Rights objects.
+def add_rights(form_data: dict, metadata: Metadata):
+    """Populate metadata with Rights objects
 
     No related CAAIS defaults.
 
@@ -308,8 +281,8 @@ def add_rights(form_data: dict, metadata: Metadata) -> None:
             LOGGER.warning("Duplicate rights were ignored: %s", repr(id_tuple))
 
 
-def add_submission_event(metadata: Metadata) -> None:
-    """Populate metadata with a new Submission-type Event object.
+def add_submission_event(metadata: Metadata):
+    """Populate metadata with a new Submission-type Event object
 
     Related CAAIS defaults:
 
@@ -345,8 +318,8 @@ def add_submission_event(metadata: Metadata) -> None:
     )
 
 
-def add_date_of_creation(metadata: Metadata) -> None:
-    """Populate metadata with a new Creation-type DateOfCreationOrRevision object.
+def add_date_of_creation(metadata: Metadata):
+    """Populate metadata with a new Creation-type DateOfCreationOrRevision object
 
     Related CAAIS defaults:
 
@@ -386,7 +359,7 @@ def add_date_of_creation(metadata: Metadata) -> None:
 #
 
 
-def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: type[Model]) -> None:
+def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: Model):
     """Add up to one related model to the metadata object by mapping the
     model's fields to the form's fields. For every field on the model that is
     not named "metadata" or "id," a field with the same name is searched in the
@@ -406,10 +379,10 @@ def add_related_models(form_data: dict, metadata: Metadata, CaaisModel: type[Mod
     for field in filter(lambda f: f.name not in ("id", "metadata"), CaaisModel._meta.get_fields()):
         # Populate terms
         if field.is_relation:
-            if field.related_model is None or not issubclass(field.related_model, AbstractTerm):
+            if not issubclass(field.related_model, AbstractTerm):
                 raise ValueError(
-                    f"Could not handle related model {field.related_model!r}! "
-                    f"Can only handle {AbstractTerm!r}"
+                    f"Could not handle related model {repr(field.related_model)}! "
+                    f"Can only handle {repr(AbstractTerm)}"
                 )
 
             term = term_or_default(
@@ -511,13 +484,13 @@ def coalesce_other_term_field(
     - term is the Other Term, and other_term is filled
     - term is not the Other Term
     """
-    term = form_data.get(field_name)
+    term = form_data.get(field_name, None)
     other_term = form_data.get(f"other_{field_name}", "")
 
     if not term and not other_term:
         return None
 
-    if term is not None and term.name.lower().strip() != "other" and other_term:
+    if term.name.lower().strip() != "other" and other_term:
         LOGGER.warning(
             ("Both %s (%s) and other_%s (%s) were specified. Ignoring the latter"),
             field_name,
@@ -536,7 +509,7 @@ def coalesce_other_term_field(
         except TermClass.DoesNotExist:
             if isinstance(notes, list):
                 notes.append(
-                    gettext(f"{TermClass._meta.verbose_name} was noted as {other_term!r}")
+                    gettext(f"{TermClass._meta.verbose_name} was noted as {repr(other_term)}")
                 )
 
     return term

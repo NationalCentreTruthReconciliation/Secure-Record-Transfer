@@ -13,8 +13,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 class SeleniumLiveServerTestCase(StaticLiveServerTestCase, ABC):
     """Class used to run Selenium-based E2E tests."""
 
-    serialized_rollback = True
-
     def setUp(self) -> None:
         """Set up the test case by initializing the web driver."""
         chrome_options = webdriver.ChromeOptions()

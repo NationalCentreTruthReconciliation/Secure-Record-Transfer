@@ -52,9 +52,12 @@ wheels = [
 
 [[package]]
 name = "bagit"
-version = "1.9.0"
+version = "1.8.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a1/a0/8866b4c6f894af0eb10e4964157f3241dd4117700fc010e7825471d51a13/bagit-1.9.0.tar.gz", hash = "sha256:9455006c2d1df88be95ec1fccabc5ea623389589ea4c85b3d85bd256f29d7656", size = 23443, upload-time = "2025-06-13T17:44:26.969Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/99/927b704237a1286f1022ea02a2fdfd82d5567cfbca97a4c343e2de7e37c4/bagit-1.8.1.tar.gz", hash = "sha256:37df1330d2e8640c8dee8ab6d0073ac701f0614d25f5252f9e05263409cee60c", size = 26229, upload-time = "2021-02-08T18:53:22.129Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1b/fc/58b3c209fdd383744b27914d0b88d0f9db72aa043e1475618d981d7089d9/bagit-1.8.1-py2.py3-none-any.whl", hash = "sha256:d14dd7e373dd24d41f6748c42f123f7db77098dfa4a0125dbacb4c8bdf767c09", size = 35137, upload-time = "2021-02-08T18:53:20.581Z" },
+]
 
 [[package]]
 name = "certifi"
@@ -837,7 +840,7 @@ prod = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bagit", specifier = ">=1.9.0,<2" },
+    { name = "bagit", specifier = ">=1.8.1,<2" },
     { name = "clamd", specifier = ">=1.0.2,<2" },
     { name = "dateparser", specifier = ">=1.2.0,<2" },
     { name = "debugpy", specifier = ">=1.8.2,<2" },

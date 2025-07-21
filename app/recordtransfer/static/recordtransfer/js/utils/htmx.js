@@ -1,4 +1,4 @@
-import { setupSubmissionGroupForm, setupAssignSubmissionGroupForm } from "../forms/forms.js";
+import { setupSubmissionGroupForm } from "../forms/forms.js";
 import { initializeSubmissionForm } from "../submission_form/index";
 import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
 
@@ -20,8 +20,23 @@ import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./uti
 export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
     closeModal();
 
+    // If the request was successful, refresh the table
     if (e.detail.successful) {
-        refreshIPSubmissionTable(context);
+        // Get base refresh URL
+        const refreshUrl = context["IN_PROGRESS_SUBMISSION_TABLE_URL"];
+        const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+
+        // Get the current page number
+        const currentPage = getCurrentTablePage();
+
+        const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
+
+        window.htmx.ajax("GET",
+            finalUrl,
+            {
+                target: "#" + context["ID_IN_PROGRESS_SUBMISSION_TABLE"],
+                swap: "innerHTML"
+            });
     }
 };
 
@@ -35,19 +50,18 @@ export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
 };
 
 /**
- * Handles the after-swap event for the modal.
- * This function is triggered after the modal content has been swapped in.
+ * Handles the after-swap event for submission group forms in HTMX contexts.
+ * Sets up the submission group form when triggered by the new submission group button
+ * and displays the modal after content swap.
  * @param {Event} e - The HTMX after-swap event object containing request details
  * @param {object} context - The context object for the current operation
  * @returns {void}
  */
-export const handleModalAfterSwap = (e, context) => {
-    const triggeredBy = e.detail.requestConfig.elt.id;
-    // Check if swap was triggered by the new submission group button
-    if (triggeredBy === "id_new_submission_group_button") {
+export const handleSubmissionGroupModalFormAfterSwap = (e, context) => {
+    // Sets up the submission group form if the modal content swap was triggered by the
+    // new submission group button
+    if (e.detail.requestConfig.elt.id === "id_new_submission_group_button") {
         setupSubmissionGroupForm(context);
-    } else if (triggeredBy.startsWith("assign_submission_group_")) {
-        setupAssignSubmissionGroupForm();
     }
     // Always show the modal after a swap on the modal content container
     showModal();
@@ -55,37 +69,52 @@ export const handleModalAfterSwap = (e, context) => {
 
 /**
  * Handles the modal swap event before content is replaced.
- * This function is triggered before the modal content is swapped and handles successful form
- * submissions by closing the modal and refreshing appropriate tables.
- * @param {CustomEvent} e - The event object containing the server response and request details.
+ * Closes the modal if the server response is empty, which occurs when the submission group is
+ * successfully created.
+ * @param {CustomEvent} e - The event object containing the server response.
  * @param {object} context - Context object with URLs and element IDs for table refresh.
+ * @param {string} context.SUBMISSION_GROUP_TABLE_URL - The URL to refresh the submission group
+ * table.
+ * @param {string} context.PAGINATE_QUERY_NAME - The query parameter name for pagination
+ * (e.g., "p").
+ * @param {string} context.ID_SUBMISSION_GROUP_TABLE - The DOM element ID of the submission group
+ * table to update.
  */
-export const handleModalBeforeSwap = (e, context) => {
-    // Only proceed if there's no server response (indicates successful form submission)
-    if (!e.detail.serverResponse) {
-        const triggeredBy = e.detail.requestConfig.elt.id;
-
-        if (triggeredBy === "submission-group-form") {
-            e.preventDefault(); // Stop the event from bubbling up
-            closeModal();
-            // Handler may be used on other pages where the submission group table is not present
-            if (context["ID_SUBMISSION_GROUP_TABLE"] &&
-                document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
-                refreshSubmissionGroupTable(context);
-            }
-        } else if (triggeredBy === "assign-submission-group-form") {
-            e.preventDefault();
-            closeModal();
-            if (context["ID_SUBMISSION_TABLE"] &&
-                document.getElementById(context["ID_SUBMISSION_TABLE"])) {
-                refreshSubmissionTable(context);
-            }
-            if (context["ID_SUBMISSION_GROUP_TABLE"] &&
-                document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
-                refreshSubmissionGroupTable(context);
-            }
+export function handleSubmissionGroupModalFormBeforeSwap(e, context) {
+    if (!e.detail.serverResponse && e.detail.requestConfig.elt.id === "submission-group-form") {
+        e.preventDefault(); // Stop the event from bubbling up
+        closeModal();
+        // Handler may be used on other pages where the submission group table is not present
+        if (context["ID_SUBMISSION_GROUP_TABLE"] &&
+            document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
+            refreshSubmissionGroupTable(context);
         }
     }
+}
+
+/**
+ * Refreshes the submission group table by making an HTMX AJAX request
+ * @param {object} context - Configuration object containing URL and element identifiers
+ * @param {string} context.SUBMISSION_GROUP_TABLE_URL - Base URL for fetching submission group
+ * table data
+ * @param {string} context.PAGINATE_QUERY_NAME - Query parameter name used for pagination
+ * @param {string} context.ID_SUBMISSION_GROUP_TABLE - DOM element ID of the submission group table
+ * to update
+ * @returns {void}
+ */
+const refreshSubmissionGroupTable = (context) => {
+    const refreshUrl = context["SUBMISSION_GROUP_TABLE_URL"];
+    const paginateQueryName = context["PAGINATE_QUERY_NAME"];
+    const currentPage = getCurrentTablePage();
+
+    const finalUrl = addQueryParam(refreshUrl, paginateQueryName, currentPage);
+
+    window.htmx.ajax("GET",
+        finalUrl,
+        {
+            target: "#" + context["ID_SUBMISSION_GROUP_TABLE"],
+            swap: "innerHTML"
+        });
 };
 
 /**
@@ -99,44 +128,3 @@ export function setupBaseHtmxEventListeners() {
         }
     });
 }
-
-/**
- * Generic function to refresh a table by making an HTMX AJAX request
- * @param {string} tableUrl - Base URL for fetching table data
- * @param {string} paginateQueryName - Query parameter name used for pagination
- * @param {string} tableElementId - DOM element ID of the table to update
- * @returns {void}
- */
-const refreshTable = (tableUrl, paginateQueryName, tableElementId) => {
-    const currentPage = getCurrentTablePage();
-    const finalUrl = addQueryParam(tableUrl, paginateQueryName, currentPage);
-
-    window.htmx.ajax("GET", finalUrl, {
-        target: "#" + tableElementId,
-        swap: "innerHTML"
-    });
-};
-
-const refreshSubmissionGroupTable = (context) => {
-    refreshTable(
-        context["SUBMISSION_GROUP_TABLE_URL"],
-        context["PAGINATE_QUERY_NAME"],
-        context["ID_SUBMISSION_GROUP_TABLE"]
-    );
-};
-
-const refreshIPSubmissionTable = (context) => {
-    refreshTable(
-        context["IN_PROGRESS_SUBMISSION_TABLE_URL"],
-        context["PAGINATE_QUERY_NAME"],
-        context["ID_IN_PROGRESS_SUBMISSION_TABLE"]
-    );
-};
-
-const refreshSubmissionTable = (context) => {
-    refreshTable(
-        context["SUBMISSION_TABLE_URL"],
-        context["PAGINATE_QUERY_NAME"],
-        context["ID_SUBMISSION_TABLE"]
-    );
-};

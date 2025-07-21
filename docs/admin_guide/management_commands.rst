@@ -111,38 +111,6 @@ disabled in production environments for safety and only works with SQLite3 datab
 * Restores the application to a clean starting point
 
 
-
-Clean Old Job Files
--------------------
-
-Deletes job attachment files for jobs whose end time is older than a specified number of days. Useful for cleaning up old files and freeing disk space.
-
-.. code-block:: bash
-
-    python manage.py clean_old_job_files --older-than-days <days>
-
-**Options:**
-
-* ``--older-than-days`` - Required. Only jobs whose end time is older than this many days will have their attachment files deleted.
-* ``--no-confirm`` - Optional. If passed, deletion proceeds without a confirmation prompt. Otherwise, you must enter ``y`` to confirm deletion.
-
-**Examples:**
-
-.. code-block:: bash
-
-    # Delete files for jobs older than 30 days, with confirmation
-    python manage.py clean_old_job_files --older-than-days 30
-
-    # Delete files for jobs older than 14 days, without confirmation
-    python manage.py clean_old_job_files --older-than-days 14 --no-confirm
-
-**What this command does:**
-
-* Finds jobs whose ``end_time`` is older than the specified number of days and have an attached file
-* Prompts for confirmation unless ``--no-confirm`` is passed
-* Deletes the attached files for those jobs
-* Prints a summary of deleted files
-
 Getting Help
 ############
 

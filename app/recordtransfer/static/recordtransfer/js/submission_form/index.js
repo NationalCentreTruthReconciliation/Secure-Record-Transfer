@@ -55,9 +55,8 @@ export const initializeSubmissionForm = () => {
 
     const submitButton = document.getElementById("submit-form-btn");
     if (submitButton) {
-        submitButton.addEventListener("click", (event) => {
-            event.preventDefault(); // Prevent form submission
-            singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
+        submitButton.addEventListener("click", () => {
+            singleCaptchaFn();
         });
     }
 };

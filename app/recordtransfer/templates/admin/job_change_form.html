@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+    {% if original.job_status == 'CP' and original.attached_file %}
+        <div class="submit-row">
+            <a href="{{ original.get_admin_download_url }}">{% trans "Download Attached File" %}</a>
+        </div>
+    {% endif %}
+{% endblock submit_buttons_bottom %}

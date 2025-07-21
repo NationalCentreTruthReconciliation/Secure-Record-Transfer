@@ -63,17 +63,3 @@ class OtherValues:
     def asdict(self) -> dict[str, str]:
         """Return the dataclass as a dictionary."""
         return dataclasses.asdict(self)
-
-
-@dataclasses.dataclass(frozen=True)
-class FormFieldNames:
-    """Class to hold form field names used in POST requests."""
-
-    # Submission Group Assignment Form Field Names
-    SUBMISSION_UUID: str = "submission_uuid"
-    GROUP_UUID: str = "group_uuid"
-    UNASSIGN_GROUP: str = "unassign_group"
-
-    def asdict(self) -> dict[str, str]:
-        """Return the dataclass as a dictionary."""
-        return dataclasses.asdict(self)

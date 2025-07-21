@@ -1,7 +1,6 @@
 import os
 import tempfile
 from typing import ClassVar
-from unittest.mock import MagicMock, patch
 from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
@@ -93,9 +92,55 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     }
 
     def setUp(self) -> None:
-        """Set up test data."""
+        """Set up the test case environment."""
         super().setUp()
-        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        # Create a test user
+        self.setUpTestData()
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
+        cls.user = User.objects.create_user(username="testuser", password="testpassword")
+
+        ### This section restores the database to the state after migrations ###
+
+        # Create rights types
+        for name, description in (
+            ("Other", "A type of rights not listed elsewhere"),
+            ("Unknown", "Use when it is not known what type of rights pertain to the material"),
+            ("Cultural Rights", "Accss to material is limited according to cultural protocols"),
+            ("Statute", "Access to material is limited according to law or legislation"),
+            ("License", "Access to material is limited by a licensing agreement"),
+            (
+                "Access",
+                "Access to material is restricted to a certain entity or group of entities",
+            ),
+            (
+                "Copyright",
+                "Access to material is based on fair dealing OR material is in the public domain",
+            ),
+        ):
+            rights_type, created = RightsType.objects.get_or_create(
+                name=name,
+                description=description,
+            )
+            if created:
+                rights_type.save()
+
+        # Create Source Information types
+        other_type, created = SourceType.objects.get_or_create(
+            name="Other",
+            description="Placeholder right to allow user to specify unique source type",
+        )
+        if created:
+            other_type.save()
+
+        other_role, created = SourceRole.objects.get_or_create(
+            name="Other",
+            description="Placeholder right to allow user to specify unique source role",
+        )
+        if created:
+            other_role.save()
 
     def go_next_step(self) -> None:
         """Go to the next step in the form."""
@@ -538,43 +583,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                 xpath = f"//dt[text()='{label}']/following-sibling::dd[1]"
                 element = self.driver.find_element(By.XPATH, xpath)
                 self.assertEqual(element.text, expected_value)
-
-    @patch("django_recaptcha.fields.ReCaptchaField.clean")
-    @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
-    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
-    def test_submit_form(
-        self,
-        mock_creation_success: MagicMock,
-        mock_thank_you: MagicMock,
-        mock_recaptcha: MagicMock,
-    ) -> None:
-        """Test that the form can be submitted successfully."""
-        # Mock the email tasks to prevent them from running
-        mock_thank_you.return_value = None
-        mock_creation_success.return_value = None
-        # Mock reCAPTCHA validation to always pass
-        mock_recaptcha.return_value = "PASSED"
-
-        self.complete_form_till_review_step()
-        driver = self.driver
-
-        # Wait until submit button is clickable
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "submit-form-btn")))
-
-        # Click the submit button
-        driver.find_element(By.ID, "submit-form-btn").click()
-
-        # Wait for redirect to submission sent page
-        WebDriverWait(driver, 10).until(
-            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:submission_sent")))
-        )
-
-        # Verify the submission success message is displayed
-        self.assertIn("Thank you for your Submission", driver.page_source)
-
-        # Verify the email tasks were called
-        mock_thank_you.assert_called_once()
-        mock_creation_success.assert_called_once()
 
     def test_previous_saves_form(self) -> None:
         """Test that the form data is saved when going to the previous step. Uses the Contact
