@@ -74,6 +74,11 @@
     width: 100%;
 }
 
+.reduce-form-field-width {
+    width: 200px !important;
+    max-width: 200px !important;
+}
+
 .flex-item>textarea {
     resize: none;
     font-size: medium;
