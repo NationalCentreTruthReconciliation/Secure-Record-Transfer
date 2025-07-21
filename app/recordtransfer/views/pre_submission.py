@@ -112,14 +112,12 @@ class SubmissionFormWizard(SessionWizardView):
             info_message=gettext("Provide a brief description of the records you're submitting"),
         ),
         SubmissionStep.RIGHTS: SubmissionStepMeta(
-            template="recordtransfer/submission_form_rights.html",
+            template="recordtransfer/submission_form_formset.html",
             title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=gettext(
-                "Depending on the records you are submitting, there may be specific rights that govern "
-                "the access of your records. The following is a brief description about the types of "
-                "rights that are available to be used. If none suit your needs, select <b>Other</b> in "
-                "the rights dropdown. "
+                "Need help understanding rights types? "
+                '<a class="non-nav-link link-primary font-semibold underline" target="_blank" href="/help#rights-types">View our guide</a> for detailed explanations.'
             ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
