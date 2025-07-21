@@ -4,8 +4,10 @@ services:
     container_name: recordtransfer_clamav
     ports:
       - 3310:3310
+    entrypoint: ["/etc/clamav/entrypoint.sh"]
     volumes:
-      - ./docker/clamav/clamd.conf:/etc/clamav/clamd.conf:z
+      - ./docker/clamav/entrypoint.sh:/etc/clamav/entrypoint.sh:z
+      - ./docker/clamav/clamd.conf.template:/etc/clamav/clamd.conf.template:z
       - ./docker/clamav/freshclam.conf:/etc/clamav/freshclam.conf:z
       - clamav-virusdb:/var/lib/clamav
       - temp-directory:/tmp
