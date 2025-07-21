@@ -39,9 +39,13 @@ def check_for_malware(file: UploadedFile) -> None:
         LOGGER.error(
             "File is too large to be read by ClamAV! %d bytes were read", file.tell(), exc_info=exc
         )
+        raise ValueError("File is too large to scan for malware") from exc
 
     except clamd.CommunicationError as exc:
         LOGGER.error("CommunicationError occurred connecting to ClamAV!", exc_info=exc)
+        raise ConnectionError(
+            "Unable to scan file for malware due to scanner communication error"
+        ) from exc
 
     # Return file pointer to beginning
     file.seek(0)

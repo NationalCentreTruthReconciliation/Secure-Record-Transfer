@@ -167,6 +167,22 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
                     },
                     status=400,
                 )
+            except ValueError as exc:
+                LOGGER.error("File too large for malware scanning: %s", _file.name, exc_info=exc)
+                return JsonResponse({
+                    "file": _file.name,
+                    "accepted": False,
+                    "uploadSessionToken": session.token,
+                    "error": gettext(f'File "{_file.name}" is too large to scan for malware'),
+                }, status=400)
+            except ConnectionError as exc:
+                LOGGER.error("ClamAV connection error for file %s", _file.name, exc_info=exc)
+                return JsonResponse({
+                    "file": _file.name,
+                    "accepted": False,
+                    "uploadSessionToken": session.token,
+                    "error": gettext("Unable to scan file for malware due to scanner error"),
+                }, status=500)
 
             try:
                 uploaded_file = session.add_temp_file(_file)
