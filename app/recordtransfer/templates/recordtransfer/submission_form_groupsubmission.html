@@ -14,7 +14,7 @@
                         hx-swap="innerHTML"
                         hx-select="#modal-content"
                         id="id_new_submission_group_button"
-                        class="btn btn-outline btn-white border-primary btn-sm gap-2 transition-transform duration-150 hover:scale-105">
+                        class="btn btn-outline btn-white border-primary btn-sm gap-2 transition-transform duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg"
                          fill="none"
                          viewBox="0 0 24 24"
@@ -41,11 +41,9 @@
     <div class="form-group mb-6">
         <div class="alert">
             <i class="fas fa-question-circle pointer-events-none text-gray-400"></i>
-            <span class="text-sm">
-                <a class="non-nav-link link-primary font-semibold"
-                   href="{% url 'recordtransfer:help' %}#why-create-groups"
-                   target="_blank">{% trans "Why would I want to make a group?" %}</a>
-            </span>
+            <a class="non-nav-link link link-primary font-semibold text-xs"
+               href="{% url 'recordtransfer:help' %}#why-create-groups"
+               target="_blank">{% trans "Why would I want to make a group?" %}</a>
         </div>
     </div>
 {% endblock formfields %}
