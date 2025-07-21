@@ -11,9 +11,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 def check_for_malware(file: UploadedFile) -> None:
-    """Scan the file for malware. If malware is found, a ValidationError is raised.
+    """Scan the file for malware.
 
-    If :ref:`CLAMAV_ENABLED` is False, return early.
+    If CLAMAV_ENABLED is False, return early.
+
+    Raises:
+        ValidationError: If the file contains malware.
+        ConnectionError: If the connection to ClamAV cannot be established or if there is a
+        communication error.
+        ValueError: If the file is too large to be scanned.
     """
     if not settings.CLAMAV_ENABLED:
         return
