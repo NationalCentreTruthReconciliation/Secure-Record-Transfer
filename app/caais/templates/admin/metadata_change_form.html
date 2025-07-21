@@ -1,13 +1,21 @@
 {% extends "admin/change_form.html" %}
-
 {% load i18n %}
 {% load static %}
-
+{% block object-tools %}
+    {% if change and not is_popup %}
+        <ul class="object-tools">
+            <li>
+                <a href="#dates-of-creation-or-revision" class="button">History</a>
+            </li>
+            {% block object-tools-items %}{% endblock object-tools-items %}
+        </ul>
+    {% endif %}
+{% endblock object-tools %}
 {% block after_related_objects %}
     {% if original.dates_of_creation_or_revision.count %}
         <div class="inline-group">
             <fieldset class="module">
-                <h2>Dates of creation or revision</h2>
+                <h2 id="dates-of-creation-or-revision">Dates of creation or revision</h2>
                 <div class="inline-related">
                 {% for date in original.dates_of_creation_or_revision.all|dictsortreversed:"creation_or_revision_date" %}
                     <h3>
