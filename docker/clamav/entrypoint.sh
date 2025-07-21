@@ -1,12 +1,11 @@
 #!/bin/bash
 set -e
 
-# Generate the actual config from template using environment variables
+# Set default if not provided
+export MAX_SINGLE_UPLOAD_SIZE_MB="${MAX_SINGLE_UPLOAD_SIZE_MB:-64}"
+
 echo "Generating ClamAV configuration from template..."
 envsubst < /etc/clamav/clamd.conf.template > /etc/clamav/clamd.conf
 
-if [ $# -eq 0 ]; then
-  exec /init
-else
-  exec "$@"
-fi
+# Execute the original entrypoint command
+exec /init

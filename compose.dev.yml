@@ -7,8 +7,6 @@ services:
     ports:
       - 3310:3310
     entrypoint: ["/etc/clamav/entrypoint.sh"]
-    env_file:
-      - .prod.env
     volumes:
       - ./docker/clamav/entrypoint.sh:/etc/clamav/entrypoint.sh:z
       - ./docker/clamav/clamd.conf.template:/etc/clamav/clamd.conf.template:z
