@@ -47,8 +47,8 @@ ScanArchive yes
 # Scan
 ###############
 
-MaxScanSize 300M
-MaxFileSize 100M
+MaxFileSize ${MAX_SINGLE_UPLOAD_SIZE_MB}M
+MaxScanSize ${MAX_SINGLE_UPLOAD_SIZE_MB}M
 MaxRecursion 30
 MaxFiles 50000
 MaxEmbeddedPE 40M
