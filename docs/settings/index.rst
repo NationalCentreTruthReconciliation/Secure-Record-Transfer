@@ -727,8 +727,7 @@ CAAIS_DEFAULT_UPDATE_TYPE
         Update   string
         =======  =========
 
-    When metadata records are updated through the Django admin interface, a DateOfCreationOrRevision
-    entry is automatically created to track changes. This setting controls the name of the creation/revision type used for these updates.
+    When metadata records are updated through the Django admin interface, a DateOfCreationOrRevision entry is automatically created to track changes. This setting controls the name of the creation/revision type used for these updates.
 
     **.env Example:**
 
@@ -736,56 +735,6 @@ CAAIS_DEFAULT_UPDATE_TYPE
 
         #file: .env
         CAAIS_DEFAULT_UPDATE_TYPE='Record Updated'
-
-
-CAAIS_DEFAULT_UPDATE_AGENT
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    *Default agent name for metadata updates*
-
-    .. table::
-
-        =======  =========
-        Default  Type
-        =======  =========
-        (empty)  string
-        =======  =========
-
-    When metadata records are updated through the Django admin interface, this setting specifies
-    the default agent name to record in the DateOfCreationOrRevision entry. By default, the name
-    of the agent who modified the CAAIS metadata is used, but if none is provided, this value will
-    be used instead.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CAAIS_DEFAULT_UPDATE_AGENT='System Administrator'
-
-
-CAAIS_DEFAULT_UPDATE_NOTE
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    *Default note for metadata updates*
-
-    .. table::
-
-        =======  =========
-        Default  Type
-        =======  =========
-        (empty)  string
-        =======  =========
-
-    An optional note to include in automatically created DateOfCreationOrRevision entries when
-    metadata records are updated through the Django admin interface.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        CAAIS_DEFAULT_UPDATE_NOTE='Metadata updated via admin interface'
 
 
 Testing

@@ -280,13 +280,10 @@ class MetadataAdmin(admin.ModelAdmin):
             defaults={"description": "Metadata record updated via admin interface"},
         )
 
-        update_agent = agent_name or caais_settings.CAAIS_DEFAULT_UPDATE_AGENT
-        update_note = update_note or caais_settings.CAAIS_DEFAULT_UPDATE_NOTE
-
         DateOfCreationOrRevision.objects.create(
             metadata=metadata,
             creation_or_revision_type=update_type,
-            creation_or_revision_agent=update_agent,
+            creation_or_revision_agent=agent_name,
             creation_or_revision_note=update_note,
         )
 
