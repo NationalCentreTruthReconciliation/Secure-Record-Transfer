@@ -1,3 +1,6 @@
+# This is a custom image for Debian-based ClamAV, but with gettext installed
+# to allow for environment variable substitution in configuration files.
+
 FROM docker.io/clamav/clamav-debian
 
 # Install gettext for envsubst
