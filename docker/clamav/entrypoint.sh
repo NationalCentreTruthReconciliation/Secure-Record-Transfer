@@ -5,7 +5,7 @@ set -e
 export MAX_SINGLE_UPLOAD_SIZE_MB="${MAX_SINGLE_UPLOAD_SIZE_MB:-64}"
 
 echo "Generating ClamAV configuration from template..."
-envsubst < /etc/clamav/clamd.conf.template > /etc/clamav/clamd.conf
+sed "s/\${MAX_SINGLE_UPLOAD_SIZE_MB}/$MAX_SINGLE_UPLOAD_SIZE_MB/g" /etc/clamav/clamd.conf.template > /etc/clamav/clamd.conf
 
 # Execute the original entrypoint command
 exec /init

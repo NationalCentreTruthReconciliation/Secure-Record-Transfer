@@ -1,8 +1,6 @@
 services:
   clamav:
-    build:
-      context: ./docker/clamav
-    image: custom-clamav
+    image: docker.io/clamav/clamav-debian
     restart: unless-stopped
     entrypoint: ["/etc/clamav/entrypoint.sh"]
     env_file:
