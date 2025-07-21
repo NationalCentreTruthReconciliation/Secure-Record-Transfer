@@ -9,10 +9,10 @@ services:
       - .prod.env
     volumes:
       - ./docker/clamav/entrypoint.sh:/etc/clamav/entrypoint.sh:z
-      - clamav-virusdb:/var/lib/clamav
-      - temp-directory:/tmp
       - ./docker/clamav/clamd.conf.template:/etc/clamav/clamd.conf.template:z
       - ./docker/clamav/freshclam.conf:/etc/clamav/freshclam.conf:z
+      - clamav-virusdb:/var/lib/clamav
+      - temp-directory:/tmp
 
   redis:
     image: docker.io/redis:8-alpine
