@@ -118,7 +118,7 @@ class SubmissionFormWizard(SessionWizardView):
             info_message=gettext(
                 "Depending on the records you are submitting, there may be specific rights that govern "
                 "the access of your records. The following is a brief description about the types of "
-                "rights that are available to be used. If none suit your needs, select Other in "
+                "rights that are available to be used. If none suit your needs, select <b>Other</b> in "
                 "the rights dropdown. "
             ),
         ),
