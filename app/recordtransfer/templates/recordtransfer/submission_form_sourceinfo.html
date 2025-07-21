@@ -18,8 +18,7 @@
         {% if field.name == "other_source_type" %}
             <div class="initially-hidden hidden">
                 <div class="alert">
-                    <i class="fas fa-exclamation-triangle pointer-events-none text-gray-400"></i>
-                    <div class="text-sm">
+                    <div class="text-xs">
                         {% blocktrans %}
                         <a class="non-nav-link link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-types">Click here</a>
                         for an explanation of the different types of source types.
@@ -30,8 +29,7 @@
         {% elif field.name == "other_source_role" %}
             <div class="initially-hidden hidden">
                 <div class="alert">
-                    <i class="fas fa-exclamation-triangle pointer-events-none text-gray-400"></i>
-                    <div class="text-sm">
+                    <div class="text-xs">
                         {% blocktrans %}
                         <a class="non-nav-link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
                         for an explanation of the different types of source roles.
