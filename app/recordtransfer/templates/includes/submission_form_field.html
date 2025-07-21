@@ -22,12 +22,10 @@
         {% endif %}
         {% if field.help_text %}
             <div class="mt-2 flex items-center">
-                <div class="relative inline-block">
-                    <i class="fa fa-info-circle h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help peer mr-1"
+                <div class="relative inline-block group">
+                    <i class="help-icon fa fa-info-circle mr-1 text-gray-400"
                        aria-hidden="true"></i>
-                    <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 peer-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                        {{ field.help_text }}
-                    </span>
+                    <span class="help-tooltip absolute left-1/2 bottom-full mb-2 -translate-x-1/2 opacity-0 group-hover:opacity-100 min-w-[12rem] max-w-[28rem] bg-gray-700 text-white rounded p-2">{{ field.help_text|safe }}</span>
                 </div>
                 <span class="text-gray-500 text-xs ml-1">Help</span>
             </div>
