@@ -289,6 +289,56 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(session.file_count, 0)
 
+    def test_malware_scan_file_too_large(self) -> None:
+        """Test that a ValueError from check_for_malware returns the correct error and status."""
+        self.patch_check_for_malware.side_effect = ValueError(
+            "File is too large to scan for malware"
+        )
+        response = self.client.post(
+            self.url,
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+        )
+
+        response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
+        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response_json.get("error"), 'File "File.PDF" is too large to scan for malware'
+        )
+        self.assertEqual(response_json.get("accepted"), False)
+        self.assertEqual(session.file_count, 0)
+
+    def test_malware_scan_connection_error(self) -> None:
+        """Test that a ConnectionError from check_for_malware returns the correct error and
+        status.
+        """
+        self.patch_check_for_malware.side_effect = ConnectionError(
+            "Unable to scan file for malware due to scanner error"
+        )
+        response = self.client.post(
+            self.url,
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+        )
+
+        response_json = response.json()
+
+        self.assertIn("uploadSessionToken", response_json)
+        self.assertTrue(response_json["uploadSessionToken"])
+
+        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(
+            response_json.get("error"), "Unable to scan file for malware due to scanner error"
+        )
+        self.assertEqual(response_json.get("accepted"), False)
+        self.assertEqual(session.file_count, 0)
+
 
 class TestUploadedFileView(TestCase):
     """Tests for recordtransfer:uploaded_file view."""
