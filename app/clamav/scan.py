@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import UploadedFile
 
 from . import connection, settings
 
-LOGGER = logging.getLogger("clamav")
+LOGGER = logging.getLogger(__name__)
 
 
 def check_for_malware(file: UploadedFile) -> None:
