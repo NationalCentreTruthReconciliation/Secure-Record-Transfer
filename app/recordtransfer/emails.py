@@ -53,12 +53,9 @@ def send_submission_creation_success(
     )
     LOGGER.info("Generated submission change URL: %s", submission_url)
 
-    admin_recipients = _get_admin_recipient_list(subject)
-    if admin_recipients:
-        used_recipients = admin_recipients
-    elif recipient_emails:
-        used_recipients = recipient_emails
-    else:
+    used_recipients = recipient_emails or _get_admin_recipient_list(subject)
+
+    if not used_recipients:
         LOGGER.warning(
             "No admin recipients found for submission creation success email. Skipping send."
         )
@@ -96,14 +93,11 @@ def send_submission_creation_failure(
             notification to. If not provided, admin recipients will be used.
     """
     subject = "Submission Failed"
-    admin_recipients = _get_admin_recipient_list(subject)
-    if admin_recipients:
-        used_recipients = admin_recipients
-    elif recipient_emails:
-        used_recipients = recipient_emails
-    else:
+    used_recipients = recipient_emails or _get_admin_recipient_list(subject)
+
+    if not used_recipients:
         LOGGER.warning(
-            "No admin recipients found for submission creation success email. Skipping send."
+            "No admin recipients found for submission creation failure email. Skipping send."
         )
         return
     _send_mail_with_logs(
