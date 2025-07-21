@@ -1,6 +1,8 @@
 """CAAIS metadata administrator"""
 
 from django.contrib import admin
+from django.contrib.admin.models import CHANGE, LogEntry
+from django.db import transaction
 from django.forms import ModelForm
 from django.http import HttpRequest
 
@@ -237,6 +239,7 @@ class MetadataAdmin(admin.ModelAdmin):
         GeneralNoteInlineAdmin,
     ]
 
+    @transaction.atomic
     def save_model(
         self, request: HttpRequest, obj: Metadata, form: ModelForm, change: bool
     ) -> None:
@@ -247,16 +250,28 @@ class MetadataAdmin(admin.ModelAdmin):
         records are updated through the admin interface.
         """
         super().save_model(request, obj, form, change)
+        if change:
+            log_entry = (
+                LogEntry.objects.filter(
+                    object_id=obj.pk,
+                    user_id=request.user.pk,
+                    content_type__app_label=obj._meta.app_label,
+                    content_type__model=obj._meta.model_name,
+                    action_flag=CHANGE,
+                )
+                .order_by("-action_time", "-pk")
+                .first()
+            )
+            change_message = log_entry.get_change_message() if log_entry else ""
+            self._create_update_revision_entry(obj, request.user.username, change_message)
 
-        if change:  # Only for updates, not initial creation
-            self._create_update_revision_entry(obj, request.user.username)
-
-    def _create_update_revision_entry(self, metadata: Metadata, agent_name: str) -> None:
+    def _create_update_revision_entry(self, metadata: Metadata, agent_name: str, update_note: str) -> None:
         """Create a DateOfCreationOrRevision entry for metadata updates.
 
         Args:
             metadata: The Metadata object that was updated
             agent_name: The username of the user who made the update
+            update_note: A note about the update
         """
         update_type_name = caais_settings.CAAIS_DEFAULT_UPDATE_TYPE
 
@@ -266,7 +281,7 @@ class MetadataAdmin(admin.ModelAdmin):
         )
 
         update_agent = agent_name or caais_settings.CAAIS_DEFAULT_UPDATE_AGENT
-        update_note = caais_settings.CAAIS_DEFAULT_UPDATE_NOTE
+        update_note = update_note or caais_settings.CAAIS_DEFAULT_UPDATE_NOTE
 
         DateOfCreationOrRevision.objects.create(
             metadata=metadata,
