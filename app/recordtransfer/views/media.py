@@ -98,8 +98,8 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
     file is added to the upload session using the session token passed as a parameter in the
     request. If a session token is invalid, an error message is returned.
 
-    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
-    file is not an accepted type, an error message is returned.
+    The file type is checked against this application's :ref:`ACCEPTED_FILE_FORMATS` setting, if
+    the file is not an accepted type, an error message is returned.
 
     Args:
         request: The HTTP GET or POST request
