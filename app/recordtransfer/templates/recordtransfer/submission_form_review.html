@@ -45,10 +45,12 @@
                                                            href="{{ file.url }}"
                                                            target="_blank">{{ file.name }}</a>
                                                     </div>
-                                                {% elif forloop.counter == 6 %}
+                                                {% endif %}
+                                                {% if forloop.counter == 6 %}
                                                     <div>
                                                         <button type="button"
-                                                                class="text-sm hover:text-primary transition"
+                                                                class="text-sm text-primary/60 underline font-medium bg-transparent border-none p-0 hover:text-primary transition cursor-pointer"
+                                                                style="appearance: none"
                                                                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.classList.toggle('hidden');">
                                                             +{{ value|length|add:'-5' }} more
                                                         </button>
