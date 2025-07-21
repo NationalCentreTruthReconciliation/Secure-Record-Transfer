@@ -585,7 +585,7 @@ class RightsForm(SubmissionForm):
                 "class": "rights-select-other",
             }
         ),
-        help_text=gettext('For example: "UK Human Rights Act 1998"'),
+        help_text=gettext("For example: &quot;UK Human Rights Act 1998&quot;"),
         label=gettext("Other type of rights"),
     )
 
@@ -599,7 +599,9 @@ class RightsForm(SubmissionForm):
                 ),
             }
         ),
-        help_text=gettext('For example: "Copyright until 2050," "Only applies to images," etc.'),
+        help_text=gettext(
+            "For example: &quot;Copyright until 2050&quot;, &quot;Only applies to images&quot;, etc."
+        ),
         label=gettext("Notes for rights"),
     )
 
