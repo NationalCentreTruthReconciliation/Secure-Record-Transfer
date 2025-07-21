@@ -135,9 +135,15 @@ class Command(BaseCommand):
         """
         func = EMAIL_FUNCTIONS[email_id]
 
-        if email_id in ("submission_creation_success", "thank_you_for_your_submission"):
+        test_recipient = ["test@admin.com"]
+
+        if email_id == "submission_creation_success":
+            func(form_data, submission, recipient_emails=test_recipient)
+        elif email_id == "submission_creation_failure":
+            func(form_data, user, recipient_emails=test_recipient)
+        elif email_id == "thank_you_for_your_submission":
             func(form_data, submission)
-        elif email_id in ("submission_creation_failure", "your_submission_did_not_go_through"):
+        elif email_id == "your_submission_did_not_go_through":
             func(form_data, user)
         elif email_id == "user_activation_email":
             func(user)
