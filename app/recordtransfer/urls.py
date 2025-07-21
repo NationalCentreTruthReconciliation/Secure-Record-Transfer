@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.urls import path, re_path
 
@@ -67,6 +68,11 @@ urlpatterns = [
         name="get_user_submission_groups",
     ),
     path(
+        "job/<uuid:job_uuid>/file/",
+        login_required(views.media.job_file),
+        name="job_file",
+    ),
+    path(
         "submission-group-table/",
         login_required(views.profile.submission_group_table),
         name="submission_group_table",
@@ -91,16 +97,21 @@ urlpatterns = [
         login_required(views.profile.delete_submission_group),
         name="delete_submission_group_modal",
     ),
+    path(
+        "assign-submission-group-modal/<uuid:uuid>/",
+        login_required(views.profile.assign_submission_group_modal),
+        name="assign_submission_group_modal",
+    ),
+    path(
+        "assign-submission-group",
+        login_required(views.profile.assign_submission_group),
+        name="assign_submission_group",
+    ),
 ]
 
 if settings.DEBUG:
     # Serve media files directly without nginx in development
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # Check permissions and serve through nginx in production
-    urlpatterns.append(
-        re_path(r"media/(?P<path>.*)", login_required(views.media.media_request), name="media")
-    )
 
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(

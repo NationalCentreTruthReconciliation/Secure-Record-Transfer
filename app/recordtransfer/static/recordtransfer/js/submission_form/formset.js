@@ -100,10 +100,31 @@ export function setupFormset(prefix, onnewform = undefined) {
             // The formset number is zero-based, so we can use the current length as the form
             // number
             const formNumber = formsetForms.length;
-            newForm.innerHTML = newForm.innerHTML.replace(
-                formRowRegex,
-                `${prefix}-${formNumber}-`
-            );
+
+            // Update form attributes and IDs by walking through all elements
+            const updateFormElements = (element, formNumber) => {
+                // Update element attributes
+                ["id", "name", "for"].forEach(attr => {
+                    const value = element.getAttribute(attr);
+                    if (value) {
+                        element.setAttribute(attr,
+                            value.replace(formRowRegex, `${prefix}-${formNumber}-`));
+                    }
+                });
+
+                // Recursively update child elements
+                element.querySelectorAll("*").forEach(child => {
+                    ["id", "name", "for"].forEach(attr => {
+                        const value = child.getAttribute(attr);
+                        if (value) {
+                            child.setAttribute(attr,
+                                value.replace(formRowRegex, `${prefix}-${formNumber}-`));
+                        }
+                    });
+                });
+            };
+
+            updateFormElements(newForm, formNumber);
 
             // Insert the new form after the last form
             lastForm.parentNode.insertBefore(newForm, lastForm.nextSibling);

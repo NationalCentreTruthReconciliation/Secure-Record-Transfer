@@ -1,9 +1,9 @@
 from django import forms
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
-from django_countries.widgets import CountrySelectWidget
 
 from recordtransfer.constants import HtmlIds, OtherValues
+from recordtransfer.widgets import CustomCountrySelectWidget
 
 
 class ContactInfoFormMixin(forms.Form):
@@ -159,7 +159,7 @@ class ContactInfoFormMixin(forms.Form):
     )
 
     country = CountryField(blank_label=gettext("Select your Country")).formfield(
-        widget=CountrySelectWidget(
+        widget=CustomCountrySelectWidget(
             attrs={
                 "class": "reduce-form-field-width",
             }
