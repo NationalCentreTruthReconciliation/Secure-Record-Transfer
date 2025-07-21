@@ -511,7 +511,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
                 ),
             }
         ),
-        help_text=gettext('For example, "200 PDF documents, totalling 2.0GB"'),
+        help_text=gettext("For example, &quot;200 PDF documents, totalling 2.0GB&quot;"),
         label=gettext("Quantity and type of files"),
     )
 
@@ -650,7 +650,9 @@ class OtherIdentifiersForm(SubmissionForm):
                 "placeholder": gettext("The type of the identifier"),
             }
         ),
-        help_text=gettext('For example: "Receipt number", "LAC Record ID", etc.'),
+        help_text=gettext(
+            "For example: &quot;Receipt number&quot;, &quot;LAC Record ID&quot;, etc."
+        ),
         label=gettext("Type of identifier"),
     )
 
