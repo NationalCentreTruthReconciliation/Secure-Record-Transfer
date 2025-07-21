@@ -1,4 +1,4 @@
-{% extends 'recordtransfer/submission_form_standard.html' %}
+{% extends "recordtransfer/submission_form_standard.html" %}
 {% load i18n %}
 {% block form_explanation %}
     {% url 'recordtransfer:index' as homepage %}
@@ -7,8 +7,8 @@
         Terms of Submission
         {% endblocktrans %}
     </div>
-    <div class="text-sm">
-        <div class="mb-4 ml-6">
+    <div class="text-sm  ml-6">
+        <div class="mb-4">
             {% blocktrans %}
         By completing and submitting this form you hereby agree to give the National Centre for
         Truth and Reconciliation (“NCTR”) legal and physical custody and control and responsibility
@@ -16,18 +16,18 @@
         inspect, research and appraise this material for a potential donation to the NCTR.
         {% endblocktrans %}
         </div>
-        <div class="mb-4 ml-6">
+        <div class="mb-4">
             {% blocktrans %}
         The NCTR accepts full responsibility for the physical condition of the materials you have
         submitted during the period when the NCTR Archives staff will examine the materials for
         potential donation.
         {% endblocktrans %}
         </div>
-        <div class="mb-8 ml-6">
+        <div class="mb-8">
             {% blocktrans %}
         If you do not wish to continue, you may <a href="{{ homepage }}">go back.</a>
         {% endblocktrans %}
             <br>
         </div>
     </div>
-{% endblock %}
+{% endblock form_explanation %}
