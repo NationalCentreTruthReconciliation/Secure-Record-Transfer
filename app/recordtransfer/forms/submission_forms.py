@@ -421,6 +421,15 @@ class RecordDescriptionForm(SubmissionForm):
         label=gettext("Title"),
     )
 
+    language_of_material = forms.CharField(
+        required=True,
+        min_length=2,
+        max_length=100,
+        widget=forms.TextInput(attrs={"placeholder": gettext("English, French")}),
+        help_text=gettext("Enter all relevant languages here"),
+        label=gettext("Language(s)"),
+    )
+
     date_of_materials = forms.RegexField(
         regex=DATE_REGEX,
         min_length=10,
@@ -451,15 +460,6 @@ class RecordDescriptionForm(SubmissionForm):
         help_text=gettext(
             "Check this box if the date is approximate, or if you are unsure of the date."
         ),
-    )
-
-    language_of_material = forms.CharField(
-        required=True,
-        min_length=2,
-        max_length=100,
-        widget=forms.TextInput(attrs={"placeholder": gettext("English, French")}),
-        help_text=gettext("Enter all relevant languages here"),
-        label=gettext("Language(s)"),
     )
 
     preliminary_scope_and_content = forms.CharField(
@@ -511,7 +511,7 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
                 ),
             }
         ),
-        help_text=gettext('For example, "200 PDF documents, totalling 2.0GB"'),
+        help_text=gettext("For example, &quot;200 PDF documents, totalling 2.0GB&quot;"),
         label=gettext("Quantity and type of files"),
     )
 
@@ -585,7 +585,7 @@ class RightsForm(SubmissionForm):
                 "class": "rights-select-other",
             }
         ),
-        help_text=gettext('For example: "UK Human Rights Act 1998"'),
+        help_text=gettext("For example: &quot;UK Human Rights Act 1998&quot;"),
         label=gettext("Other type of rights"),
     )
 
@@ -599,7 +599,9 @@ class RightsForm(SubmissionForm):
                 ),
             }
         ),
-        help_text=gettext('For example: "Copyright until 2050," "Only applies to images," etc.'),
+        help_text=gettext(
+            "For example: &quot;Copyright until 2050&quot;, &quot;Only applies to images&quot;, etc."
+        ),
         label=gettext("Notes for rights"),
     )
 
@@ -648,7 +650,9 @@ class OtherIdentifiersForm(SubmissionForm):
                 "placeholder": gettext("The type of the identifier"),
             }
         ),
-        help_text=gettext('For example: "Receipt number", "LAC Record ID", etc.'),
+        help_text=gettext(
+            "For example: &quot;Receipt number&quot;, &quot;LAC Record ID&quot;, etc."
+        ),
         label=gettext("Type of identifier"),
     )
 

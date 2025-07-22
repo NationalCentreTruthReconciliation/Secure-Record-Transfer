@@ -18,7 +18,6 @@ class ContactInfoFormMixin(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "+1 (999) 999-9999",
-                "class": "reduce-form-field-width",
             }
         ),
         label=gettext("Phone number"),
@@ -154,7 +153,6 @@ class ContactInfoFormMixin(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Z0Z 0Z0",
-                "class": "reduce-form-field-width",
             }
         ),
         label=gettext("Postal / Zip code"),

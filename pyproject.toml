@@ -10,8 +10,8 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 dependencies = [
-    "bagit>=1.8.1,<2",
-    "clamd>=1.0.2,<2",
+    "bagit>=1.9.0,<2",
+    "clamav-client>=0.7.1,<1",
     "dateparser>=1.2.0,<2",
     "debugpy>=1.8.2,<2",
     "Django==4.2.*",
@@ -21,6 +21,7 @@ dependencies = [
     "django-recaptcha>=4.0.0,<5",
     "django-rq>=3.0.0,<4",
     "django-webpack-loader>=3.2.1,<4",
+    "django-widget-tweaks>=1.4.12,<2",
     "python-decouple~=3.8",
     "rq-scheduler>=0.14.0,<0.15",
     "setuptools~=78.1.1",
@@ -59,3 +60,6 @@ package = false
 pythonpath = "app"
 python_files = "test_*.py"
 DJANGO_SETTINGS_MODULE = "app.settings.test"
+markers = [
+    "e2e: marks tests as end-to-end",
+]

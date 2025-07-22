@@ -1,7 +1,13 @@
-"""CAAIS metadata administrator"""
+"""CAAIS metadata administrator."""
+
+from typing import Any, Mapping, Optional
 
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
+from django.http import HttpRequest
+from django.template.response import TemplateResponse
 
+from caais import settings as caais_settings
 from caais.forms import (
     InlineAppraisalForm,
     InlineArchivalUnitForm,
@@ -28,6 +34,8 @@ from caais.models import (
     AssociatedDocumentationType,
     CarrierType,
     ContentType,
+    CreationOrRevisionType,
+    DateOfCreationOrRevision,
     DispositionAuthority,
     ExtentStatement,
     ExtentType,
@@ -231,6 +239,35 @@ class MetadataAdmin(admin.ModelAdmin):
         AssociatedDocumentationInlineAdmin,
         GeneralNoteInlineAdmin,
     ]
+
+    def render_change_form(self, request: HttpRequest, context: Mapping[str, Any], add: bool = False, change: bool = False, form_url: str = "", obj: Optional[Metadata] = None) -> TemplateResponse:
+        """Add dates_of_creation_or_revision to the context for the template."""
+        if obj:
+            context["dates_of_creation_or_revision"] = list(
+                obj.dates_of_creation_or_revision.all().order_by("-creation_or_revision_date")
+            )
+        else:
+            context["dates_of_creation_or_revision"] = []
+        return super().render_change_form(request, context, add, change, form_url, obj)
+
+    def log_change(self, request: HttpRequest, object: Metadata, message: str) -> LogEntry:
+        """Add a DateOfCreationOrRevision model when a change is made.
+        This method ensures CAAIS compliance by automatically tracking when metadata
+        records are updated through the admin interface.
+        """
+        log_entry = super().log_change(request, object, message)
+        update_type_name = caais_settings.CAAIS_DEFAULT_UPDATE_TYPE
+        update_type, _ = CreationOrRevisionType.objects.get_or_create(
+            name=update_type_name,
+            defaults={"description": "Metadata record updated via admin interface"},
+        )
+        DateOfCreationOrRevision.objects.create(
+            metadata=object,
+            creation_or_revision_type=update_type,
+            creation_or_revision_agent=request.user.username,
+            creation_or_revision_note=log_entry.get_change_message(),
+        )
+        return log_entry
 
 
 @admin.register(AcquisitionMethod)
