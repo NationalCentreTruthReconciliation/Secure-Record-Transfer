@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from recordtransfer.emails import (
+    send_password_reset_email,
     send_submission_creation_failure,
     send_submission_creation_success,
     send_thank_you_for_your_submission,
@@ -26,6 +27,7 @@ EMAIL_FUNCTIONS = {
     "user_activation_email": send_user_activation_email,
     "user_account_updated": send_user_account_updated,
     "user_in_progress_submission_expiring": send_user_in_progress_submission_expiring,
+    "password_reset_email": send_password_reset_email,
 }
 
 
@@ -37,13 +39,13 @@ class Command(BaseCommand):
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """Add command-line arguments to the parser."""
         parser.add_argument(
-            "to_email", type=str, help="The email address to send the test email to."
-        )
-        parser.add_argument(
             "email_id",
             type=str,
             choices=EMAIL_FUNCTIONS.keys(),
             help="The ID of the email to send (email function name).",
+        )
+        parser.add_argument(
+            "to_email", type=str, help="The email address to send the test email to."
         )
 
     def handle(self, *args, **options) -> None:
@@ -96,7 +98,7 @@ class Command(BaseCommand):
         Returns:
             Submission: A Submission instance that has not been saved to the database.
         """
-        return Submission(user=user, raw_form=b"", bag_name="test-bag")
+        return Submission(user=user, raw_form=b"")
 
     def create_test_in_progress_submission(self, user: User) -> InProgressSubmission:
         """Create and return a test InProgressSubmission instance for the given user."""
@@ -133,9 +135,15 @@ class Command(BaseCommand):
         """
         func = EMAIL_FUNCTIONS[email_id]
 
-        if email_id in ("submission_creation_success", "thank_you_for_your_submission"):
+        test_recipient = ["test@admin.com"]
+
+        if email_id == "submission_creation_success":
+            func(form_data, submission, recipient_emails=test_recipient)
+        elif email_id == "submission_creation_failure":
+            func(form_data, user, recipient_emails=test_recipient)
+        elif email_id == "thank_you_for_your_submission":
             func(form_data, submission)
-        elif email_id in ("submission_creation_failure", "your_submission_did_not_go_through"):
+        elif email_id == "your_submission_did_not_go_through":
             func(form_data, user)
         elif email_id == "user_activation_email":
             func(user)
@@ -151,5 +159,17 @@ class Command(BaseCommand):
             )
         elif email_id == "user_in_progress_submission_expiring":
             func(in_progress)
+        elif email_id == "password_reset_email":
+            func(
+                to_email=user.email,
+                context={
+                    "email": user.email,
+                    "domain": "example.com",
+                    "uid": "dGVzdHVzZXIxMjM=",
+                    "user": user,
+                    "token": "example-token-123",
+                    "protocol": "https",
+                },
+            )
         else:
             raise CommandError(f"No handler implemented for email_id '{email_id}'")

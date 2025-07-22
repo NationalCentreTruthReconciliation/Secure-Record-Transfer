@@ -1,15 +1,17 @@
 import re
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
 from django import forms
 from django.contrib.auth import password_validation
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_recaptcha.fields import ReCaptchaField
 
 from recordtransfer.constants import HtmlIds
+from recordtransfer.emails import send_password_reset_email
+from recordtransfer.forms.mixins import ContactInfoFormMixin
 from recordtransfer.models import User
 
 
@@ -63,8 +65,8 @@ class SignUpForm(UserCreationForm):
     captcha = ReCaptchaField()
 
 
-class UserProfileForm(forms.ModelForm):
-    """Form for editing user profile."""
+class UserAccountInfoForm(forms.ModelForm):
+    """Form for updating a user's account information."""
 
     NAME_PATTERN = re.compile(
         r"""^[a-zA-Z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u01FF]+([ \-']{0,1}[a-zA-Z\u00C0-\u00D6
@@ -226,3 +228,50 @@ class UserProfileForm(forms.ModelForm):
             self.data["current_password"] = ""
             self.data["new_password"] = ""
             self.data["confirm_new_password"] = ""
+
+
+class AsyncPasswordResetForm(PasswordResetForm):
+    """Form for resetting a user's password."""
+
+    def send_mail(  # noqa: D417
+        self,
+        subject_template_name: str,
+        email_template_name: str,
+        context: dict[str, Any],
+        from_email: Optional[str],
+        to_email: str,
+        html_email_template_name: Optional[str] = None,
+    ) -> None:
+        """Override parent method to send password reset email asynchronously using django_rq.
+
+        Args:
+            to_email: Recipient email address
+        """
+        send_password_reset_email.delay(
+            context=context,
+            to_email=to_email,
+        )
+
+
+class UserContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
+    """ModelForm version of ContactInfoFormMixin for editing a User's contact information."""
+
+    class Meta:
+        """Meta class for UserContactInfoForm."""
+
+        model = User
+        fields: ClassVar[list[str]] = [
+            "phone_number",
+            "address_line_1",
+            "address_line_2",
+            "city",
+            "province_or_state",
+            "other_province_or_state",
+            "postal_or_zip_code",
+            "country",
+        ]
+
+    def clean(self) -> dict:
+        """Clean form data."""
+        super().clean()
+        return self.clean_address_fields()

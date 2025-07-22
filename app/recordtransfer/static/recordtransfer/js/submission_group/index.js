@@ -1,26 +1,25 @@
 import {
-    handleSubmissionGroupModalFormBeforeSwap
+    handleModalBeforeSwap,
+    handleModalAfterSwap,
 } from "../utils/htmx.js";
-import { setupToastNotifications } from "../utils/toast.js";
-import { showModal, isValidUrl } from "../utils/utils.js";
+import { isValidUrl } from "../utils/utils.js";
 
 /**
- * Initializes the submission group page functionality including form setup,
+ * Initializes the submission group detail page functionality including form setup,
  * toast notifications, and modal handlers
  */
 export const initializeSubmissionGroup = function () {
     const context = getContext();
     if (!context) {return;}
 
-    setupToastNotifications();
     setupSubmissionGroupForm(context);
 
     window.handleModalBeforeSwap = (e) => {
-        return handleSubmissionGroupModalFormBeforeSwap(e, context);
+        return handleModalBeforeSwap(e, context);
     };
 
-    window.handleModalAfterSwap = () => {
-        showModal();
+    window.handleModalAfterSwap = (e) => {
+        return handleModalAfterSwap(e, context);
     };
 
     window.handleSubmissionGroupFormAfterSwap = () => {

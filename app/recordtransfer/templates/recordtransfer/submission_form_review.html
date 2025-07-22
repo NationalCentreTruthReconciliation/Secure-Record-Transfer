@@ -1,29 +1,30 @@
-{% extends 'recordtransfer/submission_form_standard.html' %}
+{% extends "recordtransfer/submission_form_standard.html" %}
 {% load static %}
 {% load i18n %}
-
-{% block submitbuttonattributes %}id="submit-form-btn"{% endblock %}
-{% block submitbuttontype %}button{% endblock %}
-{% block savelinkclass %}flex-med-width-item{% endblock savelinkclass %}
-{% block buttonarrayclass %}flex-med-width-item{% endblock buttonarrayclass %}
-
+{% block submitbuttonattributes %}
+    id="submit-form-btn"
+{% endblock submitbuttonattributes %}
+{% block savelinkclass %}
+    flex-med-width-item
+{% endblock savelinkclass %}
+{% block buttonarrayclass %}
+    flex-med-width-item
+{% endblock buttonarrayclass %}
 {% block formfields %}
     {{ block.super }}
     <div class="review-summary">
         {% for form in form_list %}
             <div class="review-section">
-                <div class="section-header">
-                    <h2 class="section-title">{{ form.step_title }}</h2>
-                    <button 
-                        id="goto_step_{{ form.step_name }}_link"
-                        class="step-link" 
-                        formnovalidate="formnovalidate" 
-                        name="wizard_goto_step" 
-                        value="{{ form.step_name }}">
+                <div class="text-xl font-semibold text-primary flex justify-between items-center section-header mb-4">
+                    <span class="section-title">{{ form.step_title }}</span>
+                    <button id="goto_step_{{ form.step_name }}_link"
+                            class="step-link text-primary/60 hover:text-primary"
+                            formnovalidate="formnovalidate"
+                            name="wizard_goto_step"
+                            value="{{ form.step_name }}">
                         {% trans "Go to step" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
-                
                 {% if form.fields|length > 0 %}
                     <div class="section-content">
                         {% if form.fields.items %}
@@ -34,12 +35,36 @@
                                     <dd>
                                         {% if label == "Uploaded files" %}
                                             {% for file in value %}
-                                                <div class="file-entry">
-                                                    <i class="fas fa-file"></i>
-                                                    <a class="non-nav-link" href="{{ file.url }}" target="_blank">
-                                                        {{ file.name }}
-                                                    </a>
-                                                </div>
+                                                {% if forloop.counter <= 5 %}
+                                                    <div class="file-entry mb-2 flex items-center gap-2">
+                                                        <i class="fas fa-file text-primary/60"></i>
+                                                        <a class="non-nav-link text-primary/60 font-medium underline hover:text-primary transition"
+                                                           href="{{ file.url }}"
+                                                           target="_blank">{{ file.name }}</a>
+                                                    </div>
+                                                {% endif %}
+                                                {% if forloop.counter == 6 %}
+                                                    <div>
+                                                        <button type="button"
+                                                                class="text-sm text-primary/60 underline font-medium bg-transparent border-none p-0 hover:text-primary transition cursor-pointer"
+                                                                style="appearance: none"
+                                                                onclick="this.nextElementSibling.classList.toggle('hidden'); this.classList.toggle('hidden');">
+                                                            +{{ value|length|add:'-5' }} more
+                                                        </button>
+                                                        <div class="hidden" id="more-files-{{ forloop.parentloop.counter }}">
+                                                        {% endif %}
+                                                        {% if forloop.counter > 5 %}
+                                                            <div class="file-entry mb-2 flex items-center gap-2">
+                                                                <i class="fas fa-file text-primary/60"></i>
+                                                                <a class="non-nav-link text-primary/60 font-medium underline hover:text-primary transition"
+                                                                   href="{{ file.url }}"
+                                                                   target="_blank">{{ file.name }}</a>
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if forloop.last and forloop.counter > 5 %}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
                                             {% endfor %}
                                         {% elif value == True %}
                                             ✓ {% trans "Yes" %}
@@ -62,7 +87,13 @@
                                     <dl class="field-list">
                                         {% for label, value in entry.items %}
                                             <dt>{{ label }}</dt>
-                                            <dd>{{ value|default:_("<span class='empty-value'>Not provided</span>")|safe }}</dd>
+                                            <dd>
+                                                {% if value %}
+                                                    {{ value }}
+                                                {% else %}
+                                                    <span class="empty-value">{% trans "Not provided" %}</span>
+                                                {% endif %}
+                                            </dd>
                                         {% endfor %}
                                     </dl>
                                 </div>
@@ -70,13 +101,8 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                {% if form.note %}
-                    <div class="section-note">
-                        {{ form.note }}
-                    </div>
-                {% endif %}
+                {% if form.note %}<div class="section-note">{{ form.note }}</div>{% endif %}
             </div>
         {% endfor %}
     </div>
-
 {% endblock formfields %}

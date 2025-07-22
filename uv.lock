@@ -52,12 +52,9 @@ wheels = [
 
 [[package]]
 name = "bagit"
-version = "1.8.1"
+version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e5/99/927b704237a1286f1022ea02a2fdfd82d5567cfbca97a4c343e2de7e37c4/bagit-1.8.1.tar.gz", hash = "sha256:37df1330d2e8640c8dee8ab6d0073ac701f0614d25f5252f9e05263409cee60c", size = 26229, upload-time = "2021-02-08T18:53:22.129Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/1b/fc/58b3c209fdd383744b27914d0b88d0f9db72aa043e1475618d981d7089d9/bagit-1.8.1-py2.py3-none-any.whl", hash = "sha256:d14dd7e373dd24d41f6748c42f123f7db77098dfa4a0125dbacb4c8bdf767c09", size = 35137, upload-time = "2021-02-08T18:53:20.581Z" },
-]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/a0/8866b4c6f894af0eb10e4964157f3241dd4117700fc010e7825471d51a13/bagit-1.9.0.tar.gz", hash = "sha256:9455006c2d1df88be95ec1fccabc5ea623389589ea4c85b3d85bd256f29d7656", size = 23443, upload-time = "2025-06-13T17:44:26.969Z" }
 
 [[package]]
 name = "certifi"
@@ -119,12 +116,12 @@ wheels = [
 ]
 
 [[package]]
-name = "clamd"
-version = "1.0.2"
+name = "clamav-client"
+version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/14/8b/55332f1f79f28a5ccc50f66364087e64fae8e4ed62e52007ca82b3072221/clamd-1.0.2.tar.gz", hash = "sha256:d82a2fd814684a35a1b31feadafb2e69c8ebde9403613f6bdaa5d877c0f29560", size = 8218, upload-time = "2014-08-21T14:58:18.562Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/2c/7b138ece9c42002e437f64056a5fb1ad9a2bb84049f338f856334a378d85/clamav_client-0.7.1.tar.gz", hash = "sha256:4a60e1499edc15859045a7a04e15628d670664fde01ed96740bfcbb241ebb5a5", size = 35196, upload-time = "2025-05-15T18:06:28.629Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/d0/84614de2a53ad52370adc9f9260bea420e53e0c228a248ec0eacfa65ccbb/clamd-1.0.2-py2.py3-none-any.whl", hash = "sha256:5c32546b7d1eb00fd6be00a889d79e00fbf980ed082826ccfa369bce3dcff5e7", size = 6684, upload-time = "2014-08-21T14:58:22.946Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/e6/063622e1e2ec9968a3e711aa9961d32a50e9b74a90eead61f698cf92a11f/clamav_client-0.7.1-py3-none-any.whl", hash = "sha256:2230a95c12fa3d52a51e5229567adab8739a244e91dfc873564d923ff72feda5", size = 14406, upload-time = "2025-05-15T18:06:26.904Z" },
 ]
 
 [[package]]
@@ -285,6 +282,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/64/e3/7c824814222d8411e5b2a72f4650e0181893bafa8324c33a5f77dd41db42/django_webpack_loader-3.2.1.tar.gz", hash = "sha256:d4bfaca9a640f087e7feeeb2ca6afd3d0a644bce3925b3d430448989c1673774", size = 17855, upload-time = "2025-06-16T12:33:24.353Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/79/dc/216df230d008495613b6fa3fe6f5f38c99c8516e81acda8cbe73a3c0f14c/django_webpack_loader-3.2.1-py2.py3-none-any.whl", hash = "sha256:b7e505bcdf7af8f75433f13d54010e0a95c61a8b80890a700a598602656e09bf", size = 20806, upload-time = "2025-06-16T12:33:22.672Z" },
+]
+
+[[package]]
+name = "django-widget-tweaks"
+version = "1.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a5/fe/26eb92fba83844e71bbec0ced7fc2e843e5990020e3cc676925204031654/django-widget-tweaks-1.5.0.tar.gz", hash = "sha256:1c2180681ebb994e922c754804c7ffebbe1245014777ac47897a81f57cc629c7", size = 14767, upload-time = "2023-08-25T15:29:12.778Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/46/6a/6cb6deb5c38b785c77c3ba66f53051eada49205979c407323eb666930915/django_widget_tweaks-1.5.0-py3-none-any.whl", hash = "sha256:a41b7b2f05bd44d673d11ebd6c09a96f1d013ee98121cb98c384fe84e33b881e", size = 8960, upload-time = "2023-08-25T15:29:05.644Z" },
 ]
 
 [[package]]
@@ -785,11 +791,11 @@ wheels = [
 
 [[package]]
 name = "secure-record-transfer"
-version = "2025.5.30"
+version = "2025.7.7"
 source = { virtual = "." }
 dependencies = [
     { name = "bagit" },
-    { name = "clamd" },
+    { name = "clamav-client" },
     { name = "dateparser" },
     { name = "debugpy" },
     { name = "django" },
@@ -799,6 +805,7 @@ dependencies = [
     { name = "django-recaptcha" },
     { name = "django-rq" },
     { name = "django-webpack-loader" },
+    { name = "django-widget-tweaks" },
     { name = "python-decouple" },
     { name = "rq-scheduler" },
     { name = "setuptools" },
@@ -830,8 +837,8 @@ prod = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bagit", specifier = ">=1.8.1,<2" },
-    { name = "clamd", specifier = ">=1.0.2,<2" },
+    { name = "bagit", specifier = ">=1.9.0,<2" },
+    { name = "clamav-client", specifier = ">=0.7.1,<1" },
     { name = "dateparser", specifier = ">=1.2.0,<2" },
     { name = "debugpy", specifier = ">=1.8.2,<2" },
     { name = "django", specifier = "==4.2.*" },
@@ -841,6 +848,7 @@ requires-dist = [
     { name = "django-recaptcha", specifier = ">=4.0.0,<5" },
     { name = "django-rq", specifier = ">=3.0.0,<4" },
     { name = "django-webpack-loader", specifier = ">=3.2.1,<4" },
+    { name = "django-widget-tweaks", specifier = ">=1.4.12,<2" },
     { name = "djlint", marker = "extra == 'dev'", specifier = ">=1.36.4" },
     { name = "freezegun", marker = "extra == 'dev'", specifier = ">=1.5.1,<2" },
     { name = "gunicorn", marker = "extra == 'prod'", specifier = ">=23.0.0,<24" },

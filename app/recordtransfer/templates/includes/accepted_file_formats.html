@@ -1,0 +1,24 @@
+{% load static %}
+{% load i18n %}
+<p class="text-sm text-gray-600 mb-2">
+    {%blocktrans%}
+                The following are the types of files that donors can submit using this application.
+                {% endblocktrans %}
+</p>
+<ul class="list bg-base-100 rounded-box shadow-md mt-5">
+    {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
+        {% if extensions %}
+            <li class="list-row">
+                <div class="list-col-grow">
+                    <div class="uppercase font-semibold text-primary opacity-60">{{ group }} Files</div>
+                    <p class="list-col-wrap">
+                        {% for extension in extensions %}
+                            {{ extension }}
+                            {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>

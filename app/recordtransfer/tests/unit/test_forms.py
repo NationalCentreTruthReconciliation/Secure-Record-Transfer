@@ -6,14 +6,14 @@ from caais.models import SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from recordtransfer.forms import UserProfileForm
+from recordtransfer.forms import UserAccountInfoForm
 from recordtransfer.forms.submission_forms import (
     RecordDescriptionForm,
     SourceInfoForm,
     UploadFilesForm,
 )
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.forms.user_forms import SignUpForm
+from recordtransfer.forms.user_forms import SignUpForm, UserContactInfoForm
 from recordtransfer.models import SubmissionGroup, TempUploadedFile, UploadSession, User
 
 
@@ -139,8 +139,11 @@ class SignUpFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
 
-class UserProfileFormTest(TestCase):
-    def setUp(self):
+class UserAccountInfoFormTest(TestCase):
+    """Tests for the UserAccountInfoForm."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
         self.test_username = "testuser"
         self.test_first_name = "Test"
         self.test_last_name = "User"
@@ -157,47 +160,52 @@ class UserProfileFormTest(TestCase):
             gets_notification_emails=self.test_gets_notification_emails,
         )
 
-    def test_form_valid_name_change(self):
+    def test_form_valid_name_change(self) -> None:
+        """Test that the form can change the user's name successfully."""
         form_data = {
             "first_name": "New",
             "last_name": "Name",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertEqual(user.first_name, "New")
         self.assertEqual(user.last_name, "Name")
 
-    def test_form_accented_name_change(self):
+    def test_form_accented_name_change(self) -> None:
+        """Test that the form can handle accented characters in names."""
         form_data = {
             "first_name": "Áccéntéd",
             "last_name": "Námé",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertEqual(user.first_name, "Áccéntéd")
         self.assertEqual(user.last_name, "Námé")
 
-    def test_form_invalid_first_name(self):
+    def test_form_invalid_first_name(self) -> None:
+        """Test that the form rejects invalid first names."""
         form_data = {
             "first_name": "123",
             "last_name": self.test_last_name,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("first_name", form.errors)
 
-    def test_form_invalid_last_name(self):
+    def test_form_invalid_last_name(self) -> None:
+        """Test that the form rejects invalid last names."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": "123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("last_name", form.errors)
 
-    def test_form_valid_password_change(self):
+    def test_form_valid_password_change(self) -> None:
+        """Test that the form can change the user's password successfully."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -205,12 +213,13 @@ class UserProfileFormTest(TestCase):
             "new_password": self.test_new_password,
             "confirm_new_password": self.test_new_password,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertTrue(user.check_password("new_password123"))
 
-    def test_form_invalid_current_password(self):
+    def test_form_invalid_current_password(self) -> None:
+        """Test that the form rejects an invalid current password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -218,11 +227,12 @@ class UserProfileFormTest(TestCase):
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("current_password", form.errors)
 
-    def test_form_new_passwords_do_not_match(self):
+    def test_form_new_passwords_do_not_match(self) -> None:
+        """Test that the form rejects new passwords that do not match."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -230,44 +240,48 @@ class UserProfileFormTest(TestCase):
             "new_password": "new_password123",
             "confirm_new_password": "different_password",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
-    def test_form_missing_current_password(self):
+    def test_form_missing_current_password(self) -> None:
+        """Test that the form requires the current password for password changes."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
             "new_password": "new_password123",
             "confirm_new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("current_password", form.errors)
 
-    def test_form_missing_new_password(self):
+    def test_form_missing_new_password(self) -> None:
+        """Test that the form requires a new password for password changes."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
             "current_password": self.test_password,
             "confirm_new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("new_password", form.errors)
 
-    def test_form_missing_confirm_new_password(self):
+    def test_form_missing_confirm_new_password(self) -> None:
+        """Test that the form requires confirmation of the new password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
             "current_password": self.test_password,
             "new_password": "new_password123",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("confirm_new_password", form.errors)
 
-    def test_form_new_password_is_same_as_old_password(self):
+    def test_form_new_password_is_same_as_old_password(self) -> None:
+        """Test that the form rejects a new password that is the same as the old password."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -275,17 +289,19 @@ class UserProfileFormTest(TestCase):
             "new_password": self.test_password,
             "confirm_new_password": self.test_password,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("new_password", form.errors)
 
-    def test_form_empty(self):
+    def test_form_empty(self) -> None:
+        """Test that the form is invalid when no data is provided."""
         form_data = {}
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("Form is empty.", form.errors["__all__"])
 
-    def test_form_email_notification_initial_false(self):
+    def test_form_email_notification_initial_false(self) -> None:
+        """Test that the form can set email notification preference to False."""
         self.user.gets_notification_emails = False
         self.user.save()
 
@@ -294,23 +310,25 @@ class UserProfileFormTest(TestCase):
             "last_name": self.test_last_name,
             "gets_notification_emails": True,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertTrue(user.gets_notification_emails)
 
-    def test_form_email_notification_initial_true(self):
+    def test_form_email_notification_initial_true(self) -> None:
+        """Test that the form can set email notification preference to True."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
             "gets_notification_emails": False,
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertFalse(user.gets_notification_emails)
 
-    def test_form_no_changes(self):
+    def test_form_no_changes(self) -> None:
+        """Test that the form raises an error when no fields have been changed."""
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -319,9 +337,222 @@ class UserProfileFormTest(TestCase):
             "new_password": "",
             "confirm_new_password": "",
         }
-        form = UserProfileForm(data=form_data, instance=self.user)
+        form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("No fields have been changed.", form.errors["__all__"])
+
+
+class UserContactInfoFormTest(TestCase):
+    """Tests for the UserContactInfoForm."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.valid_form_data = {
+            "phone_number": "+1 (555) 123-4567",
+            "address_line_1": "123 Test Street",
+            "address_line_2": "Suite 100",
+            "city": "Test City",
+            "province_or_state": "ON",
+            "postal_or_zip_code": "K1A 0A6",
+            "country": "CA",
+        }
+
+    def test_form_valid_contact_info(self) -> None:
+        """Test that the form can save valid contact information."""
+        form = UserContactInfoForm(data=self.valid_form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertEqual(user.phone_number, "+1 (555) 123-4567")
+        self.assertEqual(user.address_line_1, "123 Test Street")
+        self.assertEqual(user.address_line_2, "Suite 100")
+        self.assertEqual(user.city, "Test City")
+        self.assertEqual(user.province_or_state, "ON")
+        self.assertEqual(user.postal_or_zip_code, "K1A 0A6")
+        self.assertEqual(user.country, "CA")
+
+    def test_form_valid_without_optional_fields(self) -> None:
+        """Test that the form is valid without optional fields."""
+        form_data = {
+            "phone_number": "+1 (555) 123-4567",
+            "address_line_1": "123 Test Street",
+            "city": "Test City",
+            "province_or_state": "ON",
+            "postal_or_zip_code": "K1A 0A6",
+            "country": "CA",
+        }
+        form = UserContactInfoForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+
+    def test_form_invalid_phone_number_format(self) -> None:
+        """Test that the form rejects invalid phone number formats."""
+        invalid_phone_numbers = [
+            "555-1234",
+            "(555) 123-4567",
+            "1-555-123-4567",
+            "+1 555 123 4567",
+            "555.123.4567",
+        ]
+
+        for phone in invalid_phone_numbers:
+            form_data = self.valid_form_data.copy()
+            form_data["phone_number"] = phone
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertFalse(form.is_valid())
+            self.assertIn("phone_number", form.errors)
+
+    def test_form_valid_phone_number_formats(self) -> None:
+        """Test that the form accepts valid phone number formats."""
+        valid_phone_numbers = [
+            "+1 (555) 123-4567",
+            "+1 (800) 555-1234",
+            "+1 (123) 456-7890",
+        ]
+
+        for phone in valid_phone_numbers:
+            form_data = self.valid_form_data.copy()
+            form_data["phone_number"] = phone
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertTrue(form.is_valid())
+
+    def test_form_missing_required_fields(self) -> None:
+        """Test that the form requires all mandatory fields."""
+        required_fields = [
+            "phone_number",
+            "address_line_1",
+            "city",
+            "province_or_state",
+            "postal_or_zip_code",
+            "country",
+        ]
+
+        for field in required_fields:
+            form_data = self.valid_form_data.copy()
+            del form_data[field]
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertFalse(form.is_valid())
+            self.assertIn(field, form.errors)
+
+    def test_form_invalid_postal_code_formats(self) -> None:
+        """Test that the form rejects invalid postal/zip code formats."""
+        invalid_postal_codes = [
+            "K1A  0A6",  # Canadian postal code with double space
+            "ABCDEF",  # All letters
+        ]
+
+        for postal_code in invalid_postal_codes:
+            form_data = self.valid_form_data.copy()
+            form_data["postal_or_zip_code"] = postal_code
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertFalse(form.is_valid())
+            self.assertIn("postal_or_zip_code", form.errors)
+
+    def test_form_valid_postal_code_formats(self) -> None:
+        """Test that the form accepts valid postal/zip code formats."""
+        valid_postal_codes = [
+            "K1A 0A6",  # Canadian postal code with space
+            "K1A0A6",  # Canadian postal code without space
+            "12345",  # US zip code
+            "12345-1234",  # US zip+4 code
+        ]
+
+        for postal_code in valid_postal_codes:
+            form_data = self.valid_form_data.copy()
+            form_data["postal_or_zip_code"] = postal_code
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertTrue(form.is_valid())
+
+    def test_form_other_province_or_state(self) -> None:
+        """Test that the form handles 'Other' province/state selection."""
+        # Test that 'Other' requires other_province_or_state field
+        form_data = self.valid_form_data.copy()
+        form_data["province_or_state"] = "Other"
+        form_data["other_province_or_state"] = ""
+        form = UserContactInfoForm(data=form_data, instance=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_province_or_state", form.errors)
+
+        # Test that 'Other' with other_province_or_state is valid
+        form_data["other_province_or_state"] = "Custom Province"
+        form = UserContactInfoForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+
+    def test_form_address_line_2_without_line_1(self) -> None:
+        """Test that address line 2 requires address line 1."""
+        form_data = self.valid_form_data.copy()
+        form_data["address_line_1"] = ""
+        form_data["address_line_2"] = "Suite 100"
+        form = UserContactInfoForm(data=form_data, instance=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("address_line_1", form.errors)
+
+    def test_form_clears_other_province_when_not_other(self) -> None:
+        """Test that other_province_or_state is cleared when not selecting 'Other'."""
+        form_data = self.valid_form_data.copy()
+        form_data["province_or_state"] = "ON"
+        form_data["other_province_or_state"] = "Should be cleared"
+        form = UserContactInfoForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+        # The form should clear the other_province_or_state field
+        self.assertEqual(form.cleaned_data["other_province_or_state"], "")
+
+    def test_form_empty_data(self) -> None:
+        """Test that the form is invalid with empty data."""
+        form = UserContactInfoForm(data={}, instance=self.user)
+        self.assertFalse(form.is_valid())
+        # Should have errors for all required fields
+        required_fields = [
+            "phone_number",
+            "address_line_1",
+            "city",
+            "province_or_state",
+            "postal_or_zip_code",
+            "country",
+        ]
+        for field in required_fields:
+            self.assertIn(field, form.errors)
+
+    def test_form_canadian_provinces(self) -> None:
+        """Test that Canadian provinces are accepted."""
+        canadian_provinces = [
+            "AB",
+            "BC",
+            "MB",
+            "NB",
+            "NL",
+            "NS",
+            "NT",
+            "NU",
+            "ON",
+            "PE",
+            "QC",
+            "SK",
+            "YT",
+        ]
+
+        for province in canadian_provinces:
+            form_data = self.valid_form_data.copy()
+            form_data["province_or_state"] = province
+            form_data["postal_or_zip_code"] = "K1A 0A6"  # Canadian postal code
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertTrue(form.is_valid())
+
+    def test_form_us_states(self) -> None:
+        """Test that US states are accepted."""
+        us_states = ["CA", "TX", "NY", "FL", "IL", "PA", "OH", "GA", "NC", "MI"]
+
+        for state in us_states:
+            form_data = self.valid_form_data.copy()
+            form_data["province_or_state"] = state
+            form_data["postal_or_zip_code"] = "12345"  # US zip code
+            form = UserContactInfoForm(data=form_data, instance=self.user)
+            self.assertTrue(form.is_valid())
 
 
 class RecordDescriptionFormTest(TestCase):
@@ -334,6 +565,7 @@ class RecordDescriptionFormTest(TestCase):
             "date_of_materials": "2020-01-01",
             "language_of_material": "English",
             "preliminary_scope_and_content": "Test content description",
+            "preliminary_custodial_history": "History note.",
         }
 
     def test_valid_single_date(self) -> None:
@@ -457,7 +689,6 @@ class SourceInfoFormTest(TestCase):
                 "enter_manual_source_info": "no",
                 "source_name": "My New Name",
                 "source_note": "This is a test note that will be overwritten.",
-                "preliminary_custodial_history": "Preliminary history note.",
             },
             defaults=self.form_defaults,
         )
@@ -466,7 +697,6 @@ class SourceInfoFormTest(TestCase):
         self.assertEqual(form.cleaned_data["source_type"], self.source_type)
         self.assertEqual(form.cleaned_data["source_role"], self.source_role)
         self.assertEqual(form.cleaned_data["source_note"], "")
-        self.assertEqual(form.cleaned_data["preliminary_custodial_history"], "")
 
     def test_valid_manual_source_info(self) -> None:
         """Case where the user manually enters valid source information."""
@@ -480,7 +710,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": new_source_role.pk,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -489,7 +718,6 @@ class SourceInfoFormTest(TestCase):
         self.assertEqual(form.cleaned_data["source_type"], new_source_type)
         self.assertEqual(form.cleaned_data["source_role"], new_source_role)
         self.assertEqual(form.cleaned_data["source_note"], "Test Note")
-        self.assertEqual(form.cleaned_data["preliminary_custodial_history"], "History note.")
 
     def test_valid_manual_source_info_with_other(self) -> None:
         """Case where the user manually enters valid source information including Other fields."""
@@ -505,7 +733,6 @@ class SourceInfoFormTest(TestCase):
                 "source_role": other_source_role.pk,
                 "other_source_role": "My Other Source Role",
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -516,7 +743,6 @@ class SourceInfoFormTest(TestCase):
         self.assertEqual(form.cleaned_data["source_role"], other_source_role)
         self.assertEqual(form.cleaned_data["other_source_role"], "My Other Source Role")
         self.assertEqual(form.cleaned_data["source_note"], "Test Note")
-        self.assertEqual(form.cleaned_data["preliminary_custodial_history"], "History note.")
 
     def test_invalid_name(self) -> None:
         """Case where the user forgot to specify a name."""
@@ -530,7 +756,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": new_source_role.pk,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -549,7 +774,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": None,
                 "source_role": new_source_role.pk,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )
@@ -568,7 +792,6 @@ class SourceInfoFormTest(TestCase):
                 "source_type": new_source_type.pk,
                 "source_role": None,
                 "source_note": "Test Note",
-                "preliminary_custodial_history": "History note.",
             },
             defaults=self.form_defaults,
         )

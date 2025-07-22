@@ -4,7 +4,8 @@
     {% trans "About" %}
 {% endblock title %}
 {% block content %}
-    <div class="max-w-4xl mx-auto px-4 py-8">
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
         <div id="about-page-heading" class="mb-2 text-4xl text-primary">{% trans "About" %}</div>
         <div class="card">
             <div class="card-body">
@@ -20,7 +21,7 @@
         {% if FILE_UPLOAD_ENABLED %}
             <div class="text-2xl text-primary mb-4 mt-8">{% trans "Maximum Submission Size" %}</div>
             <div class="alert !p-5">
-                <i class="fas fa-info-circle pointer-events-none"></i>
+                <i class="fas fa-exclamation-triangle pointer-events-none text-gray-400"></i>
                 <div class="text-sm">
                     {% blocktrans %}
                     Submissions made through the transfer portal are subject to the maximum submission size.
@@ -33,28 +34,7 @@
                 </div>
             </div>
             <div class="text-2xl text-primary mb-4 mt-8">{% trans "Accepted File Types" %}</div>
-            <p class="text-sm">
-                {% blocktrans %}
-                The following are the types of files that donors can submit using this application.
-                {% endblocktrans %}
-            </p>
-            <ul class="list bg-base-100 rounded-box shadow-md mt-5">
-                {% for group, extensions in ACCEPTED_FILE_FORMATS.items %}
-                    {% if extensions %}
-                        <li class="list-row">
-                            <div class="list-col-grow">
-                                <div class="uppercase font-semibold opacity-60">{{ group }} Files</div>
-                                <p class="list-col-wrap">
-                                    {% for extension in extensions %}
-                                        {{ extension }}
-                                        {% if not forloop.last %},{% endif %}
-                                    {% endfor %}
-                                </p>
-                            </div>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
+            {% include "includes/accepted_file_formats.html" %}
         {% endif %}
     </div>
 {% endblock content %}

@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+{% load render_bundle from webpack_loader %}
+{% block extrahead %}
+    {{ block.super }}
+    {{ js_context|json_script:"py_context_admin" }}
+    {% render_bundle 'admin_caais' 'css' %}
+    {% render_bundle 'admin_caais' 'js' %}
+{% endblock extrahead %}

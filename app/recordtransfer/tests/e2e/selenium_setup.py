@@ -2,18 +2,21 @@ from abc import ABC
 
 from django.conf import settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.urls import reverse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from django.urls import reverse
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 class SeleniumLiveServerTestCase(StaticLiveServerTestCase, ABC):
     """Class used to run Selenium-based E2E tests."""
 
-    def setUp(self):
+    serialized_rollback = True
+
+    def setUp(self) -> None:
+        """Set up the test case by initializing the web driver."""
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-autofill")
         chrome_options.add_argument("--disable-save-password-bubble")

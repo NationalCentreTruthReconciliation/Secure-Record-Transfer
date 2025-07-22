@@ -555,29 +555,6 @@ Storage Locations
 -----------------
 
 
-BAG_STORAGE_FOLDER
-^^^^^^^^^^^^^^^^^^
-
-    *Choose where BagIt bags are stored*
-
-    .. table::
-
-        ===========================================  ============================================  ======
-        Default in Dev                               Default in Prod                               Type
-        ===========================================  ============================================  ======
-        /opt/secure-record-transfer/app/media/bags/  /opt/secure-record-transfer/app/media/bags/   string
-        ===========================================  ============================================  ======
-
-    The folder on the server where bags are to be stored.
-
-    **.env Example:**
-
-    ::
-
-        #file: .env
-        BAG_STORAGE_FOLDER=/path/to/your/folder
-
-
 UPLOAD_STORAGE_FOLDER
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -735,6 +712,29 @@ CAAIS_UNKNOWN_END_DATE
 
         #file: .env
         CAAIS_UNKNOWN_END_DATE='1999-12-31'
+
+
+CAAIS_DEFAULT_UPDATE_TYPE
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Default creation or revision type for metadata updates*
+
+    .. table::
+
+        =======  =========
+        Default  Type
+        =======  =========
+        Update   string
+        =======  =========
+
+    When metadata records are updated through the Django admin interface, a DateOfCreationOrRevision entry is automatically created to track changes. This setting controls the name of the creation/revision type used for these updates.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CAAIS_DEFAULT_UPDATE_TYPE='Record Updated'
 
 
 Testing

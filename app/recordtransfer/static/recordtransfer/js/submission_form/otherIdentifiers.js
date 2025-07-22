@@ -1,3 +1,4 @@
+import { setupHelpTooltips } from "../base/tooltip";
 import { setupFormset } from "./formset";
 
 /**
@@ -6,6 +7,11 @@ import { setupFormset } from "./formset";
  */
 export function setupOtherIdentifiersForm(context) {
     const formsetPrefix = context["formset_prefix"];
+    // Set up tooltips for all initial formset rows
+    setupHelpTooltips();
 
-    setupFormset(formsetPrefix);
+    // Set up tooltips for new rows
+    setupFormset(formsetPrefix, () => {
+        setupHelpTooltips();
+    });
 }

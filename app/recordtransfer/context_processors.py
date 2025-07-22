@@ -21,4 +21,5 @@ def constants_context(request: HttpRequest) -> dict[str, str]:
     return {
         **constants.HtmlIds().asdict(),
         **constants.QueryParameters().asdict(),
+        **constants.FormFieldNames().asdict(),
     }

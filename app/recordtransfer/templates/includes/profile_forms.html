@@ -1,0 +1,23 @@
+{% load i18n %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-2 mt-5 text-xl lg:text-2xl text-primary">{% trans "Profile Settings" %}</div>
+    <div class="tabs tabs-lift mt-4 md:mt-6">
+        <input id="id_account_tab"
+               type="radio"
+               name="profile_tabs"
+               class="tab"
+               aria-label="{% trans "Account" %}"
+               checked />
+        <div class="tab-content bg-base-100 border-base-300 p-10">
+            {% include "includes/account_info_form.html" with form=account_info_form %}
+        </div>
+        <input id="id_contact_info_tab"
+               type="radio"
+               name="profile_tabs"
+               class="tab"
+               aria-label="{% trans "Contact Information" %}" />
+        <div class="tab-content bg-base-100 border-base-300 p-10">
+            {% include "includes/contact_info_form.html" with form=contact_info_form %}
+        </div>
+    </div>
+</div>

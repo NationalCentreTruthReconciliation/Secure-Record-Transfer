@@ -1,12 +1,14 @@
 import os
 import tempfile
 from typing import ClassVar
+from unittest.mock import MagicMock, patch
 from urllib.parse import urljoin
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.test import override_settings, tag
 from django.urls import reverse
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
@@ -56,7 +58,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "source_type": "Individual",
             "source_role": "Donor",
             "source_note": "Test Source Note",
-            "preliminary_custodial_history": "Test Custodial History",
         },
         SubmissionStep.RECORD_DESCRIPTION: {
             "section_title": get_section_title(SubmissionStep.RECORD_DESCRIPTION),
@@ -65,7 +66,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             "date_is_approximated": "✓ Yes",
             "language": "English",
             "description": "Test Description",
-            "condition": "Test Condition",
+            "preliminary_custodial_history": "Test Custodial History",
         },
         SubmissionStep.RIGHTS: {
             "section_title": get_section_title(SubmissionStep.RIGHTS),
@@ -92,65 +93,42 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
     }
 
     def setUp(self) -> None:
-        """Set up the test case environment."""
-        super().setUp()
-        # Create a test user
-        self.setUpTestData()
-
-    @classmethod
-    def setUpTestData(cls) -> None:
         """Set up test data."""
-        cls.user = User.objects.create_user(username="testuser", password="testpassword")
-
-        ### This section restores the database to the state after migrations ###
-
-        # Create rights types
-        for name, description in (
-            ("Other", "A type of rights not listed elsewhere"),
-            ("Unknown", "Use when it is not known what type of rights pertain to the material"),
-            ("Cultural Rights", "Accss to material is limited according to cultural protocols"),
-            ("Statute", "Access to material is limited according to law or legislation"),
-            ("License", "Access to material is limited by a licensing agreement"),
-            (
-                "Access",
-                "Access to material is restricted to a certain entity or group of entities",
-            ),
-            (
-                "Copyright",
-                "Access to material is based on fair dealing OR material is in the public domain",
-            ),
-        ):
-            rights_type, created = RightsType.objects.get_or_create(
-                name=name,
-                description=description,
-            )
-            if created:
-                rights_type.save()
-
-        # Create Source Information types
-        other_type, created = SourceType.objects.get_or_create(
-            name="Other",
-            description="Placeholder right to allow user to specify unique source type",
-        )
-        if created:
-            other_type.save()
-
-        other_role, created = SourceRole.objects.get_or_create(
-            name="Other",
-            description="Placeholder right to allow user to specify unique source role",
-        )
-        if created:
-            other_role.save()
+        super().setUp()
+        self.user = User.objects.create_user(username="testuser", password="testpassword")
 
     def go_next_step(self) -> None:
         """Go to the next step in the form."""
         driver = self.driver
-        driver.find_element(By.ID, "form-next-button").click()
+        button = driver.find_element(By.ID, "form-next-button")
+        driver.execute_script("arguments[0].click();", button)
 
     def go_previous_step(self) -> None:
         """Go to the previous step in the form."""
         driver = self.driver
-        driver.find_element(By.ID, "form-previous-button").click()
+        button = driver.find_element(By.ID, "form-previous-button")
+        driver.execute_script("arguments[0].click();", button)
+
+    def continue_without_saving_contact_info_modal(self) -> None:
+        """Click on "Continue without saving" in the Contact Information modal."""
+        driver = self.driver
+        # Wait for the modal to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
+        )
+
+        # Retry loop for clicking the button
+        for _ in range(3):
+            try:
+                # Wait for the continue without saving button to be clickable
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
+                )
+                # Click the button to continue without saving
+                driver.find_element(By.ID, "modal-continue-without-saving").click()
+                break
+            except StaleElementReferenceException:
+                continue
 
     def go_to_review_step(self) -> None:
         """Go to the review step in the form."""
@@ -238,12 +216,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         if not required_only:
             source_note_input = driver.find_element(By.NAME, "sourceinfo-source_note")
-            preliminary_custodial_history = driver.find_element(
-                By.NAME, "sourceinfo-preliminary_custodial_history"
-            )
 
             source_note_input.send_keys(data["source_note"])
-            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
         self.go_next_step()
 
@@ -310,11 +284,11 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         description_of_contents_input.send_keys(data["description"])
 
         if not required_only:
-            condition_input = driver.find_element(
-                By.NAME, "recorddescription-condition_assessment"
+            preliminary_custodial_history = driver.find_element(
+                By.NAME, "recorddescription-preliminary_custodial_history"
             )
 
-            condition_input.send_keys(data["condition"])
+            preliminary_custodial_history.send_keys(data["preliminary_custodial_history"])
 
         self.go_next_step()
 
@@ -446,10 +420,14 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(f"{self.live_server_url}/submission/")
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
 
         self.complete_legal_agreement_step()
         self.complete_contact_information_step()
+
+        # Continue without saving contact info to profile when prompted
+        self.continue_without_saving_contact_info_modal()
+
         self.complete_source_information_step()
         self.complete_record_description_step()
         self.complete_record_rights_step()
@@ -477,7 +455,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         for step, data in self.test_data.items():
             section_title = driver.find_element(
                 By.XPATH,
-                f"//h2[contains(@class, 'section-title') and contains(text(), '{data['section_title']}')]",
+                f"//span[contains(@class, 'section-title') and contains(text(), '{data['section_title']}')]",
             )
             self.assertTrue(section_title.is_displayed())
 
@@ -503,7 +481,6 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Source type": "Individual",
                     "Source role": "Donor",
                     "Source notes": data["source_note"],
-                    "Custodial history": data["preliminary_custodial_history"],
                 }
                 self._verify_field_values("sourceinfo", fields)
 
@@ -514,7 +491,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                     "Date of materials": data["date_of_materials"],
                     "Date is approximated": data["date_is_approximated"],
                     "Description of contents": data["description"],
-                    "Condition of files": data["condition"],
+                    "Custodial history": data["preliminary_custodial_history"],
                 }
                 self._verify_field_values("recorddescription", fields)
 
@@ -562,6 +539,43 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                 element = self.driver.find_element(By.XPATH, xpath)
                 self.assertEqual(element.text, expected_value)
 
+    @patch("django_recaptcha.fields.ReCaptchaField.clean")
+    @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
+    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
+    def test_submit_form(
+        self,
+        mock_creation_success: MagicMock,
+        mock_thank_you: MagicMock,
+        mock_recaptcha: MagicMock,
+    ) -> None:
+        """Test that the form can be submitted successfully."""
+        # Mock the email tasks to prevent them from running
+        mock_thank_you.return_value = None
+        mock_creation_success.return_value = None
+        # Mock reCAPTCHA validation to always pass
+        mock_recaptcha.return_value = "PASSED"
+
+        self.complete_form_till_review_step()
+        driver = self.driver
+
+        # Wait until submit button is clickable
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "submit-form-btn")))
+
+        # Click the submit button
+        driver.find_element(By.ID, "submit-form-btn").click()
+
+        # Wait for redirect to submission sent page
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:submission_sent")))
+        )
+
+        # Verify the submission success message is displayed
+        self.assertIn("Thank you for your Submission", driver.page_source)
+
+        # Verify the email tasks were called
+        mock_thank_you.assert_called_once()
+        mock_creation_success.assert_called_once()
+
     def test_previous_saves_form(self) -> None:
         """Test that the form data is saved when going to the previous step. Uses the Contact
         Information step and the Record Description step as test cases.
@@ -570,7 +584,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         driver = self.driver
 
         # Navigate to the submission form wizard
-        driver.get(f"{self.live_server_url}/submission/")
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
@@ -634,6 +648,9 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         # Go to Source Information step
         self.go_next_step()
+
+        # Continue without saving contact info to profile when prompted
+        self.continue_without_saving_contact_info_modal()
 
         # Wait for the next step to load
         WebDriverWait(driver, 5).until(
@@ -853,6 +870,209 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
         )
+        # Verify the modal is visible
+        modal = driver.find_element(By.ID, "unsaved_changes_modal")
+        self.assertTrue(modal.is_displayed())
+
+        # Wait for the buttons in the modal to be clickable
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "modal-save-link")))
+
+        # Click on save button in the modal
+        save_button = driver.find_element(By.ID, "modal-save-link")
+        save_button.click()
+
+        # Check that user is redirected to the profile page
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
+        )
+
+    def test_optional_rights_step_bypass(self) -> None:
+        """Test that a user can bypass the Rights step without entering any information."""
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Complete required steps before Rights step
+        self.complete_legal_agreement_step()
+        self.complete_contact_information_step()
+        self.continue_without_saving_contact_info_modal()
+        self.complete_source_information_step()
+        self.complete_record_description_step()
+
+        # Wait for Rights step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "rights-0-rights_type"))
+        )
+        # Click Next without filling anything
+        self.go_next_step()
+
+        # Verify we moved to the next step (Other Identifiers)
+        identifiers_page = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "otheridentifiers-0-other_identifier_type"))
+        )
+        self.assertTrue(identifiers_page)
+
+    def test_contact_info_modal_prompt_without_saving(self) -> None:
+        """Test that the user is prompted to save contact information to their profile when
+        completing the Contact Information step. Clicking on "Continue without saving"
+        should display the Source Information step.
+        """
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out the Contact Information step
+        self.complete_contact_information_step()
+
+        # Wait for the modal to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
+        )
+
+        for _ in range(3):
+            try:
+                # Wait for the "Continue without saving" button to be clickable
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "modal-continue-without-saving"))
+                )
+
+                continue_button = driver.find_element(By.ID, "modal-continue-without-saving")
+                continue_button.click()
+                break
+            except StaleElementReferenceException:
+                continue
+
+        # Verify that the user is redirected to the Source Information step
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
+    def test_contact_info_modal_prompt_save_and_continue(self) -> None:
+        """Test that the user is prompted to save contact information to their profile when
+        completing the Contact Information step. Clicking on "Save and Continue" should save the
+        contact information and display the Source Information step.
+        """
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the submission form wizard
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Fill out the Contact Information step
+        self.complete_contact_information_step()
+
+        # Wait for the modal to appear
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "save_contact_info_modal"))
+        )
+
+        # Retry loop for clicking the button
+        for _ in range(3):
+            try:
+                # Wait for the "Save and Continue" button to be clickable
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "modal-save-contact-info"))
+                )
+                save_button = driver.find_element(By.ID, "modal-save-contact-info")
+                driver.execute_script("arguments[0].click();", save_button)
+                break
+            except StaleElementReferenceException:
+                continue
+
+        # Verify that the user is displayed the Source Information step
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
+        # Check that success toast is displayed
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
+        # Wait for previous button to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "form-previous-button"))
+        )
+
+        # Go back to previous step (Contact Information step)
+        self.go_previous_step()
+
+        # Check that clicking on "Next Step" button does not prompt the modal again
+        self.go_next_step()
+
+        # Verify that the user is displayed the Source Information step
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "sourceinfo-enter_manual_source_info"))
+        )
+
+        # Open Profile page on new tab
+        driver.execute_script(
+            "window.open(arguments[0], '_blank');",
+            urljoin(self.live_server_url, reverse("recordtransfer:user_profile")),
+        )
+
+        # Switch to the new tab
+        driver.switch_to.window(driver.window_handles[1])
+
+        # Wait for the profile page to load
+        contact_info_radio = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_contact_info_tab"))
+        )
+        contact_info_radio.click()
+
+        # Check that the contact information is saved
+        phone_number_input = driver.find_element(By.ID, "id_phone_number")
+        address_line_1_input = driver.find_element(By.ID, "id_address_line_1")
+        city_input = driver.find_element(By.ID, "id_city")
+        province_or_state_input = driver.find_element(By.ID, "id_contactinfo-province_or_state")
+        postal_or_zip_code_input = driver.find_element(By.ID, "id_postal_or_zip_code")
+        country_input = driver.find_element(By.ID, "id_country")
+
+        data = self.test_data[SubmissionStep.CONTACT_INFO]
+
+        # Verify that the contact information is saved
+        self.assertEqual(phone_number_input.get_attribute("value"), data["phone_number"])
+        self.assertEqual(address_line_1_input.get_attribute("value"), data["address_line_1"])
+        self.assertEqual(city_input.get_attribute("value"), data["city"])
+        self.assertEqual(province_or_state_input.get_attribute("value"), data["province_or_state"])
+        self.assertEqual(
+            postal_or_zip_code_input.get_attribute("value"), data["postal_or_zip_code"]
+        )
+        self.assertEqual(country_input.get_attribute("value"), data["country"])
+
+    def test_form_save_from_unsaved_changes_modal_on_review_step(self) -> None:
+        """Test that the user can save the form from the unsaved changes modal on the Review
+        step.
+        """
+        driver = self.driver
+
+        # Complete the form till the Review step
+        self.complete_form_till_review_step()
+
+        # Wait for the Review step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "review-summary"))
+        )
+
+        # Attempt to navigate to Home page without saving
+        home_link = driver.find_element(By.ID, "nav-home")
+        driver.execute_script("arguments[0].click();", home_link)
+
+        # Check for unsaved changes modal
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
+        )
+
         # Verify the modal is visible
         modal = driver.find_element(By.ID, "unsaved_changes_modal")
         self.assertTrue(modal.is_displayed())

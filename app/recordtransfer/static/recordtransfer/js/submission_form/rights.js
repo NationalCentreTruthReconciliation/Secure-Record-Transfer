@@ -1,5 +1,6 @@
+import { setupHelpTooltips } from "../base/tooltip";
+import { setupSelectOtherToggle } from "../utils/otherField";
 import { setupFormset } from "./formset";
-import { setupSelectOtherToggle } from "./otherField";
 
 /**
  * Sets up the rights form.
@@ -18,6 +19,13 @@ export function setupRightsForm(context) {
             context["other_rights_type_id"],
         );
 
+        setupRightsNoteToggle(
+            selectElement.id,
+            `id_rights-${index}-rights_value`
+        );
+
+        setupHelpTooltips();
+
         // Reset the selected value upon form creation
         selectElement.value = "";
         selectElement.dispatchEvent(new Event("change"));
@@ -30,5 +38,42 @@ export function setupRightsForm(context) {
             `id_rights-${index}-other_rights_type`,
             context["other_rights_type_id"],
         );
+
+        // Setup notes toggle for this specific form
+        setupRightsNoteToggle(
+            element.id,
+            `id_rights-${index}-rights_value`
+        );
     });
+}
+
+/**
+ * Sets up toggling the visibility of the rights value field based on the value of
+ * the rights type field with the same index.
+ * @param {string} rightsTypeId - The ID of the rights type select element.
+ * @param {string} rightsValueId - The ID of the rights value textarea element.
+ */
+function setupRightsNoteToggle(rightsTypeId, rightsValueId) {
+    const rightsTypeField = document.getElementById(rightsTypeId);
+    const rightsValueField = document.getElementById(rightsValueId);
+    const formContainer = rightsValueField ? rightsValueField.closest(".form-group") : null;
+
+    /**
+     * Updates the visibility of the rights value field based on whether
+     * the rights type field has a value.
+     */
+    function updateVisibility() {
+        if (rightsTypeField && rightsTypeField.value) {
+            if (formContainer) {formContainer.style.display = "";}
+        } else {
+            if (formContainer) {formContainer.style.display = "none";}
+        }
+    }
+
+    // Add event listener for the rights type field
+    if (rightsTypeField) {
+        rightsTypeField.addEventListener("change", updateVisibility);
+    }
+
+    updateVisibility();
 }
