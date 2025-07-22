@@ -65,6 +65,15 @@ input#id_date_of_materials {
     padding-left: 10px;
 }
 
+#show-more-dates {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.date-entry .field-label {
+    font-weight: bold;
+}
+
 @media screen and (max-width: 767px) {
     .date-is-approximate-wrapper {
         margin-left: 0;

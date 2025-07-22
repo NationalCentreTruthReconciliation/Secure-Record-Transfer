@@ -1,10 +1,13 @@
 """CAAIS metadata administrator"""
 
+from typing import Any, Mapping, Optional
+
 from django.contrib import admin
 from django.contrib.admin.models import CHANGE, LogEntry
 from django.db import transaction
 from django.forms import ModelForm
 from django.http import HttpRequest
+from django.template.response import TemplateResponse
 
 from caais import settings as caais_settings
 from caais.forms import (
@@ -239,6 +242,16 @@ class MetadataAdmin(admin.ModelAdmin):
         GeneralNoteInlineAdmin,
     ]
 
+    def render_change_form(self, request: HttpRequest, context: Mapping[str, Any], add: bool = False, change: bool = False, form_url: str = "", obj: Optional[Metadata] = None) -> TemplateResponse:
+        """Add dates_of_creation_or_revision to the context for the template."""
+        if obj:
+            context["dates_of_creation_or_revision"] = list(
+                obj.dates_of_creation_or_revision.all().order_by("-creation_or_revision_date")
+            )
+        else:
+            context["dates_of_creation_or_revision"] = []
+        return super().render_change_form(request, context, add, change, form_url, obj)
+
     @transaction.atomic
     def save_model(
         self, request: HttpRequest, obj: Metadata, form: ModelForm, change: bool
@@ -265,7 +278,9 @@ class MetadataAdmin(admin.ModelAdmin):
             change_message = log_entry.get_change_message() if log_entry else ""
             self._create_update_revision_entry(obj, request.user.username, change_message)
 
-    def _create_update_revision_entry(self, metadata: Metadata, agent_name: str, update_note: str) -> None:
+    def _create_update_revision_entry(
+        self, metadata: Metadata, agent_name: str, update_note: str
+    ) -> None:
         """Create a DateOfCreationOrRevision entry for metadata updates.
 
         Args:
