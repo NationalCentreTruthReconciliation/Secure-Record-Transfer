@@ -598,7 +598,8 @@ class SubmissionFormWizard(SessionWizardView):
         ):
             context["SHOW_REVIEW_BUTTON"] = True
 
-        if self.form_started and not self.review_step_reached:
+        # Show the save button if the user has started the form and is not on the Review Step
+        if self.form_started and self.steps.step1 != self.steps.count:
             context["SHOW_SAVE_BUTTON"] = True
 
         # Add template and JS contexts

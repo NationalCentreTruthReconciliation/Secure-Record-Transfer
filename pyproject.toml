@@ -7,9 +7,11 @@ authors = [
 ]
 requires-python = "~=3.9, <3.11"
 readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 dependencies = [
-    "bagit>=1.8.1,<2",
-    "clamd>=1.0.2,<2",
+    "bagit>=1.9.0,<2",
+    "clamav-client>=0.7.1,<1",
     "dateparser>=1.2.0,<2",
     "debugpy>=1.8.2,<2",
     "Django==4.2.*",
@@ -57,3 +59,6 @@ package = false
 pythonpath = "app"
 python_files = "test_*.py"
 DJANGO_SETTINGS_MODULE = "app.settings.test"
+markers = [
+    "e2e: marks tests as end-to-end",
+]

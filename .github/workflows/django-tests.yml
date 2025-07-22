@@ -6,6 +6,9 @@ on:
   push:
     branches: [master,510-modernize-submission-form-ui]
 
+permissions:
+  contents: read
+
 jobs:
   unit-tests:
     runs-on: ubuntu-latest

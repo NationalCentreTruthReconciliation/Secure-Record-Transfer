@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 import uuid
 from itertools import chain
@@ -609,7 +608,7 @@ class UploadSession(models.Model):
             self.status = self.SessionStatus.CREATED
             self.save()
 
-    def get_file_by_name(self, name: str) -> UploadedFile:
+    def get_file_by_name(self, name: str) -> BaseUploadedFile:
         """Get an uploaded file in this session by name. The file can be either temporary or
         permanent.
 
@@ -739,7 +738,6 @@ class UploadSession(models.Model):
 
     def make_uploads_permanent(self) -> None:
         """Make all temporary uploaded files associated with this session permanent."""
-
         if self.status == self.SessionStatus.STORED:
             LOGGER.info(
                 "All uploaded files in session %s are already in permanent storage", self.token
@@ -834,8 +832,8 @@ class UploadSession(models.Model):
         """Create a human-readable statement of how many files are in this session.
 
         If the session is in the state UPLOADING, returns a count of temp files. If the session is
-        in the state STORED, returns a count of permanent files. If the session is in the state CREATED,
-        returns an appropriate value that indicates the lack of files.
+        in the state STORED, returns a count of permanent files. If the session is in the state
+        CREATED, returns an appropriate value that indicates the lack of files.
 
         Uses the :ref:`ACCEPTED_FILE_FORMATS` setting to group file types together.
 
@@ -869,7 +867,7 @@ class UploadSession(models.Model):
         return f"{self.token} ({self.started_at}) | {self.status}"
 
 
-def session_upload_location(instance, filename: str) -> str:
+def session_upload_location(instance: TempUploadedFile, filename: str) -> str:
     """Generate the upload location for a session file."""
     if instance.session:
         return "{0}/{1}".format(instance.session.token, filename)
@@ -884,6 +882,8 @@ class BaseUploadedFile(models.Model):
     file_upload = models.FileField(null=True)
 
     class Meta:
+        """Meta information for the BaseUploadedFile model."""
+
         abstract = True
 
     @property
@@ -1010,7 +1010,8 @@ class SubmissionGroup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
 
     @property
-    def number_of_submissions_in_group(self):
+    def number_of_submissions_in_group(self) -> int:
+        """Get the number of submissions in this group."""
         return len(self.submission_set.all())
 
     def get_absolute_url(self) -> str:
@@ -1022,6 +1023,7 @@ class SubmissionGroup(models.Model):
         return reverse("recordtransfer:delete_submission_group_modal", kwargs={"uuid": self.uuid})
 
     def __str__(self):
+        """Return a string representation of this object."""
         return f"{self.name} ({self.created_by})"
 
 
@@ -1313,6 +1315,7 @@ class Job(models.Model):
         COMPLETE = "CP", _("Complete")
         FAILED = "FD", _("Failed")
 
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(null=True)
     name = models.CharField(max_length=256, null=True)
@@ -1326,15 +1329,19 @@ class Job(models.Model):
     )
     message_log = models.TextField(null=True)
 
-    def get_admin_change_url(self) -> str:
-        """Get the URL to change this object in the admin."""
-        view_name = "admin:{0}_{1}_change".format(self._meta.app_label, self._meta.model_name)
-        return reverse(view_name, args=(self.pk,))
+    def has_file(self) -> bool:
+        """Determine if this job has an attached file."""
+        return bool(self.attached_file)
 
-    def get_admin_download_url(self) -> str:
-        """Get the URL to download the attached file from the admin."""
-        view_name = "admin:{0}_{1}_download".format(self._meta.app_label, self._meta.model_name)
-        return reverse(view_name, args=(self.pk,))
+    def get_file_media_url(self) -> str:
+        """Generate the media URL to this file.
+
+        Raises:
+            FileNotFoundError if the file does not exist.
+        """
+        if self.has_file():
+            return self.attached_file.url
+        raise FileNotFoundError(f"{self.name} does not exist in job {self.uuid}")
 
     def __str__(self) -> str:
         """Return a string representation of this object."""

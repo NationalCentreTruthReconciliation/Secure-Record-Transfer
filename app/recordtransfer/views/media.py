@@ -9,46 +9,63 @@ from clamav.scan import check_for_malware
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import (
+    Http404,
     HttpRequest,
     HttpResponse,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
     HttpResponseRedirect,
     JsonResponse,
 )
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django.views.decorators.http import require_http_methods
 
 from recordtransfer.decorators import validate_upload_access
-from recordtransfer.models import UploadSession, User
+from recordtransfer.models import Job, UploadSession, User
 from recordtransfer.utils import accept_file, accept_session
 
 LOGGER = logging.getLogger(__name__)
 
 
-def media_request(request: HttpRequest, path: str) -> HttpResponse:
-    """Respond to whether a media request is allowed or not."""
-    if not request.user.is_authenticated:
-        return HttpResponseForbidden("You do not have permission to access this resource.")
+def serve_media_file(file_url: str) -> HttpResponse:
+    """Create a response that allows a client to download a media file.
 
-    if not path:
-        return HttpResponseNotFound("The requested resource could not be found")
+    In development, the development server serves media files directly, so a re-direct to the
+    file's URL is returned.
 
-    user = cast(User, request.user)
-    if not user.is_staff:
-        return HttpResponseForbidden("You do not have permission to access this resource.")
+    In production, NGINX is used, and it serves media files. The media URL is locked down with an
+    "internal" directive, and NGINX must receive an X-Accel-Redirect from the application to tell
+    it that it's OK to serve the file.
 
-    response = HttpResponse(headers={"X-Accel-Redirect": settings.MEDIA_URL + path.lstrip("/")})
+    For more info, see:
+    `NGINX docs <https://nginx.org/en/docs/http/ngx_http_core_module.html#internal>`_
 
-    # Nginx will assign its own headers for the following:
-    del response["Content-Type"]
-    del response["Content-Disposition"]
-    del response["Accept-Ranges"]
-    del response["Set-Cookie"]
-    del response["Cache-Control"]
-    del response["Expires"]
+    .. note::
 
-    return response
+       This function does not do any permission checking. Make sure the client that is asking for a
+       file has the proper permission before calling this function.
+
+    Args:
+        file_url: The media URL to serve
+
+    Returns:
+        HttpResponse: Direct redirect in development (DEBUG) mode, X-Accel-Redirect in production
+    """
+    if settings.DEBUG:
+        return HttpResponseRedirect(file_url)
+    else:
+        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
+        # Remove headers that nginx will handle
+        for header in [
+            "Content-Type",
+            "Content-Disposition",
+            "Accept-Ranges",
+            "Set-Cookie",
+            "Cache-Control",
+            "Expires",
+        ]:
+            if header in response.headers:
+                del response[header]
+        return response
 
 
 @validate_upload_access
@@ -81,8 +98,8 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
     file is added to the upload session using the session token passed as a parameter in the
     request. If a session token is invalid, an error message is returned.
 
-    The file type is checked against this application's ACCEPTED_FILE_FORMATS setting, if the
-    file is not an accepted type, an error message is returned.
+    The file type is checked against this application's :ref:`ACCEPTED_FILE_FORMATS` setting, if
+    the file is not an accepted type, an error message is returned.
 
     Args:
         request: The HTTP GET or POST request
@@ -106,76 +123,9 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
             )
 
         if request.method == "GET":
-            file_metadata = [
-                {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
-                for f in session.get_uploads()
-            ]
-
-            return JsonResponse({"files": file_metadata}, status=200)
+            return _handle_list_files(session)
         else:
-            _file = request.FILES.get("file")
-            if not _file:
-                return JsonResponse(
-                    {
-                        "uploadSessionToken": session.token,
-                        "error": gettext("No file was uploaded"),
-                    },
-                    status=400,
-                )
-
-            file_check = accept_file(_file.name, _file.size)
-            if not file_check["accepted"]:
-                return JsonResponse(
-                    {"file": _file.name, "uploadSessionToken": session.token, **file_check},
-                    status=400,
-                )
-
-            session_check = accept_session(_file.name, _file.size, session)
-            if not session_check["accepted"]:
-                return JsonResponse(
-                    {"file": _file.name, "uploadSessionToken": session.token, **session_check},
-                    status=400,
-                )
-
-            try:
-                check_for_malware(_file)
-            except ValidationError as exc:
-                LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
-                return JsonResponse(
-                    {
-                        "file": _file.name,
-                        "accepted": False,
-                        "uploadSessionToken": session.token,
-                        "error": gettext(f'Malware was detected in the file "{_file.name}"'),
-                    },
-                    status=400,
-                )
-
-            try:
-                uploaded_file = session.add_temp_file(_file)
-            except ValueError as exc:
-                LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
-                return JsonResponse(
-                    {
-                        "file": _file.name,
-                        "accepted": False,
-                        "uploadSessionToken": session.token,
-                        "error": gettext("There was an error uploading the file"),
-                    },
-                    status=500,
-                )
-
-            file_url = uploaded_file.get_file_access_url()
-
-            return JsonResponse(
-                {
-                    "file": _file.name,
-                    "accepted": True,
-                    "uploadSessionToken": session.token,
-                    "url": file_url,
-                },
-                status=200,
-            )
+            return _handle_upload_file(request, session)
 
     except Exception as exc:
         LOGGER.error("Uncaught exception in upload_file view: %s", str(exc), exc_info=exc)
@@ -185,6 +135,94 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
             },
             status=500,
         )
+
+def _handle_list_files(session: UploadSession) -> JsonResponse:
+    file_metadata = [
+        {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
+        for f in session.get_uploads()
+    ]
+    return JsonResponse({"files": file_metadata}, status=200)
+
+def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
+    _file = request.FILES.get("file")
+    if not _file:
+        return JsonResponse(
+            {
+                "uploadSessionToken": session.token,
+                "error": gettext("No file was uploaded"),
+            },
+            status=400,
+        )
+
+    file_check = accept_file(_file.name, _file.size)
+    if not file_check["accepted"]:
+        return JsonResponse(
+            {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+            status=400,
+        )
+
+    session_check = accept_session(_file.name, _file.size, session)
+    if not session_check["accepted"]:
+        return JsonResponse(
+            {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+            status=400,
+        )
+
+    try:
+        check_for_malware(_file)
+    except ValidationError as exc:
+        LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
+        return JsonResponse(
+            {
+                "file": _file.name,
+                "accepted": False,
+                "uploadSessionToken": session.token,
+                "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+            },
+            status=400,
+        )
+    except ValueError as exc:
+        LOGGER.error("File too large for malware scanning: %s", _file.name, exc_info=exc)
+        return JsonResponse({
+            "file": _file.name,
+            "accepted": False,
+            "uploadSessionToken": session.token,
+            "error": gettext(f'File "{_file.name}" is too large to scan for malware'),
+        }, status=400)
+    except ConnectionError as exc:
+        LOGGER.error("ClamAV connection error for file %s", _file.name, exc_info=exc)
+        return JsonResponse({
+            "file": _file.name,
+            "accepted": False,
+            "uploadSessionToken": session.token,
+            "error": gettext("Unable to scan file for malware due to scanner error"),
+        }, status=500)
+
+    try:
+        uploaded_file = session.add_temp_file(_file)
+    except ValueError as exc:
+        LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
+        return JsonResponse(
+            {
+                "file": _file.name,
+                "accepted": False,
+                "uploadSessionToken": session.token,
+                "error": gettext("There was an error uploading the file"),
+            },
+            status=500,
+        )
+
+    file_url = uploaded_file.get_file_access_url()
+
+    return JsonResponse(
+        {
+            "file": _file.name,
+            "accepted": True,
+            "uploadSessionToken": session.token,
+            "url": file_url,
+        },
+        status=200,
+    )
 
 
 @require_http_methods(["DELETE", "GET"])
@@ -253,17 +291,26 @@ def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpRes
         )
 
     file_url = uploaded_file.get_file_media_url()
-    if settings.DEBUG:
-        return HttpResponseRedirect(file_url)
-    else:
-        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
-        for header in [
-            "Content-Type",
-            "Content-Disposition",
-            "Accept-Ranges",
-            "Set-Cookie",
-            "Cache-Control",
-            "Expires",
-        ]:
-            del response[header]
-        return response
+    return serve_media_file(file_url)
+
+
+def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
+    """View to access the attached file associated with a job.
+
+    Args:
+        request: The HTTP request
+        job_uuid: The UUID of the job
+
+    Returns:
+        HttpResponse: Redirects to the file's media path if the job has an associated file.
+    """
+    if not request.user.is_staff:
+        raise Http404("The requested resource could not be found")
+
+    job = get_object_or_404(Job, uuid=job_uuid)
+
+    if not job.has_file():
+        raise Http404("File not found for this job")
+
+    file_url = job.get_file_media_url()
+    return serve_media_file(file_url)
