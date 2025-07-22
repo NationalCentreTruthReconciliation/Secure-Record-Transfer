@@ -20,8 +20,22 @@ export function setupFormset(prefix, onnewform = undefined) {
         formsetForms = document.querySelectorAll(".form-row");
         numForms = formsetForms.length;
         totalFormsInput.setAttribute("value", numForms);
-        // Update the initial forms input to the current number of forms
         initialFormsInput.setAttribute("value", numForms);
+
+        // Remove all separators first
+        document.querySelectorAll(".formset-separator").forEach(el => el.remove());
+
+        // Add separators after each form-row except the last
+        formsetForms.forEach((form, idx) => {
+            if (idx < formsetForms.length - 1) {
+                const hr = document.createElement("hr");
+                hr.className = "formset-separator";
+                hr.style.margin = "2em 0";
+                hr.style.border = "none";
+                hr.style.borderTop = "1px solid #ccc";
+                form.parentNode.insertBefore(hr, form.nextSibling);
+            }
+        });
 
         // Update button states
         removeFormButton.disabled = numForms <= 1;

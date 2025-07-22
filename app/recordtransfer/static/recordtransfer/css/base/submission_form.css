@@ -13,7 +13,9 @@
 }
 
 /* Used to increase the specificity of the hidden class since flex-item also specifies a display property */
-.flex-item.hidden { display: none; }
+.flex-item.hidden {
+    display: none;
+}
 
 .flex-item {
     margin-bottom: 15px;
@@ -102,8 +104,6 @@
 }
 
 .fa-info-circle {
-    color: #6c757d;
-    font-size: 14pt;
     transition: color 0.1s ease-in-out;
 }
 
