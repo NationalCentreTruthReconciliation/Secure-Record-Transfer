@@ -48,7 +48,7 @@ services:
       args:
           WEBPACK_MODE: development
     container_name: recordtransfer_rq_workers
-    command: python manage.py rqworker default
+    command: python manage.py devrqworker default
     volumes:
       - ./app/:/opt/secure-record-transfer/app/:z
       - temp-directory:/tmp
@@ -62,7 +62,7 @@ services:
       - ENV=dev
       - SERVICE_NAME=rq
       - ENABLE_DEBUGPY=1
-      - ENABLE_DEBUGPY_ON_COMMAND=rqworker
+      - ENABLE_DEBUGPY_ON_COMMAND=devrqworker
       - DEBUGPY_PORT=8010
       - WEBPACK_MODE=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
