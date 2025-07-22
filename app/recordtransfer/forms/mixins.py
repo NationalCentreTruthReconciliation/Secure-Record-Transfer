@@ -1,9 +1,9 @@
 from django import forms
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
-from django_countries.widgets import CountrySelectWidget
 
 from recordtransfer.constants import HtmlIds, OtherValues
+from recordtransfer.widgets import CustomCountrySelectWidget
 
 
 class ContactInfoFormMixin(forms.Form):
@@ -18,7 +18,6 @@ class ContactInfoFormMixin(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "+1 (999) 999-9999",
-                "class": "reduce-form-field-width",
             }
         ),
         label=gettext("Phone number"),
@@ -154,14 +153,13 @@ class ContactInfoFormMixin(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Z0Z 0Z0",
-                "class": "reduce-form-field-width",
             }
         ),
         label=gettext("Postal / Zip code"),
     )
 
     country = CountryField(blank_label=gettext("Select your Country")).formfield(
-        widget=CountrySelectWidget(
+        widget=CustomCountrySelectWidget(
             attrs={
                 "class": "reduce-form-field-width",
             }

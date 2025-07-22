@@ -4,9 +4,6 @@
 {% block submitbuttonattributes %}
     id="submit-form-btn"
 {% endblock submitbuttonattributes %}
-{% block submitbuttontype %}
-    button
-{% endblock submitbuttontype %}
 {% block savelinkclass %}
     flex-med-width-item
 {% endblock savelinkclass %}
@@ -18,10 +15,10 @@
     <div class="review-summary">
         {% for form in form_list %}
             <div class="review-section">
-                <div class="section-header">
-                    <div class="text-xl section-title">{{ form.step_title }}</div>
+                <div class="text-xl font-semibold text-primary flex justify-between items-center section-header mb-4">
+                    <span class="section-title">{{ form.step_title }}</span>
                     <button id="goto_step_{{ form.step_name }}_link"
-                            class="step-link"
+                            class="step-link text-primary/60 hover:text-primary"
                             formnovalidate="formnovalidate"
                             name="wizard_goto_step"
                             value="{{ form.step_name }}">
@@ -38,10 +35,36 @@
                                     <dd>
                                         {% if label == "Uploaded files" %}
                                             {% for file in value %}
-                                                <div class="file-entry">
-                                                    <i class="fas fa-file"></i>
-                                                    <a class="non-nav-link" href="{{ file.url }}" target="_blank">{{ file.name }}</a>
-                                                </div>
+                                                {% if forloop.counter <= 5 %}
+                                                    <div class="file-entry mb-2 flex items-center gap-2">
+                                                        <i class="fas fa-file text-primary/60"></i>
+                                                        <a class="non-nav-link text-primary/60 font-medium underline hover:text-primary transition"
+                                                           href="{{ file.url }}"
+                                                           target="_blank">{{ file.name }}</a>
+                                                    </div>
+                                                {% endif %}
+                                                {% if forloop.counter == 6 %}
+                                                    <div>
+                                                        <button type="button"
+                                                                class="text-sm text-primary/60 underline font-medium bg-transparent border-none p-0 hover:text-primary transition cursor-pointer"
+                                                                style="appearance: none"
+                                                                onclick="this.nextElementSibling.classList.toggle('hidden'); this.classList.toggle('hidden');">
+                                                            +{{ value|length|add:'-5' }} more
+                                                        </button>
+                                                        <div class="hidden" id="more-files-{{ forloop.parentloop.counter }}">
+                                                        {% endif %}
+                                                        {% if forloop.counter > 5 %}
+                                                            <div class="file-entry mb-2 flex items-center gap-2">
+                                                                <i class="fas fa-file text-primary/60"></i>
+                                                                <a class="non-nav-link text-primary/60 font-medium underline hover:text-primary transition"
+                                                                   href="{{ file.url }}"
+                                                                   target="_blank">{{ file.name }}</a>
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if forloop.last and forloop.counter > 5 %}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
                                             {% endfor %}
                                         {% elif value == True %}
                                             ✓ {% trans "Yes" %}

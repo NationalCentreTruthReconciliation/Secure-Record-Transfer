@@ -21,7 +21,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import HtmlIds
+from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup
 
@@ -58,6 +58,7 @@ class SubmissionDetailView(DetailView):
         context["metadata"] = context["submission"].metadata
         return context
 
+
 @require_http_methods(["GET"])
 def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
     """Generate and download a CSV for a specific submission."""
@@ -83,7 +84,10 @@ def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
 
     return submission_queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 
+
 require_http_methods(["GET"])
+
+
 def submission_group_bulk_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
     """Generate and download a CSV for all submissions in a submission group."""
     # Get base queryset with permission filtering
@@ -157,6 +161,12 @@ class SubmissionGroupDetailView(UpdateView):
             "ID_SUBMISSION_GROUP_NAME": HtmlIds.ID_SUBMISSION_GROUP_NAME,
             "ID_SUBMISSION_GROUP_DESCRIPTION": HtmlIds.ID_SUBMISSION_GROUP_DESCRIPTION,
             "PROFILE_URL": reverse("recordtransfer:user_profile"),
+            # Table-related context
+            "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
+            "ID_SUBMISSION_GROUP_TABLE": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
+            "SUBMISSION_GROUP_TABLE_URL": reverse("recordtransfer:submission_group_table"),
+            "ID_SUBMISSION_TABLE": HtmlIds.ID_SUBMISSION_TABLE,
+            "SUBMISSION_TABLE_URL": f"{reverse('recordtransfer:submission_table')}?{QueryParameters.SUBMISSION_GROUP_QUERY_NAME}={self.get_object().uuid}",
         }
         return context
 

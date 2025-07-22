@@ -1,35 +1,20 @@
 {% extends "recordtransfer/submission_form_base.html" %}
 {% load static %}
 {% load i18n %}
-{% block buttonarrayclass %}
-    flex-item
-{% endblock buttonarrayclass %}
 {% block formfields %}
     {% for form in wizard.form.forms %}
         {# Row to duplicate to add more forms #}
         <div class="form-row">
             {% for field in form %}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div class="flex-error">
-                            <label for="nothing"></label>
-                            <div class="field-error">{{ error }}</div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-                <div class="flex-item">
-                    <label for="{{ field.id_for_label }}" class="{{ field.css_classes }}">{{ field.label }}</label>
-                    {{ field }}
-                    {# Help tooltip #}
-                    {% if field.help_text %}
-                        <div tooltip-content="{{ field.help_text }}"
-                             class="help-tooltip help-icon">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                        </div>
-                    {% endif %}
-                </div>
+                {% include "includes/submission_form_field.html" %}
             {% endfor %}
         </div>
+        {% if not forloop.last %}
+            <hr class="formset-separator"
+                style="margin: 2em 0;
+                       border: none;
+                       border-top: 1px solid #ccc">
+        {% endif %}
     {% endfor %}
     <div class="flex-item">
         <label></label>
