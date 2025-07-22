@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django_rq",
     "django_recaptcha",
     "django_htmx",
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [
