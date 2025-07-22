@@ -22,7 +22,8 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 - Watch and re-build static resources in dev app: `docker compose -f compose.dev.yml exec app npm run watch`
 - Build docs: `uv run sphinx-build docs docs/_build`
 - Start local web server on port 8001 for docs: `uv run python -m http.server -d docs/_build 8001`
-- Reset the development database and populate with seed data: `docker compose -f compose.dev.yml exec app python manage.py reset`
+- Reset the development database: `docker compose -f compose.dev.yml exec app python manage.py reset`
+- Reset the development database and populate with seed data: `docker compose -f compose.dev.yml exec app python manage.py reset --seed`
 
 ### Development Environment
 
