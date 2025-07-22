@@ -1,7 +1,11 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE }}">
     <head>
         <title>403: Forbidden</title>
+        <meta name="description"
+              content="403 Forbidden - You are not allowed to access the requested resource.">
         <style type="text/css">
             html {
                 font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -25,11 +29,9 @@
     </head>
     <body>
         <div class="title">403: Forbidden</div>
+        <p class="message">You are not allowed to access the requested resource.</p>
         <p class="message">
-            You are not allowed to access the requested resource.
-        </p>
-        <p class="message">
-            <a href="/">Home</a>
+            <a href="{% url 'recordtransfer:index' %}">Home</a>
         </p>
     </body>
 </html>
