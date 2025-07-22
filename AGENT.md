@@ -21,6 +21,7 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 - Watch and re-build static resources in dev app: `/usr/bin/docker compose -f compose.dev.yml exec app npm run watch`
 - Build docs: `uv run sphinx-build docs docs/_build`
 - Start local web server on port 8001 for docs: `uv run python -m http.server -d docs/_build 8001`
+- Reset the development database and populate with seed data: `/usr/bin/docker compose -f compose.dev.yml exec app python manage.py reset`
 
 ### Development Environment
 
@@ -46,8 +47,9 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 
 ## Testing
 
-- pytest for all Python tests
+- Unit tests are written with unittest
 - E2E tests are written for Selenium
+- All tests use pytest as the test runner. The pytest config is in `pyproject.toml`
 
 ## Architecture
 
@@ -79,7 +81,8 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 
 ## Git Workflow
 
-- Run `npm run lint` before committing any changes to JS files, and fix linting errors before continuing.
-- Run `uv run ruff <FILE_PATH>` before commiting changes to Python files, and fix linting errors before continuing.
-- Run `uv run djlint <FILE_PATH>` before committing any changes to HTML files, and fix linting errors before continuing.
+- Run `npm run lint` before committing any changes to JS files, and fix linting errors before continuing
+- Run `uv run ruff check <FILE_PATH>` before commiting changes to Python files, and fix linting errors before continuing
+- If there are fixable errors from `ruff`, run `uv run ruff format <FILE_PATH>` to fix the errors
+- Run `uv run djlint --check --lint <FILE_PATH>` before committing any changes to HTML files, and fix linting errors before continuing
 - Never use `git push --force`
