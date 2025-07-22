@@ -1,11 +1,9 @@
-"""CAAIS metadata administrator"""
+"""CAAIS metadata administrator."""
 
 from typing import Any, Mapping, Optional
 
 from django.contrib import admin
-from django.contrib.admin.models import CHANGE, LogEntry
-from django.db import transaction
-from django.forms import ModelForm
+from django.contrib.admin.models import LogEntry
 from django.http import HttpRequest
 from django.template.response import TemplateResponse
 
