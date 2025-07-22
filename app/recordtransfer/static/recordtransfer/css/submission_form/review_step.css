@@ -78,3 +78,10 @@ dd {
 .align-center {
     align-self: center;
 }
+
+@media (max-width: 500px) {
+    .field-list {
+        display: block !important;
+        transition: display 0.3s ease;
+    }
+}
