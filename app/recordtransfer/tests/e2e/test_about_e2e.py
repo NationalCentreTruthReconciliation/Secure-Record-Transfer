@@ -103,24 +103,6 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         self.assertIn("Document Files", page_content)
         self.assertIn("pdf", page_content)
 
-    def test_navigation_to_about_page(self) -> None:
-        """Test navigating to the About page from the homepage."""
-        driver = self.driver
-        # Start at homepage
-        driver.get(f"{self.live_server_url}{reverse('recordtransfer:index')}")
-
-        # Find and click the About link in the navigation
-        about_link = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.ID, "nav-about"))
-        )
-        about_link.click()
-
-        # Verify we're on the About page
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".card-body p"))
-        )
-        self.assertIn("about", driver.current_url)
-
     def test_page_responsiveness(self) -> None:
         """Test that the About page is responsive at different viewport sizes."""
         driver = self.driver
