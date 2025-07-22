@@ -714,6 +714,29 @@ CAAIS_UNKNOWN_END_DATE
         CAAIS_UNKNOWN_END_DATE='1999-12-31'
 
 
+CAAIS_DEFAULT_UPDATE_TYPE
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Default creation or revision type for metadata updates*
+
+    .. table::
+
+        =======  =========
+        Default  Type
+        =======  =========
+        Update   string
+        =======  =========
+
+    When metadata records are updated through the Django admin interface, a DateOfCreationOrRevision entry is automatically created to track changes. This setting controls the name of the creation/revision type used for these updates.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CAAIS_DEFAULT_UPDATE_TYPE='Record Updated'
+
+
 Testing
 -------
 
