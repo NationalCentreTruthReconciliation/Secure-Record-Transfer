@@ -2,9 +2,9 @@ name: Production Smoke Test Docker (via compose.prod.yml)
 
 on:
   pull_request:
-    branches: [master,510-modernize-submission-form-ui]
+    branches: [master]
   push:
-    branches: [master,510-modernize-submission-form-ui]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
