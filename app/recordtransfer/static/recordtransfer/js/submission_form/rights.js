@@ -56,7 +56,7 @@ export function setupRightsForm(context) {
 function setupRightsNoteToggle(rightsTypeId, rightsValueId) {
     const rightsTypeField = document.getElementById(rightsTypeId);
     const rightsValueField = document.getElementById(rightsValueId);
-    const formContainer = rightsValueField ? rightsValueField.closest(".flex-item") : null;
+    const formContainer = rightsValueField ? rightsValueField.closest(".form-group") : null;
 
     /**
      * Updates the visibility of the rights value field based on whether
