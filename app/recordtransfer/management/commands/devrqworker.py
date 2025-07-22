@@ -47,6 +47,7 @@ def run_worker(worker_pid_file: str, worker_args: list[str]) -> None:
                     "Process with PID %s does not exist or has already exited.", worker_pid
                 )
 
+    # Start a new RQ worker process, saving its PID to the provided file
     start_worker_cmd = f"{sys.executable} {get_managepy_path()} rqworker --pid={worker_pid_file} {' '.join(worker_args)}"
     print(f"Starting RQ worker: {start_worker_cmd}")
     subprocess.run(shlex.split(start_worker_cmd))
