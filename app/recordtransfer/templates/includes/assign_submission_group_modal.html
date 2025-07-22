@@ -17,9 +17,7 @@
         {% csrf_token %}
         <fieldset class="fieldset">
             <legend class="fieldset-legend">Submission groups</legend>
-            <select id="group_select"
-                    name="{{ GROUP_UUID }}"
-                    class="select">
+            <select id="group_select" name="{{ GROUP_UUID }}" class="select">
                 <option value=""
                         data-description="{% trans "Select a group to see its description" %}"
                         disabled

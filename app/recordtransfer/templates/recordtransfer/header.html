@@ -26,50 +26,63 @@
                     </a>
                 </div>
                 <div class="nav-items-container">
-                    <a id="nav-home" class="nav-item nav-item-flex"
+                    <a id="nav-home"
+                       class="nav-item nav-item-flex"
                        href="{% url 'recordtransfer:index' %}">
                         <div class="nav-link">{% trans "Home" %}</div>
                         <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                     </a>
-                    <a id="nav-about" class="nav-item nav-item-flex"
+                    <a id="nav-about"
+                       class="nav-item nav-item-flex"
                        href="{% url 'recordtransfer:about' %}">
                         <div class="nav-link">{% trans "About" %}</div>
                         <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                     </a>
-                    <a id="nav-help" class="nav-item nav-item-flex" href="{% url 'recordtransfer:help' %}">
+                    <a id="nav-help"
+                       class="nav-item nav-item-flex"
+                       href="{% url 'recordtransfer:help' %}">
                         <div class="nav-link">{% trans "Help" %}</div>
                         <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                     </a>
                     {% if user.is_staff %}
-                        <a id="nav-admin" class="nav-item nav-item-flex" href="{% url 'admin:index' %}">
+                        <a id="nav-admin"
+                           class="nav-item nav-item-flex"
+                           href="{% url 'admin:index' %}">
                             <div class="nav-link">{% trans "Admin" %}</div>
                             <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                         </a>
                     {% endif %}
                     {% if user.is_authenticated %}
-                        <a id="nav-profile" class="nav-item nav-item-flex"
+                        <a id="nav-profile"
+                           class="nav-item nav-item-flex"
                            href="{% url 'recordtransfer:user_profile' %}">
                             <div class="nav-link">{% trans "Profile" %}</div>
                             <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                         </a>
-                        <a id="nav-submit" class="nav-item nav-item-flex"
+                        <a id="nav-submit"
+                           class="nav-item nav-item-flex"
                            href="{% url 'recordtransfer:submit' %}">
                             <div class="nav-link">{% trans "Submit" %}</div>
                             <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                         </a>
-                        <a id="nav-logout" class="nav-item-button nav-item-flex" href="{% url 'logout' %}">
+                        <a id="nav-logout"
+                           class="nav-item-button nav-item-flex"
+                           href="{% url 'logout' %}">
                             <div id="logout-btn" class="nav-link nav-button">{% trans "Logout" %}</div>
                         </a>
                     {% elif not user.is_authenticated %}
                         {% if SIGN_UP_ENABLED %}
-                            <a id="nav-signup" class="nav-item nav-item-flex"
+                            <a id="nav-signup"
+                               class="nav-item nav-item-flex"
                                href="{% url 'recordtransfer:create_account' %}">
                                 <div class="nav-link">{% trans "Sign Up" %}</div>
                                 <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                             </a>
                         {% endif %}
                         {% if 'login' not in request.path %}
-                            <a id="nav-login" class="nav-item-button nav-item-flex" href="{% url 'login' %}">
+                            <a id="nav-login"
+                               class="nav-item-button nav-item-flex"
+                               href="{% url 'login' %}">
                                 <div class="nav-link nav-button">{% trans "Log In" %}</div>
                             </a>
                         {% endif %}

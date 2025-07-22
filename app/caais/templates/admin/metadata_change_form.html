@@ -1,45 +1,48 @@
 {% extends "admin/change_form.html" %}
-
 {% load i18n %}
 {% load static %}
-
 {% block after_related_objects %}
     {% if original.dates_of_creation_or_revision.count %}
         <div class="inline-group">
             <fieldset class="module">
                 <h2>Dates of creation or revision</h2>
                 <div class="inline-related">
-                {% for date in original.dates_of_creation_or_revision.all|dictsortreversed:"creation_or_revision_date" %}
-                    <h3>
-                        <b>{{ date.creation_or_revision_type.name }} @ {{ date.creation_or_revision_date }}</b>
-                    </h3>
-                    <fieldset class="module aligned">
-                        {% if not date.creation_or_revision_agent and not date.creation_or_revision_note %}
-                        <div class="form-row">
-                            <div class="non-editable-field">{% trans "No other details listed" %}</div>
-                        </div>
-                        {% endif %}
-
-                        {% if date.creation_or_revision_agent %}
-                        <div class="form-row">
-                            <label for="creation_or_revision_agent_{{ forloop.counter0 }}">Creation or revision agent:</label>
-                            <div class="related-widget-wrapper">
-                                <div class="non-editable-field" id="creation_or_revision_agent_{{ forloop.counter0 }}">{{ date.creation_or_revision_agent }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if date.creation_or_revision_note %}
-                        <div class="form-row">
-                            <label for="creation_or_revision_note_{{ forloop.counter0 }}">Creation or revision note:</label>
-                            <div class="related-widget-wrapper">
-                                <div class="non-editable-field" id="creation_or_revision_note_{{ forloop.counter0 }}">{{ date.creation_or_revision_note }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </fieldset>
-                {% endfor %}
+                    {% for date in original.dates_of_creation_or_revision.all|dictsortreversed:"creation_or_revision_date" %}
+                        <h3>
+                            <b>{{ date.creation_or_revision_type.name }} @ {{ date.creation_or_revision_date }}</b>
+                        </h3>
+                        <fieldset class="module aligned">
+                            {% if not date.creation_or_revision_agent and not date.creation_or_revision_note %}
+                                <div class="form-row">
+                                    <div class="non-editable-field">{% trans "No other details listed" %}</div>
+                                </div>
+                            {% endif %}
+                            {% if date.creation_or_revision_agent %}
+                                <div class="form-row">
+                                    <label for="creation_or_revision_agent_{{ forloop.counter0 }}">Creation or revision agent:</label>
+                                    <div class="related-widget-wrapper">
+                                        <div class="non-editable-field"
+                                             id="creation_or_revision_agent_{{ forloop.counter0 }}">
+                                            {{ date.creation_or_revision_agent }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if date.creation_or_revision_note %}
+                                <div class="form-row">
+                                    <label for="creation_or_revision_note_{{ forloop.counter0 }}">Creation or revision note:</label>
+                                    <div class="related-widget-wrapper">
+                                        <div class="non-editable-field"
+                                             id="creation_or_revision_note_{{ forloop.counter0 }}">
+                                            {{ date.creation_or_revision_note }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </fieldset>
+                    {% endfor %}
                 </div>
             </fieldset>
         </div>
     {% endif %}
-{% endblock %}
+{% endblock after_related_objects %}
