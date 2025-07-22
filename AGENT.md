@@ -12,16 +12,17 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 
 ## Build & Commands
 
+- If on WSL, use `/usr/bin/docker` instead of `docker`
 - Run unit tests locally: `uv run pytest -k unit`
 - Run end-to-end tests locally: `uv run pytest -k e2e`
 - Build static resources locally (for testing Webpack config): `npm run build`
-- Start the dev app: `/usr/bin/docker compose -f compose.dev.yml up -d --build --remove-orphans`
-- Start the prod app: `/usr/bin/docker compose -f compose.prod.yml up -d --build --remove-orphans`
-- Build static resources in dev app: `/usr/bin/docker compose -f compose.dev.yml exec app npm run build`
-- Watch and re-build static resources in dev app: `/usr/bin/docker compose -f compose.dev.yml exec app npm run watch`
+- Start the dev app: `docker compose -f compose.dev.yml up -d --build --remove-orphans`
+- Start the prod app: `docker compose -f compose.prod.yml up -d --build --remove-orphans`
+- Build static resources in dev app: `docker compose -f compose.dev.yml exec app npm run build`
+- Watch and re-build static resources in dev app: `docker compose -f compose.dev.yml exec app npm run watch`
 - Build docs: `uv run sphinx-build docs docs/_build`
 - Start local web server on port 8001 for docs: `uv run python -m http.server -d docs/_build 8001`
-- Reset the development database and populate with seed data: `/usr/bin/docker compose -f compose.dev.yml exec app python manage.py reset`
+- Reset the development database and populate with seed data: `docker compose -f compose.dev.yml exec app python manage.py reset`
 
 ### Development Environment
 
