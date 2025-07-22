@@ -252,55 +252,24 @@ class MetadataAdmin(admin.ModelAdmin):
             context["dates_of_creation_or_revision"] = []
         return super().render_change_form(request, context, add, change, form_url, obj)
 
-    @transaction.atomic
-    def save_model(
-        self, request: HttpRequest, obj: Metadata, form: ModelForm, change: bool
-    ) -> None:
-        """Override save_model to automatically create DateOfCreationOrRevision entries for
-        updates.
-
+    def log_change(self, request: HttpRequest, object: Metadata, message: str) -> LogEntry:
+        """Add a DateOfCreationOrRevision model when a change is made.
         This method ensures CAAIS compliance by automatically tracking when metadata
         records are updated through the admin interface.
         """
-        super().save_model(request, obj, form, change)
-        if change:
-            log_entry = (
-                LogEntry.objects.filter(
-                    object_id=obj.pk,
-                    user_id=request.user.pk,
-                    content_type__app_label=obj._meta.app_label,
-                    content_type__model=obj._meta.model_name,
-                    action_flag=CHANGE,
-                )
-                .order_by("-action_time", "-pk")
-                .first()
-            )
-            change_message = log_entry.get_change_message() if log_entry else ""
-            self._create_update_revision_entry(obj, request.user.username, change_message)
-
-    def _create_update_revision_entry(
-        self, metadata: Metadata, agent_name: str, update_note: str
-    ) -> None:
-        """Create a DateOfCreationOrRevision entry for metadata updates.
-
-        Args:
-            metadata: The Metadata object that was updated
-            agent_name: The username of the user who made the update
-            update_note: A note about the update
-        """
+        log_entry = super().log_change(request, object, message)
         update_type_name = caais_settings.CAAIS_DEFAULT_UPDATE_TYPE
-
         update_type, _ = CreationOrRevisionType.objects.get_or_create(
             name=update_type_name,
             defaults={"description": "Metadata record updated via admin interface"},
         )
-
         DateOfCreationOrRevision.objects.create(
-            metadata=metadata,
+            metadata=object,
             creation_or_revision_type=update_type,
-            creation_or_revision_agent=agent_name,
-            creation_or_revision_note=update_note,
+            creation_or_revision_agent=request.user.username,
+            creation_or_revision_note=log_entry.get_change_message(),
         )
+        return log_entry
 
 
 @admin.register(AcquisitionMethod)
