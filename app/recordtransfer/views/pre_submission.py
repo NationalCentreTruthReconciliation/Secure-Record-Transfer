@@ -116,7 +116,9 @@ class SubmissionFormWizard(SessionWizardView):
             title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=gettext(
-                "Need help understanding rights types? "
+                "Depending on the records you are submitting, there may be specific rights that govern "
+                "the access of your records. <br> <br>"
+                " Need help understanding rights types? "
                 '<a class="non-nav-link link-primary font-semibold underline" target="_blank" href="/help#rights-types">View our guide</a> for detailed explanations.'
             ),
         ),
