@@ -71,13 +71,12 @@
                         <div class="{% block buttonarrayclass %}border-t border-base-300 pt-6 mt-6 w-full px-2 sm:px-4 flex flex-wrap{% endblock buttonarrayclass %}">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-4">
                                 <div>
-                                    {% if SHOW_SAVE_BUTTON %}
-                                        <button id="form-save-button"
-                                                class="btn btn-primary btn-outline sm:text-md font-normal w-full sm:w-auto"
-                                                formnovalidate="formnovalidate"
-                                                name="save_form_step"
-                                                value="{{ wizard.steps.current }}">{% trans "Save" %}</button>
-                                    {% endif %}
+                                    <button id="form-save-button"
+                                            class="btn btn-primary btn-outline sm:text-md font-normal w-full sm:w-auto"
+                                            formnovalidate="formnovalidate"
+                                            name="save_form_step"
+                                            value="{{ wizard.steps.current }}"
+                                            {% if not SHOW_SAVE_BUTTON %}hidden{% endif %}>{% trans "Save" %}</button>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-4 sm:w-auto w-full">
                                     {% if wizard.steps.prev %}
