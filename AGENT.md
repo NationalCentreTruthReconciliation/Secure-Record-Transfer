@@ -2,7 +2,7 @@
 
 [AGENT.md](https://ampcode.com/AGENT.md) is for AI agents to understand this codebase. Human dvelopers can reference [DEVELOPERS.md](/DEVELOPERS.md) instead.
 
-The Secure Record Transfer App is a full-stack web application built with Django for Archives to receive to digital donations of files. Form data is captured by donors in a way that complies to the Canadian Archival Accession Information Standard (CAAIS) version 1.0.
+The Secure Record Transfer App is a full-stack web application built with Django for Archives to receive to digital donations of files. Form data is captured by donors in a way that complies with the Canadian Archival Accession Information Standard (CAAIS) version 1.0.
 
 The documentation is stored in `docs/`, and the code is stored in `app/`. The models that adhere to the CAAIS standard are stored in `app/caais`. The bulk of the application is in `app/recordtransfer`.
 
@@ -41,6 +41,7 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 ## Code Style
 
 - For Python, see `ruff.toml` for linting rules
+- For Django HTML templates, see `djlint.toml` for linting rules
 - For Javascript, see `eslint.config.mjs` for linting rules
 
 ## Testing
@@ -53,7 +54,7 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 - Frontend: Django templates with HTMX
 - Backend: Django
 - Database: MySQL in production, SQLite in development
-- Styling: Tailwind CSS
+- Styling: Tailwind CSS + DaisyUI
 - Static bundler: Webpack
 - Package managers: uv, npm
 
