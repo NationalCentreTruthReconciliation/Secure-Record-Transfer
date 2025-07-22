@@ -16,7 +16,7 @@
     {{ block.super }}
 {% endblock stylesheet %}
 {% block content %}
-    <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto py-8">
         <div class="mb-6 text-4xl text-primary">{% trans form_title %}</div>
         {# Two-column layout: Steps on left, Form on right #}
         <div class="flex flex-col md:flex-row gap-6">
@@ -42,18 +42,19 @@
             <div class="md:w-2/3">
                 <div class="card bg-base-100 border border-base-300 mb-6 p-3">
                     {% if info_message %}
-                        <div class="alert !p-5">
-                            <i class="fas fa-info-circle pointer-events-none"></i>
-                            <div class="text-sm">{{ info_message }}</div>
+                        <div class="alert !p-5 flex flex-col">
+                            <div class="text-lg text-left self-start">Overview</div>
+                            <div class="text-sm text-left self-start">{{ info_message|safe }}</div>
                         </div>
                     {% endif %}
                     {% block messages %}
                         {% include "includes/messages.html" %}
                     {% endblock messages %}
-                    <div class="card-body p-6">
-                        {% block form_explanation %}
-                        {% endblock form_explanation %}
-                    </div>
+                    {% block form_explanation %}
+                        {% if block.super or form_explanation %}
+                            <div class="card-body p-6">{{ block.super }}{{ form_explanation|default:'' }}</div>
+                        {% endif %}
+                    {% endblock form_explanation %}
                     <form id="submission-form"
                           hx-post="{{ request.get_full_path }}"
                           hx-target="#main-container"
@@ -67,35 +68,26 @@
                         <div class="space-y-4 mb-8">
                             {% block formfields %}{# !!! Add the form fields here !!! #}{% endblock %}
                         </div>
-                        <div class="{% block buttonarrayclass %}border-t border-base-300 pt-6 mt-6{% endblock buttonarrayclass %}">
-                            <div class="flex justify-between items-center w-full gap-4">
+                        <div class="{% block buttonarrayclass %}border-t border-base-300 pt-6 mt-6 w-full px-2 sm:px-4 flex flex-wrap{% endblock buttonarrayclass %}">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-4">
                                 <div>
                                     {% if SHOW_SAVE_BUTTON %}
                                         <button id="form-save-button"
-                                                class="btn btn-primary btn-outline"
+                                                class="btn btn-primary btn-outline sm:text-md font-normal w-full sm:w-auto"
                                                 formnovalidate="formnovalidate"
                                                 name="save_form_step"
                                                 value="{{ wizard.steps.current }}">{% trans "Save" %}</button>
                                     {% endif %}
                                 </div>
-                                <div class="flex gap-4">
+                                <div class="flex flex-col sm:flex-row gap-4 sm:w-auto w-full">
                                     {% if wizard.steps.prev %}
                                         <button id="form-previous-button"
                                                 formnovalidate="formnovalidate"
                                                 name="wizard_goto_step"
                                                 value="{{ wizard.steps.prev }}"
-                                                class="btn btn-outline btn-primary">
-                                            <i class="fa fa-arrow-left me-2" aria-hidden="true"></i>
+                                                class="btn btn-outline btn-primary sm:text-md font-normal">
+                                            <i class="fa fa-arrow-left fa-sm me-2 font-normal" aria-hidden="true"></i>
                                             {% trans "Previous" %}
-                                        </button>
-                                    {% endif %}
-                                    {% if SHOW_REVIEW_BUTTON %}
-                                        <button id="form-review-button"
-                                                name="wizard_goto_step"
-                                                value="{{ wizard.steps.last }}"
-                                                class="btn btn-accent">
-                                            {% trans "Review" %}
-                                            <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
                                         </button>
                                     {% endif %}
                                     {% if wizard.steps.step1 != wizard.steps.count|add:"-1" %}
@@ -103,13 +95,22 @@
                                                 id="form-next-button"
                                                 {% endblock submitbuttonattributes %}
                                                 type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
-                                                class="btn btn-primary">
+                                                class="btn btn-primary sm:text-md font-normal">
                                             {% if wizard.steps.step1 == wizard.steps.count %}
                                                 {% trans "Submit" %}
                                             {% else %}
                                                 {% trans "Next" %}
-                                                <i class="fa fa-arrow-right ms-2" aria-hidden="true"></i>
+                                                <i class="fa fa-arrow-right fa-sm ms-2 font-normal" aria-hidden="true"></i>
                                             {% endif %}
+                                        </button>
+                                    {% endif %}
+                                    {% if SHOW_REVIEW_BUTTON %}
+                                        <button id="form-review-button"
+                                                name="wizard_goto_step"
+                                                value="{{ wizard.steps.last }}"
+                                                class="btn btn-accent font-normal">
+                                            {% trans "Review" %}
+                                            <i class="fa fa-arrow-right fa-sm ms-2 font-normal" aria-hidden="true"></i>
                                         </button>
                                     {% endif %}
                                 </div>

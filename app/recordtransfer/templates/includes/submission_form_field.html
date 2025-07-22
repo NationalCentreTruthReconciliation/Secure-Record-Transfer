@@ -1,0 +1,46 @@
+{% load i18n %}
+{% load widget_tweaks %}
+{% if not field.field.widget.is_hidden %}
+    <div class="form-group mb-2">
+        <label class="flex items-center gap-2 text-lg text-primary mb-2">
+            <span>{{ field.label }}</span>
+            {% if field.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
+        </label>
+        {% if field.field.widget.input_type == 'radio' %}
+            <div class="flex items-center gap-6 mt-3">{{ field|add_class:"flex gap-6" }}</div>
+        {% elif field|widget_type == 'textarea' %}
+            {{ field|add_class:"textarea textarea-bordered w-full h-32 bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-y" }}
+        {% elif field.field.widget.input_type == 'select' %}
+            {{ field|add_class:"select select-bordered w-full bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" }}
+        {% elif field.field.widget.input_type == 'checkbox' %}
+            <div class="flex items-center">
+                {{ field|add_class:"checkbox checkbox-primary mr-3 mt-2" }}
+                <span class="text-sm text-gray-700 mt-2">{{ field.label }}</span>
+            </div>
+        {% else %}
+            {{ field|add_class:"input input-bordered w-full bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" }}
+        {% endif %}
+        {% if field.help_text %}
+            <div class="mt-2 flex items-center">
+                <div class="relative inline-block">
+                    <i class="help-tooltip fa fa-info-circle mr-1 text-gray-400"
+                       aria-hidden="true"
+                       tooltip-content="{{ field.help_text|safe }}"></i>
+                </div>
+                <span class="text-gray-500 text-xs ml-1">Help</span>
+            </div>
+        {% endif %}
+        {% if field.errors %}
+            <div class="mt-2">
+                {% for error in field.errors %}
+                    <p class="text-sm text-red-600 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
