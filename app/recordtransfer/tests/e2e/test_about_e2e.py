@@ -146,6 +146,18 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         print(f"Screenshot of home page saved to {screenshot_path}")
 
         about_link = None
+        # List all elements with id nav-about
+        nav_about_elements = driver.find_elements(By.ID, "nav-about")
+        print(f"Found {len(nav_about_elements)} elements with id 'nav-about'.")
+        for i, el in enumerate(nav_about_elements):
+            try:
+                style = driver.execute_script("return window.getComputedStyle(arguments[0]).cssText;", el)
+                rect = driver.execute_script("return arguments[0].getBoundingClientRect();", el)
+                print(f"Element {i} style: {style}")
+                print(f"Element {i} bounding rect: {rect}")
+            except Exception as info_e:
+                print(f"Could not get style/rect for element {i}: {info_e}")
+
         try:
             about_link = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "nav-about"))
@@ -155,6 +167,18 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
                 "var e=document.getElementById('nav-about'); if(e) return window.getComputedStyle(e).cssText; return 'not found';"
             )
             print("Computed style for #nav-about:", style)
+
+            # Print parent style
+            parent_style = driver.execute_script(
+                "var e=document.getElementById('nav-about'); if(e && e.parentElement) return window.getComputedStyle(e.parentElement).cssText; return 'no parent';"
+            )
+            print("Computed style for #nav-about parent:", parent_style)
+
+            # Print bounding rect
+            rect = driver.execute_script(
+                "var e=document.getElementById('nav-about'); if(e) return e.getBoundingClientRect(); return 'not found';"
+            )
+            print("Bounding rect for #nav-about:", rect)
 
             # Try normal click
             about_link.click()
