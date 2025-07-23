@@ -50,8 +50,6 @@ jobs:
         with:
             name: selenium-screenshots
             path: |
-                home_page_debug.png
-                after_normal_click.png
-                after_js_click.png
-                after_js_click_first_element.png
+                before_about_click.png
+                navigate_to_about.png
             if-no-files-found: warn

@@ -43,7 +43,16 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         about_link = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "nav-about"))
         )
+
+        screenshot_before = "before_about_click.png"
+        driver.save_screenshot(screenshot_before)
+        print(f"Screenshot before About link click saved to {screenshot_before}")
+
         about_link.click()
+
+        screenshot_after = "navigate_to_about.png"
+        driver.save_screenshot(screenshot_after)
+        print(f"Screenshot after About link click saved to {screenshot_after}")
 
         page_heading = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "about-page-heading"))
