@@ -52,8 +52,15 @@ class HelpPageTest(SeleniumLiveServerTestCase):
         # Start at homepage
         driver.get(f"{self.live_server_url}/")
 
-        # Find and click the Help link in the navigation
+        # If nav-toggle-button is present and visible, click it to open menu
+        try:
+            nav_toggle = driver.find_element(By.CLASS_NAME, "nav-toggle-button")
+            if nav_toggle.is_displayed():
+                nav_toggle.click()
+        except Exception:
+            pass
 
+        # Find and click the Help link in the navigation
         help_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "nav-help")))
         help_link.click()
 
