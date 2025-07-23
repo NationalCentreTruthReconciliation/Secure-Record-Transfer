@@ -40,24 +40,27 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         home_url = reverse("recordtransfer:index")
         driver.get(f"{self.live_server_url}{home_url}")
 
-        about_link = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "nav-about"))
-        )
-
         screenshot_before = "before_about_click.png"
         driver.save_screenshot(screenshot_before)
         print(f"Screenshot before About link click saved to {screenshot_before}")
 
-        about_link.click()
+        try:
+            about_link = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "nav-about"))
+            )
+            about_link.click()
+            screenshot_after = "navigate_to_about.png"
+            driver.save_screenshot(screenshot_after)
+            print(f"Screenshot after About link click saved to {screenshot_after}")
 
-        screenshot_after = "navigate_to_about.png"
-        driver.save_screenshot(screenshot_after)
-        print(f"Screenshot after About link click saved to {screenshot_after}")
-
-        page_heading = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "about-page-heading"))
-        )
-        self.assertIn("About", page_heading.text)
+            page_heading = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.ID, "about-page-heading"))
+            )
+            self.assertIn("About", page_heading.text)
+        finally:
+            # Always save a screenshot at the end for debugging, even if test fails
+            driver.save_screenshot("final_state.png")
+            print("Screenshot of final state saved to final_state.png")
 
     @override_settings(
         FILE_UPLOAD_ENABLED=True,
