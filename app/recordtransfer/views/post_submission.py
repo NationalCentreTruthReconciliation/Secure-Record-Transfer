@@ -4,7 +4,6 @@ import logging
 from typing import Any, Optional
 
 from caais.export import ExportVersion
-from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import (
@@ -24,7 +23,7 @@ from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.models import Submission, SubmissionGroup
+from recordtransfer.models import Submission, SubmissionGroup, User
 
 LOGGER = logging.getLogger(__name__)
 
