@@ -3,7 +3,7 @@ viewing and listing uploaded files.
 """
 
 import logging
-from typing import cast
+from typing import Optional, cast
 
 from clamav.scan import check_for_malware
 from django.conf import settings
@@ -252,14 +252,6 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
         session = UploadSession.objects.filter(token=session_token).first()
     else:
         session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-    if not session:
-        if request.method == "DELETE":
-            return JsonResponse(
-                {"error": gettext("Invalid filename or upload session token")},
-                status=404,
-            )
-        else:
-            raise Http404("The uploaded file could not be found")
 
     if request.method == "DELETE":
         return _handle_uploaded_file_delete(session, file_name)
@@ -267,7 +259,13 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
         return _handle_uploaded_file_get(session, file_name)
 
 
-def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> HttpResponse:
+def _handle_uploaded_file_delete(session: Optional[UploadSession], file_name: str) -> HttpResponse:
+    if not session:
+        return JsonResponse(
+            {"error": gettext("Invalid filename or upload session token")},
+            status=404,
+        )
+
     try:
         session.remove_temp_file_by_name(file_name)
     except FileNotFoundError:
@@ -283,7 +281,10 @@ def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> Http
     return HttpResponse(status=204)
 
 
-def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpResponse:
+def _handle_uploaded_file_get(session: Optional[UploadSession], file_name: str) -> HttpResponse:
+    if not session:
+        raise Http404("The uploaded file could not be found")
+
     try:
         uploaded_file = session.get_file_by_name(file_name)
     except (FileNotFoundError, ValueError) as exc:
