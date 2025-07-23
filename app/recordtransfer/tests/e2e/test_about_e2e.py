@@ -29,7 +29,6 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         about_url = reverse("recordtransfer:about")
         driver.get(f"{self.live_server_url}{about_url}")
 
-        # Check the page heading (it's a div, not h1)
         page_heading = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "about-page-heading"))
         )
@@ -131,3 +130,20 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CSS_SELECTOR, ".card"))
         )
         self.assertTrue(mobile_element.is_displayed())
+
+    def test_navigate_to_about_from_home(self) -> None:
+        """Test navigation from home page to About page without login."""
+        driver = self.driver
+        home_url = reverse("recordtransfer:index")
+        driver.get(f"{self.live_server_url}{home_url}")
+
+        about_link = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "nav-about"))
+        )
+        about_link.click()
+
+        # Assert About page loads
+        page_heading = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "about-page-heading"))
+        )
+        self.assertIn("About", page_heading.text)
