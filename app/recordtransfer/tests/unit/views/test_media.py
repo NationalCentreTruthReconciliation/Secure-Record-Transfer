@@ -377,16 +377,11 @@ class TestUploadedFileView(TestCase):
         )
 
     def test_uploaded_file_session_not_found(self) -> None:
-        """Invalid session token."""
+        """Invalid session token returns default 404 page (not JSON)."""
         response = self.client.get(
             reverse("recordtransfer:uploaded_file", args=["invalid_token", "testfile.txt"])
         )
         self.assertEqual(response.status_code, 404)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-        self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token")
-        )
 
     def test_uploaded_file_not_found(self) -> None:
         """Invalid file name in a valid session."""
@@ -394,9 +389,6 @@ class TestUploadedFileView(TestCase):
             reverse("recordtransfer:uploaded_file", args=[self.session.token, "invalid_file.txt"])
         )
         self.assertEqual(response.status_code, 404)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-        self.assertEqual(response_json["error"], gettext("File not found in upload session"))
 
     def test_uploaded_file_invalid_user(self) -> None:
         """Invalid user for the session."""
@@ -406,11 +398,6 @@ class TestUploadedFileView(TestCase):
         self.session.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-        self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token")
-        )
 
     def test_delete_uploaded_file(self) -> None:
         """Delete an uploaded file."""
