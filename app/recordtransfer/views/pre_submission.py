@@ -19,7 +19,13 @@ from django.forms import (
     ModelForm,
     formset_factory,
 )
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    QueryDict,
+)
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -718,11 +724,16 @@ class SubmissionFormWizard(SessionWizardView):
             )
         return js_context
 
-    def done(self, form_list: list[BaseForm], **kwargs) -> HttpResponseRedirect:
+    def done(self, form_list: list[BaseForm], **kwargs) -> HttpResponse:
         """Retrieve all of the form data, and creates a Submission from it.
 
+        Args:
+            form_list: A list of all the forms in the form wizard.
+            **kwargs: Additional keyword arguments.
+
         Returns:
-            HttpResponseRedirect: Redirects the user to their User Profile page.
+            HttpResponse: A redirect to the submission sent page, or an error page if there was an
+            unexpected issue creating the submission.
         """
         form_data = {}
         try:
@@ -769,4 +780,9 @@ class SubmissionFormWizard(SessionWizardView):
             send_your_submission_did_not_go_through.delay(form_data, cast(User, self.request.user))
             send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
-            return HttpResponseRedirect(reverse("recordtransfer:system_error"))
+            raise Exception(
+                gettext(
+                    "There was an error creating your submission. Please try again later or contact "
+                    "us for assistance."
+                )
+            ) from exc

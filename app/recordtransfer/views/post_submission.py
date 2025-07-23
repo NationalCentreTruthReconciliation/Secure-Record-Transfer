@@ -23,7 +23,7 @@ from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.models import Submission, SubmissionGroup
+from recordtransfer.models import Submission, SubmissionGroup, User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -206,13 +206,9 @@ class SubmissionGroupDetailView(UpdateView):
 
 def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
     """Retrieve the groups associated with the current user."""
-    if request.user.pk != user_id and not request.user.is_staff and not request.user.is_superuser:
-        return JsonResponse(
-            {"error": gettext("You do not have permission to view these groups.")},
-            status=403,
-        )
+    user = get_object_or_404(User, pk=user_id)
 
-    submission_groups = SubmissionGroup.objects.filter(created_by=user_id)
+    submission_groups = SubmissionGroup.objects.filter(created_by=user)
     groups = [
         {"uuid": str(group.uuid), "name": group.name, "description": group.description}
         for group in submission_groups
