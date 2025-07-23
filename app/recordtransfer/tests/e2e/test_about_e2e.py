@@ -34,7 +34,7 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         )
         self.assertIn("About", page_heading.text)
 
-    def test_navigate_to_about_from_home(self) -> None:
+    def test_a(self) -> None:
         """Test navigation from home page to About page without login."""
         driver = self.driver
         home_url = reverse("recordtransfer:index")
