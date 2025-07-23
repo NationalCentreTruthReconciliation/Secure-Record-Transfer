@@ -213,6 +213,7 @@ def get_user_submission_groups(request: HttpRequest, user_uuid: str) -> JsonResp
             status=403,
         )
 
+
     submission_groups = SubmissionGroup.objects.filter(created_by=user)
     groups = [
         {"uuid": str(group.uuid), "name": group.name, "description": group.description}

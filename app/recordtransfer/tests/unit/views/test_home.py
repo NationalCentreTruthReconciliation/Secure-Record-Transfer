@@ -117,13 +117,3 @@ class TestHelpPage(TestCase):
         self.assertIn("rights_types", response.context)
         self.assertIn(self.sample_rtype, response.context["rights_types"])
         self.assertContains(response, "Description for sample rights type.")
-
-
-class TestSystemErrorPage(TestCase):
-    """Test system error page."""
-
-    def test_system_error_page_accessible(self) -> None:
-        """Test that the system error page can be accessed without login."""
-        response = self.client.get(reverse("recordtransfer:system_error"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "recordtransfer/system_error.html")

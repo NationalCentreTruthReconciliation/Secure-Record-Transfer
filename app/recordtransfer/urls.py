@@ -25,11 +25,6 @@ urlpatterns = [
         name="submit",
     ),
     path(
-        "error/",
-        views.home.SystemErrorPage.as_view(),
-        name="system_error",
-    ),
-    path(
         "submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"
     ),
     path(

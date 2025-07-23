@@ -1,0 +1,35 @@
+{% extends "recordtransfer/base.html" %}
+{% load i18n %}
+{% block title %}
+    {% block error_title %}
+    {% endblock error_title %}
+{% endblock title %}
+{% block content %}
+    <div class="flex flex-col items-center justify-center min-h-[50vh] text-center py-10 px-4">
+        <div class="bg-white shadow-lg rounded-lg p-8 border border-gray-100 max-w-md w-full">
+            <div class="flex justify-center mb-4">
+                {% block error_icon %}
+                {% endblock error_icon %}
+            </div>
+            <div class="text-2xl font-bold text-p   rimary px-4 py-2 ">
+                {% block error_heading %}
+                {% endblock error_heading %}
+            </div>
+            <div class="mb-4 text-gray-700 text-lg font-medium leading-relaxed">
+                {% block error_message %}
+                {% endblock error_message %}
+            </div>
+            <div class="text-gray-600 text-base leading-relaxed">
+                {% block error_submessage %}
+                {% endblock error_submessage %}
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <a href="{% url 'recordtransfer:index' %}"
+                   class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                    <span class="mr-2 font-bold">←</span>
+                    {% trans "Return to Home" %}
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
