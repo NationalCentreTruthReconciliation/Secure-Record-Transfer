@@ -40,11 +40,22 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         home_url = reverse("recordtransfer:index")
         driver.get(f"{self.live_server_url}{home_url}")
 
+        # Ensure window is large enough for nav bar to be visible
+        driver.set_window_size(1200, 800)
+
         screenshot_before = "before_about_click.png"
         driver.save_screenshot(screenshot_before)
         print(f"Screenshot before About link click saved to {screenshot_before}")
 
         try:
+            # If nav-toggle-button is present and visible, click it to open menu
+            try:
+                nav_toggle = driver.find_element(By.CLASS_NAME, "nav-toggle-button")
+                if nav_toggle.is_displayed():
+                    nav_toggle.click()
+            except Exception:
+                pass
+
             about_link = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "nav-about"))
             )
