@@ -137,6 +137,14 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         home_url = reverse("recordtransfer:index")
         driver.get(f"{self.live_server_url}{home_url}")
 
+        # Debug: print page source to help diagnose missing About link
+        print("\n\nHOME PAGE HTML:\n", driver.page_source[:5000], "\n...truncated...\n")
+
+        # Save screenshot for debugging
+        screenshot_path = "home_page_debug.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot of home page saved to {screenshot_path}")
+
         about_link = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "nav-about"))
         )
