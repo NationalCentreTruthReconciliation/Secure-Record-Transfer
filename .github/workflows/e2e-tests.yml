@@ -43,4 +43,4 @@ jobs:
       - name: Run E2E tests
         env:
           SELENIUM_TESTS_HEADLESS_MODE: True
-        run: uv run pytest -m e2e -n 2
+        run: uv run pytest -m e2e
