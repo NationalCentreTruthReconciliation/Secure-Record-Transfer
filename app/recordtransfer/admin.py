@@ -721,6 +721,10 @@ class CustomUserAdmin(UserAdmin):
         SubmissionGroupInline,
     ]
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Determine whether add permission is granted for this user admin."""
+        return request.user.is_superuser
+
     def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether change permission is granted for this user admin."""
         return request.user.is_superuser
