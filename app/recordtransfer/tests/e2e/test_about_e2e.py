@@ -34,44 +34,29 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         )
         self.assertIn("About", page_heading.text)
 
-    def test_a(self) -> None:
+    def test_about_navigation_from_home(self) -> None:
         """Test navigation from home page to About page without login."""
         driver = self.driver
         home_url = reverse("recordtransfer:index")
         driver.get(f"{self.live_server_url}{home_url}")
 
-        # Ensure window is large enough for nav bar to be visible
-        driver.set_window_size(1200, 800)
-
-        screenshot_before = "before_about_click.png"
-        driver.save_screenshot(screenshot_before)
-        print(f"Screenshot before About link click saved to {screenshot_before}")
-
+        # If nav-toggle-button is present and visible, click it to open menu
         try:
-            # If nav-toggle-button is present and visible, click it to open menu
-            try:
-                nav_toggle = driver.find_element(By.CLASS_NAME, "nav-toggle-button")
-                if nav_toggle.is_displayed():
-                    nav_toggle.click()
-            except Exception:
-                pass
+            nav_toggle = driver.find_element(By.CLASS_NAME, "nav-toggle-button")
+            if nav_toggle.is_displayed():
+                nav_toggle.click()
+        except Exception:
+            pass
 
-            about_link = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "nav-about"))
-            )
-            about_link.click()
-            screenshot_after = "navigate_to_about.png"
-            driver.save_screenshot(screenshot_after)
-            print(f"Screenshot after About link click saved to {screenshot_after}")
+        about_link = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "nav-about"))
+        )
+        about_link.click()
 
-            page_heading = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.ID, "about-page-heading"))
-            )
-            self.assertIn("About", page_heading.text)
-        finally:
-            # Always save a screenshot at the end for debugging, even if test fails
-            driver.save_screenshot("final_state.png")
-            print("Screenshot of final state saved to final_state.png")
+        page_heading = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "about-page-heading"))
+        )
+        self.assertIn("About", page_heading.text)
 
     @override_settings(
         FILE_UPLOAD_ENABLED=True,
