@@ -1,37 +1,22 @@
+{% extends "base_error.html" %}
 {% load i18n %}
-{% get_current_language as LANGUAGE_CODE %}
-<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
-    <head>
-        <meta name="description"
-              content="400 Bad Request - The received request was invalid.">
-        <title>400: Bad Request</title>
-        <style type="text/css">
-            html {
-                font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;
-            }
-
-            body {
-                padding: 1em;
-            }
-
-            .title {
-                color: #333333;
-                font-size: 20pt;
-                margin-bottom: 15px;
-                text-align: center;
-            }
-
-            .message {
-                text-align: center;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="title">400: Bad Request</div>
-        <p class="message">The received request was invalid.</p>
-        <p class="message">
-            <a href="{% url 'recordtransfer:index' %}">Home</a>
-        </p>
-    </body>
-</html>
+{% block error_title %}
+    {% trans "Bad Request" %}
+{% endblock error_title %}
+{% block error_icon %}
+    <svg xmlns="http://www.w3.org/2000/svg"
+         class="h-12 w-12 text-primary/60"
+         fill="none"
+         viewBox="0 0 24 24"
+         stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 11-12.728 0m12.728 0A9 9 0 005.636 18.364m12.728-12.728L5.636 18.364" />
+    </svg>
+{% endblock error_icon %}
+{% block error_heading %}
+    {% trans "400: Bad Request" %}
+{% endblock error_heading %}
+{% block error_message %}
+    {% trans "The received request was invalid." %}
+{% endblock error_message %}
+{% block error_submessage %}
+{% endblock error_submessage %}

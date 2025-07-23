@@ -3,7 +3,7 @@ viewing and listing uploaded files.
 """
 
 import logging
-from typing import cast
+from typing import Optional, cast
 
 from clamav.scan import check_for_malware
 from django.conf import settings
@@ -136,12 +136,14 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
             status=500,
         )
 
+
 def _handle_list_files(session: UploadSession) -> JsonResponse:
     file_metadata = [
         {"name": f.name, "size": f.file_upload.size, "url": f.get_file_access_url()}
         for f in session.get_uploads()
     ]
     return JsonResponse({"files": file_metadata}, status=200)
+
 
 def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
     _file = request.FILES.get("file")
@@ -183,20 +185,27 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
         )
     except ValueError as exc:
         LOGGER.error("File too large for malware scanning: %s", _file.name, exc_info=exc)
-        return JsonResponse({
-            "file": _file.name,
-            "accepted": False,
-            "uploadSessionToken": session.token,
-            "error": gettext(f'File "{_file.name}" is too large to scan for malware'),
-        }, status=400)
+        return JsonResponse(
+            {
+                "file": _file.name,
+                "accepted": False,
+                "uploadSessionToken": session.token,
+                "error": gettext('File "%(name)s" is too large to scan for malware')
+                % {"name": _file.name},
+            },
+            status=400,
+        )
     except ConnectionError as exc:
         LOGGER.error("ClamAV connection error for file %s", _file.name, exc_info=exc)
-        return JsonResponse({
-            "file": _file.name,
-            "accepted": False,
-            "uploadSessionToken": session.token,
-            "error": gettext("Unable to scan file for malware due to scanner error"),
-        }, status=500)
+        return JsonResponse(
+            {
+                "file": _file.name,
+                "accepted": False,
+                "uploadSessionToken": session.token,
+                "error": gettext("Unable to scan file for malware due to scanner error"),
+            },
+            status=500,
+        )
 
     try:
         uploaded_file = session.add_temp_file(_file)
@@ -240,27 +249,24 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
             of getting a file, redirects to the file's media path in development, or returns an
             X-Accel-Redirect to the file's media path if in production.
     """
-    try:
-        if request.user.is_staff:
-            session = UploadSession.objects.filter(token=session_token).first()
-        else:
-            session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-        if not session:
-            return JsonResponse(
-                {"error": gettext("Invalid filename or upload session token")}, status=404
-            )
+    if request.user.is_staff:
+        session = UploadSession.objects.filter(token=session_token).first()
+    else:
+        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
 
-        if request.method == "DELETE":
-            return _handle_uploaded_file_delete(session, file_name)
-        else:
-            return _handle_uploaded_file_get(session, file_name)
-
-    except Exception as exc:
-        LOGGER.error("Error handling uploaded file: %s", str(exc), exc_info=exc)
-        return JsonResponse({"error": gettext("Internal server error")}, status=500)
+    if request.method == "DELETE":
+        return _handle_uploaded_file_delete(session, file_name)
+    else:
+        return _handle_uploaded_file_get(session, file_name)
 
 
-def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> HttpResponse:
+def _handle_uploaded_file_delete(session: Optional[UploadSession], file_name: str) -> HttpResponse:
+    if not session:
+        return JsonResponse(
+            {"error": gettext("Invalid filename or upload session token")},
+            status=404,
+        )
+
     try:
         session.remove_temp_file_by_name(file_name)
     except FileNotFoundError:
@@ -276,19 +282,14 @@ def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> Http
     return HttpResponse(status=204)
 
 
-def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpResponse:
+def _handle_uploaded_file_get(session: Optional[UploadSession], file_name: str) -> HttpResponse:
+    if not session:
+        raise Http404("The uploaded file could not be found")
+
     try:
         uploaded_file = session.get_file_by_name(file_name)
-    except FileNotFoundError:
-        return JsonResponse(
-            {"error": gettext("File not found in upload session")},
-            status=404,
-        )
-    except ValueError:
-        return JsonResponse(
-            {"error": gettext("Cannot access file in upload session")},
-            status=400,
-        )
+    except (FileNotFoundError, ValueError) as exc:
+        raise Http404("The uploaded file could not be found") from exc
 
     file_url = uploaded_file.get_file_media_url()
     return serve_media_file(file_url)

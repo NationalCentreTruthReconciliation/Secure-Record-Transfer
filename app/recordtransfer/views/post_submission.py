@@ -24,7 +24,7 @@ from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
-from recordtransfer.models import Submission, SubmissionGroup
+from recordtransfer.models import Submission, SubmissionGroup, User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -213,6 +213,7 @@ def get_user_submission_groups(request: HttpRequest, user_uuid: str) -> JsonResp
             {"error": gettext("You do not have permission to view these groups.")},
             status=403,
         )
+
 
     submission_groups = SubmissionGroup.objects.filter(created_by=user)
     groups = [

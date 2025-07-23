@@ -18,8 +18,6 @@ class Help(TemplateView):
 
     template_name = "recordtransfer/help.html"
 
-    from typing import Any
-
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context variables to the template context."""
         context = super().get_context_data(**kwargs)
@@ -31,12 +29,6 @@ class Help(TemplateView):
         context["MAX_TOTAL_UPLOAD_COUNT"] = settings.MAX_TOTAL_UPLOAD_COUNT
 
         return context
-
-
-class SystemErrorPage(TemplateView):
-    """The page a user sees when there is some system error."""
-
-    template_name = "recordtransfer/system_error.html"
 
 
 class About(TemplateView):
