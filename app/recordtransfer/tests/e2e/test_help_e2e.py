@@ -40,7 +40,7 @@ class HelpPageTest(SeleniumLiveServerTestCase):
         driver.get(f"{self.live_server_url}{help_url}")
 
         # Check for the three main help cards
-        help_sections = ["source-types", "source-roles", "rights-types"]
+        help_sections = ["source-types", "source-roles", "rights-types", "faq"]
 
         for section_id in help_sections:
             section = driver.find_element(By.ID, section_id)
