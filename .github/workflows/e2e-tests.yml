@@ -44,12 +44,3 @@ jobs:
         env:
           SELENIUM_TESTS_HEADLESS_MODE: True
         run: uv run pytest -m e2e
-
-      - name: Upload Selenium screenshots
-        uses: actions/upload-artifact@v4
-        with:
-            name: selenium-screenshots
-            path: |
-                before_about_click.png
-                navigate_to_about.png
-            if-no-files-found: warn
