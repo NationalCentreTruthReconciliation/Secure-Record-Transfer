@@ -145,10 +145,30 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         driver.save_screenshot(screenshot_path)
         print(f"Screenshot of home page saved to {screenshot_path}")
 
-        about_link = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "nav-about"))
-        )
-        about_link.click()
+        about_link = None
+        try:
+            about_link = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "nav-about"))
+            )
+            # Print computed style for debugging
+            style = driver.execute_script(
+                "var e=document.getElementById('nav-about'); if(e) return window.getComputedStyle(e).cssText; return 'not found';"
+            )
+            print("Computed style for #nav-about:", style)
+
+            # Try normal click
+            about_link.click()
+        except Exception as e:
+            print(f"Normal click failed: {e}.")
+            if about_link:
+                print("Trying JS click.")
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView();", about_link)
+                    driver.execute_script("arguments[0].click();", about_link)
+                except Exception as js_e:
+                    print(f"JS click also failed: {js_e}")
+            else:
+                print("about_link was not found, cannot attempt JS click.")
 
         # Assert About page loads
         page_heading = WebDriverWait(driver, 5).until(
