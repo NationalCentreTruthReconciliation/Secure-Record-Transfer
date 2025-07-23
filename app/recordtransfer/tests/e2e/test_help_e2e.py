@@ -46,6 +46,23 @@ class HelpPageTest(SeleniumLiveServerTestCase):
             section = driver.find_element(By.ID, section_id)
             self.assertTrue(section.is_displayed(), f"Section {section_id} should be visible")
 
+    def test_navigation_to_help_page(self) -> None:
+        """Test navigating to the Help page from the homepage."""
+        driver = self.driver
+        # Start at homepage
+        driver.get(f"{self.live_server_url}/")
+
+        # Find and click the Help link in the navigation
+
+        help_link = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "nav-help")))
+        help_link.click()
+
+        # Verify we're on the Help page
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, "help-page-heading"))
+        )
+        self.assertIn("help", driver.current_url)
+
     def test_help_section_components(self) -> None:
         """Test that help sections have the right component structure."""
         driver = self.driver
