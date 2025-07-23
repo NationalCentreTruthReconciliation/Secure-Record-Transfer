@@ -63,3 +63,8 @@ DJANGO_SETTINGS_MODULE = "app.settings.test"
 markers = [
     "e2e: marks tests as end-to-end",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest-xdist>=3.8.0",
+]
