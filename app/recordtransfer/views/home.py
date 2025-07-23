@@ -18,8 +18,6 @@ class Help(TemplateView):
 
     template_name = "recordtransfer/help.html"
 
-    from typing import Any
-
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add context variables to the template context."""
         context = super().get_context_data(**kwargs)
