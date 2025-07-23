@@ -153,10 +153,30 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
             try:
                 style = driver.execute_script("return window.getComputedStyle(arguments[0]).cssText;", el)
                 rect = driver.execute_script("return arguments[0].getBoundingClientRect();", el)
+                pointer_events = driver.execute_script("return window.getComputedStyle(arguments[0]).pointerEvents;", el)
+                opacity = driver.execute_script("return window.getComputedStyle(arguments[0]).opacity;", el)
                 print(f"Element {i} style: {style}")
                 print(f"Element {i} bounding rect: {rect}")
+                print(f"Element {i} pointer-events: {pointer_events}")
+                print(f"Element {i} opacity: {opacity}")
             except Exception as info_e:
                 print(f"Could not get style/rect for element {i}: {info_e}")
+
+        # Check for overlays that may block clicks
+        overlays = driver.find_elements(By.CLASS_NAME, "menu-overlay")
+        print(f"Found {len(overlays)} elements with class 'menu-overlay'.")
+        for i, el in enumerate(overlays):
+            try:
+                style = driver.execute_script("return window.getComputedStyle(arguments[0]).cssText;", el)
+                rect = driver.execute_script("return arguments[0].getBoundingClientRect();", el)
+                pointer_events = driver.execute_script("return window.getComputedStyle(arguments[0]).pointerEvents;", el)
+                opacity = driver.execute_script("return window.getComputedStyle(arguments[0]).opacity;", el)
+                print(f"Overlay {i} style: {style}")
+                print(f"Overlay {i} bounding rect: {rect}")
+                print(f"Overlay {i} pointer-events: {pointer_events}")
+                print(f"Overlay {i} opacity: {opacity}")
+            except Exception as info_e:
+                print(f"Could not get style/rect for overlay {i}: {info_e}")
 
         try:
             about_link = WebDriverWait(driver, 10).until(
@@ -182,6 +202,8 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
 
             # Try normal click
             about_link.click()
+            driver.save_screenshot("after_normal_click.png")
+            print("Screenshot after normal click saved to after_normal_click.png")
         except Exception as e:
             print(f"Normal click failed: {e}.")
             if about_link:
@@ -189,10 +211,23 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
                 try:
                     driver.execute_script("arguments[0].scrollIntoView();", about_link)
                     driver.execute_script("arguments[0].click();", about_link)
+                    driver.save_screenshot("after_js_click.png")
+                    print("Screenshot after JS click saved to after_js_click.png")
                 except Exception as js_e:
                     print(f"JS click also failed: {js_e}")
             else:
                 print("about_link was not found, cannot attempt JS click.")
+
+            # Try JS click on the first found nav-about element if normal click fails
+            if nav_about_elements:
+                print("Trying JS click on first found nav-about element.")
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView();", nav_about_elements[0])
+                    driver.execute_script("arguments[0].click();", nav_about_elements[0])
+                    driver.save_screenshot("after_js_click_first_element.png")
+                    print("Screenshot after JS click on first element saved to after_js_click_first_element.png")
+                except Exception as js_e2:
+                    print(f"JS click on first found nav-about element also failed: {js_e2}")
 
         # Assert About page loads
         page_heading = WebDriverWait(driver, 5).until(
