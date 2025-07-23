@@ -880,8 +880,6 @@ class SiteSettingAdmin(admin.ModelAdmin):
     def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
         """Reset the site setting to its default value."""
         try:
-            from recordtransfer.models import User
-
             user = User.objects.get(pk=request.user.pk)
             obj.reset_to_default(user)
             messages.success(
