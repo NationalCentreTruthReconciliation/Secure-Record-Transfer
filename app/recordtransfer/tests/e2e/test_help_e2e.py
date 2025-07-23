@@ -79,10 +79,13 @@ class HelpPageTest(SeleniumLiveServerTestCase):
         for section_id in ["source-types", "source-roles", "rights-types"]:
             section = driver.find_element(By.ID, section_id)
 
-            # Check that section has a card container
-            card = section.find_element(
-                By.XPATH, "./ancestor::div[contains(@class, 'rounded-box')]"
-            )
+            if section_id != "faq":
+                # Check that section has a card container
+                card = section.find_element(
+                    By.XPATH, "./ancestor::div[contains(@class, 'rounded-box')]"
+                )
+            else:
+                card = section
 
             # Check that section has a collapsible component
             self.assertTrue(card.find_element(By.CSS_SELECTOR, ".collapse").is_displayed())
