@@ -190,7 +190,8 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
                 "file": _file.name,
                 "accepted": False,
                 "uploadSessionToken": session.token,
-                "error": gettext(f'File "{_file.name}" is too large to scan for malware'),
+                "error": gettext('File "%(name)s" is too large to scan for malware')
+                % {"name": _file.name},
             },
             status=400,
         )
