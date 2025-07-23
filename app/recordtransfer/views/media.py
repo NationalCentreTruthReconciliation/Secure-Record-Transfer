@@ -240,24 +240,17 @@ def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> H
             of getting a file, redirects to the file's media path in development, or returns an
             X-Accel-Redirect to the file's media path if in production.
     """
-    try:
-        if request.user.is_staff:
-            session = UploadSession.objects.filter(token=session_token).first()
-        else:
-            session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-        if not session:
-            return JsonResponse(
-                {"error": gettext("Invalid filename or upload session token")}, status=404
-            )
+    if request.user.is_staff:
+        session = UploadSession.objects.filter(token=session_token).first()
+    else:
+        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
+    if not session:
+        raise Http404("The uploaded file could not be found")
 
-        if request.method == "DELETE":
-            return _handle_uploaded_file_delete(session, file_name)
-        else:
-            return _handle_uploaded_file_get(session, file_name)
-
-    except Exception as exc:
-        LOGGER.error("Error handling uploaded file: %s", str(exc), exc_info=exc)
-        return JsonResponse({"error": gettext("Internal server error")}, status=500)
+    if request.method == "DELETE":
+        return _handle_uploaded_file_delete(session, file_name)
+    else:
+        return _handle_uploaded_file_get(session, file_name)
 
 
 def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> HttpResponse:
@@ -279,16 +272,8 @@ def _handle_uploaded_file_delete(session: UploadSession, file_name: str) -> Http
 def _handle_uploaded_file_get(session: UploadSession, file_name: str) -> HttpResponse:
     try:
         uploaded_file = session.get_file_by_name(file_name)
-    except FileNotFoundError:
-        return JsonResponse(
-            {"error": gettext("File not found in upload session")},
-            status=404,
-        )
-    except ValueError:
-        return JsonResponse(
-            {"error": gettext("Cannot access file in upload session")},
-            status=400,
-        )
+    except (FileNotFoundError, ValueError) as exc:
+        raise Http404("The uploaded file could not be found") from exc
 
     file_url = uploaded_file.get_file_media_url()
     return serve_media_file(file_url)
