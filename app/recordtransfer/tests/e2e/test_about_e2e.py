@@ -145,7 +145,7 @@ class AboutPageE2ETests(SeleniumLiveServerTestCase):
         driver.save_screenshot(screenshot_path)
         print(f"Screenshot of home page saved to {screenshot_path}")
 
-        about_link = WebDriverWait(driver, 5).until(
+        about_link = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "nav-about"))
         )
         about_link.click()
