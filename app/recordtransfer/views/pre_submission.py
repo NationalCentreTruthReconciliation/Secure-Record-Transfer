@@ -24,7 +24,6 @@ from django.http import (
     HttpRequest,
     HttpResponse,
     HttpResponseRedirect,
-    HttpResponseServerError,
     QueryDict,
 )
 from django.shortcuts import redirect
@@ -781,4 +780,9 @@ class SubmissionFormWizard(SessionWizardView):
             send_your_submission_did_not_go_through.delay(form_data, cast(User, self.request.user))
             send_submission_creation_failure.delay(form_data, cast(User, self.request.user))
 
-            return HttpResponseServerError()
+            raise Exception(
+                gettext(
+                    "There was an error creating your submission. Please try again later or contact "
+                    "us for assistance."
+                )
+            ) from exc
