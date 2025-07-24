@@ -348,3 +348,11 @@ class TestGetUserSubmissionGroups(TestCase):
 
         if group2 is not None:
             self.assertEqual(group2["description"], self.group2.description)
+
+    def test_unauthenticated_user_redirected_to_login(self) -> None:
+        """Test that an unauthenticated user is redirected to the login page."""
+        self.client.logout()
+        response = self.client.get(self.url)
+        login_url = reverse("login")
+        expected_redirect = f"{login_url}?next={self.url}"
+        self.assertRedirects(response, expected_redirect)
