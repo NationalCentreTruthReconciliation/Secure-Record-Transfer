@@ -138,6 +138,7 @@ class Login(LoginView):
 
 
 def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
+    """Handle lockout due to too many failed login attempts."""
     response = HttpResponse(status=429)
     return trigger_client_event(
         response,
