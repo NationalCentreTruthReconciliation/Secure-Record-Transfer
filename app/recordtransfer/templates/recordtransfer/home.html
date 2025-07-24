@@ -13,18 +13,12 @@
         <div class="main-graphic-text-container">
             <div class="main-graphic-text">{% trans "Securely Send Your Records to the NCTR" %}</div>
             <div class="hero-button-container">
-                <div class="hero-button">
-                    <a href="{% url 'recordtransfer:submit' %}">{% trans "Submit Your Records" %}</a>
-                </div>
+                <a href="{% url 'recordtransfer:submit' %}" class="hero-button">{% trans "Submit Your Records" %}</a>
                 {% if not user.is_authenticated %}
                     {% if SIGN_UP_ENABLED %}
-                        <div class="hero-button">
-                            <a href="{% url 'recordtransfer:create_account' %}">{% trans "Sign up Now" %}</a>
-                        </div>
+                        <a href="{% url 'recordtransfer:create_account' %}" class="hero-button">{% trans "Sign up Now" %}</a>
                     {% endif %}
-                    <div class="hero-button">
-                        <a href="{% url 'login' %}">{% trans "Log In" %}</a>
-                    </div>
+                    <a href="{% url 'login' %}" class="hero-button">{% trans "Log In" %}</a>
                 {% endif %}
             </div>
         </div>
