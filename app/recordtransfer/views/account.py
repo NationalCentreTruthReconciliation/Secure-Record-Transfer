@@ -1,5 +1,6 @@
 """Views for creating and activating user accounts."""
 
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, PasswordResetView
@@ -10,8 +11,10 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.utils.translation import gettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
+from django_htmx.http import trigger_client_event
 
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm
@@ -133,9 +136,22 @@ class Login(LoginView):
             return HttpResponse(html)
         return super().form_invalid(form)
 
+
+def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
+    response = HttpResponse(status=429)
+    return trigger_client_event(
+        response,
+        "showError",
+        {
+            "value": gettext("Too many failed login attempts. Please try again in %d minutes.")
+            % int(settings.AXES_COOLOFF_TIME * 60)
+        },
+    )
+
+
 class AsyncPasswordResetView(PasswordResetView):
     """The page a user sees when they request a password reset."""
 
-    email_template_name="registration/password_reset_email.txt"
-    html_email_template_name="registration/password_reset_email.html"
+    email_template_name = "registration/password_reset_email.txt"
+    html_email_template_name = "registration/password_reset_email.html"
     form_class = AsyncPasswordResetForm
