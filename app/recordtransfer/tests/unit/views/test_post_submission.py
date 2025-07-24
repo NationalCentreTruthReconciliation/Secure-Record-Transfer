@@ -273,3 +273,62 @@ class TestSubmissionGroupBulkCsvExport(TestCase):
             )
         )
         self.assertEqual(response.status_code, 404)
+
+
+class TestGetUserSubmissionGroups(TestCase):
+    """Tests for get_user_submission_groups view."""
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data for get_user_submission_groups view tests."""
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.other_user = User.objects.create_user(username="otheruser", password="password")
+        cls.staff_user = User.objects.create_user(
+            username="staffuser", password="password", is_staff=True
+        )
+        cls.group1 = SubmissionGroup.objects.create(name="Group 1", created_by=cls.user)
+        cls.group2 = SubmissionGroup.objects.create(name="Group 2", created_by=cls.user)
+        cls.other_group = SubmissionGroup.objects.create(
+            name="Other Group", created_by=cls.other_user
+        )
+        cls.url = reverse("recordtransfer:get_user_submission_groups")
+
+    def setUp(self) -> None:
+        """Set up test environment for each test."""
+        self.client.login(username="testuser", password="password")
+
+    def test_returns_own_groups(self) -> None:
+        """Test that the view returns only the groups owned by the user."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        group_names = {g["name"] for g in data}
+        self.assertIn("Group 1", group_names)
+        self.assertIn("Group 2", group_names)
+        self.assertNotIn("Other Group", group_names)
+
+    def test_returns_empty_for_user_with_no_groups(self) -> None:
+        """Test that the view returns the correct response for a user with no groups."""
+        self.client.login(username="otheruser", password="password")
+        url = reverse("recordtransfer:get_user_submission_groups")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            [
+                {
+                    "uuid": str(self.other_group.uuid),
+                    "name": "Other Group",
+                    "description": self.other_group.description,
+                }
+            ],
+        )
+
+    def test_staff_can_access_own_groups(self) -> None:
+        """Test that a staff user can access their own submission groups."""
+        self.client.login(username="staffuser", password="password")
+        url = reverse("recordtransfer:get_user_submission_groups")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # Staff user has no groups by default
+        self.assertEqual(response.json(), [])
