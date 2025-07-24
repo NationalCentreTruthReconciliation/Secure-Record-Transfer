@@ -23,32 +23,12 @@ def populate_initial_terms(apps, schema_editor):
         other_role.save()
 
 
-def populate_permissions(apps, schema_editor):
-    ''' Add term permissions for archival staff '''
-    emit_post_migrate_signal(1, False, 'default')
-    group = Group.objects.get(name='archivist_user')
-    existing_permissions = group.permissions.all()
-
-    for codename in (
-        'add_sourcetype',
-        'change_sourcetype',
-        'view_sourcetype',
-
-        'add_sourcerole',
-        'change_sourcerole',
-        'view_sourcerole'):
-        permission = Permission.objects.get(codename=codename)
-        if permission not in existing_permissions:
-            group.permissions.add(permission)
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordtransfer', '0017_archivist_rights_perms'),
+        ('recordtransfer', '0016_auto_20210528_1228'),
     ]
 
     operations = [
         migrations.RunPython(populate_initial_terms),
-        migrations.RunPython(populate_permissions),
     ]

@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recordtransfer', '0011_archivist_permissions'),
+        ('recordtransfer', '0010_update_site_name'),
     ]
 
     operations = [
