@@ -49,8 +49,9 @@ class UserAdminForm(ContactInfoFormMixin, UserChangeForm):
 
         # Set readonly fields
         for field_name in self.READONLY_FIELDS:
-            self.fields[field_name].disabled = True
-            self.fields[field_name].required = False
+            if field_name in self.fields:
+                self.fields[field_name].disabled = True
+                self.fields[field_name].required = False
 
     def clean(self) -> dict[str, Any]:
         """Override clean to call both parent clean methods and enforce group validation."""
@@ -142,7 +143,7 @@ class SiteSettingModelForm(RecordTransferModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.key:
+        if self.instance and self.instance.key and "value" in self.fields:
             try:
                 key_enum = SiteSettingKey[self.instance.key]
                 description = getattr(key_enum, "description", "")

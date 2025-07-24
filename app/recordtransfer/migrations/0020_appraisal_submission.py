@@ -5,23 +5,6 @@ from django.contrib.auth.models import Group, Permission
 from django.core.management.sql import emit_post_migrate_signal
 from django.db import migrations, models
 import django.db.models.deletion
-import django.utils.timezone
-
-
-def populate_permissions(apps, schema_editor):
-    ''' Add permissions to edit rights to archivist staff '''
-    emit_post_migrate_signal(1, False, 'default')
-    group = Group.objects.get(name='archivist_user')
-    existing_permissions = group.permissions.all()
-
-    for codename in (
-            # Submission
-            'change_submission',
-            'view_submission',
-        ):
-        permission = Permission.objects.filter(codename=codename).first()
-        if permission not in existing_permissions:
-            group.permissions.add(permission)
 
 
 class Migration(migrations.Migration):
@@ -59,5 +42,4 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
         ),
-        migrations.RunPython(populate_permissions),
     ]
