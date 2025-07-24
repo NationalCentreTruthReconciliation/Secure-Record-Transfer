@@ -59,14 +59,11 @@
     width: 30%;
 }
 
-.hero-button:hover {
-    cursor: pointer;
+.hero-button:hover,
+.hero-button:focus {
     background-color: #ffffff;
-}
-
-.hero-button:hover a {
     color: #ee7421;
-    transition: color 0.3s ease;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .homepage-button {
@@ -131,7 +128,8 @@
     margin-top: 2rem;
 }
 
-.primary-button, .secondary-button {
+.primary-button,
+.secondary-button {
     padding: 1rem 2rem;
     border-radius: 6px;
     text-decoration: none;
@@ -150,7 +148,8 @@
     border: 2px solid #89140a;
 }
 
-.primary-button:hover, .secondary-button:hover {
+.primary-button:hover,
+.secondary-button:hover {
     transform: translateY(-2px);
 }
 
