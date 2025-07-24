@@ -5,7 +5,7 @@
     {% blocktrans %}Your In-Progress Submission is Expiring Soon{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <div class="main-content">
         <p>{% blocktrans %}Dear {{ full_name }} ({{ username }}),{% endblocktrans %}</p>
         <p>
             {% blocktrans %}You have an in-progress submission titled "{{ in_progress_title }}" that is set to expire on {{ in_progress_expiration_date }}.{% endblocktrans %}
@@ -14,26 +14,17 @@
             {% blocktrans %}Please make sure to complete your submission before the expiration date. You can resume your submission by clicking the button below:{% endblocktrans %}
         </p>
     </div>
-    <div style="text-align: left; margin-top: 20px;">
-        <a href="https://{{ base_url }}{{ in_progress_url }}"
-           style="display: inline-block;
-                  background-color: #EE7623;
-                  color: white;
-                  padding: 10px 20px;
-                  font-weight: bold;
-                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+    <div class="main-content">
+        <a href="https://{{ base_url }}{{ in_progress_url }}" class="email-btn">
             {% blocktrans %}Resume Your Submission{% endblocktrans %}
         </a>
-        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+        <p class="fallback-link">
             {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
             <br>
             <a href="https://{{ base_url }}{{ in_progress_url }}"
-               style="color:#606060">https://{{ base_url }}{{ in_progress_url }}</a>
+               class="fallback-link-url">https://{{ base_url }}{{ in_progress_url }}</a>
         </p>
-        <p style="margin-top: 15px;
-                  font-size: 10px;
-                  color: #A0A0A0;
-                  line-height: 1.4">
+        <p class="email-note">
             {% blocktrans %}If you have any questions or need assistance, please contact our support team.{% endblocktrans %}
         </p>
     </div>

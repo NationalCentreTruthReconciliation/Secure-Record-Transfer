@@ -5,44 +5,33 @@
     {% blocktrans %}Thank You for Your Submission{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+    <p class="main-content">
         {% blocktrans %}
             Thank you for your record submission using the NCTR Record Transfer Portal. The
             files you sent are being stored securely on our servers until an archivist has the
             opportunity to view them.
             {% endblocktrans %}
     </p>
-    <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+    <p class="main-content">
         {% blocktrans %}
         If you have any questions about your submission, please contact an NCTR archivist
         at this email address:
         {% endblocktrans %}
     </p>
-    <div style="text-align: left; margin-top: 20px;">
-        <a href="mailto:{{ archivist_email }}"
-           style="display: inline-block;
-                  background-color: #EE7623;
-                  color: white;
-                  padding: 10px 20px;
-                  font-weight: bold;
-                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
-            {% blocktrans %}Contact NCTR Archivist{% endblocktrans %}
-        </a>
+    <div class="main-content">
+        <a href="mailto:{{ archivist_email }}" class="email-btn">{% blocktrans %}Contact NCTR Archivist{% endblocktrans %}</a>
     </div>
-    <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+    <p class="fallback-link">
         {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
         <br>
-        <a href="mailto:{{ archivist_email }}" style="color:#606060">mailto:{{ archivist_email }}</a>
+        <a href="mailto:{{ archivist_email }}" class="fallback-link-url">mailto:{{ archivist_email }}</a>
     </p>
-    <div style="font-size: 10px;
-                color:#6a6969;
-                padding: 0 20px;
-                margin-top: 30px">
+    <div class="email-note">
         <h3 style="font-size: 9pt;
                    color:#706c6c;
                    font-weight: bold;
                    margin-bottom: 10px">{% blocktrans %} Submission Agreement {% endblocktrans %}</h3>
-        <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+        <p class="main-content">
             {% blocktrans %}
                 Thank you for submitting records with the NCTR Record Transfer App. By completing
                 and submitting the form you hereby agree to give the National Centre for Truth and
@@ -52,7 +41,7 @@
                 NCTR.
             {% endblocktrans %}
         </p>
-        <p style="margin-top: 0; margin-bottom: 10px; line-height: 1.4;">
+        <p class="main-content">
             {% blocktrans %}
                 The NCTR accepts full responsibility for the physical condition of the materials you
                 have submitted during the period when the NCTR Archives staff will examine the

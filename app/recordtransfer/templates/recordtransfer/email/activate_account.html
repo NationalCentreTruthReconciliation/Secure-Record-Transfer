@@ -5,29 +5,23 @@
     {% blocktrans %}Activate Your New Account{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <div class="main-content">
         {% blocktrans %}
-                An account was created for the NCTR Record Transfer Portal using this email.
-                To activate your account, click the button below.
-            {% endblocktrans %}
+            An account was created for the NCTR Record Transfer Portal using this email.
+            To activate your account, click the button below.
+        {% endblocktrans %}
     </div>
-    <div style="text-align: left; margin-top: 20px;">
+    <div class="main-content">
         {% url 'recordtransfer:activate_account' uidb64=uid token=token as activate_account %}
-        <a href="https://{{ base_url }}{{ activate_account }}"
-           style="display: inline-block;
-                  background-color: #EE7623;
-                  color: white;
-                  padding: 10px 20px;
-                  font-weight: bold;
-                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+        <a href="https://{{ base_url }}{{ activate_account }}" class="email-btn">
             {% blocktrans %}Activate Account{% endblocktrans %}
         </a>
         <!-- Fallback text link for plain-text clients -->
-        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+        <p class="fallback-link">
             {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
             <br>
             <a href="https://{{ base_url }}{{ activate_account }}"
-               style="color:#606060">https://{{ base_url }}{{ activate_account }}</a>
+               class="fallback-link-url">https://{{ base_url }}{{ activate_account }}</a>
         </p>
     </div>
 {% endblock content %}
