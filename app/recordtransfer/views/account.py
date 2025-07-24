@@ -43,16 +43,14 @@ class CreateAccount(FormView):
         new_user.gets_submission_email_updates = False
         new_user.save()
         send_user_activation_email.delay(new_user)
-        if self.request.headers.get("HX-Request"):
-            response = HttpResponse()
-            response["HX-Redirect"] = self.get_success_url()
-            return response
+        if self.request.htmx:
+            return HttpResponseClientRedirect(self.get_success_url())
 
         return super().form_valid(form)
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid signup form submissions."""
-        if self.request.headers.get("HX-Request"):
+        if self.request.htmx:
             # Return only the error template for HTMX requests
             html = render_to_string(
                 "recordtransfer/signup_form.html",
