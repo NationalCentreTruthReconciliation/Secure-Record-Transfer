@@ -704,7 +704,6 @@ class SubmissionFormWizard(SessionWizardView):
                     "id_submission_group_selection": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
                     "fetch_group_descriptions_url": reverse(
                         "recordtransfer:get_user_submission_groups",
-                        kwargs={"user_uuid": self.request.user.uuid},
                     ),
                     "default_group_uuid": self.submission_group_uuid,
                 },
