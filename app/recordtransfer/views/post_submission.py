@@ -207,13 +207,6 @@ class SubmissionGroupDetailView(UpdateView):
 def get_user_submission_groups(request: HttpRequest, user_uuid: str) -> JsonResponse:
     """Return a JSON response containing all submission groups created by the specified user."""
     user = get_object_or_404(User, uuid=user_uuid)
-    if request.user != user and not request.user.is_staff and not request.user.is_superuser:
-        return JsonResponse(
-            {"error": gettext("You do not have permission to view these groups.")},
-            status=403,
-        )
-
-
     submission_groups = SubmissionGroup.objects.filter(created_by=user)
     groups = [
         {"uuid": str(group.uuid), "name": group.name, "description": group.description}
