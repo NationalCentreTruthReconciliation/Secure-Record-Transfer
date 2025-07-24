@@ -204,6 +204,7 @@ class SubmissionGroupDetailView(UpdateView):
         )
 
 
+@require_http_methods(["GET"])
 def get_user_submission_groups(request: HttpRequest) -> JsonResponse:
     """Return a JSON response containing all submission groups created by the specified user."""
     user: User = cast(User, request.user)
