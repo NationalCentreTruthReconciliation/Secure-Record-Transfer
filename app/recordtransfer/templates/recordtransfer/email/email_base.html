@@ -8,7 +8,66 @@
         <title></title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style type="text/css">
-          /* Prevent unwanted scrolling and ensure true responsiveness */
+          /* Container and main content */
+          .container {
+            background-color: #ffffff;
+            margin: 40px auto;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+          }
+          .main-content {
+            font-size: 10pt;
+            font-family: 'Open Sans', sans-serif;
+            padding: 0 20px;
+          }
+          /* Logo and header image */
+          .logo {
+            max-width: 100%;
+            width: 80%;
+            height: auto;
+            display: block;
+          }
+          .header-img {
+            max-width: 100%;
+            width: 80%;
+            height: auto;
+            display: block;
+            padding-top: 20px;
+          }
+          /* Title */
+          .email-title {
+            font-weight: bold;
+            color: #89181A;
+            font-size: 20pt;
+            padding: 6px 20px;
+            background-color: #FFFFFF;
+            margin-bottom: 15px;
+            margin-top: 20px;
+            font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+          }
+          /* Footer */
+          .footer {
+            font-size: 10px;
+            color: #ccc8c8;
+            font-family: 'Open Sans', sans-serif;
+            margin-top: 40px;
+            line-height: 0.8;
+          }
+          .footer-link {
+            color: #9f9f9f;
+          }
+          .footer-social {
+            margin: 0 auto;
+            max-width: 600px;
+            width: 100%;
+          }
+          .social-icon {
+            margin: 0 8px;
+            display: inline-block;
+            vertical-align: middle;
+          }
+          /* Responsive */
           @media only screen and (max-width: 620px) {
             .container {
               width: 100% !important;
@@ -24,71 +83,53 @@
               height: auto !important;
             }
           }
+          body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+          }
+          .bg-f4f4f4 {
+            background-color: #f4f4f4;
+          }
         </style>
     </head>
-    <body style="margin:0;
-                 padding:0;
-                 background-color:#f4f4f4;
-                 font-family: 'Merriweather', Georgia, 'Times New Roman', serif">
+    <body class="bg-f4f4f4">
         <table role="presentation"
                border="0"
                cellpadding="0"
                cellspacing="0"
                width="100%"
-               style="background-color:#f4f4f4">
+               class="bg-f4f4f4">
             <tr>
-                <td align="center" style="padding:0;">
+                <td align="center">
                     <table class="container"
                            role="presentation"
                            border="0"
                            cellpadding="0"
                            cellspacing="0"
-                           width="100%"
-                           style="background-color:#ffffff;
-                                  margin:40px auto;
-                                  padding:30px;
-                                  max-width:600px;
-                                  width:100%">
+                           width="100%">
                         <tr>
-                            <td align="center" style="padding:0;">
+                            <td align="center">
                                 <img class="logo"
                                      src="https://ehprnh2mwo3.exactdn.com/wp-content/uploads/2023/08/NCTR-BILINGUAL-sh.png"
-                                     alt="{% blocktrans %}Company Logo{% endblocktrans %}"
-                                     style="max-width:100%;
-                                            width:80%;
-                                            height:auto;
-                                            display:block">
+                                     alt="{% blocktrans %}Company Logo{% endblocktrans %}">
                             </td>
                         </tr>
                         <tr>
-                            <td align="center" style="padding-top:20px;">
+                            <td align="center">
                                 <img class="header-img"
                                      src="https://ehprnh2mwo3.exactdn.com/wp-content/uploads/2021/02/hero4-scaled.jpg"
-                                     alt="{% blocktrans %}Company Image{% endblocktrans %}"
-                                     style="max-width:100%;
-                                            width:80%;
-                                            height:auto;
-                                            display:block">
+                                     alt="{% blocktrans %}Company Image{% endblocktrans %}">
                             </td>
                         </tr>
                         <tr>
-                            <td align="center"
-                                style="font-weight:bold;
-                                       color:#89181A;
-                                       font-size:20pt;
-                                       padding:6px 20px;
-                                       background-color:#FFFFFF;
-                                       margin-bottom:15px;
-                                       margin-top:20px;
-                                       font-family:'Merriweather', Georgia, 'Times New Roman', serif">
+                            <td align="center" class="email-title">
                                 {% block title %}<!-- Your dynamic title here -->{% endblock %}
                             </td>
                         </tr>
                         <tr>
-                            <td class="main-content"
-                                style="font-size:10pt;
-                                       font-family:'Open Sans', sans-serif;
-                                       padding:0 20px">
+                            <td class="main-content">
                                 {% block content %}<!-- Your dynamic content here -->{% endblock %}
                             </td>
                         </tr>
@@ -98,75 +139,54 @@
                            cellpadding="0"
                            cellspacing="0"
                            width="100%"
-                           style="margin:0 auto;
-                                  max-width:600px;
-                                  width:100%">
+                           class="footer-social">
                         <tr>
-                            <td align="center"
-                                style="font-size:10px;
-                                       color:#ccc8c8;
-                                       font-family:'Open Sans', sans-serif;
-                                       margin-top:40px;
-                                       line-height:0.8">
+                            <td align="center" class="footer">
                                 <p>
                                     {% blocktrans %}NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8{% endblocktrans %}
                                 </p>
                                 <p>
                                     {% blocktrans %}Don't like these emails?{% endblocktrans %}
                                     <a href="http://{{ site_domain }}{% url 'recordtransfer:user_profile' %}"
-                                       style="color:#9f9f9f">{% blocktrans %}Unsubscribe in your profile{% endblocktrans %}</a>
+                                       class="footer-link">{% blocktrans %}Unsubscribe in your profile{% endblocktrans %}</a>
                                 </p>
                                 <table role="presentation"
                                        border="0"
                                        cellpadding="0"
                                        cellspacing="0"
                                        width="100%"
-                                       style="margin:0 auto;
-                                              max-width:600px;
-                                              width:100%">
+                                       class="footer-social">
                                     <tr>
                                         <td>
-                                            <a href="https://www.facebook.com/nctr.ca"
-                                               style="margin:0 8px;
-                                                      display:inline-block">
+                                            <a href="https://www.facebook.com/nctr.ca" class="social-icon">
                                                 <img src="https://img.icons8.com/windows/38/bcbbbb/facebook-new.png"
                                                      width="38"
                                                      height="38"
-                                                     alt="facebook"
-                                                     style="vertical-align:middle">
+                                                     alt="facebook">
                                             </a>
                                         </td>
                                         <td>
-                                            <a href="https://ca.linkedin.com/company/nctr-um"
-                                               style="margin:0 8px;
-                                                      display:inline-block">
+                                            <a href="https://ca.linkedin.com/company/nctr-um" class="social-icon">
                                                 <img src="https://img.icons8.com/windows/38/bcbbbb/linkedin.png"
                                                      width="38"
                                                      height="38"
-                                                     alt="linkedin"
-                                                     style="vertical-align:middle">
+                                                     alt="linkedin">
                                             </a>
                                         </td>
                                         <td>
-                                            <a href="https://www.instagram.com/nctr_um/"
-                                               style="margin:0 8px;
-                                                      display:inline-block">
+                                            <a href="https://www.instagram.com/nctr_um/" class="social-icon">
                                                 <img src="https://img.icons8.com/fluency-systems-regular/48/bcbbbb/instagram-new--v1.png"
                                                      width="38"
                                                      height="38"
-                                                     alt="instagram"
-                                                     style="vertical-align:middle">
+                                                     alt="instagram">
                                             </a>
                                         </td>
                                         <td>
-                                            <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation"
-                                               style="margin:0 8px;
-                                                      display:inline-block">
+                                            <a href="https://www.youtube.com/c/NationalCentreforTruthandReconciliation" class="social-icon">
                                                 <img src="https://img.icons8.com/windows/32/bcbbbb/youtube-play.png"
                                                      width="38"
                                                      height="38"
-                                                     alt="youtube"
-                                                     style="vertical-align:middle">
+                                                     alt="youtube">
                                             </a>
                                         </td>
                                     </tr>
