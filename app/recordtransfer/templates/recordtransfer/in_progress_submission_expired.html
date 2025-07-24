@@ -4,23 +4,16 @@
     {% trans "In-Progress Submission Expired" %}
 {% endblock title %}
 {% block content %}
-    <div class="title-text">{% trans "In-progress submission has expired" %}</div>
-    <p>
-        {% blocktrans %}
-        This in-progress submission has expired and can no longer be accessed. If you would like to submit your files again,
-        please start a new submission.
-        {% endblocktrans %}
-    </p>
-    <div class="medium-text">{% trans "Links:" %}</div>
-    <ul>
-        <li>
-            <a href="{% url 'recordtransfer:submit' %}">{% trans "Make another Submission" %}</a>
-        </li>
-        <li>
-            <a href="{% url 'recordtransfer:index' %}">{% trans "Go to Homepage" %}</a>
-        </li>
-        <li>
-            <a href="{% url 'recordtransfer:user_profile' %}">{% trans "View your Profile" %}</a>
-        </li>
-    </ul>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="mb-2 flex text-primary/60 items-center gap-3">
+            <div class="mb-2 text-4xl text-primary">{% trans "In-progress submission has expired" %}</div>
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-20 w-20"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+            </svg>
+        </div>
+    </div>
 {% endblock content %}
