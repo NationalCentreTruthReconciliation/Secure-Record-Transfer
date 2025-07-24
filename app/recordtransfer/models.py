@@ -43,7 +43,6 @@ NOT_CACHED = object()
 class User(AbstractUser):
     """The main User object used to authenticate users."""
 
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     gets_submission_email_updates = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
     phone_number = models.CharField(
