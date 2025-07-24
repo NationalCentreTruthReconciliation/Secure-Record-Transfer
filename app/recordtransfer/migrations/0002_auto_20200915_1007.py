@@ -6,9 +6,6 @@ from django.db import migrations
 
 
 def create_groups(apps, schema_editor):
-    # Able to transfer
-    group, created = Group.objects.get_or_create(name="transfer_user")
-
     # Archivist
     group, created = Group.objects.get_or_create(name="archivist_user")
 

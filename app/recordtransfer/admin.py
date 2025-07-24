@@ -627,7 +627,7 @@ class JobAdmin(ReadOnlyAdmin):
     Permissions:
         - add: Not allowed
         - change: Not allowed
-        - delete: Only if current user created job
+        - delete: Only superusers
     """
 
     fields: Sequence[Union[str, Sequence[str]]] = [
@@ -675,10 +675,7 @@ class JobAdmin(ReadOnlyAdmin):
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this model admin."""
-        return bool(
-            obj
-            and (request.user == getattr(obj, "user_triggered", None) or request.user.is_superuser)
-        )
+        return bool(obj and request.user.is_superuser)
 
 
 @admin.register(User)
@@ -686,8 +683,10 @@ class CustomUserAdmin(UserAdmin):
     """Admin for the User model.
 
     Permissions:
-        - change: Allowed if editing own account, or if editor is a superuser
-        - delete: Allowed by superusers
+        - add: Allowed by superusers only
+        - change: Allowed by superusers only. Staff users can update their user details through the
+        Profile page.
+        - delete: Allowed by superusers only
     """
 
     form = UserAdminForm
@@ -722,11 +721,13 @@ class CustomUserAdmin(UserAdmin):
         SubmissionGroupInline,
     ]
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Determine whether add permission is granted for this user admin."""
+        return request.user.is_superuser
+
     def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether change permission is granted for this user admin."""
-        if not obj:
-            return True
-        return bool(request.user.is_superuser or obj == request.user)
+        return request.user.is_superuser
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this user admin."""
@@ -828,8 +829,8 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
     Permissions:
         - add: Not allowed
-        - change: Allowed
-        - delete: Only by superusers
+        - change: Only by superusers
+        - delete: Not allowed
     """
 
     list_display: Sequence[Union[str, Callable]] = ["key", "value_type", "value", "change_date"]
@@ -883,8 +884,6 @@ class SiteSettingAdmin(admin.ModelAdmin):
     def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
         """Reset the site setting to its default value."""
         try:
-            from recordtransfer.models import User
-
             user = User.objects.get(pk=request.user.pk)
             obj.reset_to_default(user)
             messages.success(
@@ -900,6 +899,10 @@ class SiteSettingAdmin(admin.ModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         """Prevent adding new site settings through the admin interface."""
         return False
+
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
+        """Allow modification of site settings only by superusers."""
+        return request.user.is_superuser
 
     def has_delete_permission(self, request: object, obj: object = None) -> bool:
         """Prevent deletion of site settings through the admin interface."""
