@@ -332,3 +332,19 @@ class TestGetUserSubmissionGroups(TestCase):
         self.assertEqual(response.status_code, 200)
         # Staff user has no groups by default
         self.assertEqual(response.json(), [])
+
+    def test_group_descriptions_are_included_and_correct(self) -> None:
+        """Test that the group descriptions are included and correct in the response."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        # Find the group by name and check description
+        group1 = next((g for g in data if g["name"] == "Group 1"), None)
+        group2 = next((g for g in data if g["name"] == "Group 2"), None)
+        self.assertIsNotNone(group1)
+        self.assertIsNotNone(group2)
+        if group1 is not None:
+            self.assertEqual(group1["description"], self.group1.description)
+
+        if group2 is not None:
+            self.assertEqual(group2["description"], self.group2.description)
