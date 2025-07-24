@@ -46,7 +46,6 @@
             padding: 6px 20px;
             background-color: #FFFFFF;
             margin-bottom: 15px;
-            margin-top: 20px;
             font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
           }
           .footer {
@@ -69,6 +68,31 @@
             display: inline-block;
             vertical-align: middle;
           }
+          .email-btn {
+            display: inline-block;
+            background-color: #EE7623;
+            color: #fff;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+          }
+          .fallback-link {
+            font-size: 10px;
+            color: #A0A0A0;
+            margin-top: 10px;
+          }
+          .fallback-link-url {
+            color: #606060;
+            word-break: break-all;
+          }
+          .email-note {
+            margin-top: 20px;
+            font-size: 10pt;
+            color: #666;
+          }
           @media only screen and (max-width: 620px) {
             .container {
               width: 100% !important;
@@ -78,10 +102,20 @@
             .main-content {
               padding: 10px !important;
             }
-            .logo, .header-img {
+            .logo {
               max-width: 100% !important;
               width: 100% !important;
               height: auto !important;
+            }
+            .header-img {
+              display: none !important;
+            }
+            .email-btn {
+              width: 100% !important;
+              box-sizing: border-box !important;
+              text-align: center !important;
+              padding: 12px 0 !important;
+              font-size: 16px !important;
             }
           }
         </style>
@@ -136,9 +170,7 @@
                            class="footer-social">
                         <tr>
                             <td align="center" class="footer">
-                                <p>
-                                    {% blocktrans %}NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8{% endblocktrans %}
-                                </p>
+                                <p>NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8</p>
                                 <p>
                                     {% blocktrans %}Don't like these emails?{% endblocktrans %}
                                     <a href="http://{{ site_domain }}{% url 'recordtransfer:user_profile' %}"
