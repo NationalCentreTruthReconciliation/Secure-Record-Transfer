@@ -25,5 +25,35 @@
                 </p>
             </div>
         </div>
+        <div class="bg-base-100 shadow-md rounded-lg p-6 mb-8 w-full mt-8">
+            <div class="font-bold text-lg text-primary mb-4">{% trans "Quick Links" %}</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="{% url 'recordtransfer:submit' %}"
+                   class="btn btn-outline btn-primary flex items-center justify-center gap-2 px-3 py-6">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    {% trans "Make Another Submission" %}
+                </a>
+                <a href="{% url 'recordtransfer:index' %}"
+                   class="btn btn-outline btn-primary flex items-center justify-center gap-2 px-3 py-6">
+                    <span class="mr-2 font-bold text-xl">←</span>
+                    {% trans "Go to Homepage" %}
+                </a>
+                <a href="{% url 'recordtransfer:user_profile' %}"
+                   class="btn btn-outline btn-primary flex items-center justify-center gap-2 px-3 py-6">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5"
+                         viewBox="0 0 20 20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    {% trans "View your Profile" %}
+                </a>
+            </div>
+        </div>
     </div>
 {% endblock content %}
