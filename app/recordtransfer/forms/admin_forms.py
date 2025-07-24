@@ -143,7 +143,7 @@ class SiteSettingModelForm(RecordTransferModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.key:
+        if self.instance and self.instance.key and "value" in self.fields:
             try:
                 key_enum = SiteSettingKey[self.instance.key]
                 description = getattr(key_enum, "description", "")
