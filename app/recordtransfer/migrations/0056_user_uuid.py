@@ -5,15 +5,14 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recordtransfer', '0054_job_uuid'),
+        ("recordtransfer", "0055_add_archivist_permissions"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='uuid',
+            model_name="user",
+            name="uuid",
             field=models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
         ),
     ]
