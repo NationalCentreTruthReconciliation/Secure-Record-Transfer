@@ -4,12 +4,12 @@ import logging
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import AuthenticationForm
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from django.contrib.auth.forms import AuthenticationForm
 from recordtransfer.forms import SignUpForm
 from recordtransfer.tokens import account_activation_token
 
@@ -598,3 +598,15 @@ class TestLogin(TestCase):
         response = self.client.get(self.login_url)
         # Should redirect to index
         self.assertRedirects(response, reverse("recordtransfer:index"))
+
+    def test_redirect_to_next_parameter(self) -> None:
+        """Test that login redirects to next parameter if provided."""
+        next_url = reverse("recordtransfer:user_profile")
+        response = self.client.post(self.login_url + f"?next={next_url}", self.valid_credentials)
+
+        # Should redirect to the next URL
+        self.assertRedirects(response, next_url)
+
+        # User should be authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "testloginuser")

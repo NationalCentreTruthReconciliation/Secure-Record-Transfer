@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
+from recordtransfer.constants import HeaderNames
 from recordtransfer.models import Submission, SubmissionGroup, User
 
 
@@ -291,7 +292,8 @@ class TestGetUserSubmissionGroups(TestCase):
         cls.other_group = SubmissionGroup.objects.create(
             name="Other Group", created_by=cls.other_user
         )
-        cls.url = reverse("recordtransfer:get_user_submission_groups")
+        cls.submission_groups_url = reverse("recordtransfer:get_user_submission_groups")
+        cls.header = {HeaderNames.FRONTEND_REQUEST: "true"}
 
     def setUp(self) -> None:
         """Set up test environment for each test."""
@@ -299,7 +301,7 @@ class TestGetUserSubmissionGroups(TestCase):
 
     def test_returns_own_groups(self) -> None:
         """Test that the view returns only the groups owned by the user."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_groups_url, headers=self.header)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         group_names = {g["name"] for g in data}
@@ -309,9 +311,9 @@ class TestGetUserSubmissionGroups(TestCase):
 
     def test_returns_empty_for_user_with_no_groups(self) -> None:
         """Test that the view returns the correct response for a user with no groups."""
+        self.client.logout()
         self.client.login(username="otheruser", password="password")
-        url = reverse("recordtransfer:get_user_submission_groups")
-        response = self.client.get(url)
+        response = self.client.get(self.submission_groups_url, headers=self.header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json(),
@@ -326,16 +328,16 @@ class TestGetUserSubmissionGroups(TestCase):
 
     def test_staff_can_access_own_groups(self) -> None:
         """Test that a staff user can access their own submission groups."""
+        self.client.logout()
         self.client.login(username="staffuser", password="password")
-        url = reverse("recordtransfer:get_user_submission_groups")
-        response = self.client.get(url)
+        response = self.client.get(self.submission_groups_url, headers=self.header)
         self.assertEqual(response.status_code, 200)
         # Staff user has no groups by default
         self.assertEqual(response.json(), [])
 
     def test_group_descriptions_are_included_and_correct(self) -> None:
         """Test that the group descriptions are included and correct in the response."""
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_groups_url, headers=self.header)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         # Find the group by name and check description
@@ -352,7 +354,13 @@ class TestGetUserSubmissionGroups(TestCase):
     def test_unauthenticated_user_redirected_to_login(self) -> None:
         """Test that an unauthenticated user is redirected to the login page."""
         self.client.logout()
-        response = self.client.get(self.url)
+        response = self.client.get(self.submission_groups_url, headers=self.header)
         login_url = reverse("login")
-        expected_redirect = f"{login_url}?next={self.url}"
+        expected_redirect = f"{login_url}?next={self.submission_groups_url}"
         self.assertRedirects(response, expected_redirect)
+
+    def test_missing_header_returns_400(self) -> None:
+        """Test that a missing required header returns a 400 response."""
+        response = self.client.get(self.submission_groups_url)
+        self.assertEqual(response.status_code, 400)
+        self.assertTemplateUsed(response, "400.html")

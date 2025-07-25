@@ -5,27 +5,19 @@
     {% blocktrans %}New Submission Made by {{ username }}{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <div class="main-content">
         {% blocktrans %}
             {{ first_name }} {{ last_name }} ({{ username }}) made a new
             submission at {{ action_date }} with the NCTR Record Transfer Portal. To
             view their new submission, click the button below.
         {% endblocktrans %}
     </div>
-    <div style="text-align: left; margin-top: 20px;">
-        <a href="{{ submission_url }}"
-           style="display: inline-block;
-                  background-color: #EE7623;
-                  color: white;
-                  padding: 10px 20px;
-                  font-weight: bold;
-                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
-            {% blocktrans %}View New Submission{% endblocktrans %}
-        </a>
+    <div class="main-content">
+        <a href="{{ submission_url }}" class="email-btn">{% blocktrans %}View New Submission{% endblocktrans %}</a>
     </div>
-    <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+    <p class="fallback-link">
         {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
         <br>
-        <a href="{{ submission_url }}" style="color:#606060">{{ submission_url }}</a>
+        <a href="{{ submission_url }}" class="fallback-link-url">{{ submission_url }}</a>
     </p>
 {% endblock content %}

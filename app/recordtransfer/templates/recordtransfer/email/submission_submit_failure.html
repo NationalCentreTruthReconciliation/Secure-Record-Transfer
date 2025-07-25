@@ -5,11 +5,11 @@
     {% blocktrans %}Submission Made by {{ username }} Failed{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <div class="main-content">
         {% blocktrans %}
             {{ first_name }} {{ last_name }} ({{ username }}) attempted to
             make a submission at {{ action_date }} using the NCTR Record Transfer
             Portal, but an error occurred.
-            {% endblocktrans %}
+        {% endblocktrans %}
     </div>
 {% endblock content %}

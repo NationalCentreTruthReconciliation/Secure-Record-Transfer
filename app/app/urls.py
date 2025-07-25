@@ -30,7 +30,7 @@ urlpatterns = [
     # Override the login view with redirect behavior
     path(
         "account/login/",
-        Login.as_view(redirect_authenticated_user=True),
+        Login.as_view(),
         name="login",
     ),
     path("account/", include("django.contrib.auth.urls")),
