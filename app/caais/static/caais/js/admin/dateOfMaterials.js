@@ -8,6 +8,10 @@ export function setupDateOfMaterials() {
     const $ = django.jQuery;
     const dateField = $("#id_date_of_materials");
 
+    if (!dateField.length) {
+        return;
+    }
+
     // Get the placeholder elements used to indicate that the date is approximate
     const approxDatePlaceholders = $(".approx-date-wrapper");
 
