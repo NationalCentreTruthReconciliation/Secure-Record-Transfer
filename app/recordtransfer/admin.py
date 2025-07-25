@@ -877,7 +877,7 @@ class SiteSettingAdmin(admin.ModelAdmin):
             # to ensure TemplateResponse return type
             from django.http import HttpResponseRedirect
 
-            raise HttpResponseRedirect(request.get_full_path())
+            return HttpResponseRedirect(request.get_full_path())
 
         return super().changeform_view(request, object_id, form_url or "", extra_context)
 
