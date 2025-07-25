@@ -1,5 +1,7 @@
 """Views for creating and activating user accounts."""
 
+import logging
+
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -21,6 +23,8 @@ from recordtransfer.forms import SignUpForm
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
+
+LOGGER = logging.getLogger(__name__)
 
 
 class CreateAccount(FormView):
@@ -84,12 +88,13 @@ class ActivateAccount(View):
                 # Activate the user
                 user.is_active = True
                 user.save()
-                login(request, user)
+                login(request, user, backend="axes.backends.AxesBackend")
                 return redirect("recordtransfer:account_created")
             else:
                 return redirect("recordtransfer:activation_invalid")
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            LOGGER.exception("Unexpected error during account activation")
             return redirect("recordtransfer:activation_invalid")
 
 
