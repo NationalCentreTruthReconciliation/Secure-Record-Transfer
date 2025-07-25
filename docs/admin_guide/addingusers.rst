@@ -30,7 +30,7 @@ in the container running the Django application.
 Creating Users from Admin Site
 ##############################
 
-A staff member or superuser with access to the administrator application (accessible at /admin/) has
+Only a superuser with access to the administrator application (accessible at ``/admin/``) has
 the ability to create new users. To start the process, go to the admin site, and click Users.
 
 .. image:: images/admin_users.webp
