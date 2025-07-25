@@ -596,16 +596,35 @@ class TestLogin(TestCase):
         # User should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
+
+    def test_redirect_to_next_parameter(self) -> None:
+        """Test that login redirects to next parameter if provided."""
+        next_url = reverse("recordtransfer:user_profile")
+        response = self.client.post(self.login_url + f"?next={next_url}", self.valid_credentials)
+
+        # Should redirect to the next URL
+        self.assertRedirects(response, next_url)
+
+        # User should be authenticated
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "testloginuser")
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        # Logout
+        self.client.logout()
+        # Failed attempts should reset, so lockout should not trigger after 1 more fail
+        response = self.client.post(self.login_url, self.invalid_credentials)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
     @override_settings(AXES_FAILURE_LIMIT=3, AXES_COOLOFF_TIME=0.01)
     def test_lockout_after_failed_attempts(self) -> None:
         """User is locked out after too many failed login attempts."""
-        login_url = reverse("login")
         for _ in range(2):
-            response = self.client.post(login_url, self.invalid_credentials)
+            response = self.client.post(self.login_url, self.invalid_credentials)
             self.assertEqual(response.status_code, 200)
             self.assertFalse(response.wsgi_request.user.is_authenticated)
         # 4th attempt should trigger lockout
-        response = self.client.post(login_url, self.invalid_credentials)
+        response = self.client.post(self.login_url, self.invalid_credentials)
         self.assertEqual(response.status_code, 429)
 
     # @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=1)
@@ -632,19 +651,11 @@ class TestLogin(TestCase):
     @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=0.01)
     def test_lockout_resets_after_successful_login(self) -> None:
         """Lockout counter resets after successful login."""
-        login_url = reverse("login")
         # 1 failed attempt
-        self.client.post(login_url, self.invalid_credentials)
+        self.client.post(self.login_url, self.invalid_credentials)
         # Successful login
-        response = self.client.post(login_url, self.valid_credentials)
+        response = self.client.post(self.login_url, self.valid_credentials)
         self.assertRedirects(response, reverse("recordtransfer:index"))
-        self.assertTrue(response.wsgi_request.user.is_authenticated)
-        # Logout
-        self.client.logout()
-        # Failed attempts should reset, so lockout should not trigger after 1 more fail
-        response = self.client.post(login_url, self.invalid_credentials)
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.wsgi_request.user.is_authenticated)
 
     # @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=0.001)
     # def test_failed_attempt_during_lockout_resets_timer(self) -> None:

@@ -5,27 +5,19 @@
     {% blocktrans %}Your Submission Could not be Completed{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <div class="main-content">
         {% blocktrans %}
             The records you attempted to submit through the NCTR Record Transfer Portal
             did not go through correctly. You may try to submit again, or contact
             an NCTR archivist about your submission at this email address:
-            {% endblocktrans %}
+        {% endblocktrans %}
     </div>
-    <div style="text-align: left; margin-top: 20px;">
-        <a href="mailto:{{ archivist_email }}"
-           style="display: inline-block;
-                  background-color: #EE7623;
-                  color: white;
-                  padding: 10px 20px;
-                  font-weight: bold;
-                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
-            {% blocktrans %}Contact NCTR Archivist{% endblocktrans %}
-        </a>
+    <div class="main-content">
+        <a href="mailto:{{ archivist_email }}" class="email-btn">{% blocktrans %}Contact NCTR Archivist{% endblocktrans %}</a>
     </div>
-    <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+    <p class="fallback-link">
         {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
         <br>
-        <a href="mailto:{{ archivist_email }}" style="color:#606060">mailto:{{ archivist_email }}</a>
+        <a href="mailto:{{ archivist_email }}" class="fallback-link-url">mailto:{{ archivist_email }}</a>
     </p>
 {% endblock content %}

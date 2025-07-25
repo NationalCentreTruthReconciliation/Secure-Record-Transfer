@@ -63,7 +63,7 @@ urlpatterns = [
         name="submission_group_bulk_csv",
     ),
     path(
-        "user/<int:user_id>/submission-group/",
+        "user/submission-group/",
         login_required(views.post_submission.get_user_submission_groups),
         name="get_user_submission_groups",
     ),
