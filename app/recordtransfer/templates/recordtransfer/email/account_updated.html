@@ -5,7 +5,7 @@
     {% blocktrans %}  Your {{ changed_item }} for the NCTR Record Transfer Portal has been {{ changed_status }}.{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div>
+    <div class="main-content">
         {% if changed_list %}
             <p>{% trans "The following changes have been made to your account:" %}</p>
             <ul>
@@ -13,22 +13,16 @@
             </ul>
         {% endif %}
     </div>
-    <div style="text-align: left; margin-top: 20px;">
+    <div class="main-content">
         {% url 'login' as login %}
-        <a href="https://{{ site_domain }}{{ login }}"
-           style="display: inline-block;
-                  background-color: #EE7623;
-                  color: white;
-                  padding: 10px 20px;
-                  font-weight: bold;
-                  font-family: 'Merriweather', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+        <a href="https://{{ site_domain }}{{ login }}" class="email-btn">
             {% blocktrans %}Log In to Your Account{% endblocktrans %}
         </a>
         <!-- Fallback text link for plain-text clients -->
-        <p style="font-size: 10px; color:#A0A0A0; margin-top: 10px;">
+        <p class="fallback-link">
             {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
             <br>
-            <a href="https://{{ site_domain }}{{ login }}" style="color:#606060">https://{{ site_domain }}{{ login }}</a>
+            <a href="https://{{ site_domain }}{{ login }}" class="fallback-link-url">https://{{ site_domain }}{{ login }}</a>
         </p>
     </div>
 {% endblock content %}
