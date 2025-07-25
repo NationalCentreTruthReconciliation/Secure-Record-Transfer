@@ -873,9 +873,6 @@ class SiteSettingAdmin(admin.ModelAdmin):
                 obj = self.get_object(request, object_id)
                 if obj:
                     self.reset_to_default(request, obj)
-            # Instead of returning HttpResponseRedirect, raise it
-            # to ensure TemplateResponse return type
-            from django.http import HttpResponseRedirect
 
             return HttpResponseRedirect(request.get_full_path())
 
