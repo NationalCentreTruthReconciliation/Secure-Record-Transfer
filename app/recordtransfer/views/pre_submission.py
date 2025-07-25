@@ -37,6 +37,7 @@ from formtools.wizard.views import SessionWizardView
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
 from recordtransfer.constants import (
+    HeaderNames,
     HtmlIds,
     OtherValues,
     QueryParameters,
@@ -706,6 +707,7 @@ class SubmissionFormWizard(SessionWizardView):
                         "recordtransfer:get_user_submission_groups",
                     ),
                     "default_group_uuid": self.submission_group_uuid,
+                    "FRONTEND_REQUEST_HEADER": HeaderNames.FRONTEND_REQUEST,
                 },
             )
         elif step == SubmissionStep.UPLOAD_FILES:

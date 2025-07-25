@@ -74,7 +74,10 @@ const updateGroupDescription = (selectField, groupDescDisplay) => {
  */
 const fetchSubmissionGroups = async (context) => {
     const response = await fetch(context["fetch_group_descriptions_url"], {
-        method: "GET"
+        method: "GET",
+        headers: {
+            [context["FRONTEND_REQUEST_HEADER"]]: "true"
+        }
     });
 
     if (!response.ok) {

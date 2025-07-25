@@ -77,3 +77,13 @@ class FormFieldNames:
     def asdict(self) -> dict[str, str]:
         """Return the dataclass as a dictionary."""
         return dataclasses.asdict(self)
+
+@dataclasses.dataclass(frozen=True)
+class HeaderNames:
+    """Class to hold header names used in HTTP requests."""
+
+    FRONTEND_REQUEST: str = "X-Requested-By-Frontend"
+
+    def asdict(self) -> dict[str, str]:
+        """Return the dataclass as a dictionary."""
+        return dataclasses.asdict(self)
