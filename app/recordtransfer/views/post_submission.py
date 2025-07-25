@@ -1,7 +1,7 @@
 """Views for completed submissions, and creating and managing submission groups."""
 
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from caais.export import ExportVersion
 from django.db.models import QuerySet
@@ -204,10 +204,10 @@ class SubmissionGroupDetailView(UpdateView):
         )
 
 
-def get_user_submission_groups(request: HttpRequest, user_id: int) -> JsonResponse:
-    """Retrieve the groups associated with the current user."""
-    user = get_object_or_404(User, pk=user_id)
-
+@require_http_methods(["GET"])
+def get_user_submission_groups(request: HttpRequest) -> JsonResponse:
+    """Return a JSON response containing all submission groups created by the specified user."""
+    user: User = cast(User, request.user)
     submission_groups = SubmissionGroup.objects.filter(created_by=user)
     groups = [
         {"uuid": str(group.uuid), "name": group.name, "description": group.description}
