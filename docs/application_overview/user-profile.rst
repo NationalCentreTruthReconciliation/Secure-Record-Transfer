@@ -103,17 +103,35 @@ Past Submissions
 ----------------
 This section displays a table of all submissions that the user has submitted in the past.
 
-.. image:: images/user_profile_past_submissions.webp
-    :alt: User profile past submissions
+The user can view the details of a past submission by clicking on its file icon. This will open up the submission details page for that submission.
 
-The user can view the details of a past submission by clicking on the blue file icon
-on the relevant row of the table. This will open up a submission details page for that
-submission.
+.. image:: images/user_profile_past_submissions_file_icon.webp
+    :alt: User profile past submissions file icon
 
 .. image:: images/submission_details.webp
     :alt: Submission details
 
-Alternatively, the user can download a CSV file of the submission by clicking on the green download icon on the relevant row of the table.
+Alternatively, the user can download a CSV file of the submission by clicking its download icon.
+
+.. image:: images/user_profile_past_submissions_download_icon.webp
+    :alt: User profile past submissions download icon
+
+Changing/Assigning Submission Group
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The user can also change the submission group of a past submission by clicking on the change/assign icon. For more information about submission groups, see :ref:`Submission Groups`.
+
+.. image:: images/user_profile_past_submissions_change_icon.webp
+    :alt: User profile past submissions change icon
+
+This will open up a modal where the user can change the submission group of the past submission, or assign it to a group for the first time if it was not assigned to one when it was submitted.
+
+.. image:: images/user_profile_past_submissions_change_modal.webp
+    :alt: User profile past submissions change modal
+
+The user can also unassign the submission from its current group by clicking on the "Unassign Group" button. This will remove the submission from the group, but it will still remain in the user's past submissions.
+
+.. image:: images/user_profile_past_submissions_unassign_button.webp
+    :alt: User profile past submissions unassign button in change modal
 
 Submission Groups
 -----------------
