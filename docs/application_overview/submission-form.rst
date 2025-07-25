@@ -23,6 +23,12 @@ For every step of the Submission Form, the data entered is saved so the donor ca
 forward in the form without losing their data. This includes file uploads in
 :ref:`Step 8: Upload Files`, which are saved on the server upon selection.
 
+
+On the left side of the page, a progress bar visually indicates which step of the submission process the donor is currently on. This helps the donor track their progress as they move through the form.
+
+.. image:: images/submission_form_progress_bar.webp
+    :alt: Progress Bar on the submission form
+
 Throughout the form, grey information icons (i) exist next to many fields. Helpful tooltips with
 additional guidance on how to complete each field are displayed when the mouse hovers over these
 icons.
@@ -39,6 +45,8 @@ field. These errors prevent the donor from proceeding to the next step until the
 
 .. image:: images/form_error.webp
     :alt: Error message on the submission form
+
+
 
 Step 1: Legal Agreement
 #######################
