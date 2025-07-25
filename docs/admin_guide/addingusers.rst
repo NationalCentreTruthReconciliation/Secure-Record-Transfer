@@ -30,7 +30,7 @@ in the container running the Django application.
 Creating Users from Admin Site
 ##############################
 
-A staff member or superuser with access to the administrator application (accessible at /admin/) has
+Only a superuser with access to the administrator application (accessible at ``/admin/``) has
 the ability to create new users. To start the process, go to the admin site, and click Users.
 
 .. image:: images/admin_users.webp
@@ -81,7 +81,7 @@ link in the email to activate their account.
     :alt: User activation email
 
 When the user clicks the link or copies and pastes the link into their browser, their account will
-now be activated, and they will be logged in.
+now be activated, and they will be able to log in.
 
 .. image:: images/account_activated.webp
     :alt: Account activated message
