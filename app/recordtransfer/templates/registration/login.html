@@ -13,7 +13,7 @@
             <!-- Form -->
             <div id="login-form-container">
                 <form class="space-y-4"
-                      hx-post="{% url 'login' %}{% if next }?next={{ next }}{% endif %}"
+                      hx-post="{% url 'login' %}{% if next %}?next={{ next }}{% endif %}"
                       hx-target="#login-error-container"
                       hx-swap="innerHTML">
                     {% csrf_token %}
