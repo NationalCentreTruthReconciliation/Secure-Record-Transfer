@@ -81,7 +81,7 @@ link in the email to activate their account.
     :alt: User activation email
 
 When the user clicks the link or copies and pastes the link into their browser, their account will
-now be activated, and they will be logged in.
+now be activated, and they will be able to log in.
 
 .. image:: images/account_activated.webp
     :alt: Account activated message
