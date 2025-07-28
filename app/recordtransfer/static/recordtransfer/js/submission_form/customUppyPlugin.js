@@ -27,7 +27,10 @@ class FileValidationPlugin extends BasePlugin {
             existingFile => existingFile.name === file.name && existingFile.id !== file.id
         );
         if (hasDuplicate) {
-            this.uppy.info(`Cannot add the duplicate file '${file.name}', it already exists`,
+            this.uppy.info(
+                window.django.gettext(
+                    `Cannot add the duplicate file '${file.name}', it already exists`
+                ),
                 5000
             );
             this.uppy.removeFile(file.id);
