@@ -2,7 +2,6 @@
 
 import logging
 
-from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, PasswordResetView
