@@ -676,7 +676,6 @@ class TestLogin(TestCase):
         self.assertEqual(response.status_code, 429)
         locked_out_at = timezone.now()
 
-
         cooloff_minutes = int(settings.AXES_COOLOFF_TIME * 60)
         original_unlock_time = locked_out_at + datetime.timedelta(minutes=cooloff_minutes)
 
@@ -691,3 +690,37 @@ class TestLogin(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertRedirects(response, reverse("recordtransfer:index"))
             self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    @override_settings(AXES_WARNING_THRESHOLD=2, AXES_FAILURE_LIMIT=3)
+    def test_warning_shown_when_close_to_lockout(self) -> None:
+        """Test that a warning is shown when the user is close to being locked out."""
+        # Simulate 1 failed attempt
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        # Check that no warning is shown yet
+        self.assertNotIn("HX-Trigger", response.headers)
+
+        # Simulate another failed attempt
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertIn("HX-Trigger", response.headers)
+        # Check that a warning is shown
+        self.assertIn("showWarning", response.headers["HX-Trigger"])
+
+    @override_settings(AXES_WARNING_THRESHOLD=2, AXES_FAILURE_LIMIT=3)
+    def test_locked_out_message_shown(self) -> None:
+        """Test that a locked out message is shown when the user is locked out."""
+        # Simulate 2 failed attempts
+        for _ in range(2):
+            self.client.post(self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true")
+
+        # 3rd attempt should lock out the user
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertEqual(response.status_code, 429)
+        # Check that the response indicates the user is locked out
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])

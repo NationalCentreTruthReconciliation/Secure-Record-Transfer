@@ -139,13 +139,14 @@ class Login(LoginView):
                 request=self.request,
             )
         )
+
+        failures = getattr(self.request, "axes_failures_since_start", None)
         if (
-            settings.AXES_WARNING_THRESHOLD
-            <= self.request.axes_failures_since_start
-            < settings.AXES_FAILURE_LIMIT
+            failures is not None
+            and settings.AXES_WARNING_THRESHOLD <= failures < settings.AXES_FAILURE_LIMIT
         ):
-            num_tries_left = settings.AXES_FAILURE_LIMIT - self.request.axes_failures_since_start
-            return trigger_client_event(
+            num_tries_left = settings.AXES_FAILURE_LIMIT - failures
+            response = trigger_client_event(
                 response,
                 "showWarning",
                 {
@@ -155,6 +156,7 @@ class Login(LoginView):
                     % num_tries_left,
                 },
             )
+
         return response
 
 
