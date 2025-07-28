@@ -92,7 +92,7 @@ RUN useradd --create-home --uid 1000 myuser && \
 # Install required dependencies for mysqlclient and curl for health checks
 # Allow myuser to fix permissions on static and media volumes with sudo
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-mysql-client curl sudo && \
+    apt-get install -y --no-install-recommends default-mysql-client curl sudo gettext && \
     rm -rf /var/lib/apt/lists/* && \
     echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/chown -R myuser\\:myuser /opt/secure-record-transfer/app/static/" >> /etc/sudoers && \
     echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/chown -R myuser\\:myuser /opt/secure-record-transfer/app/media/" >> /etc/sudoers
