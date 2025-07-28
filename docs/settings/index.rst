@@ -32,6 +32,25 @@ AXES_FAILURE_LIMIT
         #file: .env
         AXES_FAILURE_LIMIT=5
 
+AXES_WARNING_THRESHOLD
+^^^^^^^^^^^^^^^^^^^^^^
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        3             int
+        ============  =========
+
+    Sets the number of failed login attempts after which a warning is shown to the user before lockout. Must be less than ``AXES_FAILURE_LIMIT``.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        AXES_WARNING_THRESHOLD=3
+
 AXES_COOLOFF_TIME
 ^^^^^^^^^^^^^^^^^^
 
