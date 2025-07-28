@@ -151,10 +151,14 @@ class Login(LoginView):
                 response,
                 "showWarning",
                 {
-                    "value": gettext(
-                        "You have %d login attempt(s) left before your account is locked out."
+                    "value": ngettext(
+                        "You have %(count)s login attempt left before your account is locked out.",
+                        "You have %(count)s login attempts left before your account is locked out.",
+                        num_tries_left,
                     )
-                    % num_tries_left,
+                    % {
+                        "count": num_tries_left,
+                    }
                 },
             )
 
