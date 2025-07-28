@@ -1,6 +1,7 @@
 /* global singleCaptchaFn */
 import { setupHelpTooltips } from "../base/tooltip";
 import { setupContactInfoForm } from "./contactInfo";
+import { initDropdowns } from "./dropdown";
 import { setupOtherIdentifiersForm } from "./otherIdentifiers";
 import { setupRightsForm } from "./rights";
 import { setupSourceInfoForm } from "./sourceInfo";
@@ -50,6 +51,7 @@ export const initializeSubmissionForm = () => {
     setupInputMasks();
     setupUnsavedChangesProtection();
     setupHelpTooltips();
+    initDropdowns();
 
     _setupWithContext();
 
