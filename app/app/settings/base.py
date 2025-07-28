@@ -61,6 +61,7 @@ AXES_COOLOFF_TIME = config("AXES_COOL_OFF_TIME", default=0.01, cast=float)  # in
 AXES_LOCKOUT_PARAMETERS = [["username", "user_agent"]]
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_CALLABLE = "recordtransfer.views.account.lockout"
+AXES_RESET_COOL_OFF_ON_FAILURE_DURING_LOCKOUT = False
 
 ROOT_URLCONF = "app.urls"
 
