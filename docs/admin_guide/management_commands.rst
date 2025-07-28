@@ -145,7 +145,7 @@ Deletes job attachment files for jobs whose end time is older than a specified n
 * Prints a summary of deleted files
 
 Getting Help
-############
+------------
 
 You can get help for any management command by using the ``--help`` flag:
 
