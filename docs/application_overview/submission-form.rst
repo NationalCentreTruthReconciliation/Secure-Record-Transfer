@@ -14,11 +14,7 @@ Your Records" button on the homepage. This will take the donor to the submission
 Form Overview
 #############
 
-The Submission Form is divided into multiple steps to simplify the submission process. At the
-bottom of each step, the navigation buttons **Next Step** and **Previous Step** can be clicked to
-proceed to the next step or go to the previous step in the form, respectively. The link "Click to
-save form and resume later" can be clicked to save the current form and return to it at a later
-time.
+The Submission Form is divided into multiple steps to simplify the submission process. At the bottom of each step, there are three navigation buttons: **Next Step**, **Previous Step**, and **Save**. You can click **Next Step** to proceed to the next step, **Previous Step** to go back, and **Save** to save your progress and return to the form later.
 
 .. image:: images/form_navigation.webp
     :alt: Navigation buttons on the submission form
@@ -26,6 +22,12 @@ time.
 For every step of the Submission Form, the data entered is saved so the donor can navigate back and
 forward in the form without losing their data. This includes file uploads in
 :ref:`Step 8: Upload Files`, which are saved on the server upon selection.
+
+
+On the left side of the page, a progress bar visually indicates which step of the submission process the donor is currently on. This helps the donor track their progress as they move through the form.
+
+.. image:: images/submission_form_progress_bar.webp
+    :alt: Progress Bar on the submission form
 
 Throughout the form, grey information icons (i) exist next to many fields. Helpful tooltips with
 additional guidance on how to complete each field are displayed when the mouse hovers over these
@@ -43,6 +45,8 @@ field. These errors prevent the donor from proceeding to the next step until the
 
 .. image:: images/form_error.webp
     :alt: Error message on the submission form
+
+
 
 Step 1: Legal Agreement
 #######################
@@ -138,8 +142,7 @@ This optional step allows the donor to enter any rights applying to their record
 
 If donors wish to provide rights information, they can select one or more types of rights from the dropdown menu. If the appropriate type isn't listed, they can select "Other" and specify their own type. The **+ More** button allows adding multiple rights (useful when different rights apply to different records), and the **- Remove** button can remove entries.
 
-If the donor is unsure about which right/(s) apply for their records, they can click on a link
-found at the top of the form, which will open up a description for each type of right on a new tab.
+If the donor is unsure about which right(s) apply to their records, they can click the link in the Overview section at the top of the form. This will open a description for each type of right in a new tab.
 More information about the rights in this step can be found on :ref:`Adding Rights Types`.
 
 .. image:: images/submission_step_5.webp
@@ -212,6 +215,8 @@ field.
 A preview of an uploaded file can be seen by clicking on its file icon. The donor can also remove
 uploaded files by clicking on the (x) icon.
 
+At the bottom of this section, there is also an indicator showing how many megabytes (MB) of files the donor can still upload. This helps donors keep track of their remaining upload limit as they add or remove files.
+
 .. image:: images/submission_step_8_uploaded_file.webp
     :alt: Step 8 of the submission form, an uploaded file
 
@@ -226,8 +231,10 @@ want to edit. This will take them back to that step.
 .. image:: images/submission_step_9.webp
     :alt: Step 9 of the submission form
 
-After making any necessary changes, the donor can click on the **Return to Review** button to go
-back to the review step.
+
+After making any necessary changes, the donor can click on the **Review** button to go back to the review step.
+
+When the donor goes back to a previous step, the **Save** button remains available. This allows the donor to save their updated progress at any point, reopen the form later, return to the review step, and submit when ready.
 
 .. image:: images/submission_step_9_return_to_review.webp
     :alt: Step 9 of the submission form, returning to the review step
