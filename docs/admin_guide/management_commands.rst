@@ -153,7 +153,7 @@ You can get help for any management command by using the ``--help`` flag:
 
     python manage.py <command> --help
 
-This will display detailed information about the command's arguments, and options.
+This will display detailed information about the command's arguments and options.
 
 You can also list all available management commands:
 
