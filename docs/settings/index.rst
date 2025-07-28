@@ -8,6 +8,53 @@ below.
 
 .. contents:: List of Settings
 
+Axes Settings
+-------------
+
+These settings control the behavior of Django Axes, which protects against brute-force login attempts. For full details, see the `Django Axes configuration documentation <https://django-axes.readthedocs.io/en/latest/4_configuration.html#configuring-project-settings>`_.
+
+AXES_FAILURE_LIMIT
+^^^^^^^^^^^^^^^^^^
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        5             int
+        ============  =========
+
+    Sets the maximum number of failed login attempts before a user is locked out.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        AXES_FAILURE_LIMIT=5
+
+AXES_COOLOFF_TIME
+^^^^^^^^^^^^^^^^^^
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        0.5           float
+        ============  =========
+
+    Sets the lockout period (in hours) after the failure limit is reached. For example, 0.5 is 30 minutes.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        AXES_COOLOFF_TIME=0.5
+
+Other Axes-related settings are also available in ``app/app/settings/base.py`` for advanced configuration.
+
+
 
 Security
 --------
