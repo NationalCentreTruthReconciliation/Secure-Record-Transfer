@@ -24,7 +24,7 @@ Next, click **Add Type of Rights**.
     :alt: Add Rights Type link on Right Types admin page
 
 The name you enter into the **Name:** box will be added to the list of selections in the dropdown
-when a user adds rights in Step 5: Record Rights of the Submission Form.
+when a user adds rights in Step 5: Record Rights and Restrictions of the Submission Form.
 
 Click Save when you are satisfied with the new right type.
 
@@ -55,7 +55,7 @@ Next, click **Add Source Type**.
 Enter an appropriate description and click Save when complete.
 
 The name you enter will now appear in the dropdown when users are defining sources in Step 3:
-Source Information of the Submission Form.
+Record Source Information of the Submission Form.
 
 .. image:: images/new_source_type_dropdown.webp
     :alt: New source type in source dropdown
@@ -77,7 +77,7 @@ Next, click **Add Source Role**.
 Enter an appropriate description and click Save when complete.
 
 The name you enter will now appear in the dropdown when users are defining sources in Step 3:
-Source Information of the Submission Form.
+Record Source Information of the Submission Form.
 
 .. image:: images/new_source_role_dropdown.webp
     :alt: New source role in source dropdown
