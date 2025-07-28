@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, PasswordResetView
@@ -128,14 +129,33 @@ class Login(LoginView):
 
     def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle invalid login form submissions."""
-        if self.request.htmx:
-            html = render_to_string(
+        if not self.request.htmx:
+            return super().form_invalid(form)
+
+        response = HttpResponse(
+            render_to_string(
                 "registration/login_errors.html",  # Changed to form-only template
                 {"form": form},
                 request=self.request,
             )
-            return HttpResponse(html)
-        return super().form_invalid(form)
+        )
+        if (
+            settings.AXES_WARNING_THRESHOLD
+            <= self.request.axes_failures_since_start
+            < settings.AXES_FAILURE_LIMIT
+        ):
+            num_tries_left = settings.AXES_FAILURE_LIMIT - self.request.axes_failures_since_start
+            return trigger_client_event(
+                response,
+                "showWarning",
+                {
+                    "value": gettext(
+                        "You have %d login attempt(s) left before your account is locked out."
+                    )
+                    % num_tries_left,
+                },
+            )
+        return response
 
 
 def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
@@ -145,7 +165,10 @@ def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpRes
         response,
         "showError",
         {
-            "value": gettext("Too many failed login attempts. Please try again later."),
+            "value": gettext(
+                "You have been locked out due to too many failed login attempts. "
+                "Please try again later."
+            ),
         },
     )
 
