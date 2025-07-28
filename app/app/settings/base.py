@@ -56,7 +56,9 @@ MIDDLEWARE = [
 ]
 
 # Axes configuration
+AXES_ENABLED = config("AXES_ENABLED", default=True, cast=bool)
 AXES_FAILURE_LIMIT = config("AXES_FAILURE_LIMIT", default=5, cast=int)
+AXES_WARNING_THRESHOLD = config("AXES_WARNING_THRESHOLD", default=3, cast=int)
 AXES_COOLOFF_TIME = config("AXES_COOL_OFF_TIME", default=0.5, cast=float)  # in hours
 AXES_LOCKOUT_PARAMETERS = [["username", "user_agent"]]
 AXES_RESET_ON_SUCCESS = True
