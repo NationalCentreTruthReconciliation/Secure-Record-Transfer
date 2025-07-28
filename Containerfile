@@ -25,9 +25,6 @@ RUN npm install --no-color
 # Copy application code to image
 COPY ./app ${APP_DIR}
 
-# Compile .mo files
-RUN uv run python app/manage.py compilemessages --ignore .venv
-
 # Make arg passed from compose files into environment variable
 ARG WEBPACK_MODE
 ENV WEBPACK_MODE ${WEBPACK_MODE}

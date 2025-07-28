@@ -14,6 +14,8 @@ if [ "$SERVICE_NAME" = 'rq' ]; then
   python manage.py migrate --no-input
   echo ">> Verifying settings."
   python manage.py verify_settings
+  echo ">> Compiling messages."
+  python manage.py compilemessages --ignore .venv
   echo ">> Starting RQ worker(s)"
 
 elif [ "$SERVICE_NAME" = 'rq-scheduler' ]; then
