@@ -140,6 +140,7 @@ class Login(LoginView):
             )
         )
 
+        # While the user is locked out, number of failures is not included in the request
         failures = getattr(self.request, "axes_failures_since_start", None)
         if (
             failures is not None
