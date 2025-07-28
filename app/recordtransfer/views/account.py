@@ -118,7 +118,7 @@ class Login(LoginView):
     """Custom LoginView that supports HTMX requests for login forms."""
 
     template_name = "registration/login.html"
-    redirect_authenticated_user=True
+    redirect_authenticated_user = True
 
     def form_valid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle successful login."""
@@ -146,8 +146,7 @@ def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpRes
         response,
         "showError",
         {
-            "value": gettext("Too many failed login attempts. Please try again in %d minutes.")
-            % int(settings.AXES_COOLOFF_TIME * 60)
+            "value": gettext("Too many failed login attempts. Please try again later."),
         },
     )
 
