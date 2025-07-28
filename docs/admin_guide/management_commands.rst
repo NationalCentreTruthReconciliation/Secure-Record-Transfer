@@ -59,6 +59,7 @@ testing email configuration after initial setup or changes.
 * ``user_activation_email`` - Email sent to activate new user accounts
 * ``user_account_updated`` - Email sent when user account information is updated
 * ``user_in_progress_submission_expiring`` - Email sent when in-progress submissions are expiring
+* ``password_reset_email`` - Email sent for password reset requests
 
 **Examples:**
 
