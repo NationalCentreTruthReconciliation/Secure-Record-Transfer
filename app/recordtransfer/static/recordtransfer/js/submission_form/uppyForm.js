@@ -138,7 +138,7 @@ export async function setupUppy(context) {
         const uppyFiles = uppy.getFiles();
 
         if (uppyFiles.length === 0) {
-            uppy.info("You must upload at least one file.", "error", 5000);
+            uppy.info(window.django.gettext("You must upload at least one file."), "error", 5000);
             return;
         }
 
@@ -147,7 +147,7 @@ export async function setupUppy(context) {
         );
         if (hasIssues) {
             uppy.info(
-                "Remove the files with issues to proceed.",
+                window.django.gettext("Remove the files with issues to proceed."),
                 "error",
                 5000
             );

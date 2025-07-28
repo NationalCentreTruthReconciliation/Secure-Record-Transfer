@@ -1,0 +1,31 @@
+# French translations for the Secure Record Transfer Application (JavaScript front-end)
+# Copyright (C) 2025 National Centre for Truth and Reconciliation
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-09 16:18-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: French Team <fr@example.com>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: app/recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
+msgid "No description available"
+msgstr "Aucune description disponible"
+
+#: app/recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:141
+msgid "You must upload at least one file."
+msgstr "Vous devez téléverser au moins un fichier."
+
+#: app/recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:150
+msgid "Remove the files with issues to proceed."
+msgstr "Supprimez les fichiers présentant des problèmes pour continuer."

@@ -3,7 +3,7 @@ import {
     handleModalAfterSwap
 } from "../utils/htmx.js";
 
-const noDescription = "No description available";
+const noDescription = window.django.gettext("No description available");
 
 /**
  * The entry point for setting up the submission group form.

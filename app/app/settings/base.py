@@ -2,6 +2,7 @@ import os
 
 from configuration import AcceptedFileTypes
 from decouple import Csv, config
+from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -119,6 +120,11 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = config("TIME_ZONE", default="America/Winnipeg")
 
 USE_I18N = True
+
+LANGUAGES = [
+    ("en", _("English")),
+    ("fr", _("French")),
+]
 
 
 USE_TZ = True
