@@ -59,6 +59,7 @@ testing email configuration after initial setup or changes.
 * ``user_activation_email`` - Email sent to activate new user accounts
 * ``user_account_updated`` - Email sent when user account information is updated
 * ``user_in_progress_submission_expiring`` - Email sent when in-progress submissions are expiring
+* ``password_reset_email`` - Email sent for password reset requests
 
 **Examples:**
 
@@ -144,7 +145,7 @@ Deletes job attachment files for jobs whose end time is older than a specified n
 * Prints a summary of deleted files
 
 Getting Help
-############
+------------
 
 You can get help for any management command by using the ``--help`` flag:
 
@@ -152,7 +153,7 @@ You can get help for any management command by using the ``--help`` flag:
 
     python manage.py <command> --help
 
-This will display detailed information about the command's arguments, and options.
+This will display detailed information about the command's arguments and options.
 
 You can also list all available management commands:
 
