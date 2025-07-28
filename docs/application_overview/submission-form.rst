@@ -232,7 +232,7 @@ want to edit. This will take them back to that step.
     :alt: Step 9 of the submission form
 
 
-After making any necessary changes, the donor can click on the **Return** button to go back to the review step.
+After making any necessary changes, the donor can click on the **Review** button to go back to the review step.
 
 When the donor goes back to a previous step, the **Save** button remains available. This allows the donor to save their updated progress at any point, reopen the form later, return to the review step, and submit when ready.
 
