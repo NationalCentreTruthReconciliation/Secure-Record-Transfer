@@ -7,3 +7,4 @@ example.dev.env
 example.prod.env
 node_modules
 ./static/
+*.mo
