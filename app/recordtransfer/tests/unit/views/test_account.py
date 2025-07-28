@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from freezegun import freeze_time
@@ -596,7 +597,6 @@ class TestLogin(TestCase):
         # User should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-
     def test_redirect_to_next_parameter(self) -> None:
         """Test that login redirects to next parameter if provided."""
         next_url = reverse("recordtransfer:user_profile")
@@ -627,26 +627,24 @@ class TestLogin(TestCase):
         response = self.client.post(self.login_url, self.invalid_credentials)
         self.assertEqual(response.status_code, 429)
 
-    # @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=1)
-    # def test_login_after_lockout_period(self) -> None:
-    #     """User can log in after lockout period expires."""
-    #     login_url = reverse("login")
-    #     for _ in range(2):
-    #         self.client.post(login_url, self.invalid_credentials)
-    #     # Locked out
-    #     response = self.client.post(login_url, self.valid_credentials)
-    #     self.assertEqual(response.status_code, 429)
-    #     # Calculate unlock time based on AXES_COOLOFF_TIME
-    #     unlock_time = (
-    #         datetime.datetime.now()
-    #         + datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
-    #     )
+    @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=1)
+    def test_login_after_lockout_period(self) -> None:
+        """User can log in after lockout period expires."""
+        login_url = reverse("login")
+        for _ in range(2):
+            self.client.post(login_url, self.invalid_credentials)
+        # Locked out
+        response = self.client.post(login_url, self.valid_credentials)
+        self.assertEqual(response.status_code, 429)
 
-    #     with freeze_time(unlock_time):
-    #         response = self.client.post(login_url, self.valid_credentials)
-    #         self.assertEqual(response.status_code, 200)
-    #         self.assertRedirects(response, reverse("recordtransfer:index"))
-    #         self.assertTrue(response.wsgi_request.user.is_authenticated)
+        # Calculate unlock time based on AXES_COOLOFF_TIME
+        unlock_time = timezone.now() + datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
+
+        with freeze_time(unlock_time):
+            response = self.client.post(login_url, self.valid_credentials)
+            self.assertEqual(response.status_code, 302)  # Is this the expected behaviour?
+            self.assertRedirects(response, reverse("recordtransfer:index"))
+            self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=0.01)
     def test_lockout_resets_after_successful_login(self) -> None:
