@@ -623,7 +623,7 @@ class TestLogin(TestCase):
             response = self.client.post(self.login_url, self.invalid_credentials)
             self.assertEqual(response.status_code, 200)
             self.assertFalse(response.wsgi_request.user.is_authenticated)
-        # 4th attempt should trigger lockout
+        # 3rd attempt should trigger lockout
         response = self.client.post(self.login_url, self.invalid_credentials)
         self.assertEqual(response.status_code, 429)
 
@@ -656,6 +656,12 @@ class TestLogin(TestCase):
         # Successful login
         response = self.client.post(self.login_url, self.valid_credentials)
         self.assertRedirects(response, reverse("recordtransfer:index"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.client.logout()
+        # Log back in
+        response = self.client.post(self.login_url, self.valid_credentials)
+        self.assertRedirects(response, reverse("recordtransfer:index"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     # @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=0.001)
     # def test_failed_attempt_during_lockout_resets_timer(self) -> None:
