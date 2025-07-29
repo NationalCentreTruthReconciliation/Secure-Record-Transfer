@@ -3,6 +3,7 @@ viewing and listing uploaded files.
 """
 
 import logging
+from pathlib import Path
 from typing import Optional, cast
 
 from clamav.scan import check_for_malware
@@ -53,9 +54,17 @@ def serve_media_file(file_url: str) -> HttpResponse:
     if settings.DEBUG:
         return HttpResponseRedirect(file_url)
     else:
-        response = HttpResponse(headers={"X-Accel-Redirect": file_url})
-        # Remove headers that nginx will handle
-        for header in [
+        headers = {"X-Accel-Redirect": file_url}
+
+        # NGINX will change the file name if we do not set these headers
+        if file_url.endswith(".zip"):
+            headers["Content-Type"] = "application/zip"
+            headers["Content-Disposition"] = f'attachment; filename="{Path(file_url).name}"'
+
+        response = HttpResponse(headers=headers)
+
+        # Clear headers
+        for remove in [
             "Content-Type",
             "Content-Disposition",
             "Accept-Ranges",
@@ -63,8 +72,9 @@ def serve_media_file(file_url: str) -> HttpResponse:
             "Cache-Control",
             "Expires",
         ]:
-            if header in response.headers:
-                del response[header]
+            if remove in response.headers and remove not in headers:
+                del response[remove]
+
         return response
 
 
