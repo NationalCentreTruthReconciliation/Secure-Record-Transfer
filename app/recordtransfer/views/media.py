@@ -59,7 +59,7 @@ def serve_media_file(file_url: str) -> HttpResponse:
         # NGINX will change the file name if we do not set these headers
         if file_url.endswith(".zip"):
             headers["Content-Type"] = "application/zip"
-            headers["Content-Disposition"] = f"attachment; filename={Path(file_url).name}"
+            headers["Content-Disposition"] = f'attachment; filename="{Path(file_url).name}"'
 
         response = HttpResponse(headers=headers)
 
