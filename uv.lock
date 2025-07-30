@@ -767,7 +767,7 @@ wheels = [
 
 [[package]]
 name = "secure-record-transfer"
-version = "2025.7.7"
+version = "2025.7.30"
 source = { virtual = "." }
 dependencies = [
     { name = "bagit" },
