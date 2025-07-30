@@ -381,3 +381,28 @@ def verify_site_id() -> None:
         raise ImproperlyConfigured(
             f"Site with ID {site_id} does not exist. Check the configured SITE_ID"
         )
+
+def verify_axes_settings() -> None:
+    """Verify Axes settings."""
+    if not settings.AXES_ENABLED:
+        LOGGER.debug("AXES is disabled, skipping verification.")
+        return
+    if settings.AXES_FAILURE_LIMIT <= 0:
+        raise ImproperlyConfigured(
+            "AXES_FAILURE_LIMIT must be greater than zero"
+        )
+
+    if settings.AXES_WARNING_THRESHOLD <= 0:
+        raise ImproperlyConfigured(
+            "AXES_WARNING_THRESHOLD must be greater than zero"
+        )
+
+    if settings.AXES_WARNING_THRESHOLD >= settings.AXES_FAILURE_LIMIT:
+        raise ImproperlyConfigured(
+            "AXES_WARNING_THRESHOLD must be less than AXES_FAILURE_LIMIT"
+        )
+
+    if settings.AXES_COOLOFF_TIME <= 0:
+        raise ImproperlyConfigured(
+            "AXES_COOLOFF_TIME must be a float greater than zero"
+        )

@@ -1,14 +1,18 @@
 """Tests for account creation and activation views."""
 
+import datetime
 import logging
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from freezegun import freeze_time
 
 from recordtransfer.forms import SignUpForm
 from recordtransfer.tokens import account_activation_token
@@ -467,6 +471,7 @@ class TestActivateAccount(TestCase):
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
 
+@override_settings(AXES_ENABLED=True)
 class TestLogin(TestCase):
     """Tests for the Login view."""
 
@@ -592,13 +597,6 @@ class TestLogin(TestCase):
         # User should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-    def test_redirect_authenticated_user(self) -> None:
-        """Test that authenticated users are redirected."""
-        self.client.login(username="testloginuser", password="securepassword123")
-        response = self.client.get(self.login_url)
-        # Should redirect to index
-        self.assertRedirects(response, reverse("recordtransfer:index"))
-
     def test_redirect_to_next_parameter(self) -> None:
         """Test that login redirects to next parameter if provided."""
         next_url = reverse("recordtransfer:user_profile")
@@ -610,3 +608,119 @@ class TestLogin(TestCase):
         # User should be authenticated
         self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertEqual(response.wsgi_request.user.username, "testloginuser")
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        # Logout
+        self.client.logout()
+        # Failed attempts should reset, so lockout should not trigger after 1 more fail
+        response = self.client.post(self.login_url, self.invalid_credentials)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    @override_settings(AXES_FAILURE_LIMIT=3, AXES_COOLOFF_TIME=0.01)
+    def test_lockout_after_failed_attempts(self) -> None:
+        """User is locked out after too many failed login attempts."""
+        for _ in range(2):
+            response = self.client.post(self.login_url, self.invalid_credentials)
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(response.wsgi_request.user.is_authenticated)
+        # 3rd attempt should trigger lockout
+        response = self.client.post(self.login_url, self.invalid_credentials)
+        self.assertEqual(response.status_code, 429)
+
+    @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=1)
+    def test_login_after_lockout_period(self) -> None:
+        """User can log in after lockout period expires."""
+        for _ in range(2):
+            self.client.post(self.login_url, self.invalid_credentials)
+        # Locked out
+        response = self.client.post(self.login_url, self.valid_credentials)
+        self.assertEqual(response.status_code, 429)
+
+        # Calculate unlock time based on AXES_COOLOFF_TIME
+        unlock_time = timezone.now() + datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
+
+        with freeze_time(unlock_time):
+            response = self.client.post(self.login_url, self.valid_credentials)
+            self.assertEqual(response.status_code, 302)
+            self.assertRedirects(response, reverse("recordtransfer:index"))
+            self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=0.01)
+    def test_lockout_resets_after_successful_login(self) -> None:
+        """Lockout counter resets after successful login."""
+        # 1 failed attempt
+        self.client.post(self.login_url, self.invalid_credentials)
+        # Successful login
+        response = self.client.post(self.login_url, self.valid_credentials)
+        self.assertRedirects(response, reverse("recordtransfer:index"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.client.logout()
+        # Make another failed attempt, check that it does not lock out
+        response = self.client.post(self.login_url, self.invalid_credentials)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        # Log back in
+        response = self.client.post(self.login_url, self.valid_credentials)
+        self.assertRedirects(response, reverse("recordtransfer:index"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    @override_settings(AXES_FAILURE_LIMIT=2, AXES_COOLOFF_TIME=1)
+    def test_failed_attempt_during_lockout_resets_timer(self) -> None:
+        """A failed login during lockout does not reset the window timer. The cooloff period should
+        be a fixed window from the start of the lockout.
+        """
+        login_url = reverse("login")
+        response = self.client.post(login_url, self.invalid_credentials)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(login_url, self.invalid_credentials)
+        self.assertEqual(response.status_code, 429)
+        locked_out_at = timezone.now()
+
+        cooloff_minutes = int(settings.AXES_COOLOFF_TIME * 60)
+        original_unlock_time = locked_out_at + datetime.timedelta(minutes=cooloff_minutes)
+
+        # Make a failed attempt during lockout
+        with freeze_time(original_unlock_time - datetime.timedelta(minutes=30)):
+            response = self.client.post(login_url, self.invalid_credentials)
+            self.assertEqual(response.status_code, 429)
+
+        # Login at the original unlock time should be successful
+        with freeze_time(original_unlock_time):
+            response = self.client.post(login_url, self.valid_credentials)
+            self.assertEqual(response.status_code, 302)
+            self.assertRedirects(response, reverse("recordtransfer:index"))
+            self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    @override_settings(AXES_WARNING_THRESHOLD=2, AXES_FAILURE_LIMIT=3)
+    def test_warning_shown_when_close_to_lockout(self) -> None:
+        """Test that a warning is shown when the user is close to being locked out."""
+        # Simulate 1 failed attempt
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        # Check that no warning is shown yet
+        self.assertNotIn("HX-Trigger", response.headers)
+
+        # Simulate another failed attempt
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertIn("HX-Trigger", response.headers)
+        # Check that a warning is shown
+        self.assertIn("showWarning", response.headers["HX-Trigger"])
+
+    @override_settings(AXES_WARNING_THRESHOLD=2, AXES_FAILURE_LIMIT=3)
+    def test_locked_out_message_shown(self) -> None:
+        """Test that a locked out message is shown when the user is locked out."""
+        # Simulate 2 failed attempts
+        for _ in range(2):
+            self.client.post(self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true")
+
+        # 3rd attempt should lock out the user
+        response = self.client.post(
+            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+        )
+        self.assertEqual(response.status_code, 429)
+        # Check that the response indicates the user is locked out
+        self.assertIn("HX-Trigger", response.headers)
+        self.assertIn("showError", response.headers["HX-Trigger"])

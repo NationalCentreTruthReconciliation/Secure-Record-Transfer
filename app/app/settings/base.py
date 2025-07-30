@@ -12,6 +12,7 @@ SECRET_KEY = config("SECRET_KEY", default="q9n%k!e3k8vuoo9vnromslji*hsczyj84krzz
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 INSTALLED_APPS = [
+    "axes",
     "webpack_loader",
     "caais.apps.CaaisConfig",
     "clamav.apps.ClamavConfig",
@@ -32,6 +33,13 @@ INSTALLED_APPS = [
     "widget_tweaks",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    # AxesStandaloneBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    "axes.backends.AxesStandaloneBackend",
+    # Django ModelBackend is the default authentication backend.
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -43,7 +51,19 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.gzip.GZipMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+    "axes.middleware.AxesMiddleware",
 ]
+
+# Axes configuration
+AXES_ENABLED = config("AXES_ENABLED", default=True, cast=bool)
+AXES_FAILURE_LIMIT = config("AXES_FAILURE_LIMIT", default=5, cast=int)
+AXES_WARNING_THRESHOLD = config("AXES_WARNING_THRESHOLD", default=3, cast=int)
+AXES_COOLOFF_TIME = config("AXES_COOL_OFF_TIME", default=0.5, cast=float)  # in hours
+AXES_LOCKOUT_PARAMETERS = [["username", "user_agent"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_CALLABLE = "recordtransfer.views.account.lockout"
+AXES_RESET_COOL_OFF_ON_FAILURE_DURING_LOCKOUT = False
 
 ROOT_URLCONF = "app.urls"
 
