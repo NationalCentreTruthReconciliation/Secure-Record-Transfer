@@ -1,3 +1,5 @@
+import glob
+import hashlib
 import logging
 import os
 from typing import TYPE_CHECKING, Union
@@ -354,3 +356,18 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
 
     # All checks succeded
     return {"accepted": True}
+
+
+def get_js_translation_version() -> str:
+    """Return a hash of the latest modification time of all djangojs.mo files in the locale
+    directory. This changes whenever compiled JS translations are updated.
+    """
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    locale_dir = os.path.join(base_dir, "locale")
+    mo_files = glob.glob(os.path.join(locale_dir, "*/LC_MESSAGES/djangojs.mo"))
+    latest_mtime = 0
+    for mo_file in mo_files:
+        mtime = os.path.getmtime(mo_file)
+        if mtime > latest_mtime:
+            latest_mtime = mtime
+    return hashlib.md5(str(latest_mtime).encode()).hexdigest()

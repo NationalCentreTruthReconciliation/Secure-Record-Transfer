@@ -17,7 +17,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
+from recordtransfer.utils import get_js_translation_version
 from recordtransfer.views.account import AsyncPasswordResetView, Login
 
 urlpatterns = (
@@ -35,5 +37,11 @@ urlpatterns = (
         name="login",
     ),
     path("account/", include("django.contrib.auth.urls")),
-    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+    path(
+        "jsi18n/",
+        cache_page(86400, key_prefix="jsi18n-%s" % get_js_translation_version())(
+            JavaScriptCatalog.as_view()
+        ),
+        name="javascript-catalog",
+    ),
 )
