@@ -48,8 +48,17 @@ class TestSubmissionGroupDetailView(TestCase):
         response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 404)
 
-    def test_access_staff_user(self) -> None:
-        """Test that a staff user can access the view."""
+    def test_staff_user_access_not_allowed(self) -> None:
+        """Test that a staff user cannot access the view."""
+        self.client.login(username="staffuser", password="password")
+        response = self.client.get(self.group_detail_url)
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, "404.html")
+
+    def test_staff_user_owning_group_access_allowed(self) -> None:
+        """Test that a staff user owning the submission group can access the view."""
+        self.group.created_by = self.staff_user
+        self.group.save()
         self.client.login(username="staffuser", password="password")
         response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 200)
