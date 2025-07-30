@@ -370,6 +370,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         "export_atom_2_2_csv",
         "export_atom_2_1_csv",
     ]
+    view_on_site = False
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this model admin.
