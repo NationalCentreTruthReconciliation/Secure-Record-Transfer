@@ -360,6 +360,15 @@ h2 {
     border-end-end-radius: var(--join-ee, var(--radius-field));
 }
 
+#main-container.htmx-added {
+    opacity: 0;
+}
+
+#main-container {
+    opacity: 1;
+    transition: opacity 0.35s ease-out;
+}
+
 @media (max-width: 1199px) {
 
     .main-header-content,

@@ -59,7 +59,7 @@
                           hx-post="{{ request.get_full_path }}"
                           hx-target="#main-container"
                           hx-select="#main-container"
-                          hx-swap="outerHTML show:top"
+                          hx-swap="outerHTML settle:0s show:top"
                           method="POST"
                           class="p-6 pt-0">
                         {% csrf_token %}
