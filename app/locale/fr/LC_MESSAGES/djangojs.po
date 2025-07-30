@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-09 16:18-0500\n"
+"POT-Creation-Date: 2025-07-30 14:17-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: French Team <fr@example.com>\n"
@@ -17,6 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: app/recordtransfer/static/recordtransfer/js/submission_form/customUppyPlugin.js:31
+#, javascript-format
+msgid "Cannot add the duplicate file '%s', it already exists"
+msgstr "Impossible d’ajouter le fichier en double '%s', il existe déjà"
 
 #: app/recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
 msgid "No description available"
