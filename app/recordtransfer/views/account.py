@@ -1,5 +1,8 @@
 """Views for creating and activating user accounts."""
 
+import logging
+
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, PasswordResetView
@@ -10,15 +13,18 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.utils.translation import gettext, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
+
+LOGGER = logging.getLogger(__name__)
 
 
 class CreateAccount(FormView):
@@ -80,12 +86,13 @@ class ActivateAccount(View):
                 # Activate the user
                 user.is_active = True
                 user.save()
-                login(request, user)
+                login(request, user, backend="axes.backends.AxesBackend")
                 return redirect("recordtransfer:account_created")
             else:
                 return redirect("recordtransfer:activation_invalid")
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            LOGGER.exception("Unexpected error during account activation")
             return redirect("recordtransfer:activation_invalid")
 
 
@@ -111,7 +118,7 @@ class Login(LoginView):
     """Custom LoginView that supports HTMX requests for login forms."""
 
     template_name = "registration/login.html"
-    redirect_authenticated_user=True
+    redirect_authenticated_user = True
 
     def form_valid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle successful login."""
@@ -122,18 +129,60 @@ class Login(LoginView):
 
     def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle invalid login form submissions."""
-        if self.request.htmx:
-            html = render_to_string(
+        if not self.request.htmx:
+            return super().form_invalid(form)
+
+        response = HttpResponse(
+            render_to_string(
                 "registration/login_errors.html",  # Changed to form-only template
                 {"form": form},
                 request=self.request,
             )
-            return HttpResponse(html)
-        return super().form_invalid(form)
+        )
+
+        # While the user is locked out, number of failures is not included in the request
+        failures = getattr(self.request, "axes_failures_since_start", None)
+        if (
+            failures is not None
+            and settings.AXES_WARNING_THRESHOLD <= failures < settings.AXES_FAILURE_LIMIT
+        ):
+            num_tries_left = settings.AXES_FAILURE_LIMIT - failures
+            response = trigger_client_event(
+                response,
+                "showWarning",
+                {
+                    "value": ngettext(
+                        "You have %(count)s login attempt left before your account is locked out.",
+                        "You have %(count)s login attempts left before your account is locked out.",
+                        num_tries_left,
+                    )
+                    % {
+                        "count": num_tries_left,
+                    }
+                },
+            )
+
+        return response
+
+
+def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
+    """Handle lockout due to too many failed login attempts."""
+    response = HttpResponse(status=429)
+    return trigger_client_event(
+        response,
+        "showError",
+        {
+            "value": gettext(
+                "You have been locked out due to too many failed login attempts. "
+                "Please try again later."
+            ),
+        },
+    )
+
 
 class AsyncPasswordResetView(PasswordResetView):
     """The page a user sees when they request a password reset."""
 
-    email_template_name="registration/password_reset_email.txt"
-    html_email_template_name="registration/password_reset_email.html"
+    email_template_name = "registration/password_reset_email.txt"
+    html_email_template_name = "registration/password_reset_email.html"
     form_class = AsyncPasswordResetForm

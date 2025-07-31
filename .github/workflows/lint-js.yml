@@ -2,7 +2,14 @@ name: PR JS Lint Check
 
 on:
   pull_request:
-    branches: [master]
+    paths:
+      - '**.js'
+      - eslint.config.mjs
+
+    branches:
+      - master
+      - 'feat-*'
+
     types: [opened, synchronize, reopened]
 
 permissions:

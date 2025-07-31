@@ -2,7 +2,9 @@ name: Production Smoke Test Podman (via compose.prod.yml)
 
 on:
   pull_request:
-    branches: [master]
+    branches:
+      - master
+      - 'feat-*'
   push:
     branches: [master]
   workflow_dispatch:
