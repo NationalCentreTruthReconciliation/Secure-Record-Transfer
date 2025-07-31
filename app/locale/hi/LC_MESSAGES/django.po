@@ -880,7 +880,7 @@ msgid "Address line 2"
 msgstr ""
 
 #: recordtransfer/forms/mixins.py:45 recordtransfer/models.py:70
-msgid "City"x
+msgid "City"
 msgstr ""
 
 #: recordtransfer/forms/mixins.py:57
