@@ -1,23 +1,27 @@
-name: Check for Unmigrated Model Changes
+name: Check for Issues with Compiling Message Files
 
 on:
   pull_request:
-    paths:
-      - '**.py'
     branches:
       - master
-      - 'feat-*'
+      - "feat-*"
+    paths:
+      - "**.po"
   push:
-    branches: [master]
+    branches:
+      - master
 
 permissions:
   contents: read
 
 jobs:
-  check-migrations:
+  compile-messages:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install gettext
+        run: sudo apt-get install -y gettext
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -33,5 +37,5 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
 
-      - name: Check for unmigrated changes
-        run: uv run python app/manage.py makemigrations --check
+      - name: Check that compilemessages succeeds
+        run: uv run python app/manage.py compilemessages --ignore .venv

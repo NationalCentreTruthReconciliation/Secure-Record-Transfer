@@ -2,7 +2,11 @@ name: Run Django Unit Tests
 
 on:
   pull_request:
-    branches: [master]
+    paths:
+      - '**.py'
+    branches:
+      - master
+      - 'feat-*'
   push:
     branches: [master]
 

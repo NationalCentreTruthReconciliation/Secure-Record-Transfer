@@ -24,7 +24,7 @@ Next, click **Add Type of Rights**.
     :alt: Add Rights Type link on Right Types admin page
 
 The name you enter into the **Name:** box will be added to the list of selections in the dropdown
-when a user adds rights in Step 5: Record Rights of the Submission Form.
+when a user adds rights in Step 5: Record Rights and Restrictions of the Submission Form.
 
 Click Save when you are satisfied with the new right type.
 
@@ -38,7 +38,7 @@ show up in the dropdown.
     :alt: New right type in rights dropdown
 
 The right type's name and description will also show up in the rights explanation section on the
-About page.
+Help page.
 
 .. image:: images/new_right_explanation.webp
     :alt: New right type in rights explanation
@@ -55,13 +55,13 @@ Next, click **Add Source Type**.
 Enter an appropriate description and click Save when complete.
 
 The name you enter will now appear in the dropdown when users are defining sources in Step 3:
-Source Information of the Submission Form.
+Record Source Information of the Submission Form.
 
 .. image:: images/new_source_type_dropdown.webp
     :alt: New source type in source dropdown
 
 The source type's name and description will also show up in the source type explanation section on
-the About page.
+the Help page.
 
 .. image:: images/new_source_type_explanation.webp
     :alt: New source type in source explanation
@@ -76,14 +76,14 @@ Next, click **Add Source Role**.
 
 Enter an appropriate description and click Save when complete.
 
-The name you enter will now appear in the dropdown when users are defining sources in Step 3: 
-Source Information of the Submission Form.
+The name you enter will now appear in the dropdown when users are defining sources in Step 3:
+Record Source Information of the Submission Form.
 
 .. image:: images/new_source_role_dropdown.webp
     :alt: New source role in source dropdown
 
 The source role's name and description will also show up in the source role explanation section on
-the About page.
+the Help page.
 
 .. image:: images/new_source_role_explanation.webp
     :alt: New source role in source explanation
