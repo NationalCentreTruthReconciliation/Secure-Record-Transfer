@@ -20,7 +20,7 @@ msgstr ""
 #: recordtransfer/static/recordtransfer/js/submission_form/customUppyPlugin.js:31
 #, javascript-format
 msgid "Cannot add the duplicate file '%s', it already exists"
-msgstr ""
+msgstr "Bad Translation"
 
 #: recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
 msgid "No description available"
