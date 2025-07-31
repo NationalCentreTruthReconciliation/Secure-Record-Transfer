@@ -369,5 +369,6 @@ def get_js_translation_version() -> str:
                 for locale_dir in settings.LOCALE_PATHS
                 for item in Path(locale_dir).rglob("djangojs.mo")
             ]
+            or [0]
         )
     )
