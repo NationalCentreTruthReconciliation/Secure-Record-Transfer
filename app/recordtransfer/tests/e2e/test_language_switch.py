@@ -24,10 +24,13 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
     """End-to-end tests for verifying that switching the language sets the correct cookie."""
 
     def test_language_switch_sets_cookie(self) -> None:
-        """Test that switching the language sets the 'django_language' cookie to the
-        selected value.
+        """Test that switching the language sets the 'django_language' cookie to the selected value.
+        Navigates to the home page, switches language to Hindi, and asserts the cookie is set.
         """
         driver = self.driver
+
+        # Go to the home page (ensure the dropdown is present)
+        driver.get(self.live_server_url)
 
         # Wait for the language dropdown to be present
         lang_dropdown = WebDriverWait(driver, 10).until(
@@ -36,7 +39,7 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
         Select(lang_dropdown).select_by_value("hi")
 
         # Wait for the cookie to be set (language switch may be async)
-        def cookie_is_hi(driver: webdriver.Chrome) -> bool:
+        def cookie_is_hi(driver) -> bool:
             cookie = driver.get_cookie("django_language")
             return cookie is not None and cookie.get("value") == "hi"
 
