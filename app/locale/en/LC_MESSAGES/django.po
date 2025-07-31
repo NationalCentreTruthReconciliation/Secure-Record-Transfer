@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-30 16:36-0500\n"
+"POT-Creation-Date: 2025-07-31 08:49-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: app/settings/base.py:125
+msgid "English"
+msgstr ""
+
+#: app/settings/base.py:126
+msgid "French"
+msgstr ""
 
 #: caais/forms.py:100
 msgid ""
@@ -2919,79 +2927,79 @@ msgstr ""
 msgid "Please correct the errors below."
 msgstr ""
 
-#: recordtransfer/utils.py:227
+#: recordtransfer/utils.py:228
 msgid "File is missing an extension."
 msgstr ""
 
-#: recordtransfer/utils.py:228
+#: recordtransfer/utils.py:229
 #, python-brace-format
 msgid "The file \"{0}\" does not have a file extension"
 msgstr ""
 
-#: recordtransfer/utils.py:245
+#: recordtransfer/utils.py:246
 #, python-brace-format
 msgid "Files with \"{0}\" extension are not allowed."
 msgstr ""
 
-#: recordtransfer/utils.py:246
+#: recordtransfer/utils.py:247
 #, python-brace-format
 msgid "The file \"{0}\" has an invalid extension (.{1})"
 msgstr ""
 
-#: recordtransfer/utils.py:260
+#: recordtransfer/utils.py:261
 msgid "File size is invalid."
 msgstr ""
 
-#: recordtransfer/utils.py:261
+#: recordtransfer/utils.py:262
 #, python-brace-format
 msgid "The file \"{0}\" has an invalid size ({1})"
 msgstr ""
 
-#: recordtransfer/utils.py:270
+#: recordtransfer/utils.py:271
 msgid "File is empty."
 msgstr ""
 
-#: recordtransfer/utils.py:271
+#: recordtransfer/utils.py:272
 #, python-brace-format
 msgid "The file \"{0}\" is empty"
 msgstr ""
 
-#: recordtransfer/utils.py:284
+#: recordtransfer/utils.py:285
 #, python-brace-format
 msgid "File is too big ({0:.2f}MB). Max filesize: {1}MB"
 msgstr ""
 
-#: recordtransfer/utils.py:288
+#: recordtransfer/utils.py:289
 #, python-brace-format
 msgid "The file \"{0}\" is too big ({1:.2f}MB). Max filesize: {2}MB"
 msgstr ""
 
-#: recordtransfer/utils.py:322
+#: recordtransfer/utils.py:323
 msgid "You can not upload anymore files."
 msgstr ""
 
-#: recordtransfer/utils.py:324
+#: recordtransfer/utils.py:325
 #, python-brace-format
 msgid ""
 "The file \"{0}\" would push the total file count past the maximum number of "
 "files ({1})"
 msgstr ""
 
-#: recordtransfer/utils.py:338
+#: recordtransfer/utils.py:339
 #, python-brace-format
 msgid "Maximum total upload size ({0} MB) exceeded"
 msgstr ""
 
-#: recordtransfer/utils.py:340
+#: recordtransfer/utils.py:341
 #, python-brace-format
 msgid "The file \"{0}\" would push the total transfer size past the {1}MB max"
 msgstr ""
 
-#: recordtransfer/utils.py:349
+#: recordtransfer/utils.py:350
 msgid "A file with the same name has already been uploaded."
 msgstr ""
 
-#: recordtransfer/utils.py:350
+#: recordtransfer/utils.py:351
 #, python-brace-format
 msgid "A file with the name \"{0}\" has already been uploaded"
 msgstr ""
