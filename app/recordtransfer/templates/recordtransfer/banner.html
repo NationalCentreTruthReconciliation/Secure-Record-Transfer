@@ -12,9 +12,8 @@
             {% get_language_info_list for LANGUAGES as languages %}
             {% for language in languages %}
                 <option value="{{ language.code }}"
-                        {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
-                    {{ language.name_local }} ({{ language.code }})
-                </option>
+                        {% if language.code == LANGUAGE_CODE %}selected{% endif %}
+                        class="bg-base-200 text-primary">{{ language.name_local }} ({{ language.code }})</option>
             {% endfor %}
         </select>
     </form>
