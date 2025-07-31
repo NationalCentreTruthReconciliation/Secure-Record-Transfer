@@ -124,6 +124,7 @@ USE_I18N = True
 LANGUAGES = [
     ("en", _("English")),
     ("fr", _("French")),
+    ("hi", _("Hindi")),
 ]
 
 
