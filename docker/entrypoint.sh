@@ -15,7 +15,7 @@ if [ "$SERVICE_NAME" = 'rq' ]; then
   echo ">> Verifying settings."
   python manage.py verify_settings
 
-  # This is run in the containerfile for production. This is included here for
+  # This runs in the containerfile for production. This is included here for
   # dev because the locale/ directory is in the app/ folder, which gets shared
   # as a volume locally with the container; this means the compiled messages
   # would get overwritten when the volume is shared.
