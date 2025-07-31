@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="banner-container"
      style="display: flex;
             align-items: center;
@@ -8,10 +9,16 @@
     </div>
     <form action="{% url 'set_language' %}" method="post" style="margin: 0;">
         {% csrf_token %}
-        <select name="language" onchange="this.form.submit()">
-            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
-            <option value="hi" {% if LANGUAGE_CODE == 'hi' %}selected{% endif %}>हिन्दी</option>
-            <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français</option>
+        <select name="language">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+                <option value="{{ language.code }}"
+                        {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                    {{ language.name_local }} ({{ language.code }})
+                </option>
+            {% endfor %}
         </select>
     </form>
 </div>
