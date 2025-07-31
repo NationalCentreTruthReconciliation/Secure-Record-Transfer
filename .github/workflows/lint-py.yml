@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - '**.py'
+      - ruff.toml
     types: [opened, synchronize, reopened]
 
 permissions:

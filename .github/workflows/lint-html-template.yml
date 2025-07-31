@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - '**.html'
+      - djlint.toml
     types: [opened, synchronize, reopened]
 
 permissions:
