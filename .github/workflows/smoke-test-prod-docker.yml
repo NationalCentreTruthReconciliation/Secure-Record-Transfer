@@ -3,8 +3,8 @@ name: Production Smoke Test Docker (via compose.prod.yml)
 on:
   pull_request:
     branches:
-    - master
-    - 'feat-*'
+      - master
+      - 'feat-*'
   push:
     branches: [master]
   workflow_dispatch:

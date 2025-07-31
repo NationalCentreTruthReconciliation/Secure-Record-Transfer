@@ -3,8 +3,8 @@ name: PR HTML Template Lint Check
 on:
   pull_request:
     branches:
-    - master
-    - 'feat-*'
+      - master
+      - 'feat-*'
     types: [opened, synchronize, reopened]
 
 permissions:
