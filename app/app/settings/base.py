@@ -147,6 +147,7 @@ LANGUAGES = [
     ("hi", _("Hindi")),
 ]
 
+LANGUAGE_COOKIE_NAME = "django_language"  # optional, included for clarity
 
 USE_TZ = True
 
