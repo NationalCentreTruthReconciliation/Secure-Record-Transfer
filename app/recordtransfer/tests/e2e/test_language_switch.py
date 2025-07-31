@@ -7,8 +7,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-from app.settings.base import LANGUAGE_COOKIE_NAME
-
 from .selenium_setup import SeleniumLiveServerTestCase
 
 
@@ -36,10 +34,10 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
         Select(lang_dropdown).select_by_value("hi")
 
         def get_language_cookie(driver: webdriver.Remote):
-            cookie = driver.get_cookie(LANGUAGE_COOKIE_NAME)
+            cookie = driver.get_cookie(settings.LANGUAGE_COOKIE_NAME)
             if cookie is not None and cookie.get("value") == "hi":
                 return cookie
             return None
 
         language_cookie = WebDriverWait(driver, 10).until(get_language_cookie)
-        assert language_cookie is not None, f"{LANGUAGE_COOKIE_NAME} cookie was not set"
+        self.assertIsNotNone(language_cookie)
