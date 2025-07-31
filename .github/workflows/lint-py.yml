@@ -2,9 +2,14 @@ name: PR Python Lint Check
 
 on:
   pull_request:
+    paths:
+      - '**.py'
+      - ruff.toml
+
     branches:
       - master
       - 'feat-*'
+
     types: [opened, synchronize, reopened]
 
 permissions:
