@@ -214,10 +214,24 @@ Ensure you follow the instructions in the [Local Python Environment Setup](#loca
 To build the docs, run:
 
 ```shell
-sphinx-build docs docs/_build
+uv run sphinx-build docs docs/_build
 ```
 
-The built documentation will be available in `docs/_build`. Open the `index.html` in your browser to view the docs.
+Sphinx has its own cache that it uses for builds. Because of that, Sphinx might hide errors from you if it encountered them on a previous build. You can execute a "clean" build with this command that will show all errors if there are any:
+
+```shell
+# -a: Re-write all files. See: https://www.sphinx-doc.org/en/master/man/sphinx-build.html#cmdoption-sphinx-build-a
+# -E: Read all files. See: https://www.sphinx-doc.org/en/master/man/sphinx-build.html#cmdoption-sphinx-build-E
+uv run sphinx-build -aE docs docs/_build
+```
+
+The built documentation will be available in `docs/_build`. To view the docs, either:
+
+Open the file `docs/_build/index.html` in your web browser.
+
+**OR:**
+
+Start an http server with `uv run python -m http.server -d docs/_build 8001` and open http://localhost:8001 in your browser.
 
 The Sphinx configuration can be found in `docs/conf.py`. The documentation is also built automatically by [Read The Docs](https://about.readthedocs.com/) based on the configuration in `.readthedocs.yaml` and is published [here](https://secure-record-transfer.readthedocs.io/en/latest/) when changes are made to the default branch.
 
