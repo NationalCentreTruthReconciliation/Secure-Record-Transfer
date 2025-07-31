@@ -1,6 +1,17 @@
-<div class="banner-container">
-    <div>
+<div class="banner-container"
+     style="display: flex;
+            align-items: center;
+            gap: 1.2rem">
+    <div style="display: flex; align-items: center; gap: 0.7rem;">
         <span class="banner-text">The National Residential School Crisis Line&nbsp;</span>
         <a class="banner-link non-nav-link" href="tel:1-866-925-4419">1-866-925-4419</a>
     </div>
+    <form action="{% url 'set_language' %}" method="post" style="margin: 0;">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()">
+            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+            <option value="hi" {% if LANGUAGE_CODE == 'hi' %}selected{% endif %}>हिन्दी</option>
+            <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français</option>
+        </select>
+    </form>
 </div>
