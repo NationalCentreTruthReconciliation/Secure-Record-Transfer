@@ -1,21 +1,21 @@
 {% load i18n %}
-<div class="banner-container flex items-center gap-6">
+<div class="banner-container flex items-center justify-between gap-6 w-full">
     <div class="flex items-center">
         <span class="banner-text">The National Residential School Crisis Line&nbsp;</span>
         <a class="banner-link non-nav-link" href="tel:1-866-925-4419">1-866-925-4419</a>
-        <form action="{% url 'set_language' %}" method="post" class="ml-4">
-            {% csrf_token %}
-            <select name="language" onchange="this.form.submit()">
-                {% get_current_language as LANGUAGE_CODE %}
-                {% get_available_languages as LANGUAGES %}
-                {% get_language_info_list for LANGUAGES as languages %}
-                {% for language in languages %}
-                    <option value="{{ language.code }}"
-                            {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
-                        {{ language.name_local }} ({{ language.code }})
-                    </option>
-                {% endfor %}
-            </select>
-        </form>
     </div>
+    <form action="{% url 'set_language' %}" method="post" class="ml-4">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+                <option value="{{ language.code }}"
+                        {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                    {{ language.name_local }} ({{ language.code }})
+                </option>
+            {% endfor %}
+        </select>
+    </form>
 </div>
