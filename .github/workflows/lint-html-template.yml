@@ -4,9 +4,12 @@ on:
   pull_request:
     paths:
       - '**.html'
+      - djlint.toml
+
     branches:
       - master
       - 'feat-*'
+
     types: [opened, synchronize, reopened]
 
 permissions:

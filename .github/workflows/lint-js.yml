@@ -4,9 +4,12 @@ on:
   pull_request:
     paths:
       - '**.js'
+      - eslint.config.mjs
+
     branches:
       - master
       - 'feat-*'
+
     types: [opened, synchronize, reopened]
 
 permissions:
