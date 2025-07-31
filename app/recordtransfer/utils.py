@@ -362,12 +362,11 @@ def get_js_translation_version() -> str:
 
     This changes whenever compiled JS translations are updated.
     """
-    return str(
-        max(
-            [
-                item.stat().st_mtime
-                for locale_dir in settings.LOCALE_PATHS
-                for item in Path(locale_dir).rglob("djangojs.mo")
-            ]
-        )
-    )
+    mtimes = [
+        item.stat().st_mtime
+        for locale_dir in settings.LOCALE_PATHS
+        for item in Path(locale_dir).rglob("djangojs.mo")
+    ]
+    if not mtimes:
+        return "0"
+    return str(max(mtimes))
