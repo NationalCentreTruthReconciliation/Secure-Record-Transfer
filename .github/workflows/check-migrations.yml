@@ -2,7 +2,11 @@ name: Check for Unmigrated Model Changes
 
 on:
   pull_request:
-    branches: [master]
+    paths:
+      - '**.py'
+    branches:
+      - master
+      - 'feat-*'
   push:
     branches: [master]
 

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext
@@ -564,3 +564,37 @@ class TestJobFileView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("X-Accel-Redirect", response.headers)
         self.assertTrue(response.headers["X-Accel-Redirect"].endswith("test_report.pdf"))
+
+    @override_settings(DEBUG=False)
+    def test_job_file_headers_zip_production_mode(self) -> None:
+        """Test that a zip file has content headers in production mode."""
+        self.client.login(username="staff", password="1X<ISRUkw+tuK")
+
+        # Attach a new zip file to our job - replaces the PDF file
+        zip_file = SimpleUploadedFile(
+            "my_bag.zip", b"test content", content_type="application/zip"
+        )
+        self.job_with_file.attached_file.save("my_bag.zip", zip_file)
+
+        response = self.client.get(
+            reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_with_file.uuid})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["X-Accel-Redirect"].endswith("bag.zip"))
+        self.assertEqual(response["Content-Type"], "application/zip")
+        self.assertEqual(response["Content-Disposition"], 'attachment; filename="my_bag.zip"')
+
+    @override_settings(DEBUG=False)
+    def test_job_file_headers_pdf_production_mode(self) -> None:
+        """Test that a PDF file does not have content headers in production mode."""
+        self.client.login(username="staff", password="1X<ISRUkw+tuK")
+
+        response = self.client.get(
+            reverse("recordtransfer:job_file", kwargs={"job_uuid": self.job_with_file.uuid})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["X-Accel-Redirect"].endswith("test_report.pdf"))
+        self.assertNotIn("Content-Type", response.headers)
+        self.assertNotIn("Content-Disposition", response.headers)

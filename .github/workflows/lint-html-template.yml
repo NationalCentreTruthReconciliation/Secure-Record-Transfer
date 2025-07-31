@@ -2,7 +2,14 @@ name: PR HTML Template Lint Check
 
 on:
   pull_request:
-    branches: [master]
+    paths:
+      - '**.html'
+      - djlint.toml
+
+    branches:
+      - master
+      - 'feat-*'
+
     types: [opened, synchronize, reopened]
 
 permissions:

@@ -1,6 +1,6 @@
 [project]
 name = "secure-record-transfer"
-version = "2025.7.7"
+version = "2025.7.30"
 description = "Transfer files and metadata to an archive based on accession standards"
 authors = [
     { name = "Daniel Lovegrove", email = "Daniel.Lovegrove@umanitoba.ca" },
@@ -21,6 +21,7 @@ dependencies = [
     "django-rq>=3.0.0,<4",
     "django-webpack-loader>=3.2.1,<4",
     "django-widget-tweaks>=1.4.12,<2",
+    "django-axes[ipware]>=8.0.0,<9",
     "python-decouple~=3.8",
     "rq-scheduler>=0.14.0,<0.15",
 ]

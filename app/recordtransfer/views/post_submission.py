@@ -139,21 +139,16 @@ class SubmissionGroupDetailView(UpdateView):
         super().__init__(**kwargs)
         self.http_method_names = ["get", "post", "delete"]
 
-    def get_object(self, queryset: Optional[QuerySet] = None) -> Submission:
-        """Retrieve the SubmissionGroup object based on the UUID in the URL."""
-        if queryset is None:
-            queryset = self.get_queryset()
-
+    def get_object(self, queryset: Optional[QuerySet] = None) -> SubmissionGroup:
+        """Return the SubmissionGroup for the given UUID, only if owned by the user.
+        Raises 404 if not found or not owned.
+        """
+        queryset = queryset or self.get_queryset()
         return get_object_or_404(queryset, uuid=self.kwargs.get("uuid"))
 
     def get_queryset(self) -> QuerySet[SubmissionGroup]:
-        """Return queryset filtered by user permissions."""
-        queryset = super().get_queryset()
-
-        if self.request.user.is_staff:
-            return queryset
-        else:
-            return queryset.filter(created_by=self.request.user)
+        """Restrict queryset to groups created by the current user."""
+        return super().get_queryset().filter(created_by=self.request.user)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Pass submissions associated with the group to the template."""
