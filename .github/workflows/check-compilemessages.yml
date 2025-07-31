@@ -6,7 +6,7 @@ on:
       - master
       - "feat-*"
     paths:
-      - "**.mo"
+      - "**.po"
   push:
     branches:
       - master
