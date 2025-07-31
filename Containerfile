@@ -64,18 +64,23 @@ ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]
 FROM base AS builder
 
 ENV UV_LINK_MODE=copy
+ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 # Install build tools for production dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     default-libmysqlclient-dev \
-    pkg-config
+    pkg-config \
+    gettext
 
 # Install production dependencies (e.g., mysqlclient)
 # Compile byte code to improve startup time (see https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode)
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --extra prod --compile-bytecode
+
+# Compile locale message files
+RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
 
 
 FROM python:3.10-slim AS prod
@@ -92,7 +97,7 @@ RUN useradd --create-home --uid 1000 myuser && \
 # Install required dependencies for mysqlclient and curl for health checks
 # Allow myuser to fix permissions on static and media volumes with sudo
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-mysql-client curl sudo gettext && \
+    apt-get install -y --no-install-recommends default-mysql-client curl sudo && \
     rm -rf /var/lib/apt/lists/* && \
     echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/chown -R myuser\\:myuser /opt/secure-record-transfer/app/static/" >> /etc/sudoers && \
     echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/chown -R myuser\\:myuser /opt/secure-record-transfer/app/media/" >> /etc/sudoers

@@ -14,8 +14,16 @@ if [ "$SERVICE_NAME" = 'rq' ]; then
   python manage.py migrate --no-input
   echo ">> Verifying settings."
   python manage.py verify_settings
-  echo ">> Compiling messages."
-  python manage.py compilemessages --ignore .venv
+
+  # This is run in the containerfile for production. This is included here for
+  # dev because the locale/ directory is in the app/ folder, which gets shared
+  # as a volume locally with the container; this means the compiled messages
+  # would get overwritten when the volume is shared.
+  if [ "$ENV" = 'dev' ]; then
+    echo ">> Compiling messages."
+    python manage.py compilemessages --ignore .venv
+  fi
+
   echo ">> Starting RQ worker(s)"
 
 elif [ "$SERVICE_NAME" = 'rq-scheduler' ]; then
