@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - '**.py'
-    branches: [master]
+    branches:
+      - master
+      - 'feat-*'
   push:
     branches: [master]
 

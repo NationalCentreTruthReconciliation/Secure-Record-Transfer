@@ -2,9 +2,11 @@ name: PR Python Lint Check
 
 on:
   pull_request:
-    branches: [master]
     paths:
       - '**.py'
+    branches:
+      - master
+      - 'feat-*'
     types: [opened, synchronize, reopened]
 
 permissions:

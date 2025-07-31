@@ -2,9 +2,11 @@ name: PR HTML Template Lint Check
 
 on:
   pull_request:
-    branches: [master]
     paths:
       - '**.html'
+    branches:
+      - master
+      - 'feat-*'
     types: [opened, synchronize, reopened]
 
 permissions:
