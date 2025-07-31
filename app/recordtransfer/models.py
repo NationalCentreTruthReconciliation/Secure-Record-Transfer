@@ -954,8 +954,11 @@ class BaseUploadedFile(models.Model):
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
-            return f"{self.name} | Session {self.session}"
-        return f"{self.name} Removed! | Session {self.session}"
+            return f"{self.name} | {self.session}"
+        return _("%(name)s Removed! | %(session)s") % {
+            "name": self.name,
+            "session": str(self.session),
+        }
 
 
 class TempUploadedFile(BaseUploadedFile):
