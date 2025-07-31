@@ -7,21 +7,22 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+**Description of the Bug**
 
-A clear and concise description of what the bug is.
+Provide a clear and concise description of what the bug is (i.e., what is this bug, exactly?).
 
-**To Reproduce**
+**Steps to Reproduce**
 
-Steps to reproduce the behavior:
+Provide steps to reproduce the bug as described above (i.e., how did you find this bug?):
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
+**Expected Behaviour**
 
-A clear and concise description of what you expected to happen.
+Provide a clear and concise description of what you expected to happen (i.e., why is this a bug?).
 
 **Screenshots**
 
@@ -31,6 +32,6 @@ If applicable, add screenshots to help explain your problem.
 
 Does this issue apply to the development configuration (`compose.dev.yml`), the production configuration (`compose.prod.yml`), or both?
 
-**Additional context**
+**Additional Context**
 
 Add any other context about the problem here.
