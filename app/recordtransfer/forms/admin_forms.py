@@ -106,6 +106,10 @@ class SubmissionModelForm(RecordTransferModelForm):
             "uuid",
         )
 
+        help_texts: ClassVar[dict] = {
+            "upload_session": gettext("Click link to view uploaded files"),
+        }
+
     disabled_fields: ClassVar[list] = [
         "metadata",
         "upload_session",
