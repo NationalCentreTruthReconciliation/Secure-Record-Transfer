@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from app.settings.base import LANGUAGE_COOKIE_NAME
+
 from .selenium_setup import SeleniumLiveServerTestCase
 
 
@@ -24,26 +26,20 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
     """End-to-end tests for verifying that switching the language sets the correct cookie."""
 
     def test_language_switch_sets_cookie(self) -> None:
-        """Test that switching the language sets the 'django_language' cookie to the selected value.
-        Navigates to the home page, switches language to Hindi, and asserts the cookie is set.
-        """
+        """Switching the language to Hindi sets the language cookie to 'hi'."""
         driver = self.driver
-
-        # Go to the home page (ensure the dropdown is present)
         driver.get(self.live_server_url)
 
-        # Wait for the language dropdown to be present
         lang_dropdown = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.NAME, "language"))
         )
         Select(lang_dropdown).select_by_value("hi")
 
-        # Wait for the cookie to be set (language switch may be async)
-        def cookie_is_hi(driver) -> bool:
-            cookie = driver.get_cookie("django_language")
-            return cookie is not None and cookie.get("value") == "hi"
+        def get_language_cookie(driver: webdriver.Remote):
+            cookie = driver.get_cookie(LANGUAGE_COOKIE_NAME)
+            if cookie is not None and cookie.get("value") == "hi":
+                return cookie
+            return None
 
-        WebDriverWait(driver, 10).until(cookie_is_hi)
-        language_cookie = driver.get_cookie("django_language")
-        assert language_cookie is not None, "django_language cookie was not set"
-        assert language_cookie["value"] == "hi"
+        language_cookie = WebDriverWait(driver, 10).until(get_language_cookie)
+        assert language_cookie is not None, f"{LANGUAGE_COOKIE_NAME} cookie was not set"
