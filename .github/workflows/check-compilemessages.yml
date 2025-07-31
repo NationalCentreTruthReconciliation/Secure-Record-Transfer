@@ -1,0 +1,41 @@
+name: Check for Issues with Compiling Message Files
+
+on:
+  pull_request:
+    branches:
+      - master
+      - "feat-*"
+    paths:
+      - "**.mo"
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  compile-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gettext
+        run: sudo apt-get install -y gettext
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.7.2"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Check that compilemessages succeeds
+        run: uv run python app/manage.py compilemessages --ignore .venv
