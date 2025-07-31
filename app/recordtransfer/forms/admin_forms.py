@@ -122,15 +122,13 @@ class SubmissionModelForm(RecordTransferModelForm):
         super().__init__(*args, **kwargs)
 
         if hasattr(self, "instance") and self.instance.metadata:
-            # TODO: This makes the tiny link by the Metadata title in the Submission form.
-            self.fields["metadata"].help_text = " | ".join(
-                [
-                    format_html('<a href="{}">{}</a>', url, gettext(text))
-                    for url, text in [
-                        (self.instance.get_admin_metadata_change_url(), "View or Change Metadata"),
-                    ]
-                ]
+            # This makes the tiny link by the Metadata title in the Submission form.
+            self.fields["metadata"].help_text = format_html(
+                '<a href="{}">{}</a>',
+                self.instance.get_admin_metadata_change_url(),
+                gettext("View or Change Metadata"),
             )
+
         self.fields["metadata"].widget.can_add_related = False
 
 
