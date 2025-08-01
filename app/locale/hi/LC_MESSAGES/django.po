@@ -1470,7 +1470,7 @@ msgstr ""
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:17
 #: recordtransfer/templates/recordtransfer/in_progress_submission_delete.html:23
 msgid "Cancel"
-msgstr ""
+msgstr "रद्द करें"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:48
 msgid "Unassign Group"
@@ -1486,31 +1486,31 @@ msgstr ""
 
 #: recordtransfer/templates/includes/contact_info_form.html:18
 msgid "Enter phone number"
-msgstr ""
+msgstr "फ़ोन नंबर दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:37
 msgid "Enter street address"
-msgstr ""
+msgstr "घर का पता दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:50
 msgid "Apartment, suite, etc."
-msgstr ""
+msgstr "अपार्टमेंट, सुइट, आदि."
 
 #: recordtransfer/templates/includes/contact_info_form.html:62
 msgid "Enter city"
-msgstr ""
+msgstr "शहर दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:93
 msgid "Enter state/province if not listed above"
-msgstr ""
+msgstr "यदि ऊपर सूचीबद्ध नहीं है तो राज्य/प्रांत दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:105
 msgid "Enter postal/zip code"
-msgstr ""
+msgstr "ज़िप कोड दर्ज करें"
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:4
 msgid "Are you sure you want to delete this in-progress submission?"
-msgstr ""
+msgstr "क्या आप वाकई इस प्रगतिरत सबमिशन को हटाना चाहते हैं?"
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:7
 #, python-format
