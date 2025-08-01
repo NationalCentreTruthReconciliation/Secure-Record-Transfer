@@ -3,12 +3,12 @@ name: PR HTML Template Lint Check
 on:
   pull_request:
     paths:
-      - '**.html'
+      - "**.html"
       - djlint.toml
 
     branches:
       - master
-      - 'feat-*'
+      - "feat-*"
 
     types: [opened, synchronize, reopened]
 
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version-file: ".python-version"
 
       - name: Install djlint
         run: pip install djlint
