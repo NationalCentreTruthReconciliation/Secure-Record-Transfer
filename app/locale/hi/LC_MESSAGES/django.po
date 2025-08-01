@@ -74,7 +74,7 @@ msgstr ""
 #: recordtransfer/forms/user_forms.py:37
 #: recordtransfer/templates/includes/account_info_form.html:37
 msgid "Email"
-msgstr ""
+msgstr "ईमेल"
 
 #: caais/forms.py:372
 msgid "Select a Country"
@@ -946,12 +946,12 @@ msgstr ""
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:20
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:70
 msgid "Yes"
-msgstr ""
+msgstr "हाँ"
 
 #: recordtransfer/forms/submission_forms.py:223
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:72
 msgid "No"
-msgstr ""
+msgstr "नहीं"
 
 #: recordtransfer/forms/submission_forms.py:228
 msgid "Fill out this section?"
@@ -1217,7 +1217,7 @@ msgstr ""
 #: recordtransfer/forms/user_forms.py:45
 #: recordtransfer/templates/includes/account_info_form.html:44
 msgid "Username"
-msgstr ""
+msgstr "प्रयोक्ता नाम"
 
 #: recordtransfer/forms/user_forms.py:46
 msgid "This is the username you will use to log in to your account"
@@ -1254,7 +1254,7 @@ msgstr ""
 #: recordtransfer/forms/user_forms.py:101
 #: recordtransfer/templates/includes/account_info_form.html:59
 msgid "Receive notification emails?"
-msgstr ""
+msgstr "अधिसूचना ईमेल प्राप्त करें?"
 
 #: recordtransfer/forms/user_forms.py:106
 msgid "Current Password"
@@ -1379,7 +1379,7 @@ msgstr ""
 
 #: recordtransfer/templates/admin/bag_change_form.html:6
 msgid "Click here to create a downloadable bag"
-msgstr ""
+msgstr "डाउनलोड करने योग्य बैग बनाने के लिए यहां क्लिक करें"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:5
 #: recordtransfer/templates/includes/account_info_form.html:99
@@ -1387,11 +1387,11 @@ msgstr ""
 #: recordtransfer/templates/includes/submission_group_edit_form.html:12
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:79
 msgid "Save"
-msgstr ""
+msgstr "सेव"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:7
 msgid "Save and continue editing"
-msgstr ""
+msgstr "सेव और संपादन जारी रखें"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:10
 msgid "Reset to default"
@@ -1420,6 +1420,10 @@ msgid ""
 "using this application.\n"
 "                "
 msgstr ""
+"\n"
+"                निम्नलिखित प्रकार की फाइलें दानकर्ता इस एप्लिकेशन का उपयोग करके जमा कर सकते हैं।"
+"\n"
+"                "
 
 #: recordtransfer/templates/includes/account_info_form.html:51
 msgid "Notification options"
