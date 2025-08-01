@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django_recaptcha",
     "django_htmx",
     "widget_tweaks",
+    "debug_toolbar",
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
     "axes.middleware.AxesMiddleware",
@@ -67,16 +69,11 @@ AXES_RESET_COOL_OFF_ON_FAILURE_DURING_LOCKOUT = False
 
 ROOT_URLCONF = "app.urls"
 
-loaders = [
-    "django.template.loaders.filesystem.Loader",
-    "django.template.loaders.app_directories.Loader",
-]
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
-        "APP_DIRS": False,
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -87,7 +84,6 @@ TEMPLATES = [
                 "recordtransfer.context_processors.file_upload_status",
                 "recordtransfer.context_processors.constants_context",
             ],
-            "loaders": loaders,
         },
     },
 ]
