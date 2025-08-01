@@ -1832,7 +1832,7 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/footer.html:39
 #: recordtransfer/templates/recordtransfer/header.html:38
 msgid "About"
-msgstr ""
+msgstr "अबाउट"
 
 #: recordtransfer/templates/recordtransfer/about.html:12
 msgid ""
@@ -2177,42 +2177,42 @@ msgstr ""
 
 #: recordtransfer/templates/recordtransfer/header.html:32
 msgid "Home"
-msgstr ""
+msgstr "मुखपृष्ठ"
 
 #: recordtransfer/templates/recordtransfer/header.html:44
 #: recordtransfer/templates/recordtransfer/help.html:4
 msgid "Help"
-msgstr ""
+msgstr "मदद"
 
 #: recordtransfer/templates/recordtransfer/header.html:51
 msgid "Admin"
-msgstr ""
+msgstr "प्रशासनिक"
 
 #: recordtransfer/templates/recordtransfer/header.html:59
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:19
 msgid "Profile"
-msgstr ""
+msgstr "प्रोफ़ाइल"
 
 #: recordtransfer/templates/recordtransfer/header.html:65
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:99
 msgid "Submit"
-msgstr ""
+msgstr "प्रस्तुति"
 
 #: recordtransfer/templates/recordtransfer/header.html:71
 msgid "Logout"
-msgstr ""
+msgstr "लॉगआउट"
 
 #: recordtransfer/templates/recordtransfer/header.html:78
 #: recordtransfer/templates/recordtransfer/signup_form.html:128
 #: recordtransfer/templates/registration/login.html:80
 msgid "Sign Up"
-msgstr ""
+msgstr "साइन अप"
 
 #: recordtransfer/templates/recordtransfer/header.html:86
 #: recordtransfer/templates/recordtransfer/home.html:21
 #: recordtransfer/templates/recordtransfer/signup_form.html:136
 msgid "Log In"
-msgstr ""
+msgstr "लॉग इन"
 
 #: recordtransfer/templates/recordtransfer/help.html:8
 msgid "Form Help"
