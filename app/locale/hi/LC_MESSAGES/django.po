@@ -869,31 +869,31 @@ msgstr ""
 
 #: recordtransfer/forms/mixins.py:30
 msgid "Address line 1"
-msgstr ""
+msgstr "पता पंक्ति 1"
 
 #: recordtransfer/forms/mixins.py:37
 msgid "Unit Number, RPO, PO BOX... (optional)"
-msgstr ""
+msgstr "यूनिट संख्या, आरपीओ, पीओ बॉक्स... (वैकल्पिक)"
 
 #: recordtransfer/forms/mixins.py:39
 msgid "Address line 2"
-msgstr ""
+msgstr "पता पंक्ति 2"
 
 #: recordtransfer/forms/mixins.py:45 recordtransfer/models.py:70
 msgid "City"
-msgstr ""
+msgstr "शहर"
 
 #: recordtransfer/forms/mixins.py:57
 msgid "Select your province"
-msgstr ""
+msgstr "अपना प्रांत चुनें"
 
 #: recordtransfer/forms/mixins.py:128 recordtransfer/models.py:76
 msgid "Province or state"
-msgstr ""
+msgstr "प्रांत या राज्य"
 
 #: recordtransfer/forms/mixins.py:141
 msgid "Other province or state"
-msgstr ""
+msgstr "अन्य प्रांत या राज्य"
 
 #: recordtransfer/forms/mixins.py:149
 msgid ""
@@ -903,15 +903,15 @@ msgstr ""
 
 #: recordtransfer/forms/mixins.py:158
 msgid "Postal / Zip code"
-msgstr ""
+msgstr "डाक का / ज़िप कोड"
 
 #: recordtransfer/forms/mixins.py:161
 msgid "Select your Country"
-msgstr ""
+msgstr "अपने देश का चयन करॊ"
 
 #: recordtransfer/forms/mixins.py:167
 msgid "Country"
-msgstr ""
+msgstr "देश"
 
 #: recordtransfer/forms/mixins.py:181
 msgid "Address line 1 is required if address line 2 is provided."
