@@ -1,7 +1,15 @@
 import "air-datepicker/air-datepicker.css";
 import AirDatepicker from "air-datepicker";
 import localeEn from "air-datepicker/locale/en";
+import localeFr from "air-datepicker/locale/fr";
 import IMask from "imask";
+
+const DEFAULT_LANGUAGE = "en";
+
+const LOCALE_MAP = {
+    "en": localeEn,
+    "fr": localeFr,
+};
 
 /**
  * Setup date pickers using AirDatepicker.
@@ -9,8 +17,19 @@ import IMask from "imask";
 export function setupDatePickers() {
     const dateInput = document.querySelector(".date-range-picker");
 
+    if (!dateInput) {
+        return;
+    }
+
+    const language = document.documentElement.lang ?? DEFAULT_LANGUAGE;
+    let localeObject = LOCALE_MAP[DEFAULT_LANGUAGE];
+
+    if (language in LOCALE_MAP) {
+        localeObject = LOCALE_MAP[language];
+    }
+
     new AirDatepicker(dateInput, {
-        locale: localeEn,
+        locale: localeObject,
         minDate: new Date(1800, 1, 1),
         maxDate: new Date(),
         autoClose: true,
