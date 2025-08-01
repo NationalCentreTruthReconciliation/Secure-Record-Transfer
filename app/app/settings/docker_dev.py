@@ -19,7 +19,10 @@ INTERNAL_IPS = [
     "localhost",
 ]
 
-SHOW_TOOLBAR_CALLBACK = "debug_toolbar.middleware.show_toolbar"
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+}
 
 # MySQL Database
 
