@@ -870,7 +870,7 @@ class SiteSettingAdmin(admin.ModelAdmin):
         form_url: str | None = "",
         extra_context: dict | None = None,
     ) -> TemplateResponse:
-        """Add custom context to the change form and skip validation on reset."""
+        """Add custom context to the change form."""
         extra_context = extra_context or {}
         if object_id:
             obj: SiteSetting | None = self.get_object(request, object_id)
