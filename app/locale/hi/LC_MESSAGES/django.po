@@ -482,15 +482,15 @@ msgstr ""
 
 #: recordtransfer/admin.py:80 recordtransfer/admin.py:299
 msgid "Upload Size"
-msgstr ""
+msgstr "अपलोड आकार"
 
 #: recordtransfer/admin.py:88 recordtransfer/admin.py:663
 msgid "File Link"
-msgstr ""
+msgstr "फ़ाइल लिंक"
 
 #: recordtransfer/admin.py:92
 msgid "File was removed"
-msgstr ""
+msgstr "फाइल हटा दी गई थी"
 
 #: recordtransfer/admin.py:398
 msgid ""
@@ -524,19 +524,19 @@ msgstr ""
 
 #: recordtransfer/admin.py:669
 msgid "No file attached"
-msgstr ""
+msgstr "कोई फ़ाइल अटैच नहीं है"
 
 #: recordtransfer/admin.py:766
 #: recordtransfer/tests/unit/views/test_profile.py:179
 #: recordtransfer/views/profile.py:107
 msgid "Password updated"
-msgstr ""
+msgstr "पासवर्ड अपडेट हो गया है"
 
 #: recordtransfer/admin.py:767
 #: recordtransfer/tests/unit/views/test_profile.py:180
 #: recordtransfer/views/profile.py:108
 msgid "password"
-msgstr ""
+msgstr "कूटशब्द"
 
 #: recordtransfer/admin.py:768 recordtransfer/admin.py:798
 #: recordtransfer/tests/unit/views/test_profile.py:181
@@ -558,7 +558,7 @@ msgstr ""
 
 #: recordtransfer/admin.py:796
 msgid "Account updated"
-msgstr ""
+msgstr "खाता अपडेट हो गया है"
 
 #: recordtransfer/admin.py:810
 msgid "Superuser privileges have been added to your account."
@@ -610,7 +610,9 @@ msgid ""
 "A username for the application to send \"do not reply\" emails from. This "
 "username is combined with the site's base URL to create an email address. "
 "The URL can be set from the admin site."
-msgstr ""
+msgstr "एप्लिकेशन के लिए एक उपयोगकर्ता नाम जिससे \"उत्तर न दें\" ईमेल भेजे जा सकें। इस "
+"उपयोगकर्ता नाम को साइट के मूल URL के साथ जोड़कर एक ईमेल पता बनाया जाता है।"
+"URL को एडमिन साइट से सेट किया जा सकता है।"
 
 #: recordtransfer/enums.py:66
 msgid ""
