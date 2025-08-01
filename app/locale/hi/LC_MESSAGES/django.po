@@ -60,7 +60,7 @@ msgstr ""
 #: recordtransfer/forms/submission_forms.py:209
 #: recordtransfer/forms/submission_forms.py:439
 msgid "This field is required."
-msgstr ""
+msgstr "यह फ़ील्ड आवश्यक है."
 
 #: caais/forms.py:351 recordtransfer/forms/mixins.py:16
 msgid "Phone number must look like \"+1 (999) 999-9999\""
@@ -68,7 +68,7 @@ msgstr ""
 
 #: caais/forms.py:359 recordtransfer/forms/mixins.py:23
 msgid "Phone number"
-msgstr ""
+msgstr "फ़ोन नंबर"
 
 #: caais/forms.py:363 recordtransfer/forms/submission_forms.py:122
 #: recordtransfer/forms/user_forms.py:37
@@ -78,7 +78,7 @@ msgstr "ईमेल"
 
 #: caais/forms.py:372
 msgid "Select a Country"
-msgstr ""
+msgstr "कोई देश चुनें"
 
 #: caais/models.py:88
 msgid "Acquisition methods"
@@ -197,11 +197,11 @@ msgstr ""
 
 #: caais/models.py:701
 msgid "Source types"
-msgstr ""
+msgstr "स्रोत प्रकार"
 
 #: caais/models.py:702 recordtransfer/forms/submission_forms.py:257
 msgid "Source type"
-msgstr ""
+msgstr "स्रोत प्रकार"
 
 #: caais/models.py:707
 msgid ""
@@ -211,11 +211,11 @@ msgstr ""
 
 #: caais/models.py:726
 msgid "Source roles"
-msgstr ""
+msgstr "स्रोत भूमिकाएँ"
 
 #: caais/models.py:727 recordtransfer/forms/submission_forms.py:294
 msgid "Source role"
-msgstr ""
+msgstr "स्रोत भूमिका"
 
 #: caais/models.py:732
 msgid ""
@@ -919,27 +919,27 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:68
 msgid "I accept these terms"
-msgstr ""
+msgstr "मैं इन शर्तों को स्वीकार करता/करती हूँ"
 
 #: recordtransfer/forms/submission_forms.py:104
 msgid "Contact name"
-msgstr ""
+msgstr "संपर्क नाम"
 
 #: recordtransfer/forms/submission_forms.py:111
 msgid "Job title"
-msgstr ""
+msgstr "पद का नाम"
 
 #: recordtransfer/forms/submission_forms.py:118
 msgid "Organization"
-msgstr ""
+msgstr "संगठन"
 
 #: recordtransfer/forms/submission_forms.py:198
 msgid "If \"Source type\" is Other, enter your own source type"
-msgstr ""
+msgstr "यदि \"स्रोत प्रकार\" अन्य है, तो अपना स्वयं का स्रोत प्रकार दर्ज करें"
 
 #: recordtransfer/forms/submission_forms.py:213
 msgid "If \"Source role\" is Other, enter your own source role"
-msgstr ""
+msgstr "यदि \"स्रोत भूमिका\" अन्य है, तो अपनी स्वयं की स्रोत भूमिका दर्ज करें"
 
 #: recordtransfer/forms/submission_forms.py:222
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:22
@@ -955,20 +955,20 @@ msgstr "नहीं"
 
 #: recordtransfer/forms/submission_forms.py:228
 msgid "Fill out this section?"
-msgstr ""
+msgstr "इस अनुभाग को भरें?"
 
 #: recordtransfer/forms/submission_forms.py:241
 msgid "Name of source"
-msgstr ""
+msgstr "स्रोत का नाम"
 
 #: recordtransfer/forms/submission_forms.py:242
 msgid "The organization or entity submitting the records"
-msgstr ""
+msgstr "रिकॉर्ड प्रस्तुत करने वाला संगठन या संस्था"
 
 #: recordtransfer/forms/submission_forms.py:256
 #: recordtransfer/forms/submission_forms.py:293
 msgid "Please select one"
-msgstr ""
+msgstr "कृपया एक का चयन करें"
 
 #: recordtransfer/forms/submission_forms.py:259
 msgid ""
@@ -982,7 +982,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:279
 msgid "Other source type"
-msgstr ""
+msgstr "अन्य स्रोत प्रकार"
 
 #: recordtransfer/forms/submission_forms.py:295
 msgid "How does the source relate to the records? "
@@ -994,7 +994,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:313
 msgid "Other source role"
-msgstr ""
+msgstr "अन्य स्रोत भूमिका"
 
 #: recordtransfer/forms/submission_forms.py:323
 msgid ""
@@ -1004,7 +1004,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:328
 msgid "Source notes"
-msgstr ""
+msgstr "स्रोत नोट्स"
 
 #: recordtransfer/forms/submission_forms.py:329
 msgid "e.g., The donor wishes to remain anonymous"
@@ -1012,27 +1012,27 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:420
 msgid "e.g., Committee Meeting Minutes"
-msgstr ""
+msgstr "उदाहरण: समिति की बैठक के कार्यवृत्त"
 
 #: recordtransfer/forms/submission_forms.py:421
 msgid "Title"
-msgstr ""
+msgstr "शीर्षक"
 
 #: recordtransfer/forms/submission_forms.py:428
 msgid "English, French"
-msgstr ""
+msgstr "अंग्रेज़ी, फ्रेंच"
 
 #: recordtransfer/forms/submission_forms.py:429
 msgid "Enter all relevant languages here"
-msgstr ""
+msgstr "सभी प्रासंगिक भाषाएँ यहाँ दर्ज करें"
 
 #: recordtransfer/forms/submission_forms.py:430
 msgid "Language(s)"
-msgstr ""
+msgstr "भाषा(एँ)"
 
 #: recordtransfer/forms/submission_forms.py:440
 msgid "Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"
-msgstr ""
+msgstr "दिनांक YYYY-MM-DD या YYYY-MM-DD - YYYY-MM-DD प्रारूप में होना चाहिए"
 
 #: recordtransfer/forms/submission_forms.py:444
 msgid "2000-03-14 - 2001-05-06"
@@ -1040,7 +1040,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:449
 msgid "Date of materials"
-msgstr ""
+msgstr "सामग्री की तिथि"
 
 #: recordtransfer/forms/submission_forms.py:451
 msgid ""
@@ -1050,7 +1050,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:459
 msgid "Date is approximated"
-msgstr ""
+msgstr "तिथि अनुमानित है"
 
 #: recordtransfer/forms/submission_forms.py:461
 msgid ""
@@ -1059,7 +1059,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:472
 msgid "Description of contents"
-msgstr ""
+msgstr "विषय की व्याख्या"
 
 #: recordtransfer/forms/submission_forms.py:474
 msgid ""
@@ -1075,7 +1075,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:492
 msgid "Custodial history"
-msgstr ""
+msgstr "हिरासत का इतिहास"
 
 #: recordtransfer/forms/submission_forms.py:493
 msgid "e.g., John Doe held these records before donating them in 1960"
