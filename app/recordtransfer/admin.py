@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any, Callable, Optional, Sequence, Type, Union
+from typing import Any, Callable, Sequence, cast
 
 from caais.export import ExportVersion
 from django.contrib import admin, messages
@@ -20,6 +20,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.emails import send_user_account_updated
@@ -77,22 +78,6 @@ def job_file_delete(sender: Job, instance: Job, **kwargs) -> None:
     instance.attached_file.delete(False)
 
 
-@display(description=gettext("Upload Size"))
-def format_upload_size(obj: BaseUploadedFile) -> str:
-    """Format file size of an BaseUploadedFile instance for display."""
-    if not obj.file_upload or not obj.exists:
-        return "N/A"
-    return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
-
-
-@display(description=gettext("File Link"))
-def uploaded_file_url(obj: BaseUploadedFile) -> SafeText:
-    """Return the URL to access the file, or a message if the file was removed."""
-    if not obj.file_upload or not obj.exists:
-        return mark_safe(gettext("File was removed"))
-    return format_html('<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name)
-
-
 class ReadOnlyAdmin(admin.ModelAdmin):
     """A model admin that does not allow any editing/changing/ or deletions.
 
@@ -102,7 +87,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         - delete: Not allowed
     """
 
-    readonly_fields: Sequence[Union[str, Callable]] = []
+    readonly_fields: Sequence[str | Callable] = []
 
     def get_readonly_fields(self, request: HttpRequest, obj: object = None) -> tuple:
         """Return all fields as read-only for this model admin."""
@@ -151,9 +136,29 @@ class ReadOnlyInline(admin.TabularInline):
         return False
 
 
+class BaseUploadedFileAdminMixin:
+    """Adds functions for rendering extra fields for uploaded files."""
+
+    @display(description=gettext("Upload Size"))
+    def formatted_upload_size(self, obj: BaseUploadedFile) -> str:
+        """Format file size of an BaseUploadedFile instance for display."""
+        if not obj.file_upload or not obj.exists:
+            return "N/A"
+        return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
+
+    @display(description=gettext("File Link"))
+    def uploaded_file_url(self, obj: BaseUploadedFile) -> SafeText:
+        """Return the URL to access the file, or a message if the file was removed."""
+        if not obj.file_upload or not obj.exists:
+            return mark_safe(gettext("File was removed"))
+        return format_html(
+            '<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name
+        )
+
+
 @admin.register(PermUploadedFile)
-class UploadedFileAdmin(ReadOnlyAdmin):
-    """Admin for the UploadedFile model.
+class UploadedFileAdmin(ReadOnlyAdmin, BaseUploadedFileAdminMixin):
+    """Admin for a BaseUploadedFile model.
 
     Permissions:
         - add: Not allowed
@@ -161,21 +166,21 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields: Sequence[Union[str, Sequence[str]]] = [
+    fields: Sequence[str | Sequence[str]] = [
         "id",
         "name",
-        format_upload_size,
+        "formatted_upload_size",
         "exists",
-        linkify("session"),
-        uploaded_file_url,
+        "session",
+        "uploaded_file_url",
     ]
 
-    list_display: Sequence[Union[str, Callable]] = [
+    list_display: Sequence[str | Callable] = [
         "name",
-        format_upload_size,
+        "formatted_upload_size",
         "exists",
         linkify("session"),
-        uploaded_file_url,
+        "uploaded_file_url",
     ]
 
     search_fields: Sequence[str] = [
@@ -184,11 +189,11 @@ class UploadedFileAdmin(ReadOnlyAdmin):
         "session__user__username",
     ]
 
-    ordering: Optional[Sequence[str]] = ["-pk"]
+    ordering: Sequence[str] | None = ["-pk"]
 
 
-class TempUploadedFileInline(ReadOnlyInline):
-    """Inline admin for the BaseUploadedFile model. Used to view the files
+class TempUploadedFileInline(ReadOnlyInline, BaseUploadedFileAdminMixin):
+    """Inline admin for the TempUploadedFile model. Used to view the files
     associated with an upload session.
 
     Permission:
@@ -199,20 +204,21 @@ class TempUploadedFileInline(ReadOnlyInline):
 
     model = TempUploadedFile
 
-    fields: Sequence[Union[str, Sequence[str]]] = [
-        uploaded_file_url,
-        format_upload_size,
+    fields: Sequence[str | Sequence[str]] = [
+        "uploaded_file_url",
+        "formatted_upload_size",
         "exists",
     ]
-    readonly_fields: Sequence[Union[str, Callable]] = [
+
+    readonly_fields: Sequence[str | Callable] = [
         "exists",
-        uploaded_file_url,
-        format_upload_size,
+        "uploaded_file_url",
+        "formatted_upload_size",
     ]
 
 
 class PermUploadedFileInline(ReadOnlyInline):
-    """Inline admin for the BaseUploadedFile model. Used to view the files
+    """Inline admin for the PermUploadedFile model. Used to view the files
     associated with an upload session.
 
     Permission:
@@ -222,15 +228,17 @@ class PermUploadedFileInline(ReadOnlyInline):
     """
 
     model = PermUploadedFile
-    fields: Sequence[Union[str, Sequence[str]]] = [
-        uploaded_file_url,
-        format_upload_size,
+
+    fields: Sequence[str | Sequence[str]] = [
+        "uploaded_file_url",
+        "formatted_upload_size",
         "exists",
     ]
-    readonly_fields: Sequence[Union[str, Callable]] = [
+
+    readonly_fields: Sequence[str | Callable] = [
         "exists",
-        uploaded_file_url,
-        format_upload_size,
+        "uploaded_file_url",
+        "formatted_upload_size",
     ]
 
 
@@ -244,9 +252,9 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         - delete: Not allowed
     """
 
-    fields: Sequence[Union[str, Sequence[str]]] = [
+    fields: Sequence[str | Sequence[str]] = [
         "token",
-        linkify("user"),
+        "user",
         "started_at",
         "last_upload_at",
         "file_count",
@@ -255,8 +263,13 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "is_expired",
         "expires_at",
     ]
-    search_fields: Sequence[str] = ["token", "user__username"]
-    list_display: Sequence[Union[str, Callable]] = [
+
+    search_fields: Sequence[str] = [
+        "token",
+        "user__username",
+    ]
+
+    list_display: Sequence[str | Callable] = [
         "token",
         linkify("user"),
         "started_at",
@@ -268,11 +281,11 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         "expires_at",
     ]
 
-    ordering: Optional[Sequence[str]] = [
+    ordering: Sequence[str] | None = [
         "-started_at",
     ]
 
-    def get_inlines(self, request: HttpRequest, obj: Optional[UploadSession] = None) -> list:
+    def get_inlines(self, request: HttpRequest, obj: UploadSession | None = None) -> list:
         """Return the inlines to display for the UploadSession."""
         if obj is None:
             return []
@@ -287,17 +300,17 @@ class UploadSessionAdmin(ReadOnlyAdmin):
         else:
             return [TempUploadedFileInline, PermUploadedFileInline]
 
-    def file_count(self, obj: UploadSession) -> Union[int, str]:
+    def file_count(self, obj: UploadSession) -> str:
         """Display the number of files uploaded to the session."""
         file_count = None
         try:
             file_count = obj.file_count
         except ValueError:
             file_count = "n/a"
-        return file_count
+        return str(file_count)
 
     @display(description=gettext("Upload Size"))
-    def upload_size(self, obj: UploadSession) -> Union[str, None]:
+    def upload_size(self, obj: UploadSession) -> str | None:
         """Display the total upload size for the session."""
         upload_size = None
         try:
@@ -306,7 +319,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
             upload_size = "n/a"
         return upload_size
 
-    @admin.display(description="Last upload at")
+    @display(description="Last upload at")
     def last_upload_at(self, obj: UploadSession) -> datetime:
         """Display the last time a file was uploaded to the session."""
         return obj.last_upload_interaction_time
@@ -323,9 +336,9 @@ class SubmissionInline(ReadOnlyInline):
 
     model = Submission
 
-    fields: Sequence[Union[str, Sequence[str]]] = ["uuid", "metadata"]
+    fields: Sequence[str | Sequence[str]] = ["uuid", "metadata"]
 
-    ordering: Optional[Sequence[str]] = ["-submission_date"]
+    ordering: Sequence[str] | None = ["-submission_date"]
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether delete permission is granted for this inline admin.
@@ -344,32 +357,33 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         - delete: Only by superusers
     """
 
-    list_display: Sequence[Union[str, Callable]] = [
+    list_display: Sequence[str | Callable] = [
         "name",
         linkify("created_by"),
         "number_of_submissions_in_group",
     ]
 
-    inlines: Sequence[Type[InlineModelAdmin]] = [SubmissionInline]
+    inlines: Sequence[type[InlineModelAdmin]] = [SubmissionInline]
 
     search_fields: Sequence[str] = [
         "name",
         "uuid",
     ]
 
-    ordering: Optional[Sequence[str]] = [
+    ordering: Sequence[str] | None = [
         "-created_by",
     ]
 
-    actions: Optional[
-        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
-    ] = [
+    actions: (
+        Sequence[Callable[[Any, HttpRequest, QuerySet[Any]], HttpResponse | None] | str] | None
+    ) = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
         "export_atom_2_2_csv",
         "export_atom_2_1_csv",
     ]
+
     view_on_site = False
 
     def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
@@ -380,7 +394,7 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
 
     def _export_submissions_csv(
         self, request: HttpRequest, queryset: QuerySet[SubmissionGroup], version: ExportVersion
-    ) -> Optional[HttpResponse]:
+    ) -> HttpResponse | None:
         """Export submissions from selected groups with validation.
 
         Args:
@@ -404,35 +418,27 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         return related_submissions.export_csv(version=version)
 
     @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
-    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> Optional[HttpResponse]:
+    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.CAAIS_1_0)
 
     @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
-    def export_atom_2_6_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> Optional[HttpResponse]:
+    def export_atom_2_6_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_6)
 
     @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
-    def export_atom_2_3_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> Optional[HttpResponse]:
+    def export_atom_2_3_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_3)
 
     @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
-    def export_atom_2_2_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> Optional[HttpResponse]:
+    def export_atom_2_2_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_2)
 
     @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
-    def export_atom_2_1_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> Optional[HttpResponse]:
+    def export_atom_2_1_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_1)
 
@@ -447,13 +453,13 @@ class SubmissionGroupInline(ReadOnlyInline):
     """
 
     model = SubmissionGroup
-    fields: Sequence[Union[str, Sequence[str]]] = [
+    fields: Sequence[str | Sequence[str]] = [
         "name",
         "description",
         "number_of_submissions_in_group",
     ]
     # Tells Django this is a computed field
-    readonly_fields: Sequence[Union[str, Callable[..., Any]]] = ["number_of_submissions_in_group"]
+    readonly_fields: Sequence[str | Callable] = ["number_of_submissions_in_group"]
 
 
 @admin.register(Submission)
@@ -470,9 +476,9 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     form = SubmissionModelForm
 
-    actions: Optional[
-        Sequence[Union[Callable[[Any, HttpRequest, QuerySet[Any]], Optional[HttpResponse]], str]]
-    ] = [
+    actions: (
+        Sequence[Callable[[Any, HttpRequest, QuerySet[Any]], HttpResponse | None] | str] | None
+    ) = [
         "export_caais_csv",
         "export_atom_2_6_csv",
         "export_atom_2_3_csv",
@@ -487,7 +493,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         "user__email",
     ]
 
-    list_display: Sequence[Union[str, Callable[..., Any]]] = [
+    list_display: Sequence[str | Callable] = [
         "submission_date",
         "uuid",
         "file_count",
@@ -495,11 +501,11 @@ class SubmissionAdmin(admin.ModelAdmin):
         linkify("user"),
     ]
 
-    ordering: Optional[Sequence[str]] = [
+    ordering: Sequence[str] | None = [
         "-submission_date",
     ]
 
-    readonly_fields: Sequence[Union[str, Callable[..., Any]]] = [
+    readonly_fields: Sequence[str | Callable] = [
         "submission_date",
         "user",
         "upload_session",
@@ -507,16 +513,16 @@ class SubmissionAdmin(admin.ModelAdmin):
         "uuid",
     ]
 
-    def file_count(self, obj: Submission) -> Union[int, str]:
+    def file_count(self, obj: Submission) -> str:
         """Display the number of files uploaded to the submission."""
         if not obj.upload_session:
-            return 0
+            return "0"
         file_count = None
         try:
             file_count = obj.upload_session.file_count
         except ValueError:
             file_count = "n/a"
-        return file_count
+        return str(file_count)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         """Determine whether add permission is granted for this model admin."""
@@ -631,7 +637,7 @@ class JobAdmin(ReadOnlyAdmin):
         - delete: Only superusers
     """
 
-    fields: Sequence[Union[str, Sequence[str]]] = [
+    fields: Sequence[str | Sequence[str]] = [
         "uuid",
         "name",
         "description",
@@ -643,7 +649,7 @@ class JobAdmin(ReadOnlyAdmin):
         "message_log",
     ]
 
-    list_display: Sequence[Union[str, Callable]] = [
+    list_display: Sequence[str | Callable] = [
         "name",
         "start_time",
         "user_triggered",
@@ -659,7 +665,7 @@ class JobAdmin(ReadOnlyAdmin):
         "user_triggered__last_name",
     ]
 
-    ordering: Optional[Sequence[str]] = ["-start_time"]
+    ordering: Sequence[str] | None = ["-start_time"]
 
     @display(description=gettext("File Link"))
     def file_url(self, obj: Job) -> SafeText:
@@ -717,7 +723,7 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    inlines: Sequence[Type[InlineModelAdmin]] = [
+    inlines: Sequence[type[InlineModelAdmin]] = [
         SubmissionInline,
         SubmissionGroupInline,
     ]
@@ -737,9 +743,9 @@ class CustomUserAdmin(UserAdmin):
     def changeform_view(
         self,
         request: HttpRequest,
-        object_id: Optional[str] = None,
+        object_id: str | None = None,
         form_url: str = "",
-        extra_context: Optional[dict] = None,
+        extra_context: dict | None = None,
     ) -> TemplateResponse:
         """Add JS context for contact info form."""
         extra_context = extra_context or {}
@@ -834,9 +840,9 @@ class SiteSettingAdmin(admin.ModelAdmin):
         - delete: Not allowed
     """
 
-    list_display: Sequence[Union[str, Callable]] = ["key", "value_type", "value", "change_date"]
+    list_display: Sequence[str | Callable] = ["key", "value_type", "value", "change_date"]
     search_fields: Sequence[str] = ["key", "value"]
-    readonly_fields: Sequence[Union[str, Callable]] = [
+    readonly_fields: Sequence[str | Callable] = [
         "key",
         "value_type",
         "change_date",
@@ -851,48 +857,37 @@ class SiteSettingAdmin(admin.ModelAdmin):
         self, request: HttpRequest, obj: SiteSetting, form: ModelForm, change: bool
     ) -> None:
         """Override save_model to set the changed_by field."""
-        obj.changed_by = request.user
-        super().save_model(request, obj, form, change)
+        if "_reset" in request.POST:
+            obj.reset_to_default(cast(User, request.user))
+        else:
+            obj.changed_by = request.user
+            super().save_model(request, obj, form, change)
 
     def changeform_view(
         self,
         request: HttpRequest,
-        object_id: Optional[str] = None,
-        form_url: Optional[str] = "",
-        extra_context: Optional[dict] = None,
+        object_id: str | None = None,
+        form_url: str | None = "",
+        extra_context: dict | None = None,
     ) -> TemplateResponse:
         """Add custom context to the change form and skip validation on reset."""
         extra_context = extra_context or {}
         if object_id:
-            obj: Optional[SiteSetting] = self.get_object(request, object_id)
-            if obj:
+            obj: SiteSetting | None = self.get_object(request, object_id)
+            if obj and obj.default_value:
                 extra_context["setting_default_value"] = obj.default_value
-
-        # Skip form validation if "_reset" is in POST
-        if request.method == "POST" and "_reset" in request.POST:
-            if object_id:
-                obj = self.get_object(request, object_id)
-                if obj:
-                    self.reset_to_default(request, obj)
-
-            return HttpResponseRedirect(request.get_full_path())
-
         return super().changeform_view(request, object_id, form_url or "", extra_context)
 
-    def reset_to_default(self, request: HttpRequest, obj: SiteSetting) -> None:
-        """Reset the site setting to its default value."""
-        try:
-            user = User.objects.get(pk=request.user.pk)
-            obj.reset_to_default(user)
+    def response_change(self, request: HttpRequest, obj: SiteSetting) -> HttpResponse:
+        """Mimic save and continue on POST when resetting setting."""
+        if "_reset" in request.POST:
             messages.success(
                 request,
-                f'Setting "{obj.key}" has been reset to its default value.',
+                _('Setting "%(key)s" has been reset to its default value of %(value)s.')
+                % {"key": obj.key, "value": obj.default_value},
             )
-        except Exception as e:
-            messages.error(
-                request,
-                f'Failed to reset setting "{obj.key}": {e!s}',
-            )
+            return HttpResponseRedirect(request.path)
+        return super().response_change(request, obj)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         """Prevent adding new site settings through the admin interface."""
