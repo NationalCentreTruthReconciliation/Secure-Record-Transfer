@@ -19,7 +19,6 @@ from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
-from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.constants import HtmlIds, OtherValues
