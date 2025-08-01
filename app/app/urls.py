@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from recordtransfer.views.account import AsyncPasswordResetView, Login
@@ -35,3 +35,7 @@ urlpatterns = [
     ),
     path("account/", include("django.contrib.auth.urls")),
 ]
+
+if settings.DEBUG and not settings.TESTING:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+    urlpatterns += debug_toolbar_urls()
