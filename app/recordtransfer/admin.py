@@ -139,18 +139,18 @@ class ReadOnlyInline(admin.TabularInline):
 class BaseUploadedFileAdminMixin:
     """Adds functions for rendering extra fields for uploaded files."""
 
-    @display(description=gettext("Upload Size"))
+    @display(description=_("Upload Size"))
     def formatted_upload_size(self, obj: BaseUploadedFile) -> str:
         """Format file size of an BaseUploadedFile instance for display."""
         if not obj.file_upload or not obj.exists:
             return "N/A"
         return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
 
-    @display(description=gettext("File Link"))
+    @display(description=_("File Link"))
     def uploaded_file_url(self, obj: BaseUploadedFile) -> SafeText:
         """Return the URL to access the file, or a message if the file was removed."""
         if not obj.file_upload or not obj.exists:
-            return mark_safe(gettext("File was removed"))
+            return mark_safe(_("File was removed"))
         return format_html(
             '<a target="_blank" href="{}">{}</a>', obj.get_file_access_url(), obj.name
         )
@@ -309,7 +309,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
             file_count = "n/a"
         return str(file_count)
 
-    @display(description=gettext("Upload Size"))
+    @display(description=_("Upload Size"))
     def upload_size(self, obj: UploadSession) -> str | None:
         """Display the total upload size for the session."""
         upload_size = None
@@ -409,35 +409,33 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         if not related_submissions.exists():
             self.message_user(
                 request,
-                gettext(
-                    "The selected submission group(s) do not contain any submissions to export."
-                ),
+                _("The selected submission group(s) do not contain any submissions to export."),
                 messages.WARNING,
             )
             return None
         return related_submissions.export_csv(version=version)
 
-    @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
+    @admin.action(description=_("Export CAAIS 1.0 CSV for Submissions in Selected"))
     def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.CAAIS_1_0)
 
-    @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
     def export_atom_2_6_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_6)
 
-    @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
     def export_atom_2_3_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_3)
 
-    @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
     def export_atom_2_2_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_2)
 
-    @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
     def export_atom_2_1_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_1)
@@ -562,7 +560,7 @@ class SubmissionAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 mark_safe(
-                    gettext(
+                    _(
                         (
                             'A downloadable bag is being generated. Visit the <a href="{url}">jobs page</a> for '
                             "the status of the bag generation, or check the Submission page for a download link"
@@ -576,7 +574,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         elif submission and not submission.upload_session:
             self.message_user(
                 request,
-                gettext(
+                _(
                     (
                         "There are no files associated with this submission, it is not possible to "
                         "create a Bag"
@@ -588,38 +586,38 @@ class SubmissionAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(submission.get_admin_change_url())
 
         # Error response
-        msg = gettext(f"Submission with ID '{object_id}' doesn't exist. Perhaps it was deleted?")
+        msg = _(f"Submission with ID '{object_id}' doesn't exist. Perhaps it was deleted?")
         self.message_user(request, msg, messages.ERROR)
         admin_url = reverse("admin:index", current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
 
-    @admin.action(description=gettext("Export CAAIS 1.0 CSV for Submissions in Selected"))
+    @admin.action(description=_("Export CAAIS 1.0 CSV for Submissions in Selected"))
     def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
         """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
         return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
 
-    @admin.action(description=gettext("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
     def export_atom_2_6_csv(
         self, request: HttpRequest, queryset: QuerySet
     ) -> HttpResponseRedirect:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_6)
 
-    @admin.action(description=gettext("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
     def export_atom_2_3_csv(
         self, request: HttpRequest, queryset: QuerySet
     ) -> HttpResponseRedirect:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_3)
 
-    @admin.action(description=gettext("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
     def export_atom_2_2_csv(
         self, request: HttpRequest, queryset: QuerySet
     ) -> HttpResponseRedirect:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
         return queryset.export_csv(version=ExportVersion.ATOM_2_2)
 
-    @admin.action(description=gettext("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
+    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
     def export_atom_2_1_csv(
         self, request: HttpRequest, queryset: QuerySet
     ) -> HttpResponseRedirect:
@@ -667,13 +665,13 @@ class JobAdmin(ReadOnlyAdmin):
 
     ordering: Sequence[str] | None = ["-start_time"]
 
-    @display(description=gettext("File Link"))
+    @display(description=_("File Link"))
     def file_url(self, obj: Job) -> SafeText:
         """Return the URL to access the file, or a message if there is no file associated with the
         job.
         """
         if not obj.has_file():
-            return mark_safe(gettext("No file attached"))
+            return mark_safe(_("No file attached"))
         return format_html(
             '<a target="_blank" href="{}">{}</a>',
             reverse("recordtransfer:job_file", args=[obj.uuid]),
@@ -770,9 +768,9 @@ class CustomUserAdmin(UserAdmin):
         form = self.change_password_form(user, request.POST)
         if form.is_valid() and request.method == "POST" and user is not None:
             context = {
-                "subject": gettext("Password updated"),
-                "changed_item": gettext("password"),
-                "changed_status": gettext("updated"),
+                "subject": _("Password updated"),
+                "changed_item": _("password"),
+                "changed_status": _("updated"),
             }
             send_user_account_updated.delay(user, context)
         return response
@@ -794,15 +792,15 @@ class CustomUserAdmin(UserAdmin):
             ):
                 if not obj.is_active:
                     context = {
-                        "subject": gettext("Account Deactivated"),
-                        "changed_item": gettext("account"),
-                        "changed_status": gettext("deactivated"),
+                        "subject": _("Account Deactivated"),
+                        "changed_item": _("account"),
+                        "changed_status": _("deactivated"),
                     }
                 else:
                     context = {
-                        "subject": gettext("Account updated"),
-                        "changed_item": gettext("account"),
-                        "changed_status": gettext("updated"),
+                        "subject": _("Account updated"),
+                        "changed_item": _("account"),
+                        "changed_status": _("updated"),
                         "changed_list": self._get_changed_message(form.changed_data, obj),
                     }
 
@@ -813,20 +811,14 @@ class CustomUserAdmin(UserAdmin):
         message_list = []
         if "is_superuser" in changed_data:
             if user.is_superuser:
-                message_list.append(
-                    gettext("Superuser privileges have been added to your account.")
-                )
+                message_list.append(_("Superuser privileges have been added to your account."))
             else:
-                message_list.append(
-                    gettext("Superuser privileges have been removed from your account.")
-                )
+                message_list.append(_("Superuser privileges have been removed from your account."))
         if "is_staff" in changed_data:
             if user.is_staff:
-                message_list.append(gettext("Staff privileges have been added to your account."))
+                message_list.append(_("Staff privileges have been added to your account."))
             else:
-                message_list.append(
-                    gettext("Staff privileges have been removed from your account.")
-                )
+                message_list.append(_("Staff privileges have been removed from your account."))
         return message_list
 
 
