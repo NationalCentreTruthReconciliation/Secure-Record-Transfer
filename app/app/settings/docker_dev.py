@@ -14,6 +14,13 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+SHOW_TOOLBAR_CALLBACK = "debug_toolbar.middleware.show_toolbar"
+
 # MySQL Database
 
 DEV_DATABASE_NAME = config("DEV_DATABASE_NAME", default="development_database.sqlite3")
@@ -96,7 +103,3 @@ LOGGING = {
         },
     },
 }
-
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
