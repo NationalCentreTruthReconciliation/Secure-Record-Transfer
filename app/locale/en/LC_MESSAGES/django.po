@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-31 08:49-0500\n"
+"POT-Creation-Date: 2025-08-05 14:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,18 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: app/settings/base.py:125
+#: app/settings/base.py:145
 msgid "English"
 msgstr ""
 
-#: app/settings/base.py:126
+#: app/settings/base.py:146
 msgid "French"
 msgstr ""
 
+#: app/settings/base.py:147
+msgid "Hindi"
+msgstr ""
+
 #: caais/forms.py:100
+#, python-format
 msgid ""
-". Use the date format YYYY-MM-DD for a single date or YYYY-MM-DD - YYYY-MM-"
-"DD for a date range"
+"%(help_text)s. Use the date format YYYY-MM-DD for a single date or YYYY-MM-"
+"DD - YYYY-MM-DD for a date range"
 msgstr ""
 
 #: caais/forms.py:165 caais/forms.py:193
@@ -63,7 +68,7 @@ msgid "End date must be later than start date"
 msgstr ""
 
 #: caais/forms.py:350 recordtransfer/forms/mixins.py:15
-#: recordtransfer/forms/mixins.py:147
+#: recordtransfer/forms/mixins.py:145
 #: recordtransfer/forms/submission_forms.py:183
 #: recordtransfer/forms/submission_forms.py:194
 #: recordtransfer/forms/submission_forms.py:209
@@ -493,7 +498,7 @@ msgstr ""
 msgid "Upload Size"
 msgstr ""
 
-#: recordtransfer/admin.py:88 recordtransfer/admin.py:663
+#: recordtransfer/admin.py:88 recordtransfer/admin.py:664
 msgid "File Link"
 msgstr ""
 
@@ -501,87 +506,87 @@ msgstr ""
 msgid "File was removed"
 msgstr ""
 
-#: recordtransfer/admin.py:398
+#: recordtransfer/admin.py:399
 msgid ""
 "The selected submission group(s) do not contain any submissions to export."
 msgstr ""
 
-#: recordtransfer/admin.py:405 recordtransfer/admin.py:589
+#: recordtransfer/admin.py:406 recordtransfer/admin.py:590
 msgid "Export CAAIS 1.0 CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:410 recordtransfer/admin.py:594
+#: recordtransfer/admin.py:411 recordtransfer/admin.py:595
 msgid "Export AtoM 2.6 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:417 recordtransfer/admin.py:601
+#: recordtransfer/admin.py:418 recordtransfer/admin.py:602
 msgid "Export AtoM 2.3 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:424 recordtransfer/admin.py:608
+#: recordtransfer/admin.py:425 recordtransfer/admin.py:609
 msgid "Export AtoM 2.2 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:431 recordtransfer/admin.py:615
+#: recordtransfer/admin.py:432 recordtransfer/admin.py:616
 msgid "Export AtoM 2.1 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:584
+#: recordtransfer/admin.py:585
 #, python-brace-format
 msgid "Submission with ID '{object_id}' doesn't exist. Perhaps it was deleted?"
 msgstr ""
 
-#: recordtransfer/admin.py:669
+#: recordtransfer/admin.py:670
 msgid "No file attached"
 msgstr ""
 
-#: recordtransfer/admin.py:766
+#: recordtransfer/admin.py:767
 #: recordtransfer/tests/unit/views/test_profile.py:179
 #: recordtransfer/views/profile.py:107
 msgid "Password updated"
 msgstr ""
 
-#: recordtransfer/admin.py:767
+#: recordtransfer/admin.py:768
 #: recordtransfer/tests/unit/views/test_profile.py:180
 #: recordtransfer/views/profile.py:108
 msgid "password"
 msgstr ""
 
-#: recordtransfer/admin.py:768 recordtransfer/admin.py:798
+#: recordtransfer/admin.py:769 recordtransfer/admin.py:799
 #: recordtransfer/tests/unit/views/test_profile.py:181
 #: recordtransfer/views/profile.py:109
 msgid "updated"
 msgstr ""
 
-#: recordtransfer/admin.py:790
+#: recordtransfer/admin.py:791
 msgid "Account Deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:791 recordtransfer/admin.py:797
+#: recordtransfer/admin.py:792 recordtransfer/admin.py:798
 msgid "account"
 msgstr ""
 
-#: recordtransfer/admin.py:792
+#: recordtransfer/admin.py:793
 msgid "deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:796
+#: recordtransfer/admin.py:797
 msgid "Account updated"
 msgstr ""
 
-#: recordtransfer/admin.py:810
+#: recordtransfer/admin.py:811
 msgid "Superuser privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:814
+#: recordtransfer/admin.py:815
 msgid "Superuser privileges have been removed from your account."
 msgstr ""
 
-#: recordtransfer/admin.py:818
+#: recordtransfer/admin.py:819
 msgid "Staff privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:821
+#: recordtransfer/admin.py:822
 msgid "Staff privileges have been removed from your account."
 msgstr ""
 
@@ -880,49 +885,49 @@ msgstr ""
 msgid "Address line 1"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:37
+#: recordtransfer/forms/mixins.py:36
 msgid "Unit Number, RPO, PO BOX... (optional)"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:39
+#: recordtransfer/forms/mixins.py:37
 msgid "Address line 2"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:45 recordtransfer/models.py:70
+#: recordtransfer/forms/mixins.py:43 recordtransfer/models.py:70
 msgid "City"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:57
+#: recordtransfer/forms/mixins.py:55
 msgid "Select your province"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:128 recordtransfer/models.py:76
+#: recordtransfer/forms/mixins.py:126 recordtransfer/models.py:76
 msgid "Province or state"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:141
+#: recordtransfer/forms/mixins.py:139
 msgid "Other province or state"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:149
+#: recordtransfer/forms/mixins.py:147
 msgid ""
 "Postal code must look like \"Z0Z 0Z0\", zip code must look like \"12345\" or "
 "\"12345-1234\""
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:158
+#: recordtransfer/forms/mixins.py:156
 msgid "Postal / Zip code"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:161
+#: recordtransfer/forms/mixins.py:159
 msgid "Select your Country"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:167
+#: recordtransfer/forms/mixins.py:165
 msgid "Country"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:181
+#: recordtransfer/forms/mixins.py:179
 msgid "Address line 1 is required if address line 2 is provided."
 msgstr ""
 
@@ -1152,54 +1157,54 @@ msgstr ""
 msgid "The type of the identifier"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:654
+#: recordtransfer/forms/submission_forms.py:653
 msgid ""
 "For example: &quot;Receipt number&quot;, &quot;LAC Record ID&quot;, etc."
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:656
+#: recordtransfer/forms/submission_forms.py:654
 msgid "Type of identifier"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:663
-#: recordtransfer/forms/submission_forms.py:666
+#: recordtransfer/forms/submission_forms.py:661
+#: recordtransfer/forms/submission_forms.py:664
 msgid "Identifier value"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:675
+#: recordtransfer/forms/submission_forms.py:673
 msgid "Any notes on this identifier or which files it may apply to (optional)."
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:679
+#: recordtransfer/forms/submission_forms.py:677
 msgid "Notes for identifier"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:732
+#: recordtransfer/forms/submission_forms.py:730
 msgid "Assigned group"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:751
-#: recordtransfer/forms/submission_forms.py:810
+#: recordtransfer/forms/submission_forms.py:749
+#: recordtransfer/forms/submission_forms.py:808
 msgid "Record any general notes you have about the records here (optional)"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:756
-#: recordtransfer/forms/submission_forms.py:815
+#: recordtransfer/forms/submission_forms.py:754
+#: recordtransfer/forms/submission_forms.py:813
 msgid ""
 "These should be notes that did not fit in any of the previous steps of this "
 "form"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:758
-#: recordtransfer/forms/submission_forms.py:817
+#: recordtransfer/forms/submission_forms.py:756
+#: recordtransfer/forms/submission_forms.py:815
 msgid "Other notes"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:902
+#: recordtransfer/forms/submission_forms.py:900
 msgid "No identifiers were provided."
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:904
+#: recordtransfer/forms/submission_forms.py:902
 msgid "No record rights or restrictions were provided."
 msgstr ""
 
@@ -2916,7 +2921,7 @@ msgid "Back to Login"
 msgstr ""
 
 #: recordtransfer/tests/unit/views/test_media.py:420
-#: recordtransfer/views/media.py:266
+#: recordtransfer/views/media.py:276
 msgid "Invalid filename or upload session token"
 msgstr ""
 
@@ -3004,49 +3009,64 @@ msgstr ""
 msgid "A file with the name \"{0}\" has already been uploaded"
 msgstr ""
 
-#: recordtransfer/views/media.py:89 recordtransfer/views/media.py:134
+#: recordtransfer/views/account.py:155
+#, python-format
+msgid ""
+"You have %(count)s login attempt left before your account is locked out."
+msgid_plural ""
+"You have %(count)s login attempts left before your account is locked out."
+msgstr[0] ""
+msgstr[1] ""
+
+#: recordtransfer/views/account.py:176
+msgid ""
+"You have been locked out due to too many failed login attempts. Please try "
+"again later."
+msgstr ""
+
+#: recordtransfer/views/media.py:99 recordtransfer/views/media.py:144
 msgid "There was an internal server error. Please try again."
 msgstr ""
 
-#: recordtransfer/views/media.py:120
+#: recordtransfer/views/media.py:130
 msgid "Invalid upload session token"
 msgstr ""
 
-#: recordtransfer/views/media.py:154
+#: recordtransfer/views/media.py:164
 msgid "No file was uploaded"
 msgstr ""
 
-#: recordtransfer/views/media.py:182
+#: recordtransfer/views/media.py:192
 #, python-brace-format
 msgid "Malware was detected in the file \"{_file.name}\""
 msgstr ""
 
-#: recordtransfer/views/media.py:193
+#: recordtransfer/views/media.py:203
 #, python-format
 msgid "File \"%(name)s\" is too large to scan for malware"
 msgstr ""
 
-#: recordtransfer/views/media.py:205
+#: recordtransfer/views/media.py:215
 msgid "Unable to scan file for malware due to scanner error"
 msgstr ""
 
-#: recordtransfer/views/media.py:219
+#: recordtransfer/views/media.py:229
 msgid "There was an error uploading the file"
 msgstr ""
 
-#: recordtransfer/views/media.py:274
+#: recordtransfer/views/media.py:284
 msgid "File not found in upload session"
 msgstr ""
 
-#: recordtransfer/views/media.py:279
+#: recordtransfer/views/media.py:289
 msgid "Cannot remove file from upload session"
 msgstr ""
 
-#: recordtransfer/views/post_submission.py:192
+#: recordtransfer/views/post_submission.py:187
 msgid "Group updated"
 msgstr ""
 
-#: recordtransfer/views/post_submission.py:203
+#: recordtransfer/views/post_submission.py:198
 msgid "There was an error updating the group"
 msgstr ""
 
