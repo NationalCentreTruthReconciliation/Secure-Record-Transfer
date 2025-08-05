@@ -20,16 +20,16 @@ msgstr ""
 #: recordtransfer/static/recordtransfer/js/submission_form/customUppyPlugin.js:31
 #, javascript-format
 msgid "Cannot add the duplicate file '%s', it already exists"
-msgstr ""
+msgstr "डुप्लिकेट फ़ाइल '%s' को नहीं जोड़ा जा सकता, यह पहले से मौजूद है"
 
 #: recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
 msgid "No description available"
-msgstr ""
+msgstr "कोई विवरण उपलब्ध नहीं है"
 
 #: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:141
 msgid "You must upload at least one file."
-msgstr ""
+msgstr "आपको कम से कम एक फ़ाइल अपलोड करनी होगी"
 
 #: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:150
 msgid "Remove the files with issues to proceed."
-msgstr ""
+msgstr "आगे बढ़ने के लिए समस्या वाली फ़ाइलें हटाएँ."
