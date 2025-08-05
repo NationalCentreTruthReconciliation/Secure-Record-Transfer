@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 15:09-0500\n"
+"POT-Creation-Date: 2025-08-05 15:17-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2926,7 +2926,7 @@ msgid "Back to Login"
 msgstr ""
 
 #: recordtransfer/tests/unit/views/test_media.py:420
-#: recordtransfer/views/media.py:276
+#: recordtransfer/views/media.py:277
 msgid "Invalid filename or upload session token"
 msgstr ""
 
@@ -3042,28 +3042,28 @@ msgid "No file was uploaded"
 msgstr ""
 
 #: recordtransfer/views/media.py:192
-#, python-brace-format
-msgid "Malware was detected in the file \"{_file.name}\""
+#, python-format
+msgid "Malware was detected in the file \"%(name)s\""
 msgstr ""
 
-#: recordtransfer/views/media.py:203
+#: recordtransfer/views/media.py:204
 #, python-format
 msgid "File \"%(name)s\" is too large to scan for malware"
 msgstr ""
 
-#: recordtransfer/views/media.py:215
+#: recordtransfer/views/media.py:216
 msgid "Unable to scan file for malware due to scanner error"
 msgstr ""
 
-#: recordtransfer/views/media.py:229
+#: recordtransfer/views/media.py:230
 msgid "There was an error uploading the file"
 msgstr ""
 
-#: recordtransfer/views/media.py:284
+#: recordtransfer/views/media.py:285
 msgid "File not found in upload session"
 msgstr ""
 
-#: recordtransfer/views/media.py:289
+#: recordtransfer/views/media.py:290
 msgid "Cannot remove file from upload session"
 msgstr ""
 
