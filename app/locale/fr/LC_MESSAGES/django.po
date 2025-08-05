@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 14:35-0500\n"
+"POT-Creation-Date: 2025-08-05 14:55-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -590,8 +590,12 @@ msgstr ""
 msgid "Staff privileges have been removed from your account."
 msgstr ""
 
-#: recordtransfer/caais.py:539
-msgid "{TermClass._meta.verbose_name} was noted as {other_term!r}"
+#: recordtransfer/caais.py:541
+#, python-format
+msgctxt ""
+"class_name is the name of a Python class and term_name is the user-entered "
+"value"
+msgid "%(class_name)s was noted as %(term_name)s"
 msgstr ""
 
 #: recordtransfer/decorators.py:28
