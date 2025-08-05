@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 14:55-0500\n"
+"POT-Creation-Date: 2025-08-05 15:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1375,23 +1375,23 @@ msgid "File Removal in Progress"
 msgstr ""
 
 #: recordtransfer/models.py:863
-#, python-brace-format
-msgid "{0}, totalling {1}"
-msgstr ""
-
-#: recordtransfer/models.py:1313
-msgid "Not Started"
-msgstr ""
-
-#: recordtransfer/models.py:1314
-msgid "In Progress"
-msgstr ""
-
-#: recordtransfer/models.py:1315
-msgid "Complete"
+#, python-format
+msgid "%(file_count)s, totalling %(total_size)s"
 msgstr ""
 
 #: recordtransfer/models.py:1316
+msgid "Not Started"
+msgstr ""
+
+#: recordtransfer/models.py:1317
+msgid "In Progress"
+msgstr ""
+
+#: recordtransfer/models.py:1318
+msgid "Complete"
+msgstr ""
+
+#: recordtransfer/models.py:1319
 msgid "Failed"
 msgstr ""
 
