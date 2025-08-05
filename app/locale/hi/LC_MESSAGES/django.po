@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 15:03-0500\n"
+"POT-Creation-Date: 2025-08-05 15:09-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1590,58 +1590,50 @@ msgstr ""
 #: recordtransfer/templates/includes/frequently_asked_questions.html:16
 #, python-format
 msgid ""
-"\n"
-"                        — If you have too many files for a single submission "
-"(exceeding %(MAX_TOTAL_UPLOAD_COUNT)s\n"
+"If you have too many files for a single submission (exceeding "
+"%(MAX_TOTAL_UPLOAD_COUNT)s\n"
 "                        files or %(MAX_TOTAL_UPLOAD_SIZE_MB)s MB), you can "
 "split them into multiple submissions\n"
 "                        within the same group.\n"
 "                        "
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:23
+#: recordtransfer/templates/includes/frequently_asked_questions.html:22
 msgid "You want logical organization"
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:24
+#: recordtransfer/templates/includes/frequently_asked_questions.html:23
 msgid ""
-"\n"
-"                        — You can organize related records by theme, time "
-"period, or project, even if\n"
+"You can organize related records by theme, time period, or project, even if\n"
 "                        they're submitted at different times.\n"
 "                        "
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:30
+#: recordtransfer/templates/includes/frequently_asked_questions.html:28
 msgid "You need easier tracking"
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:31
+#: recordtransfer/templates/includes/frequently_asked_questions.html:29
 msgid ""
-"\n"
-"                        — Grouping helps you and archivists track related "
-"submissions through the\n"
+"Grouping helps you and archivists track related submissions through the\n"
 "                        processing workflow.\n"
 "                        "
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:37
+#: recordtransfer/templates/includes/frequently_asked_questions.html:34
 msgid "You want consistent metadata"
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:38
+#: recordtransfer/templates/includes/frequently_asked_questions.html:35
 msgid ""
-"\n"
-"                        — Groups ensure related submissions are cataloged "
-"with consistent metadata.\n"
-"                        "
+"Groups ensure related submissions are cataloged with consistent metadata."
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:44
+#: recordtransfer/templates/includes/frequently_asked_questions.html:39
 msgid "Pro Tip:"
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:46
+#: recordtransfer/templates/includes/frequently_asked_questions.html:41
 msgid ""
 "\n"
 "                        When creating a new group, use a descriptive naming "
