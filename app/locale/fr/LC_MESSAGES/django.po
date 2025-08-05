@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 15:17-0500\n"
+"POT-Creation-Date: 2025-08-05 15:32-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2933,27 +2933,27 @@ msgid "File is missing an extension."
 msgstr ""
 
 #: recordtransfer/utils.py:229
-#, python-brace-format
-msgid "The file \"{0}\" does not have a file extension"
+#, python-format
+msgid "The file \"%(filename)s\" does not have a file extension"
 msgstr ""
 
-#: recordtransfer/utils.py:246
-#, python-brace-format
-msgid "Files with \"{0}\" extension are not allowed."
+#: recordtransfer/utils.py:245
+#, python-format
+msgid "Files with \"%(extension)s\" extension are not allowed."
 msgstr ""
 
-#: recordtransfer/utils.py:247
-#, python-brace-format
-msgid "The file \"{0}\" has an invalid extension (.{1})"
-msgstr ""
-
-#: recordtransfer/utils.py:261
-msgid "File size is invalid."
+#: recordtransfer/utils.py:248
+#, python-format
+msgid "The file \"%(filename)s\" has an invalid extension (.%(extension)s)"
 msgstr ""
 
 #: recordtransfer/utils.py:262
-#, python-brace-format
-msgid "The file \"{0}\" has an invalid size ({1})"
+msgid "File size is invalid."
+msgstr ""
+
+#: recordtransfer/utils.py:263
+#, python-format
+msgid "The file \"%(filename)s\" has an invalid size (%(size)s)"
 msgstr ""
 
 #: recordtransfer/utils.py:271
@@ -2961,18 +2961,20 @@ msgid "File is empty."
 msgstr ""
 
 #: recordtransfer/utils.py:272
-#, python-brace-format
-msgid "The file \"{0}\" is empty"
+#, python-format
+msgid "The file \"%(filename)s\" is empty"
 msgstr ""
 
 #: recordtransfer/utils.py:285
-#, python-brace-format
-msgid "File is too big ({0:.2f}MB). Max filesize: {1}MB"
+#, python-format
+msgid "File is too big (%(size_mb).2fMB). Max filesize: %(max_size)sMB"
 msgstr ""
 
-#: recordtransfer/utils.py:289
-#, python-brace-format
-msgid "The file \"{0}\" is too big ({1:.2f}MB). Max filesize: {2}MB"
+#: recordtransfer/utils.py:288
+#, python-format
+msgid ""
+"The file \"%(filename)s\" is too big (%(size_mb).2fMB). Max filesize: "
+"%(max_size)sMB"
 msgstr ""
 
 #: recordtransfer/utils.py:323
@@ -2987,22 +2989,24 @@ msgid ""
 msgstr ""
 
 #: recordtransfer/utils.py:339
-#, python-brace-format
-msgid "Maximum total upload size ({0} MB) exceeded"
+#, python-format
+msgid "Maximum total upload size (%(max_size)s MB) exceeded"
 msgstr ""
 
-#: recordtransfer/utils.py:341
-#, python-brace-format
-msgid "The file \"{0}\" would push the total transfer size past the {1}MB max"
+#: recordtransfer/utils.py:342
+#, python-format
+msgid ""
+"The file \"%(filename)s\" would push the total transfer size past the "
+"%(max_size)sMB max"
 msgstr ""
 
-#: recordtransfer/utils.py:350
+#: recordtransfer/utils.py:352
 msgid "A file with the same name has already been uploaded."
 msgstr ""
 
-#: recordtransfer/utils.py:351
-#, python-brace-format
-msgid "A file with the name \"{0}\" has already been uploaded"
+#: recordtransfer/utils.py:354
+#, python-format
+msgid "A file with the name \"%(filename)s\" has already been uploaded"
 msgstr ""
 
 #: recordtransfer/views/account.py:155
