@@ -860,7 +860,10 @@ class UploadSession(models.Model):
             [f.name for f in self.get_uploads()], settings.ACCEPTED_FILE_FORMATS
         )
 
-        return _("{0}, totalling {1}").format(count, size)
+        return _("%(file_count)s, totalling %(total_size)s") % {
+            "file_count": count,
+            "total_size": size,
+        }
 
     def __str__(self):
         """Return a string representation of this object."""
