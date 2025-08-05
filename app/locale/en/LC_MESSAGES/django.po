@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 15:32-0500\n"
+"POT-Creation-Date: 2025-08-05 15:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2982,29 +2982,29 @@ msgid "You can not upload anymore files."
 msgstr ""
 
 #: recordtransfer/utils.py:325
-#, python-brace-format
+#, python-format
 msgid ""
-"The file \"{0}\" would push the total file count past the maximum number of "
-"files ({1})"
+"The file \"%(filename)s\" would push the total file count past the maximum "
+"number of files (%(max_count)s)"
 msgstr ""
 
-#: recordtransfer/utils.py:339
+#: recordtransfer/utils.py:340
 #, python-format
 msgid "Maximum total upload size (%(max_size)s MB) exceeded"
 msgstr ""
 
-#: recordtransfer/utils.py:342
+#: recordtransfer/utils.py:343
 #, python-format
 msgid ""
 "The file \"%(filename)s\" would push the total transfer size past the "
 "%(max_size)sMB max"
 msgstr ""
 
-#: recordtransfer/utils.py:352
+#: recordtransfer/utils.py:353
 msgid "A file with the same name has already been uploaded."
 msgstr ""
 
-#: recordtransfer/utils.py:354
+#: recordtransfer/utils.py:355
 #, python-format
 msgid "A file with the name \"%(filename)s\" has already been uploaded"
 msgstr ""
