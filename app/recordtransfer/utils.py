@@ -322,9 +322,10 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
             "accepted": False,
             "error": gettext("You can not upload anymore files."),
             "verboseError": gettext(
-                'The file "{0}" would push the total file count past the '
-                "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE_MB),
+                'The file "%(filename)s" would push the total file count past the '
+                "maximum number of files (%(max_count)s)"
+            )
+            % {"filename": filename, "max_count": settings.MAX_TOTAL_UPLOAD_COUNT},
         }
 
     # Check total size of all files plus current one is within allowed size
