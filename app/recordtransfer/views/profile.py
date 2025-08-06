@@ -51,6 +51,7 @@ class UserProfile(View):
                 # Account Info Form
                 "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
                 "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
+                "ID_LANGUAGE": HtmlIds.ID_LANGUAGE,
                 "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
                 "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
                 "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,

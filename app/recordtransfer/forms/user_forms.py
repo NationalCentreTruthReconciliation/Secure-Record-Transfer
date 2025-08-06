@@ -2,6 +2,7 @@ import re
 from typing import Any, ClassVar, Optional
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
 from django.core.exceptions import ValidationError
@@ -100,6 +101,12 @@ class UserAccountInfoForm(forms.ModelForm):
         widget=forms.CheckboxInput(attrs={"id": HtmlIds.ID_GETS_NOTIFICATION_EMAILS}),
         label=_("Receive notification emails?"),
         required=False,
+    )
+    language = forms.ChoiceField(
+        choices=settings.LANGUAGES,
+        widget=forms.Select(attrs={"id": HtmlIds.ID_LANGUAGE}),
+        label=_("Preferred Language"),
+        required=True,
     )
     current_password = forms.CharField(
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CURRENT_PASSWORD}),
@@ -217,18 +224,6 @@ class UserAccountInfoForm(forms.ModelForm):
         if commit:
             user.save()
         return user
-
-    def reset_form(self) -> None:
-        """Reset form fields to initial values from instance."""
-        if self.instance:
-            self.data = self.data.copy()
-            self.data["first_name"] = self.instance.first_name
-            self.data["last_name"] = self.instance.last_name
-            self.data["gets_notification_emails"] = self.instance.gets_notification_emails
-            self.data["current_password"] = ""
-            self.data["new_password"] = ""
-            self.data["confirm_new_password"] = ""
-
 
 class AsyncPasswordResetForm(PasswordResetForm):
     """Form for resetting a user's password."""
