@@ -121,7 +121,6 @@ After compiling your translations, you'll want to verify they work correctly:
 - [ ] Placeholders are filled with actual values
 - [ ] Text fits properly in the UI (not cut off)
 - [ ] Special characters display correctly
-- [ ] Pluralization works for different counts
 
 ### Troubleshooting
 If translations don't appear:
