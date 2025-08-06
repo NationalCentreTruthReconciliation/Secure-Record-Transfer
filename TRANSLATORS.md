@@ -68,6 +68,8 @@ python manage.py makemessages --help
 
 ## Compiling Translations
 
+This is done automatically for you in development when you run the application, but you can also run it manually like this if needed.
+
 After editing `.po` files, compile them so Django can use the updated translations:
 
 ```bash
