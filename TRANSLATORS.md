@@ -93,7 +93,7 @@ You don’t need to worry about the setup — just translate the `djangojs.po` f
 ### Behind the scenes:
 - `JavaScriptCatalog.as_view()` is set up in `urls.py`
 - `{% javascript_catalog %}` is included in templates to load translations
-- Strings in JS files are marked using `gettext()` or `_()` just like in Python
+- Strings in JS files are marked using `gettext()` or `_()`
 
 ---
 
