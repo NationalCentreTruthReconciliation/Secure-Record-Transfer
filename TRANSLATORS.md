@@ -1,4 +1,4 @@
-# 🌍 TRANSLATORS.md
+# TRANSLATORS.md
 
 Welcome! This guide is for anyone helping translate this project into other languages.
 
@@ -6,7 +6,7 @@ Whether you're translating UI text or contributing localized content, this docum
 
 ---
 
-## 📝 How Translations Work
+## How Translations Work
 
 We use **Django's built-in internationalization (i18n)** framework to handle translations in both Python and JavaScript files.
 
@@ -14,7 +14,7 @@ All translatable strings are extracted into `.po` files and compiled into `.mo` 
 
 ---
 
-## 📂 Translation File Locations
+## Translation File Locations
 
 - **Python & Templates:**
   Translations are stored in `locale/<language_code>/LC_MESSAGES/django.po`.
@@ -33,7 +33,7 @@ All translatable strings are extracted into `.po` files and compiled into `.mo` 
 
 ---
 
-## 🛠️ Extracting Strings
+## Extracting Strings
 
 To extract translatable strings after making changes:
 
@@ -49,7 +49,7 @@ Replace `hi` with the target language code (e.g., `fr`, `es`, etc.).
 
 ---
 
-## 🌐 Compiling Translations
+## Compiling Translations
 
 After editing `.po` files, compile them so Django can use the updated translations:
 
@@ -59,7 +59,7 @@ python manage.py compilemessages
 
 ---
 
-## 🐍 Python Translations (`gettext_lazy`)
+## Python Translations (`gettext_lazy`)
 
 In Python files, we use `gettext_lazy` (commonly aliased as `_`) to mark strings for translation.
 
@@ -67,7 +67,7 @@ We do this because we don’t want these strings to be translated immediately wh
 
 This is important because the user’s language preference might not be known at import time (i.e., when the Python code is first loaded), but will be available at render time. Using `gettext_lazy` ensures that the correct translation is applied based on the active language at that moment.
 
-## 💬 JavaScript Translations (`djangojs.po`)
+## JavaScript Translations (`djangojs.po`)
 
 We use `JavaScriptCatalog` to make translations available to frontend code.
 
@@ -80,7 +80,7 @@ You don’t need to worry about the setup — just translate the `djangojs.po` f
 
 ---
 
-## ✅ Translating Strings
+## Translating Strings
 
 You can edit `.po` files manually, or use a GUI editor like:
 
@@ -92,7 +92,7 @@ Make sure to save your changes and recompile (`compilemessages`) after editing.
 
 ---
 
-## 🔍 Tips for Translators
+## Tips for Translators
 
 - Be consistent with terminology
 - Preserve placeholders like `{count}`, `{size}`, or `%s`
@@ -101,7 +101,7 @@ Make sure to save your changes and recompile (`compilemessages`) after editing.
 
 ---
 
-## ❓ Need Help?
+## Need Help?
 
 If you're unsure about a string or how to test your translations:
 
@@ -111,6 +111,6 @@ If you're unsure about a string or how to test your translations:
 
 ---
 
-Happy translating! 🎉
+Happy translating!
 
 Let us know if you have suggestions for improving this guide.
