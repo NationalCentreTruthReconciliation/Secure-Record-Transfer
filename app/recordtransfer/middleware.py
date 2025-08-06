@@ -5,6 +5,7 @@ from typing import Callable, cast
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
+from recordtransfer.constants import SessionFlags
 from recordtransfer.models import User
 
 
@@ -36,5 +37,42 @@ class SaveUserLanguageMiddleware:
             if user.language != new_language:
                 user.language = new_language
                 user.save(update_fields=["language"])
+
+        return response
+
+
+class SetLanguageOnLoginMiddleware:
+    """Middleware to set language cookie when user logs in with a preferred language."""
+
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+        """Initialize the middleware."""
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        """Process the request and set language cookie if needed."""
+        response = self.get_response(request)
+
+        # Check if user just logged in and has a language preference
+        if (
+            request.user.is_authenticated
+            and hasattr(request.user, "language")
+            and hasattr(request, "session")
+            and request.session.get(SessionFlags.JUST_LOGGED_IN)
+        ):
+            user = cast(User, request.user)
+            if user.language:
+                # Set the language cookie
+                response.set_cookie(
+                    settings.LANGUAGE_COOKIE_NAME,
+                    user.language,
+                    max_age=settings.LANGUAGE_COOKIE_AGE,
+                    path=settings.LANGUAGE_COOKIE_PATH,
+                    domain=settings.LANGUAGE_COOKIE_DOMAIN,
+                    secure=settings.LANGUAGE_COOKIE_SECURE,
+                    httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+                    samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+                )
+            # Clear the flag
+            del request.session[SessionFlags.JUST_LOGGED_IN]
 
         return response
