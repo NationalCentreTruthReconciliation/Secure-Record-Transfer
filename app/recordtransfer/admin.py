@@ -693,7 +693,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         *UserAdmin.fieldsets,  # original form fieldsets, expanded
         (
-            "Contact Information",
+            _("Contact Information"),
             {
                 "fields": (
                     "phone_number",
@@ -708,7 +708,13 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (
-            "Email Updates",
+            _("Language Preferences"),
+            {
+                "fields": ("language",),
+            },
+        ),
+        (
+            _("Email Updates"),
             {
                 "fields": ("gets_submission_email_updates",),
             },
