@@ -25,6 +25,7 @@ from recordtransfer.forms import (
     UserAccountInfoForm,
     UserContactInfoForm,
 )
+from recordtransfer.forms.user_forms import UserLanguageForm
 from recordtransfer.models import (
     InProgressSubmission,
     SiteSetting,
@@ -42,11 +43,10 @@ class UserProfile(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         """Render the user profile page."""
         user = cast(User, request.user)
-        account_info_form = UserAccountInfoForm(instance=user)
-        contact_info_form = UserContactInfoForm(instance=user)
         context = {
-            "account_info_form": account_info_form,
-            "contact_info_form": contact_info_form,
+            "account_info_form": UserAccountInfoForm(instance=user),
+            "contact_info_form": UserContactInfoForm(instance=user),
+            "language_form": UserLanguageForm(instance=user),
             "js_context": {
                 # Account Info Form
                 "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
