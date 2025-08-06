@@ -43,9 +43,26 @@ python manage.py makemessages -l hi
 
 # For JavaScript
 python manage.py makemessages -d djangojs -l hi
+
+# Extract for all configured languages at once
+python manage.py makemessages -a
+
+# Extract JavaScript strings for all languages
+python manage.py makemessages -d djangojs -a
 ```
 
 Replace `hi` with the target language code (e.g., `fr`, `es`, etc.).
+
+**Useful flags:**
+- `-a, --all`: Extract strings for all configured languages
+- `-d, --domain`: Specify domain (default: `django`, use `djangojs` for JavaScript)
+- `-l, --locale`: Specify a particular language code
+- `--help`: See all available options and flags
+
+For a complete list of options, run:
+```bash
+python manage.py makemessages --help
+```
 
 ---
 
