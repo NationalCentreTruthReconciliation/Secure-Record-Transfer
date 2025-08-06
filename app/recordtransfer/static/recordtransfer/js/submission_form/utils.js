@@ -166,7 +166,6 @@ export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize, totalCount,
 
     const totalCountElement = document.getElementById("files-count");
     const remainingCountElement = document.getElementById("remaining-files");
-    const maxTotalUploadCount = maxCount;
 
     const updateElement = (element, value, isError, isInteger = false) => {
         if (element) {
@@ -178,12 +177,12 @@ export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize, totalCount,
     const totalMB = totalSizeBytes / (1000 * 1000);
     const remainingMB = (maxTotalUploadSizeBytes - totalSizeBytes) / (1000 * 1000);
 
-    const remainingFiles = maxTotalUploadCount - totalCount;
+    const remainingFiles = maxCount - totalCount;
 
     updateElement(totalSizeElement, totalMB, totalSizeBytes > maxTotalUploadSizeBytes);
     updateElement(remainingSizeElement, Math.max(remainingMB, 0), remainingMB < 0);
 
-    updateElement(totalCountElement, totalCount, totalCount > maxTotalUploadCount, true);
+    updateElement(totalCountElement, totalCount, totalCount > maxCount, true);
     updateElement(remainingCountElement, Math.max(remainingFiles, 0), remainingFiles < 0, true);
 
 };
