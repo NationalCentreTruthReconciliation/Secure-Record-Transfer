@@ -14,6 +14,7 @@
 export const setupProfileForm = (context) => {
     const firstName = document.getElementById(context["ID_FIRST_NAME"]);
     const lastName = document.getElementById(context["ID_LAST_NAME"]);
+    const language = document.getElementById(context["ID_LANGUAGE"]);
     const getsNotificationEmails = document.getElementById(
         context["ID_GETS_NOTIFICATION_EMAILS"]
     );
@@ -26,6 +27,7 @@ export const setupProfileForm = (context) => {
     const inputFields = [
         firstName,
         lastName,
+        language,
         getsNotificationEmails,
         currentPassword,
         newPassword,
@@ -37,12 +39,14 @@ export const setupProfileForm = (context) => {
     const initialValues = {
         firstName: firstName.value,
         lastName: lastName.value,
+        language: language.value,
         getsNotificationEmails: getsNotificationEmails.checked,
     };
 
     const checkForChanges = () => {
         const hasChanged = firstName.value !== initialValues.firstName ||
             lastName.value !== initialValues.lastName ||
+            language.value !== initialValues.language ||
             getsNotificationEmails.checked !== initialValues.getsNotificationEmails ||
             (currentPassword.value && newPassword.value && confirmNewPassword.value);
 

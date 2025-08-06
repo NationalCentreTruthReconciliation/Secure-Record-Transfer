@@ -47,6 +47,20 @@
                        value="{{ user.username }}"
                        id="id_username">
             </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-sm md:text-md">{% trans form.language.label %}</legend>
+                <select name="{{ form.language.name }}"
+                        id="{{ form.language.id_for_label }}"
+                        class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
+                        required>
+                    {% for value, display in form.language.field.choices %}
+                        <option value="{{ value }}" {% if form.language.value == value %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.language.errors %}
+                    <p class="text-error text-xs md:text-sm">{% trans form.language.errors.0 %}</p>
+                {% endif %}
+            </fieldset>
             <fieldset class="fieldset w-full">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans "Notification options" %}</legend>
                 <label class="label pb-2 cursor-pointer"
