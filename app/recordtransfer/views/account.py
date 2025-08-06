@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from django.utils.translation import gettext, ngettext
+from django.utils.translation import get_language, gettext, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
@@ -47,6 +47,7 @@ class CreateAccount(FormView):
         new_user = form.save(commit=False)
         new_user.is_active = False
         new_user.gets_submission_email_updates = False
+        new_user.language = getattr(self.request, "LANGUAGE_CODE", get_language())
         new_user.save()
         send_user_activation_email.delay(new_user)
         if self.request.htmx:
