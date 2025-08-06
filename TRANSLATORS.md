@@ -1,4 +1,4 @@
-# TRANSLATORS.md
+# For Translators
 
 Welcome! This guide is for anyone helping translate this project into other languages.
 
@@ -93,7 +93,7 @@ You don’t need to worry about the setup — just translate the `djangojs.po` f
 ### Behind the scenes:
 - `JavaScriptCatalog.as_view()` is set up in `urls.py`
 - `{% javascript_catalog %}` is included in templates to load translations
-- Strings in JS files are marked using `gettext()` or `_()`
+- Strings in JS files are marked as translatable using `window.django.gettext()`
 
 ---
 
@@ -101,11 +101,13 @@ You don’t need to worry about the setup — just translate the `djangojs.po` f
 
 Here's the step-by-step process for translating:
 
-1. **Extract new strings**: `python manage.py makemessages -l hi`
-2. **Edit the `.po` file** with your translations (using Poedit or text editor)
-3. **Compile translations**: `python manage.py compilemessages`
-4. **Test your changes** by switching language in the app
-5. **Submit your translation updates** via pull request
+1. **Fork this repository** to your own GitHub account
+2. **Make a new branch** for your translations
+3. **Extract new strings**: `python manage.py makemessages -l hi`
+4. **Edit the `.po` file** with your translations (using Poedit or text editor)
+5. **Compile translations**: `python manage.py compilemessages`
+6. **Test your changes** by switching language in the app
+7. **Submit your translation updates** via pull request
 
 ---
 
@@ -129,6 +131,7 @@ If translations don't appear:
 3. If restart doesn't work, rebuild the container: `docker compose -f compose.dev.yml up -d --build app`
 4. Clear your browser cache
 5. Verify the `.mo` files were created in the locale directory
+6. Try changing the code to use `gettext_lazy` instead of `gettext`
 
 ---
 
