@@ -125,9 +125,10 @@ After compiling your translations, you'll want to verify they work correctly:
 ### Troubleshooting
 If translations don't appear:
 1. Check you ran `compilemessages` after editing `.po` files
-2. Restart the development server: `python manage.py runserver`
-3. Clear your browser cache
-4. Verify the `.mo` files were created in the locale directory
+2. Restart the development server: `docker compose -f compose.dev.yml restart app`
+3. If restart doesn't work, rebuild the container: `docker compose -f compose.dev.yml up -d --build app`
+4. Clear your browser cache
+5. Verify the `.mo` files were created in the locale directory
 
 ---
 
