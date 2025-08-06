@@ -97,6 +97,64 @@ You don’t need to worry about the setup — just translate the `djangojs.po` f
 
 ---
 
+## Complete Translation Workflow
+
+Here's the step-by-step process for translating:
+
+1. **Extract new strings**: `python manage.py makemessages -l hi`
+2. **Edit the `.po` file** with your translations (using Poedit or text editor)
+3. **Compile translations**: `python manage.py compilemessages`
+4. **Test your changes** by switching language in the app
+5. **Submit your translation updates** via pull request or issue
+
+---
+
+## Testing Your Translations
+
+After compiling your translations, you'll want to verify they work correctly:
+
+### Switching Languages
+- Look for a language selector in the app interface located in the header of the website
+
+### Verification Checklist
+- [ ] Text appears in your target language
+- [ ] Placeholders are filled with actual values
+- [ ] Text fits properly in the UI (not cut off)
+- [ ] Special characters display correctly
+- [ ] Pluralization works for different counts
+
+### Troubleshooting
+If translations don't appear:
+1. Check you ran `compilemessages` after editing `.po` files
+2. Restart the development server
+3. Clear your browser cache
+4. Verify the `.mo` files were created in the locale directory
+
+---
+
+## Understanding Placeholders
+
+Placeholders are variables that get filled with actual data. **Never translate the placeholder names**, only the surrounding text.
+
+### Common Placeholder Types:
+
+```po
+# Named placeholders (recommended style)
+msgid "File %(filename)s is too large (%(size)s MB)"
+msgstr "फ़ाइल %(filename)s बहुत बड़ी है (%(size)s MB)"
+
+# Simple placeholders
+msgid "Welcome, %s!"
+msgstr "स्वागत है, %s!"
+```
+
+### Key Rules:
+- **Keep placeholder names exactly the same**: `%(filename)s` stays `%(filename)s`
+- **You can reorder them** for your language's grammar: `"%(count)d files by %(user)s"` → `"%(user)s द्वारा %(count)d फ़ाइलें"`
+- **Don't change the format specifiers**: `%s`, `%d`, `.2f` must stay exactly as written
+
+---
+
 ## Translating Strings
 
 You can edit `.po` files manually, or use a GUI editor like:
