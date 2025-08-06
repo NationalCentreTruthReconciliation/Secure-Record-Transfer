@@ -48,9 +48,10 @@ class User(AbstractUser):
     gets_notification_emails = models.BooleanField(default=True)
     language = models.CharField(
         max_length=7,
+        blank=True,
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE,
-        help_text=_("Preferred language"),
+        help_text=_("Preferred language for the website and email notifications"),
         verbose_name=_("Preferred Language"),
     )
 
