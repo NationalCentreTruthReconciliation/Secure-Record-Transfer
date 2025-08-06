@@ -2,7 +2,6 @@ import re
 from typing import Any, ClassVar, Optional
 
 from django import forms
-from django.conf import settings
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
 from django.core.exceptions import ValidationError
@@ -217,6 +216,7 @@ class UserAccountInfoForm(forms.ModelForm):
             user.save()
         return user
 
+
 class AsyncPasswordResetForm(PasswordResetForm):
     """Form for resetting a user's password."""
 
@@ -262,19 +262,3 @@ class UserContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
         """Clean form data."""
         super().clean()
         return self.clean_address_fields()
-
-class UserLanguageForm(forms.ModelForm):
-    """Form for updating a user's language preference."""
-
-    class Meta:
-        """Meta class for UserLanguageForm."""
-
-        model = User
-        fields = ("language",)
-
-    language = forms.ChoiceField(
-        choices=settings.LANGUAGES,
-        widget=forms.Select(attrs={"id": HtmlIds.ID_LANGUAGE}),
-        label=_("Preferred Language"),
-        required=True,
-    )
