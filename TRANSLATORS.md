@@ -166,15 +166,6 @@ Make sure to save your changes and recompile (`compilemessages`) after editing.
 
 ---
 
-## Tips for Translators
-
-- Be consistent with terminology
-- Preserve placeholders like `{count}`, `{size}`, or `%s`
-- Use the context (`msgctxt`) if provided
-- Don’t translate code, only the user-facing text
-
----
-
 ## Need Help?
 
 If you're unsure about a string or how to test your translations:
