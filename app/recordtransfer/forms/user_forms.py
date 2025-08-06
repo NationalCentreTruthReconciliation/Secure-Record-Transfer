@@ -220,7 +220,7 @@ class UserAccountInfoForm(forms.ModelForm):
 class AsyncPasswordResetForm(PasswordResetForm):
     """Form for resetting a user's password."""
 
-    def send_mail(  # noqa: D417
+    def send_mail(
         self,
         subject_template_name: str,
         email_template_name: str,
@@ -229,14 +229,9 @@ class AsyncPasswordResetForm(PasswordResetForm):
         to_email: str,
         html_email_template_name: Optional[str] = None,
     ) -> None:
-        """Override parent method to send password reset email asynchronously using django_rq.
-
-        Args:
-            to_email: Recipient email address
-        """
+        """Override parent method to send password reset email asynchronously using django_rq."""
         send_password_reset_email.delay(
             context=context,
-            to_email=to_email,
         )
 
 
