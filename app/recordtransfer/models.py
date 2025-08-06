@@ -43,8 +43,18 @@ NOT_CACHED = object()
 class User(AbstractUser):
     """The main User object used to authenticate users."""
 
+    # User preferences
     gets_submission_email_updates = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
+    language = models.CharField(
+        max_length=7,
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE,
+        help_text=_("Preferred language"),
+        verbose_name=_("Preferred Language"),
+    )
+
+    # Contact information
     phone_number = models.CharField(
         max_length=20,
         blank=False,
