@@ -105,7 +105,7 @@ Here's the step-by-step process for translating:
 2. **Edit the `.po` file** with your translations (using Poedit or text editor)
 3. **Compile translations**: `python manage.py compilemessages`
 4. **Test your changes** by switching language in the app
-5. **Submit your translation updates** via pull request or issue
+5. **Submit your translation updates** via pull request
 
 ---
 
