@@ -15,8 +15,7 @@
                        class="input input-bordered input-sm md:input-md validator w-full bg-gray-50 text-gray-600"
                        name="{{ form.first_name.name }}"
                        id="{{ form.first_name.id_for_label }}"
-                       value="{{ form.first_name.value }}"
-                       required>
+                       value="{{ form.first_name.value }}">
                 {% if form.first_name.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
                 {% endif %}
@@ -27,8 +26,7 @@
                        class="input input-bordered input-sm md:input-md validator w-full bg-gray-50 text-gray-600"
                        name="{{ form.last_name.name }}"
                        id="{{ form.last_name.id_for_label }}"
-                       value="{{ form.last_name.value }}"
-                       required>
+                       value="{{ form.last_name.value }}">
                 {% if form.last_name.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
                 {% endif %}
@@ -54,7 +52,8 @@
                         class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
                         required>
                     {% for value, display in form.language.field.choices %}
-                        <option value="{{ value }}" {% if form.language.value == value %}selected{% endif %}>{{ display }}</option>
+                        <option value="{{ value }}"
+                                {% if form.language.value == value %}selected{% endif %}>{{ display }}</option>
                     {% endfor %}
                 </select>
                 {% if form.language.errors %}
