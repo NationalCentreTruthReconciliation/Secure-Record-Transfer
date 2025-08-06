@@ -167,10 +167,21 @@ export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize, totalCount,
     const totalCountElement = document.getElementById("files-count");
     const remainingCountElement = document.getElementById("remaining-files");
 
-    const updateElement = (element, value, isError, isInteger = false) => {
+    const updateElement = (
+        element,
+        value,
+        isError,
+        isInteger = false,
+        isRemainingField = false
+    ) => {
         if (element) {
+            const isAtLimit = isRemainingField && value === 0;
             element.innerHTML = isInteger ? value.toString() : value.toFixed(2);
             element.classList.toggle("field-error", isError);
+
+            // Add special styling when remaining value reaches 0 (limit reached)
+            element.classList.toggle("text-red-600", isAtLimit);
+            element.classList.toggle("font-bold", isAtLimit);
         }
     };
 
@@ -180,9 +191,15 @@ export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize, totalCount,
     const remainingFiles = maxCount - totalCount;
 
     updateElement(totalSizeElement, totalMB, totalSizeBytes > maxTotalUploadSizeBytes);
-    updateElement(remainingSizeElement, Math.max(remainingMB, 0), remainingMB < 0);
+    updateElement(remainingSizeElement, Math.max(remainingMB, 0), remainingMB < 0, false, true);
 
     updateElement(totalCountElement, totalCount, totalCount > maxCount, true);
-    updateElement(remainingCountElement, Math.max(remainingFiles, 0), remainingFiles < 0, true);
+    updateElement(
+        remainingCountElement,
+        Math.max(remainingFiles, 0),
+        remainingFiles < 0,
+        true,
+        true
+    );
 
 };
