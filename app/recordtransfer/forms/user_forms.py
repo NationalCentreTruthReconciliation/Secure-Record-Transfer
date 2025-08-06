@@ -81,9 +81,8 @@ class UserAccountInfoForm(forms.ModelForm):
         regex=NAME_PATTERN,
         widget=forms.TextInput(attrs={"id": HtmlIds.ID_FIRST_NAME}),
         label=_("First Name"),
-        required=True,
+        required=False,
         error_messages={
-            "required": _("First name is required."),
             "invalid": _(NAME_VALIDATION_MESSAGE),
         },
     )
@@ -91,9 +90,8 @@ class UserAccountInfoForm(forms.ModelForm):
         regex=NAME_PATTERN,
         widget=forms.TextInput(attrs={"id": HtmlIds.ID_LAST_NAME}),
         label=_("Last Name"),
-        required=True,
+        required=False,
         error_messages={
-            "required": _("Last name is required."),
             "invalid": _(NAME_VALIDATION_MESSAGE),
         },
     )
