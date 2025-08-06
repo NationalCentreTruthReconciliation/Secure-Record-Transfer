@@ -125,7 +125,7 @@ After compiling your translations, you'll want to verify they work correctly:
 ### Troubleshooting
 If translations don't appear:
 1. Check you ran `compilemessages` after editing `.po` files
-2. Restart the development server
+2. Restart the development server: `python manage.py runserver`
 3. Clear your browser cache
 4. Verify the `.mo` files were created in the locale directory
 
