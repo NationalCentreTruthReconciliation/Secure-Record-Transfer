@@ -19,5 +19,13 @@
         <div class="tab-content bg-base-100 border-base-300 p-10">
             {% include "includes/contact_info_form.html" with form=contact_info_form %}
         </div>
+        <input id="id_language_tab"
+            type="radio"
+            name="profile_tabs"
+            class="tab"
+            aria-label="{% trans "Language" %}" />
+        <div class="tab-content bg-base-100 border-base-300 p-10">
+            {% include "includes/language_form.html" with form=language_form %}
+        </div>
     </div>
 </div>

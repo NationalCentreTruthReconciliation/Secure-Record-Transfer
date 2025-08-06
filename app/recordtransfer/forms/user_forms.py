@@ -100,12 +100,6 @@ class UserAccountInfoForm(forms.ModelForm):
         label=_("Receive notification emails?"),
         required=False,
     )
-    language = forms.ChoiceField(
-        choices=settings.LANGUAGES,
-        widget=forms.Select(attrs={"id": HtmlIds.ID_LANGUAGE}),
-        label=_("Preferred Language"),
-        required=True,
-    )
     current_password = forms.CharField(
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CURRENT_PASSWORD}),
         label=_("Current Password"),
@@ -268,3 +262,19 @@ class UserContactInfoForm(ContactInfoFormMixin, forms.ModelForm):
         """Clean form data."""
         super().clean()
         return self.clean_address_fields()
+
+class UserLanguageForm(forms.ModelForm):
+    """Form for updating a user's language preference."""
+
+    class Meta:
+        """Meta class for UserLanguageForm."""
+
+        model = User
+        fields = ("language",)
+
+    language = forms.ChoiceField(
+        choices=settings.LANGUAGES,
+        widget=forms.Select(attrs={"id": HtmlIds.ID_LANGUAGE}),
+        label=_("Preferred Language"),
+        required=True,
+    )
