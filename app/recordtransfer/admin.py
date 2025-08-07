@@ -782,7 +782,10 @@ class CustomUserAdmin(UserAdmin):
             return
         if obj.gets_submission_email_updates and not obj.is_staff:
             messages.set_level(request, messages.ERROR)
-            msg = "Email updates can only be enabled for staff users."
+            msg = (
+                "Email updates can only be enabled for staff users. "
+                "Email updates have been reset to 'No'."
+            )
             self.message_user(request, msg, messages.ERROR)
             obj.gets_submission_email_updates = False
 
