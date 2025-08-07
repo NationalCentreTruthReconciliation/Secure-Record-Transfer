@@ -18,14 +18,15 @@
         {% endblocktrans %}
     </p>
     <div class="main-content">
-        <a href="{% url "recordtransfer:user_profile" %}#id_past_submissions_tab"
+        {% url 'recordtransfer:user_profile' as user_profile_url %}
+        <a href="https://{{ site_domain }}{{ user_profile_url }}#id_past_submissions_tab"
            class="email-btn">{% blocktrans %}View Your Past Submissions{% endblocktrans %}</a>
     </div>
     <p class="fallback-link">
         {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
         <br>
-        <a href="{% url "recordtransfer:user_profile" %}#id_past_submissions_tab"
-           class="fallback-link-url">{% url "recordtransfer:user_profile#id_past_submissions_tab" %}</a>
+        <a href="https://{{ site_domain }}{{ user_profile_url }}#id_past_submissions_tab"
+           class="fallback-link-url">https://{{ site_domain }}{{ user_profile_url }}#id_past_submissions_tab</a>
     </p>
     <div class="email-note">
         <h3 style="font-size: 9pt;
