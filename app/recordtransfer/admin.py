@@ -789,13 +789,15 @@ class CustomUserAdmin(UserAdmin):
             self.message_user(request, msg, messages.ERROR)
             obj.gets_submission_email_updates = False
 
+        # Get the original state before saving, to compare after save
+        original = User.objects.get(pk=obj.pk) if change else None
         super().save_model(request, obj, form, change)
         if change and (
-            not obj.is_active
+            (original and original.is_active != obj.is_active)
             or "is_superuser" in form.changed_data
             or "is_staff" in form.changed_data
         ):
-            if not obj.is_active:
+            if original and original.is_active and not obj.is_active:
                 context = {
                     "subject": gettext("Account Deactivated"),
                     "changed_item": gettext("account"),
