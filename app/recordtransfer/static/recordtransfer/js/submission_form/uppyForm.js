@@ -33,7 +33,12 @@ export async function setupUppy(context) {
     const updateCapacity = (uppy) => {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
-        updateCapacityDisplay(totalSize, context["MAX_TOTAL_UPLOAD_SIZE_MB"]);
+        updateCapacityDisplay(
+            totalSize,
+            context["MAX_TOTAL_UPLOAD_SIZE_MB"],
+            uppyFiles.length,
+            context["MAX_TOTAL_UPLOAD_COUNT"]
+        );
     };
 
     const uppy = new Uppy(
