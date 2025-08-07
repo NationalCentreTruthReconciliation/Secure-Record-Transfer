@@ -779,6 +779,11 @@ class CustomUserAdmin(UserAdmin):
             messages.set_level(request, messages.ERROR)
             msg = "Non-superusers cannot modify superuser accounts."
             self.message_user(request, msg, messages.ERROR)
+        elif obj.gets_submission_email_updates and not obj.is_staff:
+            messages.set_level(request, messages.ERROR)
+            msg = "Email updates can only be enabled for staff users."
+            self.message_user(request, msg, messages.ERROR)
+            return
         else:
             super().save_model(request, obj, form, change)
             if change and (
