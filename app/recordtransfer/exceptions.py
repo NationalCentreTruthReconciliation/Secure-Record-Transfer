@@ -1,4 +1,5 @@
-''' App-wide exceptions '''
+"""App-wide exceptions."""
+
 
 class FolderNotFoundError(Exception):
-    ''' A folder could not be found or does not exist '''
+    """A folder could not be found or does not exist."""

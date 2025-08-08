@@ -1,5 +1,6 @@
 import csv
 from io import StringIO
+from typing import Optional
 
 from caais.export import ExportVersion
 from django.apps import apps
@@ -14,13 +15,17 @@ class SubmissionQuerySet(query.QuerySet):
     """Adds the ability to export a queryset as a CSV."""
 
     def export_csv(
-        self, version: ExportVersion = ExportVersion.CAAIS_1_0, filename_prefix=None
+        self,
+        version: ExportVersion = ExportVersion.CAAIS_1_0,
+        filename_prefix: Optional[str] = None,
     ) -> HttpResponse:
         """Create an HttpResponse that contains a CSV representation of all submissions in the
         queryset.
 
         Args:
             version (ExportVersion): The type/version of the CSV to export
+            filename_prefix (str, optional): Prefix for the generated CSV filename.
+                If not provided, a default is used.
         """
         csv_file = StringIO()
         writer = csv.writer(csv_file)
