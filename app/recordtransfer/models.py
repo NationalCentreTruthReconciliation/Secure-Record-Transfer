@@ -22,8 +22,10 @@ from django.forms import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.utils.formats import date_format
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from recordtransfer.enums import SiteSettingKey, SiteSettingType, SubmissionStep
 from recordtransfer.managers import (
@@ -864,7 +866,27 @@ class UploadSession(models.Model):
 
     def __str__(self):
         """Return a string representation of this object."""
-        return f"{self.token} ({self.started_at}) | {self.status}"
+        token_substr = self.token[0:8] + "..." if len(self.token) > 8 else self.token
+
+        try:
+            file_count = self.file_count
+
+            return ngettext(
+                "Session %(token)s (%(count)s file, started: %(date)s)",
+                "Session %(token)s (%(count)s files, started: %(date)s)",
+                file_count,
+            ) % {
+                "token": token_substr,
+                "count": file_count,
+                "date": date_format(self.started_at, format="DATETIME_FORMAT", use_l10n=True),
+            }
+
+        except ValueError:
+            # An exception may be thrown if the session is in an in-between state
+            return _("%(token)s (started at %(date)s)") % {
+                "token": token_substr,
+                "date": self.started_at,
+            }
 
 
 def session_upload_location(instance: TempUploadedFile, filename: str) -> str:
@@ -932,8 +954,11 @@ class BaseUploadedFile(models.Model):
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
-            return f"{self.name} | Session {self.session}"
-        return f"{self.name} Removed! | Session {self.session}"
+            return f"{self.name} | {self.session}"
+        return _("%(name)s Removed! | %(session)s") % {
+            "name": self.name,
+            "session": str(self.session),
+        }
 
 
 class TempUploadedFile(BaseUploadedFile):
