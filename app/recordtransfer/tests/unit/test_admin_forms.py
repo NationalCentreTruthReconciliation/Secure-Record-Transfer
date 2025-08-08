@@ -383,3 +383,18 @@ class TestUserAdminForm(TestCase):
         form_data["other_province_or_state"] = "Custom Province"
         form = UserAdminForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
+
+    def test_gets_submission_email_updates_requires_is_staff(self) -> None:
+        """Test that gets_submission_email_updates can only be True if is_staff is True."""
+        self.user.is_staff = True
+        self.user.save()
+        form_data = {
+            "username": "testuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "test@example.com",
+            "is_staff": True,
+            "gets_submission_email_updates": True,
+        }
+        form = UserAdminForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
