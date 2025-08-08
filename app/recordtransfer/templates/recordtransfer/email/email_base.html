@@ -171,7 +171,7 @@
                                 <p>NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8</p>
                                 <p>
                                     {% blocktrans %}Don't like these emails?{% endblocktrans %}
-                                    <a href="http://{{ site_domain }}{% url 'recordtransfer:user_profile' %}"
+                                    <a href="{{ base_url }}{% url 'recordtransfer:user_profile' %}"
                                        class="footer-link">{% blocktrans %}Unsubscribe in your profile{% endblocktrans %}</a>
                                 </p>
                                 <table role="presentation"
