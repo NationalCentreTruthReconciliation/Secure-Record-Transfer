@@ -3,6 +3,7 @@
 import logging
 import re
 import smtplib
+from collections import defaultdict
 from typing import List, Optional
 
 import django_rq
@@ -12,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.models import InProgressSubmission, SiteSetting, Submission, User
@@ -50,8 +52,6 @@ def send_submission_creation_success(
         language: Optional language code to use for rendering the email. Only used when
             `recipient_emails` is provided.
     """
-    subject = "New Submission Ready for Review"
-
     domain = Site.objects.get_current().domain
     submission_url = "http://{domain}/{change_url}".format(
         domain=domain.rstrip(" /"), change_url=submission.get_admin_change_url().lstrip(" /")
@@ -78,15 +78,13 @@ def send_submission_creation_success(
         )
 
     if not recipients:
-        LOGGER.warning(
-            "No recipients found for submission creation success email. Skipping send."
-        )
+        LOGGER.warning("No recipients found for submission creation success email. Skipping send.")
         return
 
     _send_mail_by_language_groups(
         recipients=recipients,
         from_email=_get_do_not_reply_email_address(),
-        subject=subject,
+        subject=_("New Submission Ready for Review"),
         template_name="recordtransfer/email/submission_submit_success.html",
         context={
             "username": user_submitted.username,
@@ -118,8 +116,6 @@ def send_submission_creation_failure(
         language: Optional language code to use for rendering the email. Only used when
             `recipient_emails` is provided.
     """
-    subject = "Submission Failed"
-
     # Send to admin recipients grouped by language or use provided recipients with language
     if recipient_emails:
         # For testing or custom recipients, use the specified language or default
@@ -132,15 +128,13 @@ def send_submission_creation_failure(
         )
 
     if not recipients:
-        LOGGER.warning(
-            "No recipients found for submission creation failure email. Skipping send."
-        )
+        LOGGER.warning("No recipients found for submission creation failure email. Skipping send.")
         return
 
     _send_mail_by_language_groups(
         recipients=recipients,
         from_email=_get_do_not_reply_email_address(),
-        subject=subject,
+        subject=_("Submission Failed"),
         template_name="recordtransfer/email/submission_submit_failure.html",
         context={
             "username": user_submitted.username,
@@ -172,7 +166,7 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission) 
         _send_mail(
             recipient=user_submitted.email,
             from_email=_get_do_not_reply_email_address(),
-            subject="Thank You For Your Submission",
+            subject=_("Thank You For Your Submission"),
             template_name="recordtransfer/email/submission_success.html",
             context={
                 "archivist_email": SiteSetting.get_value_str(SiteSettingKey.ARCHIVIST_EMAIL),
@@ -194,7 +188,7 @@ def send_your_submission_did_not_go_through(form_data: dict, user_submitted: Use
         _send_mail(
             recipient=user_submitted.email,
             from_email=_get_do_not_reply_email_address(),
-            subject="Issue With Your Submission",
+            subject=_("Issue With Your Submission"),
             template_name="recordtransfer/email/submission_failure.html",
             context={
                 "username": user_submitted.username,
@@ -220,7 +214,7 @@ def send_user_activation_email(new_user: User) -> None:
     _send_mail(
         recipient=new_user.email,
         from_email=_get_do_not_reply_email_address(),
-        subject="Activate Your Account",
+        subject=_("Activate Your Account"),
         template_name="recordtransfer/email/activate_account.html",
         context={
             "username": new_user.username,
@@ -260,7 +254,7 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
     _send_mail(
         recipient=in_progress.user.email,
         from_email=_get_do_not_reply_email_address(),
-        subject="Your In-Progress Submission is Expiring Soon",
+        subject=_("Your In-Progress Submission is Expiring Soon"),
         template_name="recordtransfer/email/in_progress_submission_expiring.html",
         context={
             "username": in_progress.user.username,
@@ -287,7 +281,6 @@ def send_password_reset_email(
             - email: The recipient's email address
             - user: The User object for the recipient
     """
-    subject = "Password Reset on NCTR Record Transfer Portal"
     to_email = context.get("email")
 
     if not to_email:
@@ -297,7 +290,7 @@ def send_password_reset_email(
     _send_mail(
         recipient=to_email,
         from_email=_get_do_not_reply_email_address(),
-        subject=subject,
+        subject=_("Password Reset on NCTR Record Transfer Portal"),
         template_name="registration/password_reset_email.html",
         context=context,
     )
