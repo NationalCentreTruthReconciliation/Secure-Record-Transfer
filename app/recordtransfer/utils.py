@@ -52,7 +52,7 @@ def html_to_text(html: str) -> str:
     return "\n".join(plain_text_split)
 
 
-def get_human_readable_size(size_bytes: float, base: int = 1024, precision: int = 2) -> str:
+def get_human_readable_size(size_bytes: int, base: int = 1024, precision: int = 2) -> str:
     """Convert bytes into a human-readable size.
 
     Args:
@@ -77,13 +77,13 @@ def get_human_readable_size(size_bytes: float, base: int = 1024, precision: int 
     if size_bytes < base:
         return "%d %s" % (size_bytes, suffixes[base][0])
 
-    suffix = suffixes[base][0]
-    for _suffix in suffixes[base]:
-        if size_bytes < base:
-            break
+    suffix_list = suffixes[base]
+    idx = 0
+    while size_bytes >= base and idx < len(suffix_list) - 1:
         size_bytes /= float(base)
+        idx += 1
 
-    return "%.*f %s" % (precision, size_bytes, suffix)
+    return "%.*f %s" % (precision, size_bytes, suffix_list[idx])
 
 
 def get_human_readable_file_count(file_names: list, accepted_file_groups: dict) -> str:
@@ -123,6 +123,34 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict) 
     return string_statement
 
 
+def _count_extensions(file_names: list) -> dict:
+    """Count file extensions in a list of file names."""
+    counted_extensions = {}
+    for name in file_names:
+        split_name = name.split(".")
+        if len(split_name) == 1:
+            LOGGER.warning("Could not identify file type for file name: %s", name)
+            continue
+        extension_name = split_name[-1].lower()
+        counted_extensions[extension_name] = counted_extensions.get(extension_name, 0) + 1
+    return counted_extensions
+
+
+def _group_extensions(counted_extensions: dict, accepted_file_groups: dict) -> dict:
+    """Group counted extensions by accepted file groups."""
+    counted_extensions_per_group = {}
+    remaining_extensions = counted_extensions.copy()
+    for file_group_name, extensions_for_file_group in accepted_file_groups.items():
+        for extension in extensions_for_file_group:
+            if extension in remaining_extensions:
+                counted_extensions_per_group[file_group_name] = (
+                    counted_extensions_per_group.get(file_group_name, 0)
+                    + remaining_extensions[extension]
+                )
+                del remaining_extensions[extension]
+    return counted_extensions_per_group
+
+
 def count_file_types(file_names: list, accepted_file_groups: dict) -> dict:
     """Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
@@ -138,35 +166,10 @@ def count_file_types(file_names: list, accepted_file_groups: dict) -> dict:
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
     """
-    counted_extensions = {}
-
-    # Tabulate number of times each extension each appears
-    for name in file_names:
-        split_name = name.split(".")
-        if len(split_name) == 1:
-            LOGGER.warning("Could not identify file type for file name: %s", name)
-            continue
-        extension_name = split_name[-1].lower()
-        counted_extensions[extension_name] = counted_extensions.get(extension_name, 0) + 1
-
+    counted_extensions = _count_extensions(file_names)
     if not counted_extensions:
         return {}
-
-    # Build a reverse mapping from extension to group
-    extension_to_group = {}
-    for group, extensions in accepted_file_groups.items():
-        for ext in extensions:
-            extension_to_group[ext] = group
-
-    counted_extensions_per_group = {}
-    for ext, count in counted_extensions.items():
-        group = extension_to_group.get(ext)
-        if group:
-            counted_extensions_per_group[group] = (
-                counted_extensions_per_group.get(group, 0) + count
-            )
-
-    return counted_extensions_per_group
+    return _group_extensions(counted_extensions, accepted_file_groups)
 
 
 def mb_to_bytes(m: int) -> int:
@@ -259,8 +262,6 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
                 filename, size
             ),
         }
-
-    # Check file has some contents (i.e., non-zero size)
     if size == 0:
         return {
             "accepted": False,

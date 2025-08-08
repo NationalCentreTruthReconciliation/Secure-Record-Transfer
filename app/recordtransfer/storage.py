@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from django.conf import settings
 from django.core.files.base import File
@@ -17,7 +18,7 @@ class OverwriteStorage(FileSystemStorage):
         self.delete(name)
         return super()._save(name, content)
 
-    def get_available_name(self, name: str, max_length: int | None = None) -> str:
+    def get_available_name(self, name: str, max_length: Optional[int] = None) -> str:
         """Return the provided file name as the available name,
         allowing overwriting of existing files.
         """
