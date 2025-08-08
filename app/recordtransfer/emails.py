@@ -313,11 +313,9 @@ def _get_emails_grouped_by_lang(users: list[User]) -> dict[str, List[str]]:
     Returns:
         A dictionary with language codes as keys and lists of email addresses as values.
     """
-    language_groups = {}
+    language_groups = defaultdict(list)
     for user in users:
         lang_key = user.language or translation.get_language()
-        if lang_key not in language_groups:
-            language_groups[lang_key] = []
         language_groups[lang_key].append(user.email)
     return language_groups
 
