@@ -69,12 +69,11 @@ class CreateAccount(FormView):
         return super().form_invalid(form)
 
 
-def _set_language_cookie(response: HttpResponse, user: Any) -> HttpResponse:
+def _set_language_cookie(response: HttpResponse, lang_code: str) -> HttpResponse:
     """Set the language cookie on the response based on user's preference."""
-    user = cast(User, user)
     response.set_cookie(
-        settings.LANGUAGE_COOKIE_NAME,
-        user.language,
+        key=settings.LANGUAGE_COOKIE_NAME,
+        value=lang_code,
         max_age=settings.LANGUAGE_COOKIE_AGE,
         path=settings.LANGUAGE_COOKIE_PATH,
         domain=settings.LANGUAGE_COOKIE_DOMAIN,
@@ -83,6 +82,7 @@ def _set_language_cookie(response: HttpResponse, user: Any) -> HttpResponse:
         samesite=settings.LANGUAGE_COOKIE_SAMESITE,
     )
     return response
+
 
 class ActivateAccount(View):
     """View for activating user accounts via email link."""
@@ -104,7 +104,9 @@ class ActivateAccount(View):
                 user.is_active = True
                 user.save()
                 login(request, user, backend="axes.backends.AxesBackend")
-                return _set_language_cookie(redirect("recordtransfer:account_created"), user)
+                return _set_language_cookie(
+                    redirect("recordtransfer:account_created"), user.language
+                )
             else:
                 return redirect("recordtransfer:activation_invalid")
 
@@ -140,12 +142,12 @@ class Login(LoginView):
     def form_valid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle successful login."""
         response = super().form_valid(form)
-        user = form.get_user()
+        user = cast(User, form.get_user())
 
         if self.request.htmx:
             htmx_response = HttpResponseClientRedirect(self.get_success_url())
-            return _set_language_cookie(htmx_response, user)
-        return _set_language_cookie(response, user)
+            return _set_language_cookie(htmx_response, user.language)
+        return _set_language_cookie(response, user.language)
 
     def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle invalid login form submissions."""
