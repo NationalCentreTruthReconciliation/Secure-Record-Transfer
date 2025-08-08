@@ -61,7 +61,9 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
         self.assertIsNotNone(language_cookie)
 
     def test_user_preferred_language_used_after_login(self) -> None:
-        """When a user logs in, their preferred language is set as the cookie."""
+        """When a user logs in, their preferred language saved to their profile is set as the
+        cookie, regardless of the language set in the navbar while logged out.
+        """
         driver = self.driver
         driver.get(self.live_server_url)
 
