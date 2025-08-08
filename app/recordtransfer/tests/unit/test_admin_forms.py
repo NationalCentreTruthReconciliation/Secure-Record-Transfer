@@ -400,7 +400,7 @@ class TestUserAdminForm(TestCase):
         self.assertTrue(form.is_valid())
         self.assertNotIn("gets_submission_email_updates", form.errors)
 
-    def test_gets_submission_email_updates_requires_is_not_staff(self) -> None:
+    def test_cannot_set_submission_email_updates_when_not_staff(self) -> None:
         """Test that gets_submission_email_updates can be True only if is_staff is True."""
         self.user.is_staff = False
         self.user.save()
