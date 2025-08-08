@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger("recordtransfer")
 
 
-def zip_directory(directory: str, zipf: ZipFile):
+def zip_directory(directory: str, zipf: ZipFile) -> None:
     """Zip a directory structure into a zip file.
 
     Args:
@@ -39,18 +39,20 @@ def zip_directory(directory: str, zipf: ZipFile):
                 zipf.write(filename, arcname)
 
 
-def snake_to_camel_case(string: str):
+def snake_to_camel_case(string: str) -> str:
+    """Convert a snake_case string to camelCase."""
     string_split = string.split("_")
     return string_split[0] + "".join([x.capitalize() for x in string_split[1:]])
 
 
-def html_to_text(html: str):
+def html_to_text(html: str) -> str:
+    """Convert HTML content to plain text by stripping tags and whitespace."""
     no_tags_split = strip_tags(html).split("\n")
     plain_text_split = filter(None, map(str.strip, no_tags_split))
     return "\n".join(plain_text_split)
 
 
-def get_human_readable_size(size_bytes: int, base=1024, precision=2):
+def get_human_readable_size(size_bytes: float, base: int = 1024, precision: int = 2) -> str:
     """Convert bytes into a human-readable size.
 
     Args:
@@ -76,15 +78,15 @@ def get_human_readable_size(size_bytes: int, base=1024, precision=2):
         return "%d %s" % (size_bytes, suffixes[base][0])
 
     suffix = suffixes[base][0]
-    for suffix in suffixes[base]:
-        if round(size_bytes) < base:
+    for _suffix in suffixes[base]:
+        if size_bytes < base:
             break
         size_bytes /= float(base)
 
     return "%.*f %s" % (precision, size_bytes, suffix)
 
 
-def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
+def get_human_readable_file_count(file_names: list, accepted_file_groups: dict) -> str:
     """Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
     English) the number of files in each group.
 
@@ -96,7 +98,6 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     Returns:
         (str): A string reporting the number of files in each group.
     """
-
     counted_types = count_file_types(file_names, accepted_file_groups)
     if not counted_types:
         return "No file types could be identified"
@@ -122,7 +123,7 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict):
     return string_statement
 
 
-def count_file_types(file_names: list, accepted_file_groups: dict):
+def count_file_types(file_names: list, accepted_file_groups: dict) -> dict:
     """Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
@@ -137,7 +138,6 @@ def count_file_types(file_names: list, accepted_file_groups: dict):
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
     """
-
     counted_extensions = {}
 
     # Tabulate number of times each extension each appears
@@ -145,31 +145,26 @@ def count_file_types(file_names: list, accepted_file_groups: dict):
         split_name = name.split(".")
         if len(split_name) == 1:
             LOGGER.warning("Could not identify file type for file name: %s", name)
-        else:
-            extension_name = split_name[-1].lower()
-            if extension_name not in counted_extensions:
-                counted_extensions[extension_name] = 1
-            else:
-                counted_extensions[extension_name] += 1
+            continue
+        extension_name = split_name[-1].lower()
+        counted_extensions[extension_name] = counted_extensions.get(extension_name, 0) + 1
+
+    if not counted_extensions:
+        return {}
+
+    # Build a reverse mapping from extension to group
+    extension_to_group = {}
+    for group, extensions in accepted_file_groups.items():
+        for ext in extensions:
+            extension_to_group[ext] = group
 
     counted_extensions_per_group = {}
-    if not counted_extensions:
-        return counted_extensions_per_group
-
-    # Tabulate number of files in each file type group
-    del_keys = []
-    for file_group_name, extensions_for_file_group in accepted_file_groups.items():
-        for counted_extension_name, num_counted in counted_extensions.items():
-            if counted_extension_name in extensions_for_file_group:
-                if file_group_name not in counted_extensions_per_group:
-                    counted_extensions_per_group[file_group_name] = num_counted
-                else:
-                    counted_extensions_per_group[file_group_name] += num_counted
-                del_keys.append(counted_extension_name)
-        # Remove counted extensions
-        for key in del_keys:
-            del counted_extensions[key]
-        del_keys.clear()
+    for ext, count in counted_extensions.items():
+        group = extension_to_group.get(ext)
+        if group:
+            counted_extensions_per_group[group] = (
+                counted_extensions_per_group.get(group, 0) + count
+            )
 
     return counted_extensions_per_group
 
@@ -232,14 +227,11 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
 
     # Check extension is allowed
     extension = name_split[-1].lower()
-    extension_accepted = False
-    for _, accepted_extensions in settings.ACCEPTED_FILE_FORMATS.items():
-        for accepted_extension in accepted_extensions:
-            if extension == accepted_extension.lower():
-                extension_accepted = True
-                break
-
-    if not extension_accepted:
+    if not any(
+        extension == accepted_extension.lower()
+        for accepted_extensions in settings.ACCEPTED_FILE_FORMATS.values()
+        for accepted_extension in accepted_extensions
+    ):
         return {
             "accepted": False,
             "error": gettext('Files with "{0}" extension are not allowed.').format(extension),
@@ -248,13 +240,18 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
             ),
         }
 
-    # Check filesize is an integer
-    size = filesize
+    # Check filesize is an integer and non-negative
     try:
         size = int(filesize)
-        if size < 0:
-            raise ValueError("File size cannot be negative")
-    except ValueError:
+    except (ValueError, TypeError):
+        return {
+            "accepted": False,
+            "error": gettext("File size is invalid."),
+            "verboseError": gettext('The file "{0}" has an invalid size ({1})').format(
+                filename, filesize
+            ),
+        }
+    if size < 0:
         return {
             "accepted": False,
             "error": gettext("File size is invalid."),
@@ -289,7 +286,7 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
             ).format(filename, size_mb, max_single_size),
         }
 
-    # All checks succeded
+    # All checks succeeded
     return {"accepted": True}
 
 
