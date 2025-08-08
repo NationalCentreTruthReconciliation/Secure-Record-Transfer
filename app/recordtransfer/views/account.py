@@ -1,6 +1,7 @@
 """Views for creating and activating user accounts."""
 
 import logging
+from typing import Any, cast
 
 from django.conf import settings
 from django.contrib.auth import login
@@ -68,6 +69,21 @@ class CreateAccount(FormView):
         return super().form_invalid(form)
 
 
+def _set_language_cookie(response: HttpResponse, user: Any) -> HttpResponse:
+    """Set the language cookie on the response based on user's preference."""
+    user = cast(User, user)
+    response.set_cookie(
+        settings.LANGUAGE_COOKIE_NAME,
+        user.language,
+        max_age=settings.LANGUAGE_COOKIE_AGE,
+        path=settings.LANGUAGE_COOKIE_PATH,
+        domain=settings.LANGUAGE_COOKIE_DOMAIN,
+        secure=settings.LANGUAGE_COOKIE_SECURE,
+        httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+        samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+    )
+    return response
+
 class ActivateAccount(View):
     """View for activating user accounts via email link."""
 
@@ -88,7 +104,7 @@ class ActivateAccount(View):
                 user.is_active = True
                 user.save()
                 login(request, user, backend="axes.backends.AxesBackend")
-                return redirect("recordtransfer:account_created")
+                return _set_language_cookie(redirect("recordtransfer:account_created"), user)
             else:
                 return redirect("recordtransfer:activation_invalid")
 
@@ -123,10 +139,13 @@ class Login(LoginView):
 
     def form_valid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle successful login."""
-        super().form_valid(form)
+        response = super().form_valid(form)
+        user = form.get_user()
+
         if self.request.htmx:
-            return HttpResponseClientRedirect(self.get_success_url())
-        return redirect(self.get_success_url())
+            htmx_response = HttpResponseClientRedirect(self.get_success_url())
+            return _set_language_cookie(htmx_response, user)
+        return _set_language_cookie(response, user)
 
     def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle invalid login form submissions."""

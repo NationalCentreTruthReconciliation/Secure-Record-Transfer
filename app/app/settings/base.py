@@ -51,7 +51,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "recordtransfer.middleware.SaveUserLanguageMiddleware",  # After LocaleMiddleware
-    "recordtransfer.middleware.SetLanguageOnLoginMiddleware",  # After LocaleMiddleware
     "django.middleware.gzip.GZipMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
