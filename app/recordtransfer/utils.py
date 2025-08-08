@@ -1,11 +1,13 @@
 import logging
 import os
-from typing import TYPE_CHECKING, Union
+from collections import defaultdict
+from typing import TYPE_CHECKING, List, Union
 from zipfile import ZipFile
 
 from django.conf import settings
 from django.utils.html import strip_tags
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.exceptions import FolderNotFoundError
 
@@ -87,8 +89,8 @@ def get_human_readable_size(size_bytes: float, base: int = 1024, precision: int 
 
 
 def get_human_readable_file_count(file_names: list, accepted_file_groups: dict) -> str:
-    """Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report (in
-    English) the number of files in each group.
+    """Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report the
+    number of files in each group.
 
     Args:
         file_names (list): A list of file paths or names with extension intact
@@ -100,58 +102,49 @@ def get_human_readable_file_count(file_names: list, accepted_file_groups: dict) 
     """
     counted_types = count_file_types(file_names, accepted_file_groups)
     if not counted_types:
-        return "No file types could be identified"
+        return _("No file types could be identified")
 
     statement = []
     for group, num in counted_types.items():
         if num < 1:
             continue
-        statement.append(f"1 {group} file" if num == 1 else f"{num} {group} files")
+        statement.append(
+            ngettext_lazy(
+                "%(count)s %(file_type)s file",
+                "%(count)s %(file_type)s files",
+                num,
+            )
+            % {
+                "count": num,
+                "file_type": group,
+            }
+        )
 
     if not statement:
-        return "No file types could be identified"
+        return _("No file types could be identified")
 
-    string_statement = ""
     if len(statement) == 1:
-        string_statement = statement[0]
-    elif len(statement) == 2:
-        string_statement = f"{statement[0]} and {statement[1]}"
-    else:
-        all_except_last = statement[0:-1]
-        comma_joined_string = ", ".join(all_except_last)
-        string_statement = f"{comma_joined_string}, and {statement[-1]}"
-    return string_statement
+        return statement[0]
+
+    if len(statement) == 2:
+        return pgettext_lazy(
+            "file_count_1 and _2 are both counts like: '1 PDF file'",
+            "%(file_count_1)s and %(file_count_2)s",
+        ) % {
+            "file_count_1": statement[0],
+            "file_count_2": statement[1],
+        }
+
+    return pgettext_lazy(
+        "file_count_1 is a list like '1 PDF file, 2 Image files' and file_count_2 is a count like: '5 Video files'",
+        "%(file_count_1)s, and %(file_count_2)s",
+    ) % {
+        "file_count_1": ", ".join(statement[0:-1]),
+        "file_count_2": statement[-1],
+    }
 
 
-def _count_extensions(file_names: list) -> dict:
-    """Count file extensions in a list of file names."""
-    counted_extensions = {}
-    for name in file_names:
-        split_name = name.split(".")
-        if len(split_name) == 1:
-            LOGGER.warning("Could not identify file type for file name: %s", name)
-            continue
-        extension_name = split_name[-1].lower()
-        counted_extensions[extension_name] = counted_extensions.get(extension_name, 0) + 1
-    return counted_extensions
-
-
-def _group_extensions(counted_extensions: dict, accepted_file_groups: dict) -> dict:
-    """Group counted extensions by accepted file groups."""
-    counted_extensions_per_group = {}
-    remaining_extensions = counted_extensions.copy()
-    for file_group_name, extensions_for_file_group in accepted_file_groups.items():
-        for extension in extensions_for_file_group:
-            if extension in remaining_extensions:
-                counted_extensions_per_group[file_group_name] = (
-                    counted_extensions_per_group.get(file_group_name, 0)
-                    + remaining_extensions[extension]
-                )
-                del remaining_extensions[extension]
-    return counted_extensions_per_group
-
-
-def count_file_types(file_names: list, accepted_file_groups: dict) -> dict:
+def count_file_types(file_names: list, accepted_file_groups: dict[str, List[str]]) -> dict:
     """Tabulate how many files fall into the file groups specified in the ACCEPTED_FILE_FORMATS
     dictionary.
 
@@ -166,10 +159,30 @@ def count_file_types(file_names: list, accepted_file_groups: dict) -> dict:
     Returns:
         (dict): A dictionary mapping from group name to number of files in that group.
     """
-    counted_extensions = _count_extensions(file_names)
-    if not counted_extensions:
-        return {}
-    return _group_extensions(counted_extensions, accepted_file_groups)
+    # Invert dict so it maps from extension -> name instead of name -> extensions
+    names_for_extensions = {
+        extension: file_type_name
+        for file_type_name, file_extension_list in accepted_file_groups.items()
+        for extension in file_extension_list
+    }
+
+    counts = defaultdict(int)
+
+    for name in file_names:
+        parts = name.split(".")
+
+        if len(parts) < 2:
+            continue
+
+        extension = parts[-1].lower()
+
+        if extension not in names_for_extensions:
+            continue
+
+        name = names_for_extensions[extension]
+        counts[name] += 1
+
+    return dict(counts)
 
 
 def mb_to_bytes(m: int) -> int:
