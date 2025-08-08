@@ -52,7 +52,7 @@ def html_to_text(html: str) -> str:
     return "\n".join(plain_text_split)
 
 
-def get_human_readable_size(size_bytes: int, base: int = 1024, precision: int = 2) -> str:
+def get_human_readable_size(size_bytes: float, base: int = 1024, precision: int = 2) -> str:
     """Convert bytes into a human-readable size.
 
     Args:
