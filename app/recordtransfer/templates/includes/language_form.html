@@ -3,7 +3,8 @@
     {% csrf_token %}
     <fieldset class="fieldset w-full md:w-1/2">
         <legend class="fieldset-legend text-sm md:text-md">{% trans "Preferred Language" %}</legend>
-        <select name="language"
+        <select id="profile-language-switcher"
+                name="language"
                 onchange="this.form.submit()"
                 class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
                 required>
