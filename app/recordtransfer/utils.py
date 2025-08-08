@@ -31,7 +31,7 @@ def zip_directory(directory: str, zipf: ZipFile) -> None:
         raise ValueError("ZipFile does not exist")
 
     relroot = os.path.abspath(os.path.join(directory, os.pardir))
-    for root, _, files in os.walk(directory):
+    for root, __, files in os.walk(directory):
         # add directory (needed for empty dirs)
         zipf.write(root, os.path.relpath(root, relroot))
         for file_ in files:
