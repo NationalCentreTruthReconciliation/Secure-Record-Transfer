@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.utils.safestring import SafeText
 from django_countries.widgets import CountrySelectWidget
 
@@ -8,7 +10,11 @@ class CustomCountrySelectWidget(CountrySelectWidget):
     """
 
     def render(
-        self, name: str, value: object, attrs: dict | None = None, renderer: object | None = None
+        self,
+        name: str,
+        value: object,
+        attrs: Optional[dict] = None,
+        renderer: object | None = None,
     ) -> SafeText:
         """Render the widget with a container div around it."""
         rendered = super().render(name, value, attrs, renderer)
