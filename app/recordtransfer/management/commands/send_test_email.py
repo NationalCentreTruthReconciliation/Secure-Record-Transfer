@@ -75,8 +75,13 @@ class Command(BaseCommand):
         in_progress = self.create_test_in_progress_submission(user)
 
         try:
-            self.send_email(email_id, user, form_data, submission, in_progress)
-            logger.info("✓ Sent '%s' email to %s", email_id, to_email)
+            self.send_email(email_id, user, form_data, submission, in_progress, language)
+            if language:
+                logger.info(
+                    "✓ Sent '%s' email to %s in language '%s'", email_id, to_email, language
+                )
+            else:
+                logger.info("✓ Sent '%s' email to %s", email_id, to_email)
         except Exception as e:
             logger.exception("Error sending email '%s' to %s: %s", email_id, to_email, e)
             raise CommandError(f"Error sending email: {e}") from e
@@ -133,6 +138,7 @@ class Command(BaseCommand):
         form_data: dict,
         submission: Submission,
         in_progress: InProgressSubmission,
+        language: Optional[str] = None,
     ) -> None:
         """Send a test email based on the provided email ID.
 
@@ -142,6 +148,7 @@ class Command(BaseCommand):
             form_data (dict): Form data to be passed to the email function.
             submission (Submission): A test submission instance.
             in_progress (InProgressSubmission): A test in-progress submission instance.
+            language: Optional language code to use for the email.
 
         Raises:
             CommandError: If no handler is implemented for the given email ID.
@@ -151,9 +158,9 @@ class Command(BaseCommand):
         test_recipient = ["test@admin.com"]
 
         if email_id == "submission_creation_success":
-            func(form_data, submission, recipient_emails=test_recipient)
+            func(form_data, submission, recipient_emails=test_recipient, language=language)
         elif email_id == "submission_creation_failure":
-            func(form_data, user, recipient_emails=test_recipient)
+            func(form_data, user, recipient_emails=test_recipient, language=language)
         elif email_id == "thank_you_for_your_submission":
             func(form_data, submission)
         elif email_id == "your_submission_did_not_go_through":

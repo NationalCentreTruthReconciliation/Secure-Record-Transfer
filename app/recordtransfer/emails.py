@@ -33,7 +33,10 @@ __all__ = [
 
 @django_rq.job
 def send_submission_creation_success(
-    form_data: dict, submission: Submission, recipient_emails: Optional[List[str]] = None
+    form_data: dict,
+    submission: Submission,
+    recipient_emails: Optional[List[str]] = None,
+    language: Optional[str] = None,
 ) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there were no errors.
@@ -43,7 +46,9 @@ def send_submission_creation_success(
             NOT the CAAIS tree version of the form.
         submission: The new submission that was created.
         recipient_emails: Optional list of recipient emails. If provided, overrides the default
-        admin recipients and uses the default language for the emails.
+            admin recipients.
+        language: Optional language code to use for rendering the email. Only used when
+            `recipient_emails` is provided.
     """
     subject = "New Submission Ready for Review"
 
@@ -61,10 +66,13 @@ def send_submission_creation_success(
         )
         return
 
-    # Send to admin recipients grouped by language or use provided recipients with default language
+    # Send to admin recipients grouped by language or use provided recipients with language
     if recipient_emails:
-        admin_recipients = {translation.get_language(): recipient_emails}
+        # For testing or custom recipients, use the specified language or default
+        target_language = language or translation.get_language()
+        admin_recipients = {target_language: recipient_emails}
     else:
+        # Use the default admin recipients grouped by their language preferences
         admin_recipients = _get_emails_grouped_by_lang(
             list(User.objects.filter(gets_submission_email_updates=True, is_staff=True))
         )
@@ -93,7 +101,10 @@ def send_submission_creation_success(
 
 @django_rq.job
 def send_submission_creation_failure(
-    form_data: dict, user_submitted: User, recipient_emails: Optional[List[str]] = None
+    form_data: dict,
+    user_submitted: User,
+    recipient_emails: Optional[List[str]] = None,
+    language: Optional[str] = None,
 ) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there WERE errors.
@@ -103,15 +114,19 @@ def send_submission_creation_failure(
             NOT the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
         recipient_emails: Optional list of recipient emails. If provided, overrides the default
-        admin recipients and uses the default language for the emails.
+            admin recipients.
+        language: Optional language code to use for rendering the email. Only used when
+            `recipient_emails` is provided.
     """
     subject = "Submission Failed"
 
-    # Send to admin recipients grouped by language or use provided recipients with default language
+    # Send to admin recipients grouped by language or use provided recipients with language
     if recipient_emails:
-        admin_recipients = {translation.get_language(): recipient_emails}
+        # For testing or custom recipients, use the specified language or default
+        target_language = language or translation.get_language()
+        admin_recipients = {target_language: recipient_emails}
     else:
-        # Use the default admin recipients
+        # Use the default admin recipients grouped by their language preferences
         admin_recipients = _get_emails_grouped_by_lang(
             list(User.objects.filter(gets_submission_email_updates=True, is_staff=True))
         )
