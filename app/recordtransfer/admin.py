@@ -779,39 +779,28 @@ class CustomUserAdmin(UserAdmin):
             messages.set_level(request, messages.ERROR)
             msg = "Non-superusers cannot modify superuser accounts."
             self.message_user(request, msg, messages.ERROR)
-            return
-        if obj.gets_submission_email_updates and not obj.is_staff:
-            messages.set_level(request, messages.ERROR)
-            msg = (
-                "Email updates can only be enabled for staff users. "
-                "Email updates have been reset to 'No'."
-            )
-            self.message_user(request, msg, messages.ERROR)
-            obj.gets_submission_email_updates = False
+        else:
+            super().save_model(request, obj, form, change)
+            if change and (
+                not obj.is_active
+                or "is_superuser" in form.changed_data
+                or "is_staff" in form.changed_data
+            ):
+                if not obj.is_active:
+                    context = {
+                        "subject": gettext("Account Deactivated"),
+                        "changed_item": gettext("account"),
+                        "changed_status": gettext("deactivated"),
+                    }
+                else:
+                    context = {
+                        "subject": gettext("Account updated"),
+                        "changed_item": gettext("account"),
+                        "changed_status": gettext("updated"),
+                        "changed_list": self._get_changed_message(form.changed_data, obj),
+                    }
 
-        # Get the original state before saving, to compare after save
-        original = User.objects.get(pk=obj.pk) if change else None
-        super().save_model(request, obj, form, change)
-        if change and (
-            (original and original.is_active != obj.is_active)
-            or "is_superuser" in form.changed_data
-            or "is_staff" in form.changed_data
-        ):
-            if original and original.is_active and not obj.is_active:
-                context = {
-                    "subject": gettext("Account Deactivated"),
-                    "changed_item": gettext("account"),
-                    "changed_status": gettext("deactivated"),
-                }
-            else:
-                context = {
-                    "subject": gettext("Account updated"),
-                    "changed_item": gettext("account"),
-                    "changed_status": gettext("updated"),
-                    "changed_list": self._get_changed_message(form.changed_data, obj),
-                }
-
-            send_user_account_updated.delay(obj, context)
+                send_user_account_updated.delay(obj, context)
 
     def _get_changed_message(self, changed_data: list, user: User):
         """Generate a list of changed status message for certain account details."""
