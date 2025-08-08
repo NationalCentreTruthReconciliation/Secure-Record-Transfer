@@ -7,7 +7,9 @@ class CustomCountrySelectWidget(CountrySelectWidget):
     the select field and the flag show side by side.
     """
 
-    def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+    def render(
+        self, name: str, value: object, attrs: dict | None = None, renderer: object | None = None
+    ) -> SafeText:
         """Render the widget with a container div around it."""
         rendered = super().render(name, value, attrs, renderer)
         return SafeText(f'<div class="country-select-container">{rendered}</div>')
