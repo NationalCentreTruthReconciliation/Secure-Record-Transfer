@@ -14,7 +14,7 @@ class CustomCountrySelectWidget(CountrySelectWidget):
         name: str,
         value: object,
         attrs: Optional[dict] = None,
-        renderer: object | None = None,
+        renderer: Optional[object] = None,
     ) -> SafeText:
         """Render the widget with a container div around it."""
         rendered = super().render(name, value, attrs, renderer)
