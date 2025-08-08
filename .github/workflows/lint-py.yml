@@ -26,4 +26,4 @@ jobs:
           src: >-
             .src: ./app/recordtransfer
           version-file: "./pyproject.toml"
-          args: "--config ./ruff.toml check --extend-exclude app/recordtransfer/migrations/ --extend-exclude app/recordtransfer/tests/"
+          args: "--config ./ruff.toml check"
