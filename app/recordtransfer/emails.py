@@ -70,21 +70,21 @@ def send_submission_creation_success(
     if recipient_emails:
         # For testing or custom recipients, use the specified language or default
         target_language = language or translation.get_language()
-        admin_recipients = {target_language: recipient_emails}
+        recipients = {target_language: recipient_emails}
     else:
         # Use the default admin recipients grouped by their language preferences
-        admin_recipients = _get_emails_grouped_by_lang(
+        recipients = _get_emails_grouped_by_lang(
             list(User.objects.filter(gets_submission_email_updates=True, is_staff=True))
         )
 
-    if not admin_recipients:
+    if not recipients:
         LOGGER.warning(
-            "No admin recipients found for submission creation success email. Skipping send."
+            "No recipients found for submission creation success email. Skipping send."
         )
         return
 
     _send_mail_by_language_groups(
-        recipients=admin_recipients,
+        recipients=recipients,
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
         template_name="recordtransfer/email/submission_submit_success.html",
@@ -124,21 +124,21 @@ def send_submission_creation_failure(
     if recipient_emails:
         # For testing or custom recipients, use the specified language or default
         target_language = language or translation.get_language()
-        admin_recipients = {target_language: recipient_emails}
+        recipients = {target_language: recipient_emails}
     else:
         # Use the default admin recipients grouped by their language preferences
-        admin_recipients = _get_emails_grouped_by_lang(
+        recipients = _get_emails_grouped_by_lang(
             list(User.objects.filter(gets_submission_email_updates=True, is_staff=True))
         )
 
-    if not admin_recipients:
+    if not recipients:
         LOGGER.warning(
-            "No admin recipients found for submission creation failure email. Skipping send."
+            "No recipients found for submission creation failure email. Skipping send."
         )
         return
 
     _send_mail_by_language_groups(
-        recipients=admin_recipients,
+        recipients=recipients,
         from_email=_get_do_not_reply_email_address(),
         subject=subject,
         template_name="recordtransfer/email/submission_submit_failure.html",
