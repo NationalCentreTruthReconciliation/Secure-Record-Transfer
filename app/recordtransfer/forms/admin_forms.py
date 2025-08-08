@@ -56,7 +56,14 @@ class UserAdminForm(ContactInfoFormMixin, UserChangeForm):
     def clean(self) -> dict[str, Any]:
         """Override clean to call both parent clean methods and enforce group validation."""
         cleaned_data = super().clean()
+        gets_email_updates = cleaned_data.get("gets_submission_email_updates", False)
 
+        is_staff = cleaned_data.get("is_staff", False)
+        if gets_email_updates and not is_staff:
+            self.add_error(
+                "gets_submission_email_updates",
+                gettext("Email updates can only be enabled for staff users."),
+            )
         # All contact fields (including optional ones)
         all_contact_fields = [*self.CONTACT_FIELDS, "address_line_2", "other_province_or_state"]
 
