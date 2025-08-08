@@ -3,10 +3,10 @@ name: Run Django Unit Tests
 on:
   pull_request:
     paths:
-      - '**.py'
+      - "**.py"
     branches:
       - master
-      - 'feat-*'
+      - "feat-*"
   push:
     branches: [master]
 
@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v4
