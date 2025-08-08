@@ -15,9 +15,7 @@
     </div>
     <div class="main-content">
         {% url 'login' as login %}
-        <a href="{{ base_url }}{{ login }}" class="email-btn">
-            {% blocktrans %}Log In to Your Account{% endblocktrans %}
-        </a>
+        <a href="{{ base_url }}{{ login }}" class="email-btn">{% blocktrans %}Log In to Your Account{% endblocktrans %}</a>
         <!-- Fallback text link for plain-text clients -->
         <p class="fallback-link">
             {% trans "If the button doesn’t work, copy and paste this link into your browser:" %}
