@@ -6,6 +6,7 @@ from typing import Optional
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.emails import (
     send_password_reset_email,
@@ -171,10 +172,10 @@ class Command(BaseCommand):
             func(
                 user,
                 {
-                    "subject": "Account updated",
-                    "changed_item": "account",
-                    "changed_status": "updated",
-                    "changed_list": ["Staff privileges have been added to your account."],
+                    "subject": _("Account updated"),
+                    "changed_item": _("account"),
+                    "changed_status": _("updated"),
+                    "changed_list": [_("Staff privileges have been added to your account.")],
                 },
             )
         elif email_id == "user_in_progress_submission_expiring":
