@@ -63,6 +63,20 @@
                         <span class="text-sm text-gray-500">{% trans "MB" %}</span>
                     </div>
                 </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">{% trans "Files added:" %}</span>
+                    <div class="flex items-center gap-1">
+                        <span id="files-count" class="text-lg font-semibold text-blue-600">0</span>
+                        <span class="text-sm text-gray-500">{% trans "files" %}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">{% trans "Files remaining:" %}</span>
+                    <div class="flex items-center gap-1">
+                        <span id="remaining-files" class="text-lg font-semibold text-green-600">{{ MAX_TOTAL_UPLOAD_COUNT }}</span>
+                        <span class="text-sm text-gray-500">{% trans "files" %}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -56,7 +56,14 @@ class UserAdminForm(ContactInfoFormMixin, UserChangeForm):
     def clean(self) -> dict[str, Any]:
         """Override clean to call both parent clean methods and enforce group validation."""
         cleaned_data = super().clean()
+        gets_email_updates = cleaned_data.get("gets_submission_email_updates", False)
 
+        is_staff = cleaned_data.get("is_staff", False)
+        if gets_email_updates and not is_staff:
+            self.add_error(
+                "gets_submission_email_updates",
+                gettext("Email updates can only be enabled for staff users."),
+            )
         # All contact fields (including optional ones)
         all_contact_fields = [*self.CONTACT_FIELDS, "address_line_2", "other_province_or_state"]
 
@@ -106,6 +113,10 @@ class SubmissionModelForm(RecordTransferModelForm):
             "uuid",
         )
 
+        help_texts: ClassVar[dict] = {
+            "upload_session": gettext("Click link to view uploaded files"),
+        }
+
     disabled_fields: ClassVar[list] = [
         "metadata",
         "upload_session",
@@ -118,15 +129,13 @@ class SubmissionModelForm(RecordTransferModelForm):
         super().__init__(*args, **kwargs)
 
         if hasattr(self, "instance") and self.instance.metadata:
-            # TODO: This makes the tiny link by the Metadata title in the Submission form.
-            self.fields["metadata"].help_text = " | ".join(
-                [
-                    format_html('<a href="{}">{}</a>', url, gettext(text))
-                    for url, text in [
-                        (self.instance.get_admin_metadata_change_url(), "View or Change Metadata"),
-                    ]
-                ]
+            # This makes the tiny link by the Metadata title in the Submission form.
+            self.fields["metadata"].help_text = format_html(
+                '<a href="{}">{}</a>',
+                self.instance.get_admin_metadata_change_url(),
+                gettext("View or Change Metadata"),
             )
+
         self.fields["metadata"].widget.can_add_related = False
 
 

@@ -24,6 +24,7 @@ dependencies = [
     "django-axes[ipware]>=8.0.0,<9",
     "python-decouple~=3.8",
     "rq-scheduler>=0.14.0,<0.15",
+    "django-debug-toolbar>=6.0.0",
 ]
 
 [project.optional-dependencies]

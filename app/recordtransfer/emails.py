@@ -7,6 +7,7 @@ from collections import defaultdict
 from typing import List, Optional
 
 import django_rq
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -20,7 +21,23 @@ from recordtransfer.models import InProgressSubmission, SiteSetting, Submission,
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text
 
-LOGGER = logging.getLogger("rq.worker")
+LOGGER = logging.getLogger(__name__)
+
+
+def _get_base_url_with_protocol() -> str:
+    """Get the base URL with the appropriate protocol for the current environment.
+
+    Returns:
+        str: Full base URL with protocol (e.g., 'http://localhost:8000' or 'https://example.com')
+    """
+    # In development, use EMAIL_BASE_URL setting
+    if settings.DEBUG:
+        return settings.EMAIL_BASE_URL
+
+    # In production, use HTTPS with the actual domain
+    domain = Site.objects.get_current().domain
+    return f"https://{domain}"
+
 
 __all__ = [
     "send_password_reset_email",
@@ -52,10 +69,7 @@ def send_submission_creation_success(
         language: Optional language code to use for rendering the email. Only used when
             `recipient_emails` is provided.
     """
-    domain = Site.objects.get_current().domain
-    submission_url = "http://{domain}/{change_url}".format(
-        domain=domain.rstrip(" /"), change_url=submission.get_admin_change_url().lstrip(" /")
-    )
+    submission_url = f"{_get_base_url_with_protocol().rstrip('/')}/{submission.get_admin_change_url().lstrip('/')}"
     LOGGER.info("Generated submission change URL: %s", submission_url)
 
     user_submitted = submission.user
@@ -92,7 +106,6 @@ def send_submission_creation_success(
             "last_name": user_submitted.last_name,
             "action_date": submission.submission_date,
             "submission_url": submission_url,
-            "base_url": Site.objects.get_current().domain,
         },
     )
 
@@ -141,7 +154,6 @@ def send_submission_creation_failure(
             "first_name": user_submitted.first_name,
             "last_name": user_submitted.last_name,
             "action_date": timezone.now(),
-            "base_url": Site.objects.get_current().domain,
         },
     )
 
@@ -218,7 +230,6 @@ def send_user_activation_email(new_user: User) -> None:
         template_name="recordtransfer/email/activate_account.html",
         context={
             "username": new_user.username,
-            "base_url": Site.objects.get_current().domain,
             "uid": urlsafe_base64_encode(force_bytes(new_user.pk)),
             "token": token,
         },
@@ -259,7 +270,6 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
         context={
             "username": in_progress.user.username,
             "full_name": in_progress.user.full_name,
-            "base_url": Site.objects.get_current().domain,
             "in_progress_title": in_progress.title,
             "in_progress_expiration_date": timezone.localtime(
                 in_progress.upload_session_expires_at
@@ -409,7 +419,7 @@ def _send_mail_by_language_groups(
         LOGGER.info("SUBJECT: %s", subject)
         LOGGER.info("TO (by language): %s", recipients)
         LOGGER.info("FROM: %s", from_email)
-        context["site_domain"] = Site.objects.get_current().domain
+        context["base_url"] = _get_base_url_with_protocol()
 
         for lang, recipient_list in recipients.items():
             if not recipient_list:

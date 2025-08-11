@@ -6,7 +6,9 @@ const sharp = require("sharp");
 const BundleTracker = require("webpack-bundle-tracker");
 
 
-console.info("CURRENT MODE IN WEBPACK: ", process.env.WEBPACK_MODE);
+const mode = process.env.WEBPACK_MODE || "production"; // Default if not passed
+
+console.info("CURRENT MODE IN WEBPACK: ", mode);
 
 class WebPConverterPlugin {
     constructor(options = {}) {
@@ -55,7 +57,7 @@ class WebPConverterPlugin {
 
 
 module.exports = {
-    mode: process.env.WEBPACK_MODE === "production" ? "production" : "development",
+    mode: mode,
     devtool: process.env.WEBPACK_MODE === "production" ? false : "eval-source-map",
     watchOptions: {
         aggregateTimeout: 500,
