@@ -54,6 +54,7 @@
                             <input type="{{ field.field.widget.input_type }}"
                                    name="{{ field.html_name }}"
                                    id="{{ field.id_for_label }}"
+                                   value="{{ field.value|default:'' }}"
                                    class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                    {% if field.field.required %}required{% endif %}>
                         </div>
@@ -71,6 +72,7 @@
                             <input type="{{ field.field.widget.input_type }}"
                                    name="{{ field.html_name }}"
                                    id="{{ field.id_for_label }}"
+                                   value="{{ field.value|default:'' }}"
                                    class="pl-10 w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                    {% if field.field.required %}required{% endif %}>
                         </div>
@@ -95,6 +97,7 @@
                         <input type="text"
                                name="{{ field.html_name }}"
                                id="{{ field.id_for_label }}"
+                               value="{{ field.value|default:'' }}"
                                class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                {% if field.field.required %}required{% endif %}>
                         <!-- Last Name field - no icon -->
@@ -102,6 +105,7 @@
                         <input type="text"
                                name="{{ field.html_name }}"
                                id="{{ field.id_for_label }}"
+                               value="{{ field.value|default:'' }}"
                                class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                {% if field.field.required %}required{% endif %}>
                         <!-- Default rendering for other fields -->

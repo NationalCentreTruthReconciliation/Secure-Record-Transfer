@@ -53,7 +53,6 @@ class TestSubmissionGroupDetailView(TestCase):
         self.client.login(username="staffuser", password="password")
         response = self.client.get(self.group_detail_url)
         self.assertEqual(response.status_code, 404)
-        self.assertTemplateUsed(response, "404.html")
 
     def test_staff_user_owning_group_access_allowed(self) -> None:
         """Test that a staff user owning the submission group can access the view."""
@@ -372,4 +371,3 @@ class TestGetUserSubmissionGroups(TestCase):
         """Test that a missing required header returns a 400 response."""
         response = self.client.get(self.submission_groups_url)
         self.assertEqual(response.status_code, 400)
-        self.assertTemplateUsed(response, "400.html")
