@@ -43,6 +43,14 @@ const _setupWithContext = () => {
     default:
         break;
     }
+
+    const submitButton = document.getElementById("submit-form-btn");
+    if (submitButton && context["RECAPTCHA_ENABLED"]) {
+        submitButton.addEventListener("click", (event) => {
+            event.preventDefault(); // Prevent form submission
+            singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
+        });
+    }
 };
 
 export const initializeSubmissionForm = () => {
@@ -52,12 +60,4 @@ export const initializeSubmissionForm = () => {
     setupHelpTooltips();
 
     _setupWithContext();
-
-    const submitButton = document.getElementById("submit-form-btn");
-    if (submitButton) {
-        submitButton.addEventListener("click", (event) => {
-            event.preventDefault(); // Prevent form submission
-            singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
-        });
-    }
 };

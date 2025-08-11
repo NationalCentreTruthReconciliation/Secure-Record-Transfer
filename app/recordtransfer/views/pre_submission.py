@@ -174,11 +174,7 @@ class SubmissionFormWizard(SessionWizardView):
         SubmissionStep.REVIEW: SubmissionStepMeta(
             template="recordtransfer/submission_form_review.html",
             title=gettext("Review"),
-            form=(
-                forms.ReviewFormReCaptcha
-                if settings.RECAPTCHA_PUBLIC_KEY or is_deployed_environment() else
-                forms.ReviewForm
-            ),
+            form=(forms.ReviewFormReCaptcha if is_deployed_environment() else forms.ReviewForm),
             info_message=gettext("Review the information you've entered before submitting"),
         ),
     }
@@ -658,7 +654,10 @@ class SubmissionFormWizard(SessionWizardView):
         Returns:
             A dictionary of context data to be used in the JavaScript files. Can be empty.
         """
-        js_context: dict[str, Any] = {"FORM_STARTED": self.form_started}
+        js_context: dict[str, Any] = {
+            "FORM_STARTED": self.form_started,
+            "RECAPTCHA_ENABLED": is_deployed_environment(),
+        }
 
         step = self.current_step
         if step == SubmissionStep.CONTACT_INFO:
