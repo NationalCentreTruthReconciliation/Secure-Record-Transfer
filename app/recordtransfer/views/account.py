@@ -18,7 +18,6 @@ from django.utils.translation import get_language, gettext, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
-from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm
