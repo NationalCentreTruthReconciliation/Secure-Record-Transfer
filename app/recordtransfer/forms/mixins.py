@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV2Invisible
+from django_recaptcha.widgets import ReCaptchaV2Checkbox, ReCaptchaV2Invisible
 
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.widgets import CustomCountrySelectWidget
@@ -203,3 +203,9 @@ class HiddenCaptchaMixin:
     """Add to forms that require reCAPTCHA validation."""
 
     captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
+
+
+class VisibleCaptchaMixin:
+    """Add to forms that require visible reCAPTCHA validation."""
+
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox, label=_("Please verify you are human"))

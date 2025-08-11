@@ -20,8 +20,9 @@ from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from recordtransfer.emails import send_user_activation_email
-from recordtransfer.forms import SignUpForm
+from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
+from recordtransfer.management.commands.verify_settings import is_deployed_environment
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
 
@@ -34,8 +35,13 @@ class CreateAccount(FormView):
     """
 
     template_name = "recordtransfer/signup.html"
-    form_class = SignUpForm
     success_url = reverse_lazy("recordtransfer:activation_sent")
+
+    def get_form_class(self) -> type[BaseModelForm]:
+        """Return the appropriate form class based on environment."""
+        if is_deployed_environment():
+            return SignUpFormRecaptcha
+        return SignUpForm
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """If the user is already authenticated, redirect them to the homepage."""

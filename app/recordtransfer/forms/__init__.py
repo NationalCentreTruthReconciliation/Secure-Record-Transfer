@@ -22,6 +22,7 @@ from recordtransfer.forms.submission_forms import (
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import (
     SignUpForm,
+    SignUpFormRecaptcha,
     UserAccountInfoForm,
     UserContactInfoForm,
 )
@@ -40,6 +41,7 @@ __all__ = [
     "RightsForm",
     "RightsFormSet",
     "SignUpForm",
+    "SignUpFormRecaptcha",
     "SourceInfoForm",
     "SubmissionForm",
     "SubmissionGroupForm",

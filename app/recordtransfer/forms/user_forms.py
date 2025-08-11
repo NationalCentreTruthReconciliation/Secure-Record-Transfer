@@ -11,7 +11,7 @@ from django_recaptcha.fields import ReCaptchaField
 
 from recordtransfer.constants import HtmlIds
 from recordtransfer.emails import send_password_reset_email
-from recordtransfer.forms.mixins import ContactInfoFormMixin
+from recordtransfer.forms.mixins import ContactInfoFormMixin, VisibleCaptchaMixin
 from recordtransfer.models import User
 
 
@@ -62,7 +62,9 @@ class SignUpForm(UserCreationForm):
         label=gettext("Last name"),
     )
 
-    captcha = ReCaptchaField()
+
+class SignUpFormRecaptcha(SignUpForm, VisibleCaptchaMixin):
+    """Form for a user to create a new account with reCAPTCHA."""
 
 
 class UserAccountInfoForm(forms.ModelForm):
