@@ -27,8 +27,6 @@ from recordtransfer.tokens import account_activation_token
 
 LOGGER = logging.getLogger(__name__)
 
-LOGGER = logging.getLogger(__name__)
-
 
 class CreateAccount(FormView):
     """Allows a user to create a new account with the SignUpForm. When the form is submitted
@@ -113,7 +111,6 @@ class ActivateAccount(View):
                 return redirect("recordtransfer:activation_invalid")
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            LOGGER.exception("Unexpected error during account activation")
             LOGGER.exception("Unexpected error during account activation")
             return redirect("recordtransfer:activation_invalid")
 
