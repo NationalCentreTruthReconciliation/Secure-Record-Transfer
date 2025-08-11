@@ -19,7 +19,7 @@ from recordtransfer.models import InProgressSubmission, SiteSetting, Submission,
 from recordtransfer.tokens import account_activation_token
 from recordtransfer.utils import html_to_text
 
-LOGGER = logging.getLogger("rq.worker")
+LOGGER = logging.getLogger(__name__)
 
 
 def _get_base_url_with_protocol() -> str:
