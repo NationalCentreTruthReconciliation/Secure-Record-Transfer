@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 
 from recordtransfer.constants import HtmlIds, OtherValues
@@ -12,37 +12,35 @@ class ContactInfoFormMixin(forms.Form):
     phone_number = forms.RegexField(
         regex=r"^\+\d\s\(\d{3}\)\s\d{3}-\d{4}$",
         error_messages={
-            "required": gettext("This field is required."),
-            "invalid": gettext('Phone number must look like "+1 (999) 999-9999"'),
+            "required": _("This field is required."),
+            "invalid": _('Phone number must look like "+1 (999) 999-9999"'),
         },
         widget=forms.TextInput(
             attrs={
                 "placeholder": "+1 (999) 999-9999",
             }
         ),
-        label=gettext("Phone number"),
+        label=_("Phone number"),
     )
 
     address_line_1 = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={"placeholder": gettext("Street, and street number")}),
-        label=gettext("Address line 1"),
+        widget=forms.TextInput(attrs={"placeholder": _("Street, and street number")}),
+        label=_("Address line 1"),
     )
 
     address_line_2 = forms.CharField(
         max_length=100,
         required=False,
-        widget=forms.TextInput(
-            attrs={"placeholder": gettext("Unit Number, RPO, PO BOX... (optional)")}
-        ),
-        label=gettext("Address line 2"),
+        widget=forms.TextInput(attrs={"placeholder": _("Unit Number, RPO, PO BOX... (optional)")}),
+        label=_("Address line 2"),
     )
 
     city = forms.CharField(
         max_length=100,
         required=True,
-        label=gettext("City"),
+        label=_("City"),
     )
 
     province_or_state = forms.ChoiceField(
@@ -54,7 +52,7 @@ class ContactInfoFormMixin(forms.Form):
             }
         ),
         choices=[
-            ("", gettext("Select your province")),
+            ("", _("Select your province")),
             # Canada
             ("AB", "Alberta"),
             ("BC", "British Columbia"),
@@ -122,10 +120,10 @@ class ContactInfoFormMixin(forms.Form):
             ("WI", "Wisconsin"),
             ("WY", "Wyoming"),
             # Other values
-            ("Other", gettext(OtherValues.PROVINCE_OR_STATE)),
+            ("Other", _(OtherValues.PROVINCE_OR_STATE)),
         ],
         initial="",
-        label=gettext("Province or state"),
+        label=_("Province or state"),
     )
 
     other_province_or_state = forms.CharField(
@@ -138,14 +136,14 @@ class ContactInfoFormMixin(forms.Form):
                 "class": "reduce-form-field-width",
             }
         ),
-        label=gettext("Other province or state"),
+        label=_("Other province or state"),
     )
 
     postal_or_zip_code = forms.RegexField(
         regex=r"^(?:[0-9]{5}(?:-[0-9]{4})?)|(?:[A-Za-z]\d[A-Za-z][\- ]?\d[A-Za-z]\d)$",
         error_messages={
-            "required": gettext("This field is required."),
-            "invalid": gettext(
+            "required": _("This field is required."),
+            "invalid": _(
                 'Postal code must look like "Z0Z 0Z0", zip code must look like '
                 '"12345" or "12345-1234"'
             ),
@@ -155,16 +153,16 @@ class ContactInfoFormMixin(forms.Form):
                 "placeholder": "Z0Z 0Z0",
             }
         ),
-        label=gettext("Postal / Zip code"),
+        label=_("Postal / Zip code"),
     )
 
-    country = CountryField(blank_label=gettext("Select your Country")).formfield(
+    country = CountryField(blank_label=_("Select your Country")).formfield(
         widget=CustomCountrySelectWidget(
             attrs={
                 "class": "reduce-form-field-width",
             }
         ),
-        label=gettext("Country"),
+        label=_("Country"),
     )
 
     def clean_address_fields(self) -> dict:
@@ -178,7 +176,7 @@ class ContactInfoFormMixin(forms.Form):
         if address_line_2 and not address_line_1:
             self.add_error(
                 "address_line_1",
-                gettext("Address line 1 is required if address line 2 is provided."),
+                _("Address line 1 is required if address line 2 is provided."),
             )
 
         if not region:

@@ -50,6 +50,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "recordtransfer.middleware.SaveUserLanguageMiddleware",  # After LocaleMiddleware
     "django.middleware.gzip.GZipMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
@@ -135,7 +136,7 @@ FILE_UPLOAD_HANDLERS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 
 TIME_ZONE = config("TIME_ZONE", default="America/Winnipeg")
 
@@ -147,6 +148,7 @@ LANGUAGES = [
     ("hi", _("Hindi")),
 ]
 
+LANGUAGE_COOKIE_NAME = "django_language"  # optional, included for clarity
 
 USE_TZ = True
 

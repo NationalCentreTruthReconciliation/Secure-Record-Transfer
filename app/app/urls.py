@@ -23,6 +23,7 @@ from recordtransfer.utils import get_js_translation_version
 from recordtransfer.views.account import AsyncPasswordResetView, Login
 
 urlpatterns = (
+    path("i18n/", include("django.conf.urls.i18n")),
     path("admin/django_rq/", include("django_rq.urls")),
     path("admin/", admin.site.urls),
     path("", include("recordtransfer.urls")),
