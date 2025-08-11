@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-05 15:35-0500\n"
+"POT-Creation-Date: 2025-08-11 13:36-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: app/settings/base.py:145
+#: app/settings/base.py:140
 msgid "English"
 msgstr ""
 
-#: app/settings/base.py:146
+#: app/settings/base.py:141
 msgid "French"
 msgstr ""
 
-#: app/settings/base.py:147
+#: app/settings/base.py:142
 msgid "Hindi"
 msgstr ""
 
@@ -86,7 +86,7 @@ msgstr ""
 
 #: caais/forms.py:363 recordtransfer/forms/submission_forms.py:122
 #: recordtransfer/forms/user_forms.py:37
-#: recordtransfer/templates/includes/account_info_form.html:37
+#: recordtransfer/templates/includes/account_info_form.html:35
 msgid "Email"
 msgstr ""
 
@@ -498,7 +498,7 @@ msgstr ""
 msgid "Upload Size"
 msgstr ""
 
-#: recordtransfer/admin.py:88 recordtransfer/admin.py:664
+#: recordtransfer/admin.py:88 recordtransfer/admin.py:662
 msgid "File Link"
 msgstr ""
 
@@ -506,87 +506,105 @@ msgstr ""
 msgid "File was removed"
 msgstr ""
 
-#: recordtransfer/admin.py:399
+#: recordtransfer/admin.py:398
 msgid ""
 "The selected submission group(s) do not contain any submissions to export."
 msgstr ""
 
-#: recordtransfer/admin.py:406 recordtransfer/admin.py:590
+#: recordtransfer/admin.py:404 recordtransfer/admin.py:588
 msgid "Export CAAIS 1.0 CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:411 recordtransfer/admin.py:595
+#: recordtransfer/admin.py:409 recordtransfer/admin.py:593
 msgid "Export AtoM 2.6 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:418 recordtransfer/admin.py:602
+#: recordtransfer/admin.py:416 recordtransfer/admin.py:600
 msgid "Export AtoM 2.3 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:425 recordtransfer/admin.py:609
+#: recordtransfer/admin.py:423 recordtransfer/admin.py:607
 msgid "Export AtoM 2.2 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:432 recordtransfer/admin.py:616
+#: recordtransfer/admin.py:430 recordtransfer/admin.py:614
 msgid "Export AtoM 2.1 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:585
+#: recordtransfer/admin.py:583
 #, python-brace-format
 msgid "Submission with ID '{object_id}' doesn't exist. Perhaps it was deleted?"
 msgstr ""
 
-#: recordtransfer/admin.py:670
+#: recordtransfer/admin.py:668
 msgid "No file attached"
 msgstr ""
 
-#: recordtransfer/admin.py:767
+#: recordtransfer/admin.py:696
+#: recordtransfer/templates/includes/profile_forms.html:18
+#: recordtransfer/views/pre_submission.py:98
+msgid "Contact Information"
+msgstr ""
+
+#: recordtransfer/admin.py:711
+msgid "Language Preferences"
+msgstr ""
+
+#: recordtransfer/admin.py:717
+msgid "Email Updates"
+msgstr ""
+
+#: recordtransfer/admin.py:771
 #: recordtransfer/tests/unit/views/test_profile.py:179
-#: recordtransfer/views/profile.py:107
+#: recordtransfer/views/profile.py:105
 msgid "Password updated"
 msgstr ""
 
-#: recordtransfer/admin.py:768
+#: recordtransfer/admin.py:772
 #: recordtransfer/tests/unit/views/test_profile.py:180
-#: recordtransfer/views/profile.py:108
+#: recordtransfer/views/profile.py:106
 msgid "password"
 msgstr ""
 
-#: recordtransfer/admin.py:769 recordtransfer/admin.py:799
+#: recordtransfer/admin.py:773 recordtransfer/admin.py:803
+#: recordtransfer/management/commands/send_test_email.py:177
 #: recordtransfer/tests/unit/views/test_profile.py:181
-#: recordtransfer/views/profile.py:109
+#: recordtransfer/views/profile.py:107
 msgid "updated"
 msgstr ""
 
-#: recordtransfer/admin.py:791
+#: recordtransfer/admin.py:795
 msgid "Account Deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:792 recordtransfer/admin.py:798
+#: recordtransfer/admin.py:796 recordtransfer/admin.py:802
+#: recordtransfer/management/commands/send_test_email.py:176
 msgid "account"
 msgstr ""
 
-#: recordtransfer/admin.py:793
+#: recordtransfer/admin.py:797
 msgid "deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:797
+#: recordtransfer/admin.py:801
+#: recordtransfer/management/commands/send_test_email.py:175
 msgid "Account updated"
 msgstr ""
 
-#: recordtransfer/admin.py:811
+#: recordtransfer/admin.py:814
 msgid "Superuser privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:815
+#: recordtransfer/admin.py:816
 msgid "Superuser privileges have been removed from your account."
 msgstr ""
 
 #: recordtransfer/admin.py:819
+#: recordtransfer/management/commands/send_test_email.py:178
 msgid "Staff privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:822
+#: recordtransfer/admin.py:821
 msgid "Staff privileges have been removed from your account."
 msgstr ""
 
@@ -609,6 +627,35 @@ msgstr ""
 #: recordtransfer/decorators.py:38
 #: recordtransfer/tests/unit/test_decorators.py:84
 msgid "Uploads are only permitted during the file upload step"
+msgstr ""
+
+#: recordtransfer/emails.py:104
+msgid "New Submission Ready for Review"
+msgstr ""
+
+#: recordtransfer/emails.py:153
+msgid "Submission Failed"
+msgstr ""
+
+#: recordtransfer/emails.py:184
+msgid "Thank You For Your Submission"
+msgstr ""
+
+#: recordtransfer/emails.py:206
+msgid "Issue With Your Submission"
+msgstr ""
+
+#: recordtransfer/emails.py:232
+msgid "Activate Your Account"
+msgstr ""
+
+#: recordtransfer/emails.py:271
+#: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:5
+msgid "Your In-Progress Submission is Expiring Soon"
+msgstr ""
+
+#: recordtransfer/emails.py:306
+msgid "Password Reset on NCTR Record Transfer Portal"
 msgstr ""
 
 #: recordtransfer/enums.py:29
@@ -877,8 +924,20 @@ msgid ""
 "empty string."
 msgstr ""
 
-#: recordtransfer/forms/admin_forms.py:70
+#: recordtransfer/forms/admin_forms.py:65
+msgid "Email updates can only be enabled for staff users."
+msgstr ""
+
+#: recordtransfer/forms/admin_forms.py:77
 msgid "This field is required when contact information is provided."
+msgstr ""
+
+#: recordtransfer/forms/admin_forms.py:117
+msgid "Click link to view uploaded files"
+msgstr ""
+
+#: recordtransfer/forms/admin_forms.py:136
+msgid "View or Change Metadata"
 msgstr ""
 
 #: recordtransfer/forms/mixins.py:29
@@ -897,7 +956,7 @@ msgstr ""
 msgid "Address line 2"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:43 recordtransfer/models.py:70
+#: recordtransfer/forms/mixins.py:43 recordtransfer/models.py:83
 msgid "City"
 msgstr ""
 
@@ -905,7 +964,7 @@ msgstr ""
 msgid "Select your province"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:126 recordtransfer/models.py:76
+#: recordtransfer/forms/mixins.py:126 recordtransfer/models.py:89
 msgid "Province or state"
 msgstr ""
 
@@ -1213,14 +1272,14 @@ msgid "No record rights or restrictions were provided."
 msgstr ""
 
 #: recordtransfer/forms/submission_group_form.py:49
-#: recordtransfer/forms/user_forms.py:192
+#: recordtransfer/forms/user_forms.py:190
 msgid "Form is empty."
 msgstr ""
 
 #: recordtransfer/forms/submission_group_form.py:58
-#: recordtransfer/forms/user_forms.py:141
-#: recordtransfer/forms/user_forms.py:149
-#: recordtransfer/forms/user_forms.py:157
+#: recordtransfer/forms/user_forms.py:139
+#: recordtransfer/forms/user_forms.py:147
+#: recordtransfer/forms/user_forms.py:155
 msgid "Required"
 msgstr ""
 
@@ -1233,7 +1292,7 @@ msgid "No changes detected."
 msgstr ""
 
 #: recordtransfer/forms/user_forms.py:45
-#: recordtransfer/templates/includes/account_info_form.html:44
+#: recordtransfer/templates/includes/account_info_form.html:42
 msgid "Username"
 msgstr ""
 
@@ -1257,141 +1316,159 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:85
-msgid "First name is required."
-msgstr ""
-
-#: recordtransfer/forms/user_forms.py:92
+#: recordtransfer/forms/user_forms.py:91
 msgid "Last Name"
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:95
-msgid "Last name is required."
-msgstr ""
-
-#: recordtransfer/forms/user_forms.py:101
-#: recordtransfer/templates/includes/account_info_form.html:59
+#: recordtransfer/forms/user_forms.py:99
+#: recordtransfer/templates/includes/account_info_form.html:57
 msgid "Receive notification emails?"
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:106
+#: recordtransfer/forms/user_forms.py:104
 msgid "Current Password"
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:111
+#: recordtransfer/forms/user_forms.py:109
 msgid "New Password"
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:117
+#: recordtransfer/forms/user_forms.py:115
 msgid "Confirm New Password"
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:166
+#: recordtransfer/forms/user_forms.py:164
 msgid "The new passwords do not match."
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:175
+#: recordtransfer/forms/user_forms.py:173
 msgid "The new password must be different from the current password."
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:184
+#: recordtransfer/forms/user_forms.py:182
 msgid "Password is incorrect."
 msgstr ""
 
-#: recordtransfer/forms/user_forms.py:205
+#: recordtransfer/forms/user_forms.py:203
 msgid "No fields have been changed."
 msgstr ""
 
-#: recordtransfer/models.py:52
+#: recordtransfer/models.py:56
+msgid "Preferred language for the website and email notifications"
+msgstr ""
+
+#: recordtransfer/models.py:57
+#: recordtransfer/templates/includes/language_form.html:5
+msgid "Preferred Language"
+msgstr ""
+
+#: recordtransfer/models.py:65
 msgid "Phone number in format: +1 (999) 999-9999"
 msgstr ""
 
-#: recordtransfer/models.py:58
+#: recordtransfer/models.py:71
 msgid "Street and street number"
 msgstr ""
 
-#: recordtransfer/models.py:64
+#: recordtransfer/models.py:77
 msgid "Unit number, RPO, PO BOX (optional)"
 msgstr ""
 
-#: recordtransfer/models.py:82
+#: recordtransfer/models.py:95
 msgid "Other province or state if not listed"
 msgstr ""
 
-#: recordtransfer/models.py:88
+#: recordtransfer/models.py:101
 msgid "Postal code (Canada) or zip code (US)"
 msgstr ""
 
-#: recordtransfer/models.py:94
+#: recordtransfer/models.py:107
 msgid "Country code"
 msgstr ""
 
-#: recordtransfer/models.py:251
+#: recordtransfer/models.py:264
 msgid "Setting Key"
 msgstr ""
 
-#: recordtransfer/models.py:254
+#: recordtransfer/models.py:267
 msgid "Setting Value"
 msgstr ""
 
-#: recordtransfer/models.py:262
+#: recordtransfer/models.py:275
 msgid "Setting value type"
 msgstr ""
 
-#: recordtransfer/models.py:268
+#: recordtransfer/models.py:281
 msgid "Change date"
 msgstr ""
 
-#: recordtransfer/models.py:275
+#: recordtransfer/models.py:288
 msgid "Changed by"
 msgstr ""
 
-#: recordtransfer/models.py:422
+#: recordtransfer/models.py:435
 msgid "Session Created"
 msgstr ""
 
-#: recordtransfer/models.py:423
+#: recordtransfer/models.py:436
 msgid "Session Expired"
 msgstr ""
 
-#: recordtransfer/models.py:424
+#: recordtransfer/models.py:437
 msgid "Uploading Files"
 msgstr ""
 
-#: recordtransfer/models.py:425
+#: recordtransfer/models.py:438
 msgid "File Copy in Progress"
 msgstr ""
 
-#: recordtransfer/models.py:426
+#: recordtransfer/models.py:439
 msgid "All Files in Permanent Storage"
 msgstr ""
 
-#: recordtransfer/models.py:427
+#: recordtransfer/models.py:440
 msgid "Copying Failed"
 msgstr ""
 
-#: recordtransfer/models.py:428
+#: recordtransfer/models.py:441
 msgid "File Removal in Progress"
 msgstr ""
 
-#: recordtransfer/models.py:863
+#: recordtransfer/models.py:876
 #, python-format
 msgid "%(file_count)s, totalling %(total_size)s"
 msgstr ""
 
-#: recordtransfer/models.py:1316
+#: recordtransfer/models.py:889
+#, python-format
+msgid "Session %(token)s (%(count)s file, started: %(date)s)"
+msgid_plural "Session %(token)s (%(count)s files, started: %(date)s)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: recordtransfer/models.py:900
+#, python-format
+msgid "%(token)s (started at %(date)s)"
+msgstr ""
+
+#: recordtransfer/models.py:972
+#, python-format
+msgid "%(name)s Removed! | %(session)s"
+msgstr ""
+
+#: recordtransfer/models.py:1352
 msgid "Not Started"
 msgstr ""
 
-#: recordtransfer/models.py:1317
+#: recordtransfer/models.py:1353
 msgid "In Progress"
 msgstr ""
 
-#: recordtransfer/models.py:1318
+#: recordtransfer/models.py:1354
 msgid "Complete"
 msgstr ""
 
-#: recordtransfer/models.py:1319
+#: recordtransfer/models.py:1355
 msgid "Failed"
 msgstr ""
 
@@ -1400,7 +1477,7 @@ msgid "Click here to create a downloadable bag"
 msgstr ""
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:5
-#: recordtransfer/templates/includes/account_info_form.html:99
+#: recordtransfer/templates/includes/account_info_form.html:97
 #: recordtransfer/templates/includes/contact_info_form.html:131
 #: recordtransfer/templates/includes/submission_group_edit_form.html:12
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:79
@@ -1439,7 +1516,7 @@ msgid ""
 "                "
 msgstr ""
 
-#: recordtransfer/templates/includes/account_info_form.html:51
+#: recordtransfer/templates/includes/account_info_form.html:49
 msgid "Notification options"
 msgstr ""
 
@@ -1701,9 +1778,8 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#: recordtransfer/templates/includes/profile_forms.html:18
-#: recordtransfer/views/pre_submission.py:98
-msgid "Contact Information"
+#: recordtransfer/templates/includes/profile_forms.html:26
+msgid "Language"
 msgstr ""
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:9
@@ -1951,16 +2027,16 @@ msgstr ""
 msgid "The following changes have been made to your account:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/email/account_updated.html:19
+#: recordtransfer/templates/recordtransfer/email/account_updated.html:18
 msgid "Log In to Your Account"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/email/account_updated.html:23
+#: recordtransfer/templates/recordtransfer/email/account_updated.html:21
 #: recordtransfer/templates/recordtransfer/email/activate_account.html:21
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:22
 #: recordtransfer/templates/recordtransfer/email/submission_failure.html:19
 #: recordtransfer/templates/recordtransfer/email/submission_submit_success.html:19
-#: recordtransfer/templates/recordtransfer/email/submission_success.html:25
+#: recordtransfer/templates/recordtransfer/email/submission_success.html:26
 msgid "If the button doesn’t work, copy and paste this link into your browser:"
 msgstr ""
 
@@ -1997,10 +2073,6 @@ msgstr ""
 msgid "Unsubscribe in your profile"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:5
-msgid "Your In-Progress Submission is Expiring Soon"
-msgstr ""
-
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:9
 #, python-format
 msgid "Dear %(full_name)s (%(username)s),"
@@ -2023,7 +2095,7 @@ msgstr ""
 msgid "Resume Your Submission"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:28
+#: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:27
 msgid ""
 "If you have any questions or need assistance, please contact our support "
 "team."
@@ -2045,7 +2117,6 @@ msgid ""
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/email/submission_failure.html:16
-#: recordtransfer/templates/recordtransfer/email/submission_success.html:22
 msgid "Contact NCTR Archivist"
 msgstr ""
 
@@ -2103,17 +2174,20 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:16
 msgid ""
 "\n"
-"        If you have any questions about your submission, please contact an "
-"NCTR archivist\n"
-"        at this email address:\n"
+"            You can view your past submissions by clicking on the button "
+"below:\n"
 "        "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/email/submission_success.html:33
-msgid " Submission Agreement "
+#: recordtransfer/templates/recordtransfer/email/submission_success.html:23
+msgid "View Your Past Submissions"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:35
+msgid " Submission Agreement "
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/email/submission_success.html:37
 msgid ""
 "\n"
 "                Thank you for submitting records with the NCTR Record "
@@ -2130,7 +2204,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/email/submission_success.html:45
+#: recordtransfer/templates/recordtransfer/email/submission_success.html:47
 msgid ""
 "\n"
 "                The NCTR accepts full responsibility for the physical "
@@ -2209,14 +2283,14 @@ msgid "Logout"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/header.html:78
-#: recordtransfer/templates/recordtransfer/signup_form.html:128
+#: recordtransfer/templates/recordtransfer/signup_form.html:132
 #: recordtransfer/templates/registration/login.html:80
 msgid "Sign Up"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/header.html:86
 #: recordtransfer/templates/recordtransfer/home.html:21
-#: recordtransfer/templates/recordtransfer/signup_form.html:136
+#: recordtransfer/templates/recordtransfer/signup_form.html:140
 msgid "Log In"
 msgstr ""
 
@@ -2544,7 +2618,7 @@ msgstr ""
 msgid "The form was not valid."
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/signup_form.html:134
+#: recordtransfer/templates/recordtransfer/signup_form.html:138
 msgid "Already have an account?"
 msgstr ""
 
@@ -2722,6 +2796,19 @@ msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:60
 msgid "Remaining size allowed:"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:67
+msgid "Files added:"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:70
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:77
+msgid "files"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:74
+msgid "Files remaining:"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:12
@@ -2924,7 +3011,7 @@ msgstr ""
 #: recordtransfer/tests/unit/views/test_profile.py:146
 #: recordtransfer/tests/unit/views/test_profile.py:275
 #: recordtransfer/views/pre_submission.py:342
-#: recordtransfer/views/profile.py:131
+#: recordtransfer/views/profile.py:129
 msgid "Please correct the errors below."
 msgstr ""
 
@@ -3009,7 +3096,7 @@ msgstr ""
 msgid "A file with the name \"%(filename)s\" has already been uploaded"
 msgstr ""
 
-#: recordtransfer/views/account.py:155
+#: recordtransfer/views/account.py:177
 #, python-format
 msgid ""
 "You have %(count)s login attempt left before your account is locked out."
@@ -3018,7 +3105,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: recordtransfer/views/account.py:176
+#: recordtransfer/views/account.py:198
 msgid ""
 "You have been locked out due to too many failed login attempts. Please try "
 "again later."
@@ -3168,78 +3255,78 @@ msgid ""
 "contact us for assistance."
 msgstr ""
 
-#: recordtransfer/views/profile.py:85
+#: recordtransfer/views/profile.py:83
 msgid "Updated successfully"
 msgstr ""
 
-#: recordtransfer/views/profile.py:86
+#: recordtransfer/views/profile.py:84
 msgid "Could not update"
 msgstr ""
 
-#: recordtransfer/views/profile.py:140
+#: recordtransfer/views/profile.py:138
 msgid "Account details updated."
 msgstr ""
 
-#: recordtransfer/views/profile.py:141
+#: recordtransfer/views/profile.py:139
 msgid "Failed to update account information."
 msgstr ""
 
-#: recordtransfer/views/profile.py:149
+#: recordtransfer/views/profile.py:147
 msgid "Contact information updated."
 msgstr ""
 
-#: recordtransfer/views/profile.py:150
+#: recordtransfer/views/profile.py:148
 msgid "Failed to update contact information."
 msgstr ""
 
-#: recordtransfer/views/profile.py:172
+#: recordtransfer/views/profile.py:170
 msgid "In-progress submission deleted."
 msgstr ""
 
-#: recordtransfer/views/profile.py:177
+#: recordtransfer/views/profile.py:175
 msgid "In-progress submission not found."
 msgstr ""
 
-#: recordtransfer/views/profile.py:182
+#: recordtransfer/views/profile.py:180
 msgid "Failed to delete in-progress submission."
 msgstr ""
 
-#: recordtransfer/views/profile.py:279
+#: recordtransfer/views/profile.py:277
 msgid "Submission group created successfully."
 msgstr ""
 
-#: recordtransfer/views/profile.py:338
+#: recordtransfer/views/profile.py:336
 #, python-format
 msgid "Submission group \"%(name)s\" deleted."
 msgstr ""
 
-#: recordtransfer/views/profile.py:345
+#: recordtransfer/views/profile.py:343
 msgid "Submission group not found."
 msgstr ""
 
-#: recordtransfer/views/profile.py:350
+#: recordtransfer/views/profile.py:348
 msgid "Failed to delete submission group."
 msgstr ""
 
-#: recordtransfer/views/profile.py:403
+#: recordtransfer/views/profile.py:401
 msgid "Submission or group not found"
 msgstr ""
 
-#: recordtransfer/views/profile.py:421
+#: recordtransfer/views/profile.py:419
 msgid "Failed to assign submission to group"
 msgstr ""
 
-#: recordtransfer/views/profile.py:436
+#: recordtransfer/views/profile.py:434
 #, python-format
 msgid "Submission \"%(title)s\" is not assigned to any group"
 msgstr ""
 
-#: recordtransfer/views/profile.py:444
+#: recordtransfer/views/profile.py:442
 #, python-format
 msgid "Submission \"%(title)s\" unassigned from group \"%(group_name)s\""
 msgstr ""
 
-#: recordtransfer/views/profile.py:460
+#: recordtransfer/views/profile.py:458
 #, python-format
 msgid "Submission \"%(title)s\" assigned to group \"%(group_name)s\""
 msgstr ""
