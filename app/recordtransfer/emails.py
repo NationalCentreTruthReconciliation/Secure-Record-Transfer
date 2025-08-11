@@ -375,6 +375,7 @@ def _send_mail(
         LOGGER.info("SUBJECT: %s", subject)
         LOGGER.info("TO: %s", recipient)
         LOGGER.info("FROM: %s", from_email)
+        context["base_url"] = _get_base_url_with_protocol()
         context["site_domain"] = Site.objects.get_current().domain
 
         with translation.override(user_language or translation.get_language()):
