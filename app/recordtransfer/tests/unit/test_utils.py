@@ -272,6 +272,21 @@ class TestAcceptFile(TestCase):
         self.assertFalse(result["accepted"])
         self.assertIn("extension", result["error"])
 
+    def test_malicious_file_names(self) -> None:
+        """Test that malicious filenames are not accepted."""
+        param_list = [
+            "file\x00name.docx",  # control character in file name
+            "A" * 300 + ".pdf",  # buffer overflow attempt
+            "/".join(["A" * 100] * 10) + "/malicious.pdf"  # very long path components
+            "%2e%2e%2f%2e%2e%2f%2e%2e%2fuser%2freport.pdf",  # URL encoded traversal
+            "../../../user/document.docx",  # relative path
+            "/opt/secure-record-transfer/users.xlsx",  # absolute path
+        ]
+        for filename in param_list:
+            with self.subTest():
+                result = accept_file(filename, "512")
+                self.assertFalse(result["accepted"])
+
     def test_invalid_size(self) -> None:
         """Test that files with invalid sizes are rejected."""
         param_list = [
