@@ -224,6 +224,18 @@ class SubmissionFormWizard(SessionWizardView):
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle GET request to load a submission."""
+        # Handle browser back/forward navigation via GET parameter
+        wizard_goto_step = request.GET.get("wizard_goto_step")
+        if wizard_goto_step:
+            # For GET navigation, just set the step and render without validation
+            self.storage.current_step = wizard_goto_step
+            form = self.get_form(
+                data=self.storage.get_step_data(wizard_goto_step),
+                files=self.storage.get_step_files(wizard_goto_step),
+            )
+            forms.clear_form_errors(form)
+            return self.render(form, **kwargs)
+
         if self.in_progress_submission:
             self.load_form_data()
             return self.render(self.get_form())

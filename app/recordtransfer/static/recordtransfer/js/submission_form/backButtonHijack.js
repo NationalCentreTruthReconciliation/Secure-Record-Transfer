@@ -1,7 +1,9 @@
+import htmx from "htmx.org";
+
 // Get the current step slug from the template's json_script
 const getCurrentStepName = () => {
     const el = document.getElementById("current_step_name");
-    if (!el) {return null;}
+    if (!el) { return null; }
     try {
         return JSON.parse(el.textContent);
     } catch (e) {
@@ -11,13 +13,27 @@ const getCurrentStepName = () => {
 };
 
 // Submit the wizard to navigate directly to a step by name
-const navigateToStep = (stepName) => {
+const navigateToStep = (stepName, { method = "POST" } = {}) => {
+    if (!stepName) { return; }
+
+    if (method === "GET") {
+        // Use htmx to fetch the step HTML without submitting form data
+        const url = new URL(window.location.href);
+        url.searchParams.set("wizard_goto_step", stepName);
+        htmx.ajax("GET", url.toString(), {
+            target: "#main-container",
+            select: "#main-container",
+            swap: "innerHTML"
+        });
+        return;
+    }
+
     const form = document.getElementById("submission-form");
-    if (!form || !stepName) {return;}
+    if (!form) { return; }
 
     // Remove any previously injected input to avoid duplicates
     const existing = form.querySelector("input[name=\"wizard_goto_step\"][data-injected=\"1\"]");
-    if (existing) {existing.remove();}
+    if (existing) { existing.remove(); }
 
     const input = document.createElement("input");
     input.type = "hidden";
@@ -32,7 +48,7 @@ const navigateToStep = (stepName) => {
 // Ensure history state reflects the current step; push when changing, replace on first load
 const updateHistoryForCurrentStep = () => {
     const stepName = getCurrentStepName();
-    if (!stepName) {return;}
+    if (!stepName) { return; }
 
     const newState = { isFormStep: true, stepName };
     const curState = window.history.state;
@@ -49,13 +65,12 @@ export const setupBrowserNavigation = () => {
     updateHistoryForCurrentStep();
 
     // Handle back/forward within the wizard
-    window.addEventListener(
-        "popstate",
-        (event) => {
-            const state = event.state;
-            if (!state || !state.isFormStep) {return;}
-            if (state.stepName) {navigateToStep(state.stepName);}
-        },
-        { once: false }
-    );
+    window.addEventListener("popstate", (event) => {
+        const state = event.state;
+        if (!state || !state.isFormStep) { return; }
+        if (state.stepName) {
+            // Use GET here instead of form submission POST to avoid incomplete data errors
+            navigateToStep(state.stepName, { method: "GET" });
+        }
+    });
 };
