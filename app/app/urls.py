@@ -14,7 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
@@ -39,6 +42,7 @@ urlpatterns = (
         name="login",
     ),
     path("account/", include("django.contrib.auth.urls")),
+<<<<<<< HEAD
     path(
         "jsi18n/",
         cache_page(86400, key_prefix="jsi18n-%s" % get_js_translation_version())(
@@ -51,4 +55,10 @@ urlpatterns = (
 if settings.DEBUG and not settings.TESTING:
     from debug_toolbar.toolbar import debug_toolbar_urls
 
+=======
+]
+
+if settings.DEBUG and not settings.TESTING:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+>>>>>>> master
     urlpatterns += debug_toolbar_urls()
