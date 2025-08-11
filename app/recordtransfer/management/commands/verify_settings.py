@@ -11,6 +11,27 @@ from django.core.management.base import BaseCommand
 LOGGER = logging.getLogger(__name__)
 
 
+def is_deployed_environment() -> bool:
+    """Detect if the app is running in a deployed production environment.
+
+    Returns True if ALLOWED_HOSTS contains any non-localhost/non-127.0.0.1 hosts,
+    indicating this is a deployed production environment.
+    """
+    allowed_hosts = settings.ALLOWED_HOSTS
+
+    # If ALLOWED_HOSTS is ['*'], consider it production
+    if "*" in allowed_hosts:
+        return True
+
+    # Check if any host is not localhost/127.0.0.1
+    for host in allowed_hosts:
+        host = host.strip().lower()
+        if host not in ["localhost", "127.0.0.1", ""]:
+            return True
+
+    return False
+
+
 class Command(BaseCommand):
     """Verify application settings defined in the DJANGO_SETTINGS_MODULE."""
 
@@ -27,7 +48,9 @@ class Command(BaseCommand):
             verify_accepted_file_formats()
             verify_upload_session_expiry_settings()
             verify_site_id()
-            verify_recaptcha_settings()
+            if is_deployed_environment():
+                verify_security_settings()
+                verify_recaptcha_settings()
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)
@@ -402,14 +425,29 @@ def verify_axes_settings() -> None:
         raise ImproperlyConfigured("AXES_COOLOFF_TIME must be a float greater than zero")
 
 
+def verify_security_settings() -> None:
+    """Verify SECRET_KEY value is set."""
+    secret_key = getattr(settings, "SECRET_KEY", "")
+    if not secret_key:
+        raise ImproperlyConfigured(
+            "SECRET_KEY is required. Generate a secure secret key."
+        )
+
+    LOGGER.info("Verified SECRET_KEY is set.")
+
+
 def verify_recaptcha_settings() -> None:
     """Verify Recaptcha settings."""
-    if not settings.ENABLE_RECAPTCHA:
-        LOGGER.debug("Recaptcha is disabled, skipping verification.")
-        return
+    if not getattr(settings, "RECAPTCHA_PUBLIC_KEY", ""):
+        raise ImproperlyConfigured(
+            "RECAPTCHA_PUBLIC_KEY is required in production environments. "
+            "Set this to a valid reCAPTCHA public key."
+        )
 
-    if not settings.RECAPTCHA_PUBLIC_KEY:
-        raise ImproperlyConfigured("RECAPTCHA_PUBLIC_KEY is not set")
+    if not getattr(settings, "RECAPTCHA_PRIVATE_KEY", ""):
+        raise ImproperlyConfigured(
+            "RECAPTCHA_PRIVATE_KEY is required in production environments. "
+            "Set this to a valid reCAPTCHA private key."
+        )
 
-    if not settings.RECAPTCHA_PRIVATE_KEY:
-        raise ImproperlyConfigured("RECAPTCHA_PRIVATE_KEY is not set")
+    LOGGER.info("reCAPTCHA is properly configured.")

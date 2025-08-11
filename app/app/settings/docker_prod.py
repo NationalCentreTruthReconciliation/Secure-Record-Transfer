@@ -13,9 +13,9 @@ CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
 SECRET_KEY = config("SECRET_KEY", cast=str)
 
 # Recaptcha
-ENABLE_RECAPTCHA = config("ENABLE_RECAPTCHA", default=True, cast=bool)
-RECAPTCHA_PUBLIC_KEY = config("RECAPTCHA_PUBLIC_KEY", default="", cast=str)
-RECAPTCHA_PRIVATE_KEY = config("RECAPTCHA_PRIVATE_KEY", default="", cast=str)
+RECAPTCHA_PUBLIC_KEY = config("RECAPTCHA_PUBLIC_KEY", cast=str)
+RECAPTCHA_PRIVATE_KEY = config("RECAPTCHA_PRIVATE_KEY", cast=str)
+
 
 # MySQL Database
 
