@@ -31,6 +31,9 @@ INTERNAL_IPS = [
 ]
 
 
+EMAIL_BASE_URL = "http://localhost:8000"
+
+
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }

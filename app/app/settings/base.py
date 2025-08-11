@@ -35,8 +35,8 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    # AxesStandaloneBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    "axes.backends.AxesStandaloneBackend",
+    # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    "axes.backends.AxesBackend",
     # Django ModelBackend is the default authentication backend.
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -51,10 +51,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
-    "recordtransfer.middleware.SaveUserLanguageMiddleware",  # After LocaleMiddleware
-    "django.middleware.gzip.GZipMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "recordtransfer.middleware.SaveUserLanguageMiddleware",  # After LocaleMiddleware
     # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
     "axes.middleware.AxesMiddleware",
 ]

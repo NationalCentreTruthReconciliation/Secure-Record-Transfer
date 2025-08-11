@@ -16,6 +16,8 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
+EMAIL_BASE_URL = "http://localhost:8000"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
