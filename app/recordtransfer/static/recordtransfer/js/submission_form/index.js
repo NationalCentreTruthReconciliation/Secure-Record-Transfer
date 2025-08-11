@@ -53,6 +53,32 @@ export const initializeSubmissionForm = () => {
 
     _setupWithContext();
 
+    window.addEventListener("popstate", (event) => {
+        if (event.state && event.state.step) {
+            showStep(event.state.step);
+        }
+    });
+    const showStep = (stepNumber) => {
+    // Navigate to the specific step
+        const stepButton = document.querySelector(
+            `button[name="wizard_goto_step"][value="${stepNumber}"]`
+        );
+        if (stepButton) {
+            stepButton.click();
+        } else {
+        // Fallback: use form submission to navigate to step
+            const form = document.getElementById("submission-form");
+            if (form) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "wizard_goto_step";
+                input.value = stepNumber;
+                form.appendChild(input);
+                form.submit();
+            }
+        }
+    };
+
     const submitButton = document.getElementById("submit-form-btn");
     if (submitButton) {
         submitButton.addEventListener("click", (event) => {
