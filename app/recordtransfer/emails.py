@@ -69,6 +69,9 @@ def send_submission_creation_success(
         language: Optional language code to use for rendering the email. Only used when
             `recipient_emails` is provided.
     """
+
+    subject = "New Submission Ready for Review"
+
     submission_url = f"{_get_base_url_with_protocol().rstrip('/')}/{submission.get_admin_change_url().lstrip('/')}"
     LOGGER.info("Generated submission change URL: %s", submission_url)
 
