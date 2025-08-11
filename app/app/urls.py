@@ -23,7 +23,7 @@ from django.views.i18n import JavaScriptCatalog
 from recordtransfer.utils import get_js_translation_version
 from recordtransfer.views.account import AsyncPasswordResetView, Login
 
-urlpatterns = (
+urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("admin/django_rq/", include("django_rq.urls")),
     path("admin/", admin.site.urls),
@@ -46,7 +46,7 @@ urlpatterns = (
         ),
         name="javascript-catalog",
     ),
-)
+]
 
 if settings.DEBUG and not settings.TESTING:
     from debug_toolbar.toolbar import debug_toolbar_urls
