@@ -61,6 +61,13 @@ export function setupUnsavedChangesProtection() {
         ...document.getElementsByClassName("step-link")
     ];
 
+    // Add Django Debug Toolbar links as safe elements
+    const djDebugElement = document.getElementById("djDebug");
+    if (djDebugElement) {
+        const debugLinks = djDebugElement.querySelectorAll("a");
+        safeElements.push(...debugLinks);
+    }
+
     safeElements.forEach(element => {
         if (element) {
             element.addEventListener("click", () => {
