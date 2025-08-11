@@ -30,8 +30,8 @@ export function setupUnsavedChangesProtection() {
     // The URL to navigate to when the user chooses to leave the form
     let targetUrl = "";
 
-    // Add event listeners to only navigational links
-    document.querySelectorAll("a:not(.non-nav-link)").forEach(link => {
+    // Add event listeners to only navigational links (excluding debug toolbar links)
+    document.querySelectorAll("a:not(.non-nav-link):not(#djDebug a)").forEach(link => {
         link.addEventListener("click", (event) => {
             event.preventDefault();
             targetUrl = event.currentTarget.href;
@@ -60,13 +60,6 @@ export function setupUnsavedChangesProtection() {
         elements.formSaveButton,
         ...document.getElementsByClassName("step-link")
     ];
-
-    // Add Django Debug Toolbar links as safe elements
-    const djDebugElement = document.getElementById("djDebug");
-    if (djDebugElement) {
-        const debugLinks = djDebugElement.querySelectorAll("a");
-        safeElements.push(...debugLinks);
-    }
 
     safeElements.forEach(element => {
         if (element) {
