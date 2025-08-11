@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 import re
@@ -10,7 +11,7 @@ from django.core.management.base import BaseCommand
 
 LOGGER = logging.getLogger(__name__)
 
-
+@functools.lru_cache(maxsize=1)
 def is_deployed_environment() -> bool:
     """Detect if the app is running in a deployed production environment.
 
