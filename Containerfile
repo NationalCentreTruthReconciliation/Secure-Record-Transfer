@@ -26,7 +26,7 @@ RUN npm install --no-color
 COPY ./app ${APP_DIR}
 
 # Make arg passed from compose files into environment variable
-ARG WEBPACK_MODE
+ARG WEBPACK_MODE=production
 ENV WEBPACK_MODE ${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
@@ -64,18 +64,23 @@ ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]
 FROM base AS builder
 
 ENV UV_LINK_MODE=copy
+ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 # Install build tools for production dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     default-libmysqlclient-dev \
-    pkg-config
+    pkg-config \
+    gettext
 
 # Install production dependencies (e.g., mysqlclient)
 # Compile byte code to improve startup time (see https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode)
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --extra prod --compile-bytecode
+
+# Compile locale message files
+RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
 
 
 FROM python:3.11-slim AS prod

@@ -318,7 +318,7 @@ class UploadSessionAdmin(ReadOnlyAdmin):
             upload_size = "n/a"
         return upload_size
 
-    @display(description="Last upload at")
+    @display(description=_("Last upload at"))
     def last_upload_at(self, obj: UploadSession) -> datetime:
         """Display the last time a file was uploaded to the session."""
         return obj.last_upload_interaction_time
@@ -698,7 +698,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         *UserAdmin.fieldsets,  # original form fieldsets, expanded
         (
-            "Contact Information",
+            _("Contact Information"),
             {
                 "fields": (
                     "phone_number",
@@ -713,7 +713,13 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (
-            "Email Updates",
+            _("Language Preferences"),
+            {
+                "fields": ("language",),
+            },
+        ),
+        (
+            _("Email Updates"),
             {
                 "fields": ("gets_submission_email_updates",),
             },

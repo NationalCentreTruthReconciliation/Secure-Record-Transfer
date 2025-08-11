@@ -33,7 +33,12 @@ export async function setupUppy(context) {
     const updateCapacity = (uppy) => {
         const uppyFiles = uppy.getFiles();
         const totalSize = uppyFiles.reduce((total, file) => total + file.size, 0);
-        updateCapacityDisplay(totalSize, context["MAX_TOTAL_UPLOAD_SIZE_MB"]);
+        updateCapacityDisplay(
+            totalSize,
+            context["MAX_TOTAL_UPLOAD_SIZE_MB"],
+            uppyFiles.length,
+            context["MAX_TOTAL_UPLOAD_COUNT"]
+        );
     };
 
     const uppy = new Uppy(
@@ -138,7 +143,7 @@ export async function setupUppy(context) {
         const uppyFiles = uppy.getFiles();
 
         if (uppyFiles.length === 0) {
-            uppy.info("You must upload at least one file.", "error", 5000);
+            uppy.info(window.django.gettext("You must upload at least one file."), "error", 5000);
             return;
         }
 
@@ -147,7 +152,7 @@ export async function setupUppy(context) {
         );
         if (hasIssues) {
             uppy.info(
-                "Remove the files with issues to proceed.",
+                window.django.gettext("Remove the files with issues to proceed."),
                 "error",
                 5000
             );

@@ -7,12 +7,35 @@ from decouple import config
 from .base import *
 
 DEBUG = True
+
+INSTALLED_APPS += [
+    "debug_toolbar",
+]
+
+# Insert debug toolbar middleware after GZipMiddleware
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.middleware.gzip.GZipMiddleware") + 1,
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+)
+
 SITE_ID = config("SITE_ID", default=1, cast=int)
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
 ]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+EMAIL_BASE_URL = "http://localhost:8000"
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+}
 
 # MySQL Database
 

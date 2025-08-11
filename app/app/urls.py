@@ -15,11 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
+from django.views.i18n import JavaScriptCatalog
+from recordtransfer.utils import get_js_translation_version
 from recordtransfer.views.account import AsyncPasswordResetView, Login
 
 urlpatterns = [
+    path("i18n/", include("django.conf.urls.i18n")),
     path("admin/django_rq/", include("django_rq.urls")),
     path("admin/", admin.site.urls),
     path("", include("recordtransfer.urls")),
@@ -34,4 +39,16 @@ urlpatterns = [
         name="login",
     ),
     path("account/", include("django.contrib.auth.urls")),
+    path(
+        "jsi18n/",
+        cache_page(86400, key_prefix="jsi18n-%s" % get_js_translation_version())(
+            JavaScriptCatalog.as_view()
+        ),
+        name="javascript-catalog",
+    ),
 ]
+
+if settings.DEBUG and not settings.TESTING:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()

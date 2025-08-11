@@ -395,6 +395,15 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "uploadfiles-general_note"))
         )
 
+        # Verify initial file count displays
+        files_count_element = self.driver.find_element(By.ID, "files-count")
+        remaining_files_element = self.driver.find_element(By.ID, "remaining-files")
+
+        # Check initial values
+        self.assertEqual(files_count_element.text, "0")
+        # The remaining files should equal the max upload count initially
+        initial_remaining = remaining_files_element.text
+
         # Create temp file with specified name
         with tempfile.NamedTemporaryFile(suffix=data["filename"]) as temp_file:
             temp_file.write(data["content"])
@@ -407,6 +416,12 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "is-complete"))
             )
+
+            # Verify file count displays are updated after upload
+            self.assertEqual(files_count_element.text, "1")
+            # Remaining files should be decremented by 1
+            expected_remaining = str(int(initial_remaining) - 1)
+            self.assertEqual(remaining_files_element.text, expected_remaining)
 
             if not required_only:
                 general_note_input = self.driver.find_element(By.NAME, "uploadfiles-general_note")

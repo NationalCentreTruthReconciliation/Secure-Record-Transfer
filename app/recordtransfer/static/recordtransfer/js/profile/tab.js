@@ -33,3 +33,14 @@ export const initTabListeners = () => {
         });
     });
 };
+
+export const redirectToCorrectFragment = () => {
+    if (window.location.hash) {
+        const tabId = window.location.hash.substring(1); // Remove the #
+        const tabElement = document.getElementById(tabId);
+
+        if (tabElement) {
+            tabElement.click();
+        }
+    }
+};
