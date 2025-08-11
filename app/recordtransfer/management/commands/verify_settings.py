@@ -27,6 +27,7 @@ class Command(BaseCommand):
             verify_accepted_file_formats()
             verify_upload_session_expiry_settings()
             verify_site_id()
+            verify_recaptcha_settings()
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)
@@ -382,27 +383,33 @@ def verify_site_id() -> None:
             f"Site with ID {site_id} does not exist. Check the configured SITE_ID"
         )
 
+
 def verify_axes_settings() -> None:
     """Verify Axes settings."""
     if not settings.AXES_ENABLED:
         LOGGER.debug("AXES is disabled, skipping verification.")
         return
     if settings.AXES_FAILURE_LIMIT <= 0:
-        raise ImproperlyConfigured(
-            "AXES_FAILURE_LIMIT must be greater than zero"
-        )
+        raise ImproperlyConfigured("AXES_FAILURE_LIMIT must be greater than zero")
 
     if settings.AXES_WARNING_THRESHOLD <= 0:
-        raise ImproperlyConfigured(
-            "AXES_WARNING_THRESHOLD must be greater than zero"
-        )
+        raise ImproperlyConfigured("AXES_WARNING_THRESHOLD must be greater than zero")
 
     if settings.AXES_WARNING_THRESHOLD >= settings.AXES_FAILURE_LIMIT:
-        raise ImproperlyConfigured(
-            "AXES_WARNING_THRESHOLD must be less than AXES_FAILURE_LIMIT"
-        )
+        raise ImproperlyConfigured("AXES_WARNING_THRESHOLD must be less than AXES_FAILURE_LIMIT")
 
     if settings.AXES_COOLOFF_TIME <= 0:
-        raise ImproperlyConfigured(
-            "AXES_COOLOFF_TIME must be a float greater than zero"
-        )
+        raise ImproperlyConfigured("AXES_COOLOFF_TIME must be a float greater than zero")
+
+
+def verify_recaptcha_settings() -> None:
+    """Verify Recaptcha settings."""
+    if not settings.ENABLE_RECAPTCHA:
+        LOGGER.debug("Recaptcha is disabled, skipping verification.")
+        return
+
+    if not settings.RECAPTCHA_PUBLIC_KEY:
+        raise ImproperlyConfigured("RECAPTCHA_PUBLIC_KEY is not set")
+
+    if not settings.RECAPTCHA_PRIVATE_KEY:
+        raise ImproperlyConfigured("RECAPTCHA_PRIVATE_KEY is not set")

@@ -12,6 +12,11 @@ CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
 
 SECRET_KEY = config("SECRET_KEY", cast=str)
 
+# Recaptcha
+ENABLE_RECAPTCHA = config("ENABLE_RECAPTCHA", default=True, cast=bool)
+RECAPTCHA_PUBLIC_KEY = config("RECAPTCHA_PUBLIC_KEY", default="", cast=str)
+RECAPTCHA_PRIVATE_KEY = config("RECAPTCHA_PRIVATE_KEY", default="", cast=str)
+
 # MySQL Database
 
 DATABASES = {
@@ -50,11 +55,6 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
-
-
-# Captcha
-
-SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
 
 
 # Logging
