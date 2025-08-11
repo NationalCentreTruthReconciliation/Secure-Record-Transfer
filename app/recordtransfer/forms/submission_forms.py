@@ -12,7 +12,7 @@ from django import forms
 from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseForm, BaseFormSet
-from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.constants import (
     HtmlIds,
@@ -63,7 +63,7 @@ class AcceptLegal(SubmissionForm):
     agreement_accepted = forms.BooleanField(
         required=True,
         widget=forms.CheckboxInput(),
-        label=gettext("I accept these terms"),
+        label=_("I accept these terms"),
     )
 
 
@@ -99,25 +99,25 @@ class ContactInfoForm(SubmissionForm, ContactInfoFormMixin):
         max_length=64,
         min_length=2,
         required=True,
-        label=gettext("Contact name"),
+        label=_("Contact name"),
     )
 
     job_title = forms.CharField(
         max_length=64,
         min_length=2,
         required=False,
-        label=gettext("Job title"),
+        label=_("Job title"),
     )
 
     organization = forms.CharField(
         max_length=64,
         min_length=2,
         required=False,
-        label=gettext("Organization"),
+        label=_("Organization"),
     )
 
     email = forms.EmailField(
-        label=gettext("Email"),
+        label=_("Email"),
     )
 
     def clean(self) -> dict:
@@ -178,7 +178,7 @@ class SourceInfoForm(SubmissionForm):
                 self.fields[field].label = "hidden"
 
         if not cleaned_data.get("source_name"):
-            self.add_error("source_name", gettext("This field is required."))
+            self.add_error("source_name", _("This field is required."))
 
         self._validate_source_type(cleaned_data)
         self._validate_source_role(cleaned_data)
@@ -189,11 +189,11 @@ class SourceInfoForm(SubmissionForm):
         """Validate the source type field."""
         source_type = cleaned_data.get("source_type")
         if not source_type:
-            self.add_error("source_type", gettext("This field is required."))
+            self.add_error("source_type", _("This field is required."))
         elif source_type.name.lower() == "other" and not cleaned_data.get("other_source_type"):
             self.add_error(
                 "other_source_type",
-                gettext('If "Source type" is Other, enter your own source type'),
+                _('If "Source type" is Other, enter your own source type'),
             )
         elif source_type.name.lower() != "other":
             cleaned_data["other_source_type"] = ""
@@ -204,11 +204,11 @@ class SourceInfoForm(SubmissionForm):
         """Validate the source role field."""
         source_role = cleaned_data.get("source_role")
         if not source_role:
-            self.add_error("source_role", gettext("This field is required."))
+            self.add_error("source_role", _("This field is required."))
         elif source_role.name.lower() == "other" and not cleaned_data.get("other_source_role"):
             self.add_error(
                 "other_source_role",
-                gettext('If "Source role" is Other, enter your own source role'),
+                _('If "Source role" is Other, enter your own source role'),
             )
         elif source_role.name.lower() != "other":
             cleaned_data["other_source_role"] = ""
@@ -217,13 +217,13 @@ class SourceInfoForm(SubmissionForm):
 
     enter_manual_source_info = forms.ChoiceField(
         choices=[
-            ("yes", gettext("Yes")),
-            ("no", gettext("No")),
+            ("yes", _("Yes")),
+            ("no", _("No")),
         ],
         widget=forms.RadioSelect(
             attrs={"id": HtmlIds.ID_SOURCE_INFO_ENTER_MANUAL_SOURCE_INFO},
         ),
-        label=gettext("Fill out this section?"),
+        label=_("Fill out this section?"),
         initial="no",
     )
 
@@ -236,8 +236,8 @@ class SourceInfoForm(SubmissionForm):
                 "class": "faux-required-field",
             }
         ),
-        label=gettext("Name of source"),
-        help_text=gettext("The organization or entity submitting the records"),
+        label=_("Name of source"),
+        help_text=_("The organization or entity submitting the records"),
     )
 
     source_type = forms.ModelChoiceField(
@@ -251,9 +251,9 @@ class SourceInfoForm(SubmissionForm):
             )
         )
         .order_by("sort_order_other_first"),
-        empty_label=gettext("Please select one"),
-        label=gettext("Source type"),
-        help_text=gettext(
+        empty_label=_("Please select one"),
+        label=_("Source type"),
+        help_text=_(
             "How would you describe <b>what</b> the source entity is? "
             "i.e., The source is a(n) ______"
         ),
@@ -269,12 +269,12 @@ class SourceInfoForm(SubmissionForm):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": gettext("A source type not covered by the other choices"),
+                "placeholder": _("A source type not covered by the other choices"),
                 "class": "faux-required-field",
                 "id": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_TYPE,
             }
         ),
-        label=gettext("Other source type"),
+        label=_("Other source type"),
     )
 
     source_role = forms.ModelChoiceField(
@@ -288,9 +288,9 @@ class SourceInfoForm(SubmissionForm):
             )
         )
         .order_by("sort_order_other_first"),
-        empty_label=gettext("Please select one"),
-        label=gettext("Source role"),
-        help_text=gettext("How does the source relate to the records? "),
+        empty_label=_("Please select one"),
+        label=_("Source role"),
+        help_text=_("How does the source relate to the records? "),
         widget=forms.Select(
             attrs={
                 "class": "reduce-form-field-width faux-required-field",
@@ -303,12 +303,12 @@ class SourceInfoForm(SubmissionForm):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": gettext("A source role not covered by the other choices"),
+                "placeholder": _("A source role not covered by the other choices"),
                 "class": "faux-required-field",
                 "id": HtmlIds.ID_SOURCE_INFO_OTHER_SOURCE_ROLE,
             }
         ),
-        label=gettext("Other source role"),
+        label=_("Other source role"),
     )
 
     source_note = forms.CharField(
@@ -317,14 +317,14 @@ class SourceInfoForm(SubmissionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "4",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Enter any notes you think may be useful for the archives to "
                     "have about this entity (optional)"
                 ),
             }
         ),
-        label=gettext("Source notes"),
-        help_text=gettext("e.g., The donor wishes to remain anonymous"),
+        label=_("Source notes"),
+        help_text=_("e.g., The donor wishes to remain anonymous"),
     )
 
 
@@ -357,7 +357,7 @@ class RecordDescriptionForm(SubmissionForm):
         match_obj = re.match(RecordDescriptionForm.DATE_REGEX, date)
 
         if match_obj is None:
-            self.add_error("date_of_materials", gettext("Invalid date format"))
+            self.add_error("date_of_materials", _("Invalid date format"))
             return
 
         raw_start_date = match_obj.group("start_date")
@@ -376,17 +376,17 @@ class RecordDescriptionForm(SubmissionForm):
 
             if parsed_date.date() > datetime.now().date():
                 error_msg = (
-                    gettext("Date cannot be in the future")
+                    _("Date cannot be in the future")
                     if date_type == "start"
-                    else gettext("End date cannot be in the future")
+                    else _("End date cannot be in the future")
                 )
                 self.add_error("date_of_materials", error_msg)
 
             if parsed_date.date() < datetime(1800, 1, 1).date():
                 error_msg = (
-                    gettext("Date cannot be before 1800")
+                    _("Date cannot be before 1800")
                     if date_type == "start"
-                    else gettext("End date cannot be before 1800")
+                    else _("End date cannot be before 1800")
                 )
                 self.add_error("date_of_materials", error_msg)
 
@@ -394,9 +394,9 @@ class RecordDescriptionForm(SubmissionForm):
 
         except ValueError:
             error_msg = (
-                gettext("Invalid date format")
+                _("Invalid date format")
                 if date_type == "start"
-                else gettext("Invalid date format for end date")
+                else _("Invalid date format for end date")
             )
             self.add_error("date_of_materials", error_msg)
             return None
@@ -406,7 +406,7 @@ class RecordDescriptionForm(SubmissionForm):
     ) -> None:
         """Validate date range constraints."""
         if end_date < start_date:
-            self.add_error("date_of_materials", gettext("End date must be later than start date"))
+            self.add_error("date_of_materials", _("End date must be later than start date"))
 
         if end_date == start_date:
             cleaned_data["date_of_materials"] = raw_start_date
@@ -415,17 +415,17 @@ class RecordDescriptionForm(SubmissionForm):
         min_length=2,
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={"placeholder": gettext("e.g., Committee Meeting Minutes")}),
-        label=gettext("Title"),
+        widget=forms.TextInput(attrs={"placeholder": _("e.g., Committee Meeting Minutes")}),
+        label=_("Title"),
     )
 
     language_of_material = forms.CharField(
         required=True,
         min_length=2,
         max_length=100,
-        widget=forms.TextInput(attrs={"placeholder": gettext("English, French")}),
-        help_text=gettext("Enter all relevant languages here"),
-        label=gettext("Language(s)"),
+        widget=forms.TextInput(attrs={"placeholder": _("English, French")}),
+        help_text=_("Enter all relevant languages here"),
+        label=_("Language(s)"),
     )
 
     date_of_materials = forms.RegexField(
@@ -434,18 +434,18 @@ class RecordDescriptionForm(SubmissionForm):
         max_length=23,
         required=True,
         error_messages={
-            "required": gettext("This field is required."),
-            "invalid": gettext("Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"),
+            "required": _("This field is required."),
+            "invalid": _("Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"),
         },
         widget=forms.TextInput(
             attrs={
-                "placeholder": gettext("2000-03-14 - 2001-05-06"),
+                "placeholder": _("2000-03-14 - 2001-05-06"),
                 "class": "date-range-picker" if settings.USE_DATE_WIDGETS else "date-range-text",
                 **({"readonly": "readonly"} if settings.USE_DATE_WIDGETS else {}),
             }
         ),
-        label=gettext("Date of materials"),
-        help_text=gettext(
+        label=_("Date of materials"),
+        help_text=_(
             "Enter the range of dates that the materials cover, or a single date if there is "
             "no range."
         ),
@@ -454,8 +454,8 @@ class RecordDescriptionForm(SubmissionForm):
     date_is_approximate = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(),
-        label=gettext("Date is approximated"),
-        help_text=gettext(
+        label=_("Date is approximated"),
+        help_text=_(
             "Check this box if the date is approximate, or if you are unsure of the date."
         ),
     )
@@ -467,8 +467,8 @@ class RecordDescriptionForm(SubmissionForm):
         widget=forms.Textarea(
             attrs={"rows": "6", "placeholder": "e.g., These files contain images from ..."}
         ),
-        label=gettext("Description of contents"),
-        help_text=gettext(
+        label=_("Description of contents"),
+        help_text=_(
             "Briefly describe the content of the files you are submitting. "
             "What do the files contain?"
         ),
@@ -480,15 +480,15 @@ class RecordDescriptionForm(SubmissionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "4",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Enter any information you have on the history of who has had "
                     "custody of the records or who has kept the records in the past "
                     "(optional)"
                 ),
             }
         ),
-        label=gettext("Custodial history"),
-        help_text=gettext("e.g., John Doe held these records before donating them in 1960"),
+        label=_("Custodial history"),
+        help_text=_("e.g., John Doe held these records before donating them in 1960"),
     )
 
 
@@ -503,14 +503,14 @@ class ExtendedRecordDescriptionForm(RecordDescriptionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "2",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Record how many files and of what type they are that you "
                     "are planning on submitting (optional)"
                 ),
             }
         ),
-        help_text=gettext("For example, &quot;200 PDF documents, totalling 2.0GB&quot;"),
-        label=gettext("Quantity and type of files"),
+        help_text=_("For example, &quot;200 PDF documents, totalling 2.0GB&quot;"),
+        label=_("Quantity and type of files"),
     )
 
 
@@ -545,14 +545,14 @@ class RightsForm(SubmissionForm):
         if rights_type and rights_type.name.lower() == "other" and not other_rights_type:
             self.add_error(
                 "rights_type",
-                gettext(
+                _(
                     'If "Other type of rights" is empty, you must choose one of the '
                     "Rights types here"
                 ),
             )
             self.add_error(
                 "other_rights_type",
-                gettext('If "Type of rights" is empty, you must enter a different type here'),
+                _('If "Type of rights" is empty, you must enter a different type here'),
             )
         elif rights_type != RightsType.objects.get(name="Other"):
             cleaned_data["other_rights_type"] = ""  # Clear this field since it's not needed
@@ -570,8 +570,8 @@ class RightsForm(SubmissionForm):
             )
         )
         .order_by("sort_order_other_first"),
-        label=gettext("Type of rights"),
-        empty_label=gettext("Select a rights type (optional)"),
+        label=_("Type of rights"),
+        empty_label=_("Select a rights type (optional)"),
         required=False,
     )
 
@@ -579,12 +579,12 @@ class RightsForm(SubmissionForm):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": gettext("Other type of rights not covered by other choices"),
+                "placeholder": _("Other type of rights not covered by other choices"),
                 "class": "rights-select-other",
             }
         ),
-        help_text=gettext("For example: &quot;UK Human Rights Act 1998&quot;"),
-        label=gettext("Other type of rights"),
+        help_text=_("For example: &quot;UK Human Rights Act 1998&quot;"),
+        label=_("Other type of rights"),
     )
 
     rights_value = forms.CharField(
@@ -592,15 +592,15 @@ class RightsForm(SubmissionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "2",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Any notes on these rights or which files they may apply to (optional)"
                 ),
             }
         ),
-        help_text=gettext(
+        help_text=_(
             "For example: &quot;Copyright until 2050&quot;, &quot;Only applies to images&quot;, etc."
         ),
-        label=gettext("Notes for rights"),
+        label=_("Notes for rights"),
     )
 
     # rights_note = forms.CharField(
@@ -645,23 +645,21 @@ class OtherIdentifiersForm(SubmissionForm):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": gettext("The type of the identifier"),
+                "placeholder": _("The type of the identifier"),
             }
         ),
-        help_text=gettext(
-            "For example: &quot;Receipt number&quot;, &quot;LAC Record ID&quot;, etc."
-        ),
-        label=gettext("Type of identifier"),
+        help_text=_("For example: &quot;Receipt number&quot;, &quot;LAC Record ID&quot;, etc."),
+        label=_("Type of identifier"),
     )
 
     other_identifier_value = forms.CharField(
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": gettext("Identifier value"),
+                "placeholder": _("Identifier value"),
             }
         ),
-        label=gettext("Identifier value"),
+        label=_("Identifier value"),
     )
 
     other_identifier_note = forms.CharField(
@@ -669,12 +667,12 @@ class OtherIdentifiersForm(SubmissionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "2",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Any notes on this identifier or which files it may apply to (optional)."
                 ),
             }
         ),
-        label=gettext("Notes for identifier"),
+        label=_("Notes for identifier"),
     )
 
 
@@ -727,7 +725,7 @@ class GroupSubmissionForm(SubmissionForm):
                 "id": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
             }
         ),
-        label=gettext("Assigned group"),
+        label=_("Assigned group"),
     )
 
 
@@ -745,15 +743,15 @@ class UploadFilesForm(SubmissionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "6",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Record any general notes you have about the records here (optional)"
                 ),
             }
         ),
-        help_text=gettext(
+        help_text=_(
             "These should be notes that did not fit in any of the previous steps of this form"
         ),
-        label=gettext("Other notes"),
+        label=_("Other notes"),
     )
 
     session_token = forms.CharField(
@@ -804,15 +802,15 @@ class FinalStepFormNoUpload(SubmissionForm):
         widget=forms.Textarea(
             attrs={
                 "rows": "6",
-                "placeholder": gettext(
+                "placeholder": _(
                     "Record any general notes you have about the records here (optional)"
                 ),
             }
         ),
-        help_text=gettext(
+        help_text=_(
             "These should be notes that did not fit in any of the previous steps of this form"
         ),
-        label=gettext("Other notes"),
+        label=_("Other notes"),
     )
 
 
@@ -895,9 +893,9 @@ class ReviewForm(SubmissionForm):
                 formset_data.append(subform_data)
 
         if all_empty and isinstance(form, OtherIdentifiersFormSet):
-            note = gettext("No identifiers were provided.")
+            note = _("No identifiers were provided.")
         elif all_empty and isinstance(form, RightsFormSet):
-            note = gettext("No record rights or restrictions were provided.")
+            note = _("No record rights or restrictions were provided.")
 
         return formset_data, note
 

@@ -19,8 +19,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: app/settings/base.py:140
+#, fuzzy
+#| msgid "English, French"
 msgid "English"
-msgstr ""
+msgstr "अंग्रेज़ी, फ्रेंच"
 
 #: app/settings/base.py:141
 msgid "French"
@@ -31,11 +33,12 @@ msgid "Hindi"
 msgstr ""
 
 #: caais/forms.py:100
-#, python-format
+#, fuzzy, python-format
+#| msgid "Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"
 msgid ""
 "%(help_text)s. Use the date format YYYY-MM-DD for a single date or YYYY-MM-"
 "DD - YYYY-MM-DD for a date range"
-msgstr ""
+msgstr "दिनांक YYYY-MM-DD या YYYY-MM-DD - YYYY-MM-DD प्रारूप में होना चाहिए"
 
 #: caais/forms.py:165 caais/forms.py:193
 #: recordtransfer/forms/submission_forms.py:362
@@ -74,7 +77,7 @@ msgstr ""
 #: recordtransfer/forms/submission_forms.py:209
 #: recordtransfer/forms/submission_forms.py:439
 msgid "This field is required."
-msgstr ""
+msgstr "यह फ़ील्ड आवश्यक है."
 
 #: caais/forms.py:351 recordtransfer/forms/mixins.py:16
 msgid "Phone number must look like \"+1 (999) 999-9999\""
@@ -82,17 +85,17 @@ msgstr ""
 
 #: caais/forms.py:359 recordtransfer/forms/mixins.py:23
 msgid "Phone number"
-msgstr ""
+msgstr "फ़ोन नंबर"
 
 #: caais/forms.py:363 recordtransfer/forms/submission_forms.py:122
 #: recordtransfer/forms/user_forms.py:37
 #: recordtransfer/templates/includes/account_info_form.html:35
 msgid "Email"
-msgstr ""
+msgstr "ईमेल"
 
 #: caais/forms.py:372
 msgid "Select a Country"
-msgstr ""
+msgstr "कोई देश चुनें"
 
 #: caais/models.py:88
 msgid "Acquisition methods"
@@ -211,11 +214,11 @@ msgstr ""
 
 #: caais/models.py:701
 msgid "Source types"
-msgstr ""
+msgstr "स्रोत प्रकार"
 
 #: caais/models.py:702 recordtransfer/forms/submission_forms.py:257
 msgid "Source type"
-msgstr ""
+msgstr "स्रोत प्रकार"
 
 #: caais/models.py:707
 msgid ""
@@ -225,11 +228,11 @@ msgstr ""
 
 #: caais/models.py:726
 msgid "Source roles"
-msgstr ""
+msgstr "स्रोत भूमिकाएँ"
 
 #: caais/models.py:727 recordtransfer/forms/submission_forms.py:294
 msgid "Source role"
-msgstr ""
+msgstr "स्रोत भूमिका"
 
 #: caais/models.py:732
 msgid ""
@@ -496,15 +499,15 @@ msgstr ""
 
 #: recordtransfer/admin.py:80 recordtransfer/admin.py:299
 msgid "Upload Size"
-msgstr ""
+msgstr "अपलोड आकार"
 
 #: recordtransfer/admin.py:88 recordtransfer/admin.py:662
 msgid "File Link"
-msgstr ""
+msgstr "फ़ाइल लिंक"
 
 #: recordtransfer/admin.py:92
 msgid "File was removed"
-msgstr ""
+msgstr "फाइल हटा दी गई थी"
 
 #: recordtransfer/admin.py:398
 msgid ""
@@ -538,7 +541,7 @@ msgstr ""
 
 #: recordtransfer/admin.py:668
 msgid "No file attached"
-msgstr ""
+msgstr "कोई फ़ाइल अटैच नहीं है"
 
 #: recordtransfer/admin.py:696
 #: recordtransfer/templates/includes/profile_forms.html:18
@@ -558,13 +561,13 @@ msgstr ""
 #: recordtransfer/tests/unit/views/test_profile.py:179
 #: recordtransfer/views/profile.py:105
 msgid "Password updated"
-msgstr ""
+msgstr "पासवर्ड अपडेट हो गया है"
 
 #: recordtransfer/admin.py:772
 #: recordtransfer/tests/unit/views/test_profile.py:180
 #: recordtransfer/views/profile.py:106
 msgid "password"
-msgstr ""
+msgstr "कूटशब्द"
 
 #: recordtransfer/admin.py:773 recordtransfer/admin.py:803
 #: recordtransfer/management/commands/send_test_email.py:177
@@ -589,7 +592,7 @@ msgstr ""
 #: recordtransfer/admin.py:801
 #: recordtransfer/management/commands/send_test_email.py:175
 msgid "Account updated"
-msgstr ""
+msgstr "खाता अपडेट हो गया है"
 
 #: recordtransfer/admin.py:814
 msgid "Superuser privileges have been added to your account."
@@ -676,6 +679,9 @@ msgid ""
 "username is combined with the site's base URL to create an email address. "
 "The URL can be set from the admin site."
 msgstr ""
+"एप्लिकेशन के लिए एक उपयोगकर्ता नाम जिससे \"उत्तर न दें\" ईमेल भेजे जा सकें। इस उपयोगकर्ता "
+"नाम को साइट के मूल URL के साथ जोड़कर एक ईमेल पता बनाया जाता है।URL को एडमिन साइट से "
+"सेट किया जा सकता है।"
 
 #: recordtransfer/enums.py:66
 msgid ""
@@ -946,31 +952,31 @@ msgstr ""
 
 #: recordtransfer/forms/mixins.py:30
 msgid "Address line 1"
-msgstr ""
+msgstr "पता पंक्ति 1"
 
 #: recordtransfer/forms/mixins.py:36
 msgid "Unit Number, RPO, PO BOX... (optional)"
-msgstr ""
+msgstr "यूनिट संख्या, आरपीओ, पीओ बॉक्स... (वैकल्पिक)"
 
 #: recordtransfer/forms/mixins.py:37
 msgid "Address line 2"
-msgstr ""
+msgstr "पता पंक्ति 2"
 
 #: recordtransfer/forms/mixins.py:43 recordtransfer/models.py:83
 msgid "City"
-msgstr ""
+msgstr "शहर"
 
 #: recordtransfer/forms/mixins.py:55
 msgid "Select your province"
-msgstr ""
+msgstr "अपना प्रांत चुनें"
 
 #: recordtransfer/forms/mixins.py:126 recordtransfer/models.py:89
 msgid "Province or state"
-msgstr ""
+msgstr "प्रांत या राज्य"
 
 #: recordtransfer/forms/mixins.py:139
 msgid "Other province or state"
-msgstr ""
+msgstr "अन्य प्रांत या राज्य"
 
 #: recordtransfer/forms/mixins.py:147
 msgid ""
@@ -980,15 +986,15 @@ msgstr ""
 
 #: recordtransfer/forms/mixins.py:156
 msgid "Postal / Zip code"
-msgstr ""
+msgstr "डाक का / ज़िप कोड"
 
 #: recordtransfer/forms/mixins.py:159
 msgid "Select your Country"
-msgstr ""
+msgstr "अपने देश का चयन करॊ"
 
 #: recordtransfer/forms/mixins.py:165
 msgid "Country"
-msgstr ""
+msgstr "देश"
 
 #: recordtransfer/forms/mixins.py:179
 msgid "Address line 1 is required if address line 2 is provided."
@@ -996,56 +1002,56 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:68
 msgid "I accept these terms"
-msgstr ""
+msgstr "मैं इन शर्तों को स्वीकार करता/करती हूँ"
 
 #: recordtransfer/forms/submission_forms.py:104
 msgid "Contact name"
-msgstr ""
+msgstr "संपर्क नाम"
 
 #: recordtransfer/forms/submission_forms.py:111
 msgid "Job title"
-msgstr ""
+msgstr "पद का नाम"
 
 #: recordtransfer/forms/submission_forms.py:118
 msgid "Organization"
-msgstr ""
+msgstr "संगठन"
 
 #: recordtransfer/forms/submission_forms.py:198
 msgid "If \"Source type\" is Other, enter your own source type"
-msgstr ""
+msgstr "यदि \"स्रोत प्रकार\" अन्य है, तो अपना स्वयं का स्रोत प्रकार दर्ज करें"
 
 #: recordtransfer/forms/submission_forms.py:213
 msgid "If \"Source role\" is Other, enter your own source role"
-msgstr ""
+msgstr "यदि \"स्रोत भूमिका\" अन्य है, तो अपनी स्वयं की स्रोत भूमिका दर्ज करें"
 
 #: recordtransfer/forms/submission_forms.py:222
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:22
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:20
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:70
 msgid "Yes"
-msgstr ""
+msgstr "हाँ"
 
 #: recordtransfer/forms/submission_forms.py:223
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:72
 msgid "No"
-msgstr ""
+msgstr "नहीं"
 
 #: recordtransfer/forms/submission_forms.py:228
 msgid "Fill out this section?"
-msgstr ""
+msgstr "इस अनुभाग को भरें?"
 
 #: recordtransfer/forms/submission_forms.py:241
 msgid "Name of source"
-msgstr ""
+msgstr "स्रोत का नाम"
 
 #: recordtransfer/forms/submission_forms.py:242
 msgid "The organization or entity submitting the records"
-msgstr ""
+msgstr "रिकॉर्ड प्रस्तुत करने वाला संगठन या संस्था"
 
 #: recordtransfer/forms/submission_forms.py:256
 #: recordtransfer/forms/submission_forms.py:293
 msgid "Please select one"
-msgstr ""
+msgstr "कृपया एक का चयन करें"
 
 #: recordtransfer/forms/submission_forms.py:259
 msgid ""
@@ -1059,7 +1065,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:279
 msgid "Other source type"
-msgstr ""
+msgstr "अन्य स्रोत प्रकार"
 
 #: recordtransfer/forms/submission_forms.py:295
 msgid "How does the source relate to the records? "
@@ -1071,7 +1077,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:313
 msgid "Other source role"
-msgstr ""
+msgstr "अन्य स्रोत भूमिका"
 
 #: recordtransfer/forms/submission_forms.py:323
 msgid ""
@@ -1081,7 +1087,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:328
 msgid "Source notes"
-msgstr ""
+msgstr "स्रोत नोट्स"
 
 #: recordtransfer/forms/submission_forms.py:329
 msgid "e.g., The donor wishes to remain anonymous"
@@ -1089,27 +1095,27 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:420
 msgid "e.g., Committee Meeting Minutes"
-msgstr ""
+msgstr "उदाहरण: समिति की बैठक के कार्यवृत्त"
 
 #: recordtransfer/forms/submission_forms.py:421
 msgid "Title"
-msgstr ""
+msgstr "शीर्षक"
 
 #: recordtransfer/forms/submission_forms.py:428
 msgid "English, French"
-msgstr ""
+msgstr "अंग्रेज़ी, फ्रेंच"
 
 #: recordtransfer/forms/submission_forms.py:429
 msgid "Enter all relevant languages here"
-msgstr ""
+msgstr "सभी प्रासंगिक भाषाएँ यहाँ दर्ज करें"
 
 #: recordtransfer/forms/submission_forms.py:430
 msgid "Language(s)"
-msgstr ""
+msgstr "भाषा(एँ)"
 
 #: recordtransfer/forms/submission_forms.py:440
 msgid "Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"
-msgstr ""
+msgstr "दिनांक YYYY-MM-DD या YYYY-MM-DD - YYYY-MM-DD प्रारूप में होना चाहिए"
 
 #: recordtransfer/forms/submission_forms.py:444
 msgid "2000-03-14 - 2001-05-06"
@@ -1117,7 +1123,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:449
 msgid "Date of materials"
-msgstr ""
+msgstr "सामग्री की तिथि"
 
 #: recordtransfer/forms/submission_forms.py:451
 msgid ""
@@ -1127,7 +1133,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:459
 msgid "Date is approximated"
-msgstr ""
+msgstr "तिथि अनुमानित है"
 
 #: recordtransfer/forms/submission_forms.py:461
 msgid ""
@@ -1136,7 +1142,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:472
 msgid "Description of contents"
-msgstr ""
+msgstr "विषय की व्याख्या"
 
 #: recordtransfer/forms/submission_forms.py:474
 msgid ""
@@ -1152,7 +1158,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:492
 msgid "Custodial history"
-msgstr ""
+msgstr "हिरासत का इतिहास"
 
 #: recordtransfer/forms/submission_forms.py:493
 msgid "e.g., John Doe held these records before donating them in 1960"
@@ -1294,7 +1300,7 @@ msgstr ""
 #: recordtransfer/forms/user_forms.py:45
 #: recordtransfer/templates/includes/account_info_form.html:42
 msgid "Username"
-msgstr ""
+msgstr "प्रयोक्ता नाम"
 
 #: recordtransfer/forms/user_forms.py:46
 msgid "This is the username you will use to log in to your account"
@@ -1323,7 +1329,7 @@ msgstr ""
 #: recordtransfer/forms/user_forms.py:99
 #: recordtransfer/templates/includes/account_info_form.html:57
 msgid "Receive notification emails?"
-msgstr ""
+msgstr "अधिसूचना ईमेल प्राप्त करें?"
 
 #: recordtransfer/forms/user_forms.py:104
 msgid "Current Password"
@@ -1474,7 +1480,7 @@ msgstr ""
 
 #: recordtransfer/templates/admin/bag_change_form.html:6
 msgid "Click here to create a downloadable bag"
-msgstr ""
+msgstr "डाउनलोड करने योग्य बैग बनाने के लिए यहां क्लिक करें"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:5
 #: recordtransfer/templates/includes/account_info_form.html:97
@@ -1482,11 +1488,11 @@ msgstr ""
 #: recordtransfer/templates/includes/submission_group_edit_form.html:12
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:79
 msgid "Save"
-msgstr ""
+msgstr "सेव"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:7
 msgid "Save and continue editing"
-msgstr ""
+msgstr "सेव और संपादन जारी रखें"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:10
 msgid "Reset to default"
@@ -1515,6 +1521,10 @@ msgid ""
 "using this application.\n"
 "                "
 msgstr ""
+"\n"
+"                निम्नलिखित प्रकार की फाइलें दानकर्ता इस एप्लिकेशन का उपयोग करके जमा "
+"कर सकते हैं।\n"
+"                "
 
 #: recordtransfer/templates/includes/account_info_form.html:49
 msgid "Notification options"
@@ -1561,7 +1571,7 @@ msgstr ""
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:17
 #: recordtransfer/templates/recordtransfer/in_progress_submission_delete.html:23
 msgid "Cancel"
-msgstr ""
+msgstr "रद्द करें"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:48
 msgid "Unassign Group"
@@ -1577,31 +1587,31 @@ msgstr ""
 
 #: recordtransfer/templates/includes/contact_info_form.html:18
 msgid "Enter phone number"
-msgstr ""
+msgstr "फ़ोन नंबर दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:37
 msgid "Enter street address"
-msgstr ""
+msgstr "घर का पता दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:50
 msgid "Apartment, suite, etc."
-msgstr ""
+msgstr "अपार्टमेंट, सुइट, आदि."
 
 #: recordtransfer/templates/includes/contact_info_form.html:62
 msgid "Enter city"
-msgstr ""
+msgstr "शहर दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:93
 msgid "Enter state/province if not listed above"
-msgstr ""
+msgstr "यदि ऊपर सूचीबद्ध नहीं है तो राज्य/प्रांत दर्ज करें"
 
 #: recordtransfer/templates/includes/contact_info_form.html:105
 msgid "Enter postal/zip code"
-msgstr ""
+msgstr "ज़िप कोड दर्ज करें"
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:4
 msgid "Are you sure you want to delete this in-progress submission?"
-msgstr ""
+msgstr "क्या आप वाकई इस प्रगतिरत सबमिशन को हटाना चाहते हैं?"
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:7
 #, python-format
@@ -1779,8 +1789,10 @@ msgid "Account"
 msgstr ""
 
 #: recordtransfer/templates/includes/profile_forms.html:26
+#, fuzzy
+#| msgid "Language(s)"
 msgid "Language"
-msgstr ""
+msgstr "भाषा(एँ)"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:9
 #: recordtransfer/views/pre_submission.py:393
@@ -1914,7 +1926,7 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/footer.html:39
 #: recordtransfer/templates/recordtransfer/header.html:38
 msgid "About"
-msgstr ""
+msgstr "अबाउट"
 
 #: recordtransfer/templates/recordtransfer/about.html:12
 msgid ""
@@ -2257,42 +2269,42 @@ msgstr ""
 
 #: recordtransfer/templates/recordtransfer/header.html:32
 msgid "Home"
-msgstr ""
+msgstr "मुखपृष्ठ"
 
 #: recordtransfer/templates/recordtransfer/header.html:44
 #: recordtransfer/templates/recordtransfer/help.html:4
 msgid "Help"
-msgstr ""
+msgstr "मदद"
 
 #: recordtransfer/templates/recordtransfer/header.html:51
 msgid "Admin"
-msgstr ""
+msgstr "प्रशासनिक"
 
 #: recordtransfer/templates/recordtransfer/header.html:59
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:19
 msgid "Profile"
-msgstr ""
+msgstr "प्रोफ़ाइल"
 
 #: recordtransfer/templates/recordtransfer/header.html:65
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:99
 msgid "Submit"
-msgstr ""
+msgstr "प्रस्तुति"
 
 #: recordtransfer/templates/recordtransfer/header.html:71
 msgid "Logout"
-msgstr ""
+msgstr "लॉगआउट"
 
 #: recordtransfer/templates/recordtransfer/header.html:78
 #: recordtransfer/templates/recordtransfer/signup_form.html:132
 #: recordtransfer/templates/registration/login.html:80
 msgid "Sign Up"
-msgstr ""
+msgstr "साइन अप"
 
 #: recordtransfer/templates/recordtransfer/header.html:86
 #: recordtransfer/templates/recordtransfer/home.html:21
 #: recordtransfer/templates/recordtransfer/signup_form.html:140
 msgid "Log In"
-msgstr ""
+msgstr "लॉग इन"
 
 #: recordtransfer/templates/recordtransfer/help.html:8
 msgid "Form Help"
@@ -2804,8 +2816,10 @@ msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:70
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:77
+#, fuzzy
+#| msgid "Profile"
 msgid "files"
-msgstr ""
+msgstr "प्रोफ़ाइल"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:74
 msgid "Files remaining:"
