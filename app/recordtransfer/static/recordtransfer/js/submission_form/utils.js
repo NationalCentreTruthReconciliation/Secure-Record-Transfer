@@ -156,22 +156,50 @@ export const sendDeleteRequestForFile = async (filename) => {
  * maximum allowed upload size.
  * @param {number} totalSizeBytes - The total size of the files in bytes.
  * @param {number} maxUploadSize - The maximum upload size in bytes.
+ * @param {number} totalCount - The total number of files uploaded.
+ * @param {number} maxCount - The maximum number of files allowed.
  */
-export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize) => {
+export const updateCapacityDisplay = (totalSizeBytes, maxUploadSize, totalCount, maxCount) => {
     const totalSizeElement = document.getElementById("total-size");
     const remainingSizeElement = document.getElementById("remaining-size");
     const maxTotalUploadSizeBytes = maxUploadSize * 1000 * 1000;
 
-    const updateElement = (element, value, isError) => {
+    const totalCountElement = document.getElementById("files-count");
+    const remainingCountElement = document.getElementById("remaining-files");
+
+    const updateElement = (
+        element,
+        value,
+        isError,
+        isInteger = false,
+        isRemainingField = false
+    ) => {
         if (element) {
-            element.innerHTML = value.toFixed(2);
+            const isAtLimit = isRemainingField && value === 0;
+            element.innerHTML = isInteger ? value.toString() : value.toFixed(2);
             element.classList.toggle("field-error", isError);
+
+            // Add special styling when remaining value reaches 0 (limit reached)
+            element.classList.toggle("text-red-600", isAtLimit);
+            element.classList.toggle("font-bold", isAtLimit);
         }
     };
 
     const totalMB = totalSizeBytes / (1000 * 1000);
     const remainingMB = (maxTotalUploadSizeBytes - totalSizeBytes) / (1000 * 1000);
 
+    const remainingFiles = maxCount - totalCount;
+
     updateElement(totalSizeElement, totalMB, totalSizeBytes > maxTotalUploadSizeBytes);
-    updateElement(remainingSizeElement, Math.max(remainingMB, 0), remainingMB < 0);
+    updateElement(remainingSizeElement, Math.max(remainingMB, 0), remainingMB < 0, false, true);
+
+    updateElement(totalCountElement, totalCount, totalCount > maxCount, true);
+    updateElement(
+        remainingCountElement,
+        Math.max(remainingFiles, 0),
+        remainingFiles < 0,
+        true,
+        true
+    );
+
 };

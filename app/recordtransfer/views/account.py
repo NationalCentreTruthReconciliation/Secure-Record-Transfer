@@ -18,12 +18,15 @@ from django.utils.translation import get_language, gettext, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
+
+LOGGER = logging.getLogger(__name__)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -111,6 +114,7 @@ class ActivateAccount(View):
                 return redirect("recordtransfer:activation_invalid")
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            LOGGER.exception("Unexpected error during account activation")
             LOGGER.exception("Unexpected error during account activation")
             return redirect("recordtransfer:activation_invalid")
 

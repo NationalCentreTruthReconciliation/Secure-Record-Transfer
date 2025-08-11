@@ -6,7 +6,7 @@ import {
     handleModalAfterSwap
 } from "../utils/htmx.js";
 import { setupUserContactInfoForm } from "./contactInfo.js";
-import { initTabListeners, restoreTab } from "./tab.js";
+import { initTabListeners, restoreTab, redirectToCorrectFragment } from "./tab.js";
 
 /**
  * Main initialization function to set up all profile-related functionality
@@ -29,6 +29,7 @@ export const initializeProfile = function() {
     setupUserContactInfoForm(context);
     initTabListeners();
     restoreTab();
+    redirectToCorrectFragment();
 
     // Wrapper functions to provide context to HTMX event handlers
     window.handleDeleteIpSubmissionAfterRequest = (e) => {
