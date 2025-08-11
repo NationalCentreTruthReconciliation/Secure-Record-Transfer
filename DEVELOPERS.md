@@ -29,21 +29,24 @@ These instructions apply to all operating systems. First, install the following 
 If developing on Mac or Linux, you'll need the following tools:
 
 1. **Node.js 22+** for Javascript dependency management and builds ([Download Node.js](https://nodejs.org/en/download/))
-2. **uv 0.7.2** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
-  ```shell
-  curl -LsSf https://astral.sh/uv/0.7.2/install.sh | sh
-  ```
+2. **uv 0.8.8** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
+
+```shell
+curl -LsSf https://astral.sh/uv/0.8.8/install.sh | sh
+```
 
 ### Windows-Specific Instructions
 
 If developing on Windows, you'll need the following tools:
 
 1. **WSL 2** ([Microsoft WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install)). Note that WSL 2 may have already been installed when installing Docker or Podman; in that case, you can skip this step.
-2. **uv 0.7.2** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
-  ```shell
-  # In your WSL terminal:
-  curl -LsSf https://astral.sh/uv/0.7.2/install.sh | sh
-  ```
+2. **uv 0.8.8** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
+
+```shell
+# In your WSL terminal:
+curl -LsSf https://astral.sh/uv/0.8.8/install.sh | sh
+```
+
 3. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
 4. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
 5. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
@@ -61,7 +64,6 @@ You'll be prompted to install recommended extensions specified in `.vscode/exten
 - [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss): Tailwind CSS support
 - [Django](https://marketplace.visualstudio.com/items?itemName=batisteo.vscode-django): Django template syntax highlighting and template path jumping
 - [djLint](https://marketplace.visualstudio.com/items?itemName=monosans.djlint): Django template linting and formatting
-
 
 If you're not automatically prompted, you can install recommended extensions manually by:
 
@@ -96,6 +98,7 @@ npm install --include=dev
 ```
 
 You can then use the provided npm scripts for various tasks:
+
 - `npm run build` - Build JavaScript files for production
 - `npm run watch` - Rebuild JavaScript files whenever they change (see [Re-build JS as Changes are Made](#re-build-js-as-changes-are-made))
 - `npm run lint` - Run ESLint to check JavaScript files
@@ -197,13 +200,12 @@ You can debug Python tests directly in VSCode using the pre-configured launch se
 Two useful configurations are provided:
 
 - **Debug Pytest: Current File**
-    Runs and debugs all tests in the currently open file. Open the test file you want to debug, select this configuration from the Run and Debug panel, set desired breakpoints, and press the green play button.
+  Runs and debugs all tests in the currently open file. Open the test file you want to debug, select this configuration from the Run and Debug panel, set desired breakpoints, and press the green play button.
 
 - **Debug Pytest: Specific Test**
-    Prompts you to enter the full test name (e.g., `app/recordtransfer/tests/unit/test_models.py::TestUploadSession::test_new_session_creation`). This allows you to debug a specific test or test case.
+  Prompts you to enter the full test name (e.g., `app/recordtransfer/tests/unit/test_models.py::TestUploadSession::test_new_session_creation`). This allows you to debug a specific test or test case.
 
 While debugging, you can step through your application code in addition to the test code.
-
 
 ## Building the Documentation
 
@@ -236,6 +238,7 @@ Start an http server with `uv run python -m http.server -d docs/_build 8001` and
 The Sphinx configuration can be found in `docs/conf.py`. The documentation is also built automatically by [Read The Docs](https://about.readthedocs.com/) based on the configuration in `.readthedocs.yaml` and is published [here](https://secure-record-transfer.readthedocs.io/en/latest/) when changes are made to the default branch.
 
 ## Resetting the Database
+
 During development, you may need to reset the database to a clean state. You can do this with the following command:
 
 ```shell
@@ -249,7 +252,7 @@ podman-compose -f compose.dev.yml exec app python manage.py reset
 This will prompt you to confirm the deletion of all data in the database. Type "y" to proceed.
 This command deletes the development, and re-applies all migrations on a fresh one.
 
-To also populate the database with test data and  populate corresponding uploaded files, add the
+To also populate the database with test data and populate corresponding uploaded files, add the
 `--seed` option to the command.
 
 ```shell
@@ -268,6 +271,7 @@ submissions and a test submission group.
 After making model changes, the existing seed data may become incompatible with the database schema, and you may need to update the seed data fixture. To do this:
 
 1. **Reset the database without seeding** to start with a clean state:
+
    ```shell
    # Using Docker:
    docker compose -f compose.dev.yml exec app python manage.py reset
@@ -277,6 +281,7 @@ After making model changes, the existing seed data may become incompatible with 
    ```
 
 2. **Create the desired database state manually** by either:
+
    - Creating an admin user with `python manage.py createsuperuser`
    - Signing up as a regular user through the web app's Sign Up page
    - Then creating whatever data you wish by filling out forms, creating groups, etc.
@@ -284,6 +289,7 @@ After making model changes, the existing seed data may become incompatible with 
 3. **Important**: Any files you upload during the "Upload Files" step of forms must be present in `app/fixtures/` or they will not be available after seeding. Right now, only one test upload file is included in the fixture and available for upload, `app/fixtures/nctr_logo.jpg`.
 
 4. **Export the new seed data** once you're satisfied with the database state:
+
    ```shell
    # Using Docker:
    docker compose -f compose.dev.yml exec app python manage.py dumpdata recordtransfer caais --indent 4 > app/fixtures/seed_data.json
