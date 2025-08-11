@@ -49,6 +49,7 @@ from recordtransfer.emails import (
     send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
+from recordtransfer.management.commands.verify_settings import is_deployed_environment
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -173,7 +174,11 @@ class SubmissionFormWizard(SessionWizardView):
         SubmissionStep.REVIEW: SubmissionStepMeta(
             template="recordtransfer/submission_form_review.html",
             title=gettext("Review"),
-            form=forms.ReviewForm,
+            form=(
+                forms.ReviewFormReCaptcha
+                if settings.RECAPTCHA_PUBLIC_KEY or is_deployed_environment() else
+                forms.ReviewForm
+            ),
             info_message=gettext("Review the information you've entered before submitting"),
         ),
     }

@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.translation import gettext
 from django_countries.fields import CountryField
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.widgets import CustomCountrySelectWidget
@@ -197,3 +199,9 @@ class ContactInfoFormMixin(forms.Form):
             self.fields["other_province_or_state"].label = "hidden"
 
         return cleaned_data
+
+
+class HiddenCaptchaMixin:
+    """Add to forms that require reCAPTCHA validation."""
+
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
