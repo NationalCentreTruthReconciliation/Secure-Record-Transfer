@@ -92,37 +92,11 @@ const setupModalButtonHandlers = (contactInfo, context) => {
         saveContactInfoAndProceed(contactInfo, context);
     });
 };
-const getCurrentStepNumber = () => {
-    try {
-        // Get the current step data from the Django template
-        const currentStepElement = document.getElementById("current_step_data");
-        if (currentStepElement) {
-            const currentStep = JSON.parse(currentStepElement.textContent);
-            return currentStep + 1; // Return next step number
-        }
-
-        // Fallback: try to get from wizard management form
-        const stepInput = document.querySelector("input[name=\"current_step\"]");
-        if (stepInput) {
-            return parseInt(stepInput.value) + 1;
-        }
-
-        // Final fallback
-        return 1;
-    } catch (error) {
-        console.error("Error getting current step:", error);
-        return 1;
-    }
-};
 
 const proceedToNextStep = () => {
     const nextButton = document.getElementById("form-next-button");
     if (nextButton) {
         nextButton.click();
-        const stepNumber = getCurrentStepNumber(); // <- implement this
-
-        // Push the new state into browser history
-        history.pushState({ step: stepNumber }, "", `#step-${stepNumber}`);
     }
 };
 
