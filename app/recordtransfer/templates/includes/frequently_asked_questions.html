@@ -13,31 +13,26 @@
                 <ul class="list-disc pl-6 space-y-3">
                     <li>
                         <span class="font-semibold">{% trans "You have large collections" %}</span>
-                        {% blocktrans %}
-                        — If you have too many files for a single submission (exceeding {{ MAX_TOTAL_UPLOAD_COUNT }}
+                        — {% blocktrans %}If you have too many files for a single submission (exceeding {{ MAX_TOTAL_UPLOAD_COUNT }}
                         files or {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB), you can split them into multiple submissions
                         within the same group.
                         {% endblocktrans %}
                     </li>
                     <li>
                         <span class="font-semibold">{% trans "You want logical organization" %}</span>
-                        {% blocktrans %}
-                        — You can organize related records by theme, time period, or project, even if
+                        — {% blocktrans %}You can organize related records by theme, time period, or project, even if
                         they're submitted at different times.
                         {% endblocktrans %}
                     </li>
                     <li>
                         <span class="font-semibold">{% trans "You need easier tracking" %}</span>
-                        {% blocktrans %}
-                        — Grouping helps you and archivists track related submissions through the
+                        — {% blocktrans %}Grouping helps you and archivists track related submissions through the
                         processing workflow.
                         {% endblocktrans %}
                     </li>
                     <li>
                         <span class="font-semibold">{% trans "You want consistent metadata" %}</span>
-                        {% blocktrans %}
-                        — Groups ensure related submissions are cataloged with consistent metadata.
-                        {% endblocktrans %}
+                        — {% blocktrans %}Groups ensure related submissions are cataloged with consistent metadata.{% endblocktrans %}
                     </li>
                 </ul>
                 <div class="bg-base-200 p-4 rounded-lg mt-6">

@@ -35,7 +35,7 @@ from caais.models import (
     StorageLocation,
 )
 from django.db.models import Model
-from django.utils.translation import gettext
+from django.utils.translation import pgettext
 
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.models import SiteSetting
@@ -536,7 +536,14 @@ def coalesce_other_term_field(
         except TermClass.DoesNotExist:
             if isinstance(notes, list):
                 notes.append(
-                    gettext(f"{TermClass._meta.verbose_name} was noted as {other_term!r}")
+                    pgettext(
+                        context="class_name is the name of a Python class and term_name is the user-entered value",
+                        message="%(class_name)s was noted as %(term_name)s",
+                    )
+                    % {
+                        "class_name": TermClass._meta.verbose_name,
+                        "term_name": repr(other_term),
+                    }
                 )
 
     return term

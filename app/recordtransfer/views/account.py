@@ -1,6 +1,7 @@
 """Views for creating and activating user accounts."""
 
 import logging
+from typing import cast
 
 from django.conf import settings
 from django.contrib.auth import login
@@ -13,7 +14,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from django.utils.translation import gettext, ngettext
+from django.utils.translation import get_language, gettext, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
@@ -47,6 +48,7 @@ class CreateAccount(FormView):
         new_user = form.save(commit=False)
         new_user.is_active = False
         new_user.gets_submission_email_updates = False
+        new_user.language = getattr(self.request, "LANGUAGE_CODE", get_language())
         new_user.save()
         send_user_activation_email.delay(new_user)
         if self.request.htmx:
@@ -65,6 +67,21 @@ class CreateAccount(FormView):
             )
             return HttpResponse(html)
         return super().form_invalid(form)
+
+
+def _set_language_cookie(response: HttpResponse, lang_code: str) -> HttpResponse:
+    """Set the language cookie on the response based on user's preference."""
+    response.set_cookie(
+        key=settings.LANGUAGE_COOKIE_NAME,
+        value=lang_code,
+        max_age=settings.LANGUAGE_COOKIE_AGE,
+        path=settings.LANGUAGE_COOKIE_PATH,
+        domain=settings.LANGUAGE_COOKIE_DOMAIN,
+        secure=settings.LANGUAGE_COOKIE_SECURE,
+        httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+        samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+    )
+    return response
 
 
 class ActivateAccount(View):
@@ -87,7 +104,9 @@ class ActivateAccount(View):
                 user.is_active = True
                 user.save()
                 login(request, user, backend="axes.backends.AxesBackend")
-                return redirect("recordtransfer:account_created")
+                return _set_language_cookie(
+                    redirect("recordtransfer:account_created"), user.language
+                )
             else:
                 return redirect("recordtransfer:activation_invalid")
 
@@ -122,10 +141,13 @@ class Login(LoginView):
 
     def form_valid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle successful login."""
-        super().form_valid(form)
+        response = super().form_valid(form)
+        user = cast(User, form.get_user())
+
         if self.request.htmx:
-            return HttpResponseClientRedirect(self.get_success_url())
-        return redirect(self.get_success_url())
+            htmx_response = HttpResponseClientRedirect(self.get_success_url())
+            return _set_language_cookie(htmx_response, user.language)
+        return _set_language_cookie(response, user.language)
 
     def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle invalid login form submissions."""
