@@ -21,6 +21,7 @@ from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext_lazy as _
 
+
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.emails import send_user_account_updated
 from recordtransfer.forms import (
