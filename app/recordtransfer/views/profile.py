@@ -11,7 +11,7 @@ from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.html import escape
-from django.utils.translation import gettext
+from django.utils.translation import gettext, gettext_lazy
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
@@ -42,11 +42,9 @@ class UserProfile(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         """Render the user profile page."""
         user = cast(User, request.user)
-        account_info_form = UserAccountInfoForm(instance=user)
-        contact_info_form = UserContactInfoForm(instance=user)
         context = {
-            "account_info_form": account_info_form,
-            "contact_info_form": contact_info_form,
+            "account_info_form": UserAccountInfoForm(instance=user),
+            "contact_info_form": UserContactInfoForm(instance=user),
             "js_context": {
                 # Account Info Form
                 "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
@@ -104,9 +102,9 @@ class BaseUserProfileUpdateView(UpdateView):
             if form.cleaned_data.get("new_password"):
                 update_session_auth_hash(self.request, form.instance)
                 context = {
-                    "subject": gettext("Password updated"),
-                    "changed_item": gettext("password"),
-                    "changed_status": gettext("updated"),
+                    "subject": gettext_lazy("Password updated"),
+                    "changed_item": gettext_lazy("password"),
+                    "changed_status": gettext_lazy("updated"),
                 }
                 send_user_account_updated.delay(self.get_object(), context)
 

@@ -384,18 +384,34 @@ class TestUserAdminForm(TestCase):
         form = UserAdminForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
 
-    def test_can_set_submission_email_updates_when_staff(self) -> None:
+    def test_gets_submission_email_updates_requires_is_staff(self) -> None:
+        """Test that gets_submission_email_updates can only be True if is_staff is True."""
         self.user.is_staff = True
         self.user.save()
         form_data = {
-            "username": self.user.username,
-            "first_name": self.user.first_name,
-            "last_name": self.user.last_name,
-            "email": self.user.email,
+            "username": "testuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "test@example.com",
             "is_staff": True,
             "gets_submission_email_updates": True,
         }
         form = UserAdminForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
+        self.assertNotIn("gets_submission_email_updates", form.errors)
 
-
+    def test_cannot_set_submission_email_updates_when_not_staff(self) -> None:
+        """Test that gets_submission_email_updates can be True only if is_staff is True."""
+        self.user.is_staff = False
+        self.user.save()
+        form_data = {
+            "username": "testuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "test@example.com",
+            "is_staff": False,
+            "gets_submission_email_updates": True,
+        }
+        form = UserAdminForm(data=form_data, instance=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("gets_submission_email_updates", form.errors)

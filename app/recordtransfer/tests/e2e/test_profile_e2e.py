@@ -36,10 +36,11 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
             password="testpassword",
             first_name="Test",
             last_name="User",
+            language="en",
         )
         self.login("testuser", "testpassword")
 
-    def switch_to_contact_info_tab(self) -> None:
+    def _switch_to_contact_info_tab(self) -> None:
         """Switch to the contact information tab on the profile page."""
         driver = self.driver
 
@@ -48,7 +49,16 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         )
         contact_info_radio.click()
 
-    # Tests for the account information form
+    def _switch_to_language_tab(self) -> None:
+        """Switch to the language tab on the profile page."""
+        driver = self.driver
+
+        language_radio = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_language_tab"))
+        )
+        language_radio.click()
+
+    ### Tests for the account information form ###
     @patch("recordtransfer.views.profile.send_user_account_updated")
     def test_valid_reset_password(self, email_mock: MagicMock) -> None:
         """Test resetting the password from the profile page."""
@@ -177,7 +187,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         notifications_checkbox = driver.find_element(By.ID, "id_gets_notification_emails")
         self.assertNotEqual(notifications_checkbox.is_selected(), initial_state)
 
-    # Tests for the contact information form
+    ### Tests for the contact information form ###
     def test_save_contact_info_button(self) -> None:
         """Test that the save button for contact information is not clickable unless at least one
         contact info field has changed.
@@ -185,7 +195,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-        self.switch_to_contact_info_tab()
+        self._switch_to_contact_info_tab()
 
         # Initially, the save button should not be clickable
         save_button = driver.find_element(By.ID, "contact-info-save-btn")
@@ -202,7 +212,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-        self.switch_to_contact_info_tab()
+        self._switch_to_contact_info_tab()
 
         # Check that the required fields are marked as such
         required_fields = [
@@ -224,7 +234,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-        self.switch_to_contact_info_tab()
+        self._switch_to_contact_info_tab()
 
         # Check that the non-required fields are not marked as such
         non_required_fields = [
@@ -244,7 +254,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-        self.switch_to_contact_info_tab()
+        self._switch_to_contact_info_tab()
 
         # Fill in the contact information fields
         driver.find_element(By.ID, "id_phone_number").send_keys("+1 (555) 123-4567")
@@ -272,7 +282,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         driver = self.driver
         profile_url = reverse("recordtransfer:user_profile")
         driver.get(f"{self.live_server_url}{profile_url}")
-        self.switch_to_contact_info_tab()
+        self._switch_to_contact_info_tab()
 
         # Select 'Other' from the province/state dropdown
         province_select = WebDriverWait(driver, 5).until(
@@ -296,6 +306,33 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
             other_input.get_attribute("required"),
             "Other province/state field should be required",
         )
+
+    ### Tests for the language form ###
+    def test_language_switch(self) -> None:
+        """Switching the language from the profile page to French sets the language cookie to
+        'fr'.
+        """
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+
+        self._switch_to_language_tab()
+
+        # Wait for the language dropdown to be present
+        lang_dropdown = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "profile-language-switcher"))
+        )
+        Select(lang_dropdown).select_by_value("fr")
+
+        # Wait for the language cookie to be set
+        language_cookie = WebDriverWait(driver, 10).until(
+            lambda d: d.get_cookie(settings.LANGUAGE_COOKIE_NAME)
+        )
+        self.assertIsNotNone(language_cookie)
+        self.assertEqual(language_cookie.get("value"), "fr")
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.language, "fr")
 
 
 @tag("e2e")

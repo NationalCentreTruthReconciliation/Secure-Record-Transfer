@@ -2,6 +2,7 @@ import os
 
 from configuration import AcceptedFileTypes
 from decouple import Csv, config
+from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -34,8 +35,8 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    # AxesStandaloneBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    "axes.backends.AxesStandaloneBackend",
+    # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    "axes.backends.AxesBackend",
     # Django ModelBackend is the default authentication backend.
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "recordtransfer.middleware.SaveUserLanguageMiddleware",  # After LocaleMiddleware
     # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
     "axes.middleware.AxesMiddleware",
 ]
@@ -128,12 +130,19 @@ FILE_UPLOAD_HANDLERS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 
 TIME_ZONE = config("TIME_ZONE", default="America/Winnipeg")
 
 USE_I18N = True
 
+LANGUAGES = [
+    ("en", _("English")),
+    ("fr", _("French")),
+    ("hi", _("Hindi")),
+]
+
+LANGUAGE_COOKIE_NAME = "django_language"  # optional, included for clarity
 
 USE_TZ = True
 
