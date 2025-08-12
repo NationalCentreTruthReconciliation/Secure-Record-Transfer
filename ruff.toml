@@ -21,8 +21,6 @@ exclude = [
     "env",
 ]
 
-extend-exclude = ["app/recordtransfer/migrations/", "app/recordtransfer/tests/"]
-
 line-length = 99
 indent-width = 4
 
