@@ -10,8 +10,6 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 
-from recordtransfer.exceptions import FolderNotFoundError
-
 # This is to avoid a circular import
 if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
@@ -27,7 +25,7 @@ def zip_directory(directory: str, zipf: ZipFile) -> None:
         zipf (ZipFile): A zipfile.ZipFile handle
     """
     if not os.path.isdir(directory):
-        raise FolderNotFoundError(f"Directory {directory} does not exist")
+        raise FileNotFoundError(f"Directory {directory} does not exist")
     if not zipf:
         raise ValueError("ZipFile does not exist")
 
