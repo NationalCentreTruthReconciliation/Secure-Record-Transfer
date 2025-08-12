@@ -85,3 +85,33 @@ class CharacterCategoriesValidator:
             "Your password must include at least three of the following types: uppercase, lowercase, "
             "numbers, or one of these special characters: _ # % ( ) . ^ { } !"
         )
+
+
+class NoUserAttributesSubstringValidator:
+    """Disallow passwords that contain the user's name or username as substrings
+    (case-insensitive).
+    """
+
+    user_attributes: Iterable[str] = ("username", "first_name", "last_name")
+
+    def validate(self, password: str, user: User | None = None) -> None:
+        """Validate that the password does not contain the user's username, first name,
+        or last name as substrings (case-insensitive).
+        """
+        if not user:
+            return
+        pwd = (password or "").lower()
+        for attr in self.user_attributes:
+            value = (getattr(user, attr, "") or "").strip().lower()
+            if value and value in pwd:
+                raise ValidationError(
+                    _("The password cannot contain your %(attr)s."),
+                    code="password_contains_user_attr",
+                    params={"attr": attr.replace("_", " ")},
+                )
+
+    def get_help_text(self) -> str:
+        """Return help text indicating that the password cannot contain the
+        user's name or username.
+        """
+        return _("Your password cannot contain your name or username.")
