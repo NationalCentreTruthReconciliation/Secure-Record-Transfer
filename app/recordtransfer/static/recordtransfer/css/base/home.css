@@ -1,8 +1,5 @@
 #main-graphic-container {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     height: 97vh;
     position: relative;
 }
@@ -15,9 +12,9 @@
 
 .main-graphic-text-container {
     position: absolute;
-    top: max(100px, 25vh);
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     color: white;
     font-family: "Merriweather", serif;
     width: 60%;
@@ -288,7 +285,6 @@
 
     .main-graphic-text {
         width: 100%;
-        font-size: 2.5em;
     }
 }
 
