@@ -7,18 +7,20 @@ from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
+from recordtransfer.models import PasswordHistory, User
 
+
+@dataclass
 class LengthRangeValidator:
     """Validate that a password length falls within an inclusive range.
 
     Django ships a MinimumLengthValidator but does not enforce an upper bound.
     """
 
-    def __init__(self, min_length=10, max_length=30):
-        self.min_length = min_length
-        self.max_length = max_length
+    min_length: int = 10
+    max_length: int = 30
 
-    def validate(self, password: str, user=None) -> None:
+    def validate(self, password: str, user: User | None = None) -> None:
         """Validate that the password length is within the specified min and max range."""
         length = len(password or "")
         if length < self.min_length:
@@ -53,11 +55,10 @@ class CharacterCategoriesValidator:
     - Special characters from the allowed set: _ # % ( ) . ^ { } !
     """
 
-    def __init__(self, allowed_specials="_#%().^{}!", required_categories=3):
-        self.allowed_specials = allowed_specials
-        self.required_categories = required_categories
+    allowed_specials: str = "_#%().^{}!"
+    required_categories: int = 3
 
-    def validate(self, password: str, user=None) -> None:
+    def validate(self, password: str, user: User | None = None) -> None:
         """Validate that the password contains at least the required number of character
         categories.
         """
