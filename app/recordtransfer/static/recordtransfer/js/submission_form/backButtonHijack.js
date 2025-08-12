@@ -53,10 +53,12 @@ const updateHistoryForCurrentStep = () => {
     const newState = { isFormStep: true, stepName };
     const curState = window.history.state;
 
-    if (!curState || !curState.isFormStep) {
-        window.history.replaceState(newState, "");
-    } else if (curState.stepName !== stepName) {
-        window.history.pushState(newState, "");
+    if (!curState) {
+        history.pushState(newState, "");
+    } else if (curState.isFormStep && curState.stepName !== stepName) {
+        history.pushState(newState, "");
+    } else {
+        history.replaceState(newState, "");
     }
 };
 
