@@ -41,3 +41,44 @@ class LengthRangeValidator:
         return _(
             f"Your password must be between {self.min_length} and {self.max_length} characters long."
         )
+
+
+class CharacterCategoriesValidator:
+    """Require at least N of the defined character categories.
+    Categories used here:
+    - Uppercase (A-Z)
+    - Lowercase (a-z)
+    - Digits (0-9)
+    - Special characters from the allowed set: _ # % ( ) . ^ { } !.
+    """
+
+    def __init__(self, allowed_specials="_#%().^{}!", required_categories=3):
+        self.allowed_specials = allowed_specials
+        self.required_categories = required_categories
+
+    def validate(self, password: str, user=None) -> None:
+        """Validate that the password contains at least the required number of character
+        categories.
+        """
+        pwd = password or ""
+        has_upper = any(c.isupper() for c in pwd)
+        has_lower = any(c.islower() for c in pwd)
+        has_digit = any(c.isdigit() for c in pwd)
+        has_special = any(c in self.allowed_specials for c in pwd)
+        count = sum([has_upper, has_lower, has_digit, has_special])
+        if count < self.required_categories:
+            raise ValidationError(
+                _(
+                    "This password must contain at least three of the following: uppercase, lowercase, "
+                    "numbers, or one of these special characters: %(specials)s"
+                ),
+                code="password_not_enough_categories",
+                params={"specials": self.allowed_specials},
+            )
+
+    def get_help_text(self) -> str:
+        """Return help text describing the required character categories for the password."""
+        return _(
+            "Your password must include at least three of the following types: uppercase, lowercase, "
+            "numbers, or one of these special characters: _ # % ( ) . ^ { } !"
+        )
