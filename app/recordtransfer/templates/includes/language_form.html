@@ -1,12 +1,13 @@
 {% load i18n %}
-<div class="banner-container flex items-center justify-between gap-6 w-full">
-    <div class="hidden sm:flex items-center">
-        <span class="banner-text">The National Residential School Crisis Line&nbsp;</span>
-        <a class="banner-link non-nav-link" href="tel:1-866-925-4419">1-866-925-4419</a>
-    </div>
-    <form action="{% url 'set_language' %}" method="post" class="ml-auto">
-        {% csrf_token %}
-        <select id="language-switcher" name="language" onchange="this.form.submit()">
+<form action="{% url 'set_language' %}" method="post">
+    {% csrf_token %}
+    <fieldset class="fieldset w-full md:w-1/2">
+        <legend class="fieldset-legend text-sm md:text-md">{% trans "Preferred Language" %}</legend>
+        <select id="profile-language-switcher"
+                name="language"
+                onchange="this.form.submit()"
+                class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
+                required>
             {% get_current_language as LANGUAGE_CODE %}
             {% get_available_languages as LANGUAGES %}
             {% get_language_info_list for LANGUAGES as languages %}
@@ -16,5 +17,5 @@
                         class="bg-base-200 text-primary">{{ language.name_local }} ({{ language.code }})</option>
             {% endfor %}
         </select>
-    </form>
-</div>
+    </fieldset>
+</form>

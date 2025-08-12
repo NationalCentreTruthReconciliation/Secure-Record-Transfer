@@ -22,8 +22,10 @@ from django.forms import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.utils.formats import date_format
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from recordtransfer.enums import SiteSettingKey, SiteSettingType, SubmissionStep
 from recordtransfer.managers import (
@@ -43,8 +45,19 @@ NOT_CACHED = object()
 class User(AbstractUser):
     """The main User object used to authenticate users."""
 
+    # User preferences
     gets_submission_email_updates = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
+    language = models.CharField(
+        max_length=7,
+        blank=True,
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE,
+        help_text=_("Preferred language for the website and email notifications"),
+        verbose_name=_("Preferred Language"),
+    )
+
+    # Contact information
     phone_number = models.CharField(
         max_length=20,
         blank=False,
@@ -860,11 +873,34 @@ class UploadSession(models.Model):
             [f.name for f in self.get_uploads()], settings.ACCEPTED_FILE_FORMATS
         )
 
-        return _("{0}, totalling {1}").format(count, size)
+        return _("%(file_count)s, totalling %(total_size)s") % {
+            "file_count": count,
+            "total_size": size,
+        }
 
     def __str__(self):
         """Return a string representation of this object."""
-        return f"{self.token} ({self.started_at}) | {self.status}"
+        token_substr = self.token[0:8] + "..." if len(self.token) > 8 else self.token
+
+        try:
+            file_count = self.file_count
+
+            return ngettext(
+                "Session %(token)s (%(count)s file, started: %(date)s)",
+                "Session %(token)s (%(count)s files, started: %(date)s)",
+                file_count,
+            ) % {
+                "token": token_substr,
+                "count": file_count,
+                "date": date_format(self.started_at, format="DATETIME_FORMAT", use_l10n=True),
+            }
+
+        except ValueError:
+            # An exception may be thrown if the session is in an in-between state
+            return _("%(token)s (started at %(date)s)") % {
+                "token": token_substr,
+                "date": self.started_at,
+            }
 
 
 def session_upload_location(instance: TempUploadedFile, filename: str) -> str:
@@ -932,8 +968,11 @@ class BaseUploadedFile(models.Model):
     def __str__(self):
         """Return a string representation of this object."""
         if self.exists:
-            return f"{self.name} | Session {self.session}"
-        return f"{self.name} Removed! | Session {self.session}"
+            return f"{self.name} | {self.session}"
+        return _("%(name)s Removed! | %(session)s") % {
+            "name": self.name,
+            "session": str(self.session),
+        }
 
 
 class TempUploadedFile(BaseUploadedFile):

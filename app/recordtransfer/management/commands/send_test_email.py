@@ -1,9 +1,12 @@
 import argparse
 import logging
 from datetime import timedelta
+from typing import Optional
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.emails import (
     send_password_reset_email,
@@ -48,6 +51,14 @@ class Command(BaseCommand):
             "to_email", type=str, help="The email address to send the test email to."
         )
 
+        parser.add_argument(
+            "--language",
+            "-l",
+            type=str,
+            choices=[code for code, _ in settings.LANGUAGES],
+            help="Optional language code to send the test email in (e.g., 'en', 'fr', 'hi').",
+        )
+
     def handle(self, *args, **options) -> None:
         """Handle the command to send a test email.
 
@@ -57,24 +68,31 @@ class Command(BaseCommand):
         """
         to_email = options["to_email"]
         email_id = options["email_id"]
+        language = options.get("language")
 
-        user = self.get_test_user(to_email)
+        user = self.get_test_user(to_email, language)
         form_data = {"dummy": "data"}
         submission = self.create_test_submission(user)
         in_progress = self.create_test_in_progress_submission(user)
 
         try:
-            self.send_email(email_id, user, form_data, submission, in_progress)
-            logger.info("✓ Sent '%s' email to %s", email_id, to_email)
+            self.send_email(email_id, user, form_data, submission, in_progress, language)
+            if language:
+                logger.info(
+                    "✓ Sent '%s' email to %s in language '%s'", email_id, to_email, language
+                )
+            else:
+                logger.info("✓ Sent '%s' email to %s", email_id, to_email)
         except Exception as e:
             logger.exception("Error sending email '%s' to %s: %s", email_id, to_email, e)
             raise CommandError(f"Error sending email: {e}") from e
 
-    def get_test_user(self, email: str) -> User:
+    def get_test_user(self, email: str, language: Optional[str] = None) -> User:
         """Retrieve or create a test user with the given email address.
 
         Args:
-            email (str): The email address of the test user.
+            email: The email address of the test user.
+            language: The language code for the test user.
 
         Returns:
             User: A User instance that has not been saved to the database.
@@ -87,6 +105,7 @@ class Command(BaseCommand):
             is_active=True,
             gets_notification_emails=True,
             gets_submission_email_updates=True,
+            language=language or settings.LANGUAGE_CODE,
         )
 
     def create_test_submission(self, user: User) -> Submission:
@@ -120,6 +139,7 @@ class Command(BaseCommand):
         form_data: dict,
         submission: Submission,
         in_progress: InProgressSubmission,
+        language: Optional[str] = None,
     ) -> None:
         """Send a test email based on the provided email ID.
 
@@ -129,6 +149,7 @@ class Command(BaseCommand):
             form_data (dict): Form data to be passed to the email function.
             submission (Submission): A test submission instance.
             in_progress (InProgressSubmission): A test in-progress submission instance.
+            language: Optional language code to use for the email.
 
         Raises:
             CommandError: If no handler is implemented for the given email ID.
@@ -138,9 +159,9 @@ class Command(BaseCommand):
         test_recipient = ["test@admin.com"]
 
         if email_id == "submission_creation_success":
-            func(form_data, submission, recipient_emails=test_recipient)
+            func(form_data, submission, recipient_emails=test_recipient, language=language)
         elif email_id == "submission_creation_failure":
-            func(form_data, user, recipient_emails=test_recipient)
+            func(form_data, user, recipient_emails=test_recipient, language=language)
         elif email_id == "thank_you_for_your_submission":
             func(form_data, submission)
         elif email_id == "your_submission_did_not_go_through":
@@ -151,17 +172,16 @@ class Command(BaseCommand):
             func(
                 user,
                 {
-                    "subject": "Account updated",
-                    "changed_item": "account",
-                    "changed_status": "updated",
-                    "changed_list": ["Staff privileges have been added to your account."],
+                    "subject": _("Account updated"),
+                    "changed_item": _("account"),
+                    "changed_status": _("updated"),
+                    "changed_list": [_("Staff privileges have been added to your account.")],
                 },
             )
         elif email_id == "user_in_progress_submission_expiring":
             func(in_progress)
         elif email_id == "password_reset_email":
             func(
-                to_email=user.email,
                 context={
                     "email": user.email,
                     "domain": "example.com",

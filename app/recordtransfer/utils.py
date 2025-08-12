@@ -1,6 +1,7 @@
 import logging
 import os
 from collections import defaultdict
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
 from zipfile import ZipFile
 
@@ -236,9 +237,8 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
         return {
             "accepted": False,
             "error": gettext("File is missing an extension."),
-            "verboseError": gettext('The file "{0}" does not have a file extension').format(
-                filename
-            ),
+            "verboseError": gettext('The file "%(filename)s" does not have a file extension')
+            % {"filename": filename},
         }
 
     # Check extension is allowed
@@ -250,10 +250,12 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
     ):
         return {
             "accepted": False,
-            "error": gettext('Files with "{0}" extension are not allowed.').format(extension),
-            "verboseError": gettext('The file "{0}" has an invalid extension (.{1})').format(
-                filename, extension
-            ),
+            "error": gettext('Files with "%(extension)s" extension are not allowed.')
+            % {"extension": extension},
+            "verboseError": gettext(
+                'The file "%(filename)s" has an invalid extension (.%(extension)s)'
+            )
+            % {"filename": filename, "extension": extension},
         }
 
     # Check filesize is an integer and non-negative
@@ -271,15 +273,14 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
         return {
             "accepted": False,
             "error": gettext("File size is invalid."),
-            "verboseError": gettext('The file "{0}" has an invalid size ({1})').format(
-                filename, size
-            ),
+            "verboseError": gettext('The file "%(filename)s" has an invalid size (%(size)s)')
+            % {"filename": filename, "size": size},
         }
     if size == 0:
         return {
             "accepted": False,
             "error": gettext("File is empty."),
-            "verboseError": gettext('The file "{0}" is empty').format(filename),
+            "verboseError": gettext('The file "%(filename)s" is empty') % {"filename": filename},
         }
 
     # Check file size is less than the maximum allowed size for a single file
@@ -292,12 +293,12 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
     if size > max_single_size_bytes:
         return {
             "accepted": False,
-            "error": gettext("File is too big ({0:.2f}MB). Max filesize: {1}MB").format(
-                size_mb, max_single_size
-            ),
+            "error": gettext("File is too big (%(size_mb).2fMB). Max filesize: %(max_size)sMB")
+            % {"size_mb": size_mb, "max_size": max_single_size},
             "verboseError": gettext(
-                'The file "{0}" is too big ({1:.2f}MB). Max filesize: {2}MB'
-            ).format(filename, size_mb, max_single_size),
+                'The file "%(filename)s" is too big (%(size_mb).2fMB). Max filesize: %(max_size)sMB'
+            )
+            % {"filename": filename, "size_mb": size_mb, "max_size": max_single_size},
         }
 
     # All checks succeeded
@@ -332,9 +333,10 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
             "accepted": False,
             "error": gettext("You can not upload anymore files."),
             "verboseError": gettext(
-                'The file "{0}" would push the total file count past the '
-                "maximum number of files ({1})"
-            ).format(filename, settings.MAX_TOTAL_UPLOAD_SIZE_MB),
+                'The file "%(filename)s" would push the total file count past the '
+                "maximum number of files (%(max_count)s)"
+            )
+            % {"filename": filename, "max_count": settings.MAX_TOTAL_UPLOAD_COUNT},
         }
 
     # Check total size of all files plus current one is within allowed size
@@ -346,10 +348,12 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
     if int(filesize) > max_remaining_size_bytes:
         return {
             "accepted": False,
-            "error": gettext("Maximum total upload size ({0} MB) exceeded").format(max_size),
+            "error": gettext("Maximum total upload size (%(max_size)s MB) exceeded")
+            % {"max_size": max_size},
             "verboseError": gettext(
-                'The file "{0}" would push the total transfer size past the {1}MB max'
-            ).format(filename, max_size),
+                'The file "%(filename)s" would push the total transfer size past the %(max_size)sMB max'
+            )
+            % {"filename": filename, "max_size": max_size},
         }
 
     # Check that a file with this name has not already been uploaded
@@ -358,10 +362,28 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
         return {
             "accepted": False,
             "error": gettext("A file with the same name has already been uploaded."),
-            "verboseError": gettext('A file with the name "{0}" has already been uploaded').format(
-                filename
-            ),
+            "verboseError": gettext(
+                'A file with the name "%(filename)s" has already been uploaded'
+            )
+            % {"filename": filename},
         }
 
     # All checks succeded
     return {"accepted": True}
+
+
+def get_js_translation_version() -> str:
+    """Return the latest modification time of all djangojs.mo files in the locale directory.
+
+    This changes whenever compiled JS translations are updated.
+    """
+    return str(
+        max(
+            [
+                item.stat().st_mtime
+                for locale_dir in settings.LOCALE_PATHS
+                for item in Path(locale_dir).rglob("djangojs.mo")
+            ]
+            or [0]
+        )
+    )

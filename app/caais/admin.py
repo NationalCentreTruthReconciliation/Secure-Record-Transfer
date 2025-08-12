@@ -1,5 +1,6 @@
 """CAAIS metadata administrator."""
 
+from datetime import datetime
 from typing import Any, Mapping, Optional
 
 from django.contrib import admin
@@ -8,6 +9,7 @@ from django.http import HttpRequest
 from django.template.response import TemplateResponse
 
 from caais import settings as caais_settings
+from caais.db import GroupConcat
 from caais.forms import (
     InlineAppraisalForm,
     InlineArchivalUnitForm,
@@ -220,7 +222,13 @@ class MetadataAdmin(admin.ModelAdmin):
     list_display = [
         "accession_title",
         "accession_identifier",
-        "acquisition_method",
+        "source_name",
+        "status",
+        "last_changed",
+    ]
+
+    list_filter = [
+        "status",
     ]
 
     inlines = [
@@ -240,7 +248,28 @@ class MetadataAdmin(admin.ModelAdmin):
         GeneralNoteInlineAdmin,
     ]
 
-    def render_change_form(self, request: HttpRequest, context: Mapping[str, Any], add: bool = False, change: bool = False, form_url: str = "", obj: Optional[Metadata] = None) -> TemplateResponse:
+    def source_name(self, obj) -> Optional[str]:
+        return obj.source_of_materials.aggregate(
+            names_joined=GroupConcat("source_name", separator=", ")
+        )["names_joined"]
+
+    def last_changed(self, obj) -> Optional[datetime]:
+        most_recent = obj.dates_of_creation_or_revision.order_by(
+            "-creation_or_revision_date"
+        ).first()
+        if most_recent:
+            return most_recent.creation_or_revision_date
+        return None
+
+    def render_change_form(
+        self,
+        request: HttpRequest,
+        context: Mapping[str, Any],
+        add: bool = False,
+        change: bool = False,
+        form_url: str = "",
+        obj: Optional[Metadata] = None,
+    ) -> TemplateResponse:
         """Add dates_of_creation_or_revision to the context for the template."""
         if obj:
             context["dates_of_creation_or_revision"] = list(

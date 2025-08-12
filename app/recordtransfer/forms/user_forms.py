@@ -80,9 +80,8 @@ class UserAccountInfoForm(forms.ModelForm):
         regex=NAME_PATTERN,
         widget=forms.TextInput(attrs={"id": HtmlIds.ID_FIRST_NAME}),
         label=_("First Name"),
-        required=True,
+        required=False,
         error_messages={
-            "required": _("First name is required."),
             "invalid": _(NAME_VALIDATION_MESSAGE),
         },
     )
@@ -90,9 +89,8 @@ class UserAccountInfoForm(forms.ModelForm):
         regex=NAME_PATTERN,
         widget=forms.TextInput(attrs={"id": HtmlIds.ID_LAST_NAME}),
         label=_("Last Name"),
-        required=True,
+        required=False,
         error_messages={
-            "required": _("Last name is required."),
             "invalid": _(NAME_VALIDATION_MESSAGE),
         },
     )
@@ -218,22 +216,11 @@ class UserAccountInfoForm(forms.ModelForm):
             user.save()
         return user
 
-    def reset_form(self) -> None:
-        """Reset form fields to initial values from instance."""
-        if self.instance:
-            self.data = self.data.copy()
-            self.data["first_name"] = self.instance.first_name
-            self.data["last_name"] = self.instance.last_name
-            self.data["gets_notification_emails"] = self.instance.gets_notification_emails
-            self.data["current_password"] = ""
-            self.data["new_password"] = ""
-            self.data["confirm_new_password"] = ""
-
 
 class AsyncPasswordResetForm(PasswordResetForm):
     """Form for resetting a user's password."""
 
-    def send_mail(  # noqa: D417
+    def send_mail(
         self,
         subject_template_name: str,
         email_template_name: str,
@@ -242,14 +229,9 @@ class AsyncPasswordResetForm(PasswordResetForm):
         to_email: str,
         html_email_template_name: Optional[str] = None,
     ) -> None:
-        """Override parent method to send password reset email asynchronously using django_rq.
-
-        Args:
-            to_email: Recipient email address
-        """
+        """Override parent method to send password reset email asynchronously using django_rq."""
         send_password_reset_email.delay(
             context=context,
-            to_email=to_email,
         )
 
 

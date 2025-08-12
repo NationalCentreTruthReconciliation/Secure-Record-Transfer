@@ -30,8 +30,8 @@ export function setupUnsavedChangesProtection() {
     // The URL to navigate to when the user chooses to leave the form
     let targetUrl = "";
 
-    // Add event listeners to only navigational links
-    document.querySelectorAll("a:not(.non-nav-link)").forEach(link => {
+    // Add event listeners to only navigational links (excluding debug toolbar links)
+    document.querySelectorAll("a:not(.non-nav-link):not(#djDebug a)").forEach(link => {
         link.addEventListener("click", (event) => {
             event.preventDefault();
             targetUrl = event.currentTarget.href;

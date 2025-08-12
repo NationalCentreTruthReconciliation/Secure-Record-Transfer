@@ -78,6 +78,7 @@ class FormFieldNames:
         """Return the dataclass as a dictionary."""
         return dataclasses.asdict(self)
 
+
 @dataclasses.dataclass(frozen=True)
 class HeaderNames:
     """Class to hold header names used in HTTP requests."""
