@@ -104,14 +104,17 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "recordtransfer.validators.LengthRangeValidator",
-        "OPTIONS": {"min_length": 10, "max_length": 30},
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 8,
+        },
     },
     {
-        "NAME": "recordtransfer.validators.CharacterCategoriesValidator",
-        "OPTIONS": {"required_categories": 3},
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 LOGIN_REDIRECT_URL = "/"
