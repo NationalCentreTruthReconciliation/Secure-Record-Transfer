@@ -1,6 +1,8 @@
+import contextlib
 import functools
 import logging
 import os
+import urllib.parse
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
@@ -11,11 +13,13 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 
+from recordtransfer.constants import WindowsFileRestrictions
+
 # This is to avoid a circular import
 if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
 
-LOGGER = logging.getLogger("recordtransfer")
+LOGGER = logging.getLogger(__name__)
 
 
 def zip_directory(directory: str, zipf: ZipFile) -> None:
@@ -209,96 +213,44 @@ def bytes_to_mb(b: int) -> float:
     return b / 1000**2
 
 
-def accept_file(filename: str, filesize: Union[str, int]) -> dict:
+def accept_file(filename: str, filesize: int) -> dict:
     """Determine if a new file should be accepted. Does not check the file's
     contents, only its name and its size.
 
     These checks are applied:
+    - The file name is safe and not malicious
     - The file name is not empty
-    - The file has an extension
-    - The file's extension exists in ACCEPTED_FILE_FORMATS
+    - The file has an accepted extension
     - The file's size is an integer greater than zero
     - The file's size is less than or equal to the maximum allowed size for one file
 
     Args:
         filename (str): The name of the file
-        filesize (Union[str, int]): A string or integer representing the size of
-            the file (in bytes)
+        filesize (int): An integer representing the size of the file (in bytes)
 
     Returns:
         (dict): A dictionary containing an 'accepted' key that contains True if
             the session is valid, or False if not. The dictionary also contains
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
-    # Check extension exists
-    name_split = filename.split(".")
-    if len(name_split) == 1:
-        return {
-            "accepted": False,
-            "error": gettext("File is missing an extension."),
-            "verboseError": gettext('The file "%(filename)s" does not have a file extension')
-            % {"filename": filename},
-        }
+    validators = [
+        _validate_basic_filename,
+        _validate_filename_characters,
+        _validate_absolute_paths,
+        _validate_path_traversal,
+        _validate_windows_reserved_names,
+        _validate_file_extension,
+        _validate_file_size,
+    ]
 
-    # Check extension is allowed
-    extension = name_split[-1].lower()
-    if not any(
-        extension == accepted_extension.lower()
-        for accepted_extensions in settings.ACCEPTED_FILE_FORMATS.values()
-        for accepted_extension in accepted_extensions
-    ):
-        return {
-            "accepted": False,
-            "error": gettext('Files with "%(extension)s" extension are not allowed.')
-            % {"extension": extension},
-            "verboseError": gettext(
-                'The file "%(filename)s" has an invalid extension (.%(extension)s)'
-            )
-            % {"filename": filename, "extension": extension},
-        }
-
-    # Check filesize is an integer and non-negative
-    try:
-        size = int(filesize)
-    except (ValueError, TypeError):
-        return {
-            "accepted": False,
-            "error": gettext("File size is invalid."),
-            "verboseError": gettext('The file "{0}" has an invalid size ({1})').format(
-                filename, filesize
-            ),
-        }
-    if size < 0:
-        return {
-            "accepted": False,
-            "error": gettext("File size is invalid."),
-            "verboseError": gettext('The file "%(filename)s" has an invalid size (%(size)s)')
-            % {"filename": filename, "size": size},
-        }
-    if size == 0:
-        return {
-            "accepted": False,
-            "error": gettext("File is empty."),
-            "verboseError": gettext('The file "%(filename)s" is empty') % {"filename": filename},
-        }
-
-    # Check file size is less than the maximum allowed size for a single file
-    max_single_size = min(
-        settings.MAX_SINGLE_UPLOAD_SIZE_MB,
-        settings.MAX_TOTAL_UPLOAD_SIZE_MB,
-    )
-    max_single_size_bytes = mb_to_bytes(max_single_size)
-    size_mb = bytes_to_mb(size)
-    if size > max_single_size_bytes:
-        return {
-            "accepted": False,
-            "error": gettext("File is too big (%(size_mb).2fMB). Max filesize: %(max_size)sMB")
-            % {"size_mb": size_mb, "max_size": max_single_size},
-            "verboseError": gettext(
-                'The file "%(filename)s" is too big (%(size_mb).2fMB). Max filesize: %(max_size)sMB'
-            )
-            % {"filename": filename, "size_mb": size_mb, "max_size": max_single_size},
-        }
+    for validator in validators:
+        result = validator(filename, filesize)
+        if not result["accepted"]:
+            if "error" not in result:
+                result["error"] = _("Invalid filename or size")
+            if "verboseError" not in result:
+                result["verboseError"] = result["error"]
+            return result
 
     # All checks succeeded
     return {"accepted": True}
@@ -371,6 +323,188 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
     return {"accepted": True}
 
 
+def _validate_basic_filename(filename: str, filesize: int) -> dict:
+    """Validate basic filename properties."""
+    if not filename or not filename.strip():
+        return {
+            "accepted": False,
+            "error": _("Filename cannot be empty"),
+        }
+
+    if len(filename) > WindowsFileRestrictions.MAX_FILENAME_LENGTH:
+        return {
+            "accepted": False,
+            "error": _("Filename is too long"),
+            "verboseError": _(
+                "Filename is too long (%(num_chars)s characters, max %(max_chars)s is allowed)"
+            )
+            % {
+                "num_chars": len(filename),
+                "max_chars": WindowsFileRestrictions.MAX_FILENAME_LENGTH,
+            },
+        }
+
+    return {"accepted": True}
+
+
+def _validate_filename_characters(filename: str, filesize: int) -> dict:
+    """Validate filename doesn't contain control characters."""
+    if any(ord(char) < 32 for char in filename):
+        return {
+            "accepted": False,
+            "error": _("Filename contains invalid characters"),
+        }
+
+    return {"accepted": True}
+
+
+def _validate_absolute_paths(filename: str, filesize: int) -> dict:
+    """Validate filename doesn't contain absolute path patterns."""
+    if filename.startswith("/"):
+        return {
+            "accepted": False,
+            "error": _("Absolute paths are not allowed"),
+            "verboseError": _('Filename "%(filename)s" begins with "/"') % {"filename": filename},
+        }
+
+    if len(filename) > 2 and filename[1] == ":":
+        return {
+            "accepted": False,
+            "error": _("Absolute paths are not allowed"),
+            "verboseError": _('Filename "%(filename)s" begins with "%(drive_letter)s:"')
+            % {
+                "filename": filename,
+                "drive_letter": filename[0],
+            },
+        }
+
+    return {"accepted": True}
+
+
+def _validate_path_traversal(filename: str, filesize: int) -> dict:
+    """Validate filename doesn't contain path traversal patterns."""
+    decoded_filename = filename
+
+    with contextlib.suppress(Exception):
+        decoded_filename = urllib.parse.unquote(filename)
+
+    traversal_patterns = [
+        "..",
+        "/",
+        "\\",
+        "%2e%2e",  # URL encoded ..
+        "%2f",  # URL encoded /
+        "%5c",  # URL encoded \\
+        "%252e%252e",  # Double URL encoded ..
+        "%252f",  # Double URL encoded /
+        "%255c",  # Double URL encoded \\
+    ]
+
+    # Create a set, since decoded filename might be the same as the filename
+    check_files = {decoded_filename.lower(), filename.lower()}
+
+    for pattern in traversal_patterns:
+        if any(pattern in file for file in check_files):
+            return {
+                "accepted": False,
+                "error": _("Filename contains invalid path characters"),
+                "verboseError": _(
+                    'Filename "%(filename)s" contains invalid character pattern: "%(pattern)s"'
+                )
+                % {"filename": filename, "pattern": pattern},
+            }
+
+    return {"accepted": True}
+
+
+def _validate_windows_reserved_names(filename: str, filesize: int) -> dict:
+    """Validate filename doesn't use Windows reserved names."""
+    base_name = filename.split(".")[0].upper()
+    if base_name in WindowsFileRestrictions.RESERVED_FILENAMES:
+        return {
+            "accepted": False,
+            "error": _("Filename uses reserved system name"),
+            "verboseError": _(
+                'Filename "%(filename)s" includes Windows reserved filename "%(reserved)s"'
+            )
+            % {
+                "filename": filename,
+                "reserved": base_name,
+            },
+        }
+
+    return {"accepted": True}
+
+
+def _validate_file_extension(filename: str, filesize: int) -> dict:
+    """Validate that file extension exists, and is allowed."""
+    # Check extension exists
+    name_split = filename.split(".")
+    if len(name_split) == 1:
+        return {
+            "accepted": False,
+            "error": gettext("File is missing an extension."),
+            "verboseError": gettext('The file "%(filename)s" does not have a file extension')
+            % {"filename": filename},
+        }
+
+    # Check extension is allowed
+    extension = name_split[-1].lower()
+    if not any(
+        extension == accepted_extension.lower()
+        for accepted_extensions in settings.ACCEPTED_FILE_FORMATS.values()
+        for accepted_extension in accepted_extensions
+    ):
+        return {
+            "accepted": False,
+            "error": gettext('Files with "%(extension)s" extension are not allowed.')
+            % {"extension": extension},
+            "verboseError": gettext(
+                'The file "%(filename)s" has an invalid extension (.%(extension)s)'
+            )
+            % {"filename": filename, "extension": extension},
+        }
+
+    return {"accepted": True}
+
+
+def _validate_file_size(filename: str, filesize: int) -> dict:
+    """Check filesize is greater than zero is within the max single upload size."""
+    if filesize < 0:
+        return {
+            "accepted": False,
+            "error": gettext("File size is invalid."),
+            "verboseError": gettext('The file "%(filename)s" has an invalid size (%(size)s)')
+            % {"filename": filename, "size": filesize},
+        }
+    if filesize == 0:
+        return {
+            "accepted": False,
+            "error": gettext("File is empty."),
+            "verboseError": gettext('The file "%(filename)s" is empty') % {"filename": filename},
+        }
+
+    # Check file size is less than the maximum allowed size for a single file
+    max_single_size = min(
+        settings.MAX_SINGLE_UPLOAD_SIZE_MB,
+        settings.MAX_TOTAL_UPLOAD_SIZE_MB,
+    )
+    max_single_size_bytes = mb_to_bytes(max_single_size)
+    if filesize > max_single_size_bytes:
+        size_mb = bytes_to_mb(filesize)
+        return {
+            "accepted": False,
+            "error": gettext("File is too big (%(size_mb).2fMB). Max filesize: %(max_size_mb)sMB")
+            % {"size_mb": size_mb, "max_size_mb": max_single_size},
+            "verboseError": gettext(
+                'The file "%(filename)s" is too big (%(size_mb).2fMB). Max filesize: %(max_size_mb)sMB'
+            )
+            % {"filename": filename, "size_mb": size_mb, "max_size_mb": max_single_size},
+        }
+
+    return {"accepted": True}
+
+
 def get_js_translation_version() -> str:
     """Return the latest modification time of all djangojs.mo files in the locale directory.
 
@@ -386,6 +520,7 @@ def get_js_translation_version() -> str:
             or [0]
         )
     )
+
 
 @functools.lru_cache(maxsize=1)
 def is_deployed_environment() -> bool:
