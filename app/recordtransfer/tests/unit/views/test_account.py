@@ -49,8 +49,8 @@ class TestCreateAccount(TestCase):
             "first_name": "Test",
             "last_name": "User",
             "email": "testuser@example.com",
-            "password1": "securepassword123",
-            "password2": "securepassword123",
+            "password1": "Securepassword123",
+            "password2": "Securepassword123",
         }
 
         # Create an existing user for testing duplicate scenarios
@@ -59,7 +59,7 @@ class TestCreateAccount(TestCase):
             first_name="Existing",
             last_name="User",
             email="existing@example.com",
-            password="password123",
+            password="Password123",
         )
 
     def test_get_create_account_unauthenticated(self) -> None:
@@ -101,7 +101,7 @@ class TestCreateAccount(TestCase):
         self.assertEqual(new_user.email, "testuser@example.com")
         self.assertFalse(new_user.is_active)  # User should be inactive initially
         self.assertFalse(new_user.gets_submission_email_updates)
-        self.assertTrue(new_user.check_password("securepassword123"))
+        self.assertTrue(new_user.check_password("Securepassword123"))
 
         # Check activation email was sent
         self.mock_send_email.assert_called_once_with(new_user)
