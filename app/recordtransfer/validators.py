@@ -52,11 +52,11 @@ class CharacterCategoriesValidator:
     - Special characters from the allowed set: _ # % ( ) . ^ { } !.
     """
 
-    def __init__(self, allowed_specials="_#%().^{}!", required_categories=3):
+    def __init__(self, allowed_specials: str = "_#%().^{}!", required_categories: int = 3):
         self.allowed_specials = allowed_specials
         self.required_categories = required_categories
 
-    def validate(self, password: str, user=None) -> None:
+    def validate(self, password: str, user: User | None = None) -> None:
         """Validate that the password contains at least the required number of character
         categories.
         """
@@ -82,3 +82,41 @@ class CharacterCategoriesValidator:
             "Your password must include at least three of the following types: uppercase, lowercase, "
             "numbers, or one of these special characters: _ # % ( ) . ^ { } !"
         )
+
+
+class PasswordHistoryValidator:
+    """Ensure the new password is different from the user's previous N passwords."""
+
+    def __init__(self, history_depth: int = 5):
+        self.history_depth = history_depth
+
+    def validate(self, password: str, user: User | None = None) -> None:
+        """Validate that the password is not in the user's recent password history."""
+        if not user or not user.pk or not password:
+            return
+        # Import here to avoid circular imports
+        from django.contrib.auth.hashers import check_password
+
+        from recordtransfer.models import PasswordHistory
+
+        # First check if the new password is the same as the current password
+        if user.password and check_password(password, user.password):
+            raise ValidationError(
+                _("Your new password cannot be the same as your current password."),
+                code="password_same_as_current",
+            )
+
+        # Then check against password history
+        recent_hashes = PasswordHistory.get_recent_password_hashes(
+            user=user, limit=self.history_depth
+        )
+        if any(check_password(password, old_hash) for old_hash in recent_hashes):
+            raise ValidationError(
+                _("You cannot reuse your previous %(n)d passwords."),
+                code="password_in_history",
+                params={"n": self.history_depth},
+            )
+
+    def get_help_text(self) -> str:
+        """Return help text describing the password history requirement."""
+        return _("Your password must be different from your previous five passwords.")
