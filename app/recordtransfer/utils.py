@@ -1,5 +1,7 @@
+import contextlib
 import logging
 import os
+import urllib.parse
 from typing import TYPE_CHECKING, Union
 from zipfile import ZipFile
 
@@ -13,7 +15,7 @@ from recordtransfer.exceptions import FolderNotFoundError
 if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
 
-LOGGER = logging.getLogger("recordtransfer")
+LOGGER = logging.getLogger(__name__)
 
 
 def zip_directory(directory: str, zipf: ZipFile):
@@ -203,6 +205,7 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
     contents, only its name and its size.
 
     These checks are applied:
+    - The file name is safe and not malicious
     - The file name is not empty
     - The file has an extension
     - The file's extension exists in ACCEPTED_FILE_FORMATS
@@ -219,6 +222,15 @@ def accept_file(filename: str, filesize: Union[str, int]) -> dict:
             the session is valid, or False if not. The dictionary also contains
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
+    # Check filename safety first
+    filename_check = is_safe_filename(filename)
+    if not filename_check["safe"]:
+        return {
+            "accepted": False,
+            "error": filename_check["error"],
+            "verboseError": filename_check["error"],
+        }
+
     # Check extension exists
     name_split = filename.split(".")
     if len(name_split) == 1:
@@ -354,3 +366,147 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
 
     # All checks succeded
     return {"accepted": True}
+
+
+def is_safe_filename(filename: str) -> dict:
+    """Validate that a filename is safe and not malicious.
+
+    Args:
+        filename (str): The filename to validate
+
+    Returns:
+        dict: A dictionary with 'safe' boolean and optional 'error' message
+    """
+    validators = [
+        _validate_basic_filename,
+        _validate_filename_characters,
+        _validate_path_traversal,
+        _validate_absolute_paths,
+        _validate_windows_reserved_names,
+        _validate_path_components,
+    ]
+
+    for validator in validators:
+        result = validator(filename)
+        if not result["safe"]:
+            return result
+
+    return {"safe": True}
+
+
+def _validate_basic_filename(filename: str) -> dict:
+    """Validate basic filename properties."""
+    if not filename or not filename.strip():
+        return {
+            "safe": False,
+            "error": gettext("Filename cannot be empty"),
+        }
+
+    if len(filename) > 255:
+        return {
+            "safe": False,
+            "error": gettext("Filename is too long"),
+        }
+
+    return {"safe": True}
+
+
+def _validate_filename_characters(filename: str) -> dict:
+    """Validate filename doesn't contain control characters."""
+    if any(ord(char) < 32 for char in filename):
+        return {
+            "safe": False,
+            "error": gettext("Filename contains invalid characters"),
+        }
+
+    return {"safe": True}
+
+
+def _validate_path_traversal(filename: str) -> dict:
+    """Validate filename doesn't contain path traversal patterns."""
+    decoded_filename = filename
+
+    with contextlib.suppress(Exception):
+        decoded_filename = urllib.parse.unquote(filename)
+
+    traversal_patterns = [
+        "..",
+        "/",
+        "\\",
+        "%2e%2e",
+        "%2f",
+        "%5c",  # URL encoded
+        "%252e",
+        "%252f",
+        "%255c",  # Double encoded
+    ]
+
+    for pattern in traversal_patterns:
+        if pattern in decoded_filename.lower() or pattern in filename.lower():
+            return {
+                "safe": False,
+                "error": gettext("Filename contains invalid path characters"),
+            }
+
+    return {"safe": True}
+
+
+def _validate_absolute_paths(filename: str) -> dict:
+    """Validate filename doesn't contain absolute path patterns."""
+    if filename.startswith("/") or (len(filename) > 2 and filename[1] == ":"):
+        return {
+            "safe": False,
+            "error": gettext("Absolute paths are not allowed"),
+        }
+
+    return {"safe": True}
+
+
+def _validate_windows_reserved_names(filename: str) -> dict:
+    """Validate filename doesn't use Windows reserved names."""
+    windows_reserved = [
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
+        "COM1",
+        "COM2",
+        "COM3",
+        "COM4",
+        "COM5",
+        "COM6",
+        "COM7",
+        "COM8",
+        "COM9",
+        "LPT1",
+        "LPT2",
+        "LPT3",
+        "LPT4",
+        "LPT5",
+        "LPT6",
+        "LPT7",
+        "LPT8",
+        "LPT9",
+    ]
+
+    base_name = filename.split(".")[0].upper()
+    if base_name in windows_reserved:
+        return {
+            "safe": False,
+            "error": gettext("Filename uses reserved system name"),
+        }
+
+    return {"safe": True}
+
+
+def _validate_path_components(filename: str) -> dict:
+    """Validate path components aren't excessively long."""
+    path_components = filename.replace("\\", "/").split("/")
+    for component in path_components:
+        if len(component) > 100:
+            return {
+                "safe": False,
+                "error": gettext("Path component is too long"),
+            }
+
+    return {"safe": True}

@@ -12,6 +12,7 @@ from recordtransfer.utils import (
     get_human_readable_file_count,
     get_human_readable_size,
     html_to_text,
+    is_safe_filename,
     snake_to_camel_case,
 )
 
