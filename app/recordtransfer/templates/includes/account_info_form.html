@@ -6,34 +6,9 @@
       hx-select="#account-info-form"
       hx-on::after-request="setupProfileForm()">
     {% csrf_token %}
-    <div class="flex flex-col md:flex-row w-full gap-4">
-        <!-- Left Column -->
-        <div class="flex-1 space-y-3 md:space-y-4">
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans form.first_name.label %}</legend>
-                <input type="text"
-                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
-                       name="{{ form.first_name.name }}"
-                       id="{{ form.first_name.id_for_label }}"
-                       value="{{ form.first_name.value }}">
-                {% if form.first_name.errors %}
-                    <p class="text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
-                {% endif %}
-            </fieldset>
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans form.last_name.label %}</legend>
-                <input type="text"
-                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
-                       name="{{ form.last_name.name }}"
-                       id="{{ form.last_name.id_for_label }}"
-                       value="{{ form.last_name.value }}">
-                {% if form.last_name.errors %}
-                    <p class="text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
-                {% endif %}
-            </fieldset>
-        </div>
-        <!-- Right Column -->
-        <div class="flex-1 space-y-3 md:space-y-4">
+    <!-- Account Information Section -->
+    <div class="flex flex-col md:flex-row w-full gap-4 mb-6">
+        <div class="flex-1 space-y-3 md:space-y-4 flex flex-col justify-end">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans "Email" %}</legend>
                 <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
@@ -41,28 +16,67 @@
                        value="{{ user.email }}"
                        id="id_email">
             </fieldset>
+        </div>
+        <div class="flex-1 space-y-3 md:space-y-4 flex flex-col justify-end">
             <fieldset class="fieldset">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans "Username" %}</legend>
+                <div class="flex justify-between items-end">
+                    <legend class="fieldset-legend text-sm md:text-md">{% trans "Username" %}</legend>
+                    <a href="{% url 'password_change' %}"
+                       class="badge badge-outline badge-sm text-primary">{% trans "Change Password" %}</a>
+                </div>
                 <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
                        disabled
                        value="{{ user.username }}"
                        id="id_username">
             </fieldset>
-            <fieldset class="fieldset w-full">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans "Notification options" %}</legend>
-                <label class="label pb-2 cursor-pointer"
-                       for="{{ form.gets_notification_emails.id_for_label }}">
-                    <input type="checkbox"
-                           class="checkbox checkbox-xs md:checkbox-sm checkbox-primary"
-                           name="{{ form.gets_notification_emails.name }}"
-                           id="{{ form.gets_notification_emails.id_for_label }}"
-                           {% if form.gets_notification_emails.value %}checked{% endif %} />
-                    <span class="ml-2 text-xs md:text-sm">{% trans "Receive notification emails?" %}</span>
-                </label>
-            </fieldset>
         </div>
     </div>
-    <div class="card-actions justify-start md:justify-end mt-8 md:mt-10">
-        <button class="btn btn-primary btn-sm md:btn-md btn-wide" id="id_save_button">{% trans "Save" %}</button>
-    </div>
-</form>
+    <!-- Divider -->
+    <div class="mt-6 pt-4 border-t border-gray-200 flex justify-center"></div>
+        <!-- Editable Fields Section -->
+        <div class="flex flex-col md:flex-row w-full gap-4">
+            <!-- Left Column -->
+            <div class="flex-1 space-y-3 md:space-y-4">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-sm md:text-md">{% trans form.first_name.label %}</legend>
+                    <input type="text"
+                           class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                           name="{{ form.first_name.name }}"
+                           id="{{ form.first_name.id_for_label }}"
+                           value="{{ form.first_name.value }}">
+                    {% if form.first_name.errors %}
+                        <p class="text-error text-xs md:text-sm">{% trans form.first_name.errors.0 %}</p>
+                    {% endif %}
+                </fieldset>
+                <fieldset class="fieldset w-full">
+                    <legend class="fieldset-legend text-sm md:text-md">{% trans "Notification options" %}</legend>
+                    <label class="label pb-2 cursor-pointer"
+                           for="{{ form.gets_notification_emails.id_for_label }}">
+                        <input type="checkbox"
+                               class="checkbox checkbox-xs md:checkbox-sm checkbox-primary"
+                               name="{{ form.gets_notification_emails.name }}"
+                               id="{{ form.gets_notification_emails.id_for_label }}"
+                               {% if form.gets_notification_emails.value %}checked{% endif %} />
+                        <span class="ml-2 text-xs md:text-sm">{% trans "Receive notification emails?" %}</span>
+                    </label>
+                </fieldset>
+            </div>
+            <!-- Right Column -->
+            <div class="flex-1 space-y-3 md:space-y-4">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-sm md:text-md">{% trans form.last_name.label %}</legend>
+                    <input type="text"
+                           class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
+                           name="{{ form.last_name.name }}"
+                           id="{{ form.last_name.id_for_label }}"
+                           value="{{ form.last_name.value }}">
+                    {% if form.last_name.errors %}
+                        <p class="text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
+                    {% endif %}
+                </fieldset>
+            </div>
+        </div>
+        <div class="card-actions justify-start md:justify-end mt-8 md:mt-10">
+            <button class="btn btn-primary btn-sm md:btn-md btn-wide" id="id_save_button">{% trans "Save" %}</button>
+        </div>
+    </form>
