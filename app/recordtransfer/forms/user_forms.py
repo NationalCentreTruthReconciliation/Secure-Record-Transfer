@@ -108,7 +108,6 @@ class UserAccountInfoForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_NEW_PASSWORD}),
         label=_("New Password"),
         required=False,
-        validators=[password_validation.validate_password],
     )
     confirm_new_password = forms.CharField(
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CONFIRM_NEW_PASSWORD}),
@@ -166,14 +165,8 @@ class UserAccountInfoForm(forms.ModelForm):
                 }
             )
 
-        if new_password == current_password:
-            raise ValidationError(
-                {
-                    "new_password": [
-                        _("The new password must be different from the current password."),
-                    ]
-                }
-            )
+        # Note: Current password reuse is now handled by PasswordHistoryValidator
+        # in the clean_new_password method
 
         if not self.instance.check_password(current_password):
             raise ValidationError(
@@ -183,6 +176,14 @@ class UserAccountInfoForm(forms.ModelForm):
                     ]
                 }
             )
+
+    def clean_new_password(self):
+        """Validate the new password using Django's password validation."""
+        new_password = self.cleaned_data.get("new_password")
+        if new_password:
+            # Use Django's password validation with the user instance
+            password_validation.validate_password(new_password, self.instance)
+        return new_password
 
     def clean(self) -> dict[str, Any]:
         """Clean the form data."""
@@ -197,6 +198,19 @@ class UserAccountInfoForm(forms.ModelForm):
         password_change = bool(current_password or new_password or confirm_new_password)
 
         if password_change:
+            # Store current password in history BEFORE validation
+            # This ensures our PasswordHistoryValidator can check against it
+            if (
+                self.instance.pk
+                and current_password
+                and self.instance.check_password(current_password)
+                and new_password
+                and new_password != current_password
+            ):
+                from recordtransfer.models import PasswordHistory
+
+                PasswordHistory.objects.create(user=self.instance, password=self.instance.password)
+
             self._validate_password_change(current_password, new_password, confirm_new_password)
 
         if not self.has_changed() and not password_change:
