@@ -120,3 +120,43 @@ class PasswordHistoryValidator:
     def get_help_text(self) -> str:
         """Return help text describing the password history requirement."""
         return _("Your password must be different from your previous five passwords.")
+
+
+class UserAttributeContainsValidator:
+    """Reject passwords that contain the full first name, last name, or username
+    (case-insensitive). Email is intentionally ignored.
+    """
+
+    def __init__(self, user_attributes: tuple[str, ...] | None = None):
+        # Only check whole attribute values for these fields; do not check email
+        self.user_attributes = user_attributes or ("username", "first_name", "last_name")
+
+    def get_user_attribute_values(self, user: User) -> list[str]:
+        attribute_values_lower: list[str] = []
+        for attribute_name in self.user_attributes:
+            attribute_value = getattr(user, attribute_name, None)
+            if not attribute_value:
+                continue
+            attribute_value_lower = str(attribute_value).strip().lower()
+            if attribute_value_lower:
+                attribute_values_lower.append(attribute_value_lower)
+        return attribute_values_lower
+
+    def validate(self, password: str, user: User | None = None) -> None:
+        if not user or not password:
+            return
+        password_lower = (password or "").lower()
+        for attribute_value_lower in self.get_user_attribute_values(user):
+            if attribute_value_lower and attribute_value_lower in password_lower:
+                from django.core.exceptions import ValidationError
+                from django.utils.translation import gettext as _
+
+                raise ValidationError(
+                    _("Your password cannot contain your first name, last name, or username."),
+                    code="password_contains_user_attribute",
+                )
+
+    def get_help_text(self) -> str:
+        from django.utils.translation import gettext as _
+
+        return _("Your password cannot contain your first name, last name, or username.")
