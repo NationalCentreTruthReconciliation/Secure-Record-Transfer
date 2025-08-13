@@ -135,15 +135,6 @@ class User(AbstractUser):
 
         return True
 
-    def set_password(self, raw_password):
-        """Override set_password to track password history."""
-        # Store the current password in history before changing it
-        if self.pk and self.password:
-            PasswordHistory.objects.create(user=self, password=self.password)
-
-        # Call the parent method to set the new password
-        super().set_password(raw_password)
-
 
 class PasswordHistory(models.Model):
     """Store a user's previous password hashes for history validation."""
