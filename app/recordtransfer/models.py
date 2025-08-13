@@ -11,7 +11,6 @@ import bagit
 from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.files import File
