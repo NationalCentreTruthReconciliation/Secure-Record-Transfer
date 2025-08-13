@@ -155,13 +155,6 @@ class PasswordHistory(models.Model):
             PasswordHistory.objects.filter(user=user).values_list("password", flat=True)[:limit]
         )
 
-    @staticmethod
-    def remember(user: User, raw_password: str) -> None:
-        """Remember a user's password by storing its hashed value in the password history."""
-        if not user or not user.pk or not raw_password:
-            return
-        PasswordHistory.objects.create(user=user, password=make_password(raw_password))
-
 
 class SiteSetting(models.Model):
     """A model to store configurable site settings that administrators can modify
