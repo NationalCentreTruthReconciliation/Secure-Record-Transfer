@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 from django.conf import settings
 from django.test import override_settings, tag
@@ -137,6 +138,7 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         page_text = self.driver.page_source
         assert "This password must contain at least three of the following" in page_text
 
+    @patch("recordtransfer.views.profile.send_user_account_updated")
     def test_reuse_previous_passwords_shows_error(self) -> None:
         """Displays validation error when attempting to reuse a previous password."""
         self.open_profile_and_wait()
@@ -151,7 +153,7 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         for current, new in sequence:
             self.submit_password_change(current=current, new=new, confirm=new)
             WebDriverWait(self.driver, 5).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "alert"))
+                EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
             )
             # return to ensure form ready for next iteration
             self.open_profile_and_wait()
