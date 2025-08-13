@@ -174,7 +174,7 @@ class UserAccountInfoForm(forms.ModelForm):
                 }
             )
 
-    def clean_new_password(self):
+    def clean_new_password(self) -> Optional[str]:
         """Validate the new password using Django's password validation."""
         new_password = self.cleaned_data.get("new_password")
         if new_password:
@@ -195,7 +195,6 @@ class UserAccountInfoForm(forms.ModelForm):
         password_change = bool(current_password or new_password or confirm_new_password)
 
         if password_change:
-            # First validate basic password change logic (current password correctness, confirmation match)
             self._validate_password_change(current_password, new_password, confirm_new_password)
 
             if (
