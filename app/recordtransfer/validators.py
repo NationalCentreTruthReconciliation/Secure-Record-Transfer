@@ -132,6 +132,7 @@ class UserAttributeContainsValidator:
         self.user_attributes = user_attributes or ("username", "first_name", "last_name")
 
     def get_user_attribute_values(self, user: User) -> list[str]:
+        """Get the values of the user attributes."""
         attribute_values_lower: list[str] = []
         for attribute_name in self.user_attributes:
             attribute_value = getattr(user, attribute_name, None)
@@ -143,6 +144,7 @@ class UserAttributeContainsValidator:
         return attribute_values_lower
 
     def validate(self, password: str, user: User | None = None) -> None:
+        """Validate that the password does not contain the user's first name, last name, or username."""
         if not user or not password:
             return
         password_lower = (password or "").lower()
@@ -157,6 +159,5 @@ class UserAttributeContainsValidator:
                 )
 
     def get_help_text(self) -> str:
-        from django.utils.translation import gettext as _
-
+        """Return help text describing the user attribute requirement."""
         return _("Your password cannot contain your first name, last name, or username.")
