@@ -464,13 +464,13 @@
                         <i>{% trans "(Not specified)" %}</i>
                     {% endif %}
                 </div>
-                <div class="name-field">7.2 Date of Creation of Revision</div>
+                <div class="name-field">7.2 Date of Creation or Revision</div>
                 {% if metadata.dates_of_creation_or_revision.all %}
                     {# Loop from newest to oldest #}
                     {% for date in metadata.dates_of_creation_or_revision.all reversed %}
                         <div class="value-field">
                             <div class="repeatable-field-counter">
-                                <i>Date of Creation or Revision {{ forloop.counter }} of {{ metadata.events.count }}</i>
+                                <i>Date of Creation or Revision {{ forloop.counter }} of {{ metadata.dates_of_creation_or_revision.count }}</i>
                             </div>
                             <ul class="no-ul-margin">
                                 <li>
@@ -486,7 +486,7 @@
                                     <span id="creation-or-revision-agent-{{ forloop.counter }}">{{ date.creation_or_revision_agent }}</span>
                                 </li>
                                 <li>
-                                    <b>7.2.4 Creation or Revision Date:</b>
+                                    <b>7.2.4 Creation or Revision Note:</b>
                                     <span id="creation-or-revision-note-{{ forloop.counter }}">{{ date.creation_or_revision_note }}</span>
                                 </li>
                             </ul>
