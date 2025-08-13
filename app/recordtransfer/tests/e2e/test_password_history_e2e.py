@@ -1,5 +1,5 @@
 import os
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.test import override_settings, tag
@@ -139,7 +139,7 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         assert "This password must contain at least three of the following" in page_text
 
     @patch("recordtransfer.views.profile.send_user_account_updated")
-    def test_reuse_previous_passwords_shows_error(self) -> None:
+    def test_reuse_previous_passwords_shows_error(self, email_mock: MagicMock) -> None:
         """Displays validation error when attempting to reuse a previous password."""
         self.open_profile_and_wait()
         # Build history with multiple changes
