@@ -198,19 +198,6 @@ class UserAccountInfoForm(forms.ModelForm):
         password_change = bool(current_password or new_password or confirm_new_password)
 
         if password_change:
-            # Store current password in history BEFORE validation
-            # This ensures our PasswordHistoryValidator can check against it
-            if (
-                self.instance.pk
-                and current_password
-                and self.instance.check_password(current_password)
-                and new_password
-                and new_password != current_password
-            ):
-                from recordtransfer.models import PasswordHistory
-
-                PasswordHistory.objects.create(user=self.instance, password=self.instance.password)
-
             self._validate_password_change(current_password, new_password, confirm_new_password)
 
         if not self.has_changed() and not password_change:
