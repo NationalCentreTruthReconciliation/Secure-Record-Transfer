@@ -114,6 +114,10 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "recordtransfer.validators.CharacterCategoriesValidator",
         "OPTIONS": {"required_categories": 3},
     },
+    {
+        "NAME": "recordtransfer.validators.PasswordHistoryValidator",
+        "OPTIONS": {"history_depth": 5},
+    },
 ]
 
 LOGIN_REDIRECT_URL = "/"
