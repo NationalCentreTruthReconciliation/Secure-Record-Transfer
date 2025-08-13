@@ -57,6 +57,19 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         )
         save_button.click()
 
+    @patch("recordtransfer.views.profile.send_user_account_updated")
+    def test_successful_password_change_shows_success(self, email_mock: MagicMock) -> None:
+        """Shows a success alert when changing password with valid inputs."""
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="SecondPassword456!",
+            confirm="SecondPassword456!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
+
     def test_same_as_current_password_shows_field_error(self) -> None:
         """Displays field error when new password equals current password."""
         self.open_profile_and_wait()
