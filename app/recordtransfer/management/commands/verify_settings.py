@@ -1,4 +1,3 @@
-import functools
 import logging
 import os
 import re
@@ -9,28 +8,9 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
 
+from recordtransfer.utils import is_deployed_environment
+
 LOGGER = logging.getLogger(__name__)
-
-@functools.lru_cache(maxsize=1)
-def is_deployed_environment() -> bool:
-    """Detect if the app is running in a deployed production environment.
-
-    Returns True if ALLOWED_HOSTS contains any non-localhost/non-127.0.0.1 hosts,
-    indicating this is a deployed production environment.
-    """
-    allowed_hosts = settings.ALLOWED_HOSTS
-
-    # If ALLOWED_HOSTS is ['*'], consider it production
-    if "*" in allowed_hosts:
-        return True
-
-    # Check if any host is not localhost/127.0.0.1
-    for host in allowed_hosts:
-        host = host.strip().lower()
-        if host not in ["localhost", "127.0.0.1", ""]:
-            return True
-
-    return False
 
 
 class Command(BaseCommand):
@@ -430,9 +410,7 @@ def verify_security_settings() -> None:
     """Verify SECRET_KEY value is set."""
     secret_key = getattr(settings, "SECRET_KEY", "")
     if not secret_key:
-        raise ImproperlyConfigured(
-            "SECRET_KEY is required. Generate a secure secret key."
-        )
+        raise ImproperlyConfigured("SECRET_KEY is required. Generate a secure secret key.")
 
     LOGGER.info("Verified SECRET_KEY is set.")
 

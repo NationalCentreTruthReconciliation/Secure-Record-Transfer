@@ -22,9 +22,9 @@ from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from recordtransfer.emails import send_user_activation_email
 from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
-from recordtransfer.management.commands.verify_settings import is_deployed_environment
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
+from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 
