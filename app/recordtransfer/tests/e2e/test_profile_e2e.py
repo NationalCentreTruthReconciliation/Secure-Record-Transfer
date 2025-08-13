@@ -123,7 +123,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
 
         driver.find_element(By.NAME, "current_password").send_keys("Securepassword123")
         driver.find_element(By.NAME, "new_password").send_keys("Newsecurepassword123")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("Newsecurepassword123")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("Wrongsecurepassword123")
         save_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_save_button"))
         )
