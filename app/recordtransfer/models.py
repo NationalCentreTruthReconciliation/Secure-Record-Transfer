@@ -11,6 +11,7 @@ import bagit
 from caais.export import ExportVersion
 from caais.models import Metadata
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.files import File
@@ -133,6 +134,42 @@ class User(AbstractUser):
             return bool(self.other_province_or_state)
 
         return True
+
+    def set_password(self, raw_password):
+        """Override set_password to track password history."""
+        # Store the current password in history before changing it
+        if self.pk and self.password:
+            PasswordHistory.objects.create(user=self, password=self.password)
+
+        # Call the parent method to set the new password
+        super().set_password(raw_password)
+
+
+class PasswordHistory(models.Model):
+    """Store a user's previous password hashes for history validation."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_history")
+    password = models.CharField(max_length=255)  # hashed password
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Meta information for the Password History model."""
+
+        ordering: ClassVar[list[str]] = ["-changed_at"]
+
+    @staticmethod
+    def get_recent_password_hashes(user: User, limit: int = 5) -> list[str]:
+        """Retrieve a list of recent password hashes for the specified user."""
+        return list(
+            PasswordHistory.objects.filter(user=user).values_list("password", flat=True)[:limit]
+        )
+
+    @staticmethod
+    def remember(user: User, raw_password: str) -> None:
+        """Remember a user's password by storing its hashed value in the password history."""
+        if not user or not user.pk or not raw_password:
+            return
+        PasswordHistory.objects.create(user=user, password=make_password(raw_password))
 
 
 class SiteSetting(models.Model):
