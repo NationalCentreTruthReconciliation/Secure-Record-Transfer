@@ -55,3 +55,15 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
             EC.element_to_be_clickable((By.ID, "id_save_button"))
         )
         save_button.click()
+
+    def test_successful_password_change_shows_success(self) -> None:
+        """Shows a success alert when changing password with valid inputs."""
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="SecondPassword456!",
+            confirm="SecondPassword456!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+        )
