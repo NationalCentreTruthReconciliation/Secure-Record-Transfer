@@ -179,3 +179,19 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         )
         page_text = self.driver.page_source
         assert "You cannot reuse your previous 5 passwords." in page_text
+
+    def test_password_too_similar_to_email(self) -> None:
+        """Shows error when new password is too similar to the email address."""
+        self.user.email = "UniquePart123@example.com"
+        self.user.save()
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="UniquePart123-Strong1!",
+            confirm="UniquePart123-Strong1!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source.lower()
+        assert "too similar" in page_text
