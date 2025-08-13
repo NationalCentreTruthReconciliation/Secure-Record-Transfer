@@ -13,7 +13,6 @@ from recordtransfer.utils import (
     get_human_readable_size,
     get_js_translation_version,
     html_to_text,
-    is_safe_filename,
     snake_to_camel_case,
 )
 
@@ -243,12 +242,12 @@ class TestAcceptFile(TestCase):
     def test_accept_file_valid(self) -> None:
         """Test that valid files are accepted."""
         param_list = [
-            ("My File.pdf", "1"),
-            ("My File.PDF", "1"),
-            ("My File.PDf", "1"),
-            ("My.File.PDf", "1024"),
-            ("My File.docx", "991"),
-            ("My File.xlsx", "9081"),
+            ("My File.pdf", 1),
+            ("My File.PDF", 1),
+            ("My File.PDf", 1),
+            ("My.File.PDf", 1024),
+            ("My File.docx", 991),
+            ("My File.xlsx", 9081),
         ]
         for filename, filesize in param_list:
             with self.subTest():
@@ -264,13 +263,13 @@ class TestAcceptFile(TestCase):
         ]
         for extension in param_list:
             with self.subTest():
-                result = accept_file(f"My File.{extension}", "9012")
+                result = accept_file(f"My File.{extension}", 9012)
                 self.assertFalse(result["accepted"])
                 self.assertIn("extension", result["error"])
 
     def test_accept_file_missing_extension(self) -> None:
         """Test that files without an extension are rejected."""
-        result = accept_file("My File", "209")
+        result = accept_file("My File", 209)
         self.assertFalse(result["accepted"])
         self.assertIn("extension", result["error"])
 
@@ -286,15 +285,14 @@ class TestAcceptFile(TestCase):
         ]
         for filename in param_list:
             with self.subTest():
-                result = accept_file(filename, "512")
+                result = accept_file(filename, 512)
                 self.assertFalse(result["accepted"])
 
     def test_invalid_size(self) -> None:
         """Test that files with invalid sizes are rejected."""
         param_list = [
-            "-1",
-            "-1000",
-            "One thousand",
+            -1,
+            -1000,
         ]
         for size in param_list:
             with self.subTest():
@@ -304,7 +302,7 @@ class TestAcceptFile(TestCase):
 
     def test_empty_file(self) -> None:
         """Test that empty files are rejected."""
-        result = accept_file("My File.pdf", "0")
+        result = accept_file("My File.pdf", 0)
         self.assertFalse(result["accepted"])
         self.assertIn("empty", result["error"])
 
