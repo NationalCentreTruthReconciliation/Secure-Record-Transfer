@@ -101,9 +101,6 @@ WSGI_APPLICATION = "app.wsgi.application"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
         "NAME": "recordtransfer.validators.LengthRangeValidator",
         "OPTIONS": {"min_length": 10, "max_length": 30},
     },
@@ -117,6 +114,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "recordtransfer.validators.PasswordHistoryValidator",
         "OPTIONS": {"history_depth": 5},
+    },
+    {
+        "NAME": "recordtransfer.validators.UserAttributeContainsValidator",
+        "OPTIONS": {
+            "user_attributes": ("username", "first_name", "last_name"),
+        },
     },
 ]
 
