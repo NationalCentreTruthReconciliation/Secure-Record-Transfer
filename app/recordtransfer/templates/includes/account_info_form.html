@@ -12,7 +12,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.first_name.label %}</legend>
                 <input type="text"
-                       class="input input-bordered input-sm md:input-md validator w-full bg-gray-50 text-gray-600"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
                        name="{{ form.first_name.name }}"
                        id="{{ form.first_name.id_for_label }}"
                        value="{{ form.first_name.value }}">
@@ -23,7 +23,7 @@
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.last_name.label %}</legend>
                 <input type="text"
-                       class="input input-bordered input-sm md:input-md validator w-full bg-gray-50 text-gray-600"
+                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
                        name="{{ form.last_name.name }}"
                        id="{{ form.last_name.id_for_label }}"
                        value="{{ form.last_name.value }}">
@@ -31,6 +31,9 @@
                     <p class="text-error text-xs md:text-sm">{% trans form.last_name.errors.0 %}</p>
                 {% endif %}
             </fieldset>
+        </div>
+        <!-- Right Column -->
+        <div class="flex-1 space-y-3 md:space-y-4">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans "Email" %}</legend>
                 <input class="input input-bordered input-sm md:input-md w-full bg-base-200"
@@ -56,40 +59,6 @@
                            {% if form.gets_notification_emails.value %}checked{% endif %} />
                     <span class="ml-2 text-xs md:text-sm">{% trans "Receive notification emails?" %}</span>
                 </label>
-            </fieldset>
-        </div>
-        <!-- Right Column -->
-        <div class="flex-1 space-y-3 md:space-y-4">
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans form.current_password.label %}</legend>
-                <input type="password"
-                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
-                       name="{{ form.current_password.name }}"
-                       id="{{ form.current_password.id_for_label }}"
-                       autocomplete="off">
-                {% if form.current_password.errors %}
-                    <p class="text-error text-xs md:text-sm">{% trans form.current_password.errors.0 %}</p>
-                {% endif %}
-            </fieldset>
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans form.new_password.label %}</legend>
-                <input type="password"
-                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
-                       name="{{ form.new_password.name }}"
-                       id="{{ form.new_password.id_for_label }}">
-                {% if form.new_password.errors %}
-                    <p class="text-error text-xs md:text-sm">{% trans form.new_password.errors.0 %}</p>
-                {% endif %}
-            </fieldset>
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend text-sm md:text-md">{% trans form.confirm_new_password.label %}</legend>
-                <input type="password"
-                       class="input input-bordered input-sm md:input-md w-full bg-gray-50 text-gray-600"
-                       name="{{ form.confirm_new_password.name }}"
-                       id="{{ form.confirm_new_password.id_for_label }}">
-                {% if form.confirm_new_password.errors %}
-                    <p class="text-error text-xs md:text-sm">{% trans form.confirm_new_password.errors.0 %}</p>
-                {% endif %}
             </fieldset>
         </div>
     </div>

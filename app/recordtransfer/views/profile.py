@@ -50,9 +50,6 @@ class UserProfile(View):
                 "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
                 "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
                 "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
-                "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
-                "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
-                "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
                 # Contact Info Form
                 "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                 "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
