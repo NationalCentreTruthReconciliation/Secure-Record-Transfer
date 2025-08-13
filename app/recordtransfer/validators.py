@@ -144,7 +144,9 @@ class UserAttributeContainsValidator:
         return attribute_values_lower
 
     def validate(self, password: str, user: User | None = None) -> None:
-        """Validate that the password does not contain the user's first name, last name, or username."""
+        """Validate that the password does not contain the user's
+        first name, last name, or username.
+        """
         if not user or not password:
             return
         password_lower = (password or "").lower()
