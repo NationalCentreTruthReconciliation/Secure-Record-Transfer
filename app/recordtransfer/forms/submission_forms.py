@@ -13,14 +13,12 @@ from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseForm, BaseFormSet
 from django.utils.translation import gettext_lazy as _
-from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV2Invisible
 
 from recordtransfer.constants import (
     HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.forms.mixins import ContactInfoFormMixin
+from recordtransfer.forms.mixins import ContactInfoFormMixin, HiddenCaptchaMixin
 from recordtransfer.models import SubmissionGroup, UploadSession, User
 
 
@@ -826,8 +824,6 @@ class ReviewForm(SubmissionForm):
 
         submission_step = SubmissionStep.REVIEW
 
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible, label="hidden")
-
     @staticmethod
     def _get_base_fields_data(form: BaseForm) -> dict[str, Any]:
         """Extract fields data from a form."""
@@ -944,6 +940,10 @@ class ReviewForm(SubmissionForm):
                 )
 
         return preview_data
+
+
+class ReviewFormReCaptcha(ReviewForm, HiddenCaptchaMixin):
+    """The final step of the form, with a hidden reCAPTCHA input."""
 
 
 def clear_form_errors(form: Union[BaseForm, BaseFormSet]) -> None:

@@ -43,6 +43,27 @@ const _setupWithContext = () => {
     default:
         break;
     }
+
+    setupSubmitButton(context);
+};
+
+/**
+ * Setup submit button behavior based on reCAPTCHA configuration
+ * @param {object} context - Configuration context
+ */
+const setupSubmitButton = (context) => {
+    if (!context.RECAPTCHA_ENABLED) {
+        return;
+    }
+    const submitButton = document.getElementById("submit-form-btn");
+
+    if (!submitButton) {
+        return;
+    }
+    submitButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
+    });
 };
 
 export const initializeSubmissionForm = () => {
@@ -52,12 +73,4 @@ export const initializeSubmissionForm = () => {
     setupHelpTooltips();
 
     _setupWithContext();
-
-    const submitButton = document.getElementById("submit-form-btn");
-    if (submitButton) {
-        submitButton.addEventListener("click", (event) => {
-            event.preventDefault(); // Prevent form submission
-            singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
-        });
-    }
 };

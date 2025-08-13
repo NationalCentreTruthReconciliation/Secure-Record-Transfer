@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Union
-from unittest.mock import patch
 
 from caais.models import SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -22,13 +21,6 @@ class SignUpFormTest(TestCase):
 
     def setUp(self) -> None:
         """Set up test data."""
-        # Patch the ReCaptchaField clean method
-        self.mock_clean_patcher = patch("django_recaptcha.fields.ReCaptchaField.clean")
-        self.mock_clean = self.mock_clean_patcher.start()
-        self.mock_clean.return_value = "PASSED"
-
-        self.addCleanup(self.mock_clean_patcher.stop)
-
         self.valid_form_data = {
             "username": "testuser123",
             "first_name": "Test",

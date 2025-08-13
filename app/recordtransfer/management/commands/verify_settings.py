@@ -8,6 +8,8 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
 
+from recordtransfer.utils import is_deployed_environment
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -27,6 +29,9 @@ class Command(BaseCommand):
             verify_accepted_file_formats()
             verify_upload_session_expiry_settings()
             verify_site_id()
+            if is_deployed_environment():
+                verify_security_settings()
+                verify_recaptcha_settings()
 
         except AttributeError as exc:
             match_obj = re.search(r'has no attribute ["\'](.+)["\']', str(exc), re.IGNORECASE)
@@ -382,27 +387,46 @@ def verify_site_id() -> None:
             f"Site with ID {site_id} does not exist. Check the configured SITE_ID"
         )
 
+
 def verify_axes_settings() -> None:
     """Verify Axes settings."""
     if not settings.AXES_ENABLED:
         LOGGER.debug("AXES is disabled, skipping verification.")
         return
     if settings.AXES_FAILURE_LIMIT <= 0:
-        raise ImproperlyConfigured(
-            "AXES_FAILURE_LIMIT must be greater than zero"
-        )
+        raise ImproperlyConfigured("AXES_FAILURE_LIMIT must be greater than zero")
 
     if settings.AXES_WARNING_THRESHOLD <= 0:
-        raise ImproperlyConfigured(
-            "AXES_WARNING_THRESHOLD must be greater than zero"
-        )
+        raise ImproperlyConfigured("AXES_WARNING_THRESHOLD must be greater than zero")
 
     if settings.AXES_WARNING_THRESHOLD >= settings.AXES_FAILURE_LIMIT:
-        raise ImproperlyConfigured(
-            "AXES_WARNING_THRESHOLD must be less than AXES_FAILURE_LIMIT"
-        )
+        raise ImproperlyConfigured("AXES_WARNING_THRESHOLD must be less than AXES_FAILURE_LIMIT")
 
     if settings.AXES_COOLOFF_TIME <= 0:
+        raise ImproperlyConfigured("AXES_COOLOFF_TIME must be a float greater than zero")
+
+
+def verify_security_settings() -> None:
+    """Verify SECRET_KEY value is set."""
+    secret_key = getattr(settings, "SECRET_KEY", "")
+    if not secret_key:
+        raise ImproperlyConfigured("SECRET_KEY is required. Generate a secure secret key.")
+
+    LOGGER.info("Verified SECRET_KEY is set.")
+
+
+def verify_recaptcha_settings() -> None:
+    """Verify Recaptcha settings."""
+    if not getattr(settings, "RECAPTCHA_PUBLIC_KEY", ""):
         raise ImproperlyConfigured(
-            "AXES_COOLOFF_TIME must be a float greater than zero"
+            "RECAPTCHA_PUBLIC_KEY is required in production environments. "
+            "Set this to a valid reCAPTCHA public key."
         )
+
+    if not getattr(settings, "RECAPTCHA_PRIVATE_KEY", ""):
+        raise ImproperlyConfigured(
+            "RECAPTCHA_PRIVATE_KEY is required in production environments. "
+            "Set this to a valid reCAPTCHA private key."
+        )
+
+    LOGGER.info("reCAPTCHA is properly configured.")
