@@ -67,3 +67,17 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
         )
+
+    def test_same_as_current_password_shows_field_error(self) -> None:
+        """Displays field error when new password equals current password."""
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="InitialPassword123!",
+            confirm="InitialPassword123!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "Your new password cannot be the same as your current password." in page_text
