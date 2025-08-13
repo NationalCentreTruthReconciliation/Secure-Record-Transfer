@@ -165,9 +165,6 @@ class UserAccountInfoForm(forms.ModelForm):
                 }
             )
 
-        # Note: Current password reuse is now handled by PasswordHistoryValidator
-        # in the clean_new_password method
-
         if not self.instance.check_password(current_password):
             raise ValidationError(
                 {
@@ -198,7 +195,19 @@ class UserAccountInfoForm(forms.ModelForm):
         password_change = bool(current_password or new_password or confirm_new_password)
 
         if password_change:
+            # First validate basic password change logic (current password correctness, confirmation match)
             self._validate_password_change(current_password, new_password, confirm_new_password)
+
+            if (
+                self.instance.pk
+                and current_password
+                and self.instance.check_password(current_password)
+                and new_password
+                and new_password != current_password
+            ):
+                from recordtransfer.models import PasswordHistory
+
+                PasswordHistory.objects.create(user=self.instance, password=self.instance.password)
 
         if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
