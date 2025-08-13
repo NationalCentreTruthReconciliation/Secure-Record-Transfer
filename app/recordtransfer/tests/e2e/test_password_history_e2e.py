@@ -148,3 +148,34 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         )
         page_text = self.driver.page_source
         assert "This password must contain at least three of the following" in page_text
+
+    def test_reuse_previous_passwords_shows_error(self) -> None:
+        """Displays validation error when attempting to reuse a previous password."""
+        self.open_profile_and_wait()
+        # Build history with multiple changes
+        sequence = [
+            ("InitialPassword123!", "SecondPassword456!"),
+            ("SecondPassword456!", "ThirdPassword789!"),
+            ("ThirdPassword789!", "FourthPasswordABC!"),
+            ("FourthPasswordABC!", "FifthPasswordDEF!"),
+            ("FifthPasswordDEF!", "SixthPasswordXYZ!"),
+        ]
+        for current, new in sequence:
+            self.submit_password_change(current=current, new=new, confirm=new)
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+            )
+            # return to ensure form ready for next iteration
+            self.open_profile_and_wait()
+
+        # Try to reuse an older password (e.g., SecondPassword456!)
+        self.submit_password_change(
+            current="SixthPasswordXYZ!",
+            new="SecondPassword456!",
+            confirm="SecondPassword456!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "You cannot reuse your previous 5 passwords." in page_text
