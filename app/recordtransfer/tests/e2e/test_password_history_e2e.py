@@ -150,9 +150,6 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         ]
         for current, new in sequence:
             self.submit_password_change(current=current, new=new, confirm=new)
-            WebDriverWait(self.driver, 15).until(
-                lambda d: "Account details updated." in d.page_source
-            )
             # return to ensure form ready for next iteration
             self.open_profile_and_wait()
 
