@@ -162,7 +162,13 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertFalse(response.context["form"].errors)
         self.assertTrue(self.user.submission_set.exists())
         if response:
-            self.assertRedirects(response, reverse("recordtransfer:submission_sent"))
+            self.assertEqual(200, response.status_code)
+            # Check that response tells HTMX on client side to redirect to Submission Sent page
+            hx_redirect = response.headers.get("HX-Redirect") or ""
+            self.assertEqual(hx_redirect, reverse("recordtransfer:submission_sent"))
+            # Follow the redirect to Submission Sent page
+            response = self.client.get(hx_redirect, follow=True)
+            self.assertEqual(200, response.status_code)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
