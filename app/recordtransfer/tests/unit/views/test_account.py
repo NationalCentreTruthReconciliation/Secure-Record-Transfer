@@ -31,16 +31,10 @@ class TestCreateAccount(TestCase):
 
     def setUp(self) -> None:
         """Set up test data."""
-        # Patch the ReCaptchaField clean method to avoid requiring actual captcha validation
-        self.mock_clean_patcher = patch("django_recaptcha.fields.ReCaptchaField.clean")
-        self.mock_clean = self.mock_clean_patcher.start()
-        self.mock_clean.return_value = "PASSED"
-
         # Mock the send_user_activation_email task
         self.mock_email_patcher = patch("recordtransfer.emails.send_user_activation_email.delay")
         self.mock_send_email = self.mock_email_patcher.start()
 
-        self.addCleanup(self.mock_clean_patcher.stop)
         self.addCleanup(self.mock_email_patcher.stop)
 
         self.create_account_url = reverse("recordtransfer:create_account")
