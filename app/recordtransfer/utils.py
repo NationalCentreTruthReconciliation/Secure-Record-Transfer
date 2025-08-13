@@ -233,8 +233,8 @@ def accept_file(filename: str, filesize: int) -> dict:
     validators = [
         _validate_basic_filename,
         _validate_filename_characters,
-        _validate_path_traversal,
         _validate_absolute_paths,
+        _validate_path_traversal,
         _validate_windows_reserved_names,
         _validate_file_extension,
         _validate_file_size,
@@ -350,6 +350,29 @@ def _validate_filename_characters(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
+def _validate_absolute_paths(filename: str, filesize: int) -> dict:
+    """Validate filename doesn't contain absolute path patterns."""
+    if filename.startswith("/"):
+        return {
+            "accepted": False,
+            "error": _("Absolute paths are not allowed"),
+            "verboseError": _('Filename "%(filename)s" begins with "/"') % {"filename": filename},
+        }
+
+    if len(filename) > 2 and filename[1] == ":":
+        return {
+            "accepted": False,
+            "error": _("Absolute paths are not allowed"),
+            "verboseError": _('Filename "%(filename)s" begins with "%(drive_letter)s:"')
+            % {
+                "filename": filename,
+                "drive_letter": filename[0],
+            },
+        }
+
+    return {"accepted": True}
+
+
 def _validate_path_traversal(filename: str, filesize: int) -> dict:
     """Validate filename doesn't contain path traversal patterns."""
     decoded_filename = filename
@@ -382,29 +405,6 @@ def _validate_path_traversal(filename: str, filesize: int) -> dict:
                 )
                 % {"filename": filename, "pattern": pattern},
             }
-
-    return {"accepted": True}
-
-
-def _validate_absolute_paths(filename: str, filesize: int) -> dict:
-    """Validate filename doesn't contain absolute path patterns."""
-    if filename.startswith("/"):
-        return {
-            "accepted": False,
-            "error": _("Absolute paths are not allowed"),
-            "verboseError": _('Filename "%(filename)s" begins with "/"') % {"filename": filename},
-        }
-
-    if len(filename) > 2 and filename[1] == ":":
-        return {
-            "accepted": False,
-            "error": _("Absolute paths are not allowed"),
-            "verboseError": _('Filename "%(filename)s" begins with "%(drive_letter)s:"')
-            % {
-                "filename": filename,
-                "drive_letter": filename[0],
-            },
-        }
 
     return {"accepted": True}
 
