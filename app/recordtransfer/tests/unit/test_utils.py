@@ -282,6 +282,8 @@ class TestAcceptFile(TestCase):
             "%2e%2e%2f%2e%2e%2f%2e%2e%2fuser%2freport.pdf",  # URL encoded traversal
             "../../../user/document.docx",  # relative path
             "/opt/secure-record-transfer/users.xlsx",  # absolute path
+            "C:/Program Files (x86)/users.xlsx",  # absolute Windows path
+            "COM5.pdf",  # Windows reserved file name
         ]
         for filename in param_list:
             with self.subTest():
