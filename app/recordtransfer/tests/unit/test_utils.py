@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from recordtransfer.models import TempUploadedFile, UploadSession
@@ -11,6 +11,7 @@ from recordtransfer.utils import (
     count_file_types,
     get_human_readable_file_count,
     get_human_readable_size,
+    get_js_translation_version,
     html_to_text,
     is_safe_filename,
     snake_to_camel_case,
@@ -425,3 +426,13 @@ class TestAcceptSession(TestCase):
                     "A file with the same name has already been uploaded",
                     result["error"],
                 )
+
+
+class TestGetJsTranslationVersion(TestCase):
+    """Tests for get_js_translation_version."""
+
+    @override_settings(LOCALE_PATHS=[])
+    def test_no_locale_paths(self) -> None:
+        """Test that a default value of '0' is returned if there are no paths."""
+        version = get_js_translation_version()
+        self.assertEqual("0", version)

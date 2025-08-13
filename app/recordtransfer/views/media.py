@@ -189,7 +189,8 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
                 "file": _file.name,
                 "accepted": False,
                 "uploadSessionToken": session.token,
-                "error": gettext(f'Malware was detected in the file "{_file.name}"'),
+                "error": gettext('Malware was detected in the file "%(name)s"')
+                % {"name": _file.name},
             },
             status=400,
         )

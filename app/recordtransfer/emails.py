@@ -3,6 +3,7 @@
 import logging
 import re
 import smtplib
+from collections import defaultdict
 from typing import List, Optional
 
 import django_rq
@@ -10,9 +11,10 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.models import InProgressSubmission, SiteSetting, Submission, User
@@ -50,36 +52,53 @@ __all__ = [
 
 @django_rq.job
 def send_submission_creation_success(
-    form_data: dict, submission: Submission, recipient_emails: Optional[List[str]] = None
+    form_data: dict,
+    submission: Submission,
+    recipient_emails: Optional[List[str]] = None,
+    language: Optional[str] = None,
 ) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there were no errors.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the submission form. This is
+        form_data: A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
-        submission (Submission): The new submission that was created.
-        recipient_emails (List[str], optional): A list of recipient email addresses to send the
-            notification to. If not provided, admin recipients will be used.
+        submission: The new submission that was created.
+        recipient_emails: Optional list of recipient emails. If provided, overrides the default
+            admin recipients.
+        language: Optional language code to use for rendering the email. Only used when
+            `recipient_emails` is provided.
     """
-    subject = "New Submission Ready for Review"
-
     submission_url = f"{_get_base_url_with_protocol().rstrip('/')}/{submission.get_admin_change_url().lstrip('/')}"
     LOGGER.info("Generated submission change URL: %s", submission_url)
 
-    used_recipients = recipient_emails or _get_admin_recipient_list(subject)
-
-    if not used_recipients:
-        LOGGER.warning(
-            "No admin recipients found for submission creation success email. Skipping send."
+    user_submitted = submission.user
+    if not user_submitted:
+        LOGGER.error(
+            "Submission %d has no associated user. Cannot send submission creation success email.",
+            submission.pk,
         )
         return
 
-    user_submitted = submission.user
-    _send_mail_with_logs(
-        recipients=used_recipients,
+    # Send to admin recipients grouped by language or use provided recipients with language
+    if recipient_emails:
+        # For testing or custom recipients, use the specified language or default
+        target_language = language or translation.get_language()
+        recipients = {target_language: recipient_emails}
+    else:
+        # Use the default admin recipients grouped by their language preferences
+        recipients = _get_emails_grouped_by_lang(
+            list(User.objects.filter(gets_submission_email_updates=True, is_staff=True))
+        )
+
+    if not recipients:
+        LOGGER.warning("No recipients found for submission creation success email. Skipping send.")
+        return
+
+    _send_mail_by_language_groups(
+        recipients=recipients,
         from_email=_get_do_not_reply_email_address(),
-        subject=subject,
+        subject=_("New Submission Ready for Review"),
         template_name="recordtransfer/email/submission_submit_success.html",
         context={
             "username": user_submitted.username,
@@ -93,7 +112,10 @@ def send_submission_creation_success(
 
 @django_rq.job
 def send_submission_creation_failure(
-    form_data: dict, user_submitted: User, recipient_emails: Optional[List[str]] = None
+    form_data: dict,
+    user_submitted: User,
+    recipient_emails: Optional[List[str]] = None,
+    language: Optional[str] = None,
 ) -> None:
     """Send an email to users who get submission email updates that a user submitted a new
     submission and there WERE errors.
@@ -102,21 +124,30 @@ def send_submission_creation_failure(
         form_data (dict): A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
         user_submitted (User): The user that tried to create the submission.
-        recipient_emails (List[str], optional): A list of recipient email addresses to send the
-            notification to. If not provided, admin recipients will be used.
+        recipient_emails: Optional list of recipient emails. If provided, overrides the default
+            admin recipients.
+        language: Optional language code to use for rendering the email. Only used when
+            `recipient_emails` is provided.
     """
-    subject = "Submission Failed"
-    used_recipients = recipient_emails or _get_admin_recipient_list(subject)
-
-    if not used_recipients:
-        LOGGER.warning(
-            "No admin recipients found for submission creation failure email. Skipping send."
+    # Send to admin recipients grouped by language or use provided recipients with language
+    if recipient_emails:
+        # For testing or custom recipients, use the specified language or default
+        target_language = language or translation.get_language()
+        recipients = {target_language: recipient_emails}
+    else:
+        # Use the default admin recipients grouped by their language preferences
+        recipients = _get_emails_grouped_by_lang(
+            list(User.objects.filter(gets_submission_email_updates=True, is_staff=True))
         )
+
+    if not recipients:
+        LOGGER.warning("No recipients found for submission creation failure email. Skipping send.")
         return
-    _send_mail_with_logs(
-        recipients=used_recipients,
+
+    _send_mail_by_language_groups(
+        recipients=recipients,
         from_email=_get_do_not_reply_email_address(),
-        subject=subject,
+        subject=_("Submission Failed"),
         template_name="recordtransfer/email/submission_submit_failure.html",
         context={
             "username": user_submitted.username,
@@ -132,19 +163,27 @@ def send_thank_you_for_your_submission(form_data: dict, submission: Submission) 
     """Send a submission success email to the user who made the submission.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the submission form.
+        form_data: A dictionary of the cleaned form data from the submission form.
             This is NOT the CAAIS tree version of the form.
-        submission (Submission): The new submission that was created.
+        submission: The new submission that was created.
     """
-    if submission.user.gets_notification_emails:
-        _send_mail_with_logs(
-            recipients=[submission.user.email],
+    user_submitted = submission.user
+    if not user_submitted:
+        LOGGER.error(
+            "Submission %d has no associated user. Cannot send thank you for your submission email.",
+            submission.pk,
+        )
+        return
+    if user_submitted.gets_notification_emails:
+        _send_mail(
+            recipient=user_submitted.email,
             from_email=_get_do_not_reply_email_address(),
-            subject="Thank You For Your Submission",
+            subject=_("Thank You For Your Submission"),
             template_name="recordtransfer/email/submission_success.html",
             context={
                 "archivist_email": SiteSetting.get_value_str(SiteSettingKey.ARCHIVIST_EMAIL),
             },
+            user_language=user_submitted.language,
         )
 
 
@@ -153,15 +192,15 @@ def send_your_submission_did_not_go_through(form_data: dict, user_submitted: Use
     """Send a submission failure email to the user who made the submission.
 
     Args:
-        form_data (dict): A dictionary of the cleaned form data from the submission form. This is
+        form_data: A dictionary of the cleaned form data from the submission form. This is
             NOT the CAAIS tree version of the form.
-        user_submitted (User): The user that tried to create the submission.
+        user_submitted: The user that tried to create the submission.
     """
     if user_submitted.gets_notification_emails:
-        _send_mail_with_logs(
-            recipients=[user_submitted.email],
+        _send_mail(
+            recipient=user_submitted.email,
             from_email=_get_do_not_reply_email_address(),
-            subject="Issue With Your Submission",
+            subject=_("Issue With Your Submission"),
             template_name="recordtransfer/email/submission_failure.html",
             context={
                 "username": user_submitted.username,
@@ -169,6 +208,7 @@ def send_your_submission_did_not_go_through(form_data: dict, user_submitted: Use
                 "last_name": user_submitted.last_name,
                 "archivist_email": SiteSetting.get_value_str(SiteSettingKey.ARCHIVIST_EMAIL),
             },
+            user_language=user_submitted.language,
         )
 
 
@@ -178,21 +218,22 @@ def send_user_activation_email(new_user: User) -> None:
     must visit the link to activate their account.
 
     Args:
-        new_user (User): The new user who requested an account
+        new_user: The new user who requested an account
     """
     token = account_activation_token.make_token(new_user)
     LOGGER.info("Generated token for activation link: %s", token)
 
-    _send_mail_with_logs(
-        recipients=[new_user.email],
+    _send_mail(
+        recipient=new_user.email,
         from_email=_get_do_not_reply_email_address(),
-        subject="Activate Your Account",
+        subject=_("Activate Your Account"),
         template_name="recordtransfer/email/activate_account.html",
         context={
             "username": new_user.username,
             "uid": urlsafe_base64_encode(force_bytes(new_user.pk)),
             "token": token,
         },
+        user_language=new_user.language,
     )
 
 
@@ -201,15 +242,16 @@ def send_user_account_updated(user_updated: User, context_vars: dict) -> None:
     """Send a notice that the user's account has been updated.
 
     Args:
-        user_updated (User): The user whose account was updated.
-        context_vars (dict): Template context variables.
+        user_updated: The user whose account was updated.
+        context_vars: Template context variables.
     """
-    _send_mail_with_logs(
-        recipients=[user_updated.email],
+    _send_mail(
+        recipient=user_updated.email,
         from_email=_get_do_not_reply_email_address(),
         subject=context_vars["subject"],
         template_name="recordtransfer/email/account_updated.html",
         context=context_vars,
+        user_language=user_updated.language,
     )
 
 
@@ -220,10 +262,10 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
     Args:
          in_progress: The in-progress submission to remind the user about
     """
-    _send_mail_with_logs(
-        recipients=[in_progress.user.email],
+    _send_mail(
+        recipient=in_progress.user.email,
         from_email=_get_do_not_reply_email_address(),
-        subject="Your In-Progress Submission is Expiring Soon",
+        subject=_("Your In-Progress Submission is Expiring Soon"),
         template_name="recordtransfer/email/in_progress_submission_expiring.html",
         context={
             "username": in_progress.user.username,
@@ -234,54 +276,51 @@ def send_user_in_progress_submission_expiring(in_progress: InProgressSubmission)
             ).strftime("%Y-%m-%d %H:%M:%S"),
             "in_progress_url": in_progress.get_resume_url(),
         },
+        user_language=in_progress.user.language,
     )
 
 
 @django_rq.job
 def send_password_reset_email(
     context: dict,
-    to_email: str,
 ) -> None:
     """Send a password reset email asynchronously using django_rq.
 
     Args:
-        context: Template context variables
-        to_email: Recipient email address
+        context: Context variables for the email, including:
+            - email: The recipient's email address
+            - user: The User object for the recipient
     """
-    subject = "Password Reset on NCTR Record Transfer Portal"
+    to_email = context.get("email")
 
-    _send_mail_with_logs(
-        recipients=[to_email],
+    if not to_email:
+        LOGGER.error("Missing email in context for password reset email.")
+        return
+
+    _send_mail(
+        recipient=to_email,
         from_email=_get_do_not_reply_email_address(),
-        subject=subject,
+        subject=_("Password Reset on NCTR Record Transfer Portal"),
         template_name="registration/password_reset_email.html",
         context=context,
     )
 
 
-def _get_admin_recipient_list(subject: str) -> List[str]:
-    """Get a list of admin users who are set up to receive notification emails.
+def _get_emails_grouped_by_lang(users: list[User]) -> dict[str, List[str]]:
+    """Get a dictionary of user emails grouped by their language preferences for notification
+    emails.
 
     Args:
-        subject (str): The subject of the email
+        users: A list of User objects to group by language.
 
     Returns:
-        (List[str]): A list of email addresses
+        A dictionary with language codes as keys and lists of email addresses as values.
     """
-    LOGGER.info('Finding Users to send "%s" email to', subject)
-    recipients_list = list(
-        User.objects.filter(gets_submission_email_updates=True, is_staff=True).values_list(
-            "email", flat=True
-        )
-    )
-
-    if not recipients_list:
-        LOGGER.warning("There are no users configured to receive submission update emails.")
-        return []
-    LOGGER.info(
-        "Found %d Users(s) to send email to: %s", len(recipients_list), str(recipients_list)
-    )
-    return recipients_list
+    language_groups = defaultdict(list)
+    for user in users:
+        lang_key = user.language or translation.get_language()
+        language_groups[lang_key].append(user.email)
+    return language_groups
 
 
 def _get_do_not_reply_email_address() -> str:
@@ -313,41 +352,104 @@ def _get_do_not_reply_email_address() -> str:
     return f"{SiteSetting.get_value_str(SiteSettingKey.DO_NOT_REPLY_USERNAME)}@{clean_domain}"
 
 
-def _send_mail_with_logs(
-    recipients: List[str], from_email: str, subject: str, template_name: str, context: dict
-):
-    """Send an HTML email and a Text email, while logging what is being sent.
+def _send_mail(
+    recipient: str,
+    from_email: str,
+    subject: str,
+    template_name: str,
+    context: dict,
+    user_language: Optional[str] = None,
+) -> None:
+    """Send an HTML email and a Text email to a recipient.
 
     Args:
-        recipients (List[str]): A list of recipients to receive this email
-        from_email (str): A "From" address to send the email as
-        subject (str): A subject for the email
-        template_name (str): The name of the email template
-        context (dict): Any context that may need to be used to render the email
+        recipient: A recipient email address
+        from_email: A "From" address to send the email as
+        subject: A subject for the email
+        template_name: The name of the email template
+        context: Any context that may need to be used to render the email
+        user_language: The language to use for the email
     """
     try:
         LOGGER.info("Setting up new email:")
         LOGGER.info("SUBJECT: %s", subject)
-        LOGGER.info("TO: %s", recipients)
+        LOGGER.info("TO: %s", recipient)
         LOGGER.info("FROM: %s", from_email)
-        LOGGER.info("Rendering HTML email from %s", template_name)
         context["base_url"] = _get_base_url_with_protocol()
-        msg_html = render_to_string(template_name, context)
-        LOGGER.info("Stripping tags from rendered HTML to create a plaintext email")
-        msg_plain = html_to_text(msg_html)
-        LOGGER.info("Sending...")
-        send_mail(
-            subject=subject,
-            message=msg_plain,
-            from_email=from_email,
-            recipient_list=recipients,
-            html_message=msg_html,
-            fail_silently=False,
-        )
-        num_recipients = len(recipients)
-        if num_recipients == 1:
-            LOGGER.info("1 email sent")
-        else:
-            LOGGER.info("%d emails sent", num_recipients)
+        context["site_domain"] = Site.objects.get_current().domain
+
+        with translation.override(user_language or translation.get_language()):
+            msg_html = render_to_string(template_name, context)
+            LOGGER.info("Stripping tags from rendered HTML to create a plaintext email")
+            msg_plain = html_to_text(msg_html)
+
+            LOGGER.info("Sending...")
+            send_mail(
+                subject=subject,
+                message=msg_plain,
+                from_email=from_email,
+                recipient_list=[recipient],
+                html_message=msg_html,
+                fail_silently=False,
+            )
+
+            LOGGER.info("Email sent")
+
+    except smtplib.SMTPException as exc:
+        LOGGER.error("Error when sending email to user, %s: %s", exc.__class__.__name__, str(exc))
+
+
+def _send_mail_by_language_groups(
+    recipients: dict[str, List[str]],
+    from_email: str,
+    subject: str,
+    template_name: str,
+    context: dict,
+) -> None:
+    """Send an HTML email and a Text email to recipients grouped by language.
+
+    Args:
+        recipients: A dictionary mapping language codes to lists of recipients
+        from_email: A "From" address to send the email as
+        subject: A subject for the email
+        template_name: The name of the email template
+        context: Any context that may need to be used to render the email.
+    """
+    try:
+        LOGGER.info("Setting up new email:")
+        LOGGER.info("SUBJECT: %s", subject)
+        LOGGER.info("TO (by language): %s", recipients)
+        LOGGER.info("FROM: %s", from_email)
+        context["base_url"] = _get_base_url_with_protocol()
+
+        for lang, recipient_list in recipients.items():
+            if not recipient_list:
+                continue
+
+            current_language = lang or translation.get_language()
+            LOGGER.info("Rendering email for language: %s", current_language)
+            LOGGER.info("Recipients for language %s: %s", current_language, recipient_list)
+
+            with translation.override(current_language):
+                msg_html = render_to_string(template_name, context)
+                LOGGER.info("Stripping tags from rendered HTML to create a plaintext email")
+                msg_plain = html_to_text(msg_html)
+
+                LOGGER.info("Sending...")
+                send_mail(
+                    subject=subject,
+                    message=msg_plain,
+                    from_email=from_email,
+                    recipient_list=recipient_list,
+                    html_message=msg_html,
+                    fail_silently=False,
+                )
+
+                num_recipients = len(recipient_list)
+                if num_recipients == 1:
+                    LOGGER.info("1 email sent for language %s", current_language)
+                else:
+                    LOGGER.info("%d emails sent for language %s", num_recipients, current_language)
+
     except smtplib.SMTPException as exc:
         LOGGER.error("Error when sending email to user, %s: %s", exc.__class__.__name__, str(exc))

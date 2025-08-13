@@ -45,8 +45,19 @@ NOT_CACHED = object()
 class User(AbstractUser):
     """The main User object used to authenticate users."""
 
+    # User preferences
     gets_submission_email_updates = models.BooleanField(default=False)
     gets_notification_emails = models.BooleanField(default=True)
+    language = models.CharField(
+        max_length=7,
+        blank=True,
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE,
+        help_text=_("Preferred language for the website and email notifications"),
+        verbose_name=_("Preferred Language"),
+    )
+
+    # Contact information
     phone_number = models.CharField(
         max_length=20,
         blank=False,
@@ -862,7 +873,10 @@ class UploadSession(models.Model):
             [f.name for f in self.get_uploads()], settings.ACCEPTED_FILE_FORMATS
         )
 
-        return _("{0}, totalling {1}").format(count, size)
+        return _("%(file_count)s, totalling %(total_size)s") % {
+            "file_count": count,
+            "total_size": size,
+        }
 
     def __str__(self):
         """Return a string representation of this object."""

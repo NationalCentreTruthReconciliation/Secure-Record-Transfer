@@ -24,12 +24,6 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           src: >-
-            ./app/recordtransfer/views
-            ./app/recordtransfer/forms
-            ./app/recordtransfer/management
-            ./app/recordtransfer/models.py
-            ./app/recordtransfer/apps.py
-            ./app/recordtransfer/admin.py
-            ./app/recordtransfer/caais.py
+            ./app/recordtransfer
           version-file: "./pyproject.toml"
-          args: "--config ./ruff.toml check"
+          args: "--config ./ruff.toml check --exclude app/recordtransfer/migrations/ --exclude app/recordtransfer/tests/"
