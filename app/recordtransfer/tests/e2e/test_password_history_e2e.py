@@ -183,18 +183,50 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         page_text = self.driver.page_source
         assert "You cannot reuse your previous 5 passwords." in page_text
 
-    def test_password_too_similar_to_email(self) -> None:
-        """Shows error when new password is too similar to the email address."""
-        self.user.email = "UniquePart123@example.com"
+    def test_password_contains_username_shows_error(self) -> None:
+        """Displays error when password contains the user's exact username."""
+        self.user.username = "ExactUserName"
         self.user.save()
         self.open_profile_and_wait()
         self.submit_password_change(
             current="InitialPassword123!",
-            new="UniquePart123-Strong1!",
-            confirm="UniquePart123-Strong1!",
+            new="ExactUserName-Strong1!",
+            confirm="ExactUserName-Strong1!",
         )
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
-        page_text = self.driver.page_source.lower()
-        assert "too similar" in page_text
+        page_text = self.driver.page_source
+        assert "Your password cannot contain your first name, last name, or username." in page_text
+
+    def test_password_contains_first_name_shows_error(self) -> None:
+        """Displays error when password contains the user's exact first name."""
+        self.user.first_name = "Firstname"
+        self.user.save()
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="Firstname-Strong1!",
+            confirm="Firstname-Strong1!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "Your password cannot contain your first name, last name, or username." in page_text
+
+    def test_password_contains_last_name_shows_error(self) -> None:
+        """Displays error when password contains the user's exact last name."""
+        self.user.last_name = "Lastname"
+        self.user.save()
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="Lastname-Strong1!",
+            confirm="Lastname-Strong1!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "Your password cannot contain your first name, last name, or username." in page_text
