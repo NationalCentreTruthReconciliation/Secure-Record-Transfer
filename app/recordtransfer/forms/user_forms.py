@@ -174,14 +174,6 @@ class UserAccountInfoForm(forms.ModelForm):
                 }
             )
 
-    def clean_new_password(self) -> Optional[str]:
-        """Validate the new password using Django's password validation."""
-        new_password = self.cleaned_data.get("new_password")
-        if new_password:
-            # Use Django's password validation with the user instance
-            password_validation.validate_password(new_password, self.instance)
-        return new_password
-
     def clean(self) -> dict[str, Any]:
         """Clean the form data."""
         if not self.data:
@@ -196,6 +188,11 @@ class UserAccountInfoForm(forms.ModelForm):
 
         if password_change:
             self._validate_password_change(current_password, new_password, confirm_new_password)
+            if new_password:
+                try:
+                    password_validation.validate_password(new_password, self.instance)
+                except ValidationError as e:
+                    self.add_error("new_password", e)
 
             if (
                 self.instance.pk
