@@ -52,22 +52,17 @@ const _setupWithContext = () => {
  * @param {object} context - Configuration context
  */
 const setupSubmitButton = (context) => {
+    if (!context.RECAPTCHA_ENABLED) {
+        return;
+    }
     const submitButton = document.getElementById("submit-form-btn");
+
     if (!submitButton) {
         return;
     }
-
     submitButton.addEventListener("click", (event) => {
         event.preventDefault();
-
-        if (context.RECAPTCHA_ENABLED) {
-            singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
-        } else {
-            const submissionForm = document.getElementById("submission-form");
-            if (submissionForm) {
-                submissionForm.submit();
-            }
-        }
+        singleCaptchaFn(); // Let reCAPTCHA handle the submission after validation
     });
 };
 
