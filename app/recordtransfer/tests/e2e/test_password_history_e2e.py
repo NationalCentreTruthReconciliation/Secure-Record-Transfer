@@ -95,3 +95,56 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         )
         page_text = self.driver.page_source
         assert "This password is too short" in page_text
+
+    def test_too_long_password_shows_error(self) -> None:
+        """Displays validation error for too long password."""
+        self.open_profile_and_wait()
+        long_pwd = "A" * 31 + "1!a"
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new=long_pwd,
+            confirm=long_pwd,
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "This password is too long" in page_text
+
+    def test_missing_character_categories_shows_error(self) -> None:
+        """Displays validation error when required character categories are missing."""
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="Onlylettersandnumbers",
+            confirm="Onlylettersandnumbers",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "This password must contain at least three of the following" in page_text
+
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="onlylettersandspecialchars!",
+            confirm="onlylettersandspecialchars!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "This password must contain at least three of the following" in page_text
+
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="ONLYUPPERLETTERSANDNUMBERS",
+            confirm="ONLYUPPERLETTERSANDNUMBERS",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "This password must contain at least three of the following" in page_text
