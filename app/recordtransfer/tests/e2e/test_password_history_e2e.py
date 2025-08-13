@@ -81,3 +81,17 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         )
         page_text = self.driver.page_source
         assert "Your new password cannot be the same as your current password." in page_text
+
+    def test_too_short_password_shows_error(self) -> None:
+        """Displays validation error for too short password."""
+        self.open_profile_and_wait()
+        self.submit_password_change(
+            current="InitialPassword123!",
+            new="Short1!",
+            confirm="Short1!",
+        )
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = self.driver.page_source
+        assert "This password is too short" in page_text
