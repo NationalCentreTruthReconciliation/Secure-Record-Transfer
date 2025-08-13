@@ -65,7 +65,7 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
             confirm="SecondPassword456!",
         )
         WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".alert-success"))
         )
 
     def test_same_as_current_password_shows_field_error(self) -> None:
@@ -163,7 +163,7 @@ class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
         for current, new in sequence:
             self.submit_password_change(current=current, new=new, confirm=new)
             WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "alert-success"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".alert-success"))
             )
             # return to ensure form ready for next iteration
             self.open_profile_and_wait()
