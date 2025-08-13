@@ -12,6 +12,8 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 
+from recordtransfer.constants import WindowsFileRestrictions
+
 # This is to avoid a circular import
 if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
@@ -328,12 +330,17 @@ def _validate_basic_filename(filename: str, filesize: int) -> dict:
             "error": _("Filename cannot be empty"),
         }
 
-    if len(filename) > 255:
+    if len(filename) > WindowsFileRestrictions.MAX_FILENAME_LENGTH:
         return {
             "accepted": False,
             "error": _("Filename is too long"),
-            "verboseError": _("Filename is too long (%(num)s characters)")
-            % {"num": len(filename)},
+            "verboseError": _(
+                "Filename is too long (%(num_chars)s characters, max %(max_chars)s is allowed)"
+            )
+            % {
+                "num_chars": len(filename),
+                "max_chars": WindowsFileRestrictions.MAX_FILENAME_LENGTH,
+            },
         }
 
     return {"accepted": True}
@@ -411,33 +418,8 @@ def _validate_path_traversal(filename: str, filesize: int) -> dict:
 
 def _validate_windows_reserved_names(filename: str, filesize: int) -> dict:
     """Validate filename doesn't use Windows reserved names."""
-    windows_reserved = (
-        "CON",
-        "PRN",
-        "AUX",
-        "NUL",
-        "COM1",
-        "COM2",
-        "COM3",
-        "COM4",
-        "COM5",
-        "COM6",
-        "COM7",
-        "COM8",
-        "COM9",
-        "LPT1",
-        "LPT2",
-        "LPT3",
-        "LPT4",
-        "LPT5",
-        "LPT6",
-        "LPT7",
-        "LPT8",
-        "LPT9",
-    )
-
     base_name = filename.split(".")[0].upper()
-    if base_name in windows_reserved:
+    if base_name in WindowsFileRestrictions.RESERVED_FILENAMES:
         return {
             "accepted": False,
             "error": _("Filename uses reserved system name"),
