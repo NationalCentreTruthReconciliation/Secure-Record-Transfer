@@ -12,7 +12,7 @@ from django_recaptcha.fields import ReCaptchaField
 from recordtransfer.constants import HtmlIds
 from recordtransfer.emails import send_password_reset_email
 from recordtransfer.forms.mixins import ContactInfoFormMixin
-from recordtransfer.models import User
+from recordtransfer.models import PasswordHistory, User
 
 
 class SignUpForm(UserCreationForm):
@@ -201,8 +201,6 @@ class UserAccountInfoForm(forms.ModelForm):
                 and new_password
                 and new_password != current_password
             ):
-                from recordtransfer.models import PasswordHistory
-
                 PasswordHistory.objects.create(user=self.instance, password=self.instance.password)
 
         if not self.has_changed() and not password_change:

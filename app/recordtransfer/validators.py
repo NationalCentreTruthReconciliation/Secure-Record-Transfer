@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
-from recordtransfer.models import User
+from recordtransfer.models import PasswordHistory, User
 
 
 @dataclass
@@ -94,10 +95,6 @@ class PasswordHistoryValidator:
         """Validate that the password is not in the user's recent password history."""
         if not user or not user.pk or not password:
             return
-        # Import here to avoid circular imports
-        from django.contrib.auth.hashers import check_password
-
-        from recordtransfer.models import PasswordHistory
 
         # First check if the new password is the same as the current password
         if user.password and check_password(password, user.password):
@@ -152,9 +149,6 @@ class UserAttributeContainsValidator:
         password_lower = (password or "").lower()
         for attribute_value_lower in self.get_user_attribute_values(user):
             if attribute_value_lower and attribute_value_lower in password_lower:
-                from django.core.exceptions import ValidationError
-                from django.utils.translation import gettext as _
-
                 raise ValidationError(
                     _("Your password cannot contain your first name, last name, or username."),
                     code="password_contains_user_attribute",
