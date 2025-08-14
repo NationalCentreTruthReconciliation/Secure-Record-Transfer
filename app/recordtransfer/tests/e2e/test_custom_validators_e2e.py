@@ -125,7 +125,7 @@ class CustomValidatorsE2ETest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
         page_text = self.driver.page_source
-        assert "This password must contain at least three of the following" in page_text
+        assert "Your password must contain at least" in page_text
 
         self.open_profile_and_wait()
         self.submit_password_change(
@@ -137,7 +137,7 @@ class CustomValidatorsE2ETest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
         page_text = self.driver.page_source
-        assert "This password must contain at least three of the following" in page_text
+        assert "Your password must contain at least" in page_text
 
         self.open_profile_and_wait()
         self.submit_password_change(
@@ -149,7 +149,7 @@ class CustomValidatorsE2ETest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
         page_text = self.driver.page_source
-        assert "This password must contain at least three of the following" in page_text
+        assert "Your password must contain at least" in page_text
 
     @patch("recordtransfer.views.profile.send_user_account_updated")
     def test_reuse_previous_passwords_shows_error(self, email_mock: MagicMock) -> None:
