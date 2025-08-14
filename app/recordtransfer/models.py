@@ -1519,7 +1519,6 @@ def _handle_password_change(instance: User, **kwargs):
                 instance.username,
                 instance.pk,
             )
-    except User.DoesNotExist:
-        pass
+
     except Exception as e:
         LOGGER.error("Error creating password history for user %s: %s", instance.pk, str(e))
