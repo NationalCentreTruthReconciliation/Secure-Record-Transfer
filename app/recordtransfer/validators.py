@@ -29,9 +29,8 @@ class LengthRangeValidator:
             )
         if length > self.max_length:
             raise ValidationError(
-                _(
-                    f"This password is too long. It must contain at most {self.max_length} characters."
-                ),
+                _("This password is too long. It must contain at most %(num)s characters.")
+                % {"num": self.max_length},
                 code="password_too_long",
             )
 
