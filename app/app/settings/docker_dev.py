@@ -18,6 +18,8 @@ MIDDLEWARE.insert(
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 )
 
+SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+
 SITE_ID = config("SITE_ID", default=1, cast=int)
 
 ALLOWED_HOSTS = [

@@ -23,7 +23,6 @@ from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
-    HttpResponseRedirect,
     QueryDict,
 )
 from django.shortcuts import redirect
@@ -55,6 +54,7 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
+from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 
@@ -173,7 +173,7 @@ class SubmissionFormWizard(SessionWizardView):
         SubmissionStep.REVIEW: SubmissionStepMeta(
             template="recordtransfer/submission_form_review.html",
             title=gettext("Review"),
-            form=forms.ReviewForm,
+            form=(forms.ReviewFormReCaptcha if is_deployed_environment() else forms.ReviewForm),
             info_message=gettext("Review the information you've entered before submitting"),
         ),
     }
@@ -653,7 +653,10 @@ class SubmissionFormWizard(SessionWizardView):
         Returns:
             A dictionary of context data to be used in the JavaScript files. Can be empty.
         """
-        js_context: dict[str, Any] = {"FORM_STARTED": self.form_started}
+        js_context: dict[str, Any] = {
+            "FORM_STARTED": self.form_started,
+            "RECAPTCHA_ENABLED": is_deployed_environment(),
+        }
 
         step = self.current_step
         if step == SubmissionStep.CONTACT_INFO:
@@ -773,7 +776,7 @@ class SubmissionFormWizard(SessionWizardView):
             send_submission_creation_success.delay(form_data, submission)
             send_thank_you_for_your_submission.delay(form_data, submission)
 
-            return HttpResponseRedirect(reverse("recordtransfer:submission_sent"))
+            return HttpResponseClientRedirect(reverse("recordtransfer:submission_sent"))
 
         except Exception as exc:
             LOGGER.error("Encountered error creating Submission object", exc_info=exc)
