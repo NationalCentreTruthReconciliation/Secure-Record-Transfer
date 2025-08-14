@@ -14,9 +14,7 @@ def pytest_runtestloop(session: pytest.Session) -> None:
     run.
     """
     selected_items = session.items
-    if not session.config.option.collectonly and any(
-        "/e2e/" in item.nodeid for item in selected_items
-    ):
+    if any("/e2e/" in item.nodeid for item in selected_items):
         try:
             npm_cmd = shutil.which("npm") or "npm"
             subprocess.run(
