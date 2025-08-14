@@ -198,6 +198,8 @@ class UserAccountInfoFormTest(TestCase):
 
     def test_form_valid_password_change(self) -> None:
         """Test that the form can change the user's password successfully."""
+        history_before_test = self.user.password_history.count()
+
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -208,7 +210,11 @@ class UserAccountInfoFormTest(TestCase):
         form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
+
+        history_after_test = self.user.password_history.count()
+
         self.assertTrue(user.check_password("new_password123"))
+        self.assertEqual(1 + history_before_test, history_after_test)
 
     def test_form_invalid_current_password(self) -> None:
         """Test that the form rejects an invalid current password."""
