@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext_lazy
 
 from recordtransfer.models import PasswordHistory, User
 
@@ -24,12 +25,8 @@ class LengthRangeValidator:
         length = len(password or "")
         if length < self.min_length:
             raise ValidationError(
-                _(
-                    "This password is too short. It must contain at least %(num)s characters."
-                )
-                % {
-                    "num": self.min_length
-                },
+                _("This password is too short. It must contain at least %(num)s characters.")
+                % {"num": self.min_length},
                 code="password_too_short",
             )
         if length > self.max_length:
@@ -102,8 +99,7 @@ class CharacterCategoriesValidator:
                 "numbers, or one of these special characters: %(specials)s"
             ),
             self.required_categories,
-        )
-        % {
+        ) % {
             "num": self.required_categories,
             "specials": " ".join(c for c in self.allowed_specials),
         }
@@ -150,8 +146,7 @@ class PasswordHistoryValidator:
             "Your password must be different from your previous password.",
             "Your password must be different from your previous %(num)s passwords.",
             self.history_depth,
-        )
-        % {
+        ) % {
             "num": self.history_depth,
         }
 
@@ -161,7 +156,7 @@ class ContainsUserNameValidator:
     (case-insensitive). Email is intentionally ignored.
     """
 
-    self.user_attributes: ClassVar[tuple] = ("username", "first_name", "last_name")
+    user_attributes: tuple = ("username", "first_name", "last_name")
 
     def get_user_attribute_values(self, user: User) -> list[str]:
         """Get the values of the user attributes."""
