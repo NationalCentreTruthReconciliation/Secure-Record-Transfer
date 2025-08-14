@@ -116,6 +116,69 @@ SECRET_KEY
         python -c "import secrets; print(secrets.token_urlsafe(50))"
 
 
+RECAPTCHA_PUBLIC_KEY
+^^^^^^^^^^^^^^^^^^^^
+
+    *Google reCAPTCHA v2 public site key for user verification*
+
+    .. table::
+
+        =======================  =========
+        Default                  Type
+        =======================  =========
+        None (required in prod)  string
+        =======================  =========
+
+    The public site key for Google reCAPTCHA v2 integration. This key is visible to users and used to display the reCAPTCHA widget on forms.
+
+    **Required in production environments** - The application will fail to start if this is not set when deployed.
+
+    **Optional in development** - reCAPTCHA is disabled for local testing and development.
+
+    **.env Example:**
+
+    ::
+
+        # file: .prod.env
+        RECAPTCHA_PUBLIC_KEY=6LcXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    **Getting reCAPTCHA Keys:**
+
+    Sign up for reCAPTCHA keys at: https://www.google.com/recaptcha/intro/index.html
+
+
+RECAPTCHA_PRIVATE_KEY
+^^^^^^^^^^^^^^^^^^^^^
+
+    *Google reCAPTCHA v2 private secret key for server-side verification*
+
+    .. table::
+
+        =======================  =========
+        Default                  Type
+        =======================  =========
+        None (required in prod)  string
+        =======================  =========
+
+    The private secret key for Google reCAPTCHA v2 integration. This key is used server-side to verify user responses and should be kept confidential.
+
+    **Required in production environments** - The application will fail to start if this is not set when deployed.
+
+    **Optional in development** - reCAPTCHA is disabled for local testing and development.
+
+    **.env Example:**
+
+    ::
+
+        # file: .prod.env
+        RECAPTCHA_PRIVATE_KEY=6LcXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    .. warning::
+        Keep your private key secure and never commit it to version control or expose it in client-side code.
+
+
+
+
 Application Features
 --------------------
 

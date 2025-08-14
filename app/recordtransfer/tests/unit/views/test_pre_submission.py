@@ -139,18 +139,16 @@ class SubmissionFormWizardTests(TestCase):
         return submit_data
 
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
-    @patch("django_recaptcha.fields.ReCaptchaField.clean")
     @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
     @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
     def test_wizard(
-        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock, mock_clean: MagicMock
+        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock
     ) -> None:
         """Test the SubmissionFormWizard view from start to finish. This test will fill out the form
         with the test data and submit it, making sure no errors are raised.
         """
         mock_thank_you.return_value = None
         mock_creation_success.return_value = None
-        mock_clean.return_value = "PASSED"
         self.assertEqual(200, self.client.get(self.url).status_code)
         self.assertFalse(self.user.submission_set.exists())
         response = None
@@ -164,7 +162,13 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertFalse(response.context["form"].errors)
         self.assertTrue(self.user.submission_set.exists())
         if response:
-            self.assertRedirects(response, reverse("recordtransfer:submission_sent"))
+            self.assertEqual(200, response.status_code)
+            # Check that response tells HTMX on client side to redirect to Submission Sent page
+            hx_redirect = response.headers.get("HX-Redirect") or ""
+            self.assertEqual(hx_redirect, reverse("recordtransfer:submission_sent"))
+            # Follow the redirect to Submission Sent page
+            response = self.client.get(hx_redirect, follow=True)
+            self.assertEqual(200, response.status_code)
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
