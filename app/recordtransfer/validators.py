@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext_lazy
 
-from recordtransfer.models import PasswordHistory, User
+from recordtransfer.models import User
 
 
 class LengthRangeValidator:
@@ -122,9 +122,7 @@ class PasswordHistoryValidator:
             )
 
         # Then check against password history
-        recent_hashes = PasswordHistory.get_recent_password_hashes(
-            user=user, limit=self.history_depth
-        )
+        recent_hashes = user.past_password_hashes(self.history_depth)
         if any(check_password(password, old_hash) for old_hash in recent_hashes):
             raise ValidationError(
                 ngettext_lazy(
