@@ -14,7 +14,6 @@ from recordtransfer.forms.mixins import ContactInfoFormMixin, VisibleCaptchaMixi
 from recordtransfer.models import PasswordHistory, User
 
 
-
 class SignUpForm(UserCreationForm):
     """Form for a user to create a new account."""
 
