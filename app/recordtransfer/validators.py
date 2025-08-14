@@ -9,15 +9,15 @@ from django.utils.translation import gettext as _
 from recordtransfer.models import PasswordHistory, User
 
 
-@dataclass
 class LengthRangeValidator:
     """Validate that a password length falls within an inclusive range.
 
     Django ships a MinimumLengthValidator but does not enforce an upper bound.
     """
 
-    min_length: int = 10
-    max_length: int = 30
+    def __init__(self, min_length: int = 10, max_length: int = 30):
+        self.min_length = min_length
+        self.max_length = max_length
 
     def validate(self, password: str, user: User | None = None) -> None:
         """Validate that the password length is within the specified min and max range."""
@@ -25,8 +25,11 @@ class LengthRangeValidator:
         if length < self.min_length:
             raise ValidationError(
                 _(
-                    f"This password is too short. It must contain at least {self.min_length} characters."
-                ),
+                    "This password is too short. It must contain at least %(num)s characters."
+                )
+                % {
+                    "num": self.min_length
+                },
                 code="password_too_short",
             )
         if length > self.max_length:
@@ -69,20 +72,41 @@ class CharacterCategoriesValidator:
         count = sum([has_upper, has_lower, has_digit, has_special])
         if count < self.required_categories:
             raise ValidationError(
-                _(
-                    "This password must contain at least three of the following: uppercase, lowercase, "
-                    "numbers, or one of these special characters: %(specials)s"
-                ),
+                ngettext_lazy(
+                    (
+                        "This password must contain one of the following: uppercase, lowercase, "
+                        "numbers, or one of these special characters: %(specials)s"
+                    ),
+                    (
+                        "This password must contain at least %(num)s of the following: uppercase, lowercase, "
+                        "numbers, or one of these special characters: %(specials)s"
+                    ),
+                    self.required_categories,
+                )
+                % {
+                    "num": self.required_categories,
+                    "specials": self.allowed_specials,
+                },
                 code="password_not_enough_categories",
-                params={"specials": self.allowed_specials},
             )
 
     def get_help_text(self) -> str:
         """Return help text describing the required character categories for the password."""
-        return _(
-            "Your password must include at least three of the following types: uppercase, lowercase, "
-            "numbers, or one of these special characters: _ # % ( ) . ^ { } !"
+        return ngettext_lazy(
+            (
+                "Your password must include one of the following types: uppercase, lowercase, "
+                "numbers, or one of these special characters: %(specials)s"
+            ),
+            (
+                "Your password must include at least %(num)s following types: uppercase, lowercase, "
+                "numbers, or one of these special characters: %(specials)s"
+            ),
+            self.required_categories,
         )
+        % {
+            "num": self.required_categories,
+            "specials": " ".join(c for c in self.allowed_specials),
+        }
 
 
 class PasswordHistoryValidator:
@@ -109,24 +133,35 @@ class PasswordHistoryValidator:
         )
         if any(check_password(password, old_hash) for old_hash in recent_hashes):
             raise ValidationError(
-                _("You cannot reuse your previous %(n)d passwords."),
+                ngettext_lazy(
+                    "You cannot reuse your previous password.",
+                    "You cannot reuse your previous %(num)s passwords.",
+                    self.history_depth,
+                )
+                % {
+                    "num": self.history_depth,
+                },
                 code="password_in_history",
-                params={"n": self.history_depth},
             )
 
     def get_help_text(self) -> str:
         """Return help text describing the password history requirement."""
-        return _("Your password must be different from your previous five passwords.")
+        return ngettext_lazy(
+            "Your password must be different from your previous password.",
+            "Your password must be different from your previous %(num)s passwords.",
+            self.history_depth,
+        )
+        % {
+            "num": self.history_depth,
+        }
 
 
-class UserAttributeContainsValidator:
+class ContainsUserNameValidator:
     """Reject passwords that contain the full first name, last name, or username
     (case-insensitive). Email is intentionally ignored.
     """
 
-    def __init__(self, user_attributes: tuple[str, ...] | None = None):
-        # Only check whole attribute values for these fields; do not check email
-        self.user_attributes = user_attributes or ("username", "first_name", "last_name")
+    self.user_attributes: ClassVar[tuple] = ("username", "first_name", "last_name")
 
     def get_user_attribute_values(self, user: User) -> list[str]:
         """Get the values of the user attributes."""

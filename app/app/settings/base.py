@@ -113,9 +113,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "recordtransfer.validators.UserAttributeContainsValidator",
-        "OPTIONS": {
-            "user_attributes": ("username", "first_name", "last_name"),
-        },
     },
 ]
 
