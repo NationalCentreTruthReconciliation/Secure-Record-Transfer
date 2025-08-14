@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
+from django.utils.translation import format_lazy, ngettext_lazy
 from django.utils.translation import gettext as _
-from django.utils.translation import ngettext_lazy
 
 from recordtransfer.models import User
 
@@ -67,40 +67,29 @@ class CharacterCategoriesValidator:
         count = sum([has_upper, has_lower, has_digit, has_special])
         if count < self.required_categories:
             raise ValidationError(
-                ngettext_lazy(
-                    (
-                        "This password must contain one of the following: uppercase, lowercase, "
-                        "numbers, or one of these special characters: %(specials)s"
+                format_lazy(
+                    ngettext_lazy(
+                        "This password must contain one of the following: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                        "This password must contain at least {num} of the following: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                        self.required_categories,
                     ),
-                    (
-                        "This password must contain at least %(num)s of the following: uppercase, lowercase, "
-                        "numbers, or one of these special characters: %(specials)s"
-                    ),
-                    self.required_categories,
-                )
-                % {
-                    "num": self.required_categories,
-                    "specials": self.allowed_specials,
-                },
+                    num=self.required_categories,
+                    specials=self.allowed_specials,
+                ),
                 code="password_not_enough_categories",
             )
 
     def get_help_text(self) -> str:
         """Return help text describing the required character categories for the password."""
-        return ngettext_lazy(
-            (
-                "Your password must include one of the following types: uppercase, lowercase, "
-                "numbers, or one of these special characters: %(specials)s"
+        return format_lazy(
+            ngettext_lazy(
+                "Your password must include one of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                "Your password must include at least {num} of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                self.required_categories,
             ),
-            (
-                "Your password must include at least %(num)s following types: uppercase, lowercase, "
-                "numbers, or one of these special characters: %(specials)s"
-            ),
-            self.required_categories,
-        ) % {
-            "num": self.required_categories,
-            "specials": self.allowed_specials,
-        }
+            num=self.required_categories,
+            specials=self.allowed_specials,
+        )
 
 
 class PasswordHistoryValidator:
@@ -125,26 +114,27 @@ class PasswordHistoryValidator:
         recent_hashes = user.past_password_hashes(self.history_depth)
         if any(check_password(password, old_hash) for old_hash in recent_hashes):
             raise ValidationError(
-                ngettext_lazy(
-                    "You cannot reuse your previous password.",
-                    "You cannot reuse your previous %(num)s passwords.",
-                    self.history_depth,
-                )
-                % {
-                    "num": self.history_depth,
-                },
+                format_lazy(
+                    ngettext_lazy(
+                        "You cannot reuse your previous password.",
+                        "You cannot reuse your previous {num} passwords.",
+                        self.history_depth,
+                    ),
+                    num=self.history_depth,
+                ),
                 code="password_in_history",
             )
 
     def get_help_text(self) -> str:
         """Return help text describing the password history requirement."""
-        return ngettext_lazy(
-            "Your password must be different from your previous password.",
-            "Your password must be different from your previous %(num)s passwords.",
-            self.history_depth,
-        ) % {
-            "num": self.history_depth,
-        }
+        return format_lazy(
+            ngettext_lazy(
+                "Your password must be different from your previous password.",
+                "Your password must be different from your previous {num} passwords.",
+                self.history_depth,
+            ),
+            num=self.history_depth,
+        )
 
 
 class ContainsUserNameValidator:
