@@ -70,8 +70,8 @@ class CharacterCategoriesValidator:
             raise ValidationError(
                 format_lazy(
                     ngettext_lazy(
-                        "This password must contain one of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
-                        "This password must contain at least {num} of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                        "Your password must include one of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                        "Your password must include at least {num} of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
                         self.required_categories,
                     ),
                     num=self.required_categories,
@@ -117,8 +117,8 @@ class PasswordHistoryValidator:
             raise ValidationError(
                 format_lazy(
                     ngettext_lazy(
-                        "You cannot reuse your previous password.",
-                        "You cannot reuse your previous {num} passwords.",
+                        "Your password must be different from your previous password.",
+                        "Your password must be different from your previous {num} passwords.",
                         self.history_depth,
                     ),
                     num=self.history_depth,
