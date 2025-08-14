@@ -67,19 +67,36 @@ class CharacterCategoriesValidator:
         count = sum([has_upper, has_lower, has_digit, has_special])
         if count < self.required_categories:
             raise ValidationError(
-                _(
-                    "Your password must contain at least %(num)s of the following: uppercase, lowercase, "
-                    "numbers, or one of these special characters: %(specials)s"
+                ngettext_lazy(
+                    (
+                        "This password must contain one of the following: uppercase, lowercase, "
+                        "numbers, or one of these special characters: %(specials)s"
+                    ),
+                    (
+                        "This password must contain at least %(num)s of the following: uppercase, lowercase, "
+                        "numbers, or one of these special characters: %(specials)s"
+                    ),
+                    self.required_categories,
                 )
-                % {"num": self.required_categories, "specials": self.allowed_specials},
+                % {
+                    "num": self.required_categories,
+                    "specials": self.allowed_specials,
+                },
                 code="password_not_enough_categories",
             )
 
     def get_help_text(self) -> str:
         """Return help text describing the required character categories for the password."""
-        return _(
-            "Your password must include at least %(num)s of the following types: uppercase, lowercase, "
-            "numbers, or one of these special characters: %(specials)s"
+        return ngettext_lazy(
+            (
+                "Your password must include one of the following types: uppercase, lowercase, "
+                "numbers, or one of these special characters: %(specials)s"
+            ),
+            (
+                "Your password must include at least %(num)s following types: uppercase, lowercase, "
+                "numbers, or one of these special characters: %(specials)s"
+            ),
+            self.required_categories,
         ) % {
             "num": self.required_categories,
             "specials": " ".join(c for c in self.allowed_specials),
