@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from recordtransfer.constants import HtmlIds
 from recordtransfer.emails import send_password_reset_email
 from recordtransfer.forms.mixins import ContactInfoFormMixin, VisibleCaptchaMixin
-from recordtransfer.models import PasswordHistory, User
+from recordtransfer.models import User
 
 
 class SignUpForm(UserCreationForm):
