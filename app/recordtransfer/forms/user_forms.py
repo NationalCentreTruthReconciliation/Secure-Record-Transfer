@@ -195,15 +195,6 @@ class UserAccountInfoForm(forms.ModelForm):
                 except ValidationError as e:
                     self.add_error("new_password", e)
 
-            if (
-                self.instance.pk
-                and current_password
-                and self.instance.check_password(current_password)
-                and new_password
-                and new_password != current_password
-            ):
-                PasswordHistory.objects.create(user=self.instance, password=self.instance.password)
-
         if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
 
