@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
-from django.utils.translation import format_lazy, ngettext_lazy
+from django.utils.text import format_lazy
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext_lazy
 
 from recordtransfer.models import User
 
@@ -18,7 +19,7 @@ class LengthRangeValidator:
         self.min_length = min_length
         self.max_length = max_length
 
-    def validate(self, password: str) -> None:
+    def validate(self, password: str, user: None = None) -> None:
         """Validate that the password length is within the specified min and max range."""
         length = len(password or "")
         if length < self.min_length:
@@ -55,7 +56,7 @@ class CharacterCategoriesValidator:
         self.allowed_specials = allowed_specials
         self.required_categories = required_categories
 
-    def validate(self, password: str) -> None:
+    def validate(self, password: str, user: None = None) -> None:
         """Validate that the password contains at least the required number of character
         categories.
         """
@@ -69,8 +70,8 @@ class CharacterCategoriesValidator:
             raise ValidationError(
                 format_lazy(
                     ngettext_lazy(
-                        "This password must contain one of the following: uppercase, lowercase, numbers, or one of these special characters: {specials}",
-                        "This password must contain at least {num} of the following: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                        "This password must contain one of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
+                        "This password must contain at least {num} of the following types: uppercase, lowercase, numbers, or one of these special characters: {specials}",
                         self.required_categories,
                     ),
                     num=self.required_categories,
