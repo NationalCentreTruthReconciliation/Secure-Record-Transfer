@@ -87,6 +87,29 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         user = get_user_model().objects.get(username="testuser")
         self.assertTrue(user.check_password("Newsecurepassword123"))
 
+    def test_same_as_current_password_shows_field_error(self) -> None:
+        """Displays field error when new password equals current password."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
+        driver.find_element(By.NAME, "current_password").send_keys("Securepassword123")
+        driver.find_element(By.NAME, "new_password").send_keys("Securepassword123")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("Securepassword123")
+
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = driver.page_source
+        self.assertIn("Your new password cannot be the same as your current password.", page_text)
+
     def test_password_change_wrong_current_password(self) -> None:
         """Test error when the current password is wrong."""
         driver = self.driver
