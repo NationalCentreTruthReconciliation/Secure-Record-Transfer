@@ -112,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "OPTIONS": {"history_depth": 5},
     },
     {
-        "NAME": "recordtransfer.validators.UserAttributeContainsValidator",
+        "NAME": "recordtransfer.validators.ContainsUserNameValidator",
     },
 ]
 
