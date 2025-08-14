@@ -11,6 +11,7 @@
     /* Fade in/out */
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
+    transform: translateX(-12px);
 
     padding: 6px;
     font-size: 11pt;
