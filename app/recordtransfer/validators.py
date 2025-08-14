@@ -18,7 +18,7 @@ class LengthRangeValidator:
         self.min_length = min_length
         self.max_length = max_length
 
-    def validate(self, password: str, user: User | None = None) -> None:
+    def validate(self, password: str) -> None:
         """Validate that the password length is within the specified min and max range."""
         length = len(password or "")
         if length < self.min_length:
@@ -55,7 +55,7 @@ class CharacterCategoriesValidator:
         self.allowed_specials = allowed_specials
         self.required_categories = required_categories
 
-    def validate(self, password: str, user: User | None = None) -> None:
+    def validate(self, password: str) -> None:
         """Validate that the password contains at least the required number of character
         categories.
         """
@@ -99,7 +99,7 @@ class CharacterCategoriesValidator:
             self.required_categories,
         ) % {
             "num": self.required_categories,
-            "specials": " ".join(c for c in self.allowed_specials),
+            "specials": self.allowed_specials,
         }
 
 
@@ -109,7 +109,7 @@ class PasswordHistoryValidator:
     def __init__(self, history_depth: int = 5):
         self.history_depth = history_depth
 
-    def validate(self, password: str, user: User | None = None) -> None:
+    def validate(self, password: str, user: User) -> None:
         """Validate that the password is not in the user's recent password history."""
         if not user or not user.pk or not password:
             return
