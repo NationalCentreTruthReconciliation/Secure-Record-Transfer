@@ -23,7 +23,7 @@ from .selenium_setup import SeleniumLiveServerTestCase
         },
     }
 )
-class PasswordHistoryAndValidationE2ETest(SeleniumLiveServerTestCase):
+class CustomValidatorsE2ETest(SeleniumLiveServerTestCase):
     """E2E tests for password change UX: validation, history, and success paths."""
 
     def setUp(self) -> None:
