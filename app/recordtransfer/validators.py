@@ -36,9 +36,10 @@ class LengthRangeValidator:
 
     def get_help_text(self) -> str:
         """Return help text describing the required password length range."""
-        return _(
-            f"Your password must be between {self.min_length} and {self.max_length} characters long."
-        )
+        return _("Your password must be between %(num)s and %(num2)s characters long.") % {
+            "num": self.min_length,
+            "num2": self.max_length,
+        }
 
 
 class CharacterCategoriesValidator:
