@@ -105,9 +105,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "OPTIONS": {"min_length": 10, "max_length": 30},
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
         "NAME": "recordtransfer.validators.CharacterCategoriesValidator",
         "OPTIONS": {"required_categories": 3},
     },
