@@ -134,6 +134,11 @@ class User(AbstractUser):
 
         return True
 
+    def past_password_hashes(self, limit: int = 5) -> list:
+        """Get the past N hashes of this user's previous password."""
+        hashes = self.password_history.order_by("-changed_at")[:limit]
+        return list(hashes.values_list("password", flat=True))
+
 
 class PasswordHistory(models.Model):
     """Store a user's previous password hashes for history validation."""
@@ -141,18 +146,6 @@ class PasswordHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_history")
     password = models.CharField(max_length=255)  # hashed password
     changed_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        """Meta information for the Password History model."""
-
-        ordering: ClassVar[list[str]] = ["-changed_at"]
-
-    @staticmethod
-    def get_recent_password_hashes(user: User, limit: int = 5) -> list[str]:
-        """Retrieve a list of recent password hashes for the specified user."""
-        return list(
-            PasswordHistory.objects.filter(user=user).values_list("password", flat=True)[:limit]
-        )
 
 
 class SiteSetting(models.Model):
