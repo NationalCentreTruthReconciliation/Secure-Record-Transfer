@@ -157,7 +157,7 @@ class UserAccountInfoForm(forms.ModelForm):
 
         cleaned_data = super().clean()
         current_password = cleaned_data.get("current_password")
-        new_password = cleaned_data.get("new_password")
+        new_password = cleaned_data.get("new_password") or self.data.get("new_password")
         confirm_new_password = cleaned_data.get("confirm_new_password")
 
         password_change = bool(current_password or new_password or confirm_new_password)
