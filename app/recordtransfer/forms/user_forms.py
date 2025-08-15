@@ -109,6 +109,7 @@ class UserAccountInfoForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_NEW_PASSWORD}),
         label=_("New Password"),
         required=False,
+        validators=[password_validation.validate_password],
     )
     confirm_new_password = forms.CharField(
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CONFIRM_NEW_PASSWORD}),
@@ -166,6 +167,15 @@ class UserAccountInfoForm(forms.ModelForm):
                 }
             )
 
+        if new_password == current_password:
+            raise ValidationError(
+                {
+                    "new_password": [
+                        _("The new password must be different from the current password."),
+                    ]
+                }
+            )
+
         if not self.instance.check_password(current_password):
             raise ValidationError(
                 {
@@ -189,11 +199,6 @@ class UserAccountInfoForm(forms.ModelForm):
 
         if password_change:
             self._validate_password_change(current_password, new_password, confirm_new_password)
-            if new_password:
-                try:
-                    password_validation.validate_password(new_password, self.instance)
-                except ValidationError as e:
-                    self.add_error("new_password", e)
 
         if not self.has_changed() and not password_change:
             raise ValidationError(_("No fields have been changed."))
