@@ -21,27 +21,40 @@ from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
 from recordtransfer.utils import get_js_translation_version
-from recordtransfer.views.account import AsyncPasswordChangeView, AsyncPasswordResetView, Login
+from recordtransfer.views.account import (
+    AsyncPasswordChangeView,
+    AsyncPasswordResetConfirmView,
+    AsyncPasswordResetView,
+    Login,
+)
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("admin/django_rq/", include("django_rq.urls")),
     path("admin/", admin.site.urls),
     path("", include("recordtransfer.urls")),
-    path(
-        "account/password_reset/",
-        AsyncPasswordResetView.as_view(),
-    ),
-    path(
-        "account/password_change/",
-        AsyncPasswordChangeView.as_view(),
-    ),
-    # Override the login view with redirect behavior
+    # Custom auth views - these override Django's built-in views
     path(
         "account/login/",
         Login.as_view(),
         name="login",
     ),
+    path(
+        "account/password_change/",
+        AsyncPasswordChangeView.as_view(),
+        name="password_change",
+    ),
+    path(
+        "account/password_reset/",
+        AsyncPasswordResetView.as_view(),
+        name="password_reset",
+    ),
+    path(
+        "account/reset/<uidb64>/<token>/",
+        AsyncPasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
+    ),
+    # Django's built-in auth URLs (remaining views that aren't overridden)
     path("account/", include("django.contrib.auth.urls")),
     path(
         "jsi18n/",
