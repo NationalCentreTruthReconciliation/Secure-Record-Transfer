@@ -104,13 +104,6 @@ class PasswordHistoryValidator:
         if not user or not user.pk or not password:
             return
 
-        # First check if the new password is the same as the current password
-        if user.password and check_password(password, user.password):
-            raise ValidationError(
-                _("Your new password cannot be the same as your current password."),
-                code="password_same_as_current",
-            )
-
         # Then check against password history
         recent_hashes = user.past_password_hashes(self.history_depth)
         if any(check_password(password, old_hash) for old_hash in recent_hashes):

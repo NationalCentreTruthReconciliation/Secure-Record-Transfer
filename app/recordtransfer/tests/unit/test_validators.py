@@ -173,15 +173,6 @@ class PasswordHistoryValidatorTestCase(TestCase):
             username="testuser", email="test@example.com", password="InitialPassword123!"
         )
 
-    def test_current_password_reuse(self) -> None:
-        """Test that current password cannot be reused."""
-        target = PasswordHistoryValidator()
-
-        with self.assertRaises(ValidationError) as cm:
-            target.validate("InitialPassword123!", self.user)
-
-        self.assertEqual(cm.exception.code, "password_same_as_current")
-
     def test_empty_password(self) -> None:
         """Test behavior with empty password."""
         target = PasswordHistoryValidator()
