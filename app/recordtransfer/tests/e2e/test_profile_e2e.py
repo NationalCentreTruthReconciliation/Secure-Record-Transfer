@@ -33,12 +33,12 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         self.user = User.objects.create_user(
             username="testuser",
             email="testuser@example.com",
-            password="testpassword",
+            password="Securepassword123",
             first_name="Test",
             last_name="User",
             language="en",
         )
-        self.login("testuser", "testpassword")
+        self.login("testuser", "Securepassword123")
 
     def _switch_to_contact_info_tab(self) -> None:
         """Switch to the contact information tab on the profile page."""
@@ -69,9 +69,9 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
-        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "current_password").send_keys("Securepassword123")
+        driver.find_element(By.NAME, "new_password").send_keys("Newsecurepassword123")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("Newsecurepassword123")
 
         save_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_save_button"))
@@ -85,7 +85,30 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         from django.contrib.auth import get_user_model
 
         user = get_user_model().objects.get(username="testuser")
-        self.assertTrue(user.check_password("newsecurepassword"))
+        self.assertTrue(user.check_password("Newsecurepassword123"))
+
+    def test_same_as_current_password_shows_field_error(self) -> None:
+        """Displays field error when new password equals current password."""
+        driver = self.driver
+        profile_url = reverse("recordtransfer:user_profile")
+        driver.get(f"{self.live_server_url}{profile_url}")
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "current_password"))
+        )
+        driver.find_element(By.NAME, "current_password").send_keys("Securepassword123")
+        driver.find_element(By.NAME, "new_password").send_keys("Securepassword123")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("Securepassword123")
+
+        save_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.ID, "id_save_button"))
+        )
+        save_button.click()
+
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
+        )
+        page_text = driver.page_source
+        self.assertIn("The new password must be different from the current password.", page_text)
 
     def test_password_change_wrong_current_password(self) -> None:
         """Test error when the current password is wrong."""
@@ -97,8 +120,8 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         )
 
         driver.find_element(By.NAME, "current_password").send_keys("wrongpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("newsecurepassword")
+        driver.find_element(By.NAME, "new_password").send_keys("Newsecurepassword123")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("Newsecurepassword123")
         save_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_save_button"))
         )
@@ -121,9 +144,9 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "current_password"))
         )
 
-        driver.find_element(By.NAME, "current_password").send_keys("testpassword")
-        driver.find_element(By.NAME, "new_password").send_keys("newsecurepassword")
-        driver.find_element(By.NAME, "confirm_new_password").send_keys("differentpassword")
+        driver.find_element(By.NAME, "current_password").send_keys("Securepassword123")
+        driver.find_element(By.NAME, "new_password").send_keys("Newsecurepassword123")
+        driver.find_element(By.NAME, "confirm_new_password").send_keys("Wrongsecurepassword123")
         save_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_save_button"))
         )
@@ -354,7 +377,7 @@ class SubmissionTablesTest(SeleniumLiveServerTestCase):
         self.user = User.objects.create_user(
             username="testuser",
             email="testuser@example.com",
-            password="testpassword",
+            password="Securepassword123",
             first_name="Test",
             last_name="User",
         )
@@ -369,7 +392,7 @@ class SubmissionTablesTest(SeleniumLiveServerTestCase):
             name="Test Group",
             created_by=self.user,
         )
-        self.login("testuser", "testpassword")
+        self.login("testuser", "Securepassword123")
 
     def move_to_in_progress_submission_tab(self) -> None:
         """Help method to move to an in-progress submission tab."""
@@ -669,6 +692,7 @@ class SubmissionTablesTest(SeleniumLiveServerTestCase):
         )
         self.assertIsNotNone(error_present)
 
+
 @tag("e2e")
 @override_settings(
     WEBPACK_LOADER={
@@ -688,7 +712,7 @@ class ChangeSubmissionGroupTest(SeleniumLiveServerTestCase):
         self.user = User.objects.create_user(
             username="testuser",
             email="testuser@example.com",
-            password="testpassword",
+            password="Securepassword123",
             first_name="Test",
             last_name="User",
         )
@@ -707,7 +731,7 @@ class ChangeSubmissionGroupTest(SeleniumLiveServerTestCase):
             name="Second Group",
             created_by=self.user,
         )
-        self.login("testuser", "testpassword")
+        self.login("testuser", "Securepassword123")
 
     def _click_assign_group_button(self) -> None:
         """Click the assign group button for a submission on the Profile page."""
@@ -722,14 +746,10 @@ class ChangeSubmissionGroupTest(SeleniumLiveServerTestCase):
         assign_button.click()
 
         # Wait for the modal to appear
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "base_modal"))
-        )
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "base_modal")))
 
         # Wait for the group select dropdown to be present
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "group_select"))
-        )
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "group_select")))
 
     def test_submission_title_present(self) -> None:
         """Test that the submission title is present in the submission group change modal."""

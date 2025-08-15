@@ -1,12 +1,13 @@
 from enum import Enum
 from unittest.mock import MagicMock, patch
 
+from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from recordtransfer.enums import SettingKeyMeta, SiteSettingKey, SiteSettingType
 from recordtransfer.forms.admin_forms import SiteSettingModelForm, UserAdminForm
-from recordtransfer.models import SiteSetting, User
+from recordtransfer.models import PasswordHistory, SiteSetting, User
 
 
 class TestSiteSettingModelForm(TestCase):
@@ -415,3 +416,69 @@ class TestUserAdminForm(TestCase):
         form = UserAdminForm(data=form_data, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn("gets_submission_email_updates", form.errors)
+
+
+class TestPasswordChangeForm(TestCase):
+    """Test the admin password change form."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            password="testpassword123",
+        )
+
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[
+            {
+                "NAME": "recordtransfer.validators.LengthRangeValidator",
+                "OPTIONS": {"min_length": 10, "max_length": 30},
+            },
+        ]
+    )
+    def test_password_history_logged(self) -> None:
+        """Test that a PasswordHistory model is added when the user's password changes.
+
+        Uses a simplified password scheme - passwords only need to meet lenght requirements.
+        """
+        password_history_before_test = self.user.password_history.count()
+
+        form = AdminPasswordChangeForm(
+            user=self.user,
+            data={
+                "password1": "ThisIsTheNewOne",
+                "password2": "ThisIsTheNewOne",
+            },
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        password_history_after_test = self.user.password_history.count()
+        self.assertEqual(1 + password_history_before_test, password_history_after_test)
+
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[
+            {
+                "NAME": "recordtransfer.validators.LengthRangeValidator",
+                "OPTIONS": {"min_length": 10, "max_length": 30},
+            },
+        ]
+    )
+    def test_password_history_not_logged(self) -> None:
+        """Test that a PasswordHistory model is NOT added when the user's password changes."""
+        password_history_before_test = self.user.password_history.count()
+
+        form = AdminPasswordChangeForm(
+            user=self.user,
+            data={
+                "password1": "ThisIsTheNewOne",
+                "password2": "ThisIsTheNewOneButNotTheSame",
+            },
+        )
+        self.assertFalse(form.is_valid())
+
+        password_history_after_test = self.user.password_history.count()
+        self.assertEqual(password_history_before_test, password_history_after_test)

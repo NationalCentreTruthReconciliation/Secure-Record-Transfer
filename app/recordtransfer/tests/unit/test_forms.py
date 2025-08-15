@@ -26,15 +26,15 @@ class SignUpFormTest(TestCase):
             "first_name": "Test",
             "last_name": "User",
             "email": "testuser@example.com",
-            "password1": "securepassword123",
-            "password2": "securepassword123",
+            "password1": "Securepassword123",
+            "password2": "Securepassword123",
         }
         self.existing_user = User.objects.create_user(
             username="existinguser",
             first_name="Existing",
             last_name="User",
             email="existing@example.com",
-            password="password123",
+            password="Password123",
         )
 
     def test_form_save(self) -> None:
@@ -46,7 +46,7 @@ class SignUpFormTest(TestCase):
         self.assertEqual(user.first_name, "Test")
         self.assertEqual(user.last_name, "User")
         self.assertEqual(user.email, "testuser@example.com")
-        self.assertTrue(user.check_password("securepassword123"))
+        self.assertTrue(user.check_password("Securepassword123"))
 
     def test_form_duplicate_username(self) -> None:
         """Test that form rejects duplicate username."""
@@ -198,6 +198,8 @@ class UserAccountInfoFormTest(TestCase):
 
     def test_form_valid_password_change(self) -> None:
         """Test that the form can change the user's password successfully."""
+        history_before_test = self.user.password_history.count()
+
         form_data = {
             "first_name": self.test_first_name,
             "last_name": self.test_last_name,
@@ -208,7 +210,11 @@ class UserAccountInfoFormTest(TestCase):
         form = UserAccountInfoForm(data=form_data, instance=self.user)
         self.assertTrue(form.is_valid())
         user = form.save()
+
+        history_after_test = self.user.password_history.count()
+
         self.assertTrue(user.check_password("new_password123"))
+        self.assertEqual(1 + history_before_test, history_after_test)
 
     def test_form_invalid_current_password(self) -> None:
         """Test that the form rejects an invalid current password."""
