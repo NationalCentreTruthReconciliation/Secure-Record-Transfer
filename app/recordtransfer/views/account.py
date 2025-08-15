@@ -91,6 +91,11 @@ class CreateAccount(FormView):
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid signup form submissions."""
+        LOGGER.info(
+            "Signup form invalid: errors=%s, ip=%s",
+            form.errors.as_json(),
+            self.request.META.get("REMOTE_ADDR"),
+        )
         if self.request.htmx:
             # Return only the error template for HTMX requests
             html = render_to_string(
