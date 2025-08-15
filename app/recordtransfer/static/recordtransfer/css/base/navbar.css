@@ -7,8 +7,8 @@ header {
 }
 
 header.homepage {
-    position: absolute;
-    background-color: transparent;
+    position: relative;
+    background-color: primary;
     box-shadow: none;
 }
 
