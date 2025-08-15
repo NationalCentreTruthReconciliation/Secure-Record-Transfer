@@ -223,7 +223,7 @@ class Login(LoginView):
             "User logged in successfully: username='%s', user_id=%s, ip=%s",
             user.username,
             user.pk,
-            self._get_client_ip(self.request),
+            _get_client_ip(self.request),
         )
 
         if self.request.htmx:
@@ -238,7 +238,7 @@ class Login(LoginView):
         LOGGER.warning(
             "Failed login attempt: username='%s', ip=%s",
             username,
-            self._get_client_ip(self.request),
+            _get_client_ip(self.request),
         )
 
         if not self.request.htmx:
