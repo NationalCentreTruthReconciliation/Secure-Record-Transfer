@@ -4,7 +4,6 @@ from typing import Any, ClassVar, Optional
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
@@ -134,61 +133,27 @@ class UserAccountInfoForm(forms.ModelForm):
     ) -> None:
         """Validate password change fields."""
         if not current_password:
-            raise ValidationError(
-                {
-                    "current_password": [
-                        _("Required"),
-                    ]
-                }
-            )
+            self.add_error("current_password", _("Required"))
         if not new_password:
-            raise ValidationError(
-                {
-                    "new_password": [
-                        _("Required"),
-                    ]
-                }
-            )
+            self.add_error("new_password", _("Required"))
         if not confirm_new_password:
-            raise ValidationError(
-                {
-                    "confirm_new_password": [
-                        _("Required"),
-                    ]
-                }
+            self.add_error("confirm_new_password", _("Required"))
+
+        if new_password and confirm_new_password and new_password != confirm_new_password:
+            self.add_error("confirm_new_password", _("The new passwords do not match."))
+
+        if new_password and current_password and new_password == current_password:
+            self.add_error(
+                "new_password", _("The new password must be different from the current password.")
             )
 
-        if new_password != confirm_new_password:
-            raise ValidationError(
-                {
-                    "confirm_new_password": [
-                        _("The new passwords do not match."),
-                    ]
-                }
-            )
-
-        if new_password == current_password:
-            raise ValidationError(
-                {
-                    "new_password": [
-                        _("The new password must be different from the current password."),
-                    ]
-                }
-            )
-
-        if not self.instance.check_password(current_password):
-            raise ValidationError(
-                {
-                    "current_password": [
-                        _("Password is incorrect."),
-                    ]
-                }
-            )
+        if current_password and not self.instance.check_password(current_password):
+            self.add_error("current_password", _("Password is incorrect."))
 
     def clean(self) -> dict[str, Any]:
         """Clean the form data."""
         if not self.data:
-            raise ValidationError(_("Form is empty."))
+            self.add_error("Form is empty.")
 
         cleaned_data = super().clean()
         current_password = cleaned_data.get("current_password")
@@ -201,7 +166,7 @@ class UserAccountInfoForm(forms.ModelForm):
             self._validate_password_change(current_password, new_password, confirm_new_password)
 
         if not self.has_changed() and not password_change:
-            raise ValidationError(_("No fields have been changed."))
+            self.add_error(_("No fields have been changed."))
 
         return cleaned_data
 
