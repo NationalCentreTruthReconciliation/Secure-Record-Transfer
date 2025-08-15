@@ -58,6 +58,11 @@ export function setupUnsavedChangesProtection() {
         }
     });
 
+    // Reset historyChange when modal closes
+    elements.modal.addEventListener("close", () => {
+        historyChange = false;
+    });
+
     // For non-fresh forms, add a dummy history state if none exists yet
     // This allows us to intercept browser back/forward navigation
     addDummyState();
