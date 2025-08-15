@@ -153,7 +153,7 @@ class UserAccountInfoForm(forms.ModelForm):
     def clean(self) -> dict[str, Any]:
         """Clean the form data."""
         if not self.data:
-            self.add_error("Form is empty.")
+            self.add_error(None, _("Form is empty."))
 
         cleaned_data = super().clean()
         current_password = cleaned_data.get("current_password")
@@ -166,7 +166,7 @@ class UserAccountInfoForm(forms.ModelForm):
             self._validate_password_change(current_password, new_password, confirm_new_password)
 
         if not self.has_changed() and not password_change:
-            self.add_error(_("No fields have been changed."))
+            self.add_error(None, _("No fields have been changed."))
 
         return cleaned_data
 
