@@ -9,9 +9,6 @@ class HtmlIds:
     ID_FIRST_NAME: str = "id_first_name"
     ID_LAST_NAME: str = "id_last_name"
     ID_GETS_NOTIFICATION_EMAILS: str = "id_gets_notification_emails"
-    ID_CURRENT_PASSWORD: str = "id_current_password"
-    ID_NEW_PASSWORD: str = "id_new_password"
-    ID_CONFIRM_NEW_PASSWORD: str = "id_confirm_new_password"
 
     # Submission Group Form Field IDs
     ID_SUBMISSION_GROUP_NAME: str = "id_submission_group_name"

@@ -6,10 +6,6 @@
  * @param {string} context.ID_LAST_NAME - The ID of the last name input field.
  * @param {string} context.ID_GETS_NOTIFICATION_EMAILS - The ID of the notification emails
  * checkbox.
- * @param {string} context.ID_CURRENT_PASSWORD - The ID of the current password input field.
- * @param {string} context.ID_NEW_PASSWORD - The ID of the new password input field.
- * @param {string} context.ID_CONFIRM_NEW_PASSWORD - The ID of the confirm new password input
- * field.
  */
 export const setupProfileForm = (context) => {
     const firstName = document.getElementById(context["ID_FIRST_NAME"]);
@@ -17,19 +13,11 @@ export const setupProfileForm = (context) => {
     const getsNotificationEmails = document.getElementById(
         context["ID_GETS_NOTIFICATION_EMAILS"]
     );
-    const currentPassword = document.getElementById(context["ID_CURRENT_PASSWORD"]);
-    const newPassword = document.getElementById(context["ID_NEW_PASSWORD"]);
-    const confirmNewPassword = document.getElementById(
-        context["ID_CONFIRM_NEW_PASSWORD"]
-    );
 
     const inputFields = [
         firstName,
         lastName,
         getsNotificationEmails,
-        currentPassword,
-        newPassword,
-        confirmNewPassword
     ];
 
     const saveButton = document.getElementById("id_save_button");
@@ -43,8 +31,7 @@ export const setupProfileForm = (context) => {
     const checkForChanges = () => {
         const hasChanged = firstName.value !== initialValues.firstName ||
             lastName.value !== initialValues.lastName ||
-            getsNotificationEmails.checked !== initialValues.getsNotificationEmails ||
-            (currentPassword.value && newPassword.value && confirmNewPassword.value);
+            getsNotificationEmails.checked !== initialValues.getsNotificationEmails;
 
         saveButton.disabled = !hasChanged;
     };
