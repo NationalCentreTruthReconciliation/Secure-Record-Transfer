@@ -64,8 +64,8 @@ export function setupUnsavedChangesProtection() {
 
     const popstateListener = () => {
         historyChange = true;
-        elements.modal.showModal();
         addDummyState();
+        elements.modal.showModal();
     };
 
     // Elements that should not trigger the browser warning dialog
