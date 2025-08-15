@@ -1,2 +1,3 @@
 *.sh text=auto eol=lf
 *.conf text=auto eol=lf
+*.conf.template text=auto eol=lf
