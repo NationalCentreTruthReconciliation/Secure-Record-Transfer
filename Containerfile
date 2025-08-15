@@ -1,4 +1,4 @@
-FROM nikolaik/python-nodejs:python3.10-nodejs22-slim AS base
+FROM nikolaik/python-nodejs:python3.11-nodejs22-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
@@ -83,7 +83,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
 
 
-FROM python:3.10-slim AS prod
+FROM python:3.11-slim AS prod
 
 ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
