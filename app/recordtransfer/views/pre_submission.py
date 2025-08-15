@@ -28,7 +28,9 @@ from django.http import (
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext
+from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from formtools.wizard.views import SessionWizardView
@@ -198,6 +200,7 @@ class SubmissionFormWizard(SessionWizardView):
             LOGGER.error("Invalid step name: %s", current)
             raise Http404("Invalid step name") from exc
 
+    @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Dispatch the request to the appropriate handler method."""
         self.in_progress_uuid = request.GET.get("resume")
@@ -222,6 +225,7 @@ class SubmissionFormWizard(SessionWizardView):
 
         return super().dispatch(request, *args, **kwargs)
 
+    @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle GET request to load a submission."""
         if self.in_progress_submission:
@@ -238,6 +242,7 @@ class SubmissionFormWizard(SessionWizardView):
         self.storage.data = pickle.loads(self.in_progress_submission.step_data)["past"]
         self.storage.current_step = self.in_progress_submission.current_step
 
+    @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a submission."""
         # User is not saving the form, so continue with the normal form submission
