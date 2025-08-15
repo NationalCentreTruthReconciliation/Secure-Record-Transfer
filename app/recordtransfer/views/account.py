@@ -1,7 +1,7 @@
 """Views for creating and activating user accounts."""
 
 import logging
-from typing import Any, cast
+from typing import cast
 
 from django.conf import settings
 from django.contrib.auth import login
