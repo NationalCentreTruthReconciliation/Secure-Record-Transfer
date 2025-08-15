@@ -108,7 +108,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.CLASS_NAME, "text-error"))
         )
         page_text = driver.page_source
-        self.assertIn("Your new password cannot be the same as your current password.", page_text)
+        self.assertIn("The new password must be different from the current password.", page_text)
 
     def test_password_change_wrong_current_password(self) -> None:
         """Test error when the current password is wrong."""
