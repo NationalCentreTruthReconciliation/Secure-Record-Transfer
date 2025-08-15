@@ -21,7 +21,7 @@ from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
 from recordtransfer.utils import get_js_translation_version
-from recordtransfer.views.account import AsyncPasswordResetView, Login
+from recordtransfer.views.account import AsyncPasswordChangeView, AsyncPasswordResetView, Login
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
@@ -31,6 +31,10 @@ urlpatterns = [
     path(
         "account/password_reset/",
         AsyncPasswordResetView.as_view(),
+    ),
+    path(
+        "account/password_change/",
+        AsyncPasswordChangeView.as_view(),
     ),
     # Override the login view with redirect behavior
     path(

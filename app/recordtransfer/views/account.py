@@ -5,8 +5,8 @@ from typing import cast
 
 from django.conf import settings
 from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -14,12 +14,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from django.utils.translation import get_language, gettext, ngettext
+from django.utils.translation import get_language, gettext, gettext_lazy, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
-from recordtransfer.emails import send_user_activation_email
+from recordtransfer.emails import send_user_account_updated, send_user_activation_email
 from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
@@ -214,3 +214,22 @@ class AsyncPasswordResetView(PasswordResetView):
     email_template_name = "registration/password_reset_email.txt"
     html_email_template_name = "registration/password_reset_email.html"
     form_class = AsyncPasswordResetForm
+
+
+class AsyncPasswordChangeView(PasswordChangeView):
+    """The page a user sees when they change their password. Overrides `PasswordChangeView` to
+    send an email notification asynchronously after successful password change.
+    """
+
+    def form_valid(self, form: PasswordChangeForm) -> HttpResponse:
+        """Handle successful password change."""
+        response = super().form_valid(form)
+        user = cast(User, form.user)
+
+        context = {
+            "subject": gettext_lazy("Password updated"),
+            "changed_item": gettext_lazy("password"),
+            "changed_status": gettext_lazy("updated"),
+        }
+        send_user_account_updated.delay(user, context)
+        return response
