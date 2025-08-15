@@ -216,7 +216,7 @@ class TempUploadedFileInline(ReadOnlyInline, BaseUploadedFileAdminMixin):
     ]
 
 
-class PermUploadedFileInline(ReadOnlyInline):
+class PermUploadedFileInline(ReadOnlyInline, BaseUploadedFileAdminMixin):
     """Inline admin for the PermUploadedFile model. Used to view the files
     associated with an upload session.
 
