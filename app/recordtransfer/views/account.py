@@ -246,6 +246,13 @@ class AsyncPasswordResetView(PasswordResetView):
     html_email_template_name = "registration/password_reset_email.html"
     form_class = AsyncPasswordResetForm
 
+    def form_valid(self, form: AsyncPasswordResetForm) -> HttpResponse:
+        """Handle successful password reset request."""
+        email = form.cleaned_data["email"]
+        LOGGER.info("Password reset requested for email: %s", email)
+        response = super().form_valid(form)
+        return response
+
 
 class AsyncPasswordResetConfirmView(PasswordResetConfirmView):
     """The page a user sees when they are setting a new password after a password reset.
