@@ -44,7 +44,7 @@ RUN chmod +x ${PROJ_DIR}/entrypoint.sh
 # DEVELOPMENT IMAGE
 #
 
-FROM base as dev
+FROM base AS dev
 
 ENV PYTHONUNBUFFERED=1
 
