@@ -1,5 +1,4 @@
 import os
-from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse
 
 from django.conf import settings
