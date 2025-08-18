@@ -6,12 +6,14 @@ from typing import cast
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, SetPasswordForm
+from django.contrib.auth.signals import user_logged_out
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
     PasswordResetConfirmView,
     PasswordResetView,
 )
+from django.dispatch import receiver
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -29,7 +31,7 @@ from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import is_deployed_environment
+from recordtransfer.utils import get_client_ip_address, is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,8 +51,14 @@ class CreateAccount(FormView):
         return SignUpForm
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """If the user is already authenticated, redirect them to the homepage."""
+        """Redirect authenticated users to homepage."""
         if request.user.is_authenticated:
+            LOGGER.info(
+                "Authenticated user redirected from login: username='%s', user_id=%s, ip=%s",
+                request.user.username,
+                request.user.pk,
+                get_client_ip_address(request),
+            )
             return redirect("recordtransfer:index")
         return super().dispatch(request, *args, **kwargs)
 
@@ -61,7 +69,24 @@ class CreateAccount(FormView):
         new_user.gets_submission_email_updates = False
         new_user.language = getattr(self.request, "LANGUAGE_CODE", get_language())
         new_user.save()
+
+        LOGGER.info(
+            "New user account created: username='%s', email='%s', user_id=%s, ip=%s",
+            new_user.username,
+            new_user.email,
+            new_user.pk,
+            get_client_ip_address(self.request),
+        )
+
         send_user_activation_email.delay(new_user)
+
+        LOGGER.info(
+            "Activation email sent to user: username='%s', email='%s', user_id=%s",
+            new_user.username,
+            new_user.email,
+            new_user.pk,
+        )
+
         if self.request.htmx:
             return HttpResponseClientRedirect(self.get_success_url())
 
@@ -69,6 +94,11 @@ class CreateAccount(FormView):
 
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         """Handle invalid signup form submissions."""
+        LOGGER.info(
+            "Signup form invalid: errors=%s, ip=%s",
+            form.errors.as_json(),
+            get_client_ip_address(self.request),
+        )
         if self.request.htmx:
             # Return only the error template for HTMX requests
             html = render_to_string(
@@ -102,6 +132,12 @@ class ActivateAccount(View):
         """Handle GET request for account activation."""
         # Redirect authenticated users to homepage
         if request.user.is_authenticated:
+            LOGGER.info(
+                "Authenticated user redirected from account activation: username='%s', user_id=%s, ip=%s",
+                request.user.username,
+                request.user.pk,
+                get_client_ip_address(request),
+            )
             return redirect("recordtransfer:index")
 
         try:
@@ -114,11 +150,34 @@ class ActivateAccount(View):
                 # Activate the user
                 user.is_active = True
                 user.save()
+
+                LOGGER.info(
+                    "User account activated successfully: username='%s', email='%s', user_id=%s, ip=%s",
+                    user.username,
+                    user.email,
+                    user.pk,
+                    get_client_ip_address(request),
+                )
+
                 login(request, user, backend="axes.backends.AxesBackend")
+
+                LOGGER.info(
+                    "User logged in after account activation: username='%s', user_id=%s, ip=%s",
+                    user.username,
+                    user.pk,
+                    get_client_ip_address(request),
+                )
+
                 return _set_language_cookie(
                     redirect("recordtransfer:account_created"), user.language
                 )
             else:
+                LOGGER.warning(
+                    "Failed account activation attempt: username='%s', user_id=%s, reason='invalid_token_or_already_active', ip=%s",
+                    user.username,
+                    user.pk,
+                    get_client_ip_address(request),
+                )
                 return redirect("recordtransfer:activation_invalid")
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
@@ -155,6 +214,13 @@ class Login(LoginView):
         response = super().form_valid(form)
         user = cast(User, form.get_user())
 
+        LOGGER.info(
+            "User logged in successfully: username='%s', user_id=%s, ip=%s",
+            user.username,
+            user.pk,
+            get_client_ip_address(self.request),
+        )
+
         if self.request.htmx:
             htmx_response = HttpResponseClientRedirect(self.get_success_url())
             return _set_language_cookie(htmx_response, user.language)
@@ -162,6 +228,13 @@ class Login(LoginView):
 
     def form_invalid(self, form: AuthenticationForm) -> HttpResponse:
         """Handle invalid login form submissions."""
+        username = form.cleaned_data.get("username", "unknown") if form.cleaned_data else "unknown"
+        LOGGER.warning(
+            "Failed login attempt: username='%s', ip=%s",
+            username,
+            get_client_ip_address(self.request),
+        )
+
         if not self.request.htmx:
             return super().form_invalid(form)
 
@@ -198,8 +271,29 @@ class Login(LoginView):
         return response
 
 
+@receiver(user_logged_out)
+def log_user_logout(sender: User, request: HttpRequest, user: User, **kwargs) -> None:
+    """Log when a user logs out."""
+    if user and request:
+        LOGGER.info(
+            "User logged out: username='%s', user_id=%s, ip=%s",
+            user.username,
+            user.pk,
+            get_client_ip_address(request),
+        )
+    elif request:
+        LOGGER.info("Anonymous user logged out: ip=%s", get_client_ip_address(request))
+
+
 def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
     """Handle lockout due to too many failed login attempts."""
+    username = credentials.get("username", "unknown")
+    LOGGER.warning(
+        "Account locked out due to too many failed login attempts: username='%s', ip=%s",
+        username,
+        get_client_ip_address(request),
+    )
+
     response = HttpResponse(status=429)
     return trigger_client_event(
         response,
