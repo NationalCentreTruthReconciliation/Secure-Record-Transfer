@@ -143,10 +143,11 @@ class ActivateAccount(View):
                 user.save()
 
                 LOGGER.info(
-                    "User account activated successfully: username='%s', email='%s', user_id=%s",
+                    "User account activated successfully: username='%s', email='%s', user_id=%s, ip=%s",
                     user.username,
                     user.email,
                     user.pk,
+                    get_client_ip_address(request),
                 )
 
                 login(request, user, backend="axes.backends.AxesBackend")
