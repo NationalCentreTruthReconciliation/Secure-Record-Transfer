@@ -66,10 +66,11 @@ class CreateAccount(FormView):
         new_user.save()
 
         LOGGER.info(
-            "New user account created: username='%s', email='%s', user_id=%s",
+            "New user account created: username='%s', email='%s', user_id=%s, ip=%s",
             new_user.username,
             new_user.email,
             new_user.pk,
+            get_client_ip_address(self.request),
         )
 
         send_user_activation_email.delay(new_user)
@@ -164,9 +165,10 @@ class ActivateAccount(View):
                 )
             else:
                 LOGGER.warning(
-                    "Failed account activation attempt: username='%s', user_id=%s, reason='invalid_token_or_already_active'",
+                    "Failed account activation attempt: username='%s', user_id=%s, reason='invalid_token_or_already_active', ip=%s",
                     user.username,
                     user.pk,
+                    get_client_ip_address(request),
                 )
                 return redirect("recordtransfer:activation_invalid")
 
@@ -278,11 +280,10 @@ def log_user_logout(sender: User, request: HttpRequest, user: User, **kwargs) ->
 def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
     """Handle lockout due to too many failed login attempts."""
     username = credentials.get("username", "unknown")
-    ip_address = get_client_ip_address(request)
     LOGGER.warning(
         "Account locked out due to too many failed login attempts: username='%s', ip=%s",
         username,
-        ip_address,
+        get_client_ip_address(request),
     )
 
     response = HttpResponse(status=429)
