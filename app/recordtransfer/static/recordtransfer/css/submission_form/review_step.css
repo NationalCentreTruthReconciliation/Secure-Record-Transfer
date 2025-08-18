@@ -6,7 +6,8 @@
 .review-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: #f8f9fa;
+    background-color: var(--color-gray-50);
+
     border-radius: 8px;
 }
 

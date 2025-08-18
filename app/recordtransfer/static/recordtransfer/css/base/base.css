@@ -291,6 +291,7 @@ h2 {
     padding: 12px;
     margin: 20px 0;
     border-radius: 10px;
+    background-color: var(--color-gray-50);
 }
 
 .alert-dismiss {
