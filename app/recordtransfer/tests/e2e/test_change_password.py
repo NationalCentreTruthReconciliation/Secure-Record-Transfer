@@ -62,8 +62,9 @@ class ChangePasswordTest(SeleniumLiveServerTestCase):
         mock_send_email.assert_called_once()
 
         # Verify the password has been changed by logging out and back in
-        logout_url = reverse("logout")
-        self.driver.get(f"{self.live_server_url}{logout_url}")
+        logout_button = driver.find_element(By.ID, "logout-btn")
+        driver.execute_script("arguments[0].click();", logout_button)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "nav-login")))
         self.login("testuser", new_password)
 
     def test_wrong_old_password(self, mock_send_email: MagicMock) -> None:
