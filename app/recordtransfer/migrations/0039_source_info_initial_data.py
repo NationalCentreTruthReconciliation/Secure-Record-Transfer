@@ -12,9 +12,9 @@ def populate_required_terms(apps, schema_editor):
             name="Individual", description="An individual person."
         )
 
-    donor = SourceType.objects.filter(name="Donor").first()
+    donor = SourceRole.objects.filter(name="Donor").first()
     if not donor:
-        SourceType.objects.create(
+        SourceRole.objects.create(
             name="Donor", description="An entity that donates records."
         )
 
