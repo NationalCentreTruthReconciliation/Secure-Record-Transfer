@@ -26,7 +26,7 @@ from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import is_deployed_environment
+from recordtransfer.utils import is_deployed_environment, get_client_ip_address
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class CreateAccount(FormView):
                 "Authenticated user redirected from login: username='%s', user_id=%s, ip=%s",
                 request.user.username,
                 request.user.pk,
-                _get_client_ip(request),
+                get_client_ip_address(request),
             )
             return redirect("recordtransfer:index")
         return super().dispatch(request, *args, **kwargs)
@@ -128,7 +128,7 @@ class ActivateAccount(View):
                 "Authenticated user redirected from account activation: username='%s', user_id=%s, ip=%s",
                 request.user.username,
                 request.user.pk,
-                _get_client_ip(request),
+                get_client_ip_address(request),
             )
             return redirect("recordtransfer:index")
 
@@ -155,7 +155,7 @@ class ActivateAccount(View):
                     "User logged in after account activation: username='%s', user_id=%s, ip=%s",
                     user.username,
                     user.pk,
-                    _get_client_ip(request),
+                    get_client_ip_address(request),
                 )
 
                 return _set_language_cookie(
@@ -207,7 +207,7 @@ class Login(LoginView):
             "User logged in successfully: username='%s', user_id=%s, ip=%s",
             user.username,
             user.pk,
-            _get_client_ip(self.request),
+            get_client_ip_address(self.request),
         )
 
         if self.request.htmx:
@@ -221,7 +221,7 @@ class Login(LoginView):
         LOGGER.warning(
             "Failed login attempt: username='%s', ip=%s",
             username,
-            _get_client_ip(self.request),
+            get_client_ip_address(self.request),
         )
 
         if not self.request.htmx:
@@ -263,18 +263,21 @@ class Login(LoginView):
 @receiver(user_logged_out)
 def log_user_logout(sender: User, request: HttpRequest, user: User, **kwargs) -> None:
     """Log when a user logs out."""
-    LOGGER.info(
-        "User logged out: username='%s', user_id=%s, ip=%s",
-        user.username,
-        user.pk,
-        _get_client_ip(request),
-    )
+    if user and request:
+        LOGGER.info(
+            "User logged out: username='%s', user_id=%s, ip=%s",
+            user.username,
+            user.pk,
+            get_client_ip_address(request),
+        )
+    elif request:
+        LOGGER.info("Anonymous user logged out: ip=%s", get_client_ip_address(request))
 
 
 def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
     """Handle lockout due to too many failed login attempts."""
     username = credentials.get("username", "unknown")
-    ip_address = _get_client_ip(request)
+    ip_address = get_client_ip_address(request)
     LOGGER.warning(
         "Account locked out due to too many failed login attempts: username='%s', ip=%s",
         username,
