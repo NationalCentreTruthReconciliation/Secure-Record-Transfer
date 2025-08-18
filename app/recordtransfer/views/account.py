@@ -95,6 +95,7 @@ class CreateAccount(FormView):
             get_client_ip_address(self.request),
         )
         if self.request.htmx:
+            # Return only the error template for HTMX requests
             html = render_to_string(
                 "recordtransfer/signup_form.html",
                 {"form": form},
@@ -124,6 +125,7 @@ class ActivateAccount(View):
 
     def get(self, request: HttpRequest, uidb64: str, token: str) -> HttpResponse:
         """Handle GET request for account activation."""
+        # Redirect authenticated users to homepage
         if request.user.is_authenticated:
             LOGGER.info(
                 "Authenticated user redirected from account activation: username='%s', user_id=%s, ip=%s",
@@ -134,6 +136,7 @@ class ActivateAccount(View):
             return redirect("recordtransfer:index")
 
         try:
+            # Decode the user ID
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
 
