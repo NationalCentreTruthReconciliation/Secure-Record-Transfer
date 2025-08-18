@@ -236,7 +236,7 @@ class TestCreateAccount(TestCase):
         response = self.client.post(
             self.create_account_url,
             data=self.valid_form_data,
-            HTTP_HX_REQUEST="true",
+            headers={"hx-request": "true"}
         )
 
         # Check for HX-Redirect response
@@ -261,7 +261,7 @@ class TestCreateAccount(TestCase):
         response = self.client.post(
             self.create_account_url,
             data=invalid_data,
-            HTTP_HX_REQUEST="true",
+            headers={"hx-request": "true"}
         )
 
         # Check for HX-Redirect response
@@ -285,7 +285,7 @@ class TestCreateAccount(TestCase):
         response = self.client.post(
             self.create_account_url,
             data={},  # Empty data
-            HTTP_HX_REQUEST="true",
+            headers={"hx-request": "true"}
         )
 
         # Should return form with errors
@@ -555,7 +555,7 @@ class TestLogin(TestCase):
 
     def test_htmx_login_successful(self) -> None:
         """Test HTMX login with valid credentials."""
-        response = self.client.post(self.login_url, self.valid_credentials, HTTP_HX_REQUEST="true")
+        response = self.client.post(self.login_url, self.valid_credentials, headers={"hx-request": "true"})
 
         # Should be a direct response with HX-Redirect header
         self.assertEqual(response.status_code, 200)
@@ -568,7 +568,7 @@ class TestLogin(TestCase):
     def test_htmx_login_invalid(self) -> None:
         """Test HTMX login with invalid credentials."""
         response = self.client.post(
-            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+            self.login_url, self.invalid_credentials, headers={"hx-request": "true"}
         )
         self.assertEqual(response.status_code, 200)
 
@@ -581,7 +581,7 @@ class TestLogin(TestCase):
     def test_htmx_login_inactive_user(self) -> None:
         """Test HTMX login with inactive user."""
         response = self.client.post(
-            self.login_url, self.inactive_credentials, HTTP_HX_REQUEST="true"
+            self.login_url, self.inactive_credentials, headers={"hx-request": "true"}
         )
         self.assertEqual(response.status_code, 200)
 
@@ -690,14 +690,14 @@ class TestLogin(TestCase):
         """Test that a warning is shown when the user is close to being locked out."""
         # Simulate 1 failed attempt
         response = self.client.post(
-            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+            self.login_url, self.invalid_credentials, headers={"hx-request": "true"}
         )
         # Check that no warning is shown yet
         self.assertNotIn("HX-Trigger", response.headers)
 
         # Simulate another failed attempt
         response = self.client.post(
-            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+            self.login_url, self.invalid_credentials, headers={"hx-request": "true"}
         )
         self.assertIn("HX-Trigger", response.headers)
         # Check that a warning is shown
@@ -708,11 +708,11 @@ class TestLogin(TestCase):
         """Test that a locked out message is shown when the user is locked out."""
         # Simulate 2 failed attempts
         for _ in range(2):
-            self.client.post(self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true")
+            self.client.post(self.login_url, self.invalid_credentials, headers={"hx-request": "true"})
 
         # 3rd attempt should lock out the user
         response = self.client.post(
-            self.login_url, self.invalid_credentials, HTTP_HX_REQUEST="true"
+            self.login_url, self.invalid_credentials, headers={"hx-request": "true"}
         )
         self.assertEqual(response.status_code, 429)
         # Check that the response indicates the user is locked out
