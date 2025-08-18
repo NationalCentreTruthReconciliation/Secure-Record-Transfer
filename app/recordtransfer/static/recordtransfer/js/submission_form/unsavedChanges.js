@@ -68,9 +68,18 @@ export function setupUnsavedChangesProtection() {
     addDummyState();
 
     const popstateListener = () => {
+        // Store current scroll position before showing modal
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+
         historyChange = true;
         addDummyState();
         elements.modal.showModal();
+
+        // Restore scroll position after modal is shown
+        requestAnimationFrame(() => {
+            window.scrollTo(scrollX, scrollY);
+        });
     };
 
     // Elements that should not trigger the browser warning dialog
