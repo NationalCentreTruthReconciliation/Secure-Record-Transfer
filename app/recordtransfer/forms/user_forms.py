@@ -4,9 +4,9 @@ from typing import Any, ClassVar, Optional
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
 
 from recordtransfer.constants import HtmlIds
 from recordtransfer.emails import send_password_reset_email
