@@ -91,7 +91,7 @@ class CreateAccount(FormView):
         LOGGER.info(
             "Signup form invalid: errors=%s, ip=%s",
             form.errors.as_json(),
-            self.request.META.get("REMOTE_ADDR"),
+            get_client_ip_address(self.request),
         )
         if self.request.htmx:
             html = render_to_string(
