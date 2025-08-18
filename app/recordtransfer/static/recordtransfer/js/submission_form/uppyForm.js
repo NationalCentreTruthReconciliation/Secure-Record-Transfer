@@ -158,7 +158,10 @@ export async function setupUppy(context) {
             );
             return;
         }
-        submissionForm.submit();
+
+        // Acts as if user clicked the Review button, so that HTMX can intercept the form
+        // submission
+        submissionForm.requestSubmit();
     });
 
     // Set the endpoint for file upload dynamically, based on the current upload session token
