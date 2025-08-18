@@ -103,16 +103,6 @@ class CreateAccount(FormView):
         return super().form_invalid(form)
 
 
-def _get_client_ip(request: HttpRequest) -> str:
-    """Get the client's IP address from the request."""
-    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-    else:
-        ip = request.META.get("REMOTE_ADDR", "unknown")
-    return ip
-
-
 def _set_language_cookie(response: HttpResponse, lang_code: str) -> HttpResponse:
     """Set the language cookie on the response based on user's preference."""
     response.set_cookie(

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, List, Union
 from zipfile import ZipFile
 
 from django.conf import settings
+from django.http import HttpRequest
 from django.utils.html import strip_tags
 from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
@@ -542,3 +543,13 @@ def is_deployed_environment() -> bool:
             return True
 
     return False
+
+
+def get_client_ip_address(request: HttpRequest) -> str:
+    """Get the client's IP address from the request."""
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR", "unknown")
+    return ip
