@@ -917,7 +917,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
         )
 
-        driver.execute_script("window.history.back();")
+        driver.execute_script("window.history.go(-1)")
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
