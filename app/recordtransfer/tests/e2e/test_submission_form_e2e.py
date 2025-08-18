@@ -903,11 +903,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         # Navigate to the home page first
         driver.get(urljoin(self.live_server_url, reverse("recordtransfer:index")))
 
-        # Wait for and click the Submit navigation button
-        submit_nav = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "nav-submit"))
-        )
-        submit_nav.click()
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
 
         # Fill out the Legal Agreement step
         self.complete_legal_agreement_step()
@@ -917,7 +913,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
         )
 
-        driver.execute_script("window.history.go(-1)")
+        driver.back()
 
         # Check for unsaved changes modal
         WebDriverWait(driver, 10).until(
