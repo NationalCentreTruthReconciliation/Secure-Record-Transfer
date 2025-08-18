@@ -171,7 +171,7 @@ class ActivateAccount(View):
 
                 # Log successful login after activation
                 LOGGER.info(
-                    "User logged in after account activation: username='%s', user_id=%s, ip=%s",
+                    "User automatically logged in after account activation: username='%s', user_id=%s, ip=%s",
                     user.username,
                     user.pk,
                     _get_client_ip(request),
