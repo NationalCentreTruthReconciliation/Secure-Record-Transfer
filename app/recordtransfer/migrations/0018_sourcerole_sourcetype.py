@@ -8,25 +8,24 @@ from caais.models import SourceType, SourceRole
 
 
 def populate_initial_terms(apps, schema_editor):
-    other_type, created = SourceType.objects.get_or_create(
-        name='Other',
-        description='Placeholder right to allow user to specify unique source type'
-    )
-    if created:
-        other_type.save()
+    other_type = SourceType.objects.filter(name="Other").first()
+    if not other_type:
+        SourceType.objects.create(
+            name="Other",
+            description="Placeholder right to allow user to specify unique source type",
+        )
 
-    other_role, created = SourceRole.objects.get_or_create(
-        name='Other',
-        description='Placeholder right to allow user to specify unique source role'
-    )
-    if created:
-        other_role.save()
+    other_role = SourceRole.objects.filter(name="Other").first()
+    if not other_role:
+        SourceRole.objects.create(
+            name="Other",
+            description="Placeholder right to allow user to specify unique source role",
+        )
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('recordtransfer', '0016_auto_20210528_1228'),
+        ("recordtransfer", "0016_auto_20210528_1228"),
     ]
 
     operations = [

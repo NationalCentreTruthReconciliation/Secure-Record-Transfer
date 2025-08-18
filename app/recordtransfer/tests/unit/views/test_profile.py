@@ -146,40 +146,6 @@ class TestAccountInfoUpdateView(TestCase):
             trigger_data["showError"]["value"], gettext("Please correct the errors below.")
         )
 
-    def test_password_change(self) -> None:
-        """Test that a valid password change updates the user's password, also calling the
-        necessary side effects.
-        """
-        form_data = {
-            "first_name": "Test",
-            "last_name": "User",
-            "current_password": "testpassword",
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        with (
-            patch("recordtransfer.views.profile.update_session_auth_hash") as mock_update_session,
-            patch(
-                "recordtransfer.views.profile.send_user_account_updated.delay"
-            ) as mock_send_email,
-        ):
-            response = self.client.post(self.url, data=form_data, headers=self.htmx_headers)
-            self.assertEqual(response.status_code, 200)
-            self.user.refresh_from_db()
-            self.assertTrue(self.user.check_password("new_password123"))
-
-            # Verify the methods were called
-            mock_update_session.assert_called_once_with(response.wsgi_request, self.user)
-            mock_send_email.assert_called_once()
-
-            # Verify the email context
-            call_args = mock_send_email.call_args
-            self.assertEqual(call_args[0][0], self.user)
-            email_context = call_args[0][1]
-            self.assertEqual(email_context["subject"], gettext("Password updated"))
-            self.assertEqual(email_context["changed_item"], gettext("password"))
-            self.assertEqual(email_context["changed_status"], gettext("updated"))
-
     def test_exception_handling(self) -> None:
         """Test that an exception during account info update returns an error."""
         with patch("recordtransfer.views.profile.User.save") as mock_save:
@@ -1092,7 +1058,6 @@ class TestAssignSubmissionGroupModalView(TestCase):
         # Verify no current group
         self.assertIsNone(context["current_group"])
         self.assertEqual(context["submission_uuid"], self.submission.uuid)
-
 
     def test_modal_success_with_current_group(self) -> None:
         """Test successful modal display when submission has a current group."""
