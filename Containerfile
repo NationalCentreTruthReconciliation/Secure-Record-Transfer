@@ -7,9 +7,9 @@ ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 WORKDIR ${PROJ_DIR}
 
-# 🔧 Install gettext for makemessages (includes msguniq)
+# 🔧 Install gettext for makemessages (includes msguniq) and libmagic for MIME type detection
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext && \
+    apt-get install -y --no-install-recommends gettext libmagic1 && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy uv-related files, and install Python dependencies

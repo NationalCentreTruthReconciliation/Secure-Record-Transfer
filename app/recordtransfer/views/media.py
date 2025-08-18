@@ -166,7 +166,12 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
             status=400,
         )
 
-    file_check = accept_file(_file.name, _file.size)
+    # Read file content for MIME type validation
+    file_content = _file.read()
+    # Reset file pointer after reading
+    _file.seek(0)
+
+    file_check = accept_file(_file.name, _file.size, file_content)
     if not file_check["accepted"]:
         return JsonResponse(
             {"file": _file.name, "uploadSessionToken": session.token, **file_check},

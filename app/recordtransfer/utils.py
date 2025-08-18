@@ -1,12 +1,21 @@
 import contextlib
 import functools
 import logging
+import mimetypes
 import os
 import urllib.parse
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
 from zipfile import ZipFile
+
+try:
+    import magic
+
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
+    magic = None
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -214,20 +223,96 @@ def bytes_to_mb(b: int) -> float:
     return b / 1000**2
 
 
-def accept_file(filename: str, filesize: int) -> dict:
-    """Determine if a new file should be accepted. Does not check the file's
-    contents, only its name and its size.
+@functools.lru_cache(maxsize=1)
+def get_accepted_mime_types() -> set[str]:
+    """Get all accepted MIME types based on ACCEPTED_FILE_TYPES from settings.
+
+    Returns:
+        set: Set of all acceptable MIME types for configured file extensions
+    """
+    accepted_mime_types = set()
+
+    # Get all extensions from ACCEPTED_FILE_FORMATS
+    for file_group_extensions in settings.ACCEPTED_FILE_FORMATS.values():
+        for extension in file_group_extensions:
+            mime_types = _get_expected_mime_types(extension)
+            accepted_mime_types.update(mime_types)
+
+    return accepted_mime_types
+
+
+def _get_expected_mime_types(extension: str) -> set[str]:
+    """Get expected MIME types for a file extension using python-magic.
+
+    Args:
+        extension: File extension without the dot (e.g., 'pdf', 'jpg')
+
+    Returns:
+        set: Set of acceptable MIME types for the extension
+    """
+    # Normalize extension
+    ext = extension.lower().lstrip(".")
+
+    # Use mimetypes module for initial guess
+    mime_type, _ = mimetypes.guess_type(f"file.{ext}")
+
+    # Create a set of acceptable MIME types
+    acceptable_types = set()
+
+    if mime_type:
+        acceptable_types.add(mime_type)
+
+    # Add common variations and aliases for specific extensions
+    # This covers cases where different systems might report slightly different MIME types
+    mime_variations = {
+        # Archive formats
+        "zip": {"application/zip", "application/x-zip-compressed"},
+        "7z": {"application/x-7z-compressed"},
+        # Audio formats
+        "mp3": {"audio/mpeg", "audio/mp3"},
+        "wav": {"audio/wav", "audio/x-wav", "audio/wave"},
+        "flac": {"audio/flac", "audio/x-flac"},
+        # Document formats
+        "docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+        "odt": {"application/vnd.oasis.opendocument.text"},
+        "pdf": {"application/pdf"},
+        "txt": {"text/plain"},
+        "html": {"text/html"},
+        # Image formats
+        "jpg": {"image/jpeg"},
+        "jpeg": {"image/jpeg"},
+        "png": {"image/png"},
+        "gif": {"image/gif"},
+        # Spreadsheet formats
+        "xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        "csv": {"text/csv", "text/plain", "application/csv"},
+        # Video formats
+        "mkv": {"video/x-matroska", "video/mkv"},
+        "mp4": {"video/mp4"},
+    }
+
+    if ext in mime_variations:
+        acceptable_types.update(mime_variations[ext])
+
+    return acceptable_types
+
+
+def accept_file(filename: str, filesize: int, file_content: bytes | None = None) -> dict:
+    """Determine if a new file should be accepted.
+
+    Args:
+        filename: The name of the file to check
+        filesize: The size of the file in bytes
+        file_content: Optional file content for MIME type validation
 
     These checks are applied:
     - The file name is safe and not malicious
     - The file name is not empty
     - The file has an accepted extension
+    - The file's MIME type matches the expected MIME type for the extension
+      (if file_content provided)
     - The file's size is an integer greater than zero
     - The file's size is less than or equal to the maximum allowed size for one file
-
-    Args:
-        filename (str): The name of the file
-        filesize (int): An integer representing the size of the file (in bytes)
 
     Returns:
         (dict): A dictionary containing an 'accepted' key that contains True if
@@ -241,11 +326,16 @@ def accept_file(filename: str, filesize: int) -> dict:
         _validate_path_traversal,
         _validate_windows_reserved_names,
         _validate_file_extension,
+        _validate_mime_type,
         _validate_file_size,
     ]
 
     for validator in validators:
-        result = validator(filename, filesize)
+        # MIME type validator needs the file_content parameter
+        if validator == _validate_mime_type:
+            result = validator(filename, filesize, file_content)
+        else:
+            result = validator(filename, filesize)
         if not result["accepted"]:
             if "error" not in result:
                 result["error"] = _("Invalid filename or size")
@@ -464,6 +554,91 @@ def _validate_file_extension(filename: str, filesize: int) -> dict:
                 'The file "%(filename)s" has an invalid extension (.%(extension)s)'
             )
             % {"filename": filename, "extension": extension},
+        }
+
+    return {"accepted": True}
+
+
+def _validate_mime_type(filename: str, filesize: int, file_content: bytes) -> dict:
+    """Check if the file's MIME type matches the expected MIME type for its extension.
+
+    Only performs validation if file_content is provided and magic library is available.
+    """
+    # If magic library is not available or file content is empty, skip MIME type validation
+    if not MAGIC_AVAILABLE or file_content is None:
+        return {"accepted": True}
+
+    # Get the file extension
+    extension = Path(filename).suffix.lower().lstrip(".")
+    if not extension:
+        return {
+            "accepted": False,
+            "error": _("File is missing an extension"),
+            "verboseError": _('The file "%(filename)s" does not have a file extension')
+            % {"filename": filename},
+        }
+
+    # Get expected MIME types for this extension
+    expected_mime_types = _get_expected_mime_types(extension)
+    if not expected_mime_types:
+        return {
+            "accepted": False,
+            "error": _("File type is not supported"),
+            "verboseError": _(
+                'The file "%(filename)s" has an unsupported extension "%(extension)s"'
+            )
+            % {"filename": filename, "extension": extension},
+        }
+
+    # Detect actual MIME type using python-magic
+    try:
+        if magic is not None:
+            detected_mime_type = magic.from_buffer(file_content, mime=True)
+        else:
+            # This should not be reached due to the MAGIC_AVAILABLE check above
+            return {"accepted": True}
+    except Exception:
+        return {
+            "accepted": False,
+            "error": _("File type could not be determined"),
+            "verboseError": _(
+                'The file "%(filename)s" could not be analyzed for MIME type validation'
+            )
+            % {"filename": filename},
+        }
+
+    # Check if detected MIME type matches any expected MIME type
+    if detected_mime_type not in expected_mime_types:
+        return {
+            "accepted": False,
+            "error": gettext('File type mismatch. Expected "%(expected)s" but got "%(detected)s".')
+            % {
+                "expected": ", ".join(sorted(expected_mime_types)),
+                "detected": detected_mime_type,
+            },
+            "verboseError": gettext(
+                'The file "%(filename)s" has MIME type "%(detected)s" but expected one of: %(expected)s'
+            )
+            % {
+                "filename": filename,
+                "detected": detected_mime_type,
+                "expected": ", ".join(sorted(expected_mime_types)),
+            },
+        }
+
+    # Ensure the detected MIME type is among the globally accepted MIME types
+    accepted_mime_types = get_accepted_mime_types()
+    if detected_mime_type not in accepted_mime_types:
+        return {
+            "accepted": False,
+            "error": _("File type is not allowed by system configuration"),
+            "verboseError": gettext(
+                'The file "%(filename)s" has MIME type "%(detected)s" which is not allowed by the system configuration'
+            )
+            % {
+                "filename": filename,
+                "detected": detected_mime_type,
+            },
         }
 
     return {"accepted": True}
