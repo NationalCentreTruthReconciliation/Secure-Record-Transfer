@@ -883,7 +883,7 @@ requires-dist = [
     { name = "django-formtools", specifier = ">=2.5.1,<3" },
     { name = "django-htmx", specifier = ">=1.23.0,<2" },
     { name = "django-recaptcha", specifier = ">=4.0.0,<5" },
-    { name = "django-rq", specifier = ">=3.0.0,<4" },
+    { name = "django-rq", specifier = ">=3.1,<4" },
     { name = "django-webpack-loader", specifier = ">=3.2.1,<4" },
     { name = "django-widget-tweaks", specifier = ">=1.4.12,<2" },
     { name = "djlint", marker = "extra == 'dev'", specifier = ">=1.36.4" },
