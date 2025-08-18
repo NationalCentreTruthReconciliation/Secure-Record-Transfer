@@ -73,7 +73,7 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
         Select(lang_dropdown).select_by_value("fr")
 
         # Log the user out
-        driver.find_element(By.ID, "logout-btn").click()
+        driver.find_element(By.ID, "nav-logout").click()
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "nav-login")))
 
         # Go to homepage
