@@ -285,12 +285,15 @@ class Login(LoginView):
 @receiver(user_logged_out)
 def log_user_logout(sender: User, request: HttpRequest, user: User, **kwargs) -> None:
     """Log when a user logs out."""
-    LOGGER.info(
-        "User logged out: username='%s', user_id=%s, ip=%s",
-        user.username,
-        user.pk,
-        _get_client_ip(request),
-    )
+    if user and request:
+        LOGGER.info(
+            "User logged out: username='%s', user_id=%s, ip=%s",
+            user.username,
+            user.pk,
+            _get_client_ip(request),
+        )
+    elif request:
+        LOGGER.info("Anonymous user logged out: ip=%s", _get_client_ip(request))
 
 
 def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpResponse:
