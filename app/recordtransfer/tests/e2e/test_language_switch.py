@@ -73,8 +73,7 @@ class TestLanguageSwitch(SeleniumLiveServerTestCase):
         Select(lang_dropdown).select_by_value("fr")
 
         # Log the user out
-        logout_url = reverse("logout")
-        driver.get(f"{self.live_server_url}{logout_url}")
+        self.client.logout()
 
         # Go to homepage
         driver.get(self.live_server_url)
