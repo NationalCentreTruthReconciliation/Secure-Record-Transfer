@@ -134,6 +134,44 @@ class User(AbstractUser):
 
         return True
 
+    def past_password_hashes(self, limit: int = 5) -> list:
+        """Get the past N hashes of this user's previous password."""
+        hashes = self.password_history.order_by("-changed_at")[:limit]
+        return list(hashes.values_list("password", flat=True))
+
+
+class PasswordHistory(models.Model):
+    """Store a user's previous password hashes for history validation."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_history")
+    password = models.CharField(max_length=255)  # hashed password
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+
+@receiver(pre_save, sender=User)
+def add_previous_password_to_history(instance: User, **kwargs) -> None:
+    """Handle password history when User password changes."""
+    if not instance.pk:  # New user, no password history needed
+        return
+
+    try:
+        # Get the old password from the database
+        old_instance = User.objects.get(pk=instance.pk)
+        old_password = old_instance.password
+
+        if old_password != instance.password:
+            PasswordHistory.objects.create(
+                user=instance, password=old_password, changed_at=timezone.now()
+            )
+            LOGGER.info(
+                "Password history created for user: username='%s', user_id=%s",
+                instance.username,
+                instance.pk,
+            )
+
+    except Exception as e:
+        LOGGER.error("Error creating password history for user %s: %s", instance.pk, str(e))
+
 
 class SiteSetting(models.Model):
     """A model to store configurable site settings that administrators can modify

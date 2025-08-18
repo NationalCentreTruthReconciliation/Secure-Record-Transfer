@@ -26,15 +26,15 @@ class SignUpFormTest(TestCase):
             "first_name": "Test",
             "last_name": "User",
             "email": "testuser@example.com",
-            "password1": "securepassword123",
-            "password2": "securepassword123",
+            "password1": "Securepassword123",
+            "password2": "Securepassword123",
         }
         self.existing_user = User.objects.create_user(
             username="existinguser",
             first_name="Existing",
             last_name="User",
             email="existing@example.com",
-            password="password123",
+            password="Password123",
         )
 
     def test_form_save(self) -> None:
@@ -46,7 +46,7 @@ class SignUpFormTest(TestCase):
         self.assertEqual(user.first_name, "Test")
         self.assertEqual(user.last_name, "User")
         self.assertEqual(user.email, "testuser@example.com")
-        self.assertTrue(user.check_password("securepassword123"))
+        self.assertTrue(user.check_password("Securepassword123"))
 
     def test_form_duplicate_username(self) -> None:
         """Test that form rejects duplicate username."""
