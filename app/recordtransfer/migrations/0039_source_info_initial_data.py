@@ -6,19 +6,17 @@ from caais.models import SourceRole, SourceType
 
 
 def populate_required_terms(apps, schema_editor):
-    individual_type, created = SourceType.objects.get_or_create(
-        name="Individual",
-        description="An individual person.",
-    )
-    if created:
-        individual_type.save()
+    individual = SourceType.objects.filter(name="Individual").first()
+    if not individual:
+        SourceType.objects.create(
+            name="Individual", description="An individual person."
+        )
 
-    donor_role, created = SourceRole.objects.get_or_create(
-        name="Donor",
-        description="The entity is the donor of the records.",
-    )
-    if created:
-        donor_role.save()
+    donor = SourceRole.objects.filter(name="Donor").first()
+    if not donor:
+        SourceRole.objects.create(
+            name="Donor", description="An entity that donates records."
+        )
 
 
 class Migration(migrations.Migration):
