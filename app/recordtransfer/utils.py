@@ -9,14 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Union
 from zipfile import ZipFile
 
-try:
-    import magic
-
-    MAGIC_AVAILABLE = True
-except ImportError:
-    MAGIC_AVAILABLE = False
-    magic = None
-
 from django.conf import settings
 from django.http import HttpRequest
 from django.utils.html import strip_tags
@@ -30,6 +22,45 @@ if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
 
 LOGGER = logging.getLogger(__name__)
+
+try:
+    import magic
+
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
+    magic = None
+    LOGGER.warning("Failed to import python-magic library. MIME type validation will be disabled.")
+
+
+# Pre-defined MIME type variations for different file extensions
+# This covers cases where different systems might report slightly different MIME types
+_MIME_TYPE_VARIATIONS = {
+    # Archive formats
+    "zip": {"application/zip", "application/x-zip-compressed"},
+    "7z": {"application/x-7z-compressed"},
+    # Audio formats
+    "mp3": {"audio/mpeg", "audio/mp3"},
+    "wav": {"audio/wav", "audio/x-wav", "audio/wave"},
+    "flac": {"audio/flac", "audio/x-flac"},
+    # Document formats
+    "docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+    "odt": {"application/vnd.oasis.opendocument.text"},
+    "pdf": {"application/pdf"},
+    "txt": {"text/plain"},
+    "html": {"text/html"},
+    # Image formats
+    "jpg": {"image/jpeg"},
+    "jpeg": {"image/jpeg"},
+    "png": {"image/png"},
+    "gif": {"image/gif"},
+    # Spreadsheet formats
+    "xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+    "csv": {"text/csv", "text/plain", "application/csv"},
+    # Video formats
+    "mkv": {"video/x-matroska", "video/mkv"},
+    "mp4": {"video/mp4"},
+}
 
 
 def zip_directory(directory: str, zipf: ZipFile) -> None:
@@ -241,6 +272,7 @@ def get_accepted_mime_types() -> set[str]:
     return accepted_mime_types
 
 
+@functools.lru_cache(maxsize=128)
 def _get_expected_mime_types(extension: str) -> set[str]:
     """Get expected MIME types for a file extension using python-magic.
 
@@ -256,43 +288,14 @@ def _get_expected_mime_types(extension: str) -> set[str]:
     # Use mimetypes module for initial guess
     mime_type, _ = mimetypes.guess_type(f"file.{ext}")
 
-    # Create a set of acceptable MIME types
     acceptable_types = set()
 
     if mime_type:
         acceptable_types.add(mime_type)
 
     # Add common variations and aliases for specific extensions
-    # This covers cases where different systems might report slightly different MIME types
-    mime_variations = {
-        # Archive formats
-        "zip": {"application/zip", "application/x-zip-compressed"},
-        "7z": {"application/x-7z-compressed"},
-        # Audio formats
-        "mp3": {"audio/mpeg", "audio/mp3"},
-        "wav": {"audio/wav", "audio/x-wav", "audio/wave"},
-        "flac": {"audio/flac", "audio/x-flac"},
-        # Document formats
-        "docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
-        "odt": {"application/vnd.oasis.opendocument.text"},
-        "pdf": {"application/pdf"},
-        "txt": {"text/plain"},
-        "html": {"text/html"},
-        # Image formats
-        "jpg": {"image/jpeg"},
-        "jpeg": {"image/jpeg"},
-        "png": {"image/png"},
-        "gif": {"image/gif"},
-        # Spreadsheet formats
-        "xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-        "csv": {"text/csv", "text/plain", "application/csv"},
-        # Video formats
-        "mkv": {"video/x-matroska", "video/mkv"},
-        "mp4": {"video/mp4"},
-    }
-
-    if ext in mime_variations:
-        acceptable_types.update(mime_variations[ext])
+    if ext in _MIME_TYPE_VARIATIONS:
+        acceptable_types.update(_MIME_TYPE_VARIATIONS[ext])
 
     return acceptable_types
 
@@ -319,6 +322,9 @@ def accept_file(filename: str, filesize: int, file_content: bytes | None = None)
             the session is valid, or False if not. The dictionary also contains
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
+    if not file_content:
+        return {"accepted": False, "error": _("File is empty.")}
+
     validators = [
         _validate_basic_filename,
         _validate_filename_characters,
@@ -331,11 +337,7 @@ def accept_file(filename: str, filesize: int, file_content: bytes | None = None)
     ]
 
     for validator in validators:
-        # MIME type validator needs the file_content parameter
-        if validator == _validate_mime_type:
-            result = validator(filename, filesize, file_content)
-        else:
-            result = validator(filename, filesize)
+        result = validator(filename, filesize, file_content)
         if not result["accepted"]:
             if "error" not in result:
                 result["error"] = _("Invalid filename or size")
@@ -414,8 +416,8 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
     return {"accepted": True}
 
 
-def _validate_basic_filename(filename: str, filesize: int) -> dict:
-    """Validate basic filename properties."""
+def _validate_basic_filename(filename: str, filesize: int, file_content: bytes) -> dict:
+    """Validate basic filename requirements."""
     if not filename or not filename.strip():
         return {
             "accepted": False,
@@ -438,7 +440,7 @@ def _validate_basic_filename(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_filename_characters(filename: str, filesize: int) -> dict:
+def _validate_filename_characters(filename: str, filesize: int, file_content: bytes) -> dict:
     """Validate filename doesn't contain control characters."""
     if any(ord(char) < 32 for char in filename):
         return {
@@ -449,7 +451,7 @@ def _validate_filename_characters(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_absolute_paths(filename: str, filesize: int) -> dict:
+def _validate_absolute_paths(filename: str, filesize: int, file_content: bytes) -> dict:
     """Validate filename doesn't contain absolute path patterns."""
     if filename.startswith("/"):
         return {
@@ -472,7 +474,7 @@ def _validate_absolute_paths(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_path_traversal(filename: str, filesize: int) -> dict:
+def _validate_path_traversal(filename: str, filesize: int, file_content: bytes) -> dict:
     """Validate filename doesn't contain path traversal patterns."""
     decoded_filename = filename
 
@@ -508,7 +510,7 @@ def _validate_path_traversal(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_windows_reserved_names(filename: str, filesize: int) -> dict:
+def _validate_windows_reserved_names(filename: str, filesize: int, file_content: bytes) -> dict:
     """Validate filename doesn't use Windows reserved names."""
     base_name = filename.split(".")[0].upper()
     if base_name in WindowsFileRestrictions.RESERVED_FILENAMES:
@@ -527,7 +529,7 @@ def _validate_windows_reserved_names(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_file_extension(filename: str, filesize: int) -> dict:
+def _validate_file_extension(filename: str, filesize: int, file_content: bytes) -> dict:
     """Validate that file extension exists, and is allowed."""
     # Check extension exists
     name_split = filename.split(".")
@@ -564,8 +566,8 @@ def _validate_mime_type(filename: str, filesize: int, file_content: bytes) -> di
 
     Only performs validation if file_content is provided and magic library is available.
     """
-    # If magic library is not available or file content is empty, skip MIME type validation
-    if not MAGIC_AVAILABLE or file_content is None:
+    # If magic library is not available, skip MIME type validation
+    if not MAGIC_AVAILABLE:
         return {"accepted": True}
 
     # Get the file extension
@@ -644,7 +646,7 @@ def _validate_mime_type(filename: str, filesize: int, file_content: bytes) -> di
     return {"accepted": True}
 
 
-def _validate_file_size(filename: str, filesize: int) -> dict:
+def _validate_file_size(filename: str, filesize: int, file_content: bytes) -> dict:
     """Check filesize is greater than zero is within the max single upload size."""
     if filesize < 0:
         return {
