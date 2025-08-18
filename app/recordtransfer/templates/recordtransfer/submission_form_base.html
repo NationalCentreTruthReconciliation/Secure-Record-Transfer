@@ -93,7 +93,7 @@
                                         <button {% block submitbuttonattributes %}
                                                 id="form-next-button"
                                                 {% endblock submitbuttonattributes %}
-                                                type="{% block submitbuttontype %}submit{% endblock submitbuttontype %}"
+                                                type="submit"
                                                 class="btn btn-primary sm:text-md font-normal">
                                             {% if wizard.steps.step1 == wizard.steps.count %}
                                                 {% trans "Submit" %}
@@ -105,6 +105,7 @@
                                     {% endif %}
                                     {% if SHOW_REVIEW_BUTTON %}
                                         <button id="form-review-button"
+                                                type="submit"
                                                 name="wizard_goto_step"
                                                 value="{{ wizard.steps.last }}"
                                                 class="btn btn-accent font-normal">
