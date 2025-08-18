@@ -26,7 +26,7 @@ from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import is_deployed_environment, get_client_ip_address
+from recordtransfer.utils import get_client_ip_address, is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 
