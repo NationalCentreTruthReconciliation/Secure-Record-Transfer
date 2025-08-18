@@ -1,4 +1,5 @@
 import os
+from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.test import override_settings, tag
@@ -21,6 +22,7 @@ from recordtransfer.tests.e2e.selenium_setup import SeleniumLiveServerTestCase
         },
     }
 )
+@patch("recordtransfer.emails.send_user_account_updated.delay")
 class ChangePasswordTest(SeleniumLiveServerTestCase):
     """End-to-end tests for the Change Password page."""
 
@@ -45,7 +47,7 @@ class ChangePasswordTest(SeleniumLiveServerTestCase):
             EC.presence_of_element_located((By.ID, "id_old_password"))
         )
 
-    def test_change_password_valid(self) -> None:
+    def test_change_password_valid(self, mock_send_email: MagicMock) -> None:
         """Test changing the password with valid data."""
         new_password = "NewSecurepassword123"
         self.driver.find_element(By.ID, "id_old_password").send_keys("Securepassword123")
@@ -56,12 +58,15 @@ class ChangePasswordTest(SeleniumLiveServerTestCase):
         # Wait to redirect to password change done page
         WebDriverWait(self.driver, 10).until(EC.url_contains(reverse("password_change_done")))
 
+        # Verify the email function was called
+        mock_send_email.assert_called_once()
+
         # Verify the password has been changed by logging out and back in
         logout_url = reverse("logout")
         self.driver.get(f"{self.live_server_url}{logout_url}")
         self.login("testuser", new_password)
 
-    def test_wrong_old_password(self) -> None:
+    def test_wrong_old_password(self, mock_send_email: MagicMock) -> None:
         """Test changing the password with an incorrect old password."""
         self.driver.find_element(By.ID, "id_old_password").send_keys("WrongOldPassword")
         self.driver.find_element(By.ID, "id_new_password1").send_keys("NewSecurepassword123")
