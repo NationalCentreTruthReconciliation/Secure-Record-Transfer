@@ -6,6 +6,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
 from recordtransfer.constants import HtmlIds
 from recordtransfer.emails import send_password_reset_email
@@ -108,7 +109,6 @@ class UserAccountInfoForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_NEW_PASSWORD}),
         label=_("New Password"),
         required=False,
-        validators=[password_validation.validate_password],
     )
     confirm_new_password = forms.CharField(
         widget=forms.PasswordInput(attrs={"id": HtmlIds.ID_CONFIRM_NEW_PASSWORD}),
@@ -164,7 +164,11 @@ class UserAccountInfoForm(forms.ModelForm):
 
         if password_change:
             self._validate_password_change(current_password, new_password, confirm_new_password)
-
+            if new_password:
+                try:
+                    password_validation.validate_password(new_password, self.instance)
+                except ValidationError as e:
+                    self.add_error("new_password", e)
         if not self.has_changed() and not password_change:
             self.add_error(None, _("No fields have been changed."))
 
