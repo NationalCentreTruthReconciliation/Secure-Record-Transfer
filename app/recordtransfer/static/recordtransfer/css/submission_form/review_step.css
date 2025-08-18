@@ -7,7 +7,7 @@
     margin-bottom: 2rem;
     padding: 1.5rem;
     background-color: var(--color-gray-50);
-
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06);
     border-radius: 8px;
 }
 
