@@ -3,7 +3,6 @@
 import logging
 from typing import Any, Optional, cast
 
-from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
@@ -18,7 +17,6 @@ from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import FormFieldNames, HtmlIds, OtherValues, QueryParameters
-from recordtransfer.emails import send_user_account_updated
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import (
     SubmissionGroupForm,
@@ -50,9 +48,6 @@ class UserProfile(View):
                 "ID_FIRST_NAME": HtmlIds.ID_FIRST_NAME,
                 "ID_LAST_NAME": HtmlIds.ID_LAST_NAME,
                 "ID_GETS_NOTIFICATION_EMAILS": HtmlIds.ID_GETS_NOTIFICATION_EMAILS,
-                "ID_CURRENT_PASSWORD": HtmlIds.ID_CURRENT_PASSWORD,
-                "ID_NEW_PASSWORD": HtmlIds.ID_NEW_PASSWORD,
-                "ID_CONFIRM_NEW_PASSWORD": HtmlIds.ID_CONFIRM_NEW_PASSWORD,
                 # Contact Info Form
                 "id_province_or_state": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
                 "id_other_province_or_state": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
@@ -99,15 +94,6 @@ class BaseUserProfileUpdateView(UpdateView):
         """
         try:
             super().form_valid(form)
-            if form.cleaned_data.get("new_password"):
-                update_session_auth_hash(self.request, form.instance)
-                context = {
-                    "subject": _("Password updated"),
-                    "changed_item": _("password"),
-                    "changed_status": _("updated"),
-                }
-                send_user_account_updated.delay(self.get_object(), context)
-
             context = self.get_context_data(form=form)
             response = self.render_to_response(context)
             return trigger_client_event(

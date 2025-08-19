@@ -893,6 +893,48 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
             EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
         )
 
+    def test_unsaved_changes_protection_browser_back_button(self) -> None:
+        """Test that the unsaved changes modal functions correctly when using the browser back
+        button.
+        """
+        self.login("testuser", "testpassword")
+        driver = self.driver
+
+        # Navigate to the home page first
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:index")))
+
+        driver.get(urljoin(self.live_server_url, reverse("recordtransfer:submit")))
+
+        # Fill out the Legal Agreement step
+        self.complete_legal_agreement_step()
+
+        # Wait for the Contact Information step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "contactinfo-contact_name"))
+        )
+
+        driver.back()
+
+        # Check for unsaved changes modal
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, "unsaved_changes_modal"))
+        )
+        # Verify the modal is visible
+        modal = driver.find_element(By.ID, "unsaved_changes_modal")
+        self.assertTrue(modal.is_displayed())
+
+        # Wait for leave button to be clickable
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "unsaved-changes-leave-btn"))
+        )
+        leave_button = driver.find_element(By.ID, "unsaved-changes-leave-btn")
+        leave_button.click()
+
+        # Check that user is moved back to the home page
+        WebDriverWait(driver, 10).until(
+            EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:index")))
+        )
+
     def test_optional_rights_step_bypass(self) -> None:
         """Test that a user can bypass the Rights step without entering any information."""
         self.login("testuser", "testpassword")

@@ -5,9 +5,14 @@ from typing import cast
 
 from django.conf import settings
 from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, SetPasswordForm
 from django.contrib.auth.signals import user_logged_out
-from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.views import (
+    LoginView,
+    PasswordChangeView,
+    PasswordResetConfirmView,
+    PasswordResetView,
+)
 from django.dispatch import receiver
 from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
@@ -16,12 +21,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from django.utils.translation import get_language, gettext, ngettext
+from django.utils.translation import get_language, gettext, gettext_lazy, ngettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
-from recordtransfer.emails import send_user_activation_email
+from recordtransfer.emails import send_user_account_updated, send_user_activation_email
 from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
@@ -302,9 +307,65 @@ def lockout(request: HttpRequest, credentials: dict, *args, **kwargs) -> HttpRes
     )
 
 
+class AsyncPasswordChangeView(PasswordChangeView):
+    """The page a user sees when they change their password.
+
+    Overrides `PasswordChangeView` to send an email notification asynchronously after successful
+    password change.
+    """
+
+    def form_valid(self, form: PasswordChangeForm) -> HttpResponse:
+        """Handle successful password change."""
+        LOGGER.info("Password change successful for user: %s", form.user)
+        response = super().form_valid(form)
+        user = cast(User, form.user)
+
+        context = {
+            "subject": gettext_lazy("Password updated"),
+            "changed_item": gettext_lazy("password"),
+            "changed_status": gettext_lazy("updated"),
+        }
+        send_user_account_updated.delay(user, context)
+        return response
+
+
 class AsyncPasswordResetView(PasswordResetView):
-    """The page a user sees when they request a password reset."""
+    """The page a user sees when they request a password reset.
+
+    Overrides `PasswordResetView` to send an email notification asynchronously to the user after
+    requesting a password reset.
+    """
 
     email_template_name = "registration/password_reset_email.txt"
     html_email_template_name = "registration/password_reset_email.html"
     form_class = AsyncPasswordResetForm
+
+    def form_valid(self, form: AsyncPasswordResetForm) -> HttpResponse:
+        """Handle successful password reset request."""
+        email = form.cleaned_data["email"]
+        LOGGER.info("Password reset requested for email: %s", email)
+        response = super().form_valid(form)
+        return response
+
+
+class AsyncPasswordResetConfirmView(PasswordResetConfirmView):
+    """The page a user sees when they are setting a new password after a password reset.
+
+    Overrides `PasswordResetConfirmView` to send an email notification asynchronously after
+    successful password reset.
+    """
+
+    def form_valid(self, form: SetPasswordForm) -> HttpResponse:
+        """Handle successful password reset confirmation."""
+        LOGGER.info("Password reset successful for user: %s", form.user)
+        response = super().form_valid(form)
+        user = cast(User, form.user)
+
+        context = {
+            "subject": gettext_lazy("Password reset successful"),
+            "changed_item": gettext_lazy("password"),
+            "changed_status": gettext_lazy("reset"),
+        }
+        send_user_account_updated.delay(user, context)
+        LOGGER.info("Password reset email queued for user: %s", user.username)
+        return response

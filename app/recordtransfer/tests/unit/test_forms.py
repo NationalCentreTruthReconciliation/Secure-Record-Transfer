@@ -142,7 +142,6 @@ class UserAccountInfoFormTest(TestCase):
         self.test_email = "testuser@example.com"
         self.test_password = "old_password"
         self.test_gets_notification_emails = True
-        self.test_new_password = "new_password123"
         self.user = User.objects.create_user(
             username=self.test_username,
             first_name=self.test_first_name,
@@ -196,108 +195,6 @@ class UserAccountInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("last_name", form.errors)
 
-    def test_form_valid_password_change(self) -> None:
-        """Test that the form can change the user's password successfully."""
-        history_before_test = self.user.password_history.count()
-
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_password,
-            "new_password": self.test_new_password,
-            "confirm_new_password": self.test_new_password,
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertTrue(form.is_valid())
-        user = form.save()
-
-        history_after_test = self.user.password_history.count()
-
-        self.assertTrue(user.check_password("new_password123"))
-        self.assertEqual(1 + history_before_test, history_after_test)
-
-    def test_form_invalid_current_password(self) -> None:
-        """Test that the form rejects an invalid current password."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": "wrong_password",
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("current_password", form.errors)
-
-    def test_form_new_passwords_do_not_match(self) -> None:
-        """Test that the form rejects new passwords that do not match."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_password,
-            "new_password": "new_password123",
-            "confirm_new_password": "different_password",
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("confirm_new_password", form.errors)
-
-    def test_form_missing_current_password(self) -> None:
-        """Test that the form requires the current password for password changes."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "new_password": "new_password123",
-            "confirm_new_password": "new_password123",
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("current_password", form.errors)
-
-    def test_form_missing_new_password(self) -> None:
-        """Test that the form requires a new password for password changes."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_password,
-            "confirm_new_password": "new_password123",
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("new_password", form.errors)
-
-    def test_form_missing_confirm_new_password(self) -> None:
-        """Test that the form requires confirmation of the new password."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_password,
-            "new_password": "new_password123",
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("confirm_new_password", form.errors)
-
-    def test_form_new_password_is_same_as_old_password(self) -> None:
-        """Test that the form rejects a new password that is the same as the old password."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "current_password": self.test_password,
-            "new_password": self.test_password,
-            "confirm_new_password": self.test_password,
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("new_password", form.errors)
-
-    def test_form_empty(self) -> None:
-        """Test that the form is invalid when no data is provided."""
-        form_data = {}
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("Form is empty.", form.errors["__all__"])
-
     def test_form_email_notification_initial_false(self) -> None:
         """Test that the form can set email notification preference to False."""
         self.user.gets_notification_emails = False
@@ -324,20 +221,6 @@ class UserAccountInfoFormTest(TestCase):
         self.assertTrue(form.is_valid())
         user = form.save()
         self.assertFalse(user.gets_notification_emails)
-
-    def test_form_no_changes(self) -> None:
-        """Test that the form raises an error when no fields have been changed."""
-        form_data = {
-            "first_name": self.test_first_name,
-            "last_name": self.test_last_name,
-            "gets_notification_emails": self.test_gets_notification_emails,
-            "current_password": "",
-            "new_password": "",
-            "confirm_new_password": "",
-        }
-        form = UserAccountInfoForm(data=form_data, instance=self.user)
-        self.assertFalse(form.is_valid())
-        self.assertIn("No fields have been changed.", form.errors["__all__"])
 
 
 class UserContactInfoFormTest(TestCase):

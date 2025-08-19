@@ -1,4 +1,3 @@
-
 /**
  * Sets up a modal form that is displayed if a user tries to leave the page with unsaved changes.
  */
@@ -29,6 +28,7 @@ export function setupUnsavedChangesProtection() {
 
     // The URL to navigate to when the user chooses to leave the form
     let targetUrl = "";
+    let historyChange = false;
 
     // Add event listeners to only navigational links (excluding debug toolbar links)
     document.querySelectorAll("a:not(.non-nav-link):not(#djDebug a)").forEach(link => {
@@ -48,8 +48,39 @@ export function setupUnsavedChangesProtection() {
 
     elements.leaveButton.addEventListener("click", () => {
         window.removeEventListener("beforeunload", beforeUnloadListener);
-        window.location.href = targetUrl;
+        window.removeEventListener("popstate", popstateListener);
+
+        if (historyChange) {
+            // Go back past the dummy state to the actual previous page
+            history.go(-2);
+        } else {
+            window.location.href = targetUrl;
+        }
     });
+
+    // Reset historyChange when modal closes
+    elements.modal.addEventListener("close", () => {
+        historyChange = false;
+    });
+
+    // For non-fresh forms, add a dummy history state if none exists yet
+    // This allows us to intercept browser back/forward navigation
+    addDummyState();
+
+    const popstateListener = () => {
+        // Store current scroll position before showing modal
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+
+        historyChange = true;
+        addDummyState();
+        elements.modal.showModal();
+
+        // Restore scroll position after modal is shown
+        requestAnimationFrame(() => {
+            window.scrollTo(scrollX, scrollY);
+        });
+    };
 
     // Elements that should not trigger the browser warning dialog
     const safeElements = [
@@ -70,4 +101,13 @@ export function setupUnsavedChangesProtection() {
     });
 
     window.addEventListener("beforeunload", beforeUnloadListener);
+    window.addEventListener("popstate", popstateListener);
 }
+
+const addDummyState = () => {
+    const DUMMY_STATE_KEY = "dummy_unsaved_changes_state";
+    if (!history.state || !(DUMMY_STATE_KEY in history.state)) {
+        // Push a dummy state
+        history.pushState({ [DUMMY_STATE_KEY]: true }, "", null);
+    }
+};
