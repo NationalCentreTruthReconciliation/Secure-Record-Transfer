@@ -251,7 +251,7 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     }
 
     sort = request.GET.get("sort", "last_updated")
-    direction = request.GET.get("direction", "asc")
+    direction = request.GET.get("direction", "desc")
     order_field = allowed_sorts.get(sort, "last_updated")
     if direction == "desc":
         order_field = f"-{order_field}"

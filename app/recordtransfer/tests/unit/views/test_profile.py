@@ -429,8 +429,8 @@ class TestInProgressSubmissionTableView(TestCase):
         for i in range(3):
             self._create_in_progress_submission(title=f"Test In-Progress Submission {i}")
 
-        # Note that in-progress submissions are ordered by creation date, so the most recent
-        # submissions will appear first in the table.
+        # Note that in-progress submissions are ordered by last updated, so the most recently
+        # edited submissions will appear first in the table.
         # Test first page
         response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
         self.assertEqual(response.status_code, 200)
