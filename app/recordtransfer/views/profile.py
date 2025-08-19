@@ -273,17 +273,37 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
 
 
 def submission_table(request: HttpRequest) -> HttpResponse:
-    """Render the past submission table with pagination."""
+    """Render the past submission table with pagination and sorting,
+    optionally filtered by group.
+    """
+    sort_options = {
+        "submission_date": _("Submission Date"),
+        "submission_group": _("Submission Group"),
+    }
+    allowed_sorts = {
+        "submission_date": "submission_date",
+        "submission_group": "part_of_group",
+    }
+    sort = request.GET.get("sort", "submission_date")
+    direction = request.GET.get("direction", "desc")
+    order_field = allowed_sorts.get(sort, "submission_date")
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
     group_uuid = request.GET.get(QueryParameters.SUBMISSION_GROUP_QUERY_NAME)
-    queryset = None
-    context = {}
+    context = {
+        "current_sort": sort,
+        "current_direction": direction,
+        "sort_options": sort_options,
+        "target_id": HtmlIds.ID_SUBMISSION_TABLE,
+    }
     if group_uuid:
         queryset = Submission.objects.filter(user=request.user, part_of_group__uuid=group_uuid)
         context["IN_GROUP"] = True
     else:
         queryset = Submission.objects.filter(user=request.user)
 
-    queryset = queryset.order_by("-submission_date")
+    queryset = queryset.order_by(order_field)
 
     return _paginated_table_view(
         request,
