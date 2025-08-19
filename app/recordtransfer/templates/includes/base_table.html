@@ -1,45 +1,50 @@
 {% load i18n %}
 {% if sort_options %}
-<div class="flex justify-end mb-4">
-  <div class="dropdown dropdown-end">
-    <label tabindex="0" class="btn btn-xs btn-outline btn-primary m-1 p-3">
-      <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0013 14.414V19a1 1 0 01-2 0v-4.586a1 1 0 00-.293-.707L4.293 6.707A1 1 0 014 6V4z" /></svg>
-      {% trans "Sort" %}
-    </label>
-    <div tabindex="0" class="dropdown-content z-[1] card card-compact w-64 p-4 bg-base-100 border border-base-300 shadow">
-      <form class="flex flex-col gap-2">
-        {% for key, value in request.GET.items %}
-          {% if key != 'sort' and key != 'direction' %}
-            <input type="hidden" name="{{ key }}" value="{{ value }}">
-          {% endif %}
-        {% endfor %}
-        <label for="sort-field" class="font-semibold">{% trans "Sort by:" %}</label>
-        <select name="sort"
-                id="sort-field"
-                class="select select-bordered select-sm"
-                aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
-                hx-get="{{ paginate_url }}"
-                hx-target="#{{ target_id }}"
-                hx-include="closest form">
-          {% for value, label in sort_options.items %}
-            <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <label for="sort-direction" class="font-semibold">{% trans "Direction:" %}</label>
-        <select name="direction"
-                id="sort-direction"
-                class="select select-bordered select-sm"
-                aria-label="{% blocktrans %}Direction{% endblocktrans %}"
-                hx-get="{{ paginate_url }}"
-                hx-target="#{{ target_id }}"
-                hx-include="closest form">
-          <option value="asc" {% if current_direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
-          <option value="desc" {% if current_direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>
-        </select>
-      </form>
+    <div class="flex justify-end mb-4">
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-xs btn-outline btn-primary m-1 p-3">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="inline w-4 h-4 mr-1"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0013 14.414V19a1 1 0 01-2 0v-4.586a1 1 0 00-.293-.707L4.293 6.707A1 1 0 014 6V4z" />
+                </svg>
+                {% trans "Sort" %}
+            </label>
+            <div tabindex="0"
+                 class="dropdown-content z-[1] card card-compact w-64 p-4 bg-base-100 border border-base-300 shadow">
+                <form class="flex flex-col gap-2">
+                    {% for key, value in request.GET.items %}
+                        {% if key != 'sort' and key != 'direction' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}
+                    {% endfor %}
+                    <label for="sort-field" class="font-semibold">{% trans "Sort by:" %}</label>
+                    <select name="sort"
+                            id="sort-field"
+                            class="select select-bordered select-sm"
+                            aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
+                            hx-get="{{ paginate_url }}"
+                            hx-target="#{{ target_id }}"
+                            hx-include="closest form">
+                        {% for value, label in sort_options.items %}
+                            <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="sort-direction" class="font-semibold">{% trans "Direction:" %}</label>
+                    <select name="direction"
+                            id="sort-direction"
+                            class="select select-bordered select-sm"
+                            aria-label="{% blocktrans %}Direction{% endblocktrans %}"
+                            hx-get="{{ paginate_url }}"
+                            hx-target="#{{ target_id }}"
+                            hx-include="closest form">
+                        <option value="asc" {% if current_direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
+                        <option value="desc" {% if current_direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>
+                    </select>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 {% endif %}
 <div class="flex flex-col flex-initial mb-5">
     <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100 max-h-[80vh]">
