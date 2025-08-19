@@ -4,7 +4,7 @@ import logging
 from typing import Any, Optional, cast
 
 from django.core.paginator import Paginator
-from django.db.models import QuerySet
+from django.db.models import Count, QuerySet
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -206,15 +206,17 @@ def _paginated_table_view(
 
 
 def submission_group_table(request: HttpRequest) -> HttpResponse:
-    """Render the submission group table with pagination."""
+    """Render the submission group table with pagination and sorting."""
     sort_options = {
         "name": _("Group Name"),
         "description": _("Group Description"),
+        "submissions": _("Submissions in Group"),
     }
 
     allowed_sorts = {
         "name": "name",
         "description": "description",
+        "submissions": "submission_count",
     }
     sort = request.GET.get("sort", "name")
     direction = request.GET.get("direction", "asc")
@@ -222,7 +224,11 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
     if direction == "desc":
         order_field = f"-{order_field}"
 
-    queryset = SubmissionGroup.objects.filter(created_by=request.user).order_by(order_field)
+    queryset = (
+        SubmissionGroup.objects.filter(created_by=request.user)
+        .annotate(submission_count=Count("submission"))
+        .order_by(order_field)
+    )
     return _paginated_table_view(
         request,
         queryset,
