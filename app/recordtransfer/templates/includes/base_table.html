@@ -1,3 +1,30 @@
+{% load i18n %}
+{% if sort_options %}
+    <form method="get" class="mb-4 flex flex-row gap-2 items-center">
+        {% for key, value in request.GET.items %}
+            {% if key != 'sort' and key != 'direction' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}
+        {% endfor %}
+        <label for="sort-field" class="sr-only">{% trans "Sort by:" %}</label>
+        <select name="sort"
+                id="sort-field"
+                class="select select-bordered select-sm"
+                aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
+                onchange="this.form.submit()">
+            {% for value, label in sort_options %}
+                <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <label for="sort-direction" class="sr-only">{% trans "Direction:" %}</label>
+        <select name="direction"
+                id="sort-direction"
+                class="select select-bordered select-sm"
+                aria-label="{% blocktrans %}Direction{% endblocktrans %}"
+                onchange="this.form.submit()">
+            <option value="asc" {% if current_direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
+            <option value="desc" {% if current_direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>
+        </select>
+    </form>
+{% endif %}
 <div class="flex flex-col flex-initial mb-5">
     <div class="overflow-x-auto rounded-box border border-base-content/10 bg-base-100 max-h-[40vh]">
         <table class="table table-sm md:table-md">
