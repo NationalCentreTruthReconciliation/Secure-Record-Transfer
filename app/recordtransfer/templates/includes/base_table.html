@@ -10,8 +10,7 @@
                 class="select select-bordered select-sm"
                 aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
                 hx-get="{{ paginate_url }}"
-                hx-target="#id_profile_table_tabs"
-                hx-push-url="true"
+                hx-target="#{{ target_id }}"
                 hx-include="closest div">
             {% for value, label in sort_options.items %}
                 <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
@@ -23,8 +22,7 @@
                 class="select select-bordered select-sm"
                 aria-label="{% blocktrans %}Direction{% endblocktrans %}"
                 hx-get="{{ paginate_url }}"
-                hx-target="#id_profile_table_tabs"
-                hx-push-url="true"
+                hx-target="#{{ target_id }} "
                 hx-include="closest div">
             <option value="asc" {% if current_direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
             <option value="desc" {% if current_direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>

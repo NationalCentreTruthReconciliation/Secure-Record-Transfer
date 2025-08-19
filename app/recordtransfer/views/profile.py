@@ -233,6 +233,7 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
             "current_sort": sort,
             "current_direction": direction,
             "sort_options": sort_options,
+            "target_id": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
         },
     )
 
