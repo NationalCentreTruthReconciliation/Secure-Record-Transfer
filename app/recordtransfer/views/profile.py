@@ -11,7 +11,7 @@ from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.html import escape
-from django.utils.translation import gettext, gettext_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
@@ -80,8 +80,8 @@ class BaseUserProfileUpdateView(UpdateView):
 
     model = User
     success_url = reverse_lazy("recordtransfer:user_profile")
-    update_success_message = gettext("Updated successfully")
-    update_error_message = gettext("Could not update")
+    update_success_message = _("Updated successfully")
+    update_error_message = _("Could not update")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -102,9 +102,9 @@ class BaseUserProfileUpdateView(UpdateView):
             if form.cleaned_data.get("new_password"):
                 update_session_auth_hash(self.request, form.instance)
                 context = {
-                    "subject": gettext_lazy("Password updated"),
-                    "changed_item": gettext_lazy("password"),
-                    "changed_status": gettext_lazy("updated"),
+                    "subject": _("Password updated"),
+                    "changed_item": _("password"),
+                    "changed_status": _("updated"),
                 }
                 send_user_account_updated.delay(self.get_object(), context)
 
@@ -126,7 +126,7 @@ class BaseUserProfileUpdateView(UpdateView):
         context = self.get_context_data(form=form)
         response = self.render_to_response(context)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Please correct the errors below.")}
+            response, "showError", {"value": _("Please correct the errors below.")}
         )
 
 
@@ -135,8 +135,8 @@ class AccountInfoUpdateView(BaseUserProfileUpdateView):
 
     form_class = UserAccountInfoForm
     template_name = "includes/account_info_form.html"
-    update_success_message = gettext("Account details updated.")
-    update_error_message = gettext("Failed to update account information.")
+    update_success_message = _("Account details updated.")
+    update_error_message = _("Failed to update account information.")
 
 
 class ContactInfoUpdateView(BaseUserProfileUpdateView):
@@ -144,8 +144,8 @@ class ContactInfoUpdateView(BaseUserProfileUpdateView):
 
     form_class = UserContactInfoForm
     template_name = "includes/contact_info_form.html"
-    update_success_message = gettext("Contact information updated.")
-    update_error_message = gettext("Failed to update contact information.")
+    update_success_message = _("Contact information updated.")
+    update_error_message = _("Failed to update contact information.")
 
 
 @require_http_methods(["GET", "DELETE"])
@@ -167,17 +167,17 @@ def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpRespon
         in_progress.delete()
         response = HttpResponse(status=204)
         return trigger_client_event(
-            response, "showSuccess", {"value": gettext("In-progress submission deleted.")}
+            response, "showSuccess", {"value": _("In-progress submission deleted.")}
         )
     except Http404:
         response = HttpResponse(status=404)
         return trigger_client_event(
-            response, "showError", {"value": gettext("In-progress submission not found.")}
+            response, "showError", {"value": _("In-progress submission not found.")}
         )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Failed to delete in-progress submission.")}
+            response, "showError", {"value": _("Failed to delete in-progress submission.")}
         )
 
 
@@ -221,13 +221,33 @@ def _paginated_table_view(
 
 def submission_group_table(request: HttpRequest) -> HttpResponse:
     """Render the submission group table with pagination."""
-    queryset = SubmissionGroup.objects.filter(created_by=request.user).order_by("name")
+    sort_options = {
+        "name": _("Group Name"),
+        "description": _("Group Description"),
+    }
+
+    allowed_sorts = {
+        "name": "name",
+        "description": "description",
+    }
+    sort = request.GET.get("sort", "name")
+    direction = request.GET.get("direction", "asc")
+    order_field = allowed_sorts.get(sort, "name")
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
+    queryset = SubmissionGroup.objects.filter(created_by=request.user).order_by(order_field)
     return _paginated_table_view(
         request,
         queryset,
         "includes/submission_group_table.html",
         HtmlIds.ID_SUBMISSION_GROUP_TABLE,
         reverse("recordtransfer:submission_group_table"),
+        extra_context={
+            "current_sort": sort,
+            "current_direction": direction,
+            "sort_options": sort_options,
+        },
     )
 
 
@@ -274,7 +294,7 @@ class SubmissionGroupModalCreateView(CreateView):
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "includes/new_submission_group_modal.html"
-    success_message = gettext("Submission group created successfully.")
+    success_message = _("Submission group created successfully.")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -333,19 +353,19 @@ def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
             response,
             "showSuccess",
             {
-                "value": gettext('Submission group "%(name)s" deleted.')
+                "value": _('Submission group "%(name)s" deleted.')
                 % {"name": escape(submission_group.name)},
             },
         )
     except Http404:
         response = HttpResponse(status=404)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Submission group not found.")}
+            response, "showError", {"value": _("Submission group not found.")}
         )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Failed to delete submission group.")}
+            response, "showError", {"value": _("Failed to delete submission group.")}
         )
 
 
@@ -398,7 +418,7 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
         except (Submission.DoesNotExist, SubmissionGroup.DoesNotExist):
             response = HttpResponse(status=404)
             return trigger_client_event(
-                response, "showError", {"value": gettext("Submission or group not found")}
+                response, "showError", {"value": _("Submission or group not found")}
             )
 
         submission_title = (
@@ -416,7 +436,7 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
         return trigger_client_event(
             response,
             "showError",
-            {"value": gettext("Failed to assign submission to group")},
+            {"value": _("Failed to assign submission to group")},
         )
 
 
@@ -431,7 +451,7 @@ def _handle_unassign_submission(submission: Submission, submission_title: str) -
             response,
             "showError",
             {
-                "value": gettext('Submission "%(title)s" is not assigned to any group')
+                "value": _('Submission "%(title)s" is not assigned to any group')
                 % {"title": submission_title}
             },
         )
@@ -439,7 +459,7 @@ def _handle_unassign_submission(submission: Submission, submission_title: str) -
     submission.part_of_group = None
     submission.save()
 
-    success_message = gettext('Submission "%(title)s" unassigned from group "%(group_name)s"') % {
+    success_message = _('Submission "%(title)s" unassigned from group "%(group_name)s"') % {
         "title": submission_title,
         "group_name": escape(original_group.name),
     }
@@ -455,7 +475,7 @@ def _handle_assign_submission(
     submission.part_of_group = group
     submission.save()
 
-    success_message = gettext('Submission "%(title)s" assigned to group "%(group_name)s"') % {
+    success_message = _('Submission "%(title)s" assigned to group "%(group_name)s"') % {
         "title": submission_title,
         "group_name": escape(group.name) if group else "",
     }

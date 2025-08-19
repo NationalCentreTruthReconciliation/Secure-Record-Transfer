@@ -10,7 +10,7 @@
                 class="select select-bordered select-sm"
                 aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
                 onchange="this.form.submit()">
-            {% for value, label in sort_options %}
+            {% for value, label in sort_options.items %}
                 <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
