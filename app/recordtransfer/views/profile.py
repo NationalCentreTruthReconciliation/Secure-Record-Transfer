@@ -3,12 +3,14 @@
 import logging
 from typing import Any, Optional, cast
 
+from django.conf import settings
 from django.core.paginator import Paginator
-from django.db.models import Count, QuerySet
+from django.db.models import Count, DateTimeField, ExpressionWrapper, F, QuerySet
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.html import escape
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -249,12 +251,25 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     sort_options = {
         "last_updated": _("Last Updated"),
         "submission_title": _("Submission Title"),
+        "expires_at": _("Expires At"),
     }
 
     allowed_sorts = {
         "last_updated": "last_updated",
         "submission_title": "title",
+        "expires_at": "expires_at",
     }
+    expire_minutes = settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+    if expire_minutes != -1:
+        queryset = InProgressSubmission.objects.filter(user=request.user).annotate(
+            expires_at=ExpressionWrapper(
+                F("upload_session__last_upload_interaction_time")
+                + timezone.timedelta(minutes=expire_minutes),
+                output_field=DateTimeField(),
+            )
+        )
+    else:
+        queryset = InProgressSubmission.objects.filter(user=request.user)
 
     sort = request.GET.get("sort", "last_updated")
     direction = request.GET.get("direction", "desc")
@@ -262,7 +277,7 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     if direction == "desc":
         order_field = f"-{order_field}"
 
-    queryset = InProgressSubmission.objects.filter(user=request.user).order_by(order_field)
+    queryset = queryset.order_by(order_field)
     return _paginated_table_view(
         request,
         queryset,
