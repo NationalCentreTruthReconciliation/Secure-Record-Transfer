@@ -284,10 +284,12 @@ def submission_table(request: HttpRequest) -> HttpResponse:
     """
     sort_options = {
         "submission_date": _("Submission Date"),
+        "submission_title": _("Submission Title"),
         "submission_group": _("Submission Group"),
     }
     allowed_sorts = {
         "submission_date": "submission_date",
+        "submission_title": "metadata__accession_title",
         "submission_group": "part_of_group",
     }
     sort = request.GET.get("sort", "submission_date")
