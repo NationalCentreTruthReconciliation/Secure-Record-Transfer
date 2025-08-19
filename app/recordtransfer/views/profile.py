@@ -240,13 +240,35 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
 
 def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     """Render the in-progress submission table with pagination."""
-    queryset = InProgressSubmission.objects.filter(user=request.user).order_by("-last_updated")
+    sort_options = {
+        "last_updated": _("Last Updated"),
+        "submission_title": _("Submission Title"),
+    }
+
+    allowed_sorts = {
+        "last_updated": "last_updated",
+        "submission_title": "title",
+    }
+
+    sort = request.GET.get("sort", "last_updated")
+    direction = request.GET.get("direction", "asc")
+    order_field = allowed_sorts.get(sort, "last_updated")
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
+    queryset = InProgressSubmission.objects.filter(user=request.user).order_by(order_field)
     return _paginated_table_view(
         request,
         queryset,
         "includes/in_progress_submission_table.html",
         HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
         reverse("recordtransfer:in_progress_submission_table"),
+        extra_context={
+            "current_sort": sort,
+            "current_direction": direction,
+            "sort_options": sort_options,
+            "target_id": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
+        },
     )
 
 
