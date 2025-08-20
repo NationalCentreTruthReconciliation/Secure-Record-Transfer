@@ -1104,6 +1104,49 @@ class TestDeleteSubmissionGroupView(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class TestBaseTableTemplate(TestCase):
+    """Tests for the base table template functionality."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        User.objects.all().delete()
+
+    def test_base_table_sorting_tooltip_content(self) -> None:
+        """Test that the sorting tooltip shows correct information."""
+        response = self.client.get(
+            reverse("recordtransfer:submission_group_table"), headers={"HX-Request": "true"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        content = response.content.decode()
+        # Check for tooltip content
+        self.assertIn("Sort field:", content)
+        self.assertIn("Sort direction:", content)
+        # Check for default values
+        self.assertIn("Group Name", content)
+        self.assertIn("Ascending", content)
+
+    def test_base_table_sorting_htmx_integration(self) -> None:
+        """Test that sorting integrates properly with HTMX."""
+        response = self.client.get(
+            reverse("recordtransfer:submission_group_table"), headers={"HX-Request": "true"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        content = response.content.decode()
+        # Check for HTMX attributes on sort controls
+        self.assertIn("hx-get", content)
+        self.assertIn("hx-target", content)
+        self.assertIn("hx-include", content)
+
+
 class TestSubmissionGroupModalCreateView(TestCase):
     """Tests for SubmissionGroupModalCreateView."""
 
