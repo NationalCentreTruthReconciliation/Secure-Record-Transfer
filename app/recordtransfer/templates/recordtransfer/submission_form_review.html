@@ -31,10 +31,7 @@
                             {# Regular form fields #}
                             <dl id="field-list-{{ form.step_name }}" class="field-list">
                                 {% for label, value in form.fields.items %}
-                                    <dt class="font-bold"
-                                        {% if label == "Uploaded files" %}class="align-center font-bold"{% endif %}>
-                                        {{ label }}
-                                    </dt>
+                                    <dt class="font-bold{% if label == "Uploaded files" %} align-center{% endif %}">{{ label }}</dt>
                                     <dd>
                                         {% if label == "Uploaded files" %}
                                             {% for file in value %}
