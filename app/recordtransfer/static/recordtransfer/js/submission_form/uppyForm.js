@@ -68,6 +68,7 @@ export async function setupUppy(context) {
             showRemoveButtonAfterComplete: true,
             doneButtonHandler: null,
             showLinkToFileUploadResult: true,
+            fileManagerSelectionType: "both",
         })
         .use(XHR, {
             method: "POST",
