@@ -5,12 +5,9 @@
             <label tabindex="0"
                    class="btn btn-xs btn-outline btn-primary m-1 mr-5 p-3 tooltip tooltip-hover">
                 <span class="tooltip-content">
-                    {% trans "Currently sorted by:" %}
+                    {% trans "Sort field:" %} {% for key, value in sort_options.items %}{% if key == current_sort %}{{ value }}{% endif %}{% endfor %}
                     <br>
-                    {% for key, value in sort_options.items %}
-                        {% if key == current_sort %}{{ value }}{% endif %}
-                    {% endfor %}
-                    ({{ current_direction|title }})
+                    {% trans "Sort direction:" %} {% if current_direction == "desc" %}{% trans "Descending" %}{% else %}{% trans "Ascending" %}{% endif %}
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="inline w-4 h-4 mr-1"
