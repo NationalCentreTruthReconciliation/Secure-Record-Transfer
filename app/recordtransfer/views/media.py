@@ -166,7 +166,7 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
             status=400,
         )
 
-    file_check = accept_file(_file.name, _file.size)
+    file_check = accept_file(_file.name, _file.size, _file)
     if not file_check["accepted"]:
         return JsonResponse(
             {"file": _file.name, "uploadSessionToken": session.token, **file_check},
