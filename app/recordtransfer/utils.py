@@ -543,7 +543,7 @@ def _validate_file_extension(filename: str, filesize: int, file: UploadedFile) -
 def _validate_mime_type(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Check if the file's MIME type matches the expected MIME type for its extension.
 
-    Only performs validation if file_content is provided and magic library is available.
+    Only performs validation if magic library is available.
     """
     # If magic library is not available, skip MIME type validation
     if not MAGIC_AVAILABLE:
