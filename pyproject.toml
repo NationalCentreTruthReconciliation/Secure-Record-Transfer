@@ -23,7 +23,6 @@ dependencies = [
     "django-widget-tweaks>=1.4.12,<2",
     "django-axes[ipware]>=8.0.0,<9",
     "python-decouple~=3.8",
-    "python-magic>=0.4.27,<0.5",
     "rq-scheduler>=0.14.0,<0.15",
     "django-debug-toolbar>=6.0.0",
 ]
