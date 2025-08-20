@@ -31,10 +31,7 @@
                             {# Regular form fields #}
                             <dl id="field-list-{{ form.step_name }}" class="field-list">
                                 {% for label, value in form.fields.items %}
-                                    <dt class="font-bold"
-                                        {% if label == "Uploaded files" %}class="align-center"{% endif %}>
-                                        {{ label }}
-                                    </dt>
+                                    <dt {% if label == "Uploaded files" %}class="align-center"{% endif %}>{{ label }}</dt>
                                     <dd>
                                         {% if label == "Uploaded files" %}
                                             {% for file in value %}
@@ -89,7 +86,7 @@
                                 <div class="formset-entry">
                                     <dl class="field-list">
                                         {% for label, value in entry.items %}
-                                            <dt class="font-bold">{{ label }}</dt>
+                                            <dt>{{ label }}</dt>
                                             <dd>
                                                 {% if value %}
                                                     {{ value }}
