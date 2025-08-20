@@ -198,6 +198,12 @@ pytest -k "e2e"
 # There is currently no way to do this with python manage.py test (yet)
 ```
 
+To display skipped tests and the reason why they were skipped, add the `-rs` flag to any pytest command:
+
+```shell
+pytest -rs
+```
+
 ### Debugging Tests with VSCode
 
 You can debug Python tests directly in VSCode using the pre-configured launch settings in `.vscode/launch.json`. To access these launch settings, open the Run & Debug menu (press `Ctrl+Shift+D` on Windows/Linux or `Cmd+Shift+D` on Mac).
