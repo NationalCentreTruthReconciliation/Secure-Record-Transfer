@@ -1137,3 +1137,46 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         WebDriverWait(driver, 10).until(
             EC.url_to_be(urljoin(self.live_server_url, reverse("recordtransfer:user_profile")))
         )
+
+    def test_removing_uploaded_file(self) -> None:
+        """Test that the user can remove an uploaded file from the Review step."""
+        driver = self.driver
+
+        # Complete the form till the Review step
+        self.complete_form_till_review_step()
+
+        # Wait for the Review step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "review-summary"))
+        )
+
+        self.go_previous_step()
+
+        # Wait for the upload dashboard to load
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "uppy-dashboard")))
+
+        # Verify file count display shows one file uploaded
+        files_count_element = self.driver.find_element(By.ID, "files-count")
+        self.assertEqual(files_count_element.text, "1")
+
+        # Remove uploaded file
+        remove_button = driver.find_element(By.CSS_SELECTOR, ".uppy-Dashboard-Item-action--remove")
+        remove_button.click()
+
+        # Go to previous step
+        self.go_previous_step()
+
+        # Wait for the Assign to Group step to load
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "groupsubmission-group_uuid"))
+        )
+
+        # Go back to Upload Files step
+        self.go_next_step()
+
+        # Wait for the upload dashboard to load
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "uppy-dashboard")))
+
+        # Verify file count display shows zero files uploaded
+        files_count_element = self.driver.find_element(By.ID, "files-count")
+        self.assertEqual(files_count_element.text, "0")
