@@ -12,10 +12,10 @@
 {% endblock buttonarrayclass %}
 {% block formfields %}
     {{ block.super }}
-    <div class="review-summary">
+    <div class="review-summary max-w-800px my-8">
         {% for form in form_list %}
-            <div class="review-section">
-                <div class="text-xl font-semibold text-primary flex justify-between items-center section-header mb-4">
+            <div class="alert !p-5 flex flex-col items-stretch gap-0">
+                <div class="text-lg text-primary flex justify-between items-center section-header mb-4">
                     <span class="section-title">{{ form.step_title }}</span>
                     <button id="goto_step_{{ form.step_name }}_link"
                             class="step-link text-primary/60 hover:text-primary"
@@ -31,7 +31,7 @@
                             {# Regular form fields #}
                             <dl id="field-list-{{ form.step_name }}" class="field-list">
                                 {% for label, value in form.fields.items %}
-                                    <dt {% if label == "Uploaded files" %}class="align-center"{% endif %}>{{ label }}</dt>
+                                    <dt class="font-bold{% if label == "Uploaded files" %} align-center{% endif %}">{{ label }}</dt>
                                     <dd>
                                         {% if label == "Uploaded files" %}
                                             {% for file in value %}
@@ -86,7 +86,7 @@
                                 <div class="formset-entry">
                                     <dl class="field-list">
                                         {% for label, value in entry.items %}
-                                            <dt>{{ label }}</dt>
+                                            <dt class="font-bold">{{ label }}</dt>
                                             <dd>
                                                 {% if value %}
                                                     {{ value }}
