@@ -254,24 +254,6 @@ def bytes_to_mb(b: int) -> float:
     return b / 1000**2
 
 
-@functools.lru_cache(maxsize=1)
-def get_accepted_mime_types() -> set[str]:
-    """Get all accepted MIME types based on ACCEPTED_FILE_TYPES from settings.
-
-    Returns:
-        set: Set of all acceptable MIME types for configured file extensions
-    """
-    accepted_mime_types = set()
-
-    # Get all extensions from ACCEPTED_FILE_FORMATS
-    for file_group_extensions in settings.ACCEPTED_FILE_FORMATS.values():
-        for extension in file_group_extensions:
-            mime_types = _get_expected_mime_types(extension)
-            accepted_mime_types.update(mime_types)
-
-    return accepted_mime_types
-
-
 @functools.lru_cache(maxsize=128)
 def _get_expected_mime_types(extension: str) -> set[str]:
     """Get expected MIME types for a file extension using python-magic.
@@ -570,15 +552,7 @@ def _validate_mime_type(filename: str, filesize: int, file_content: bytes) -> di
     if not MAGIC_AVAILABLE:
         return {"accepted": True}
 
-    # Get the file extension
     extension = Path(filename).suffix.lower().lstrip(".")
-    if not extension:
-        return {
-            "accepted": False,
-            "error": _("File is missing an extension"),
-            "verboseError": _('The file "%(filename)s" does not have a file extension')
-            % {"filename": filename},
-        }
 
     # Get expected MIME types for this extension
     expected_mime_types = _get_expected_mime_types(extension)
@@ -613,7 +587,9 @@ def _validate_mime_type(filename: str, filesize: int, file_content: bytes) -> di
     if detected_mime_type not in expected_mime_types:
         return {
             "accepted": False,
-            "error": gettext('File type mismatch. Expected "%(expected)s" but got "%(detected)s".')
+            "error": gettext(
+                'File MIME type mismatch. Expected %(expected)s but got "%(detected)s".'
+            )
             % {
                 "expected": ", ".join(sorted(expected_mime_types)),
                 "detected": detected_mime_type,
@@ -625,21 +601,6 @@ def _validate_mime_type(filename: str, filesize: int, file_content: bytes) -> di
                 "filename": filename,
                 "detected": detected_mime_type,
                 "expected": ", ".join(sorted(expected_mime_types)),
-            },
-        }
-
-    # Ensure the detected MIME type is among the globally accepted MIME types
-    accepted_mime_types = get_accepted_mime_types()
-    if detected_mime_type not in accepted_mime_types:
-        return {
-            "accepted": False,
-            "error": _("File type is not allowed by system configuration"),
-            "verboseError": gettext(
-                'The file "%(filename)s" has MIME type "%(detected)s" which is not allowed by the system configuration'
-            )
-            % {
-                "filename": filename,
-                "detected": detected_mime_type,
             },
         }
 
