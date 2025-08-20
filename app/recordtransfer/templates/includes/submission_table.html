@@ -29,7 +29,7 @@
             <td>
                 <div class="flex flex-row gap-4">
                     <a href="{% url 'recordtransfer:submission_detail' uuid=submission.uuid %}"
-                       class="link link-info tooltip"
+                       class="link link-info tooltip tooltip-left"
                        data-tip="{% trans "View Report" %}"
                        target="_blank"
                        id="view_submission_report_{{ forloop.counter }}">
@@ -40,13 +40,13 @@
                        hx-swap="innerHTML"
                        hx-select="#modal-content"
                        hx-trigger="click"
-                       class="link link-warning tooltip"
+                       class="link link-warning tooltip tooltip-left"
                        data-tip="{% trans "Change/assign group" %}"
                        id="assign_submission_group_{{ forloop.counter }}">
                         <i class="fas fa-edit"></i>
                     </a>
                     <a href="{% url 'recordtransfer:submission_csv' uuid=submission.uuid %}"
-                       class="link link-success tooltip"
+                       class="link link-success tooltip tooltip-left"
                        data-tip="{% trans "Export CSV" %}"
                        id="id_download_csv_{{ forloop.counter }}">
                         <i class="fas fa-download"></i>
