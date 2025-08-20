@@ -65,11 +65,13 @@
                             <div class="nav-link">{% trans "Submit" %}</div>
                             <i class="fa fa-angle-right nav-link-icon" aria-hidden="true"></i>
                         </a>
-                        <a id="nav-logout"
-                           class="nav-item-button nav-item-flex"
-                           href="{% url 'logout' %}">
-                            <div id="logout-btn" class="nav-link nav-button">{% trans "Logout" %}</div>
-                        </a>
+                        <form id="nav-logout"
+                              class="nav-item-button nav-item-flex"
+                              method="post"
+                              action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button id="logout-btn" class="nav-link nav-button">{% trans "Logout" %}</button>
+                        </form>
                     {% elif not user.is_authenticated %}
                         {% if SIGN_UP_ENABLED %}
                             <a id="nav-signup"
