@@ -448,6 +448,84 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
         self.assertNotIn("Test In-Progress Submission 1", response.content.decode())
 
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_sorting_functionality(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that the in-progress submission table includes sorting functionality."""
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that sorting controls are present
+        content = response.content.decode()
+        self.assertIn("Sort by:", content)
+        self.assertIn("Direction:", content)
+        self.assertIn("Last Updated", content)
+        self.assertIn("Submission Title", content)
+        self.assertIn("Expires At", content)
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_default_sorting(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that the in-progress submission table has default sorting applied."""
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that default sort context is provided
+        context = response.context
+        self.assertEqual(context["current_sort"], "last_updated")
+        self.assertEqual(context["current_direction"], "desc")
+        self.assertIn("sort_options", context)
+        self.assertIn("last_updated", context["sort_options"])
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_custom_sorting(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that custom sorting parameters work correctly."""
+        # Test sorting by title in ascending order
+        response = self.client.get(
+            f"{self.in_progress_table_url}?sort=submission_title&direction=asc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "submission_title")
+        self.assertEqual(context["current_direction"], "asc")
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_sorting_by_expires_at(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that sorting by expires_at works correctly."""
+        # Test sorting by expires_at
+        response = self.client.get(
+            f"{self.in_progress_table_url}?sort=expires_at&direction=desc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "expires_at")
+        self.assertEqual(context["current_direction"], "desc")
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_sorting_without_expiry(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that sorting works correctly when upload sessions don't expire."""
+        with patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", -1):
+            response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
+            self.assertEqual(response.status_code, 200)
+
+            # Check that expires_at is not in sort options when sessions don't expire
+            context = response.context
+            self.assertNotIn("expires_at", context["sort_options"])
+            self.assertIn("last_updated", context["sort_options"])
+            self.assertIn("submission_title", context["sort_options"])
+
 
 class TestSubmissionGroupTableView(TestCase):
     """Tests for the submission group table view."""
