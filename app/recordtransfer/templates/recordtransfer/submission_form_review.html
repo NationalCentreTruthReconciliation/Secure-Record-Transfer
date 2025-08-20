@@ -14,7 +14,7 @@
     {{ block.super }}
     <div class="review-summary max-w-800px my-8">
         {% for form in form_list %}
-            <div class="alert !p-5 flex flex-col items-stretch">
+            <div class="alert !p-5 flex flex-col items-stretch gap-0">
                 <div class="text-lg text-primary flex justify-between items-center section-header mb-4">
                     <span class="section-title">{{ form.step_title }}</span>
                     <button id="goto_step_{{ form.step_name }}_link"
