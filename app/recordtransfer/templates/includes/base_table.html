@@ -2,7 +2,14 @@
 {% if sort_options %}
     <div class="flex justify-end mb-4">
         <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-xs btn-outline btn-primary m-1 p-3">
+            <label tabindex="0" class="btn btn-xs btn-outline btn-primary m-1 mr-5 p-3 tooltip tooltip-hover">
+                <span class="tooltip-content">
+                  {% trans 'Currently sorted by:' %}<br>
+                  {% for key, value in sort_options.items %}
+                    {% if key == current_sort %}{{ value }}{% endif %}
+                  {% endfor %}
+                  ({{ current_direction|title }})
+                </span>
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="inline w-4 h-4 mr-1"
                      fill="none"
