@@ -475,7 +475,9 @@ ACCEPTED_FILE_FORMATS
 
         **Security Warning: Compressed File Formats**
 
-        Including compressed file formats (such as zip, 7z, rar, tar, gz) in your accepted file formats may pose security risks. The application does not currently analyze the contents of compressed files, which means malicious files could be uploaded within compressed archives without detection.
+        Including compressed file formats in your accepted file formats may pose security risks. The application does not currently analyze the contents of compressed files, which means malicious files could be uploaded within compressed archives without detection.
+
+        For a full list of compressed file extensions that are detected by the application, please refer to :class:`~recordtransfer.constants.FileExtensions.COMPRESSED` in the constants module.
 
         Consider carefully whether you need to accept compressed file formats, and if possible, restrict uploads to uncompressed file types only.
 
