@@ -248,19 +248,21 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
 
 def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     """Render the in-progress submission table with pagination."""
-    sort_options = {
-        "last_updated": _("Last Updated"),
-        "submission_title": _("Submission Title"),
-        "expires_at": _("Expires At"),
-    }
-
-    allowed_sorts = {
-        "last_updated": "last_updated",
-        "submission_title": "title",
-        "expires_at": "expires_at",
-    }
     expire_minutes = settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+
     if expire_minutes != -1:
+        sort_options = {
+            "last_updated": _("Last Updated"),
+            "submission_title": _("Submission Title"),
+            "expires_at": _("Expires At"),
+        }
+
+        allowed_sorts = {
+            "last_updated": "last_updated",
+            "submission_title": "title",
+            "expires_at": "expires_at",
+        }
+
         queryset = InProgressSubmission.objects.filter(user=request.user).annotate(
             expires_at=ExpressionWrapper(
                 F("upload_session__last_upload_interaction_time")
@@ -269,6 +271,16 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
             )
         )
     else:
+        sort_options = {
+            "last_updated": _("Last Updated"),
+            "submission_title": _("Submission Title"),
+        }
+
+        allowed_sorts = {
+            "last_updated": "last_updated",
+            "submission_title": "title",
+        }
+
         queryset = InProgressSubmission.objects.filter(user=request.user)
 
     sort = request.GET.get("sort", "last_updated")
@@ -298,7 +310,7 @@ def submission_table(request: HttpRequest) -> HttpResponse:
     optionally filtered by group.
     """
     sort_options = {
-        "submission_date": _("Submission Date"),
+        "submission_date": _("Date Submitted"),
         "submission_title": _("Submission Title"),
         "submission_group": _("Submission Group"),
     }
