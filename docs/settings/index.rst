@@ -471,6 +471,14 @@ ACCEPTED_FILE_FORMATS
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
 
+    .. warning::
+
+        **Security Warning: Compressed File Formats**
+
+        Including compressed file formats (such as zip, 7z, rar, tar, gz) in your accepted file formats may pose security risks. The application does not currently analyze the contents of compressed files, which means malicious files could be uploaded within compressed archives without detection.
+
+        Consider carefully whether you need to accept compressed file formats, and if possible, restrict uploads to uncompressed file types only.
+
     Here are some examples based on what you might want to accept (note that you can only specify
     the ACCEPTED_FILE_FORMATS variable *once*):
 
