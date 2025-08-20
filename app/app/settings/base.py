@@ -219,7 +219,7 @@ APPROXIMATE_DATE_FORMAT = config("APPROXIMATE_DATE_FORMAT", default="[ca. {date}
 
 # File types allowed to be uploaded. See documentation for how to customize this list.
 ACCEPTED_FILE_FORMATS = config(
-    "ACCEPTED_FILE_TYPES",
+    "ACCEPTED_FILE_FORMATS",
     cast=AcceptedFileTypes(),
     default="Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
 )
