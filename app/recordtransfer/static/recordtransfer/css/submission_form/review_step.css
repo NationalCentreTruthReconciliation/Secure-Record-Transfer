@@ -5,10 +5,6 @@
     margin: 0;
 }
 
-dt {
-    font-weight: bold;
-}
-
 .empty-value,
 .section-note {
     color: #6c757d;
