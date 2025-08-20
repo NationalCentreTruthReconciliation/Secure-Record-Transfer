@@ -277,7 +277,7 @@ class SubmissionGroupModalCreateView(CreateView):
     def form_valid(self, form: BaseModelForm) -> HttpResponse:
         """Handle valid form submission."""
         super().form_valid(form)
-        referer = self.request.META.get("HTTP_REFERER", "")
+        referer = self.request.headers.get("referer", "")
         response = HttpResponse(status=201)
 
         if reverse("recordtransfer:submit") in referer:
