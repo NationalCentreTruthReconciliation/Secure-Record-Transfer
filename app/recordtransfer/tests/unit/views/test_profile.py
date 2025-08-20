@@ -699,6 +699,95 @@ class TestSubmissionTableView(TestCase):
         response = self.client.get(self.submission_table_url)  # No HTMX headers
         self.assertEqual(response.status_code, 400)
 
+    def test_submission_table_sorting_functionality(self) -> None:
+        """Test that the submission table includes sorting functionality."""
+        response = self.client.get(self.submission_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that sorting controls are present
+        content = response.content.decode()
+        self.assertIn("Sort by:", content)
+        self.assertIn("Direction:", content)
+        self.assertIn("Date Submitted", content)
+        self.assertIn("Submission Title", content)
+        self.assertIn("Submission Group", content)
+        self.assertIn("Ascending", content)
+        self.assertIn("Descending", content)
+
+    def test_submission_table_default_sorting(self) -> None:
+        """Test that the submission table has default sorting applied."""
+        response = self.client.get(self.submission_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that default sort context is provided
+        context = response.context
+        self.assertEqual(context["current_sort"], "submission_date")
+        self.assertEqual(context["current_direction"], "desc")
+        self.assertIn("sort_options", context)
+        self.assertIn("submission_date", context["sort_options"])
+
+    def test_submission_table_custom_sorting(self) -> None:
+        """Test that custom sorting parameters work correctly."""
+        # Test sorting by title in ascending order
+        response = self.client.get(
+            f"{self.submission_table_url}?sort=submission_title&direction=asc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "submission_title")
+        self.assertEqual(context["current_direction"], "asc")
+
+    def test_submission_table_sorting_with_group_filter(self) -> None:
+        """Test that sorting works correctly when filtering by group."""
+        # Create a submission group
+        group = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Test Group",
+            uuid=uuid.uuid4(),
+        )
+
+        # Test sorting with group filter
+        response = self.client.get(
+            f"{self.submission_table_url}?{QueryParameters.SUBMISSION_GROUP_QUERY_NAME}={group.uuid}&sort=submission_title&direction=desc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "submission_title")
+        self.assertEqual(context["current_direction"], "desc")
+        self.assertTrue(context.get("IN_GROUP", False))
+
+    def test_submission_table_invalid_sort_parameters(self) -> None:
+        """Test that invalid sort parameters are handled gracefully."""
+        # Test invalid sort field
+        response = self.client.get(
+            f"{self.submission_table_url}?sort=invalid_field&direction=asc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should fall back to default sorting
+        context = response.context
+        self.assertEqual(context["current_sort"], "invalid_field")
+        self.assertEqual(context["current_direction"], "asc")
+
+    def test_submission_table_invalid_direction_parameters(self) -> None:
+        """Test that invalid direction parameters are handled gracefully."""
+        # Test invalid direction
+        response = self.client.get(
+            f"{self.submission_table_url}?sort=submission_title&direction=invalid",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should use the invalid direction as-is
+        context = response.context
+        self.assertEqual(context["current_sort"], "submission_title")
+        self.assertEqual(context["current_direction"], "invalid")
+
 
 class TestDeleteInProgressSubmission(TestCase):
     """Tests for the delete_in_progress_submission view."""
