@@ -603,6 +603,77 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertNotIn("Test Group 0", response.content.decode())
         self.assertNotIn("Test Group 1", response.content.decode())
 
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_sorting_functionality(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that the submission group table includes sorting functionality."""
+        response = self.client.get(self.submission_group_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that sorting controls are present
+        content = response.content.decode()
+        self.assertIn("Sort by:", content)
+        self.assertIn("Direction:", content)
+        self.assertIn("Group Name", content)
+        self.assertIn("Group Description", content)
+        self.assertIn("Submissions in Group", content)
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_default_sorting(self, mock_get_value_int: MagicMock) -> None:
+        """Test that the submission group table has default sorting applied."""
+        response = self.client.get(self.submission_group_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that default sort context is provided
+        context = response.context
+        self.assertEqual(context["current_sort"], "name")
+        self.assertEqual(context["current_direction"], "asc")
+        self.assertIn("sort_options", context)
+        self.assertIn("name", context["sort_options"])
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_custom_sorting(self, mock_get_value_int: MagicMock) -> None:
+        """Test that custom sorting parameters work correctly."""
+        # Test sorting by description in descending order
+        response = self.client.get(
+            f"{self.submission_group_table_url}?sort=description&direction=desc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "description")
+        self.assertEqual(context["current_direction"], "desc")
+
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_sorting_by_submissions_count(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that sorting by submissions count works correctly."""
+        # Create groups with different submission counts
+        group1 = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Group 1",
+            uuid=uuid.uuid4(),
+        )
+        group2 = SubmissionGroup.objects.create(
+            created_by=self.user,
+            name="Group 2",
+            uuid=uuid.uuid4(),
+        )
+
+        # Test sorting by submissions count
+        response = self.client.get(
+            f"{self.submission_group_table_url}?sort=submissions&direction=desc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "submissions")
+        self.assertEqual(context["current_direction"], "desc")
+
 
 class TestSubmissionTableView(TestCase):
     """Tests for the submission table view."""
