@@ -1,3 +1,4 @@
+import unittest
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -6,6 +7,7 @@ from django.utils import timezone
 
 from recordtransfer.models import TempUploadedFile, UploadSession
 from recordtransfer.utils import (
+    MAGIC_AVAILABLE,
     accept_file,
     accept_session,
     count_file_types,
@@ -295,6 +297,7 @@ class TestAcceptFile(TestCase):
                 result = accept_file(filename, filesize, file_content)
                 self.assertTrue(result["accepted"])
 
+    @unittest.skipUnless(MAGIC_AVAILABLE, "libmagic is required for MIME type validation tests")
     def test_accept_file_mime_type_mismatch(self) -> None:
         """Test that files with mismatched MIME types are rejected."""
         # Test cases where file extension doesn't match actual content

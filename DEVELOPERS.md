@@ -157,6 +157,11 @@ This will re-build the bundled JS files any time you save a change to a `.js` fi
 
 Ensure you follow the instructions in the [Local Python Environment Setup](#local-python-environment-setup) section before continuing.
 
+**Note:** Some file acceptance tests require the `libmagic` library for MIME type validation. If you don't have `libmagic` installed, these tests will be automatically skipped. To install `libmagic`:
+
+- **macOS**: `brew install libmagic`
+- **Ubuntu/Debian**: `sudo apt-get install libmagic1`
+
 The tests can be run in a few different ways:
 
 1. Using [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (this uses [settings in the `pyproject.toml` file](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml))
