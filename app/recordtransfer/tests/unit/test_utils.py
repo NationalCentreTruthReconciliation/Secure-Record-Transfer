@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
@@ -242,8 +242,8 @@ class TestAcceptFile(TestCase):
         super().setUpClass()
 
     @staticmethod
-    def get_file_content(extension: str) -> bytes:
-        """Generate byte content that will be detected as the specified file type."""
+    def generate_uploaded_file(filename: str = "") -> UploadedFile:
+        """Generate a UploadedFile instance with minimal content based on the file's extension."""
         content_map = {
             "pdf": b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n",  # PDF header
             "txt": b"This is a text file content",  # Plain text
@@ -275,26 +275,26 @@ class TestAcceptFile(TestCase):
             ),  # Extended Linux ELF header that gets detected as executable
             "script": b"#!/bin/bash\necho 'malicious'",  # Shell script
             "html": b"<!DOCTYPE html><html><body>",  # HTML content
-            # Generic content for testing
-            "generic": b"test content",
         }
-        return content_map.get(extension.lower(), b"test content")
+        return SimpleUploadedFile(
+            filename,
+            content_map.get(filename.split(".")[-1].lower(), b"test content"),
+        )
 
     def test_accept_file_valid(self) -> None:
         """Test that valid files are accepted with matching MIME types."""
         param_list = [
-            ("My File.pdf", 1, "pdf"),
-            ("My File.PDF", 1, "pdf"),
-            ("My File.PDf", 1, "pdf"),
-            ("My.File.PDf", 1024, "pdf"),
-            ("My File.txt", 991, "txt"),
-            ("My File.jpg", 9081, "jpg"),
-            ("My File.png", 512, "png"),
+            ("My File.pdf", 1),
+            ("My File.PDF", 1),
+            ("My File.PDf", 1),
+            ("My.File.PDf", 1024),
+            ("My File.txt", 991),
+            ("My File.jpg", 9081),
+            ("My File.png", 512),
         ]
-        for filename, filesize, extension in param_list:
+        for filename, filesize in param_list:
             with self.subTest(filename=filename):
-                file_content = self.get_file_content(extension)
-                result = accept_file(filename, filesize, file_content)
+                result = accept_file(filename, filesize, self.generate_uploaded_file(filename))
                 self.assertTrue(result["accepted"])
 
     @unittest.skipUnless(MAGIC_AVAILABLE, "libmagic is required for MIME type validation tests")
@@ -303,21 +303,21 @@ class TestAcceptFile(TestCase):
         # Test cases where file extension doesn't match actual content
         test_cases = [
             # Executable disguised as PDF
-            ("malware.pdf", 1024, "exe"),  # Windows PE header
+            ("malware.pdf", 1024, "malware.exe"),  # Windows PE header
             # Executable disguised as text file
-            ("malware.txt", 1024, "elf"),  # Linux ELF header
+            ("malware.txt", 1024, "malware.elf"),  # Linux ELF header
             # Script disguised as image file
-            ("script.jpg", 1024, "script"),  # Shell script
+            ("script.jpg", 1024, "script.sh"),  # Shell script
             # HTML file disguised as PDF
-            ("fake.pdf", 1024, "html"),  # HTML content
+            ("fake.pdf", 1024, "fake.html"),  # HTML content
             # PNG content with JPG extension
-            ("fake.jpg", 1024, "png"),  # PNG content but .jpg extension
+            ("fake.jpg", 1024, "fake.png"),  # PNG content but .jpg extension
         ]
 
-        for filename, filesize, content_type in test_cases:
+        for filename, filesize, content_filename in test_cases:
             with self.subTest(filename=filename):
-                malicious_content = self.get_file_content(content_type)
-                result = accept_file(filename, filesize, malicious_content)
+                result = accept_file(filename, filesize, self.generate_uploaded_file(content_filename))
+                print(result)
                 # The file should be rejected due to MIME type mismatch
                 self.assertFalse(result["accepted"])
                 self.assertIn("MIME type mismatch", result.get("error", ""))
@@ -332,15 +332,15 @@ class TestAcceptFile(TestCase):
         ]
         for extension in param_list:
             with self.subTest():
-                result = accept_file(
-                    f"My File.{extension}", 9012, self.get_file_content("generic")
-                )
+                file_name = f"My File.{extension}"
+                result = accept_file(file_name, 9012, self.generate_uploaded_file(file_name))
                 self.assertFalse(result["accepted"])
                 self.assertIn("extension", result["error"])
 
     def test_accept_file_missing_extension(self) -> None:
         """Test that files without an extension are rejected."""
-        result = accept_file("My File", 209, self.get_file_content("generic"))
+        file = SimpleUploadedFile("No Extension File", b"test content")
+        result = accept_file("No Extension File", 209, file)
         self.assertFalse(result["accepted"])
         self.assertIn("extension", result["error"])
 
@@ -358,7 +358,7 @@ class TestAcceptFile(TestCase):
         ]
         for filename in param_list:
             with self.subTest():
-                result = accept_file(filename, 512, self.get_file_content("generic"))
+                result = accept_file(filename, 512, self.generate_uploaded_file(filename))
                 self.assertFalse(result["accepted"])
 
     def test_invalid_size(self) -> None:
@@ -369,13 +369,15 @@ class TestAcceptFile(TestCase):
         ]
         for size in param_list:
             with self.subTest():
-                result = accept_file("My File.pdf", size, self.get_file_content("pdf"))
+                file_name = "My File.pdf"
+                result = accept_file(file_name, size, self.generate_uploaded_file(file_name))
                 self.assertFalse(result["accepted"])
                 self.assertIn("size is invalid", result["error"])
 
     def test_empty_file(self) -> None:
         """Test that empty files are rejected."""
-        result = accept_file("My File.pdf", 0, b"")
+        file = SimpleUploadedFile("empty.pdf", b"")
+        result = accept_file("empty.pdf", 0, file)
         self.assertFalse(result["accepted"])
         self.assertIn("empty", result["error"])
 
@@ -391,14 +393,18 @@ class TestAcceptFile(TestCase):
         ]
         for size in param_list:
             with self.subTest():
-                result = accept_file("My File.pdf", size, self.get_file_content("pdf"))
+                file_name = "My File.pdf"
+                result = accept_file(file_name, size, self.generate_uploaded_file(file_name))
                 self.assertFalse(result["accepted"])
                 self.assertIn("File is too big", result["error"])
 
     def test_file_exactly_max_size(self) -> None:
         """Test that files that are exactly the max size are accepted."""
         # Max size is patched to 1 MB
-        result = accept_file("My File.pdf", ((1000**2) * 1), self.get_file_content("pdf"))  # 1 MB
+        file_name = "My File.pdf"
+        result = accept_file(
+            file_name, ((1000**2) * 1), self.generate_uploaded_file(file_name)
+        )  # 1 MB
         self.assertTrue(result["accepted"])
 
 
