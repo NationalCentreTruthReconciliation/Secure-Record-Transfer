@@ -8,67 +8,10 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
 
+from recordtransfer.constants import FileExtensions
 from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
-
-COMPRESSED_FILE_EXTENSIONS = {
-    "7z",
-    "aar",
-    "ace",
-    "arj",
-    "apk",
-    "arc",
-    "ark",
-    "br",
-    "bz",
-    "bz2",
-    "cab",
-    "chm",
-    "deb",
-    "dmg",
-    "ear",
-    "egg",
-    "epub",
-    "gz",
-    "jar",
-    "lha",
-    "lrz",
-    "lz",
-    "lz4",
-    "lzh",
-    "lzma",
-    "lzo",
-    "lzop",
-    "mar",
-    "par2",
-    "pea",
-    "pet",
-    "pkg",
-    "rar",
-    "rpm",
-    "rz",
-    "s7z",
-    "shar",
-    "sit",
-    "sitx",
-    "tbz",
-    "tbz2",
-    "tgz",
-    "tlz",
-    "txz",
-    "tzo",
-    "war",
-    "whl",
-    "xpi",
-    "xz",
-    "z",
-    "zip",
-    "zipx",
-    "zoo",
-    "zpaq",
-    "zst",
-}
 
 
 class Command(BaseCommand):
@@ -359,7 +302,7 @@ def _check_for_compressed_files(inverted_formats: dict) -> None:
     found_compressed = []
 
     for extension in inverted_formats:
-        if extension in COMPRESSED_FILE_EXTENSIONS:
+        if extension in FileExtensions.COMPRESSED:
             found_compressed.append(extension)
 
     if found_compressed:
