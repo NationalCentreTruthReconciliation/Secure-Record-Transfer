@@ -586,20 +586,24 @@ def _validate_mime_type(filename: str, filesize: int, file: UploadedFile) -> dic
     if detected_mime_type not in expected_mime_types:
         return {
             "accepted": False,
-            "error": gettext(
-                'File MIME type mismatch. Expected %(expected)s but got "%(detected)s".'
+            "error": ngettext_lazy(
+                'File MIME type mismatch. Expected %(expected)s but got "%(detected)s".',
+                'File MIME type mismatch. Expected one of: %(expected)s but got "%(detected)s".',
+                len(expected_mime_types),
             )
             % {
-                "expected": ", ".join(sorted(expected_mime_types)),
+                "expected": ", ".join(f'"{mtype}"' for mtype in sorted(expected_mime_types)),
                 "detected": detected_mime_type,
             },
-            "verboseError": gettext(
-                'The file "%(filename)s" has MIME type "%(detected)s" but expected one of: %(expected)s'
+            "verboseError": ngettext_lazy(
+                'The file "%(filename)s" has MIME type "%(detected)s" but expected %(expected)s',
+                'The file "%(filename)s" has MIME type "%(detected)s" but expected one of: %(expected)s',
+                len(expected_mime_types),
             )
             % {
                 "filename": filename,
                 "detected": detected_mime_type,
-                "expected": ", ".join(sorted(expected_mime_types)),
+                "expected": ", ".join(f'"{mtype}"' for mtype in sorted(expected_mime_types)),
             },
         }
 
