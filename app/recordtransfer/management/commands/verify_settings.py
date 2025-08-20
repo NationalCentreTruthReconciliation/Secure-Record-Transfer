@@ -12,6 +12,64 @@ from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 
+COMPRESSED_FILE_EXTENSIONS = {
+    "7z",
+    "aar",
+    "ace",
+    "arj",
+    "apk",
+    "arc",
+    "ark",
+    "br",
+    "bz",
+    "bz2",
+    "cab",
+    "chm",
+    "deb",
+    "dmg",
+    "ear",
+    "egg",
+    "epub",
+    "gz",
+    "jar",
+    "lha",
+    "lrz",
+    "lz",
+    "lz4",
+    "lzh",
+    "lzma",
+    "lzo",
+    "lzop",
+    "mar",
+    "par2",
+    "pea",
+    "pet",
+    "pkg",
+    "rar",
+    "rpm",
+    "rz",
+    "s7z",
+    "shar",
+    "sit",
+    "sitx",
+    "tbz",
+    "tbz2",
+    "tgz",
+    "tlz",
+    "txz",
+    "tzo",
+    "war",
+    "whl",
+    "xpi",
+    "xz",
+    "z",
+    "zip",
+    "zipx",
+    "zoo",
+    "zpaq",
+    "zst",
+}
+
 
 class Command(BaseCommand):
     """Verify application settings defined in the DJANGO_SETTINGS_MODULE."""
@@ -289,6 +347,38 @@ def verify_accepted_file_formats() -> None:
             _check_extension_duplicates(extension, group_name, inverted_formats)
             inverted_formats[extension] = group_name
 
+    _check_for_compressed_files(inverted_formats)
+
+
+def _check_for_compressed_files(inverted_formats: dict) -> None:
+    """Check for compressed file extensions in accepted formats and print warning.
+
+    Args:
+        inverted_formats: Dictionary mapping extensions to their group names.
+    """
+    found_compressed = []
+
+    for extension in inverted_formats:
+        if extension in COMPRESSED_FILE_EXTENSIONS:
+            found_compressed.append(extension)
+
+    if found_compressed:
+        warning_msg = [
+            "",
+            "********************************************************************************",
+            "******* !! WARNING !!",
+            "******* You've enabled uploads of compressed file collections (.zip, .7z, ...)",
+            "******* Analyzing compressed files is not supported yet, it is possible for",
+            "******* malicious files to be uploaded like this.",
+            "******* Consider removing this file type from ACCEPTED_FILE_FORMATS",
+            "********************************************************************************",
+            f"******* Found compressed extensions: {', '.join(found_compressed)}",
+            "********************************************************************************",
+            "",
+        ]
+
+        LOGGER.warning("\n".join(warning_msg))
+
 
 def _validate_cron(cron_str: str) -> None:
     """Validate a cron expression.
@@ -316,7 +406,7 @@ def _validate_cron(cron_str: str) -> None:
     field_names = ["minute", "hour", "day_of_month", "month", "day_of_week"]
 
     # Validate each field
-    for value, field in zip(fields, field_names):
+    for value, field in zip(fields, field_names, strict=True):
         pattern = cron_patterns[field]
         if not re.match(pattern, value):
             raise ValueError(f"Invalid value '{value}' for field '{field}'")
