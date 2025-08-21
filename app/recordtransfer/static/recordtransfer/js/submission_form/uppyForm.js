@@ -120,6 +120,20 @@ export async function setupUppy(context) {
             indexedDBName: "uppy-files"
         });
 
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+            .register("/static/recordtransfer/js/submission_form/ServiceWorker.js")
+            .then((registration) => {
+                console.log(
+                    "ServiceWorker registration successful with scope: ",
+                    registration.scope,
+                );
+            })
+            .catch((error) => {
+                console.log(`Registration failed with ${error}`);
+            });
+    }
+
 
     uppy.on("files-added" , () => {
         updateCapacity(uppy);
