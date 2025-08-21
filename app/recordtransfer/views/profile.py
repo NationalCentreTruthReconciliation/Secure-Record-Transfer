@@ -220,9 +220,18 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
         "description": "description",
         "submissions": "submission_count",
     }
-    sort = request.GET.get("sort", "name")
-    direction = request.GET.get("direction", "asc")
-    order_field = allowed_sorts.get(sort, "name")
+    default_sort = "name"
+    default_direction = "asc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
     if direction == "desc":
         order_field = f"-{order_field}"
 
@@ -283,9 +292,18 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
 
         queryset = InProgressSubmission.objects.filter(user=request.user)
 
-    sort = request.GET.get("sort", "last_updated")
-    direction = request.GET.get("direction", "desc")
-    order_field = allowed_sorts.get(sort, "last_updated")
+    default_sort = "last_updated"
+    default_direction = "desc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
     if direction == "desc":
         order_field = f"-{order_field}"
 
@@ -319,9 +337,18 @@ def submission_table(request: HttpRequest) -> HttpResponse:
         "submission_title": "metadata__accession_title",
         "submission_group": "part_of_group",
     }
-    sort = request.GET.get("sort", "submission_date")
-    direction = request.GET.get("direction", "desc")
-    order_field = allowed_sorts.get(sort, "submission_date")
+    default_sort = "submission_date"
+    default_direction = "desc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
     if direction == "desc":
         order_field = f"-{order_field}"
 
