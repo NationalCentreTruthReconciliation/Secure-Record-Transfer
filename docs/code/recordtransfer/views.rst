@@ -1,5 +1,5 @@
-recordtransfer.views - Views
-============================
+recordtransfer.views
+====================
 .. contents:: Modules on this Page
 
 Home

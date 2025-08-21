@@ -1,5 +1,5 @@
-configuration - Custom Config Parsers
-=====================================
+Custom Config Parsers
+=====================
 
 .. automodule:: configuration
    :members:
