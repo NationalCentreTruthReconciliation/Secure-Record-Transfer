@@ -526,6 +526,22 @@ class TestInProgressSubmissionTableView(TestCase):
             self.assertIn("last_updated", context["sort_options"])
             self.assertIn("submission_title", context["sort_options"])
 
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_in_progress_submission_table_invalid_params_fallback_to_defaults(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Invalid sort field and direction should fall back to defaults."""
+        response = self.client.get(
+            f"{self.in_progress_table_url}?sort=invalid_field&direction=invalid_direction",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        # Defaults for in_progress table
+        self.assertEqual(context["current_sort"], "last_updated")
+        self.assertEqual(context["current_direction"], "desc")
+
 
 class TestSubmissionGroupTableView(TestCase):
     """Tests for the submission group table view."""
@@ -674,6 +690,22 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertEqual(context["current_sort"], "submissions")
         self.assertEqual(context["current_direction"], "desc")
 
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_group_table_invalid_params_fallback_to_defaults(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Invalid sort field and direction should fall back to defaults."""
+        response = self.client.get(
+            f"{self.submission_group_table_url}?sort=invalid_field&direction=invalid_direction",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        # Defaults for submission group table
+        self.assertEqual(context["current_sort"], "name")
+        self.assertEqual(context["current_direction"], "asc")
+
 
 class TestSubmissionTableView(TestCase):
     """Tests for the submission table view."""
@@ -760,33 +792,21 @@ class TestSubmissionTableView(TestCase):
         self.assertEqual(context["current_direction"], "desc")
         self.assertTrue(context.get("IN_GROUP", False))
 
-    def test_submission_table_invalid_sort_parameters(self) -> None:
-        """Test that invalid sort parameters are handled gracefully."""
-        # Test invalid sort field
+    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    def test_submission_table_invalid_params_fallback_to_defaults(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Invalid sort field and direction should fall back to defaults."""
         response = self.client.get(
-            f"{self.submission_table_url}?sort=invalid_field&direction=asc",
+            f"{self.submission_table_url}?sort=invalid_field&direction=invalid_direction",
             headers=self.htmx_headers,
         )
         self.assertEqual(response.status_code, 200)
 
-        # Should fall back to default sorting
         context = response.context
-        self.assertEqual(context["current_sort"], "invalid_field")
-        self.assertEqual(context["current_direction"], "asc")
-
-    def test_submission_table_invalid_direction_parameters(self) -> None:
-        """Test that invalid direction parameters are handled gracefully."""
-        # Test invalid direction
-        response = self.client.get(
-            f"{self.submission_table_url}?sort=submission_title&direction=invalid",
-            headers=self.htmx_headers,
-        )
-        self.assertEqual(response.status_code, 200)
-
-        # Should use the invalid direction as-is
-        context = response.context
-        self.assertEqual(context["current_sort"], "submission_title")
-        self.assertEqual(context["current_direction"], "invalid")
+        # Defaults for submission table
+        self.assertEqual(context["current_sort"], "submission_date")
+        self.assertEqual(context["current_direction"], "desc")
 
 
 class TestDeleteInProgressSubmission(TestCase):
