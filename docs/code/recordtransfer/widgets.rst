@@ -1,5 +1,5 @@
-recordtransfer.widgets
-======================
+recordtransfer.widgets - Custom HTML widgets
+============================================
 
 .. automodule:: recordtransfer.widgets
     :members:

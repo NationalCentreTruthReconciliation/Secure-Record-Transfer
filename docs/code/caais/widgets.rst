@@ -1,5 +1,5 @@
-caais.widgets
-=============
+caais.widgets - Custom Django form widgets for CAAIS
+====================================================
 
 .. automodule:: caais.widgets
     :members:

@@ -1,5 +1,5 @@
-caais.managers
-==============
+caais.managers - Model managers for CAAIS models
+================================================
 
 .. automodule:: caais.managers
     :members:

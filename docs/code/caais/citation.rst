@@ -1,5 +1,5 @@
-caais.citation
-==============
+caais.citation - Add CAAIS citations to text
+============================================
 
 .. automodule:: caais.citation
     :members:

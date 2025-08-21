@@ -1,5 +1,5 @@
-caais.db
-========
+caais.db - Database utilities and custom aggregates
+===================================================
 
 .. automodule:: caais.db
     :members:

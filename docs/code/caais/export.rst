@@ -1,5 +1,5 @@
-caais.export
-============
+caais.export - CSV column reference for exports
+===============================================
 
 .. automodule:: caais.export
     :members:

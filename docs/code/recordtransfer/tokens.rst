@@ -1,5 +1,5 @@
-recordtransfer.tokens
-=====================
+recordtransfer.tokens - Authentication token generation
+=======================================================
 
 .. automodule:: recordtransfer.tokens
     :members:

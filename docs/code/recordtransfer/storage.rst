@@ -1,5 +1,5 @@
-recordtransfer.storage
-======================
+recordtransfer.storage - Custom storage definitions
+===================================================
 
 .. automodule:: recordtransfer.storage
     :members:

@@ -1,5 +1,5 @@
-recordtransfer.handlers
-=======================
+recordtransfer.handlers - Logging handlers
+==========================================
 
 .. automodule:: recordtransfer.handlers
     :members:

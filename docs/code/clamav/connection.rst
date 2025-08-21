@@ -1,5 +1,5 @@
-clamav.connection
-=================
+clamav.connection - Connect to ClamAV
+=====================================
 
 .. automodule:: clamav.connection
     :members:

@@ -1,5 +1,5 @@
-recordtransfer.middleware
-=========================
+recordtransfer.middleware - Custom middleware
+=============================================
 
 .. automodule:: recordtransfer.middleware
     :members:

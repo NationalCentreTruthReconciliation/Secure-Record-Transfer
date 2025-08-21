@@ -1,5 +1,5 @@
-recordtransfer.decorators
-=========================
+recordtransfer.decorators - Function decorators
+===============================================
 
 .. automodule:: recordtransfer.decorators
     :members:

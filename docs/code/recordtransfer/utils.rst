@@ -1,5 +1,5 @@
-recordtransfer.utils
-====================
+recordtransfer.utils - Miscellaneous utilities
+==============================================
 
 .. automodule:: recordtransfer.utils
     :members:

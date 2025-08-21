@@ -1,5 +1,5 @@
-recordtransfer.emails
-=====================
+recordtransfer.emails - Async email functions
+=============================================
 
 Each function in the ``emails.py`` file is a ``django_rq.job``, meaning that these functions are
 meant to run asynchronously.

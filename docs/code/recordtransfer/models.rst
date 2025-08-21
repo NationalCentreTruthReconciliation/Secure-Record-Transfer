@@ -1,5 +1,5 @@
-recordtransfer.models
-=====================
+recordtransfer.models - Models for recordtransfer app
+=====================================================
 
 .. automodule:: recordtransfer.models
     :members:

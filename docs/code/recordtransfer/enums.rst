@@ -1,5 +1,5 @@
-recordtransfer.enums
-====================
+recordtransfer.enums - Enum classes for record transfer app
+===========================================================
 
 .. automodule:: recordtransfer.enums
     :members:

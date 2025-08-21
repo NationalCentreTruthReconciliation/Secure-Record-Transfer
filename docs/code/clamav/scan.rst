@@ -1,5 +1,5 @@
-clamav.scan
-===========
+clamav.scan - Scan files with ClamAV
+====================================
 
 .. automodule:: clamav.scan
     :members:

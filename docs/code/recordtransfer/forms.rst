@@ -1,5 +1,5 @@
-recordtransfer.forms
-====================
+recordtransfer.forms - Forms for recordtransfer models
+======================================================
 
 .. contents:: Modules on this Page
 

@@ -1,5 +1,5 @@
-recordtransfer.jobs
-===================
+recordtransfer.jobs - Asynchronous jobs
+=======================================
 
 .. automodule:: recordtransfer.jobs
     :members:

@@ -1,5 +1,5 @@
-caais.admin
-===========
+caais.admin - Manage CAAIS models in admin site
+===============================================
 
 .. automodule:: caais.admin
     :members:
