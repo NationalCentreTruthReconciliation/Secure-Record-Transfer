@@ -3,8 +3,10 @@ import "@uppy/dashboard/dist/style.css";
 
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
+import GoldenRetriever from "@uppy/golden-retriever";
 import XHR from "@uppy/xhr-upload";
 import FileValidationPlugin from "./customUppyPlugin";
+
 import {
     getCookie,
     getSessionToken,
@@ -112,7 +114,12 @@ export async function setupUppy(context) {
             }
 
         })
-        .use(FileValidationPlugin);
+        .use(FileValidationPlugin)
+        .use(GoldenRetriever, {
+            serviceWorker: true,
+            indexedDBName: "uppy-files"
+        });
+
 
     uppy.on("files-added" , () => {
         updateCapacity(uppy);
@@ -134,6 +141,10 @@ export async function setupUppy(context) {
             issueFileIds.splice(index, 1);
         }
         sendDeleteRequestForFile(file.name);
+    });
+
+    uppy.on("restored", (fileIDs) => {
+        console.info("Restored files:", fileIDs);
     });
 
     reviewButton.addEventListener("click", async (event) => {
