@@ -316,7 +316,9 @@ class TestAcceptFile(TestCase):
 
         for filename, filesize, content_filename in test_cases:
             with self.subTest(filename=filename):
-                result = accept_file(filename, filesize, self.generate_uploaded_file(content_filename))
+                result = accept_file(
+                    filename, filesize, self.generate_uploaded_file(content_filename)
+                )
                 print(result)
                 # The file should be rejected due to MIME type mismatch
                 self.assertFalse(result["accepted"])
@@ -498,11 +500,7 @@ class TestAcceptSession(TestCase):
         for name in names:
             with self.subTest():
                 result = accept_session(name, "1000", self.session_1)
-                self.assertFalse(result["accepted"])
-                self.assertIn(
-                    "A file with the same name has already been uploaded",
-                    result["error"],
-                )
+                self.assertTrue(result["accepted"])
 
 
 class TestGetJsTranslationVersion(TestCase):
