@@ -21,20 +21,9 @@ class FileValidationPlugin extends BasePlugin {
         if (file.meta?.mock) {
             return;
         }
-        // Check if file name is duplicate
-        const uppyFiles = this.uppy.getFiles();
-        const hasDuplicate = uppyFiles.some(
-            existingFile => existingFile.name === file.name && existingFile.id !== file.id
-        );
-        if (hasDuplicate) {
-            const messageTemplate = window.django.gettext(
-                "Cannot add the duplicate file '%s', it already exists"
-            );
-            const message = window.django.interpolate(messageTemplate, [file.name]);
-            this.uppy.info(message, 5000);
-            this.uppy.removeFile(file.id);
-            return;
-        }
+
+        // No need to check for duplicates since backend handles overwriting
+        // Files with the same name will overwrite existing ones
     };
 }
 

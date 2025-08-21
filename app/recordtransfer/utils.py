@@ -382,16 +382,12 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
     # Check that a file with this name has not already been uploaded
     filename_list = [f.name for f in session.get_temporary_uploads()]
     if filename in filename_list:
-        return {
-            "accepted": False,
-            "error": gettext("A file with the same name has already been uploaded."),
-            "verboseError": gettext(
-                'A file with the name "%(filename)s" has already been uploaded'
-            )
-            % {"filename": filename},
-        }
+        # Instead of rejecting, allow overwriting by removing the existing file
+        existing_file = next(f for f in session.get_temporary_uploads() if f.name == filename)
+        if existing_file:
+            existing_file.delete()
 
-    # All checks succeded
+    # All checks succeeded
     return {"accepted": True}
 
 
