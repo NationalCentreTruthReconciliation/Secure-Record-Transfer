@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     "webpack_loader",
     "caais.apps.CaaisConfig",
     "clamav.apps.ClamavConfig",
+    "upload.apps.UploadConfig",
     "recordtransfer.apps.RecordTransferConfig",
     "django.contrib.admin",
     "django.contrib.auth",
