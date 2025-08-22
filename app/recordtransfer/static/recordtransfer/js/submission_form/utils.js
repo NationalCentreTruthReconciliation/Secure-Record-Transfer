@@ -139,7 +139,7 @@ export const sendDeleteRequestForFile = async (filename) => {
         console.error("Cannot delete file without a session token");
         return null;
     }
-    const response = await fetch(`/upload-session/${sessionToken}/files/${filename}`, {
+    const response = await fetch(`/upload-session/${sessionToken}/files/${filename}/`, {
         method: "DELETE",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"),
