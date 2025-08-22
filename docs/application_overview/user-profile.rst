@@ -176,7 +176,7 @@ This will take the user to a page where they can modify the group name and group
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
-Clicking on the down arrow icon will export all submissions in that group as a CSV file for download.
+Clicking on the download icon will export all submissions in that group as a CSV file for download.
 
 .. image:: images/user_profile_submission_groups_download.webp
     :alt: User profile submission groups download
@@ -197,3 +197,20 @@ When you do this, a confirmation dialog box will appear asking if you are sure y
 Click **Yes** to proceed with deleting the submission group. This will remove the group, but any submissions previously associated with it will remain intact, they will simply no longer be associated with any group.
 
 Click **Cancel** if you do not wish to proceed with the deletion. This will close the dialog and return you to the profile page without making any changes.
+
+Table Sorting Functionality
+----------------------------
+Users can sort the data in the tables by clicking on the Sort button found at the top right of the table. This feature is available for the In-Progress Submissions, Past Submissions, and Submission Groups tables. The table will be sorted by the field that is clicked on. The sorting order can also be chosen by clicking on the Sort button.
+
+.. image:: images/user_profile_sort.webp
+    :alt: User profile table sorting functionality
+
+On hovering over the Sort button, it shows how the current table is sorted right now.
+
+.. image:: images/user_profile_sort_hover.webp
+    :alt: User profile current sorting
+
+
+
+
+
