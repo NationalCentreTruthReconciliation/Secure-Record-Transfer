@@ -116,3 +116,70 @@ class WindowsFileRestrictions:
         "LPT8",
         "LPT9",
     )
+
+
+@dataclasses.dataclass(frozen=True)
+class FileExtensions:
+    """Class to hold file extension sets used in the application."""
+
+    COMPRESSED: tuple = (
+        "7z",
+        "aar",
+        "ace",
+        "arj",
+        "apk",
+        "arc",
+        "ark",
+        "br",
+        "bz",
+        "bz2",
+        "cab",
+        "chm",
+        "deb",
+        "dmg",
+        "ear",
+        "egg",
+        "epub",
+        "gz",
+        "jar",
+        "lha",
+        "lrz",
+        "lz",
+        "lz4",
+        "lzh",
+        "lzma",
+        "lzo",
+        "lzop",
+        "mar",
+        "par2",
+        "pea",
+        "pet",
+        "pkg",
+        "rar",
+        "rpm",
+        "rz",
+        "s7z",
+        "shar",
+        "sit",
+        "sitx",
+        "tbz",
+        "tbz2",
+        "tgz",
+        "tlz",
+        "txz",
+        "tzo",
+        "war",
+        "whl",
+        "xpi",
+        "xz",
+        "z",
+        "zip",
+        "zipx",
+        "zoo",
+        "zpaq",
+        "zst",
+    )
+
+    def asdict(self) -> dict[str, str]:
+        """Return the dataclass as a dictionary."""
+        return dataclasses.asdict(self)
