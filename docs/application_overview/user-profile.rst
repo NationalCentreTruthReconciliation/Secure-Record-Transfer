@@ -164,6 +164,11 @@ group.
 .. image:: images/create_submission_group.webp
     :alt: Create submission group
 
+In the Submission Groups table on the Profile page, clicking on the download icon will export all submissions in that group as a CSV file for download.
+
+.. image:: images/user_profile_submission_groups_download.webp
+    :alt: User profile submission groups download
+
 
 The user can also view and modify the details of an existing submission group by clicking on the
 blue eye icon for that group in the table on the profile page.
@@ -175,11 +180,6 @@ This will take the user to a page where they can modify the group name and group
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
-
-Clicking on the download icon will export all submissions in that group as a CSV file for download.
-
-.. image:: images/user_profile_submission_groups_download.webp
-    :alt: User profile submission groups download
 
 Clicking on "New submission +" takes the user to the Submission Form with the
 submission group pre-selected.
