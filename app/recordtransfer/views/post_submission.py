@@ -125,7 +125,7 @@ def submission_group_bulk_csv_export(request: HttpRequest, uuid: str) -> HttpRes
     if not related_submissions.exists():
         messages.error(
             request,
-            _("This submission group has no submissions associated with it to export."),
+            gettext("This submission group has no submissions associated with it to export."),
         )
 
         return redirect("recordtransfer:user_profile")
