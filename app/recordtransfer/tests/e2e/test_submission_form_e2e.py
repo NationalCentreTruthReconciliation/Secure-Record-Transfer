@@ -1139,7 +1139,7 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         )
 
     def test_removing_uploaded_file(self) -> None:
-        """Test that the user can remove an uploaded file from the Review step."""
+        """Test that removign an uploaded file from the Upload Files step functions correctly."""
         driver = self.driver
 
         # Complete the form till the Review step
