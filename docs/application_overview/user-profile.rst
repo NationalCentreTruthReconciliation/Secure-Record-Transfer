@@ -171,7 +171,7 @@ blue eye icon for that group in the table on the profile page.
 .. image:: images/user_profile_submission_groups_view.webp
     :alt: User profile submission groups
 
-This will take the user to a page where they can modify the group name and group description, and also view past submissions made under this group.
+This will take the user to a page where they can modify the group name and group description, and also view past submissions made under this group. Users can also sort the submissions within the group using the same sorting functionality available on the main Profile page tables.
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
