@@ -169,6 +169,11 @@ This will take the user to a page where they can modify the group name and group
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
 
+Clicking on the down arrow icon will export all submissions in that group as a CSV file for download.
+
+.. image:: images/user_profile_submission_groups_download.webp
+    :alt: User profile submission groups download
+
 Clicking on "New submission +" takes the user to the Submission Form with the
 submission group pre-selected.
 
