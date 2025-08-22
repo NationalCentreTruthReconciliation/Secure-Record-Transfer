@@ -199,7 +199,7 @@ Click **Yes** to proceed with deleting the submission group. This will remove th
 Click **Cancel** if you do not wish to proceed with the deletion. This will close the dialog and return you to the profile page without making any changes.
 
 Table Sorting Functionality
-----------------------------
+---------------------------
 Users can sort the data in the tables by clicking on the Sort button found at the top right of the table. This feature is available for the In-Progress Submissions, Past Submissions, and Submission Groups tables. The table will be sorted by the field that is clicked on. The sorting order can also be chosen by clicking on the Sort button.
 
 .. image:: images/user_profile_sort.webp
