@@ -1,7 +1,6 @@
 import logging
 from typing import Optional, cast
 
-from clamav.scan import check_for_malware
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import (
@@ -15,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 from nginx.serve import serve_media_file
 
 from .check import accept_file, accept_session
+from .clam import check_for_malware
 from .models import UploadSession
 
 User = settings.AUTH_USER_MODEL

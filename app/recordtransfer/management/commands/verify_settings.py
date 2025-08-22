@@ -22,6 +22,7 @@ class Command(BaseCommand):
         """Verify application settings."""
         try:
             LOGGER.info("Verifying settings in %s", settings.SETTINGS_MODULE)
+            verify_clamav_settings()
             verify_date_format()
             verify_checksum_settings()
             verify_storage_folder_settings()
@@ -43,6 +44,22 @@ class Command(BaseCommand):
                     )
                 ) from exc
             raise exc
+
+
+def verify_clamav_settings() -> None:
+    """Verify clamav service settings.
+
+    - CLAMAV_ENABLED
+    - CLAMAV_HOST
+    - CLAMAV_PORT
+    """
+    if settings.CLAMAV_ENABLED:
+        if not settings.CLAMAV_HOST:
+            raise ImproperlyConfigured("CLAMAV_HOST must be set in CLAMAV_ENABLED is True")
+        if settings.CLAMAV_PORT <= 0:
+            raise ImproperlyConfigured(
+                f"CLAMAV_PORT value {settings.CLAMAV_PORT} is not valid (must be greater than zero)"
+            )
 
 
 def verify_date_format() -> None:

@@ -17,3 +17,7 @@ ACCEPTED_FILE_FORMATS = getattr(
         "Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4"
     ),
 )
+
+CLAMAV_ENABLED = getattr(settings, "CLAMAV_ENABLED", True)
+CLAMAV_HOST = getattr(settings, "CLAMAV_HOST", "clamav")
+CLAMAV_PORT = getattr(settings, "CLAMAV_PORT", 3310)
