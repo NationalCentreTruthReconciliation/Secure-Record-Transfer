@@ -54,8 +54,16 @@ curl -LsSf https://astral.sh/uv/0.8.8/install.sh | sh
 ```
 
 3. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
-4. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
-5. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
+
+4. **pnpm** for Javascript package management ([pnpm.io](https://pnpm.io/)). After installing npm, use the following command to install pnpm:
+
+```shell
+# In your WSL terminal:
+npm install -g pnpm@latest-10
+```
+
+5. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
+6. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
 
 ### Repository Setup
 
