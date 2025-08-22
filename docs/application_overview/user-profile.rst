@@ -200,7 +200,7 @@ Click **Cancel** if you do not wish to proceed with the deletion. This will clos
 
 Table Sorting Functionality
 ---------------------------
-Users can sort the data in the tables by clicking on the Sort button found at the top right of the table. This feature is available for the In-Progress Submissions, Past Submissions, and Submission Groups tables. The table will be sorted by the field that is clicked on. The sorting order can also be chosen by clicking on the Sort button.
+All tables on the Profile page (In-Progress Submissions, Past Submissions, and Submission Groups) include a Sort button located at the top right of each table. Users can click this button to sort the table data by different fields. When clicked, users can select which field to sort by and choose between ascending or descending order.
 
 .. image:: images/user_profile_sort.webp
     :alt: User profile table sorting functionality
