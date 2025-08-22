@@ -222,7 +222,7 @@ APPROXIMATE_DATE_FORMAT = config("APPROXIMATE_DATE_FORMAT", default="[ca. {date}
 ACCEPTED_FILE_FORMATS = config(
     "ACCEPTED_FILE_FORMATS",
     cast=AcceptedFileTypes(),
-    default="Archive:zip|Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
+    default="Audio:mp3,wav,flac|Document:docx,odt,pdf,txt,html|Image:jpg,jpeg,png,gif|Spreadsheet:xlsx,csv|Video:mkv,mp4",
 )
 
 # Media file storage locations

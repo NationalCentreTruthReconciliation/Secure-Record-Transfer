@@ -5,9 +5,10 @@ from caais.models import RightsType, SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from upload.models import UploadSession
 
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
+from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
 
 
 class SubmissionFormWizardTests(TestCase):

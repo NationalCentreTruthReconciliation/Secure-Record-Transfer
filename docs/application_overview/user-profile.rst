@@ -9,7 +9,7 @@ user profile page is accessible by clicking on "Profile" on the navigation bar.
     :alt: User profile on the navigation bar
 
 
-The Profile page has two tabs: "Account" and "Contact Information".
+The Profile page has three tabs: "Account", "Contact Information", and "Language".
 
 .. image:: images/user_profile_tabs.webp
     :alt: User profile tabs
@@ -17,15 +17,22 @@ The Profile page has two tabs: "Account" and "Contact Information".
 Account Tab
 -----------
 In the Account tab, users can view and edit their personal information. This includes
-their name, email address and email notification preference, however, the email address field is read-only and cannot be changed from the Profile page. Users can also change their password here.
-
-The "Receive notification emails?" checkbox allows users to control whether they want to receive
+their name, email address and email notification preference, however, the email address field is read-only and cannot be changed from the Profile page. The "Receive notification emails?" checkbox allows users to control whether they want to receive
 email notifications for new submissions. By default, this checkbox is checked.
 
 .. image:: images/profile_account_populate.webp
     :alt: User profile personal information
 
 To save changes made to personal information, click on the "Save" button.
+
+Users can also change their password here by clicking on the change password button towards the top right of the Account tab. This will lead them to a password change page.
+
+.. image:: images/user_profile_change_password.webp
+    :alt: User profile account change password
+
+On this page, users can enter their old password and new password along with its confirmation to change their passwords.
+
+
 
 Contact Information Tab
 -----------------------
@@ -40,6 +47,15 @@ By completing this information once in your profile, these details will be autom
 
 .. image:: images/submission_step_2_prefilled.webp
     :alt: Auto Populate step 2 of submission form
+
+Language Tab
+------------
+The Language tab allows users to change the language of the application. This is useful for users who are not comfortable with English, or who prefer to use a different language.
+
+.. image:: images/profile_language_switcher.webp
+    :alt: Language switcher tab
+
+
 
 In-Progress Submissions
 -----------------------
@@ -148,6 +164,11 @@ group.
 .. image:: images/create_submission_group.webp
     :alt: Create submission group
 
+In the Submission Groups table on the Profile page, clicking on the download icon will export all submissions in that group as a CSV file for download.
+
+.. image:: images/user_profile_submission_groups_download.webp
+    :alt: User profile submission groups download
+
 
 The user can also view and modify the details of an existing submission group by clicking on the
 blue eye icon for that group in the table on the profile page.
@@ -155,7 +176,7 @@ blue eye icon for that group in the table on the profile page.
 .. image:: images/user_profile_submission_groups_view.webp
     :alt: User profile submission groups
 
-This will take the user to a page where they can modify the group name and group description, and also view past submissions made under this group.
+This will take the user to a page where they can modify the group name and group description, and also view past submissions made under this group. Users can also sort the submissions within the group using the same sorting functionality available on the main Profile page tables.
 
 .. image:: images/submission_group_details.webp
     :alt: Submission group details
@@ -176,3 +197,20 @@ When you do this, a confirmation dialog box will appear asking if you are sure y
 Click **Yes** to proceed with deleting the submission group. This will remove the group, but any submissions previously associated with it will remain intact, they will simply no longer be associated with any group.
 
 Click **Cancel** if you do not wish to proceed with the deletion. This will close the dialog and return you to the profile page without making any changes.
+
+Table Sorting Functionality
+---------------------------
+All tables on the Profile page (In-Progress Submissions, Past Submissions, and Submission Groups) include a Sort button located at the top right of each table. Users can click this button to sort the table data by different fields. When clicked, users can select which field to sort by and choose between ascending or descending order.
+
+.. image:: images/user_profile_sort.webp
+    :alt: User profile table sorting functionality
+
+On hovering over the Sort button, it shows how the current table is sorted right now.
+
+.. image:: images/user_profile_sort_hover.webp
+    :alt: User profile current sorting
+
+
+
+
+

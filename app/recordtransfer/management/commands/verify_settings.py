@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
 
+from recordtransfer.constants import FileExtensions
 from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
@@ -306,6 +307,38 @@ def verify_accepted_file_formats() -> None:
             _check_extension_duplicates(extension, group_name, inverted_formats)
             inverted_formats[extension] = group_name
 
+    _check_for_compressed_files(inverted_formats)
+
+
+def _check_for_compressed_files(inverted_formats: dict) -> None:
+    """Check for compressed file extensions in accepted formats and print warning.
+
+    Args:
+        inverted_formats: Dictionary mapping extensions to their group names.
+    """
+    found_compressed = []
+
+    for extension in inverted_formats:
+        if extension in FileExtensions.COMPRESSED:
+            found_compressed.append(extension)
+
+    if found_compressed:
+        warning_msg = [
+            "",
+            "********************************************************************************",
+            "******* !! WARNING !!",
+            "******* You've enabled uploads of compressed file collections (.zip, .7z, ...)",
+            "******* Analyzing compressed files is not supported yet, it is possible for",
+            "******* malicious files to be uploaded like this.",
+            "******* Consider removing this file type from ACCEPTED_FILE_FORMATS",
+            "********************************************************************************",
+            f"******* Found compressed extensions: {', '.join(found_compressed)}",
+            "********************************************************************************",
+            "",
+        ]
+
+        LOGGER.warning("\n".join(warning_msg))
+
 
 def _validate_cron(cron_str: str) -> None:
     """Validate a cron expression.
@@ -333,7 +366,7 @@ def _validate_cron(cron_str: str) -> None:
     field_names = ["minute", "hour", "day_of_month", "month", "day_of_week"]
 
     # Validate each field
-    for value, field in zip(fields, field_names):
+    for value, field in zip(fields, field_names, strict=True):
         pattern = cron_patterns[field]
         if not re.match(pattern, value):
             raise ValueError(f"Invalid value '{value}' for field '{field}'")

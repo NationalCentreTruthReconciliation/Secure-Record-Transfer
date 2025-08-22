@@ -183,7 +183,7 @@ class TestSubmission(TestCase):
         # Check that the Bag is removed after an error
         remove_bag_mock.assert_called_once()
 
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     @patch("recordtransfer.models.Submission.remove_bag")
     @patch("bagit.Bag.is_valid")
     def test_create_new_exception_if_bag_invalid(
@@ -202,7 +202,7 @@ class TestSubmission(TestCase):
         # Check that the Bag is removed after an error
         remove_bag_mock.assert_called_once()
 
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.UploadSession.copy_session_uploads")
     def test_create_new_bag(self, copy_uploads_mock: MagicMock) -> None:
         """Test creating a new Bag when one does not exist."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
@@ -228,7 +228,7 @@ class TestSubmission(TestCase):
             self.assertIn(f"{self.HELLO_FILE_MD5}  data/hello.txt", manifest_lines)
             self.assertIn(f"{self.WORLD_FILE_MD5}  data/world.txt", manifest_lines)
 
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     def test_create_new_bag_multiple_algorithms(self, copy_uploads_mock: MagicMock) -> None:
         """Test creating a new Bag with multiple checksum algorithms."""
         copy_uploads_mock.side_effect = self._create_new_files_OK
@@ -243,8 +243,8 @@ class TestSubmission(TestCase):
             self.assertTrue((temp_dir_path / "manifest-sha1.txt").exists())
             self.assertTrue((temp_dir_path / "manifest-sha256.txt").exists())
 
-    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.get_permanent_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     def test_update_existing_bag(
         self, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
     ) -> None:
@@ -291,8 +291,8 @@ class TestSubmission(TestCase):
 
             self.assertEqual(mod_time_before, mod_time_after)
 
-    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.get_permanent_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     def test_update_existing_bag_files_differ(
         self, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
     ) -> None:
@@ -319,8 +319,8 @@ class TestSubmission(TestCase):
 
             self.assertEqual(copy_uploads_mock.call_count, 2)
 
-    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.get_permanent_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     @patch("bagit.Bag")
     def test_update_existing_bag_exception(
         self, bag_mock: MagicMock, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
@@ -350,8 +350,8 @@ class TestSubmission(TestCase):
 
             self.assertEqual(copy_uploads_mock.call_count, 2)
 
-    @patch("recordtransfer.models.UploadSession.get_permanent_uploads")
-    @patch("recordtransfer.models.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.get_permanent_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     def test_update_existing_bag_algorithms_differ(
         self, copy_uploads_mock: MagicMock, perm_upload_mock: MagicMock
     ) -> None:
@@ -422,7 +422,7 @@ class TestInProgressSubmission(TestCase):
         self.in_progress.upload_session = None
         self.assertFalse(self.in_progress.upload_session_expired)
 
-    @patch("recordtransfer.models.UploadSession.expires_soon", new_callable=PropertyMock)
+    @patch("upload.models.UploadSession.expires_soon", new_callable=PropertyMock)
     def test_upload_session_expires_soon(self, mock_expires_soon: PropertyMock) -> None:
         """Test upload_session_expires_soon property."""
         mock_expires_soon.return_value = True

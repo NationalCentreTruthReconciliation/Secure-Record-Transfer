@@ -67,7 +67,7 @@ class TestCreateUploadSessionView(TestCase):
     MAX_TOTAL_UPLOAD_COUNT=4,
 )
 class TestUploadFilesView(TestCase):
-    """Tests for recordtransfer:upload_files view."""
+    """Tests for upload:upload_files view."""
 
     @classmethod
     def setUpClass(cls) -> None:

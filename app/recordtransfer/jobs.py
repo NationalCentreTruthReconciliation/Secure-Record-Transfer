@@ -8,12 +8,13 @@ from django.conf import settings
 from django.core.files.base import File
 from django.db.models.query import QuerySet
 from django.utils import timezone
+from upload.models import UploadSession
 
 from recordtransfer import utils
 from recordtransfer.emails import send_user_in_progress_submission_expiring
 from recordtransfer.handlers import JobLogHandler
 from recordtransfer.models import LOGGER as RECORDTRANSFER_MODELS_LOGGER
-from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
+from recordtransfer.models import InProgressSubmission, Job, Submission, User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -91,6 +92,16 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         job_handler.close()
 
 
+def get_expirable_upload_sessions() -> QuerySet[UploadSession]:
+    """Get upload sessions that can be expired, that have an in-progress submission attached."""
+    return UploadSession.objects.get_expirable().filter(in_progress_submission__isnull=False).all()
+
+
+    """Get upload sessions that can be deleted, and do not have an in-progress submission."""
+def get_deletable_upload_sessions() -> QuerySet[UploadSession]:
+    return UploadSession.objects.get_deletable().filter(in_progress_submission__isnull=True).all()
+
+
 @django_rq.job
 def cleanup_expired_sessions() -> None:
     """Clean up UploadSession objects that are expirable. Upload sessions that are not associated
@@ -99,17 +110,8 @@ def cleanup_expired_sessions() -> None:
     """
     LOGGER.info("Cleaning up upload sessions ...")
     try:
-        expirable_sessions: QuerySet[UploadSession] = (
-            UploadSession.objects.get_expirable()  # type: ignore
-            .filter(in_progress_submission__isnull=False)
-            .all()
-        )
-
-        deletable_sessions: QuerySet[UploadSession] = (
-            UploadSession.objects.get_deletable()  # type: ignore
-            .filter(in_progress_submission__isnull=True)
-            .all()
-        )
+        expirable_sessions = get_expirable_upload_sessions()
+        deletable_sessions = get_deletable_upload_sessions()
 
         expirable_count = expirable_sessions.count()
         deletable_count = deletable_sessions.count()
