@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
@@ -27,6 +28,7 @@ from recordtransfer.views.account import (
     AsyncPasswordResetView,
     Login,
 )
+from upload.urls import urlpatterns as upload_urlpatterns
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
@@ -65,7 +67,14 @@ urlpatterns = [
     ),
 ]
 
+if settings.DEBUG:
+    # Serve media files directly without nginx in development
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 if settings.DEBUG and not settings.TESTING:
     from debug_toolbar.toolbar import debug_toolbar_urls
 
     urlpatterns += debug_toolbar_urls()
+
+if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
+    urlpatterns += upload_urlpatterns

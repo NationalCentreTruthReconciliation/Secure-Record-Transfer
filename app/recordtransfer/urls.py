@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
@@ -107,31 +106,6 @@ urlpatterns = [
         name="assign_submission_group",
     ),
 ]
-
-if settings.DEBUG:
-    # Serve media files directly without nginx in development
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
-    urlpatterns.extend(
-        [
-            path(
-                "upload-session/",
-                login_required(views.media.create_upload_session),
-                name="create_upload_session",
-            ),
-            path(
-                "upload-session/<session_token>/files/",
-                login_required(views.media.upload_or_list_files),
-                name="upload_files",
-            ),
-            path(
-                "upload-session/<session_token>/files/<file_name>/",
-                login_required(views.media.uploaded_file),
-                name="uploaded_file",
-            ),
-        ]
-    )
 
 if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(

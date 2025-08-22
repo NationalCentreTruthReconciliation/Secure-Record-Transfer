@@ -15,6 +15,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 INSTALLED_APPS = [
     "axes",
     "webpack_loader",
+    "nginx.apps.NginxConfig",
     "caais.apps.CaaisConfig",
     "clamav.apps.ClamavConfig",
     "upload.apps.UploadConfig",
