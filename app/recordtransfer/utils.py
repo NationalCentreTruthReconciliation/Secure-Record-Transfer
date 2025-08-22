@@ -1,26 +1,15 @@
-import contextlib
 import functools
-import logging
-import mimetypes
 import os
-import urllib.parse
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Union
+from typing import List
 from zipfile import ZipFile
 
 from django.conf import settings
-from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from django.utils.html import strip_tags
-from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
-
-from recordtransfer.constants import WindowsFileRestrictions
-
-# This is to avoid a circular import
-if TYPE_CHECKING:
-    from recordtransfer.models import UploadSession
+from django.utils.translation import ngettext_lazy, pgettext_lazy
 
 
 def zip_directory(directory: str, zipf: ZipFile) -> None:

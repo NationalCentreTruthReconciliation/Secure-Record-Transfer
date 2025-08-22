@@ -1,16 +1,13 @@
 import logging
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.forms import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import gettext
 from freezegun import freeze_time
 
-from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import Job, TempUploadedFile, UploadSession, User
+from recordtransfer.models import Job, User
 
 
 @freeze_time("2024-01-15 10:30:00")
@@ -98,7 +95,7 @@ class TestJobFileView(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
-    @patch("recordtransfer.views.media.settings.DEBUG", True)
+    @override_settings(DEBUG=True)
     def test_job_file_success_debug_mode(self) -> None:
         """Test successful file access in DEBUG mode."""
         self.client.login(username="staff", password="1X<ISRUkw+tuK")
@@ -108,7 +105,7 @@ class TestJobFileView(TestCase):
         # Check that the redirect URL contains the filename
         self.assertIn("test_report.pdf", response["Location"])
 
-    @patch("recordtransfer.views.media.settings.DEBUG", False)
+    @override_settings(DEBUG=False)
     def test_job_file_success_production_mode(self) -> None:
         """Test successful file access in production mode."""
         self.client.login(username="staff", password="1X<ISRUkw+tuK")

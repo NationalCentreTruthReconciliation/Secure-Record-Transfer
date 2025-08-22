@@ -8,6 +8,9 @@ from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext, ngettext_lazy
 from django.utils.translation import gettext_lazy as _
 
+# TODO: This module should not depend on recordtransfer!
+from recordtransfer.utils import bytes_to_mb, mb_to_bytes
+
 from upload.constants import WindowsFileRestrictions
 from upload.mime import MAGIC_AVAILABLE, mime
 
@@ -61,7 +64,7 @@ def accept_file(filename: str, filesize: int, file: UploadedFile) -> dict:
     return {"accepted": True}
 
 
-def accept_session(filename: str, filesize: Union[str, int], session: UploadSession) -> dict:
+def accept_session(filename: str, filesize: Union[str, int], session: "UploadSession") -> dict:
     """Determine if a new file should be accepted as part of the session.
 
     These checks are applied:

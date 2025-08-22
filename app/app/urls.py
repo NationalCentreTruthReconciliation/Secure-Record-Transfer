@@ -77,4 +77,4 @@ if settings.DEBUG and not settings.TESTING:
     urlpatterns += debug_toolbar_urls()
 
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
-    urlpatterns += upload_urlpatterns
+    urlpatterns += [path("", include("upload.urls"))]

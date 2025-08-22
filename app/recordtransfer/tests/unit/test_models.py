@@ -1,23 +1,19 @@
-import logging
 import shutil
-import tempfile
-from datetime import datetime, timedelta
-from datetime import timezone as dttimezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Optional
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import bagit
 from caais.models import Metadata
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db.models.manager import BaseManager
 from django.forms import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from upload.models import PermUploadedFile, TempUploadedFile, UploadSession
 
 from recordtransfer.enums import SiteSettingType, SubmissionStep
 from recordtransfer.models import (
@@ -25,9 +21,62 @@ from recordtransfer.models import (
     Job,
     SiteSetting,
     Submission,
-    UploadSession,
     User,
 )
+
+
+def get_mock_temp_uploaded_file(
+    name: str,
+    exists: bool = True,
+    session: UploadSession | None = None,
+    upload_to: str = "/media/temp/",
+    size: int = 1024,
+) -> MagicMock:
+    """Create a new MagicMock that implements all the correct properties
+    required for an TempUploadedFile.
+    """
+    if not exists:
+        size = 0
+    file_mock = MagicMock(spec_set=TempUploadedFile)
+    file_mock.exists = exists
+    file_mock.name = name
+    file_mock.session = session
+
+    file_upload_mock = MagicMock()
+    file_upload_mock.size = size
+    file_upload_mock.path = f"{upload_to.rstrip('/')}/{name}"
+    file_upload_mock.name = name
+
+    file_mock.file_upload = file_upload_mock
+
+    return file_mock
+
+
+def get_mock_perm_uploaded_file(
+    name: str,
+    exists: bool = True,
+    session: Optional[UploadSession] = None,
+    upload_to: str = "/media/uploaded_files/",
+    size: int = 1024,
+) -> MagicMock:
+    """Create a new MagicMock that implements all the correct properties
+    required for an PermUploadedFile.
+    """
+    if not exists:
+        size = 0
+    file_mock = MagicMock(spec_set=PermUploadedFile)
+    file_mock.exists = exists
+    file_mock.name = name
+    file_mock.session = session
+
+    file_upload_mock = MagicMock()
+    file_upload_mock.size = size
+    file_upload_mock.path = f"{upload_to.rstrip('/')}/{name}"
+    file_upload_mock.name = name
+
+    file_mock.file_upload = file_upload_mock
+
+    return file_mock
 
 
 class TestSubmission(TestCase):

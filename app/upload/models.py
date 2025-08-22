@@ -12,6 +12,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.formats import date_format
@@ -582,7 +583,7 @@ class BaseUploadedFile(models.Model):
     def get_file_access_url(self) -> str:
         """Generate URL to request access for this file."""
         return reverse(
-            "recordtransfer:uploaded_file",
+            "upload:uploaded_file",
             kwargs={
                 "session_token": self.session.token,
                 "file_name": self.name,

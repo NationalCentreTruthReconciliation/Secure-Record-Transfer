@@ -1,19 +1,17 @@
 import logging
 from unittest.mock import MagicMock, patch
 
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext
 from upload.models import TempUploadedFile, UploadSession
 
-User = settings.AUTH_USER_MODEL
-
 
 class TestCreateUploadSessionView(TestCase):
-    """Tests for recordtransfer:create_upload_session view."""
+    """Tests for session creation view."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -24,12 +22,13 @@ class TestCreateUploadSessionView(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         """Create user accounts."""
+        User = get_user_model()
         cls.test_user = User.objects.create_user(username="testuser", password="1X<ISRUkw+tuK")
 
     def setUp(self) -> None:
         """Set up test environment."""
         self.client.login(username="testuser", password="1X<ISRUkw+tuK")
-        self.url = reverse("recordtransfer:create_upload_session")
+        self.url = reverse("upload:create_upload_session")
 
     def tearDown(self) -> None:
         """Tear down test environment."""
@@ -51,7 +50,7 @@ class TestCreateUploadSessionView(TestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
 
-    @patch("recordtransfer.views.media.UploadSession.new_session")
+    @patch("upload.models.UploadSession.new_session")
     def test_create_upload_session_error(self, mock_new_session: MagicMock) -> None:
         """Test that a 500 is returned if an error is raised."""
         mock_new_session.side_effect = Exception("Error creating session")
@@ -61,13 +60,12 @@ class TestCreateUploadSessionView(TestCase):
         self.assertIn("error", response_json)
 
 
-@patch(
-    "django.conf.settings.ACCEPTED_FILE_FORMATS",
-    {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
+@override_settings(
+    ACCEPTED_FILE_FORMATS={"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
+    MAX_TOTAL_UPLOAD_SIZE_MB=3,
+    MAX_SINGLE_UPLOAD_SIZE_MB=1,
+    MAX_TOTAL_UPLOAD_COUNT=4,
 )
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_SIZE_MB", 3)
-@patch("django.conf.settings.MAX_SINGLE_UPLOAD_SIZE_MB", 1)
-@patch("django.conf.settings.MAX_TOTAL_UPLOAD_COUNT", 4)  # Number of files
 class TestUploadFilesView(TestCase):
     """Tests for recordtransfer:upload_files view."""
 
@@ -81,18 +79,19 @@ class TestUploadFilesView(TestCase):
     def setUpTestData(cls) -> None:
         """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
+        User = get_user_model()
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
 
     def setUp(self) -> None:
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.patch__accept_file = patch("recordtransfer.views.media.accept_file").start()
-        self.patch__accept_session = patch("recordtransfer.views.media.accept_session").start()
-        self.patch_check_for_malware = patch(
-            "recordtransfer.views.media.check_for_malware"
-        ).start()
+        self.patch__accept_file = patch("upload.views.accept_file").start()
         self.patch__accept_file.return_value = {"accepted": True}
+
+        self.patch__accept_session = patch("upload.views.accept_session").start()
         self.patch__accept_session.return_value = {"accepted": True}
+
+        self.patch_check_for_malware = patch("upload.views.check_for_malware").start()
 
         # Create a new upload session token
         self.session = UploadSession.new_session(user=self.test_user_1)
@@ -101,9 +100,14 @@ class TestUploadFilesView(TestCase):
 
     def tearDown(self) -> None:
         """Tear down test environment."""
-        TempUploadedFile.objects.all().delete()
-        UploadSession.objects.all().delete()
         self.client.logout()
+        # Reset side effects before stopping patches
+        self.patch__accept_file.side_effect = None
+        self.patch__accept_session.side_effect = None
+        self.patch_check_for_malware.side_effect = None
+        self.patch__accept_file.stop()
+        self.patch__accept_session.stop()
+        self.patch_check_for_malware.stop()
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -123,6 +127,7 @@ class TestUploadFilesView(TestCase):
     def test_list_uploaded_files_invalid_user(self) -> None:
         """Invalid user for the session."""
         # Create a new session with a different user
+        User = get_user_model()
         other_session = UploadSession.new_session(
             user=User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
         )
@@ -154,7 +159,7 @@ class TestUploadFilesView(TestCase):
 
     ## --- POST Request Tests --- ##
 
-    def test_logged_out_error(self):
+    def test_logged_out_error(self) -> None:
         """Test that a 302 is returned if the user is not logged in."""
         self.client.logout()
         response = self.client.post(self.url, {})
@@ -202,7 +207,9 @@ class TestUploadFilesView(TestCase):
 
     def test_new_session_made_token_mismatch_user(self) -> None:
         """Test that a 400 error is received if the token does not match the user."""
-        other_user = User.objects.create_user(username="testuser2", password="1X<ISRUkw+tuK")
+        other_user = get_user_model().objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
         other_user_session = UploadSession.new_session(user=other_user)
 
         response = self.client.post(
@@ -340,6 +347,7 @@ class TestUploadedFileView(TestCase):
     def setUpTestData(cls) -> None:
         """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
+        User = get_user_model()
         cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
         cls.admin_user = User.objects.create_user(
             username="admin", password="3&SAjfTYZQ", is_staff=True
@@ -349,11 +357,6 @@ class TestUploadedFileView(TestCase):
         """Set up test environment."""
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
-
-        # Set up client session data
-        session = self.client.session
-        session["wizard_submission_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
-        session.save()
 
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
         self.temp_file = self.session.add_temp_file(
@@ -377,7 +380,7 @@ class TestUploadedFileView(TestCase):
 
     def test_uploaded_file_invalid_user(self) -> None:
         """Invalid user for the session."""
-        self.session.user = User.objects.create_user(
+        self.session.user = get_user_model().objects.create_user(
             username="testuser2", password="1X<ISRUkw+tuK"
         )
         self.session.save()
@@ -392,7 +395,7 @@ class TestUploadedFileView(TestCase):
 
     def test_delete_uploaded_file_invalid_user(self) -> None:
         """Test delete with an invalid user for the session."""
-        self.session.user = User.objects.create_user(
+        self.session.user = get_user_model().objects.create_user(
             username="testuser2", password="1X<ISRUkw+tuK"
         )
         self.session.save()
@@ -405,13 +408,13 @@ class TestUploadedFileView(TestCase):
             response_json["error"], gettext("Invalid filename or upload session token")
         )
 
-    @patch("upload.views.media.settings.DEBUG", True)
+    @override_settings(DEBUG=True)
     def test_get_uploaded_file_in_debug(self) -> None:
         """Test getting the file in DEBUG mode."""
         response = self.client.get(self.url)
         self.assertEqual(response.url, self.temp_file.get_file_media_url())
 
-    @patch("upload.views.media.settings.DEBUG", False)
+    @override_settings(DEBUG=False)
     def test_get_uploaded_file_in_production(self) -> None:
         """Test getting the file in production mode."""
         response = self.client.get(self.url)
