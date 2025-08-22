@@ -65,7 +65,7 @@ class BaseUploadedFileAdminMixin:
 class BaseUploadedFileAdmin(BaseUploadedFileAdminMixin, admin.ModelAdmin):
     """Regular admin for uploaded files."""
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether add permission is granted for this model admin."""
         return False
 
@@ -81,7 +81,7 @@ class BaseUploadedFileAdmin(BaseUploadedFileAdminMixin, admin.ModelAdmin):
 class BaseUploadedFileInlineAdmin(BaseUploadedFileAdminMixin, admin.TabularInline):
     """Inline admin for uploaded files."""
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: object = None) -> bool:
         """Determine whether add permission is granted for this model admin."""
         return False
 

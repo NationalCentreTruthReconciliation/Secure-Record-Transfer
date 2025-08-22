@@ -99,8 +99,18 @@ def cleanup_expired_sessions() -> None:
     """
     LOGGER.info("Cleaning up upload sessions ...")
     try:
-        expirable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_expirable().all()
-        deletable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_deletable().all()
+        expirable_sessions: QuerySet[UploadSession] = (
+            UploadSession.objects.get_expirable()  # type: ignore
+            .filter(in_progress_submission__isnull=False)
+            .all()
+        )
+
+        deletable_sessions: QuerySet[UploadSession] = (
+            UploadSession.objects.get_deletable()  # type: ignore
+            .filter(in_progress_submission__isnull=True)
+            .all()
+        )
+
         expirable_count = expirable_sessions.count()
         deletable_count = deletable_sessions.count()
         if expirable_count == 0 and deletable_count == 0:
