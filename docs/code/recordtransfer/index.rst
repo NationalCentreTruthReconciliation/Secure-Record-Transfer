@@ -8,6 +8,7 @@ The main Secure Record Transfer application is included in this app.
 
     admin
     caais
+    constants
     context_processors
     decorators
     emails
