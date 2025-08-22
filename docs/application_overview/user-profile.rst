@@ -9,7 +9,7 @@ user profile page is accessible by clicking on "Profile" on the navigation bar.
     :alt: User profile on the navigation bar
 
 
-The Profile page has two tabs: "Account" and "Contact Information".
+The Profile page has three tabs: "Account", "Contact Information", and "Language".
 
 .. image:: images/user_profile_tabs.webp
     :alt: User profile tabs
@@ -17,15 +17,22 @@ The Profile page has two tabs: "Account" and "Contact Information".
 Account Tab
 -----------
 In the Account tab, users can view and edit their personal information. This includes
-their name, email address and email notification preference, however, the email address field is read-only and cannot be changed from the Profile page. Users can also change their password here.
-
-The "Receive notification emails?" checkbox allows users to control whether they want to receive
+their name, email address and email notification preference, however, the email address field is read-only and cannot be changed from the Profile page. The "Receive notification emails?" checkbox allows users to control whether they want to receive
 email notifications for new submissions. By default, this checkbox is checked.
 
 .. image:: images/profile_account_populate.webp
     :alt: User profile personal information
 
 To save changes made to personal information, click on the "Save" button.
+
+Users can also change their password here by clicking on the change password button towards the top right of the Account tab. This will lead them to a password change page.
+
+.. image:: images/user_profile_change_password.webp
+    :alt: User profile account change password
+
+On this page, users can enter their old password and new password along with its confirmation to change their passwords.
+
+
 
 Contact Information Tab
 -----------------------
