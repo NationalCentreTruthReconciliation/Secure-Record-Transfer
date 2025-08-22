@@ -4,6 +4,7 @@ import logging
 from typing import Any, Optional, cast
 
 from caais.export import ExportVersion
+from django.contrib import messages
 from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
@@ -13,7 +14,7 @@ from django.http import (
     HttpResponse,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -122,7 +123,12 @@ def submission_group_bulk_csv_export(request: HttpRequest, uuid: str) -> HttpRes
         )
 
     if not related_submissions.exists():
-        raise Http404("No submissions found in this group")
+        messages.error(
+            request,
+            gettext("This submission group has no submissions associated with it to export."),
+        )
+
+        return redirect("recordtransfer:user_profile")
 
     return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
 

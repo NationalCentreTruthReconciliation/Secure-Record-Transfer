@@ -36,7 +36,7 @@
                 <div class="flex flex-row gap-4">
                     {% if not in_progress.upload_session_expired %}
                         <a href="{{ in_progress.get_resume_url }}"
-                           class="link link-success tooltip"
+                           class="link link-success tooltip tooltip-left"
                            data-tip="{% trans "Resume" %}"
                            id="resume_in_progress_{{ forloop.counter }}">
                             <i class="fas fa-play"></i>
@@ -47,7 +47,7 @@
                        hx-swap="innerHTML"
                        hx-select="#modal-content"
                        hx-trigger="click"
-                       class="link link-error tooltip"
+                       class="link link-error tooltip tooltip-left"
                        data-tip="{% trans "Delete" %}"
                        id="delete_in_progress_{{ forloop.counter }}">
                         <i class="fas fa-trash-alt"></i>

@@ -3,14 +3,16 @@
 import logging
 from typing import Any, Optional, cast
 
+from django.conf import settings
 from django.core.paginator import Paginator
-from django.db.models import QuerySet
+from django.db.models import Count, DateTimeField, ExpressionWrapper, F, QuerySet
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.html import escape
-from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView
@@ -75,8 +77,8 @@ class BaseUserProfileUpdateView(UpdateView):
 
     model = User
     success_url = reverse_lazy("recordtransfer:user_profile")
-    update_success_message = gettext("Updated successfully")
-    update_error_message = gettext("Could not update")
+    update_success_message = _("Updated successfully")
+    update_error_message = _("Could not update")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -112,7 +114,7 @@ class BaseUserProfileUpdateView(UpdateView):
         context = self.get_context_data(form=form)
         response = self.render_to_response(context)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Please correct the errors below.")}
+            response, "showError", {"value": _("Please correct the errors below.")}
         )
 
 
@@ -121,8 +123,8 @@ class AccountInfoUpdateView(BaseUserProfileUpdateView):
 
     form_class = UserAccountInfoForm
     template_name = "includes/account_info_form.html"
-    update_success_message = gettext("Account details updated.")
-    update_error_message = gettext("Failed to update account information.")
+    update_success_message = _("Account details updated.")
+    update_error_message = _("Failed to update account information.")
 
 
 class ContactInfoUpdateView(BaseUserProfileUpdateView):
@@ -130,8 +132,8 @@ class ContactInfoUpdateView(BaseUserProfileUpdateView):
 
     form_class = UserContactInfoForm
     template_name = "includes/contact_info_form.html"
-    update_success_message = gettext("Contact information updated.")
-    update_error_message = gettext("Failed to update contact information.")
+    update_success_message = _("Contact information updated.")
+    update_error_message = _("Failed to update contact information.")
 
 
 @require_http_methods(["GET", "DELETE"])
@@ -153,17 +155,17 @@ def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpRespon
         in_progress.delete()
         response = HttpResponse(status=204)
         return trigger_client_event(
-            response, "showSuccess", {"value": gettext("In-progress submission deleted.")}
+            response, "showSuccess", {"value": _("In-progress submission deleted.")}
         )
     except Http404:
         response = HttpResponse(status=404)
         return trigger_client_event(
-            response, "showError", {"value": gettext("In-progress submission not found.")}
+            response, "showError", {"value": _("In-progress submission not found.")}
         )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Failed to delete in-progress submission.")}
+            response, "showError", {"value": _("Failed to delete in-progress submission.")}
         )
 
 
@@ -206,41 +208,164 @@ def _paginated_table_view(
 
 
 def submission_group_table(request: HttpRequest) -> HttpResponse:
-    """Render the submission group table with pagination."""
-    queryset = SubmissionGroup.objects.filter(created_by=request.user).order_by("name")
+    """Render the submission group table with pagination and sorting."""
+    sort_options = {
+        "name": _("Group Name"),
+        "description": _("Group Description"),
+        "submissions": _("Submissions in Group"),
+    }
+
+    allowed_sorts = {
+        "name": "name",
+        "description": "description",
+        "submissions": "submission_count",
+    }
+    default_sort = "name"
+    default_direction = "asc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
+    queryset = (
+        SubmissionGroup.objects.filter(created_by=request.user)
+        .annotate(submission_count=Count("submission"))
+        .order_by(order_field)
+    )
     return _paginated_table_view(
         request,
         queryset,
         "includes/submission_group_table.html",
         HtmlIds.ID_SUBMISSION_GROUP_TABLE,
         reverse("recordtransfer:submission_group_table"),
+        extra_context={
+            "current_sort": sort,
+            "current_direction": direction,
+            "sort_options": sort_options,
+            "target_id": HtmlIds.ID_SUBMISSION_GROUP_TABLE,
+        },
     )
 
 
 def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
     """Render the in-progress submission table with pagination."""
-    queryset = InProgressSubmission.objects.filter(user=request.user).order_by("-last_updated")
+    expire_minutes = settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+
+    if expire_minutes != -1:
+        sort_options = {
+            "last_updated": _("Last Updated"),
+            "submission_title": _("Submission Title"),
+            "expires_at": _("Expires At"),
+        }
+
+        allowed_sorts = {
+            "last_updated": "last_updated",
+            "submission_title": "title",
+            "expires_at": "expires_at",
+        }
+
+        queryset = InProgressSubmission.objects.filter(user=request.user).annotate(
+            expires_at=ExpressionWrapper(
+                F("upload_session__last_upload_interaction_time")
+                + timezone.timedelta(minutes=expire_minutes),
+                output_field=DateTimeField(),
+            )
+        )
+    else:
+        sort_options = {
+            "last_updated": _("Last Updated"),
+            "submission_title": _("Submission Title"),
+        }
+
+        allowed_sorts = {
+            "last_updated": "last_updated",
+            "submission_title": "title",
+        }
+
+        queryset = InProgressSubmission.objects.filter(user=request.user)
+
+    default_sort = "last_updated"
+    default_direction = "desc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
+    queryset = queryset.order_by(order_field)
     return _paginated_table_view(
         request,
         queryset,
         "includes/in_progress_submission_table.html",
         HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
         reverse("recordtransfer:in_progress_submission_table"),
+        extra_context={
+            "current_sort": sort,
+            "current_direction": direction,
+            "sort_options": sort_options,
+            "target_id": HtmlIds.ID_IN_PROGRESS_SUBMISSION_TABLE,
+        },
     )
 
 
 def submission_table(request: HttpRequest) -> HttpResponse:
-    """Render the past submission table with pagination."""
+    """Render the past submission table with pagination and sorting,
+    optionally filtered by group.
+    """
+    sort_options = {
+        "submission_date": _("Date Submitted"),
+        "submission_title": _("Submission Title"),
+        "submission_group": _("Submission Group"),
+    }
+    allowed_sorts = {
+        "submission_date": "submission_date",
+        "submission_title": "metadata__accession_title",
+        "submission_group": "part_of_group",
+    }
+    default_sort = "submission_date"
+    default_direction = "desc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
     group_uuid = request.GET.get(QueryParameters.SUBMISSION_GROUP_QUERY_NAME)
-    queryset = None
-    context = {}
+    context = {
+        "current_sort": sort,
+        "current_direction": direction,
+        "sort_options": sort_options,
+        "target_id": HtmlIds.ID_SUBMISSION_TABLE,
+    }
     if group_uuid:
         queryset = Submission.objects.filter(user=request.user, part_of_group__uuid=group_uuid)
         context["IN_GROUP"] = True
     else:
         queryset = Submission.objects.filter(user=request.user)
 
-    queryset = queryset.order_by("-submission_date")
+    queryset = queryset.order_by(order_field)
 
     return _paginated_table_view(
         request,
@@ -260,7 +385,7 @@ class SubmissionGroupModalCreateView(CreateView):
     model = SubmissionGroup
     form_class = SubmissionGroupForm
     template_name = "includes/new_submission_group_modal.html"
-    success_message = gettext("Submission group created successfully.")
+    success_message = _("Submission group created successfully.")
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
@@ -319,19 +444,19 @@ def delete_submission_group(request: HttpRequest, uuid: str) -> HttpResponse:
             response,
             "showSuccess",
             {
-                "value": gettext('Submission group "%(name)s" deleted.')
+                "value": _('Submission group "%(name)s" deleted.')
                 % {"name": escape(submission_group.name)},
             },
         )
     except Http404:
         response = HttpResponse(status=404)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Submission group not found.")}
+            response, "showError", {"value": _("Submission group not found.")}
         )
     except Exception:
         response = HttpResponse(status=500)
         return trigger_client_event(
-            response, "showError", {"value": gettext("Failed to delete submission group.")}
+            response, "showError", {"value": _("Failed to delete submission group.")}
         )
 
 
@@ -384,7 +509,7 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
         except (Submission.DoesNotExist, SubmissionGroup.DoesNotExist):
             response = HttpResponse(status=404)
             return trigger_client_event(
-                response, "showError", {"value": gettext("Submission or group not found")}
+                response, "showError", {"value": _("Submission or group not found")}
             )
 
         submission_title = (
@@ -402,7 +527,7 @@ def assign_submission_group(request: HttpRequest) -> HttpResponse:
         return trigger_client_event(
             response,
             "showError",
-            {"value": gettext("Failed to assign submission to group")},
+            {"value": _("Failed to assign submission to group")},
         )
 
 
@@ -417,7 +542,7 @@ def _handle_unassign_submission(submission: Submission, submission_title: str) -
             response,
             "showError",
             {
-                "value": gettext('Submission "%(title)s" is not assigned to any group')
+                "value": _('Submission "%(title)s" is not assigned to any group')
                 % {"title": submission_title}
             },
         )
@@ -425,7 +550,7 @@ def _handle_unassign_submission(submission: Submission, submission_title: str) -
     submission.part_of_group = None
     submission.save()
 
-    success_message = gettext('Submission "%(title)s" unassigned from group "%(group_name)s"') % {
+    success_message = _('Submission "%(title)s" unassigned from group "%(group_name)s"') % {
         "title": submission_title,
         "group_name": escape(original_group.name),
     }
@@ -441,7 +566,7 @@ def _handle_assign_submission(
     submission.part_of_group = group
     submission.save()
 
-    success_message = gettext('Submission "%(title)s" assigned to group "%(group_name)s"') % {
+    success_message = _('Submission "%(title)s" assigned to group "%(group_name)s"') % {
         "title": submission_title,
         "group_name": escape(group.name) if group else "",
     }
