@@ -431,8 +431,6 @@ ACCEPTED_FILE_FORMATS
 
     Accepted files are grouped by type of file. The default accepted file extensions are:
 
-    - Archive
-        - zip
     - Audio
         - mp3
         - wav
