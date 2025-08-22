@@ -3,7 +3,29 @@
 {% load render_bundle from webpack_loader %}
 {% block extrahead %}
     {{ block.super }}
+    <link rel="icon" href="{% static 'recordtransfer/img/favicon.ico' %}" />
     {{ js_context|json_script:"py_context_admin" }}
     {% render_bundle 'admin_recordtransfer' 'js' %}
     {% render_bundle 'admin_recordtransfer' 'css' %}
 {% endblock extrahead %}
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        #branding img {
+            float: left;
+            margin-right: 10px;
+        }
+
+        #branding h1 {
+            float: left;
+        }
+    </style>
+{% endblock extrastyle %}
+{% block branding %}
+    <img height="40"
+         src="{% static 'nctrlogo_flame_150x150px.webp' %}"
+         alt="NCTR Logo" />
+    <h1 style="line-height: 40px;" id="site-name">
+        <a href="{% url 'admin:index' %}">NCTR Transfer App Administration</a>
+    </h1>
+{% endblock branding %}
