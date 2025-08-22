@@ -41,9 +41,9 @@ By completing this information once in your profile, these details will be autom
 .. image:: images/submission_step_2_prefilled.webp
     :alt: Auto Populate step 2 of submission form
 
-Language Switcher Tab
----------------------
-The Language Switcher tab allows users to change the language of the application. This is useful for users who are not comfortable with English, or who prefer to use a different language.
+Language Tab
+------------
+The Language tab allows users to change the language of the application. This is useful for users who are not comfortable with English, or who prefer to use a different language.
 
 .. image:: images/profile_language_switcher.webp
     :alt: Language switcher tab
