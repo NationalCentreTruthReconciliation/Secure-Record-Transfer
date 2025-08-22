@@ -16,6 +16,7 @@ part of this application.
     caais
     models
     enums
+    constants
     utils
     decorators
     commands

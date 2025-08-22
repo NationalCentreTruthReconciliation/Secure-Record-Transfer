@@ -1,6 +1,7 @@
 import contextlib
 import functools
 import logging
+import mimetypes
 import os
 import urllib.parse
 from collections import defaultdict
@@ -9,6 +10,7 @@ from typing import TYPE_CHECKING, List, Union
 from zipfile import ZipFile
 
 from django.conf import settings
+from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from django.utils.html import strip_tags
 from django.utils.translation import gettext, ngettext_lazy, pgettext_lazy
@@ -21,6 +23,45 @@ if TYPE_CHECKING:
     from recordtransfer.models import UploadSession
 
 LOGGER = logging.getLogger(__name__)
+
+try:
+    import magic
+
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
+    magic = None
+    LOGGER.warning("Failed to import python-magic library. MIME type validation will be disabled.")
+
+
+# Pre-defined MIME type variations for different file extensions
+# This covers cases where different systems might report slightly different MIME types
+_MIME_TYPE_VARIATIONS = {
+    # Archive formats
+    "zip": {"application/zip", "application/x-zip-compressed"},
+    "7z": {"application/x-7z-compressed"},
+    # Audio formats
+    "mp3": {"audio/mpeg", "audio/mp3"},
+    "wav": {"audio/wav", "audio/x-wav", "audio/wave"},
+    "flac": {"audio/flac", "audio/x-flac"},
+    # Document formats
+    "docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+    "odt": {"application/vnd.oasis.opendocument.text"},
+    "pdf": {"application/pdf"},
+    "txt": {"text/plain"},
+    "html": {"text/html"},
+    # Image formats
+    "jpg": {"image/jpeg"},
+    "jpeg": {"image/jpeg"},
+    "png": {"image/png"},
+    "gif": {"image/gif"},
+    # Spreadsheet formats
+    "xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+    "csv": {"text/csv", "text/plain", "application/csv"},
+    # Video formats
+    "mkv": {"video/x-matroska", "video/mkv"},
+    "mp4": {"video/mp4"},
+}
 
 
 def zip_directory(directory: str, zipf: ZipFile) -> None:
@@ -214,20 +255,49 @@ def bytes_to_mb(b: int) -> float:
     return b / 1000**2
 
 
-def accept_file(filename: str, filesize: int) -> dict:
-    """Determine if a new file should be accepted. Does not check the file's
-    contents, only its name and its size.
+@functools.lru_cache(maxsize=128)
+def _get_expected_mime_types(extension: str) -> set[str]:
+    """Get expected MIME types for a file extension using python-magic.
+
+    Args:
+        extension: File extension without the dot (e.g., 'pdf', 'jpg')
+
+    Returns:
+        set: Set of acceptable MIME types for the extension
+    """
+    # Normalize extension
+    ext = extension.lower().lstrip(".")
+
+    # Use mimetypes module for initial guess
+    mime_type, _ = mimetypes.guess_type(f"file.{ext}")
+
+    acceptable_types = set()
+
+    if mime_type:
+        acceptable_types.add(mime_type)
+
+    # Add common variations and aliases for specific extensions
+    if ext in _MIME_TYPE_VARIATIONS:
+        acceptable_types.update(_MIME_TYPE_VARIATIONS[ext])
+
+    return acceptable_types
+
+
+def accept_file(filename: str, filesize: int, file: UploadedFile) -> dict:
+    """Determine if a new file should be accepted.
+
+    Args:
+        filename: The name of the file to check
+        filesize: The size of the file in bytes
+        file: The object containing the file data
 
     These checks are applied:
     - The file name is safe and not malicious
     - The file name is not empty
     - The file has an accepted extension
+    - The file's MIME type matches the expected MIME type for the extension
     - The file's size is an integer greater than zero
     - The file's size is less than or equal to the maximum allowed size for one file
-
-    Args:
-        filename (str): The name of the file
-        filesize (int): An integer representing the size of the file (in bytes)
 
     Returns:
         (dict): A dictionary containing an 'accepted' key that contains True if
@@ -235,17 +305,18 @@ def accept_file(filename: str, filesize: int) -> dict:
             an 'error' and 'verboseError' key if 'accepted' is False.
     """
     validators = [
+        _validate_file_size,
         _validate_basic_filename,
         _validate_filename_characters,
         _validate_absolute_paths,
         _validate_path_traversal,
         _validate_windows_reserved_names,
         _validate_file_extension,
-        _validate_file_size,
+        _validate_mime_type,
     ]
 
     for validator in validators:
-        result = validator(filename, filesize)
+        result = validator(filename, filesize, file)
         if not result["accepted"]:
             if "error" not in result:
                 result["error"] = _("Invalid filename or size")
@@ -324,8 +395,8 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
     return {"accepted": True}
 
 
-def _validate_basic_filename(filename: str, filesize: int) -> dict:
-    """Validate basic filename properties."""
+def _validate_basic_filename(filename: str, filesize: int, file: UploadedFile) -> dict:
+    """Validate basic filename requirements."""
     if not filename or not filename.strip():
         return {
             "accepted": False,
@@ -348,7 +419,7 @@ def _validate_basic_filename(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_filename_characters(filename: str, filesize: int) -> dict:
+def _validate_filename_characters(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Validate filename doesn't contain control characters."""
     if any(ord(char) < 32 for char in filename):
         return {
@@ -359,7 +430,7 @@ def _validate_filename_characters(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_absolute_paths(filename: str, filesize: int) -> dict:
+def _validate_absolute_paths(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Validate filename doesn't contain absolute path patterns."""
     if filename.startswith("/"):
         return {
@@ -382,7 +453,7 @@ def _validate_absolute_paths(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_path_traversal(filename: str, filesize: int) -> dict:
+def _validate_path_traversal(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Validate filename doesn't contain path traversal patterns."""
     decoded_filename = filename
 
@@ -418,7 +489,7 @@ def _validate_path_traversal(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_windows_reserved_names(filename: str, filesize: int) -> dict:
+def _validate_windows_reserved_names(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Validate filename doesn't use Windows reserved names."""
     base_name = filename.split(".")[0].upper()
     if base_name in WindowsFileRestrictions.RESERVED_FILENAMES:
@@ -437,7 +508,7 @@ def _validate_windows_reserved_names(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_file_extension(filename: str, filesize: int) -> dict:
+def _validate_file_extension(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Validate that file extension exists, and is allowed."""
     # Check extension exists
     name_split = filename.split(".")
@@ -469,7 +540,77 @@ def _validate_file_extension(filename: str, filesize: int) -> dict:
     return {"accepted": True}
 
 
-def _validate_file_size(filename: str, filesize: int) -> dict:
+def _validate_mime_type(filename: str, filesize: int, file: UploadedFile) -> dict:
+    """Check if the file's MIME type matches the expected MIME type for its extension.
+
+    Only performs validation if magic library is available.
+    """
+    # If magic library is not available, skip MIME type validation
+    if not MAGIC_AVAILABLE:
+        return {"accepted": True}
+
+    extension = Path(filename).suffix.lower().lstrip(".")
+
+    # Get expected MIME types for this extension
+    expected_mime_types = _get_expected_mime_types(extension)
+    if not expected_mime_types:
+        return {
+            "accepted": False,
+            "error": _("File type is not supported"),
+            "verboseError": _(
+                'The file "%(filename)s" has an unsupported extension "%(extension)s"'
+            )
+            % {"filename": filename, "extension": extension},
+        }
+
+    # Detect actual MIME type using python-magic
+    try:
+        if magic is not None:
+            # Read only first 2048 bytes to avoid memory issues
+            file_chunk = file.read(2048)
+            detected_mime_type = magic.from_buffer(file_chunk, mime=True)
+            file.seek(0)
+        else:
+            raise Exception("magic library is not available")
+    except Exception:
+        return {
+            "accepted": False,
+            "error": _("File type could not be determined"),
+            "verboseError": _(
+                'The file "%(filename)s" could not be analyzed for MIME type validation'
+            )
+            % {"filename": filename},
+        }
+
+    # Check if detected MIME type matches any expected MIME type
+    if detected_mime_type not in expected_mime_types:
+        return {
+            "accepted": False,
+            "error": ngettext_lazy(
+                'File MIME type mismatch. Expected %(expected)s but got "%(detected)s".',
+                'File MIME type mismatch. Expected one of: %(expected)s but got "%(detected)s".',
+                len(expected_mime_types),
+            )
+            % {
+                "expected": ", ".join(f'"{mtype}"' for mtype in sorted(expected_mime_types)),
+                "detected": detected_mime_type,
+            },
+            "verboseError": ngettext_lazy(
+                'The file "%(filename)s" has MIME type "%(detected)s" but expected %(expected)s',
+                'The file "%(filename)s" has MIME type "%(detected)s" but expected one of: %(expected)s',
+                len(expected_mime_types),
+            )
+            % {
+                "filename": filename,
+                "detected": detected_mime_type,
+                "expected": ", ".join(f'"{mtype}"' for mtype in sorted(expected_mime_types)),
+            },
+        }
+
+    return {"accepted": True}
+
+
+def _validate_file_size(filename: str, filesize: int, file: UploadedFile) -> dict:
     """Check filesize is greater than zero is within the max single upload size."""
     if filesize < 0:
         return {

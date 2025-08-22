@@ -15,13 +15,13 @@
             <td>
                 <div class="flex flex-row gap-4">
                     <a href="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
-                       class="link link-info tooltip"
+                       class="link link-info tooltip tooltip-left"
                        data-tip="{% trans "View group" %}"
                        id="view_submission_group_{{ forloop.counter }}">
                         <i class="fas fa-eye"></i>
                     </a>
                     <a href="{% url 'recordtransfer:submission_group_bulk_csv' uuid=group.uuid %}"
-                       class="link link-success tooltip"
+                       class="link link-success tooltip tooltip-left"
                        data-tip="{% trans "Export Submissions as CSV" %}"
                        id="export_submission_group_{{ forloop.counter }}">
                         <i class="fas fa-download"></i>
@@ -31,7 +31,7 @@
                        hx-swap="innerHTML"
                        hx-select="#modal-content"
                        hx-trigger="click"
-                       class="link link-error tooltip"
+                       class="link link-error tooltip tooltip-left"
                        data-tip="{% trans "Delete" %}"
                        id="delete_submission_group_{{ forloop.counter }}">
                         <i class="fas fa-trash-alt"></i>
