@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
 # Install pnpm globally
-RUN npm install -g pnpm
+RUN npm install -g pnpm@latest-10
 
 # Install Node.js dependencies with pnpm
 # Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
