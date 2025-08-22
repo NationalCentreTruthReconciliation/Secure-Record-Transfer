@@ -431,8 +431,6 @@ ACCEPTED_FILE_FORMATS
 
     Accepted files are grouped by type of file. The default accepted file extensions are:
 
-    - Archive
-        - zip
     - Audio
         - mp3
         - wav
@@ -470,6 +468,16 @@ ACCEPTED_FILE_FORMATS
     uploaded.
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
+
+    .. warning::
+
+        **Security Warning: Compressed File Formats**
+
+        Including compressed file formats in your accepted file formats may pose security risks. The application does not currently analyze the contents of compressed files, which means malicious files could be uploaded within compressed archives without detection.
+
+        For a full list of compressed file extensions that are detected by the application, please refer to :class:`~recordtransfer.constants.FileExtensions.COMPRESSED` in the constants module.
+
+        Consider carefully whether you need to accept compressed file formats, and if possible, restrict uploads to uncompressed file types only.
 
     Here are some examples based on what you might want to accept (note that you can only specify
     the ACCEPTED_FILE_FORMATS variable *once*):

@@ -40,9 +40,9 @@ To access and modify site settings:
 
 Resetting to Default
 --------------------
-To reset a site setting to its default value, on the edit page, simply click on the
-**Reset to Default** button. This will restore the setting to its original value as defined
-in the application code.
+To reset a site setting to its default value, on the edit page, click the
+**Reset to Default** button. The button label includes the default value that will be
+restored, so you can review it before proceeding. This will restore the setting to its original value as defined in the application code.
 
 .. image:: images/admin_reset_site_setting.webp
     :alt: Reset Site Setting button in admin app

@@ -264,8 +264,8 @@ class TestSubmissionGroupBulkCsvExport(TestCase):
 
     @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
     def test_non_staff_user_owns_group_but_not_submissions(self, mock_export: MagicMock) -> None:
-        """Test that a non-staff user cannot export CSV if they own the group but not the
-        submissions.
+        """Test that a non-staff user is redirected to profile page with error message if they own
+        the group but not the submissions.
         """
         user_one = User.objects.create_user(username="user_one", password="password")
         user_two = User.objects.create_user(username="user_two", password="password")
@@ -281,7 +281,8 @@ class TestSubmissionGroupBulkCsvExport(TestCase):
                 "recordtransfer:submission_group_bulk_csv", kwargs={"uuid": user_one_group.uuid}
             )
         )
-        self.assertEqual(response.status_code, 404)
+        # Now redirects to profile page with error message
+        self.assertRedirects(response, reverse("recordtransfer:user_profile"))
 
 
 class TestGetUserSubmissionGroups(TestCase):
