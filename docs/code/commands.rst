@@ -1,5 +1,5 @@
-recordtransfer.management.commands - Management Commands for the Record Transfer Application
-============================================================================================
+Management Commands for the Record Transfer App
+===============================================
 
 This module contains Django management commands for the Record Transfer Application.
 

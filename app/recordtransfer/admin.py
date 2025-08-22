@@ -688,8 +688,7 @@ class CustomUserAdmin(UserAdmin):
 
     Permissions:
         - add: Allowed by superusers only
-        - change: Allowed by superusers only. Staff users can update their user details through the
-        Profile page.
+        - change: Allowed by superusers only. Others update their user info in the Profile page.
         - delete: Allowed by superusers only
     """
 
