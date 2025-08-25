@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     "caais.apps.CaaisConfig",
     "clamav.apps.ClamavConfig",
     "recordtransfer.apps.RecordTransferConfig",
+    "admin_interface",
+    "colorfield",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -33,6 +35,8 @@ INSTALLED_APPS = [
     "django_htmx",
     "widget_tweaks",
 ]
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
