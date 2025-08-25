@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 from typing import Union
 
 from caais.models import SourceRole, SourceType
+from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from recordtransfer.forms import UserAccountInfoForm
 from recordtransfer.forms.submission_forms import (
+    OtherIdentifiersForm,
     RecordDescriptionForm,
     SourceInfoForm,
     UploadFilesForm,
@@ -715,6 +717,166 @@ class SourceInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
         self.assertIn("other_source_role", form.errors)
+
+
+class OtherIdentifiersFormTest(TestCase):
+    """Tests for the OtherIdentifiersForm."""
+
+    def test_form_valid_with_all_fields(self) -> None:
+        """Test that the form is valid when all fields are provided."""
+        form_data = {
+            "other_identifier_type": "Receipt number",
+            "other_identifier_value": "12345",
+            "other_identifier_note": "This is a test note",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["other_identifier_type"], "Receipt number")
+        self.assertEqual(form.cleaned_data["other_identifier_value"], "12345")
+        self.assertEqual(form.cleaned_data["other_identifier_note"], "This is a test note")
+
+    def test_form_valid_with_type_and_value_only(self) -> None:
+        """Test that the form is valid when only type and value are provided."""
+        form_data = {
+            "other_identifier_type": "LAC Record ID",
+            "other_identifier_value": "ABC-123",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["other_identifier_type"], "LAC Record ID")
+        self.assertEqual(form.cleaned_data["other_identifier_value"], "ABC-123")
+        self.assertEqual(form.cleaned_data["other_identifier_note"], "")
+
+    def test_form_valid_with_empty_fields(self) -> None:
+        """Test that the form is valid when all fields are empty."""
+        form_data = {
+            "other_identifier_type": "",
+            "other_identifier_value": "",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_invalid_type_without_value(self) -> None:
+        """Test that the form is invalid when type is provided but value is missing."""
+        form_data = {
+            "other_identifier_type": "Receipt number",
+            "other_identifier_value": "",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_value", form.errors)
+        self.assertIn(
+            "Must enter a value for this identifier", form.errors["other_identifier_value"]
+        )
+
+    def test_form_invalid_value_without_type(self) -> None:
+        """Test that the form is invalid when value is provided but type is missing."""
+        form_data = {
+            "other_identifier_type": "",
+            "other_identifier_value": "12345",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_type", form.errors)
+        self.assertIn(
+            "Must enter a type for this identifier", form.errors["other_identifier_type"]
+        )
+
+    def test_form_invalid_note_without_type_and_value(self) -> None:
+        """Test that the form is invalid when note is provided but type and value are missing."""
+        form_data = {
+            "other_identifier_type": "",
+            "other_identifier_value": "",
+            "other_identifier_note": "This is a test note",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_type", form.errors)
+        self.assertIn("other_identifier_value", form.errors)
+        self.assertIn("other_identifier_note", form.errors)
+        self.assertIn(
+            "Must enter a type for this identifier", form.errors["other_identifier_type"]
+        )
+        self.assertIn(
+            "Must enter a value for this identifier", form.errors["other_identifier_value"]
+        )
+        self.assertIn(
+            "Cannot enter a note without entering a value and type",
+            form.errors["other_identifier_note"],
+        )
+
+    def test_form_invalid_type_and_note_without_value(self) -> None:
+        """Test that the form is invalid when type and note are provided but value is missing."""
+        form_data = {
+            "other_identifier_type": "Receipt number",
+            "other_identifier_value": "",
+            "other_identifier_note": "This is a test note",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_value", form.errors)
+        self.assertIn(
+            "Must enter a value for this identifier", form.errors["other_identifier_value"]
+        )
+
+    def test_form_invalid_value_and_note_without_type(self) -> None:
+        """Test that the form is invalid when value and note are provided but type is missing."""
+        form_data = {
+            "other_identifier_type": "",
+            "other_identifier_value": "12345",
+            "other_identifier_note": "This is a test note",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_type", form.errors)
+        self.assertIn(
+            "Must enter a type for this identifier", form.errors["other_identifier_type"]
+        )
+
+    def test_form_field_labels_and_placeholders(self) -> None:
+        """Test that form fields have correct labels and placeholders."""
+        form = OtherIdentifiersForm()
+
+        # Test labels
+        self.assertEqual(form.fields["other_identifier_type"].label, "Type of identifier")
+        self.assertEqual(form.fields["other_identifier_value"].label, "Identifier value")
+        self.assertEqual(form.fields["other_identifier_note"].label, "Notes for identifier")
+
+        # Test placeholders
+        self.assertEqual(
+            form.fields["other_identifier_type"].widget.attrs["placeholder"],
+            "The type of the identifier",
+        )
+        self.assertEqual(
+            form.fields["other_identifier_value"].widget.attrs["placeholder"], "Identifier value"
+        )
+        self.assertEqual(
+            form.fields["other_identifier_note"].widget.attrs["placeholder"],
+            "Any notes on this identifier or which files it may apply to (optional).",
+        )
+
+    def test_form_field_required_attributes(self) -> None:
+        """Test that all form fields are correctly marked as not required."""
+        form = OtherIdentifiersForm()
+
+        self.assertFalse(form.fields["other_identifier_type"].required)
+        self.assertFalse(form.fields["other_identifier_value"].required)
+        self.assertFalse(form.fields["other_identifier_note"].required)
+
+    def test_form_field_widgets(self) -> None:
+        """Test that form fields have correct widget types."""
+        form = OtherIdentifiersForm()
+
+        self.assertIsInstance(form.fields["other_identifier_type"].widget, forms.TextInput)
+        self.assertIsInstance(form.fields["other_identifier_value"].widget, forms.TextInput)
+        self.assertIsInstance(form.fields["other_identifier_note"].widget, forms.Textarea)
+
+        # Test textarea rows attribute
+        self.assertEqual(form.fields["other_identifier_note"].widget.attrs["rows"], "2")
 
 
 class UploadFilesFormTest(TestCase):
