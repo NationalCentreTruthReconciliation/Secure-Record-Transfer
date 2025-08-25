@@ -18,20 +18,21 @@ To change the currently active theme:
 1. Log into the admin interface as a superuser
 2. Navigate to **Admin Interface** → **Themes**
 
-    .. image:: /images/admin_themes_navigation.png
+    .. image:: images/admin_themes_navigation.webp
        :alt: Admin themes navigation
 
 3. You will see a list of available themes
 
-   .. image:: /images/admin_themes_list.png
+   .. image:: images/admin_themes_select_and_save.webp
       :alt: List of available admin themes
 
-4. Check the **Active** checkbox on your desired theme to enable it
+4. Check the **Active** checkbox on your desired theme and click on "Save" to enable it
+
+.. warning::
+   Changing the active theme will affect the admin interface appearance for all admin users site-wide. The change takes effect immediately after saving.
 
 .. note::
    Only one theme can be active at a time. Activating a new theme will automatically deactivate the previously active theme.
-
-The changes will take effect immediately after saving.
 
 Adding a New Theme
 ------------------
@@ -41,7 +42,7 @@ To create a new custom theme:
 1. Navigate to **Admin Interface** → **Themes** in the admin
 2. Click the **Add Theme** button
 
-   .. image:: /images/add_new_theme_button.png
+   .. image:: images/add_new_theme_button.webp
       :alt: Add new theme button
 
 3. Make your desired changes to any of the theme settings (see :ref:`theme-form-sections` below)
@@ -54,12 +55,11 @@ To modify an existing theme:
 
 1. Navigate to **Admin Interface** → **Themes** in the admin
 2. Click on the theme you want to modify from the list
-
-   .. image:: /images/edit_existing_theme.png
-      :alt: Editing an existing theme
-
 3. Make your desired changes to any of the theme settings (see :ref:`theme-form-sections` above for detailed descriptions)
 4. Click **Save** to apply your modifications
+
+.. warning::
+    Modifying a theme that is currently active will immediately affect the admin interface appearance for all admin users site-wide. Changes take effect as soon as the theme is saved.
 
 .. _theme-form-sections:
 
@@ -67,6 +67,9 @@ Theme Form Sections and Settings
 ---------------------------------
 
 The admin interface theme form is organized into several sections, each controlling different aspects of the admin interface appearance and behavior.
+
+.. note::
+    The "Environment" and "Inlines" setting sections are left undocumented as their purpose and functionality are unclear.
 
 Basic Settings
 ~~~~~~~~~~~~~~
@@ -88,12 +91,15 @@ Language Chooser
 
 **Control**
     Dropdown selection for the type of language selector:
-
     - ``Default Select`` - Standard dropdown
+
+      .. image:: images/admin_theme_language_chooser_default_select.webp
+             :alt: Admin theme language chooser default select type
+
     - ``Minimal Select`` - More discreet dropdown
 
-    .. image:: /images/admin_theme_language_chooser_select_type.png
-         :alt: Admin theme language chooser select type
+      .. image:: images/admin_theme_language_chooser_minimal_select.webp
+             :alt: Admin theme language chooser minimal select type
 
 **Display**
    How language options are displayed:
@@ -134,6 +140,9 @@ Favicon (not supported)
 Title
 ~~~~~
 
+.. image:: images/admin_theme_title.webp
+    :alt: Admin theme title configuration
+
 **Title**
     The text displayed in the admin interface header
 
@@ -143,13 +152,13 @@ Title
 **Visible**
     Checkbox to show/hide the title in the header
 
-    .. image:: /images/admin_theme_title_section.png
-        :alt: Admin theme title section configuration
-
 Header
 ~~~~~~
 
 Controls the appearance of the admin interface header/ navigation bar.
+
+.. image:: images/admin_theme_header_section.webp
+    :alt: Admin theme header section configuration
 
 **Background Color**
     Hex color code for the header background
@@ -163,22 +172,29 @@ Controls the appearance of the admin interface header/ navigation bar.
 **Link Hover Color**
     Hex color code for header links on hover
 
-    .. image:: /images/admin_theme_header_section.png
-        :alt: Admin theme header section configuratio
-
 Breadcrumbs/Module Styling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Controls the appearance of the breadcrumbs, app modules and fieldset headings.
 
-.. image:: /images/admin_theme_breadcrumbs_example.png
+.. figure:: images/admin_theme_breadcrumbs_example.webp
     :alt: Example of breadcrumbs styling in admin interface
 
-.. image:: /images/admin_theme_app_modules_example.png
+    Breadcrumbs example
+
+|
+
+.. figure:: images/admin_theme_app_modules_example.webp
     :alt: Example of app modules styling in admin interface
 
-.. image:: /images/admin_theme_fieldset_headings_example.png
+    App modules example
+
+|
+
+.. figure:: images/admin_theme_fieldset_headings_example.webp
     :alt: Example of fieldset headings styling in admin interface
+
+    Fieldsets example
 
 **Background Color**
    Hex color code for module box backgrounds
@@ -204,6 +220,16 @@ Controls the appearance of the breadcrumbs, app modules and fieldset headings.
 Generic Links
 ~~~~~~~~~~~~~
 
+.. figure:: images/admin_theme_generic_links_example_1.webp
+    :alt: Example of generic links styling in admin interface
+
+    Generic links example 1
+
+.. figure:: images/admin_theme_generic_links_example_2.webp
+    :alt: Another example of generic links styling in admin interface
+
+    Generic links example 2
+
 **Link Color**
     Hex color code for general links throughout the admin
 
@@ -213,50 +239,44 @@ Generic Links
 **Link Active Color**
     Hex color code for active/clicked links
 
-.. image:: /images/admin_theme_generic_links_example_1.png
-     :alt: Example of generic links styling in admin interface
-
-.. image:: /images/admin_theme_generic_links_example_2.png
-     :alt: Another example of generic links styling in admin interface
-
 Save Button
 ~~~~~~~~~~~
 
-**Button Background Color**
+.. image:: images/admin_theme_save_button_section.webp
+     :alt: Admin theme save button section configuration
+
+**Background Color**
     Hex color code for save button backgrounds
 
-**Button Background Hover Color**
+**Background Hover Color**
     Hex color code for save buttons on hover
 
-**Button Text Color**
+**Text Color**
     Hex color code for save button text
-
-.. image:: /images/admin_theme_save_button_section.png
-     :alt: Admin theme save button section configuration
 
 Delete Button
 ~~~~~~~~~~~~~
 
-**Button Background Color**
+.. image:: images/admin_theme_delete_button_section.webp
+      :alt: Admin theme delete button section configuration
+
+**Background Color**
     Hex color code for delete button backgrounds
 
-**Button Background Hover Color**
+**Background Hover Color**
     Hex color code for delete buttons on hover
 
-**Button Text Color**
+**Text Color**
     Hex color code for delete button text
-
-.. image:: /images/admin_theme_delete_button_section.png
-      :alt: Admin theme delete button section configuration
 
 Navigation Bar
 ~~~~~~~~~~~~~~
 
+.. image:: images/admin_theme_foldable_apps.webp
+   :alt: Admin theme collapsable app sections
+
 **Foldable apps**
    Checkbox to allow collapsing/expanding app sections
-
-.. image:: /images/admin_theme_navigation_bar_section.png
-   :alt: Admin theme collapsable app sections
 
 Related Objects Modal
 ~~~~~~~~~~~~~~~~~~~~~
@@ -264,12 +284,12 @@ Related Objects Modal
 **Active**
     Checkbox to enable/disable modal popups for related object editing.
 
-.. figure:: /images/admin_theme_related_modal_example.png
+.. figure:: images/admin_theme_related_modal_example.webp
     :alt: Example of related object modal popup in admin interface
 
     When related modal is enabled, editing objects opens in a modal popup.
 
-.. figure:: /images/admin_theme_related_modal_disabled_example.png
+.. figure:: images/admin_theme_related_modal_disabled_example.webp
     :alt: Example of related object editing in new window when modal is disabled
 
     When related modal is disabled, editing objects opens in a new window.
@@ -292,13 +312,13 @@ Form Controls
 **Sticky Submit**
     When enabled, form submit buttons (e.g., "Save", "Delete") will stick to the bottom of the screen when scrolling.
 
-    .. image:: /images/admin_theme_sticky_submit_example.png
+    .. image:: images/admin_theme_sticky_submit_example.webp
         :alt: Example of sticky submit buttons in admin interface
 
 **Sticky Pagination**
     When enabled, pagination controls will stick to the bottom of the screen when scrolling.
 
-    .. image:: /images/admin_theme_sticky_pagination_example.png
+    .. image:: images/admin_theme_sticky_pagination_example.webp
         :alt: Example of sticky pagination controls in admin interface
 
 List Filter
@@ -307,41 +327,44 @@ List Filter
 **Highlight**
     Checkbox to enable highlighting of active filters
 
-    .. image:: /images/admin_theme_list_filter_highlight_example.png
+    .. image:: images/admin_theme_list_filter_highlight_example.webp
         :alt: Example of highlighted active filters in admin interface
 
 **Dropdown**
     Checkbox to use dropdown style for filters instead of default links
 
-    .. image:: /images/admin_theme_list_filter_dropdown_example.png
+    .. image:: images/admin_theme_list_filter_dropdown_example.webp
         :alt: Example of dropdown style filters in admin interface
 
 **Sticky**
     Checkbox to make filters stick to the top when scrolling
 
-    .. image:: /images/admin_theme_list_filter_sticky_example.png
-        :alt: Example of sticky filters in admin interface
-
 **Removal Links**
     Checkbox to show "x" links for removing individual filters
 
-    .. image:: /images/admin_theme_list_filter_removal_links_example.png
+    .. image:: images/admin_theme_list_filter_removal_links_example.webp
         :alt: Example of filter removal links in admin interface
 
 Change Form
 ~~~~~~~~~~~
 
 **Fieldsets as tabs**
-   Checkbox to display form fieldsets as tabs instead of sections
+    Checkbox to display form fieldsets as tabs instead of sections
+
+    .. image:: images/admin_theme_fieldsets_as_tabs_example.webp
+         :alt: Example of fieldsets displayed as tabs in admin interface
 
 **Inlines as tabs**
-   Checkbox to display inline forms as tabs
+    Checkbox to display inline forms as tabs
+
+    .. image:: images/admin_theme_inlines_as_tabs_example.webp
+         :alt: Example of inline forms displayed as tabs in admin interface
 
 Recent Actions
 ~~~~~~~~~~~~~~
 
+.. image:: images/admin_theme_recent_actions_example.webp
+    :alt: Example of recent actions sidebar in admin interface
+
 **Visible**
    Checkbox to show/hide the recent actions sidebar on the admin home page
-
-   .. image:: /images/admin_theme_recent_actions_example.png
-       :alt: Example of recent actions sidebar in admin interface
