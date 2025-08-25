@@ -659,7 +659,9 @@ class ArchivalUnit(models.Model):
 
     def __str__(self):
         """Return a string representation of the archival unit."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class DispositionAuthority(models.Model):
@@ -703,7 +705,9 @@ class DispositionAuthority(models.Model):
 
     def __str__(self):
         """Return a string representation of the disposition authority."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class SourceType(AbstractTerm):
@@ -922,7 +926,9 @@ class SourceOfMaterial(models.Model):
 
     def __str__(self):
         """Return a string representation of the source of material."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class PreliminaryCustodialHistory(models.Model):
@@ -971,7 +977,9 @@ class PreliminaryCustodialHistory(models.Model):
 
     def __str__(self):
         """Return a string representation of the preliminary custodial history."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class ExtentType(AbstractTerm):
@@ -1137,7 +1145,9 @@ class ExtentStatement(models.Model):
 
     def __str__(self):
         """Return a string representation of the extent statement."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class PreliminaryScopeAndContent(models.Model):
@@ -1187,7 +1197,9 @@ class PreliminaryScopeAndContent(models.Model):
 
     def __str__(self):
         """Return a string representation of the preliminary scope and content."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class LanguageOfMaterial(models.Model):
@@ -1230,7 +1242,9 @@ class LanguageOfMaterial(models.Model):
 
     def __str__(self):
         """Return a string representation of the language of material."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class StorageLocation(models.Model):
@@ -1272,7 +1286,9 @@ class StorageLocation(models.Model):
 
     def __str__(self):
         """Return a string representation of the storage location."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class RightsType(AbstractTerm):
@@ -1366,7 +1382,9 @@ class Rights(models.Model):
 
     def __str__(self):
         """Return a string representation of the rights statement."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class PreservationRequirementsType(AbstractTerm):
@@ -1468,7 +1486,9 @@ class PreservationRequirements(models.Model):
 
     def __str__(self):
         """Return a string representation of the preservation requirements."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class AppraisalType(AbstractTerm):
@@ -1563,7 +1583,9 @@ class Appraisal(models.Model):
 
     def __str__(self):
         """Return a string representation of the appraisal."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class AssociatedDocumentationType(AbstractTerm):
@@ -1661,7 +1683,9 @@ class AssociatedDocumentation(models.Model):
 
     def __str__(self):
         """Return a string representation of the associated documentation."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class EventType(AbstractTerm):
@@ -1760,7 +1784,9 @@ class Event(models.Model):
 
     def __str__(self):
         """Return a string representation of the event."""
-        return f"{self.__class__.__name__} #{self.id} @ {self.event_date!s}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk} @ {self.event_date!s}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class GeneralNote(models.Model):
@@ -1803,7 +1829,9 @@ class GeneralNote(models.Model):
 
     def __str__(self):
         """Return a string representation of the general note."""
-        return f"{self.__class__.__name__} #{self.id}"
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class CreationOrRevisionType(AbstractTerm):
