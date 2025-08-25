@@ -630,22 +630,22 @@ class OtherIdentifiersForm(SubmissionForm):
         if id_type:
             reserved_types = ["accession number", "accession identifier"]
             if id_type.lower() in reserved_types:
-                reserved_msg = "This identifier type is reserved and cannot be used"
-                self.add_error("other_identifier_type", reserved_msg)
+                self.add_error(
+                    "other_identifier_type",
+                    _("This identifier type is reserved and cannot be used")
+                )
 
         if id_type and not id_value:
-            value_msg = "Must enter a value for this identifier"
-            self.add_error("other_identifier_value", value_msg)
+            self.add_error("other_identifier_value", _("Must enter a value for this identifier"))
         elif not id_type and id_value:
-            type_msg = "Must enter a type for this identifier"
-            self.add_error("other_identifier_type", type_msg)
+            self.add_error("other_identifier_type", _("Must enter a type for this identifier"))
         elif not id_type and id_note:
-            type_msg = "Must enter a type for this identifier"
-            self.add_error("other_identifier_type", type_msg)
-            value_msg = "Must enter a value for this identifier"
-            self.add_error("other_identifier_value", value_msg)
-            note_msg = "Cannot enter a note without entering a value and type"
-            self.add_error("other_identifier_note", note_msg)
+            self.add_error("other_identifier_type", _("Must enter a type for this identifier"))
+            self.add_error("other_identifier_value", _("Must enter a value for this identifier"))
+            self.add_error(
+                "other_identifier_note",
+                _("Cannot enter a note without entering a value and type")
+            )
         return cleaned_data
 
     other_identifier_type = forms.CharField(
