@@ -4,6 +4,8 @@ ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
 WORKDIR ${PROJ_DIR}
 
@@ -14,15 +16,20 @@ RUN apt-get update && \
     libmagic1 && \
     rm -rf /var/lib/apt/lists/*
 
+# Install pnpm globally
+RUN npm install -g pnpm@latest-10
+
 # Copy uv-related files, and install Python dependencies
 # Uses a persistent cache mount for uv (see https://docs.astral.sh/uv/guides/integration/docker/#caching)
 COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Install Node.js dependencies
-COPY package*.json ${PROJ_DIR}
-RUN npm install --no-color
+# Install Node.js dependencies with pnpm
+# Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
+COPY package.json pnpm-lock.yaml ${PROJ_DIR}
+RUN --mount=type=cache,id=pnpm,target=${PNPM_HOME}/store \
+    pnpm install --frozen-lockfile --prod
 
 # Copy application code to image
 COPY ./app ${APP_DIR}
@@ -33,7 +40,7 @@ ENV WEBPACK_MODE ${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
 COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
-RUN npm run build
+RUN pnpm run build
 
 # Copy entrypoint script to image
 COPY ./docker/entrypoint.sh ${PROJ_DIR}

@@ -18,13 +18,13 @@ def pytest_runtestloop(session: pytest.Session) -> None:
         "/e2e/" in item.nodeid for item in selected_items
     ):
         try:
-            npm_cmd = shutil.which("npm") or "npm"
+            pnpm_cmd = shutil.which("pnpm") or "pnpm"
             subprocess.run(
-                [npm_cmd, "install"],
+                [pnpm_cmd, "install"],
                 check=True,
             )
             subprocess.run(
-                [npm_cmd, "run", "build"],
+                [pnpm_cmd, "run", "build"],
                 check=True,
                 env={
                     **os.environ,
@@ -32,8 +32,8 @@ def pytest_runtestloop(session: pytest.Session) -> None:
                 },
             )
         except subprocess.CalledProcessError as e:
-            pytest.exit(f"Failed to run npm install or build: {e}")
+            pytest.exit(f"Failed to run pnpm install or build: {e}")
         except FileNotFoundError as e:
             pytest.exit(
-                f"npm command not found (got: {e}). npm must be installed to run e2e tests."
+                f"pnpm command not found (got: {e}). pnpm must be installed to run e2e tests."
             )
