@@ -16,14 +16,14 @@ RUN apt-get update && \
     libmagic1 && \
     rm -rf /var/lib/apt/lists/*
 
+# Install pnpm globally
+RUN npm install -g pnpm@latest-10
+
 # Copy uv-related files, and install Python dependencies
 # Uses a persistent cache mount for uv (see https://docs.astral.sh/uv/guides/integration/docker/#caching)
 COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
-
-# Install pnpm globally
-RUN npm install -g pnpm@latest-10
 
 # Install Node.js dependencies with pnpm
 # Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
