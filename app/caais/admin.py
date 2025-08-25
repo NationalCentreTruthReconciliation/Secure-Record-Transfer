@@ -1,10 +1,13 @@
 """CAAIS metadata administrator."""
 
 from datetime import datetime
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from django.contrib import admin
+from django.contrib.admin import ListFilter
 from django.contrib.admin.models import LogEntry
+from django.contrib.admin.options import InlineModelAdmin
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.template.response import TemplateResponse
 
@@ -61,7 +64,7 @@ from caais.models import (
 
 
 class IdentifierInlineAdmin(admin.StackedInline):
-    """Admin for editing identifiers inline"""
+    """Admin for editing identifiers inline."""
 
     model = Identifier
     form = InlineIdentifierForm
@@ -69,13 +72,14 @@ class IdentifierInlineAdmin(admin.StackedInline):
     max_num = 64
     extra = 0
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Identifier]:
+        """Exclude accession identifiers from the queryset."""
         ids = super().get_queryset(request).exclude(identifier_type="Accession Identifier")
         return ids
 
 
 class ArchivalUnitInlineAdmin(admin.TabularInline):
-    """Admin for editing archival units inline"""
+    """Admin for editing archival units inline."""
 
     model = ArchivalUnit
     form = InlineArchivalUnitForm
@@ -85,7 +89,7 @@ class ArchivalUnitInlineAdmin(admin.TabularInline):
 
 
 class DispositionAuthorityInlineAdmin(admin.TabularInline):
-    """Admin for editing disposition authorities inline"""
+    """Admin for editing disposition authorities inline."""
 
     model = DispositionAuthority
     form = InlineDispositionAuthorityForm
@@ -106,7 +110,7 @@ class SourceOfMaterialInlineAdmin(admin.StackedInline):
 
 
 class PreliminaryCustodialHistoryInlineAdmin(admin.TabularInline):
-    """Admin for editing preliminary custodial histories inline"""
+    """Admin for editing preliminary custodial histories inline."""
 
     model = PreliminaryCustodialHistory
     form = InlinePreliminaryCustodialHistoryForm
@@ -116,7 +120,7 @@ class PreliminaryCustodialHistoryInlineAdmin(admin.TabularInline):
 
 
 class ExtentStatementInlineAdmin(admin.StackedInline):
-    """Admin for editing extent statements inline"""
+    """Admin for editing extent statements inline."""
 
     model = ExtentStatement
     form = InlineExtentStatementForm
@@ -127,7 +131,7 @@ class ExtentStatementInlineAdmin(admin.StackedInline):
 
 
 class PreliminaryScopeAndContentInlineAdmin(admin.TabularInline):
-    """Admin for editing preliminary scope and contents inline"""
+    """Admin for editing preliminary scope and contents inline."""
 
     model = PreliminaryScopeAndContent
     form = InlinePreliminaryScopeAndContentForm
@@ -137,7 +141,7 @@ class PreliminaryScopeAndContentInlineAdmin(admin.TabularInline):
 
 
 class LanguageOfMaterialInlineAdmin(admin.TabularInline):
-    """Admin for editing language of materials inline"""
+    """Admin for editing language of materials inline."""
 
     model = LanguageOfMaterial
     form = InlineLanguageOfMaterialForm
@@ -147,7 +151,7 @@ class LanguageOfMaterialInlineAdmin(admin.TabularInline):
 
 
 class StorageLocationInlineAdmin(admin.TabularInline):
-    """Admin for editing storage locations inline"""
+    """Admin for editing storage locations inline."""
 
     model = StorageLocation
     form = InlineStorageLocationForm
@@ -157,7 +161,7 @@ class StorageLocationInlineAdmin(admin.TabularInline):
 
 
 class RightsInlineAdmin(admin.StackedInline):
-    """Admin for editing rights inline"""
+    """Admin for editing rights inline."""
 
     model = Rights
     form = InlineRightsForm
@@ -167,7 +171,7 @@ class RightsInlineAdmin(admin.StackedInline):
 
 
 class PreservationRequirementsInlineAdmin(admin.StackedInline):
-    """Admin for editing preservation requirements inline"""
+    """Admin for editing preservation requirements inline."""
 
     model = PreservationRequirements
     form = InlinePreservationRequirementsForm
@@ -177,7 +181,7 @@ class PreservationRequirementsInlineAdmin(admin.StackedInline):
 
 
 class AppraisalInlineAdmin(admin.StackedInline):
-    """Admin for editing appraisals inline"""
+    """Admin for editing appraisals inline."""
 
     model = Appraisal
     form = InlineAppraisalForm
@@ -187,7 +191,7 @@ class AppraisalInlineAdmin(admin.StackedInline):
 
 
 class AssociatedDocumentationInlineAdmin(admin.StackedInline):
-    """Admin for editing associated documentation inline"""
+    """Admin for editing associated documentation inline."""
 
     model = AssociatedDocumentation
     form = InlineAssociatedDocumentationForm
@@ -197,7 +201,7 @@ class AssociatedDocumentationInlineAdmin(admin.StackedInline):
 
 
 class GeneralNoteInlineAdmin(admin.TabularInline):
-    """Admin for editing general notes inline"""
+    """Admin for editing general notes inline."""
 
     model = GeneralNote
     form = InlineGeneralNoteForm
@@ -213,13 +217,15 @@ class MetadataAdmin(admin.ModelAdmin):
     """
 
     class Media:
+        """Static assets for the Metadata admin."""
+
         js = ("https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",)
 
     change_form_template = "admin/metadata_change_form.html"
 
     form = MetadataForm
 
-    list_display = [
+    list_display: Sequence[str | Callable] = [
         "accession_title",
         "accession_identifier",
         "source_name",
@@ -227,11 +233,11 @@ class MetadataAdmin(admin.ModelAdmin):
         "last_changed",
     ]
 
-    list_filter = [
+    list_filter: Sequence[str | type[ListFilter] | tuple[str, type[ListFilter]]] = [
         "status",
     ]
 
-    inlines = [
+    inlines: Sequence[type[InlineModelAdmin]] = [
         IdentifierInlineAdmin,
         ArchivalUnitInlineAdmin,
         DispositionAuthorityInlineAdmin,
@@ -248,12 +254,14 @@ class MetadataAdmin(admin.ModelAdmin):
         GeneralNoteInlineAdmin,
     ]
 
-    def source_name(self, obj) -> Optional[str]:
+    def source_name(self, obj: Metadata) -> Optional[str]:
+        """Return a comma-separated list of source names."""
         return obj.source_of_materials.aggregate(
             names_joined=GroupConcat("source_name", separator=", ")
         )["names_joined"]
 
-    def last_changed(self, obj) -> Optional[datetime]:
+    def last_changed(self, obj: Metadata) -> Optional[datetime]:
+        """Return the date the metadata was last changed."""
         most_recent = obj.dates_of_creation_or_revision.order_by(
             "-creation_or_revision_date"
         ).first()
@@ -312,11 +320,11 @@ class MetadataAdmin(admin.ModelAdmin):
 @admin.register(AppraisalType)
 @admin.register(AssociatedDocumentationType)
 class TermAdmin(admin.ModelAdmin):
-    """Generic administrator for models inheriting from AbstractTerm"""
+    """Generic administrator for models inheriting from AbstractTerm."""
 
-    list_display = [
+    list_display: Sequence[str | Callable] = [
         "name",
         "id",
     ]
 
-    ordering = ["name"]
+    ordering: Sequence[str] | None = ["name"]
