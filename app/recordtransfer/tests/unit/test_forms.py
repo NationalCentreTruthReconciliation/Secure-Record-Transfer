@@ -878,6 +878,104 @@ class OtherIdentifiersFormTest(TestCase):
         # Test textarea rows attribute
         self.assertEqual(form.fields["other_identifier_note"].widget.attrs["rows"], "2")
 
+    def test_form_invalid_reserved_type_accession_number(self) -> None:
+        """Test that the form rejects 'Accession Number' as a reserved identifier type."""
+        form_data = {
+            "other_identifier_type": "Accession Number",
+            "other_identifier_value": "12345",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_type", form.errors)
+        self.assertIn(
+            "This identifier type is reserved and cannot be used",
+            form.errors["other_identifier_type"],
+        )
+
+    def test_form_invalid_reserved_type_accession_identifier(self) -> None:
+        """Test that the form rejects 'Accession Identifier' as a reserved identifier type."""
+        form_data = {
+            "other_identifier_type": "Accession Identifier",
+            "other_identifier_value": "12345",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_type", form.errors)
+        self.assertIn(
+            "This identifier type is reserved and cannot be used",
+            form.errors["other_identifier_type"],
+        )
+
+    def test_form_invalid_reserved_type_case_insensitive(self) -> None:
+        """Test that reserved identifier type validation is case insensitive."""
+        test_cases = [
+            "ACCESSION NUMBER",
+            "accession number",
+            "Accession Number",
+            "aCcEsSiOn NuMbEr",
+            "ACCESSION IDENTIFIER",
+            "accession identifier",
+            "Accession Identifier",
+            "aCcEsSiOn IdEnTiFiEr",
+        ]
+
+        for reserved_type in test_cases:
+            with self.subTest(reserved_type=reserved_type):
+                form_data = {
+                    "other_identifier_type": reserved_type,
+                    "other_identifier_value": "12345",
+                    "other_identifier_note": "",
+                }
+                form = OtherIdentifiersForm(data=form_data)
+                self.assertFalse(form.is_valid())
+                self.assertIn("other_identifier_type", form.errors)
+                self.assertIn(
+                    "This identifier type is reserved and cannot be used",
+                    form.errors["other_identifier_type"],
+                )
+
+    def test_form_valid_similar_but_not_reserved_types(self) -> None:
+        """Test that similar but non-reserved identifier types are allowed."""
+        valid_similar_types = [
+            "Accession Numbers",  # Plural
+            "My Accession Number",  # With prefix
+            "Accession Number Copy",  # With suffix
+            "Accession ID",  # Different but similar
+            "Access Number",  # Similar spelling
+            "Record Number",  # Different type
+        ]
+
+        for valid_type in valid_similar_types:
+            with self.subTest(valid_type=valid_type):
+                form_data = {
+                    "other_identifier_type": valid_type,
+                    "other_identifier_value": "12345",
+                    "other_identifier_note": "",
+                }
+                form = OtherIdentifiersForm(data=form_data)
+                self.assertTrue(form.is_valid(), f"Form should be valid for type: {valid_type}")
+
+    def test_form_reserved_type_error_with_missing_value(self) -> None:
+        """Test that reserved type error is shown even when value is missing."""
+        form_data = {
+            "other_identifier_type": "Accession Number",
+            "other_identifier_value": "",
+            "other_identifier_note": "",
+        }
+        form = OtherIdentifiersForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_identifier_type", form.errors)
+        self.assertIn("other_identifier_value", form.errors)
+        self.assertIn(
+            "This identifier type is reserved and cannot be used",
+            form.errors["other_identifier_type"],
+        )
+        self.assertIn(
+            "Must enter a value for this identifier", form.errors["other_identifier_value"]
+        )
+
 
 class UploadFilesFormTest(TestCase):
     """Tests for the UploadFilesForm."""

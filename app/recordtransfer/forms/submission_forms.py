@@ -626,6 +626,13 @@ class OtherIdentifiersForm(SubmissionForm):
         id_value = cleaned_data.get("other_identifier_value")
         id_note = cleaned_data.get("other_identifier_note")
 
+        # Check for reserved identifier types
+        if id_type:
+            reserved_types = ["accession number", "accession identifier"]
+            if id_type.lower() in reserved_types:
+                reserved_msg = "This identifier type is reserved and cannot be used"
+                self.add_error("other_identifier_type", reserved_msg)
+
         if id_type and not id_value:
             value_msg = "Must enter a value for this identifier"
             self.add_error("other_identifier_value", value_msg)
