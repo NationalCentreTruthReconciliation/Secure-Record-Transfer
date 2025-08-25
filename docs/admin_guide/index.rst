@@ -13,6 +13,7 @@ using command-line interfaces and terminal environments.
     managing_submissions
     management_commands
     site_settings
+    managing_admin_themes
 
 .. seealso::
 
