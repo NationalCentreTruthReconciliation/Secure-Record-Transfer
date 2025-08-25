@@ -45,7 +45,7 @@ To create a new custom theme:
    .. image:: images/add_new_theme_button.webp
       :alt: Add new theme button
 
-3. Make your desired changes to any of the theme settings (see :ref:`theme-form-sections` below)
+3. Make your desired changes to any of the theme settings (see :ref:`theme-settings` below)
 4. Click **Save** to create the theme
 
 Modifying an Existing Theme
@@ -55,16 +55,16 @@ To modify an existing theme:
 
 1. Navigate to **Admin Interface** → **Themes** in the admin
 2. Click on the theme you want to modify from the list
-3. Make your desired changes to any of the theme settings (see :ref:`theme-form-sections` above for detailed descriptions)
+3. Make your desired changes to any of the theme settings (see :ref:`theme-settings` above for detailed descriptions)
 4. Click **Save** to apply your modifications
 
 .. warning::
     Modifying a theme that is currently active will immediately affect the admin interface appearance for all admin users site-wide. Changes take effect as soon as the theme is saved.
 
-.. _theme-form-sections:
+.. _theme-settings:
 
-Theme Form Sections and Settings
----------------------------------
+Theme Settings
+--------------
 
 The admin interface theme form is organized into several sections, each controlling different aspects of the admin interface appearance and behavior.
 
