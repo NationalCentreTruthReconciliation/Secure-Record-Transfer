@@ -55,7 +55,7 @@ To modify an existing theme:
 
 1. Navigate to **Admin Interface** → **Themes** in the admin
 2. Click on the theme you want to modify from the list
-3. Make your desired changes to any of the theme settings (see :ref:`theme-settings` above for detailed descriptions)
+3. Make your desired changes to any of the theme settings (see :ref:`theme-settings` below for detailed descriptions)
 4. Click **Save** to apply your modifications
 
 .. warning::
