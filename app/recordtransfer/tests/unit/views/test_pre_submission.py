@@ -5,9 +5,10 @@ from caais.models import RightsType, SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from upload.models import UploadSession
 
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
+from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
 
 
 class SubmissionFormWizardTests(TestCase):
@@ -103,13 +104,13 @@ class SubmissionFormWizardTests(TestCase):
         """Upload a test file to the server. Returns the upload session token used to upload the
         file.
         """
-        response = self.client.post(reverse("recordtransfer:create_upload_session"))
+        response = self.client.post(reverse("upload:create_upload_session"))
         self.assertEqual(201, response.status_code)
         session_token = response.json()["uploadSessionToken"]
 
         test_file = SimpleUploadedFile("test_file.txt", b"file_content", content_type="text/plain")
         response = self.client.post(
-            reverse("recordtransfer:upload_files", kwargs={"session_token": session_token}),
+            reverse("upload:upload_files", kwargs={"session_token": session_token}),
             {"file": test_file},
         )
         self.assertEqual(200, response.status_code)
@@ -141,9 +142,7 @@ class SubmissionFormWizardTests(TestCase):
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
     @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
     @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
-    def test_wizard(
-        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock
-    ) -> None:
+    def test_wizard(self, mock_thank_you: MagicMock, mock_creation_success: MagicMock) -> None:
         """Test the SubmissionFormWizard view from start to finish. This test will fill out the form
         with the test data and submit it, making sure no errors are raised.
         """

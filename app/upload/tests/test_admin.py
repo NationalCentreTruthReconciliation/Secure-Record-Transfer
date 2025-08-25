@@ -1,11 +1,10 @@
-"""Tests for the admin module."""
+"""Tests for the admin site."""
 
 from unittest.mock import Mock
 
 from django.test import RequestFactory, TestCase
-
-from recordtransfer.admin import PermUploadedFileInline, TempUploadedFileInline, UploadSessionAdmin
-from recordtransfer.models import UploadSession
+from upload.admin import PermUploadedFileInline, TempUploadedFileInline, UploadSessionAdmin
+from upload.models import UploadSession
 
 
 class TestUploadSessionAdmin(TestCase):
