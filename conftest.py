@@ -18,13 +18,13 @@ def pytest_runtestloop(session: pytest.Session) -> None:
         "/e2e/" in item.nodeid for item in selected_items
     ):
         try:
-            npm_cmd = shutil.which("pnpm") or "pnpm"
+            pnpm_cmd = shutil.which("pnpm") or "pnpm"
             subprocess.run(
-                [npm_cmd, "install"],
+                [pnpm_cmd, "install"],
                 check=True,
             )
             subprocess.run(
-                [npm_cmd, "run", "build"],
+                [pnpm_cmd, "run", "build"],
                 check=True,
                 env={
                     **os.environ,
