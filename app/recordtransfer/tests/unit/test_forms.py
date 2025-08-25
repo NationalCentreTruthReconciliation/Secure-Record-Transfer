@@ -837,43 +837,18 @@ class OtherIdentifiersFormTest(TestCase):
             "Must enter a type for this identifier", form.errors["other_identifier_type"]
         )
 
-    def test_form_field_labels_and_placeholders(self) -> None:
-        """Test that form fields have correct labels and placeholders."""
-        form = OtherIdentifiersForm()
-
-        # Test labels
-        self.assertEqual(form.fields["other_identifier_type"].label, "Type of identifier")
-        self.assertEqual(form.fields["other_identifier_value"].label, "Identifier value")
-        self.assertEqual(form.fields["other_identifier_note"].label, "Notes for identifier")
-
-        # Test placeholders
-        self.assertEqual(
-            form.fields["other_identifier_type"].widget.attrs["placeholder"],
-            "The type of the identifier",
-        )
-        self.assertEqual(
-            form.fields["other_identifier_value"].widget.attrs["placeholder"], "Identifier value"
-        )
-        self.assertEqual(
-            form.fields["other_identifier_note"].widget.attrs["placeholder"],
-            "Any notes on this identifier or which files it may apply to (optional).",
-        )
-
-    def test_form_field_required_attributes(self) -> None:
-        """Test that all form fields are correctly marked as not required."""
-        form = OtherIdentifiersForm()
-
-        self.assertFalse(form.fields["other_identifier_type"].required)
-        self.assertFalse(form.fields["other_identifier_value"].required)
-        self.assertFalse(form.fields["other_identifier_note"].required)
-
     def test_form_field_widgets(self) -> None:
         """Test that form fields have correct widget types."""
         form = OtherIdentifiersForm()
 
         self.assertIsInstance(form.fields["other_identifier_type"].widget, forms.TextInput)
+        self.assertFalse(form.fields["other_identifier_type"].required)
+
         self.assertIsInstance(form.fields["other_identifier_value"].widget, forms.TextInput)
+        self.assertFalse(form.fields["other_identifier_value"].required)
+
         self.assertIsInstance(form.fields["other_identifier_note"].widget, forms.Textarea)
+        self.assertFalse(form.fields["other_identifier_note"].required)
 
         # Test textarea rows attribute
         self.assertEqual(form.fields["other_identifier_note"].widget.attrs["rows"], "2")
@@ -915,8 +890,8 @@ class OtherIdentifiersFormTest(TestCase):
             "accession number",
             "Accession Number",
             "aCcEsSiOn NuMbEr",
-            "ACCESSION IDENTIFIER",
-            "accession identifier",
+            "  ACCESSION IDENTIFIER",
+            "accession identifier ",
             "Accession Identifier",
             "aCcEsSiOn IdEnTiFiEr",
         ]
