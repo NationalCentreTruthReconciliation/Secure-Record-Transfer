@@ -4,7 +4,7 @@ from datetime import datetime
 from django.test import TestCase
 from django.utils import timezone
 
-from caais.export import ExportVersion
+from caais.csvfile import Columns
 from caais.models import (
     AcquisitionMethod,
     Appraisal,
@@ -119,7 +119,7 @@ class TestIdentifierManager(TestCase):
         identifier_1.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.identifiers.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.identifiers.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_identifier_caais_1_0(self):
@@ -131,11 +131,11 @@ class TestIdentifierManager(TestCase):
         )
         identifier_1.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.identifiers.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         # Assure data is as we expect
         self.assertEqual(flat["identifierTypes"], "ID TYPE 1")
@@ -157,11 +157,11 @@ class TestIdentifierManager(TestCase):
         identifier_1.save()
         identifier_2.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.identifiers.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["identifierTypes"], "ID TYPE 1|ID TYPE 2")
         self.assertEqual(flat["identifierValues"], "ID VALUE 1|ID VALUE 2")
@@ -171,7 +171,7 @@ class TestIdentifierManager(TestCase):
         identifier_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_identifier_atom_2_6(self):
@@ -184,11 +184,11 @@ class TestIdentifierManager(TestCase):
         )
         identifier_1.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["alternativeIdentifierTypes"], "ID TYPE 1")
         self.assertEqual(flat["alternativeIdentifiers"], "ID VALUE 1")
@@ -211,11 +211,11 @@ class TestIdentifierManager(TestCase):
         identifier_1.save()
         identifier_2.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["alternativeIdentifierTypes"], "ID TYPE 1|ID TYPE 2")
         self.assertEqual(flat["alternativeIdentifiers"], "ID VALUE 1|ID VALUE 2")
@@ -240,11 +240,11 @@ class TestIdentifierManager(TestCase):
         identifier_1.save()
         identifier_2.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["alternativeIdentifierTypes"], "ID TYPE")
         self.assertEqual(flat["alternativeIdentifiers"], "ID VALUE")
@@ -254,7 +254,7 @@ class TestIdentifierManager(TestCase):
         identifier_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_identifier_atom_2_3(self):
@@ -267,14 +267,14 @@ class TestIdentifierManager(TestCase):
         )
         identifier_1.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
         identifier_1.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_identifier_atom_2_2(self):
@@ -287,14 +287,14 @@ class TestIdentifierManager(TestCase):
         )
         identifier_1.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
         identifier_1.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_identifier_atom_2_1(self):
@@ -307,7 +307,7 @@ class TestIdentifierManager(TestCase):
         )
         identifier_1.save()
 
-        flat = self.metadata.identifiers.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.identifiers.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -350,18 +350,18 @@ class TestArchivalUnitManager(TestCase):
         unit_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.archival_units.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.archival_units.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_archival_unit_caais_1_0(self):
         unit_1 = ArchivalUnit(metadata=self.metadata, archival_unit="ARCHIVAL UNIT 1")
         unit_1.save()
 
-        flat = self.metadata.archival_units.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.archival_units.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["archivalUnits"], "ARCHIVAL UNIT 1")
 
@@ -373,15 +373,15 @@ class TestArchivalUnitManager(TestCase):
         unit_1.save()
         unit_2.save()
 
-        flat = self.metadata.archival_units.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.archival_units.flatten(Columns.CAAIS_1_0)
 
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["archivalUnits"], "ARCHIVAL UNIT 1|ARCHIVAL UNIT 2")
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_archival_unit_atom_2_6(self):
@@ -389,14 +389,14 @@ class TestArchivalUnitManager(TestCase):
         unit = ArchivalUnit(metadata=self.metadata, archival_unit="ARCHIVAL UNIT 1")
         unit.save()
 
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_6)
 
         self.assertFalse(flat)
 
         unit.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_archival_unit_atom_2_3(self):
@@ -404,14 +404,14 @@ class TestArchivalUnitManager(TestCase):
         unit = ArchivalUnit(metadata=self.metadata, archival_unit="ARCHIVAL UNIT 1")
         unit.save()
 
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
         unit.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_archival_unit_atom_2_2(self):
@@ -419,14 +419,14 @@ class TestArchivalUnitManager(TestCase):
         unit = ArchivalUnit(metadata=self.metadata, archival_unit="ARCHIVAL UNIT 1")
         unit.save()
 
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
         unit.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_archival_unit_atom_2_1(self):
@@ -434,7 +434,7 @@ class TestArchivalUnitManager(TestCase):
         unit = ArchivalUnit(metadata=self.metadata, archival_unit="ARCHIVAL UNIT 1")
         unit.save()
 
-        flat = self.metadata.archival_units.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.archival_units.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -483,7 +483,7 @@ class TestDispositionAuthorityManager(TestCase):
         unit_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.disposition_authorities.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_disposition_authority_caais_1_0(self):
@@ -492,11 +492,11 @@ class TestDispositionAuthorityManager(TestCase):
         )
         unit_1.save()
 
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.disposition_authorities.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["dispositionAuthorities"], "DISPOSITION AUTHORITY 1")
 
@@ -512,18 +512,18 @@ class TestDispositionAuthorityManager(TestCase):
         unit_1.save()
         unit_2.save()
 
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.disposition_authorities.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(
             flat["dispositionAuthorities"], "DISPOSITION AUTHORITY 1|DISPOSITION AUTHORITY 2"
         )
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_disposition_authority_atom_2_6(self):
@@ -533,14 +533,14 @@ class TestDispositionAuthorityManager(TestCase):
         )
         unit.save()
 
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_6)
 
         self.assertFalse(flat)
 
         unit.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_disposition_authority_atom_2_3(self):
@@ -550,14 +550,14 @@ class TestDispositionAuthorityManager(TestCase):
         )
         unit.save()
 
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
         unit.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_disposition_authority_atom_2_2(self):
@@ -567,14 +567,14 @@ class TestDispositionAuthorityManager(TestCase):
         )
         unit.save()
 
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
         unit.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_disposition_authority_atom_2_1(self):
@@ -584,7 +584,7 @@ class TestDispositionAuthorityManager(TestCase):
         )
         unit.save()
 
-        flat = self.metadata.disposition_authorities.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.disposition_authorities.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -630,7 +630,7 @@ class TestSourceOfMaterialManager(TestCase):
         source = SourceOfMaterial(metadata=self.metadata, address_line_1="123 Example Street")
         source.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.source_of_materials.flatten(Columns.CAAIS_1_0)
 
         self.assertEqual(flat["sourceStreetAddress"], "123 Example Street")
 
@@ -638,7 +638,7 @@ class TestSourceOfMaterialManager(TestCase):
         source = SourceOfMaterial(metadata=self.metadata, address_line_2="123 Example Street")
         source.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.source_of_materials.flatten(Columns.CAAIS_1_0)
 
         self.assertEqual(flat["sourceStreetAddress"], "123 Example Street")
 
@@ -650,7 +650,7 @@ class TestSourceOfMaterialManager(TestCase):
         )
         source.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.source_of_materials.flatten(Columns.CAAIS_1_0)
 
         self.assertEqual(flat["sourceStreetAddress"], "123 Example Street, Apt. 14")
 
@@ -658,7 +658,7 @@ class TestSourceOfMaterialManager(TestCase):
         source = SourceOfMaterial(metadata=self.metadata, address_line_1="123 Example Street")
         source.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_6)
 
         self.assertEqual(flat["donorStreetAddress"], "123 Example Street")
 
@@ -666,7 +666,7 @@ class TestSourceOfMaterialManager(TestCase):
         source = SourceOfMaterial(metadata=self.metadata, address_line_2="123 Example Street")
         source.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_6)
 
         self.assertEqual(flat["donorStreetAddress"], "123 Example Street")
 
@@ -678,12 +678,12 @@ class TestSourceOfMaterialManager(TestCase):
         )
         source.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_6)
 
         self.assertEqual(flat["donorStreetAddress"], "123 Example Street, Apt. 14")
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.source_of_materials.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_source_caais_1_0(self):
@@ -713,11 +713,11 @@ class TestSourceOfMaterialManager(TestCase):
 
         source_1.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.source_of_materials.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["sourceType"], "Individual")
         self.assertEqual(flat["sourceName"], "SOURCE NAME")
@@ -773,11 +773,11 @@ class TestSourceOfMaterialManager(TestCase):
         source_1.save()
         source_2.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.source_of_materials.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["sourceType"], "Individual|Individual")
         self.assertEqual(flat["sourceName"], "SOURCE NAME 1|SOURCE NAME 2")
@@ -802,7 +802,7 @@ class TestSourceOfMaterialManager(TestCase):
         source_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_source_atom_2_6(self):
@@ -831,11 +831,11 @@ class TestSourceOfMaterialManager(TestCase):
         )
         source_1.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["donorName"], "SOURCE NAME 1")
         self.assertEqual(flat["donorStreetAddress"], "LINE 1, LINE 2")
@@ -892,11 +892,11 @@ class TestSourceOfMaterialManager(TestCase):
         source_1.save()
         source_2.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["donorName"], "SOURCE NAME 1")
         self.assertEqual(flat["donorStreetAddress"], "LINE 1, LINE 2")
@@ -920,7 +920,7 @@ class TestSourceOfMaterialManager(TestCase):
         source_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_source_atom_2_3(self):
@@ -949,11 +949,11 @@ class TestSourceOfMaterialManager(TestCase):
         )
         source_1.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["donorName"], "SOURCE NAME 1")
         self.assertEqual(flat["donorStreetAddress"], "LINE 1, LINE 2")
@@ -974,7 +974,7 @@ class TestSourceOfMaterialManager(TestCase):
         source_1.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_source_atom_2_2(self):
@@ -1003,11 +1003,11 @@ class TestSourceOfMaterialManager(TestCase):
         )
         source_1.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["donorName"], "SOURCE NAME 1")
         self.assertEqual(flat["donorStreetAddress"], "LINE 1, LINE 2")
@@ -1028,7 +1028,7 @@ class TestSourceOfMaterialManager(TestCase):
         source_1.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_source_atom_2_1(self):
@@ -1057,11 +1057,11 @@ class TestSourceOfMaterialManager(TestCase):
         )
         source_1.save()
 
-        flat = self.metadata.source_of_materials.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.source_of_materials.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["donorName"], "SOURCE NAME 1")
         self.assertEqual(flat["donorStreetAddress"], "LINE 1, LINE 2")
@@ -1124,7 +1124,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_history_caais_1_0(self):
@@ -1133,11 +1133,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         )
         history_1.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["preliminaryCustodialHistory"], "HISTORY 1")
 
@@ -1153,11 +1153,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_1.save()
         history_2.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["preliminaryCustodialHistory"], "HISTORY 1|HISTORY 2")
 
@@ -1165,7 +1165,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_history_atom_2_6(self):
@@ -1174,11 +1174,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         )
         history_1.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "HISTORY 1")
 
@@ -1194,11 +1194,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_1.save()
         history_2.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "* HISTORY 1\n* HISTORY 2")
 
@@ -1206,7 +1206,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_history_atom_2_3(self):
@@ -1215,11 +1215,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         )
         history_1.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "HISTORY 1")
 
@@ -1235,11 +1235,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_1.save()
         history_2.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "* HISTORY 1\n* HISTORY 2")
 
@@ -1247,7 +1247,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_2.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_history_atom_2_2(self):
@@ -1256,11 +1256,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         )
         history_1.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "HISTORY 1")
 
@@ -1276,11 +1276,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_1.save()
         history_2.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "* HISTORY 1\n* HISTORY 2")
 
@@ -1288,7 +1288,7 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_2.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_history_atom_2_1(self):
@@ -1297,11 +1297,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         )
         history_1.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "HISTORY 1")
 
@@ -1317,11 +1317,11 @@ class TestPreliminaryCustodialHistoryManager(TestCase):
         history_1.save()
         history_2.save()
 
-        flat = self.metadata.preliminary_custodial_histories.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preliminary_custodial_histories.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["archivalHistory"], "* HISTORY 1\n* HISTORY 2")
 
@@ -1365,7 +1365,7 @@ class TestExtentStatementManager(TestCase):
         extent_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.extent_statements.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.extent_statements.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_extent_caais_1_0(self):
@@ -1385,11 +1385,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.extent_statements.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["extentTypes"], "Extent Received")
         self.assertEqual(flat["quantityAndUnitOfMeasure"], "3 FILES")
@@ -1421,11 +1421,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.extent_statements.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
         self.assertEqual(flat["quantityAndUnitOfMeasure"], "3 FILES|10 PDFs")
@@ -1437,7 +1437,7 @@ class TestExtentStatementManager(TestCase):
             obj.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_extent_atom_2_6(self):
@@ -1457,11 +1457,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "3 FILES")
@@ -1493,11 +1493,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "* 3 FILES\n* 10 PDFs")
@@ -1506,7 +1506,7 @@ class TestExtentStatementManager(TestCase):
             obj.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_extent_atom_2_3(self):
@@ -1526,11 +1526,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "3 FILES")
@@ -1562,11 +1562,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "* 3 FILES\n* 10 PDFs")
@@ -1575,7 +1575,7 @@ class TestExtentStatementManager(TestCase):
             obj.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_extent_atom_2_2(self):
@@ -1595,11 +1595,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "3 FILES")
@@ -1631,11 +1631,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "* 3 FILES\n* 10 PDFs")
@@ -1644,7 +1644,7 @@ class TestExtentStatementManager(TestCase):
             obj.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_extent_atom_2_1(self):
@@ -1664,11 +1664,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "3 FILES")
@@ -1700,11 +1700,11 @@ class TestExtentStatementManager(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = self.metadata.extent_statements.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.extent_statements.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["receivedExtentUnits"], "* 3 FILES\n* 10 PDFs")
@@ -1750,7 +1750,7 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_2.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_scope_caais_1_0(self):
@@ -1759,11 +1759,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         )
         scope_1.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["preliminaryScopeAndContent"], "SCOPE 1")
 
@@ -1779,18 +1779,18 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_1.save()
         scope_2.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["preliminaryScopeAndContent"], "SCOPE 1|SCOPE 2")
 
         scope_1.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_scope_atom_2_6(self):
@@ -1799,11 +1799,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         )
         scope_1.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1")
 
@@ -1819,11 +1819,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_1.save()
         scope_2.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1; SCOPE 2")
 
@@ -1831,7 +1831,7 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_scope_atom_2_3(self):
@@ -1840,11 +1840,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         )
         scope_1.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1")
 
@@ -1860,11 +1860,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_1.save()
         scope_2.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1; SCOPE 2")
 
@@ -1872,7 +1872,7 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_2.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_scope_atom_2_2(self):
@@ -1881,11 +1881,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         )
         scope_1.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1")
 
@@ -1901,11 +1901,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_1.save()
         scope_2.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1; SCOPE 2")
 
@@ -1913,7 +1913,7 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_2.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_scope_atom_2_1(self):
@@ -1922,11 +1922,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         )
         scope_1.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1")
 
@@ -1942,11 +1942,11 @@ class TestPreliminaryScopeAndContentManager(TestCase):
         scope_1.save()
         scope_2.save()
 
-        flat = self.metadata.preliminary_scope_and_contents.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preliminary_scope_and_contents.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "SCOPE 1; SCOPE 2")
 
@@ -1987,18 +1987,18 @@ class TestLanguageOfMaterialManager(TestCase):
         language_2.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.language_of_materials.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_language_caais_1_0(self):
         language_1 = LanguageOfMaterial(metadata=self.metadata, language_of_material="en")
         language_1.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.language_of_materials.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["languageOfMaterials"], "en")
 
@@ -2016,11 +2016,11 @@ class TestLanguageOfMaterialManager(TestCase):
         language_1.save()
         language_2.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.language_of_materials.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["languageOfMaterials"], "en|fr")
 
@@ -2028,18 +2028,18 @@ class TestLanguageOfMaterialManager(TestCase):
         language_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_language_atom_2_6(self):
         language_1 = LanguageOfMaterial(metadata=self.metadata, language_of_material="en")
         language_1.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en")
 
@@ -2057,11 +2057,11 @@ class TestLanguageOfMaterialManager(TestCase):
         language_1.save()
         language_2.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en; fr")
 
@@ -2069,18 +2069,18 @@ class TestLanguageOfMaterialManager(TestCase):
         language_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_language_atom_2_3(self):
         language_1 = LanguageOfMaterial(metadata=self.metadata, language_of_material="en")
         language_1.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en")
 
@@ -2098,11 +2098,11 @@ class TestLanguageOfMaterialManager(TestCase):
         language_1.save()
         language_2.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en; fr")
 
@@ -2110,18 +2110,18 @@ class TestLanguageOfMaterialManager(TestCase):
         language_2.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_language_atom_2_2(self):
         language_1 = LanguageOfMaterial(metadata=self.metadata, language_of_material="en")
         language_1.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en")
 
@@ -2139,11 +2139,11 @@ class TestLanguageOfMaterialManager(TestCase):
         language_1.save()
         language_2.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en; fr")
 
@@ -2151,18 +2151,18 @@ class TestLanguageOfMaterialManager(TestCase):
         language_2.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_language_atom_2_1(self):
         language_1 = LanguageOfMaterial(metadata=self.metadata, language_of_material="en")
         language_1.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en")
 
@@ -2180,11 +2180,11 @@ class TestLanguageOfMaterialManager(TestCase):
         language_1.save()
         language_2.save()
 
-        flat = self.metadata.language_of_materials.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.language_of_materials.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["scopeAndContent"], "Language(s) of materials: en; fr")
 
@@ -2231,7 +2231,7 @@ class TestStorageLocationManager(TestCase):
         location_2.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.storage_locations.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.storage_locations.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_location_caais_1_0(self):
@@ -2241,11 +2241,11 @@ class TestStorageLocationManager(TestCase):
         )
         location_1.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.storage_locations.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["storageLocation"], "LOCATION 1")
 
@@ -2263,11 +2263,11 @@ class TestStorageLocationManager(TestCase):
         location_1.save()
         location_2.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.storage_locations.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["storageLocation"], "LOCATION 1|LOCATION 2")
 
@@ -2275,7 +2275,7 @@ class TestStorageLocationManager(TestCase):
         location_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_location_atom_2_6(self):
@@ -2285,11 +2285,11 @@ class TestStorageLocationManager(TestCase):
         )
         location_1.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "LOCATION 1")
 
@@ -2307,11 +2307,11 @@ class TestStorageLocationManager(TestCase):
         location_1.save()
         location_2.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "* LOCATION 1\n* LOCATION 2")
 
@@ -2319,7 +2319,7 @@ class TestStorageLocationManager(TestCase):
         location_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_location_atom_2_3(self):
@@ -2329,11 +2329,11 @@ class TestStorageLocationManager(TestCase):
         )
         location_1.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "LOCATION 1")
 
@@ -2351,11 +2351,11 @@ class TestStorageLocationManager(TestCase):
         location_1.save()
         location_2.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "* LOCATION 1\n* LOCATION 2")
 
@@ -2363,7 +2363,7 @@ class TestStorageLocationManager(TestCase):
         location_2.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_location_atom_2_2(self):
@@ -2373,11 +2373,11 @@ class TestStorageLocationManager(TestCase):
         )
         location_1.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "LOCATION 1")
 
@@ -2395,11 +2395,11 @@ class TestStorageLocationManager(TestCase):
         location_1.save()
         location_2.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "* LOCATION 1\n* LOCATION 2")
 
@@ -2407,7 +2407,7 @@ class TestStorageLocationManager(TestCase):
         location_2.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_location_atom_2_1(self):
@@ -2417,11 +2417,11 @@ class TestStorageLocationManager(TestCase):
         )
         location_1.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "LOCATION 1")
 
@@ -2439,11 +2439,11 @@ class TestStorageLocationManager(TestCase):
         location_1.save()
         location_2.save()
 
-        flat = self.metadata.storage_locations.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.storage_locations.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["locationInformation"], "* LOCATION 1\n* LOCATION 2")
 
@@ -2487,7 +2487,7 @@ class TestRightsManager(TestCase):
         rights_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.rights.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.rights.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_rights_caais_1_0(self):
@@ -2501,11 +2501,11 @@ class TestRightsManager(TestCase):
         )
         rights_1.save()
 
-        flat = self.metadata.rights.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.rights.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["rightsTypes"], "Copyright")
         self.assertEqual(flat["rightsValues"], "RIGHTS VALUE")
@@ -2532,11 +2532,11 @@ class TestRightsManager(TestCase):
         rights_1.save()
         rights_2.save()
 
-        flat = self.metadata.rights.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.rights.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["rightsTypes"], "Copyright|Copyright")
         self.assertEqual(flat["rightsValues"], "RIGHTS VALUE 1|RIGHTS VALUE 2")
@@ -2548,7 +2548,7 @@ class TestRightsManager(TestCase):
             rights_type.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_rights_atom_2_6(self):
@@ -2556,14 +2556,14 @@ class TestRightsManager(TestCase):
         rights_1 = Rights(metadata=self.metadata)
         rights_1.save()
 
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_6)
 
         self.assertFalse(flat)
 
         rights_1.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_rights_atom_2_3(self):
@@ -2571,14 +2571,14 @@ class TestRightsManager(TestCase):
         rights_1 = Rights(metadata=self.metadata)
         rights_1.save()
 
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
         rights_1.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_rights_atom_2_2(self):
@@ -2586,14 +2586,14 @@ class TestRightsManager(TestCase):
         rights_1 = Rights(metadata=self.metadata)
         rights_1.save()
 
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
         rights_1.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_rights_atom_2_1(self):
@@ -2601,7 +2601,7 @@ class TestRightsManager(TestCase):
         rights_1 = Rights(metadata=self.metadata)
         rights_1.save()
 
-        flat = self.metadata.rights.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.rights.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -2644,7 +2644,7 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preservation_requirements.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_requirement_caais_1_0(self):
@@ -2658,11 +2658,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_type.save()
         requirements_1.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preservation_requirements.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["preservationRequirementsTypes"], "Preservation Concern")
         self.assertEqual(flat["preservationRequirementsValues"], "VALUE 1")
@@ -2686,11 +2686,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_1.save()
         requirements_2.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.preservation_requirements.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["preservationRequirementsTypes"], "Preservation Concern|NULL")
         self.assertEqual(flat["preservationRequirementsValues"], "VALUE 1|VALUE 2")
@@ -2701,7 +2701,7 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_requirement_atom_2_6(self):
@@ -2715,11 +2715,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_type.save()
         requirements_1.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "VALUE 1. NOTE 1")
@@ -2746,11 +2746,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_2.save()
         requirements_3.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "* VALUE 1. NOTE 1\n* VALUE 2")
@@ -2761,7 +2761,7 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_3.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_requirement_atom_2_3(self):
@@ -2775,11 +2775,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_type.save()
         requirements_1.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "VALUE 1. NOTE 1")
@@ -2806,11 +2806,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_2.save()
         requirements_3.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "* VALUE 1. NOTE 1\n* VALUE 2")
@@ -2821,7 +2821,7 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_3.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_requirement_atom_2_2(self):
@@ -2835,11 +2835,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_type.save()
         requirements_1.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "VALUE 1. NOTE 1")
@@ -2866,11 +2866,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_2.save()
         requirements_3.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "* VALUE 1. NOTE 1\n* VALUE 2")
@@ -2881,7 +2881,7 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_3.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_requirement_atom_2_1(self):
@@ -2895,11 +2895,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_type.save()
         requirements_1.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "VALUE 1. NOTE 1")
@@ -2926,11 +2926,11 @@ class TestPreservationRequirementsManager(TestCase):
         requirements_2.save()
         requirements_3.save()
 
-        flat = self.metadata.preservation_requirements.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.preservation_requirements.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["processingNotes"], "* VALUE 1. NOTE 1\n* VALUE 2")
@@ -2977,7 +2977,7 @@ class TestAppraisalManager(TestCase):
         appraisal_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.appraisals.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.appraisals.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_appraisal_caais_1_0(self):
@@ -2992,11 +2992,11 @@ class TestAppraisalManager(TestCase):
         )
         appraisal_1.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.appraisals.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["appraisalTypes"], "Archival Appraisal")
         self.assertEqual(flat["appraisalValues"], "APPRAISAL 1")
@@ -3022,11 +3022,11 @@ class TestAppraisalManager(TestCase):
         appraisal_1.save()
         appraisal_2.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.appraisals.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["appraisalTypes"], "Archival Appraisal|NULL")
         self.assertEqual(flat["appraisalValues"], "APPRAISAL 1|APPRAISAL 2")
@@ -3037,7 +3037,7 @@ class TestAppraisalManager(TestCase):
         appraisal_type.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_appraisal_atom_2_6(self):
@@ -3052,11 +3052,11 @@ class TestAppraisalManager(TestCase):
         )
         appraisal_1.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["appraisal"], "APPRAISAL 1. NOTE 1")
 
@@ -3084,11 +3084,11 @@ class TestAppraisalManager(TestCase):
         appraisal_2.save()
         appraisal_3.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["appraisal"], "* APPRAISAL 1. NOTE 1\n* APPRAISAL 2")
 
@@ -3098,7 +3098,7 @@ class TestAppraisalManager(TestCase):
         appraisal_type.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_appraisal_atom_2_3(self):
@@ -3113,11 +3113,11 @@ class TestAppraisalManager(TestCase):
         )
         appraisal_1.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["appraisal"], "APPRAISAL 1. NOTE 1")
 
@@ -3145,11 +3145,11 @@ class TestAppraisalManager(TestCase):
         appraisal_2.save()
         appraisal_3.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["appraisal"], "* APPRAISAL 1. NOTE 1\n* APPRAISAL 2")
 
@@ -3159,7 +3159,7 @@ class TestAppraisalManager(TestCase):
         appraisal_type.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_appraisal_atom_2_2(self):
@@ -3174,11 +3174,11 @@ class TestAppraisalManager(TestCase):
         )
         appraisal_1.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["appraisal"], "APPRAISAL 1. NOTE 1")
 
@@ -3206,11 +3206,11 @@ class TestAppraisalManager(TestCase):
         appraisal_2.save()
         appraisal_3.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["appraisal"], "* APPRAISAL 1. NOTE 1\n* APPRAISAL 2")
 
@@ -3220,7 +3220,7 @@ class TestAppraisalManager(TestCase):
         appraisal_type.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_appraisal_atom_2_1(self):
@@ -3235,11 +3235,11 @@ class TestAppraisalManager(TestCase):
         )
         appraisal_1.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["appraisal"], "APPRAISAL 1. NOTE 1")
 
@@ -3267,11 +3267,11 @@ class TestAppraisalManager(TestCase):
         appraisal_2.save()
         appraisal_3.save()
 
-        flat = self.metadata.appraisals.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.appraisals.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["appraisal"], "* APPRAISAL 1. NOTE 1\n* APPRAISAL 2")
 
@@ -3324,7 +3324,7 @@ class TestAssociatedDocumentationManager(TestCase):
         doc_2.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.associated_documentation.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_doc_caais_1_0(self):
@@ -3339,11 +3339,11 @@ class TestAssociatedDocumentationManager(TestCase):
         )
         doc_1.save()
 
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.associated_documentation.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["associatedDocumentationTypes"], "Related Documentation")
         self.assertEqual(flat["associatedDocumentationTitles"], "TITLE")
@@ -3370,11 +3370,11 @@ class TestAssociatedDocumentationManager(TestCase):
         )
         doc_2.save()
 
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.associated_documentation.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["associatedDocumentationTypes"], "Related Documentation|NULL")
         self.assertEqual(flat["associatedDocumentationTitles"], "TITLE 1|TITLE 2")
@@ -3385,7 +3385,7 @@ class TestAssociatedDocumentationManager(TestCase):
         doc_type.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_doc_atom_2_6(self):
@@ -3400,7 +3400,7 @@ class TestAssociatedDocumentationManager(TestCase):
         )
         doc_1.save()
 
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_6)
 
         self.assertFalse(flat)
 
@@ -3408,7 +3408,7 @@ class TestAssociatedDocumentationManager(TestCase):
         doc_type.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_doc_atom_2_3(self):
@@ -3423,7 +3423,7 @@ class TestAssociatedDocumentationManager(TestCase):
         )
         doc_1.save()
 
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
@@ -3431,7 +3431,7 @@ class TestAssociatedDocumentationManager(TestCase):
         doc_type.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_doc_atom_2_2(self):
@@ -3446,7 +3446,7 @@ class TestAssociatedDocumentationManager(TestCase):
         )
         doc_1.save()
 
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
@@ -3454,7 +3454,7 @@ class TestAssociatedDocumentationManager(TestCase):
         doc_type.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_doc_atom_2_1(self):
@@ -3469,7 +3469,7 @@ class TestAssociatedDocumentationManager(TestCase):
         )
         doc_1.save()
 
-        flat = self.metadata.associated_documentation.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.associated_documentation.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -3513,7 +3513,7 @@ class TestEventManager(TestCase):
         event_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.events.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.events.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     @patch.object(
@@ -3532,11 +3532,11 @@ class TestEventManager(TestCase):
         )
         event_1.save()
 
-        flat = self.metadata.events.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.events.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["eventTypes"], "Updated")
         self.assertEqual(flat["eventDates"], "2023-03-15")
@@ -3564,11 +3564,11 @@ class TestEventManager(TestCase):
         event_1.save()
         event_2.save()
 
-        flat = self.metadata.events.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.events.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["eventTypes"], "Updated|NULL")
         self.assertEqual(flat["eventDates"], "2023-02-28|2023-02-28")
@@ -3580,7 +3580,7 @@ class TestEventManager(TestCase):
         event_type.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_event_atom_2_6(self):
@@ -3588,14 +3588,14 @@ class TestEventManager(TestCase):
         event_1 = Event(metadata=self.metadata)
         event_1.save()
 
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_6)
 
         self.assertFalse(flat)
 
         event_1.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_event_atom_2_3(self):
@@ -3603,14 +3603,14 @@ class TestEventManager(TestCase):
         event_1 = Event(metadata=self.metadata)
         event_1.save()
 
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
         event_1.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_event_atom_2_2(self):
@@ -3618,14 +3618,14 @@ class TestEventManager(TestCase):
         event_1 = Event(metadata=self.metadata)
         event_1.save()
 
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
         event_1.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_event_atom_2_1(self):
@@ -3633,7 +3633,7 @@ class TestEventManager(TestCase):
         event_1 = Event(metadata=self.metadata)
         event_1.save()
 
-        flat = self.metadata.events.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.events.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -3676,18 +3676,18 @@ class TestGeneralNoteManager(TestCase):
         general_note_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.general_notes.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.general_notes.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     def test_flatten_single_note_caais_1_0(self):
         note_1 = GeneralNote(metadata=self.metadata, general_note="NOTE 1")
         note_1.save()
 
-        flat = self.metadata.general_notes.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.general_notes.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["generalNotes"], "NOTE 1")
 
@@ -3699,11 +3699,11 @@ class TestGeneralNoteManager(TestCase):
         note_1.save()
         note_2.save()
 
-        flat = self.metadata.general_notes.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.general_notes.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["generalNotes"], "NOTE 1|NOTE 2")
 
@@ -3711,7 +3711,7 @@ class TestGeneralNoteManager(TestCase):
         note_2.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     def test_flatten_single_note_atom_2_6(self):
@@ -3719,14 +3719,14 @@ class TestGeneralNoteManager(TestCase):
         general_note_1 = GeneralNote(metadata=self.metadata)
         general_note_1.save()
 
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_6)
 
         self.assertFalse(flat)
 
         general_note_1.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     def test_flatten_single_note_atom_2_3(self):
@@ -3734,14 +3734,14 @@ class TestGeneralNoteManager(TestCase):
         general_note_1 = GeneralNote(metadata=self.metadata)
         general_note_1.save()
 
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_3)
 
         self.assertFalse(flat)
 
         general_note_1.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_2)
         self.assertFalse(flat)
 
     def test_flatten_single_note_atom_2_2(self):
@@ -3749,14 +3749,14 @@ class TestGeneralNoteManager(TestCase):
         general_note_1 = GeneralNote(metadata=self.metadata)
         general_note_1.save()
 
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_2)
 
         self.assertFalse(flat)
 
         general_note_1.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     def test_flatten_single_note_atom_2_1(self):
@@ -3764,7 +3764,7 @@ class TestGeneralNoteManager(TestCase):
         general_note_1 = GeneralNote(metadata=self.metadata)
         general_note_1.save()
 
-        flat = self.metadata.general_notes.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.general_notes.flatten(Columns.ATOM_2_1)
 
         self.assertFalse(flat)
 
@@ -3807,7 +3807,7 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_3.delete()
 
     def test_flatten_no_data_caais_1_0(self):
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.CAAIS_1_0)
         self.assertFalse(flat)
 
     @patch.object(
@@ -3827,11 +3827,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         )
         date_1.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["creationOrRevisionTypes"], "Creation")
         self.assertEqual(flat["creationOrRevisionDates"], "2023-09-30")
@@ -3865,11 +3865,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_1.save()
         date_2.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.CAAIS_1_0)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["creationOrRevisionTypes"], "Creation|Revision")
         self.assertEqual(flat["creationOrRevisionDates"], "2023-05-13|2023-05-13")
@@ -3882,7 +3882,7 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         revision_type.delete()
 
     def test_flatten_no_data_atom_2_6(self):
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_6)
         self.assertFalse(flat)
 
     @patch.object(
@@ -3898,11 +3898,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         )
         date_1.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-04-18")
@@ -3930,11 +3930,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_1.save()
         date_2.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_6)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-10-08")
@@ -3943,7 +3943,7 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_2.delete()
 
     def test_flatten_no_data_atom_2_3(self):
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     @patch.object(
@@ -3959,11 +3959,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         )
         date_1.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-02-03")
@@ -3991,11 +3991,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_1.save()
         date_2.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-07-21")
@@ -4004,7 +4004,7 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_2.delete()
 
     def test_flatten_no_data_atom_2_2(self):
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_3)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_3)
         self.assertFalse(flat)
 
     @patch.object(
@@ -4020,11 +4020,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         )
         date_1.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-08-20")
@@ -4052,11 +4052,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_1.save()
         date_2.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_2)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-05-16")
@@ -4065,7 +4065,7 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_2.delete()
 
     def test_flatten_no_data_atom_2_1(self):
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_1)
         self.assertFalse(flat)
 
     @patch.object(
@@ -4081,11 +4081,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         )
         date_1.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-09-27")
@@ -4113,11 +4113,11 @@ class TestDateOfCreationOrRevisionManager(TestCase):
         date_1.save()
         date_2.save()
 
-        flat = self.metadata.dates_of_creation_or_revision.flatten(ExportVersion.ATOM_2_1)
+        flat = self.metadata.dates_of_creation_or_revision.flatten(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(len(flat), 1)
         self.assertEqual(flat["acquisitionDate"], "2023-06-10")

@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Optional, cast
 
-from caais.export import ExportVersion
+from caais.csvfile import Columns
 from django.contrib import messages
 from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
@@ -84,7 +84,7 @@ def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
     else:
         prefix = "export-"
 
-    return submission_queryset.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+    return submission_queryset.export_csv(version=Columns.CAAIS_1_0, filename_prefix=prefix)
 
 
 require_http_methods(["GET"])
@@ -130,7 +130,7 @@ def submission_group_bulk_csv_export(request: HttpRequest, uuid: str) -> HttpRes
 
         return redirect("recordtransfer:user_profile")
 
-    return related_submissions.export_csv(version=ExportVersion.CAAIS_1_0, filename_prefix=prefix)
+    return related_submissions.export_csv(version=Columns.CAAIS_1_0, filename_prefix=prefix)
 
 
 class SubmissionGroupDetailView(UpdateView):

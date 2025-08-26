@@ -5,7 +5,7 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
-from caais.export import ExportVersion
+from caais.csvfile import Columns
 from caais.models import (
     AcquisitionMethod,
     Appraisal,
@@ -135,11 +135,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["repository"], "Repository")
         self.assertEqual(flat["accessionTitle"], "Title")
@@ -185,11 +185,11 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["repository"], "My Repository")
         self.assertEqual(flat["identifierTypes"], "ID|ID")
@@ -240,11 +240,11 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["sourceType"], "Individual")
         self.assertEqual(flat["sourceName"], "Name")
@@ -310,11 +310,11 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["dateOfMaterials"], "March 2018")
         self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
@@ -374,11 +374,11 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["dateOfMaterials"], "Circa 2018")
         self.assertEqual(flat["extentTypes"], "Extent Received|NULL")
@@ -454,11 +454,11 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["storageLocation"], "DPAS|External Hard Drive A")
         self.assertEqual(flat["rightsTypes"], "Public Domain")
@@ -512,11 +512,11 @@ class TestMetadata(TestCase):
         for obj in objects:
             obj.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["eventTypes"], "Metadata Received|Files Received")
         self.assertEqual(flat["eventDates"], "2023-12-05|2023-12-05")
@@ -545,11 +545,11 @@ class TestMetadata(TestCase):
         note_2.save()
         note_3.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["generalNotes"], "Note 1|Note 2|Note 3")
 
@@ -585,11 +585,11 @@ class TestMetadata(TestCase):
         date_1.save()
         date_2.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.CAAIS_1_0)
+        flat = metadata.create_flat_representation(Columns.CAAIS_1_0)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.CAAIS_1_0.fieldnames)
+            self.assertIn(key, Columns.CAAIS_1_0.fieldnames)
 
         self.assertEqual(flat["rulesOrConventions"], "CAAIS 1.0")
         self.assertEqual(flat["creationOrRevisionTypes"], "Created|Revised")
@@ -619,11 +619,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_6)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
@@ -647,11 +647,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_6)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_6)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_6.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_6.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
@@ -670,11 +670,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_3)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
@@ -698,11 +698,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_3)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_3)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_3.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_3.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
@@ -721,11 +721,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_2)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
@@ -749,11 +749,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_2)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_2)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_2.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_2.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")
@@ -772,11 +772,11 @@ class TestMetadata(TestCase):
         )
         metadata.save()
 
-        flat = metadata.create_flat_representation(ExportVersion.ATOM_2_1)
+        flat = metadata.create_flat_representation(Columns.ATOM_2_1)
 
         # Assure no weird keys were added
         for key in flat.keys():
-            self.assertIn(key, ExportVersion.ATOM_2_1.fieldnames)
+            self.assertIn(key, Columns.ATOM_2_1.fieldnames)
 
         self.assertEqual(flat["title"], "Title")
         self.assertEqual(flat["acquisitionType"], "")

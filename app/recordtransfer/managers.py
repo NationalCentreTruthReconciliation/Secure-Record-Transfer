@@ -2,7 +2,7 @@ import csv
 from io import StringIO
 from typing import Optional
 
-from caais.export import ExportVersion
+from caais.csvfile import Columns
 from django.apps import apps
 from django.conf import settings
 from django.db import models
@@ -16,7 +16,7 @@ class SubmissionQuerySet(query.QuerySet):
 
     def export_csv(
         self,
-        version: ExportVersion = ExportVersion.CAAIS_1_0,
+        version: Columns = Columns.CAAIS_1_0,
         filename_prefix: Optional[str] = None,
     ) -> HttpResponse:
         """Create an HttpResponse that contains a CSV representation of all submissions in the

@@ -28,7 +28,7 @@ from django.utils.translation import gettext
 from django_countries.fields import CountryField
 
 from caais.citation import cite_caais
-from caais.export import ExportVersion
+from caais.csvfile import Columns
 from caais.managers import (
     AppraisalManager,
     ArchivalUnitManager,
@@ -379,9 +379,9 @@ class Metadata(models.Model):
         if start_date == end_date:
             formatted_date = str(start_date)
 
-        return formatted_date, start_date, end_date # type: ignore
+        return formatted_date, start_date, end_date  # type: ignore
 
-    def _create_flat_atom_representation(self, row: dict, version: ExportVersion):
+    def _create_flat_atom_representation(self, row: dict, version: Columns):
         row.update(self.identifiers.flatten(version))
         row.update(self.archival_units.flatten(version))
         row.update(self.disposition_authorities.flatten(version))
@@ -418,12 +418,12 @@ class Metadata(models.Model):
 
         row["culture"] = "en"
 
-        if self.date_of_materials and not version == ExportVersion.ATOM_2_1:
+        if self.date_of_materials and not version == Columns.ATOM_2_1:
             parsed_date, start_date, end_date = self.parse_event_date_for_atom()
             if self.date_is_approximate:
                 parsed_date = settings.APPROXIMATE_DATE_FORMAT.format(date=parsed_date)
 
-            if version == ExportVersion.ATOM_2_2:
+            if version == Columns.ATOM_2_2:
                 row["creationDatesType"] = "Creation"
                 row["creationDates"] = parsed_date
                 row["creationDatesStart"] = str(start_date)
@@ -434,7 +434,7 @@ class Metadata(models.Model):
                 row["eventStartDates"] = str(start_date)
                 row["eventEndDates"] = str(end_date)
 
-    def _create_flat_caais_representation(self, row: dict, version: ExportVersion):
+    def _create_flat_caais_representation(self, row: dict, version: Columns):
         # Section 1
         row["repository"] = self.repository or ""
         row.update(self.identifiers.flatten(version))
@@ -479,7 +479,7 @@ class Metadata(models.Model):
         row.update(self.dates_of_creation_or_revision.flatten(version))
         row["languageOfAccessionRecord"] = self.language_of_accession_record or ""
 
-    def create_flat_representation(self, version=ExportVersion.CAAIS_1_0) -> dict:
+    def create_flat_representation(self, version=Columns.CAAIS_1_0) -> dict:
         """Convert this model and all related models into a flat dictionary
         suitable to be written to a CSV or used as the metadata fields for a
         BagIt bag.
@@ -501,7 +501,7 @@ class Metadata(models.Model):
         row = OrderedDict()
         for col in version.fieldnames:
             row[col] = ""
-        if ExportVersion.is_atom(version):
+        if Columns.is_atom(version):
             self._create_flat_atom_representation(row, version)
         else:
             self._create_flat_caais_representation(row, version)

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import ClassVar, Iterable, Optional, Union
 
 import bagit
-from caais.export import ExportVersion
+from caais.csvfile import Columns
 from caais.models import Metadata
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -1309,7 +1309,7 @@ class Submission(models.Model):
             return self._create_new_bag(location, algorithms, file_perms)
 
         # Update metadata since no files or algorithms changed, but the metadata model might have
-        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
+        bagit_info = self.metadata.create_flat_representation(version=Columns.CAAIS_1_0)
         bag.info.update(bagit_info)
         bag.save()
 
@@ -1342,7 +1342,7 @@ class Submission(models.Model):
         LOGGER.info('Creating BagIt bag at "%s"', location)
         LOGGER.info("Using these checksum algorithm(s): %s", ", ".join(algorithms))
 
-        bagit_info = self.metadata.create_flat_representation(version=ExportVersion.CAAIS_1_0)
+        bagit_info = self.metadata.create_flat_representation(version=Columns.CAAIS_1_0)
         bag = bagit.make_bag(str(location), bagit_info, checksums=algorithms)
 
         LOGGER.info("Setting file mode for bag payload files to %s", file_perms)
