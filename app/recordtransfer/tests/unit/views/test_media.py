@@ -382,15 +382,11 @@ class TestReadOnlyUploadedFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
 
-        # Set up client session data
-        session = self.client.session
-        session["wizard_submission_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
-        session.save()
-
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
         self.temp_file = self.session.add_temp_file(
             SimpleUploadedFile("testfile.txt", self.one_kib)
         )
+
         self.url = reverse("uploaded_file", args=[self.session.token, file_to_upload.name])
 
     def test_readonly_uploaded_file_session_not_found(self) -> None:
