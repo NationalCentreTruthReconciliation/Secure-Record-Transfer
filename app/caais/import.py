@@ -1,5 +1,11 @@
 from caais.csvfile import Columns
 from caais.db import MULTI_VALUE_SEPARATOR
+from caais.models import Identifier, Metadata
+
+
+def is_empty_cell(cell: str) -> bool:
+    """Determine if a cell should be considered empty or not."""
+    return not cell or cell.lower() not in ("null", "nan")
 
 
 def validate_fieldnames(row: dict, columns: Columns = Columns.CAAIS_1_0) -> None:
@@ -30,7 +36,7 @@ def validate_fieldnames(row: dict, columns: Columns = Columns.CAAIS_1_0) -> None
         )
 
 
-def split_cell(row: dict, *cols) -> tuple[list[str]]:
+def split_cells(row: dict, *cols) -> tuple[list[str], ...]:
     """Split cells from one or more columns by the MULTI_VALUE_SEPARATOR.
 
     If multiple cols are passed, the number of elements in each col after splitting is compared. If
@@ -57,10 +63,74 @@ def split_cell(row: dict, *cols) -> tuple[list[str]]:
                 f"elements, separated by a {MULTI_VALUE_SEPARATOR} character"
             )
 
-        clean_col_split = [
-            value if value and value.lower() != "null" else None for value in col_split
-        ]
+        clean_col_split = [value if not is_empty_cell(value) else None for value in col_split]
 
         split.append(clean_col_split)
 
     return tuple(split)
+
+
+def create_metadata(row: dict, columns: Columns, allow_new_terms: bool) -> None:
+    """Create the parent Metadata object that all other data that connects to it."""
+    metadata = Metadata()
+
+    metadata.save()
+
+    create_identifiers(metadata, row, columns)
+
+
+def create_identifiers(metadata: Metadata, row: dict, columns: Columns) -> None:
+    """Convert CSV data to Identifier objects."""
+    if columns.is_atom:
+        _create_identifiers_atom(metadata, row, columns)
+    else:
+        _create_identifiers_caais(metadata, row, columns)
+
+
+def _create_identifiers_atom(metadata: Metadata, row: dict, columns: Columns) -> None:
+    # The alternativeIdentifier columns were added in 2.6
+    if columns in (Columns.ATOM_2_1, Columns.ATOM_2_2, Columns.ATOM_2_3):
+        return
+
+    if columns != columns.ATOM_2_6:
+        raise ValueError(f"Only {columns.ATOM_2_6!r} is supported.")
+
+    data = split_cells(
+        row,
+        "alternativeIdentifierTypes",
+        "alternativeIdentifiers",
+        "alternativeIdentifierNotes",
+    )
+    for id_type, id_value, id_note in zip(*data, strict=True):
+        Identifier.objects.create(
+            metadata=metadata,
+            identifier_type=id_type,
+            identifier_value=id_value,
+            identifier_note=id_note,
+        )
+
+    if not is_empty_cell(row["accessionNumber"]):
+        Identifier.objects.create(
+            metadata=metadata,
+            identifier_type="Accession Identifier",
+            identifier_value=row["accessionNumber"].strip(),
+        )
+
+
+def _create_identifiers_caais(metadata: Metadata, row: dict, columns: Columns) -> None:
+    if columns != Columns.CAAIS_1_0:
+        raise ValueError(f"Only {columns.CAAIS_1_0!r} is supported")
+
+    data = split_cells(
+        row,
+        "identifierTypes",
+        "identifierValues",
+        "identifierNotes",
+    )
+    for id_type, id_value, id_note in zip(*data, strict=True):
+        Identifier.objects.create(
+            metadata=metadata,
+            identifier_type=id_type,
+            identifier_value=id_value,
+            identifier_note=id_note,
+        )
