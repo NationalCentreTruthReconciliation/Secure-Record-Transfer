@@ -1,6 +1,10 @@
+import logging
+
 from caais.csvfile import Columns
 from caais.db import MULTI_VALUE_SEPARATOR
 from caais.models import Identifier, Metadata
+
+LOGGER = logging.getLogger(__name__)
 
 
 def is_empty_cell(cell: str) -> bool:
@@ -102,6 +106,10 @@ def _create_identifiers_atom(metadata: Metadata, row: dict, columns: Columns) ->
         "alternativeIdentifierNotes",
     )
     for id_type, id_value, id_note in zip(*data, strict=True):
+        if id_type == "Accession Identifier":
+            LOGGER.warning("Skipping adding reserved 'Accession Identifier' alternativeIdentifier")
+            continue
+
         Identifier.objects.create(
             metadata=metadata,
             identifier_type=id_type,
@@ -127,7 +135,16 @@ def _create_identifiers_caais(metadata: Metadata, row: dict, columns: Columns) -
         "identifierValues",
         "identifierNotes",
     )
+
+    accession_id_found = False
+
     for id_type, id_value, id_note in zip(*data, strict=True):
+        if id_type == "Accession Identifier":
+            if accession_id_found:
+                LOGGER.warning("Skipping adding duplicate 'Accession Identifier'")
+                continue
+            accession_id_found = True
+
         Identifier.objects.create(
             metadata=metadata,
             identifier_type=id_type,
