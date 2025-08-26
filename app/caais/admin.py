@@ -1,15 +1,18 @@
 """CAAIS metadata administrator."""
 
 from datetime import datetime
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
-from django.http import HttpRequest
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 
 from caais import settings as caais_settings
 from caais.db import GroupConcat
+from caais.export import ExportVersion
 from caais.forms import (
     InlineAppraisalForm,
     InlineArchivalUnitForm,
@@ -27,6 +30,7 @@ from caais.forms import (
     InlineStorageLocationForm,
     MetadataForm,
 )
+from caais.managers import MetadataQuerySet
 from caais.models import (
     AcquisitionMethod,
     Appraisal,
@@ -248,6 +252,16 @@ class MetadataAdmin(admin.ModelAdmin):
         GeneralNoteInlineAdmin,
     ]
 
+    actions: (
+        Sequence[Callable[[Any, HttpRequest, QuerySet[Any]], HttpResponse | None] | str] | None
+    ) = [
+        "export_caais_csv",
+        "export_atom_2_6_csv",
+        "export_atom_2_3_csv",
+        "export_atom_2_2_csv",
+        "export_atom_2_1_csv",
+    ]
+
     def source_name(self, obj) -> Optional[str]:
         return obj.source_of_materials.aggregate(
             names_joined=GroupConcat("source_name", separator=", ")
@@ -297,6 +311,39 @@ class MetadataAdmin(admin.ModelAdmin):
             creation_or_revision_note=log_entry.get_change_message(),
         )
         return log_entry
+
+    @admin.action(description=_("Export CAAIS 1.0 CSV for Selected"))
+    def export_caais_csv(self, request: HttpRequest, queryset: MetadataQuerySet) -> HttpResponse:
+        """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
+        return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
+
+    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Selected"))
+    def export_atom_2_6_csv(
+        self, request: HttpRequest, queryset: MetadataQuerySet
+    ) -> HttpResponse:
+        """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
+        return queryset.export_csv(version=ExportVersion.ATOM_2_6)
+
+    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Selected"))
+    def export_atom_2_3_csv(
+        self, request: HttpRequest, queryset: MetadataQuerySet
+    ) -> HttpResponse:
+        """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
+        return queryset.export_csv(version=ExportVersion.ATOM_2_3)
+
+    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Selected"))
+    def export_atom_2_2_csv(
+        self, request: HttpRequest, queryset: MetadataQuerySet
+    ) -> HttpResponse:
+        """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
+        return queryset.export_csv(version=ExportVersion.ATOM_2_2)
+
+    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Selected"))
+    def export_atom_2_1_csv(
+        self, request: HttpRequest, queryset: MetadataQuerySet
+    ) -> HttpResponse:
+        """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
+        return queryset.export_csv(version=ExportVersion.ATOM_2_1)
 
 
 @admin.register(AcquisitionMethod)
