@@ -1,27 +1,98 @@
-from abc import ABC, abstractmethod
+import csv
 import re
+from abc import ABC, abstractmethod
+from io import StringIO
 
 from django.db import models
-from django.db.models import Q, CharField, Value, Case, When, Value, F
+from django.db.models import Case, CharField, F, Q, Value, When
 from django.db.models.functions import Concat
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
+from django.utils import timezone
 
-from caais.db import DefaultConcat, GroupConcat, CharFieldOrDefault
+from caais.db import CharFieldOrDefault, DefaultConcat, GroupConcat
 from caais.export import ExportVersion
 
+PUNCTUATION_END = re.compile(r"(?:\?|!|\.|,|;)\s*$")
 
-PUNCTUATION_END = re.compile(r'(?:\?|!|\.|,|;)\s*$')
+
+class MetadataQuerySet(models.QuerySet):
+    """Custom queryset for Metadata objects that has an export_csv method to convert all objects
+    to a CSV.
+    """
+
+    def export_csv(
+        self,
+        version: ExportVersion = ExportVersion.CAAIS_1_0,
+        filename_prefix: str | None = None,
+    ) -> HttpResponse:
+        """Create an HttpResponse that contains a CSV representation of all metadata objects in the
+        queryset.
+
+        Args:
+            version: The type/version of the CSV to export
+            filename_prefix:
+                Prefix for the generated CSV filename. If not provided, a default is used.
+
+        Returns:
+            An HTTP response to download the CSV.
+        """
+        csv_file = StringIO()
+        writer = csv.writer(csv_file)
+        first_row = True
+
+        for metadata in self:
+            row = metadata.create_flat_representation(version)
+            if first_row:
+                writer.writerow(row.keys())
+                first_row = False
+            writer.writerow(row.values())
+
+        csv_file.seek(0)
+
+        response = HttpResponse(csv_file, content_type="text/csv")
+
+        local_time = timezone.localtime(timezone.now()).strftime(r"%Y%m%d_%H%M%S")
+        if not filename_prefix:
+            version_bits = str(version).split("_")
+            filename_prefix = "{0}_v{1}_".format(
+                version_bits[0], ".".join([str(x) for x in version_bits[1:]])
+            )
+
+        filename = f"{filename_prefix}{local_time}.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        csv_file.close()
+        return response
 
 
 class MetadataManager(models.Manager):
+    def get_queryset(self) -> MetadataQuerySet:
+        return MetadataQuerySet(self.model, using=self._db)
+
     def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
-        ''' Convert this model and all related models into a flat dictionary
+        """Convert this model and all related models into a flat dictionary
         suitable to be written to a CSV or used as the metadata fields for a
         BagIt bag.
-        '''
-        return [
-            metadata.create_flat_representation(version) for metadata in self.get_queryset()
-        ]
+        """
+        return [metadata.create_flat_representation(version) for metadata in self.get_queryset()]
+
+    def export_csv(
+        self,
+        version: ExportVersion = ExportVersion.CAAIS_1_0,
+        filename_prefix: str | None = None,
+    ) -> HttpResponse:
+        """Create an HttpResponse that contains a CSV representation of all metadata objects in the
+        queryset.
+
+        Args:
+            version: The type/version of the CSV to export
+            filename_prefix:
+                Prefix for the generated CSV filename. If not provided, a default is used.
+
+        Returns:
+            An HTTP response to download the CSV.
+        """
+        return self.get_queryset().export_csv(version=version, filename_prefix=filename_prefix)
 
 
 class CaaisModelManager(models.Manager, ABC):
