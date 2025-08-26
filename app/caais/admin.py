@@ -9,6 +9,7 @@ from django.http import HttpRequest
 from django.template.response import TemplateResponse
 
 from caais import settings as caais_settings
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.db import GroupConcat
 from caais.forms import (
     InlineAppraisalForm,
@@ -70,7 +71,7 @@ class IdentifierInlineAdmin(admin.StackedInline):
     extra = 0
 
     def get_queryset(self, request):
-        ids = super().get_queryset(request).exclude(identifier_type="Accession Identifier")
+        ids = super().get_queryset(request).exclude(identifier_type=ACCESSION_IDENTIFIER_TYPE)
         return ids
 
 

@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any, Optional, OrderedDict, TypedDict, Union
 from uuid import UUID
 
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.models import RightsType, SourceRole, SourceType
 from django import forms
 from django.conf import settings
@@ -627,7 +628,7 @@ class OtherIdentifiersForm(SubmissionForm):
         id_note = cleaned_data.get("other_identifier_note")
 
         # Check for reserved identifier types
-        if id_type and id_type.lower() in ("accession number", "accession identifier"):
+        if id_type and id_type.lower() == ACCESSION_IDENTIFIER_TYPE.lower():
             self.add_error(
                 "other_identifier_type", _("This identifier type is reserved and cannot be used")
             )
