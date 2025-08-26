@@ -235,6 +235,16 @@ class MetadataAdmin(admin.ModelAdmin):
         "status",
     ]
 
+    search_fields: Sequence[str] = [
+        "identifiers__identifier_value",
+        "source_of_materials__source_name",
+        "source_of_materials__contact_name",
+        "source_of_materials__organization",
+        "status__name",
+        "accession_title",
+        "repository",
+    ]
+
     inlines = [
         IdentifierInlineAdmin,
         ArchivalUnitInlineAdmin,
