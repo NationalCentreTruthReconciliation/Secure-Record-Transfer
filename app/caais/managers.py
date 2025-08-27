@@ -66,36 +66,6 @@ class MetadataQuerySet(models.QuerySet):
         return response
 
 
-class MetadataManager(models.Manager):
-    def get_queryset(self) -> MetadataQuerySet:
-        return MetadataQuerySet(self.model, using=self._db)
-
-    def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
-        """Convert this model and all related models into a flat dictionary
-        suitable to be written to a CSV or used as the metadata fields for a
-        BagIt bag.
-        """
-        return [metadata.create_flat_representation(version) for metadata in self.get_queryset()]
-
-    def export_csv(
-        self,
-        version: ExportVersion = ExportVersion.CAAIS_1_0,
-        filename_prefix: str | None = None,
-    ) -> HttpResponse:
-        """Create an HttpResponse that contains a CSV representation of all metadata objects in the
-        queryset.
-
-        Args:
-            version: The type/version of the CSV to export
-            filename_prefix:
-                Prefix for the generated CSV filename. If not provided, a default is used.
-
-        Returns:
-            An HTTP response to download the CSV.
-        """
-        return self.get_queryset().export_csv(version=version, filename_prefix=filename_prefix)
-
-
 class CaaisModelManager(models.Manager, ABC):
     ''' Custom manager for CAAIS models that require the flatten() function.
     '''

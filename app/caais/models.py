@@ -40,7 +40,7 @@ from caais.managers import (
     GeneralNoteManager,
     IdentifierManager,
     LanguageOfMaterialManager,
-    MetadataManager,
+    MetadataQuerySet,
     PreliminaryCustodialHistoryManager,
     PreliminaryScopeAndContentManager,
     PreservationRequirementsManager,
@@ -228,7 +228,7 @@ class Metadata(models.Model):
         verbose_name_plural = gettext("CAAIS metadata")
         verbose_name = gettext("CAAIS metadata")
 
-    objects = MetadataManager()
+    objects = MetadataQuerySet.as_manager()
 
     @property
     def accession_identifier(self) -> str:
