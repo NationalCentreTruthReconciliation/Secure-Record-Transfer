@@ -547,6 +547,22 @@ class SubmissionAdmin(admin.ModelAdmin):
             *super().get_urls(),
         ]
 
+    def get_form(
+        self, request: HttpRequest, obj: Submission | None = None, change: bool = False, **kwargs
+    ) -> type[ModelForm]:
+        """Conditionally add help_text to upload_session if one exists."""
+        if not obj or not obj.upload_session:
+            return super().get_form(request, obj, change, **kwargs)
+
+        upload_session_help = "Click link to view uploaded files"
+
+        if "help_texts" in kwargs:
+            kwargs["help_texts"]["upload_session"] = upload_session_help
+        else:
+            kwargs.update({"help_texts": {"upload_session": upload_session_help}})
+
+        return super().get_form(request, obj, **kwargs)
+
     def create_zipped_bag(self, request: HttpRequest, object_id: str) -> HttpResponseRedirect:
         """Start a background job to create a downloadable bag.
 
