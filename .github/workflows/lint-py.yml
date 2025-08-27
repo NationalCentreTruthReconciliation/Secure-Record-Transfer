@@ -17,14 +17,13 @@ permissions:
 
 jobs:
   lint-python:
-    name: Lint Python Code
+    name: Lint RecordTransfer and CAAIS Modules
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
         with:
           src: >-
-            ./app/recordtransfer
-            ./app/caais
+            ./app/recordtransfer ./app/caais
           version-file: "./pyproject.toml"
-          args: "--config ./ruff.toml check --exclude '**/migrations/*' --exclude '**/tests/*' --exclude '**/test/*'"
+          args: "--config ./ruff.toml check --exclude app/recordtransfer/migrations/ --exclude app/recordtransfer/tests/ --exclude app/caais/migrations/ --exclude app/caais/tests/"
