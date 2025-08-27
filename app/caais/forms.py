@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import ClassVar
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
@@ -262,13 +261,17 @@ class MetadataForm(CaaisModelForm):
 
 
 class InlineIdentifierForm(CaaisModelForm):
+    """Form for inline editing of Identifier instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = Identifier
         fields = "__all__"
 
         required = ("identifier_value",)
 
-        widgets = {
+        widgets: ClassVar = {
             "identifier_note": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -291,11 +294,15 @@ class InlineIdentifierForm(CaaisModelForm):
 
 
 class InlineArchivalUnitForm(CaaisModelForm):
+    """Form for inline editing of ArchivalUnit instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = ArchivalUnit
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "archival_unit": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -306,11 +313,15 @@ class InlineArchivalUnitForm(CaaisModelForm):
 
 
 class InlineDispositionAuthorityForm(CaaisModelForm):
+    """Form for inline editing of DispositionAuthority instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = DispositionAuthority
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "disposition_authority": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -321,7 +332,11 @@ class InlineDispositionAuthorityForm(CaaisModelForm):
 
 
 class InlineSourceOfMaterialForm(CaaisModelForm):
+    """Form for inline editing of SourceOfMaterial instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = SourceOfMaterial
         fields = "__all__"
 
@@ -337,7 +352,7 @@ class InlineSourceOfMaterialForm(CaaisModelForm):
             "source_confidentiality",
         )
 
-        widgets = {
+        widgets: ClassVar = {
             "source_type": SelectTermWidget,
             "source_role": SelectTermWidget,
             "source_note": forms.widgets.Textarea(
@@ -385,11 +400,15 @@ class InlineSourceOfMaterialForm(CaaisModelForm):
 
 
 class InlinePreliminaryCustodialHistoryForm(CaaisModelForm):
+    """Form for inline editing of PreliminaryCustodialHistory instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = PreliminaryCustodialHistory
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "preliminary_custodial_history": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -400,7 +419,11 @@ class InlinePreliminaryCustodialHistoryForm(CaaisModelForm):
 
 
 class InlineExtentStatementForm(CaaisModelForm):
+    """Form for inline editing of ExtentStatement instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = ExtentStatement
         fields = "__all__"
 
@@ -412,7 +435,7 @@ class InlineExtentStatementForm(CaaisModelForm):
             "carrier_type",
         )
 
-        widgets = {
+        widgets: ClassVar = {
             "extent_type": SelectTermWidget,
             "quantity_and_unit_of_measure": forms.widgets.Textarea(
                 attrs={
@@ -432,11 +455,15 @@ class InlineExtentStatementForm(CaaisModelForm):
 
 
 class InlinePreliminaryScopeAndContentForm(CaaisModelForm):
+    """Form for inline editing of PreliminaryScopeAndContent instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = PreliminaryScopeAndContent
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "preliminary_scope_and_content": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -447,11 +474,15 @@ class InlinePreliminaryScopeAndContentForm(CaaisModelForm):
 
 
 class InlineLanguageOfMaterialForm(CaaisModelForm):
+    """Form for inline editing of LanguageOfMaterial instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = LanguageOfMaterial
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "language_of_material": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -462,11 +493,15 @@ class InlineLanguageOfMaterialForm(CaaisModelForm):
 
 
 class InlineStorageLocationForm(CaaisModelForm):
+    """Form for inline editing of StorageLocation instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = StorageLocation
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "storage_location": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
@@ -477,7 +512,11 @@ class InlineStorageLocationForm(CaaisModelForm):
 
 
 class InlineRightsForm(CaaisModelForm):
+    """Form for inline editing of Rights instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = Rights
         fields = "__all__"
 
@@ -485,7 +524,7 @@ class InlineRightsForm(CaaisModelForm):
 
         not_required = ("rights_type",)
 
-        widgets = {
+        widgets: ClassVar = {
             "rights_type": SelectTermWidget,
             "rights_value": forms.widgets.Textarea(
                 attrs={
@@ -503,7 +542,11 @@ class InlineRightsForm(CaaisModelForm):
 
 
 class InlinePreservationRequirementsForm(CaaisModelForm):
+    """Form for inline editing of PreservationRequirements instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = PreservationRequirements
         fields = "__all__"
 
@@ -511,7 +554,7 @@ class InlinePreservationRequirementsForm(CaaisModelForm):
 
         not_required = ("preservation_requirements_type",)
 
-        widgets = {
+        widgets: ClassVar = {
             "preservation_requirements_type": SelectTermWidget,
             "preservation_requirements_value": forms.widgets.Textarea(
                 attrs={
@@ -529,7 +572,11 @@ class InlinePreservationRequirementsForm(CaaisModelForm):
 
 
 class InlineAppraisalForm(CaaisModelForm):
+    """Form for inline editing of Appraisal instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = Appraisal
         fields = "__all__"
 
@@ -537,7 +584,7 @@ class InlineAppraisalForm(CaaisModelForm):
 
         not_required = ("appraisal_type",)
 
-        widgets = {
+        widgets: ClassVar = {
             "appraisal_type": SelectTermWidget,
             "appraisal_value": forms.widgets.Textarea(
                 attrs={
@@ -555,7 +602,11 @@ class InlineAppraisalForm(CaaisModelForm):
 
 
 class InlineAssociatedDocumentationForm(CaaisModelForm):
+    """Form for inline editing of AssociatedDocumentation instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = AssociatedDocumentation
         fields = "__all__"
 
@@ -563,7 +614,7 @@ class InlineAssociatedDocumentationForm(CaaisModelForm):
 
         not_required = ("associated_documentation_type",)
 
-        widgets = {
+        widgets: ClassVar = {
             "associated_documentation_type": SelectTermWidget,
             "associated_documentation_value": forms.widgets.Textarea(
                 attrs={
@@ -581,11 +632,15 @@ class InlineAssociatedDocumentationForm(CaaisModelForm):
 
 
 class InlineGeneralNoteForm(CaaisModelForm):
+    """Form for inline editing of GeneralNote instances."""
+
     class Meta:
+        """Meta options for the form."""
+
         model = GeneralNote
         fields = "__all__"
 
-        widgets = {
+        widgets: ClassVar = {
             "general_note": forms.widgets.Textarea(
                 attrs={
                     "rows": 2,
