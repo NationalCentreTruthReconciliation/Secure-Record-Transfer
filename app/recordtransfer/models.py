@@ -150,6 +150,10 @@ def add_previous_password_to_history(instance: User, **kwargs) -> None:
     if not instance.pk:  # New user, no password history needed
         return
 
+    # Skip password history during fixture loading to avoid race conditions
+    if kwargs.get("raw", False):
+        return
+
     try:
         # Get the old password from the database
         old_instance = User.objects.get(pk=instance.pk)
@@ -165,6 +169,8 @@ def add_previous_password_to_history(instance: User, **kwargs) -> None:
                 instance.pk,
             )
 
+    except User.DoesNotExist:
+        LOGGER.debug("User %s does not exist yet, skipping password history", instance.pk)
     except Exception as e:
         LOGGER.error("Error creating password history for user %s: %s", instance.pk, str(e))
 
