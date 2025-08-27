@@ -556,10 +556,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
         upload_session_help = _("Click link to view uploaded files")
 
-        if "help_texts" in kwargs:
-            kwargs["help_texts"]["upload_session"] = upload_session_help
-        else:
-            kwargs.update({"help_texts": {"upload_session": upload_session_help}})
+        kwargs.setdefault("help_texts", {})["upload_session"] = upload_session_help
 
         return super().get_form(request, obj, **kwargs)
 
