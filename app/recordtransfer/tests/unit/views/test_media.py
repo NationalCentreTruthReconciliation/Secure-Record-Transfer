@@ -383,10 +383,7 @@ class TestReadOnlyUploadedFileView(TestCase):
         self.session = UploadSession.new_session(user=self.test_user_1)
 
         file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
-        self.temp_file = self.session.add_temp_file(
-            SimpleUploadedFile("testfile.txt", self.one_kib)
-        )
-
+        self.temp_file = self.session.add_temp_file(file_to_upload)
         self.url = reverse("uploaded_file", args=[self.session.token, file_to_upload.name])
 
     def test_readonly_uploaded_file_session_not_found(self) -> None:
