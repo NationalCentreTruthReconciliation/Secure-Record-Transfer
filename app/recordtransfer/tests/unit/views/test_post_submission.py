@@ -181,15 +181,16 @@ class TestSubmissionCsvExport(TestCase):
         response = self.client.get(self.submission_csv_url)
         self.assertEqual(response.status_code, 404)
 
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    @patch("caais.managers.MetadataQuerySet.export_csv")
     def test_access_staff_user(self, mock_export: MagicMock) -> None:
         """Test that a staff user can access the view."""
         mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
         self.client.login(username="staffuser", password="password")
         response = self.client.get(self.submission_csv_url)
         self.assertEqual(response.status_code, 200)
+        mock_export.assert_called_once()
 
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    @patch("caais.managers.MetadataQuerySet.export_csv")
     def test_csv_generation(self, mock_export: MagicMock) -> None:
         """Test that the CSV export is called with correct parameters."""
         mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
@@ -244,15 +245,16 @@ class TestSubmissionGroupBulkCsvExport(TestCase):
         response = self.client.get(self.submission_group_csv_url)
         self.assertEqual(response.status_code, 404)
 
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    @patch("caais.managers.MetadataQuerySet.export_csv")
     def test_access_staff_user(self, mock_export: MagicMock) -> None:
         """Test that a staff user can access the view."""
         mock_export.return_value = HttpResponse("csv_content", content_type="text/csv")
         self.client.login(username="staffuser", password="password")
         response = self.client.get(self.submission_group_csv_url)
         self.assertEqual(response.status_code, 200)
+        mock_export.assert_called_once()
 
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    @patch("caais.managers.MetadataQuerySet.export_csv")
     def test_invalid_group_uuid(self, mock_export: MagicMock) -> None:
         """Test that accessing a nonexistent submission group returns 404."""
         invalid_csv_url = reverse(
@@ -261,8 +263,9 @@ class TestSubmissionGroupBulkCsvExport(TestCase):
         )
         response = self.client.get(invalid_csv_url)
         self.assertEqual(response.status_code, 404)
+        mock_export.assert_not_called()
 
-    @patch("recordtransfer.managers.SubmissionQuerySet.export_csv")
+    @patch("caais.managers.MetadataQuerySet.export_csv")
     def test_non_staff_user_owns_group_but_not_submissions(self, mock_export: MagicMock) -> None:
         """Test that a non-staff user is redirected to profile page with error message if they own
         the group but not the submissions.
@@ -283,6 +286,7 @@ class TestSubmissionGroupBulkCsvExport(TestCase):
         )
         # Now redirects to profile page with error message
         self.assertRedirects(response, reverse("recordtransfer:user_profile"))
+        mock_export.assert_not_called()
 
 
 class TestGetUserSubmissionGroups(TestCase):

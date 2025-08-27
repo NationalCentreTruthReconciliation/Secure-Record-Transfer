@@ -5,8 +5,10 @@ from typing import ClassVar
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.models import (
     AbstractTerm,
     Appraisal,
@@ -229,7 +231,7 @@ class MetadataForm(CaaisModelForm):
     def save(self, commit: bool = True) -> Metadata:
         """Save the accession identifier input as an Identifier on the metadata object.
 
-        The Identifier is given the reserved name "Accession Identifier".
+        The Identifier is given the reserved type identified by ACCESSION_IDENTIFIER_TYPE.
         """
         metadata: Metadata = super().save(commit)
 
@@ -247,7 +249,7 @@ class MetadataForm(CaaisModelForm):
         if not metadata.accession_identifier:
             new_id = Identifier(
                 metadata=metadata,
-                identifier_type="Accession Identifier",
+                identifier_type=ACCESSION_IDENTIFIER_TYPE,
                 identifier_value=accession_id,
             )
 
@@ -275,14 +277,17 @@ class InlineIdentifierForm(CaaisModelForm):
             ),
         }
 
-    def clean_identifier_type(self):
-        """Don't allow a duplicate accession identifier to be specified"""
-        data = self.cleaned_data["identifier_type"]
-        if data.lower() == "accession identifier":
-            raise ValidationError(
-                f"{data} is a reserved Identifier type - please use another type name"
+    def clean(self) -> dict:
+        """Don't allow a duplicate accession identifier to be specified."""
+        cleaned_data = super().clean()
+        id_type = cleaned_data.get("identifier_type", "")
+        if id_type.lower() == ACCESSION_IDENTIFIER_TYPE.lower():
+            self.add_error(
+                "identifier_type",
+                _("'%(id)s' is a reserved Identifier type - please use another type name")
+                % {"id": id_type},
             )
-        return data
+        return cleaned_data
 
 
 class InlineArchivalUnitForm(CaaisModelForm):

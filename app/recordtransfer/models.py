@@ -28,11 +28,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
 from recordtransfer.enums import SiteSettingKey, SiteSettingType, SubmissionStep
-from recordtransfer.managers import (
-    InProgressSubmissionManager,
-    SubmissionQuerySet,
-    UploadSessionManager,
-)
+from recordtransfer.managers import InProgressSubmissionManager, UploadSessionManager
 from recordtransfer.storage import OverwriteStorage, TempFileStorage, UploadedFileStorage
 from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
 
@@ -1141,8 +1137,6 @@ class Submission(models.Model):
     )
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
-
-    objects = SubmissionQuerySet.as_manager()
 
     @property
     def bag_name(self) -> str:

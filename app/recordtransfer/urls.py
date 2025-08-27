@@ -132,6 +132,18 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
             ),
         ]
     )
+elif not settings.FILE_UPLOAD_ENABLED:
+    # Still allow files to be viewed when uploads are disabled
+    urlpatterns.extend(
+        [
+            path(
+                "upload-session/<session_token>/files/<file_name>/",
+                login_required(views.media.readonly_uploaded_file),
+                name="uploaded_file",
+            ),
+        ]
+    )
+
 
 if settings.TESTING or settings.SIGN_UP_ENABLED:
     urlpatterns.extend(

@@ -1,27 +1,69 @@
-from abc import ABC, abstractmethod
+import csv
 import re
+from abc import ABC, abstractmethod
+from io import StringIO
 
 from django.db import models
-from django.db.models import Q, CharField, Value, Case, When, Value, F
+from django.db.models import Case, CharField, F, Q, Value, When
 from django.db.models.functions import Concat
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
+from django.utils import timezone
 
-from caais.db import DefaultConcat, GroupConcat, CharFieldOrDefault
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
+from caais.db import CharFieldOrDefault, DefaultConcat, GroupConcat
 from caais.export import ExportVersion
 
+PUNCTUATION_END = re.compile(r"(?:\?|!|\.|,|;)\s*$")
 
-PUNCTUATION_END = re.compile(r'(?:\?|!|\.|,|;)\s*$')
 
+class MetadataQuerySet(models.QuerySet):
+    """Custom queryset for Metadata objects that has an export_csv method to convert all objects
+    to a CSV.
+    """
 
-class MetadataManager(models.Manager):
-    def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
-        ''' Convert this model and all related models into a flat dictionary
-        suitable to be written to a CSV or used as the metadata fields for a
-        BagIt bag.
-        '''
-        return [
-            metadata.create_flat_representation(version) for metadata in self.get_queryset()
-        ]
+    def export_csv(
+        self,
+        version: ExportVersion = ExportVersion.CAAIS_1_0,
+        filename_prefix: str | None = None,
+    ) -> HttpResponse:
+        """Create an HttpResponse that contains a CSV representation of all metadata objects in the
+        queryset.
+
+        Args:
+            version: The type/version of the CSV to export
+            filename_prefix:
+                Prefix for the generated CSV filename. If not provided, a default is used.
+
+        Returns:
+            An HTTP response to download the CSV.
+        """
+        csv_file = StringIO()
+        writer = csv.writer(csv_file)
+        first_row = True
+
+        for metadata in self:
+            row = metadata.create_flat_representation(version)
+            if first_row:
+                writer.writerow(row.keys())
+                first_row = False
+            writer.writerow(row.values())
+
+        csv_file.seek(0)
+
+        response = HttpResponse(csv_file, content_type="text/csv")
+
+        local_time = timezone.localtime(timezone.now()).strftime(r"%Y%m%d_%H%M%S")
+        if not filename_prefix:
+            version_bits = str(version).split("_")
+            filename_prefix = "{0}_v{1}_".format(
+                version_bits[0], ".".join([str(x) for x in version_bits[1:]])
+            )
+
+        filename = f"{filename_prefix}{local_time}.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        csv_file.close()
+        return response
 
 
 class CaaisModelManager(models.Manager, ABC):
@@ -52,46 +94,32 @@ class CaaisModelManager(models.Manager, ABC):
 
 
 class IdentifierManager(CaaisModelManager):
-    def accession_identifier(self):
-        ''' Get the first identifier with Accession Identifier or Accession
-        Number as the type, or None if an identifier like this does not exist.
-        '''
-        return self.get_queryset().filter(
-            Q(identifier_type__icontains='Accession Identifier') |
-            Q(identifier_type__icontains='Accession Number')
-        ).first()
+    def accession_identifier(self) -> str | None:
+        """Get the first identifier with the ACCESSION_IDENTIFIER_TYPE type, or None if an
+        identifier like this does not exist.
+        """
+        return self.get_queryset().filter(identifier_type=ACCESSION_IDENTIFIER_TYPE).first()
 
     def flatten_atom(self, version: ExportVersion) -> dict:
         # alternativeIdentifiers were added in AtoM v2.6
         if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2, ExportVersion.ATOM_2_3):
             return {}
 
-        return self.get_queryset().filter(
-            ~Q(identifier_type__icontains='Accession Identifier') &
-            ~Q(identifier_type__icontains='Accession Number')
-        ).aggregate(
-            alternativeIdentifiers=DefaultConcat(
-                CharFieldOrDefault('identifier_value')
-            ),
-            alternativeIdentifierTypes=DefaultConcat(
-                CharFieldOrDefault('identifier_type')
-            ),
-            alternativeIdentifierNotes=DefaultConcat(
-                CharFieldOrDefault('identifier_note')
+        return (
+            self.get_queryset()
+            .filter(~Q(identifier_type=ACCESSION_IDENTIFIER_TYPE))
+            .aggregate(
+                alternativeIdentifiers=DefaultConcat(CharFieldOrDefault("identifier_value")),
+                alternativeIdentifierTypes=DefaultConcat(CharFieldOrDefault("identifier_type")),
+                alternativeIdentifierNotes=DefaultConcat(CharFieldOrDefault("identifier_note")),
             )
         )
 
     def flatten_caais(self, version: ExportVersion) -> dict:
         return self.get_queryset().aggregate(
-            identifierTypes=DefaultConcat(
-                CharFieldOrDefault('identifier_type')
-            ),
-            identifierValues=DefaultConcat(
-                CharFieldOrDefault('identifier_value')
-            ),
-            identifierNotes=DefaultConcat(
-                CharFieldOrDefault('identifier_note')
-            ),
+            identifierTypes=DefaultConcat(CharFieldOrDefault("identifier_type")),
+            identifierValues=DefaultConcat(CharFieldOrDefault("identifier_value")),
+            identifierNotes=DefaultConcat(CharFieldOrDefault("identifier_note")),
         )
 
 
