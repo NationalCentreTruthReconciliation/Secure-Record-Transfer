@@ -26,4 +26,4 @@ jobs:
           src: >-
             ./app/recordtransfer ./app/caais
           version-file: "./pyproject.toml"
-          args: "--config ./ruff.toml check --exclude '**/migrations/*' --exclude '**/tests/*'"
+          args: "--config ./ruff.toml check --exclude app/recordtransfer/migrations/ --exclude app/recordtransfer/tests/ --exclude app/caais/migrations/ --exclude app/caais/tests/"
