@@ -10,6 +10,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.utils import timezone
 
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.db import CharFieldOrDefault, DefaultConcat, GroupConcat
 from caais.export import ExportVersion
 
@@ -123,46 +124,32 @@ class CaaisModelManager(models.Manager, ABC):
 
 
 class IdentifierManager(CaaisModelManager):
-    def accession_identifier(self):
-        ''' Get the first identifier with Accession Identifier or Accession
-        Number as the type, or None if an identifier like this does not exist.
-        '''
-        return self.get_queryset().filter(
-            Q(identifier_type__icontains='Accession Identifier') |
-            Q(identifier_type__icontains='Accession Number')
-        ).first()
+    def accession_identifier(self) -> str | None:
+        """Get the first identifier with the ACCESSION_IDENTIFIER_TYPE type, or None if an
+        identifier like this does not exist.
+        """
+        return self.get_queryset().filter(identifier_type=ACCESSION_IDENTIFIER_TYPE).first()
 
     def flatten_atom(self, version: ExportVersion) -> dict:
         # alternativeIdentifiers were added in AtoM v2.6
         if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2, ExportVersion.ATOM_2_3):
             return {}
 
-        return self.get_queryset().filter(
-            ~Q(identifier_type__icontains='Accession Identifier') &
-            ~Q(identifier_type__icontains='Accession Number')
-        ).aggregate(
-            alternativeIdentifiers=DefaultConcat(
-                CharFieldOrDefault('identifier_value')
-            ),
-            alternativeIdentifierTypes=DefaultConcat(
-                CharFieldOrDefault('identifier_type')
-            ),
-            alternativeIdentifierNotes=DefaultConcat(
-                CharFieldOrDefault('identifier_note')
+        return (
+            self.get_queryset()
+            .filter(~Q(identifier_type=ACCESSION_IDENTIFIER_TYPE))
+            .aggregate(
+                alternativeIdentifiers=DefaultConcat(CharFieldOrDefault("identifier_value")),
+                alternativeIdentifierTypes=DefaultConcat(CharFieldOrDefault("identifier_type")),
+                alternativeIdentifierNotes=DefaultConcat(CharFieldOrDefault("identifier_note")),
             )
         )
 
     def flatten_caais(self, version: ExportVersion) -> dict:
         return self.get_queryset().aggregate(
-            identifierTypes=DefaultConcat(
-                CharFieldOrDefault('identifier_type')
-            ),
-            identifierValues=DefaultConcat(
-                CharFieldOrDefault('identifier_value')
-            ),
-            identifierNotes=DefaultConcat(
-                CharFieldOrDefault('identifier_note')
-            ),
+            identifierTypes=DefaultConcat(CharFieldOrDefault("identifier_type")),
+            identifierValues=DefaultConcat(CharFieldOrDefault("identifier_value")),
+            identifierNotes=DefaultConcat(CharFieldOrDefault("identifier_note")),
         )
 
 

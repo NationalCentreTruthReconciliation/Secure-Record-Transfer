@@ -8,6 +8,7 @@ This app contains the models that implement CAAIS, and some related tools for ex
 
     admin
     citation
+    constants
     db
     export
     forms

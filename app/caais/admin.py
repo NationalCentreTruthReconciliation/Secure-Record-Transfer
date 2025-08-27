@@ -11,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 
 from caais import settings as caais_settings
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.db import GroupConcat
 from caais.export import ExportVersion
 from caais.forms import (
@@ -74,7 +75,7 @@ class IdentifierInlineAdmin(admin.StackedInline):
     extra = 0
 
     def get_queryset(self, request):
-        ids = super().get_queryset(request).exclude(identifier_type="Accession Identifier")
+        ids = super().get_queryset(request).exclude(identifier_type=ACCESSION_IDENTIFIER_TYPE)
         return ids
 
 
