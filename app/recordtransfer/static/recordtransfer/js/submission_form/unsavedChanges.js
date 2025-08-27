@@ -26,6 +26,9 @@ export function setupUnsavedChangesProtection() {
         get formSaveButton() { return document.getElementById("form-save-button"); }
     };
 
+    const logoutBtn = document.getElementById("logout-btn");
+    const logoutForm = document.getElementById("nav-logout");
+
     // The URL to navigate to when the user chooses to leave the form
     let targetUrl = "";
     let historyChange = false;
@@ -39,6 +42,15 @@ export function setupUnsavedChangesProtection() {
         });
     });
 
+    // Handle logout button separately
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            targetUrl = logoutForm.action;
+            elements.modal.showModal();
+        });
+    }
+
     elements.saveButton.addEventListener("click", (event) => {
         event.preventDefault();
         // Save and submit the form using the form's save button
@@ -49,6 +61,11 @@ export function setupUnsavedChangesProtection() {
     elements.leaveButton.addEventListener("click", () => {
         window.removeEventListener("beforeunload", beforeUnloadListener);
         window.removeEventListener("popstate", popstateListener);
+
+        if (targetUrl === logoutForm?.action) {
+            logoutForm.submit();
+            return;
+        }
 
         if (historyChange) {
             // Go back past the dummy state to the actual previous page
