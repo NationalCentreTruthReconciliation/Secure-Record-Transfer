@@ -416,7 +416,7 @@ class StorageLocationManager(CaaisModelManager):
         if len(locations) == 1:
             location = locations[0]
         elif len(locations) > 1:
-            location = "\n".join(f"* {l}" for l in locations)
+            location = "\n".join(f"* {location_item}" for location_item in locations)
         else:
             location = ""
 
@@ -456,6 +456,20 @@ class RightsManager(CaaisModelManager):
         )
 
 
+def build_value_note(value: str, note: str) -> str:
+    """Create a combined value + note string for display."""
+    if value and note:
+        if not PUNCTUATION_END.search(value):
+            return f"{value}. {note}"
+        else:
+            return f"{value} {note}"
+    elif value:
+        return value
+    elif note:
+        return note
+    return ""
+
+
 class PreservationRequirementsManager(CaaisModelManager):
     """Custom manager for PreservationRequirements model."""
 
@@ -463,25 +477,13 @@ class PreservationRequirementsManager(CaaisModelManager):
         """Include first value + note if there is only one, otherwise include
         every value + note in a bullet point list.
         """
-        processing_notes = []
-        for req in self.get_queryset():
-            value = req.preservation_requirements_value
-            note = req.preservation_requirements_note
-
-            if value and note:
-                if not PUNCTUATION_END.search(value):
-                    list_item = f"{value}. {note}"
-                else:
-                    list_item = f"{value} {note}"
-            elif value:
-                list_item = value
-            elif note:
-                list_item = note
-            else:
-                list_item = ""
-
-            if list_item:
-                processing_notes.append(list_item)
+        processing_notes = [
+            build_value_note(
+                req.preservation_requirements_value, req.preservation_requirements_note
+            )
+            for req in self.get_queryset()
+        ]
+        processing_notes = [n for n in processing_notes if n]
 
         if len(processing_notes) == 1:
             note = processing_notes[0]
@@ -495,6 +497,7 @@ class PreservationRequirementsManager(CaaisModelManager):
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
             preservationRequirementsTypes=DefaultConcat(
                 Case(
@@ -522,25 +525,11 @@ class AppraisalManager(CaaisModelManager):
         """Include single appraisal value + note if there is only one,
         otherwise create a bullet point list of all appraisals' value + note.
         """
-        appraisals = []
-        for app in self.get_queryset():
-            value = app.appraisal_value
-            note = app.appraisal_note
-
-            if value and note:
-                if not PUNCTUATION_END.search(value):
-                    list_item = f"{value}. {note}"
-                else:
-                    list_item = f"{value} {note}"
-            elif value:
-                list_item = value
-            elif note:
-                list_item = note
-            else:
-                list_item = ""
-
-            if list_item:
-                appraisals.append(list_item)
+        appraisals = [
+            build_value_note(app.appraisal_value, app.appraisal_note)
+            for app in self.get_queryset()
+        ]
+        appraisals = [item for item in appraisals if item]
 
         if len(appraisals) == 1:
             appraisal = appraisals[0]
