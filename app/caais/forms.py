@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from django import forms
 from django.utils.translation import gettext
@@ -156,76 +156,72 @@ class MetadataForm(CaaisModelForm):
     )
 
     def clean(self) -> dict:
-        """Validate the date_of_materials field."""
+        """Form date as approximate if user chose to mark the date as approximate."""
         cleaned_data = super().clean()
 
         if date := cleaned_data.get("date_of_materials"):
-            match_obj = re.match(MetadataForm.DATE_REGEX, date)
-
-            if match_obj is None:
-                self.add_error("date_of_materials", gettext("Invalid date format"))
-                return cleaned_data
-
-            raw_start_date = match_obj.group("start_date")
-
-            try:
-                raw_end_date = match_obj.group("end_date")
-            except IndexError:
-                raw_end_date = None
-
-            invalid_date_message_added = False
-            future_date_message_added = False
-            early_date_message_added = False
-
-            start_date = None
-
-            try:
-                start_date = datetime.strptime(raw_start_date, r"%Y-%m-%d").date()
-
-                if start_date > datetime.now().date():
-                    self.add_error("date_of_materials", gettext("Date cannot be in the future"))
-                    future_date_message_added = True
-
-                if start_date < datetime(1800, 1, 1).date():
-                    self.add_error("date_of_materials", gettext("Date cannot be before 1800"))
-                    early_date_message_added = True
-
-            except ValueError:
-                self.add_error("date_of_materials", gettext("Invalid date format"))
-                invalid_date_message_added = True
-
-            end_date = None
-            if raw_end_date:
-                try:
-                    end_date = datetime.strptime(raw_end_date, r"%Y-%m-%d").date()
-
-                    if not future_date_message_added and end_date > datetime.now().date():
-                        self.add_error(
-                            "date_of_materials", gettext("End date cannot be in the future")
-                        )
-
-                    if not early_date_message_added and end_date < datetime(1800, 1, 1).date():
-                        self.add_error(
-                            "date_of_materials", gettext("End date cannot be before 1800")
-                        )
-
-                except ValueError:
-                    if not invalid_date_message_added:
-                        self.add_error(
-                            "date_of_materials", gettext("Invalid date format for end date")
-                        )
-
-            if end_date and start_date:
-                if end_date < start_date:
-                    self.add_error(
-                        "date_of_materials",
-                        gettext("End date must be later than start date"),
-                    )
-
-                if end_date == start_date:
-                    cleaned_data["date_of_materials"] = raw_start_date
+            self._validate_date_format_and_parse(date, cleaned_data)
 
         return cleaned_data
+
+    def _validate_date_format_and_parse(self, date: str, cleaned_data: dict) -> None:
+        """Validate date format and parse dates."""
+        match_obj = re.match(MetadataForm.DATE_REGEX, date)
+
+        if match_obj is None:
+            self.add_error("date_of_materials", _("Invalid date format"))
+            return
+
+        raw_start_date = match_obj.group("start_date")
+        raw_end_date = match_obj.group("end_date") if match_obj.group("end_date") else None
+
+        start_date = self._validate_single_date(raw_start_date, "start")
+        end_date = self._validate_single_date(raw_end_date, "end") if raw_end_date else None
+
+        if start_date and end_date:
+            self._validate_date_range(start_date, end_date, raw_start_date, cleaned_data)
+
+    def _validate_single_date(self, raw_date: str, date_type: str) -> Optional[datetime]:
+        """Validate a single date string and return parsed date."""
+        try:
+            parsed_date = datetime.strptime(raw_date, r"%Y-%m-%d")
+
+            if parsed_date.date() > datetime.now().date():
+                error_msg = (
+                    _("Date cannot be in the future")
+                    if date_type == "start"
+                    else _("End date cannot be in the future")
+                )
+                self.add_error("date_of_materials", error_msg)
+
+            if parsed_date.date() < datetime(1800, 1, 1).date():
+                error_msg = (
+                    _("Date cannot be before 1800")
+                    if date_type == "start"
+                    else _("End date cannot be before 1800")
+                )
+                self.add_error("date_of_materials", error_msg)
+
+            return parsed_date
+
+        except ValueError:
+            error_msg = (
+                _("Invalid date format")
+                if date_type == "start"
+                else _("Invalid date format for end date")
+            )
+            self.add_error("date_of_materials", error_msg)
+            return None
+
+    def _validate_date_range(
+        self, start_date: datetime, end_date: datetime, raw_start_date: str, cleaned_data: dict
+    ) -> None:
+        """Validate date range constraints."""
+        if end_date < start_date:
+            self.add_error("date_of_materials", _("End date must be later than start date"))
+
+        if end_date == start_date:
+            cleaned_data["date_of_materials"] = raw_start_date
 
     def save(self, commit: bool = True) -> Metadata:
         """Save the accession identifier input as an Identifier on the metadata object.
