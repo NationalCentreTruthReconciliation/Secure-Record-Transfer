@@ -148,6 +148,11 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_groupsubmission.html",
             title=gettext("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
+            info_message=gettext(
+                "You may assign this submission to a group to keep your records organized. "
+                "<b>This step is optional</b>. If you do not wish to assign a group, you can "
+                "proceed to the next step."
+            ),
         ),
         **(
             {
