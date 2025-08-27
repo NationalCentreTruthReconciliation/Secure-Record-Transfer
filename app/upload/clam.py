@@ -1,16 +1,29 @@
+"""Malware and virus scanning with ClamAV."""
+
 import logging
-from typing import BinaryIO, cast
+from typing import BinaryIO, Optional, cast
 
 from clamav_client import clamd
 from django.core.exceptions import ValidationError
-from django.core.files.uploadedfile import UploadedFile
+from django.core.files import File
 
-from . import connection, settings
+from . import settings
 
 LOGGER = logging.getLogger(__name__)
 
 
-def check_for_malware(file: UploadedFile) -> None:
+def get_clamd_socket() -> Optional[clamd.ClamdNetworkSocket]:
+    """Return a socket that can be used to communicate with clamd over the network.
+
+    Returns:
+        None if :ref:`CLAMAV_ENABLED` is False, otherwise, the connection object
+    """
+    if not settings.CLAMAV_ENABLED:
+        return None
+    return clamd.ClamdNetworkSocket(settings.CLAMAV_HOST, settings.CLAMAV_PORT)
+
+
+def check_for_malware(file: File) -> None:
     """Scan the file for malware.
 
     If :ref:`CLAMAV_ENABLED` is False, return early.
@@ -24,7 +37,7 @@ def check_for_malware(file: UploadedFile) -> None:
     if not settings.CLAMAV_ENABLED:
         return
 
-    socket = connection.get_clamd_socket()
+    socket = get_clamd_socket()
 
     if not socket:
         raise ConnectionError("Connection to ClamAV could not be established.")

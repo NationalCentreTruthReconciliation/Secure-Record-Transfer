@@ -75,7 +75,7 @@
     "inputs": [
         {
             "id": "testName",
-            "description": "Test name (e.g., app/recordtransfer/tests/unit/test_models.py::TestUploadSession::test_new_session_creation)",
+            "description": "Test name (e.g., app/upload/tests/unit/test_models.py::TestUploadSession::test_new_session_creation)",
             "type": "promptString"
         }
     ]
