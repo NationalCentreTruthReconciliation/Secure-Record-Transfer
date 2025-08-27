@@ -28,9 +28,11 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
 export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
     closeModal();
 
-    // If the request was successful, refresh the table
+    // If the request was successful, refresh the submission group table, *and* the submission
+    // table, in case the deleted group was linked to any submissions.
     if (e.detail.successful) {
         refreshSubmissionGroupTable(context);
+        refreshSubmissionTable(context);
     }
 };
 
