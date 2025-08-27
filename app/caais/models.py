@@ -60,20 +60,24 @@ class AbstractTerm(models.Model):
     """
 
     class Meta:
+        """Meta options for the abstract term."""
+
         abstract = True
 
     name = models.CharField(max_length=128, null=False, blank=False, unique=True)
     description = models.TextField(blank=True, default="")
 
     def __str__(self):
+        """Return a string representation of the term."""
         return self.name
 
     def __repr__(self):
+        """Return a developer-friendly representation of the term."""
         return f"<{self.__class__.__name__}(name='{self.name}')>"
 
 
 class AcquisitionMethod(AbstractTerm):
-    """**Acquisition Method** [CAAIS, Section 1.5]
+    """**Acquisition Method** [CAAIS, Section 1.5].
 
     Definition: *The process by which a repository acquires material.*
 
@@ -85,6 +89,8 @@ class AcquisitionMethod(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the acquisition method."""
+
         verbose_name_plural = gettext("Acquisition methods")
         verbose_name = gettext("Acquisition method")
 
@@ -96,7 +102,7 @@ AcquisitionMethod._meta.get_field("name").help_text = cite_caais(
 
 
 class Status(AbstractTerm):
-    """**Status** [CAAIS, Section 1.7]
+    """**Status** [CAAIS, Section 1.7].
 
     Definition: *The current position of the material with respect to the
     repository's workflows and business processes.*
@@ -109,6 +115,8 @@ class Status(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the status term."""
+
         verbose_name_plural = gettext("Statuses")
         verbose_name = gettext("Status")
 
@@ -225,6 +233,8 @@ class Metadata(models.Model):
     """
 
     class Meta:
+        """Meta options for the model."""
+
         verbose_name_plural = gettext("CAAIS metadata")
         verbose_name = gettext("CAAIS metadata")
 
@@ -232,6 +242,7 @@ class Metadata(models.Model):
 
     @property
     def accession_identifier(self) -> str:
+        """Return the accession identifier for the metadata."""
         # We check self.pk here in case the model is not saved yet
         if self.pk and self.identifiers.count() > 0:
             accession_id = self.identifiers.accession_identifier()
@@ -379,7 +390,7 @@ class Metadata(models.Model):
         if start_date == end_date:
             formatted_date = str(start_date)
 
-        return formatted_date, start_date, end_date # type: ignore
+        return formatted_date, start_date, end_date  # type: ignore
 
     def _create_flat_atom_representation(self, row: dict, version: ExportVersion):
         row.update(self.identifiers.flatten(version))
@@ -418,7 +429,7 @@ class Metadata(models.Model):
 
         row["culture"] = "en"
 
-        if self.date_of_materials and not version == ExportVersion.ATOM_2_1:
+        if self.date_of_materials and version != ExportVersion.ATOM_2_1:
             parsed_date, start_date, end_date = self.parse_event_date_for_atom()
             if self.date_is_approximate:
                 parsed_date = settings.APPROXIMATE_DATE_FORMAT.format(date=parsed_date)
@@ -479,7 +490,7 @@ class Metadata(models.Model):
         row.update(self.dates_of_creation_or_revision.flatten(version))
         row["languageOfAccessionRecord"] = self.language_of_accession_record or ""
 
-    def create_flat_representation(self, version=ExportVersion.CAAIS_1_0) -> dict:
+    def create_flat_representation(self, version: ExportVersion = ExportVersion.CAAIS_1_0) -> dict:
         """Convert this model and all related models into a flat dictionary
         suitable to be written to a CSV or used as the metadata fields for a
         BagIt bag.
@@ -507,7 +518,7 @@ class Metadata(models.Model):
             self._create_flat_caais_representation(row, version)
         return row
 
-    def update_accession_id(self, accession_id: str):
+    def update_accession_id(self, accession_id: str) -> None:
         """Update the accession identifier value, if an accession identifier
         exists.
 
@@ -521,11 +532,12 @@ class Metadata(models.Model):
             a_id.save()
 
     def __str__(self):
+        """Return a string representation of the metadata object."""
         return self.accession_title or "No title"
 
 
 class Identifier(models.Model):
-    """**Identifiers** [CAAIS, Section 1.2]
+    """**Identifiers** [CAAIS, Section 1.2].
 
     Definition: *Alphabetic, numeric, or alpha-numeric codes assigned to
     accessioned material, parts of the material, or accruals for purposes of
@@ -550,6 +562,8 @@ class Identifier(models.Model):
     """
 
     class Meta:
+        """Meta options for the Identifier model."""
+
         verbose_name_plural = gettext("Identifiers")
         verbose_name = gettext("Identifier")
 
@@ -599,13 +613,14 @@ class Identifier(models.Model):
     )
 
     def __str__(self):
+        """Return a string representation of the identifier."""
         if self.identifier_type:
             return f"{self.identifier_value} ({self.identifier_type})"
         return self.identifier_value
 
 
 class ArchivalUnit(models.Model):
-    """**Archival Unit** [CAAIS, Section 1.4]
+    """**Archival Unit** [CAAIS, Section 1.4].
 
     Definition: *The archival unit or the aggregate to which the accessioned
     material belongs.*
@@ -619,6 +634,8 @@ class ArchivalUnit(models.Model):
     """
 
     class Meta:
+        """Meta options for the ArchivalUnit model."""
+
         verbose_name_plural = gettext("Archival units")
         verbose_name = gettext("Archival unit")
 
@@ -641,11 +658,14 @@ class ArchivalUnit(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the archival unit."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class DispositionAuthority(models.Model):
-    """**Disposition Authority** [CAAIS, Section 1.6]
+    """**Disposition Authority** [CAAIS, Section 1.6].
 
     Definition: *A reference to policies, directives, and agreements that
     prescribe and allow for the transfer of material to a repository.*
@@ -659,6 +679,8 @@ class DispositionAuthority(models.Model):
     """
 
     class Meta:
+        """Meta options for the DispositionAuthority model."""
+
         verbose_name_plural = gettext("Disposition authorities")
         verbose_name = gettext("Disposition authority")
 
@@ -682,11 +704,14 @@ class DispositionAuthority(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the disposition authority."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class SourceType(AbstractTerm):
-    """**Source Type** [CAAIS, Section 2.1.1]
+    """**Source Type** [CAAIS, Section 2.1.1].
 
     Definition: *A term describing the nature of the source.*
 
@@ -698,6 +723,8 @@ class SourceType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the SourceType model."""
+
         verbose_name_plural = gettext("Source types")
         verbose_name = gettext("Source type")
 
@@ -711,7 +738,7 @@ SourceType._meta.get_field("name").help_text = cite_caais(
 
 
 class SourceRole(AbstractTerm):
-    """**Source Role** [CAAIS, Section 2.1.4]
+    """**Source Role** [CAAIS, Section 2.1.4].
 
     Definition: *The relationship of the named source to the material.*
 
@@ -723,6 +750,8 @@ class SourceRole(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the SourceRole model."""
+
         verbose_name_plural = gettext("Source roles")
         verbose_name = gettext("Source role")
 
@@ -737,7 +766,7 @@ SourceRole._meta.get_field("name").help_text = cite_caais(
 
 
 class SourceConfidentiality(AbstractTerm):
-    """**Source Confidentiality** [CAAIS, Section 2.1.6]
+    """**Source Confidentiality** [CAAIS, Section 2.1.6].
 
     Definition: *An instruction to maintain information about the source in
     confidence.*
@@ -750,6 +779,8 @@ class SourceConfidentiality(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the SourceConfidentiality model."""
+
         verbose_name_plural = gettext("Source confidentialities")
         verbose_name = gettext("Source confidentiality")
 
@@ -766,7 +797,7 @@ SourceConfidentiality._meta.get_field("name").help_text = cite_caais(
 
 
 class SourceOfMaterial(models.Model):
-    """**Source of Material** [CAAIS, Section 2.1]
+    """**Source of Material** [CAAIS, Section 2.1].
 
     Definition: *A corporate body, person or family responsible for the
     creation, use or transfer of the accessioned material.*
@@ -828,6 +859,8 @@ class SourceOfMaterial(models.Model):
     """
 
     class Meta:
+        """Meta options for the SourceOfMaterial model."""
+
         verbose_name_plural = gettext("Sources of material")
         verbose_name = gettext("Source of material")
 
@@ -892,11 +925,14 @@ class SourceOfMaterial(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the source of material."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class PreliminaryCustodialHistory(models.Model):
-    """**Preliminary Custodial History** [CAAIS, Section 2.2]
+    """**Preliminary Custodial History** [CAAIS, Section 2.2].
 
     Definition: *Information about the chain of agents, in addition to the
     creator(s), that have exercised custody or control over the material at all
@@ -911,6 +947,8 @@ class PreliminaryCustodialHistory(models.Model):
     """
 
     class Meta:
+        """Meta options for the PreliminaryCustodialHistory model."""
+
         verbose_name_plural = gettext("Preliminary custodial histories")
         verbose_name = gettext("Preliminary custodial history")
 
@@ -938,11 +976,14 @@ class PreliminaryCustodialHistory(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the preliminary custodial history."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class ExtentType(AbstractTerm):
-    """**Extent Type** [CAAIS, Section 3.2.1]
+    """**Extent Type** [CAAIS, Section 3.2.1].
 
     Definition: *A term that characterizes the nature of each extent statement.*
 
@@ -954,6 +995,8 @@ class ExtentType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the ExtentType model."""
+
         verbose_name_plural = gettext("Extent types")
         verbose_name = gettext("Extent type")
 
@@ -968,7 +1011,7 @@ ExtentType._meta.get_field("name").help_text = cite_caais(
 
 
 class ContentType(AbstractTerm):
-    """**Content Type** [CAAIS, Section 3.2.3]
+    """**Content Type** [CAAIS, Section 3.2.3].
 
     Definition: *The type of material contained in the units measured,
     considered as a form of communication or documentary genre.*
@@ -981,6 +1024,8 @@ class ContentType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the ContentType model."""
+
         verbose_name_plural = gettext("Content types")
         verbose_name = gettext("Content type")
 
@@ -995,7 +1040,7 @@ ContentType._meta.get_field("name").help_text = cite_caais(
 
 
 class CarrierType(AbstractTerm):
-    """**Carrier Type** [CAAIS, Section 3.2.4]
+    """**Carrier Type** [CAAIS, Section 3.2.4].
 
     Definition: *The physical format of an object that supports or carries
     archival materials.*
@@ -1008,6 +1053,8 @@ class CarrierType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the CarrierType model."""
+
         verbose_name_plural = gettext("Carrier types")
         verbose_name = gettext("Carrier type")
 
@@ -1022,7 +1069,7 @@ CarrierType._meta.get_field("name").help_text = cite_caais(
 
 
 class ExtentStatement(models.Model):
-    """**Extent Statement** [CAAIS, Section 3.2]
+    """**Extent Statement** [CAAIS, Section 3.2].
 
     Definition: *The physical or logical quantity and type of material.*
 
@@ -1047,6 +1094,8 @@ class ExtentStatement(models.Model):
     """
 
     class Meta:
+        """Meta options for the ExtentStatement model."""
+
         verbose_name = gettext("Extent statement")
         verbose_name_plural = gettext("Extent statements")
 
@@ -1095,11 +1144,14 @@ class ExtentStatement(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the extent statement."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class PreliminaryScopeAndContent(models.Model):
-    """**Preliminary Scope and Content** [CAAIS, Section 3.3]
+    """**Preliminary Scope and Content** [CAAIS, Section 3.3].
 
     Definition: *A preliminary description of the functions and activities that
     generated the accessioned material as well as information about its
@@ -1115,6 +1167,8 @@ class PreliminaryScopeAndContent(models.Model):
     """
 
     class Meta:
+        """Meta options for the PreliminaryScopeAndContent model."""
+
         verbose_name_plural = gettext("Preliminary scope and content")
         verbose_name = gettext("Preliminary scope and content")
 
@@ -1142,11 +1196,14 @@ class PreliminaryScopeAndContent(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the preliminary scope and content."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class LanguageOfMaterial(models.Model):
-    """**Language of Material** [CAAIS, Section 3.4]
+    """**Language of Material** [CAAIS, Section 3.4].
 
     Definition: *The language(s) and script(s) represented in the accessioned
     materials.*
@@ -1160,6 +1217,8 @@ class LanguageOfMaterial(models.Model):
     """
 
     class Meta:
+        """Meta options for the LanguageOfMaterial model."""
+
         verbose_name_plural = gettext("Language of materials")
         verbose_name = gettext("Language of material")
 
@@ -1182,11 +1241,14 @@ class LanguageOfMaterial(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the language of material."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class StorageLocation(models.Model):
-    """**Storage Location** [CAAIS, Section 4.1]
+    """**Storage Location** [CAAIS, Section 4.1].
 
     Definition: *The physical or logical location where the material resides.*
 
@@ -1199,6 +1261,8 @@ class StorageLocation(models.Model):
     """
 
     class Meta:
+        """Meta options for the StorageLocation model."""
+
         verbose_name_plural = "Storage locations"
         verbose_name = "Storage location"
 
@@ -1221,11 +1285,14 @@ class StorageLocation(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the storage location."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class RightsType(AbstractTerm):
-    """**Rights Type** [CAAIS, Section 4.2.1]
+    """**Rights Type** [CAAIS, Section 4.2.1].
 
     Definition: *A term that characterizes the nature of a rights statement.*
 
@@ -1237,6 +1304,8 @@ class RightsType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the RightsType model."""
+
         verbose_name_plural = "Rights types"
         verbose_name = "Type of rights"
 
@@ -1251,7 +1320,7 @@ RightsType._meta.get_field("name").help_text = cite_caais(
 
 
 class Rights(models.Model):
-    """**Rights** [CAAIS, Section 4.2]
+    """**Rights** [CAAIS, Section 4.2].
 
     Definition: *The assertion of one or more rights pertaining to the
     material.*
@@ -1274,6 +1343,8 @@ class Rights(models.Model):
     """
 
     class Meta:
+        """Meta options for the Rights model."""
+
         verbose_name_plural = "Rights"
         verbose_name = "Rights statement"
 
@@ -1310,11 +1381,14 @@ class Rights(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the rights statement."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class PreservationRequirementsType(AbstractTerm):
-    """**Preservation Requirements Type** [CAAIS, Section 4.3.1]
+    """**Preservation Requirements Type** [CAAIS, Section 4.3.1].
 
     Definition: *A description of the material's physical state, dependency or
     preservation concerns identified.*
@@ -1327,6 +1401,8 @@ class PreservationRequirementsType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the PreservationRequirementsType model."""
+
         verbose_name_plural = "Preservation requirements types"
         verbose_name = "Preservation requirements type"
 
@@ -1341,7 +1417,7 @@ PreservationRequirementsType._meta.get_field("name").help_text = cite_caais(
 
 
 class PreservationRequirements(models.Model):
-    """**Preservation Requirements** [CAAIS, Section 4.3]
+    """**Preservation Requirements** [CAAIS, Section 4.3].
 
     Definition: *Information about physical condition and / or logical
     dependencies that need to be addressed by the repository to ensure the
@@ -1365,6 +1441,8 @@ class PreservationRequirements(models.Model):
     """
 
     class Meta:
+        """Meta options for the PreservationRequirements model."""
+
         verbose_name_plural = "Preservation requirements"
         verbose_name = "Preservation requirement"
 
@@ -1407,11 +1485,14 @@ class PreservationRequirements(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the preservation requirements."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class AppraisalType(AbstractTerm):
-    """**Appraisal Type** [CAAIS, Section 4.4.1]
+    """**Appraisal Type** [CAAIS, Section 4.4.1].
 
     Definition: *A term that characterizes the nature of the appraisal.*
 
@@ -1423,6 +1504,8 @@ class AppraisalType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the AppraisalType model."""
+
         verbose_name_plural = "Appraisal types"
         verbose_name = "Appraisal type"
 
@@ -1437,7 +1520,7 @@ AppraisalType._meta.get_field("name").help_text = cite_caais(
 
 
 class Appraisal(models.Model):
-    """**Appraisal** [CAAIS, Section 4.4]
+    """**Appraisal** [CAAIS, Section 4.4].
 
     Definition: *Information about the assessment of value of the materials
     accessioned.*
@@ -1458,6 +1541,8 @@ class Appraisal(models.Model):
     """
 
     class Meta:
+        """Meta options for the Appraisal model."""
+
         verbose_name_plural = "Appraisals"
         verbose_name = "Appraisal"
 
@@ -1497,11 +1582,14 @@ class Appraisal(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the appraisal."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class AssociatedDocumentationType(AbstractTerm):
-    """**Associated Documentation Type** [CAAIS, Section 4.5.1]
+    """**Associated Documentation Type** [CAAIS, Section 4.5.1].
 
     Definition: *A term that characterizes the nature of the appraisal.*
 
@@ -1513,6 +1601,8 @@ class AssociatedDocumentationType(AbstractTerm):
     """
 
     class Meta(AbstractTerm.Meta):
+        """Meta options for the AssociatedDocumentationType model."""
+
         verbose_name_plural = "Associated documentation types"
         verbose_name = "Associated documentation type"
 
@@ -1528,7 +1618,7 @@ AssociatedDocumentationType._meta.get_field("name").help_text = cite_caais(
 
 
 class AssociatedDocumentation(models.Model):
-    """**Associated Documentation** [CAAIS, Section 4.5]
+    """**Associated Documentation** [CAAIS, Section 4.5].
 
     Definition: *A reference to any documentation related to the material in the
     accession.*
@@ -1551,6 +1641,8 @@ class AssociatedDocumentation(models.Model):
     """
 
     class Meta:
+        """Meta options for the AssociatedDocumentation model."""
+
         verbose_name_plural = "Associated documentation"
         verbose_name = "Associated document"
 
@@ -1590,11 +1682,14 @@ class AssociatedDocumentation(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the associated documentation."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class EventType(AbstractTerm):
-    """**Event Type** [CAAIS, Section 5.1.1]
+    """**Event Type** [CAAIS, Section 5.1.1].
 
     Definition: *A term that characterizes the type of event documented in the
     accession process.*
@@ -1606,7 +1701,9 @@ class EventType(AbstractTerm):
         description (TextField): A description of the event type
     """
 
-    class Meta:
+    class Meta(AbstractTerm.Meta):
+        """Meta options for the EventType model."""
+
         verbose_name = "Event type"
         verbose_name_plural = "Event types"
 
@@ -1621,7 +1718,7 @@ EventType._meta.get_field("name").help_text = cite_caais(
 
 
 class Event(models.Model):
-    """**Event** [CAAIS, Section 5.1]
+    """**Event** [CAAIS, Section 5.1].
 
     Definition: *The actions taken by repository staff throughout the accession
     process.*
@@ -1645,6 +1742,8 @@ class Event(models.Model):
     """
 
     class Meta:
+        """Meta options for the Event model."""
+
         verbose_name_plural = "Events"
         verbose_name = "Event"
 
@@ -1684,11 +1783,14 @@ class Event(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id} @ {str(self.event_date)}"
+        """Return a string representation of the event."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk} @ {self.event_date!s}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class GeneralNote(models.Model):
-    """**General Note** [CAAIS, Section 6.1]
+    """**General Note** [CAAIS, Section 6.1].
 
     Definition: *Additional information relating to the accession process or
     material that is not otherwise captured.*
@@ -1702,6 +1804,8 @@ class GeneralNote(models.Model):
     """
 
     class Meta:
+        """Meta options for the GeneralNote model."""
+
         verbose_name = "General note"
         verbose_name_plural = "General notes"
 
@@ -1724,11 +1828,14 @@ class GeneralNote(models.Model):
     )
 
     def __str__(self):
-        return f"{self.__class__.__name__} #{self.id}"
+        """Return a string representation of the general note."""
+        if self.pk:
+            return f"{self.__class__.__name__} #{self.pk}"
+        return f"{self.__class__.__name__} (unsaved)"
 
 
 class CreationOrRevisionType(AbstractTerm):
-    """**Creation or Revision Type** [CAAIS, Section 7.2.1]
+    """**Creation or Revision Type** [CAAIS, Section 7.2.1].
 
     Definition: *A term characterizing the nature of the action applied to the
     accession record.*
@@ -1740,7 +1847,9 @@ class CreationOrRevisionType(AbstractTerm):
         description (TextField): A description of the creation or revision type
     """
 
-    class Meta:
+    class Meta(AbstractTerm.Meta):
+        """Meta options for the Creation or Revision Type model."""
+
         verbose_name = "Date of creation or revision type"
         verbose_name_plural = "Date of creation or revision types"
 
@@ -1755,7 +1864,7 @@ CreationOrRevisionType._meta.get_field("name").help_text = cite_caais(
 
 
 class DateOfCreationOrRevision(models.Model):
-    """**Date of Creation or Revision** [CAAIS, Section 7.2]
+    """**Date of Creation or Revision** [CAAIS, Section 7.2].
 
     Definition: *Date(s) on which the accession record was created or revised.*
 
@@ -1782,6 +1891,8 @@ class DateOfCreationOrRevision(models.Model):
     """
 
     class Meta:
+        """Meta options for the Date of Creation or Revision model."""
+
         verbose_name = "Date of creation or revision"
         verbose_name_plural = "Dates of creation or revision"
 
