@@ -6,6 +6,7 @@ from typing import Any, Callable, Mapping, Optional, Sequence
 from django.contrib import admin
 from django.contrib.admin import ListFilter
 from django.contrib.admin.models import LogEntry
+from django.contrib.admin.options import InlineModelAdmin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
@@ -75,7 +76,8 @@ class IdentifierInlineAdmin(admin.StackedInline):
     max_num = 64
     extra = 0
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Identifier]:
+        """Exclude accession identifiers from the queryset."""
         ids = super().get_queryset(request).exclude(identifier_type=ACCESSION_IDENTIFIER_TYPE)
         return ids
 
@@ -249,7 +251,7 @@ class MetadataAdmin(admin.ModelAdmin):
         "repository",
     ]
 
-    inlines = [
+    inlines: Sequence[type[InlineModelAdmin]] = [
         IdentifierInlineAdmin,
         ArchivalUnitInlineAdmin,
         DispositionAuthorityInlineAdmin,
@@ -276,7 +278,8 @@ class MetadataAdmin(admin.ModelAdmin):
         "export_atom_2_1_csv",
     ]
 
-    def source_name(self, obj) -> Optional[str]:
+    def source_name(self, obj: Metadata) -> Optional[str]:
+        """Return a comma-separated list of source names."""
         return obj.source_of_materials.aggregate(
             names_joined=GroupConcat("source_name", separator=", ")
         )["names_joined"]
