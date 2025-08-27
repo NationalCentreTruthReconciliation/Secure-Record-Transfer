@@ -97,8 +97,8 @@ def get_expirable_upload_sessions() -> QuerySet[UploadSession]:
     return UploadSession.objects.get_expirable().filter(in_progress_submission__isnull=False).all()
 
 
-    """Get upload sessions that can be deleted, and do not have an in-progress submission."""
 def get_deletable_upload_sessions() -> QuerySet[UploadSession]:
+    """Get upload sessions that can be deleted, and do not have an in-progress submission."""
     return UploadSession.objects.get_deletable().filter(in_progress_submission__isnull=True).all()
 
 

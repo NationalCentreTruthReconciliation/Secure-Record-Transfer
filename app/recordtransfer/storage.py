@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Optional
 
 from django.core.files.base import File
@@ -22,4 +21,3 @@ class OverwriteStorage(FileSystemStorage):
         allowing overwriting of existing files.
         """
         return name
-
