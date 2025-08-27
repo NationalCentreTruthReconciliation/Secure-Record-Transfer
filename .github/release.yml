@@ -1,0 +1,29 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: Security Fixes 🔒
+      labels:
+        - security
+    - title: Bug Fixes 🐛
+      labels:
+        - bug
+    - title: New Features & Enhancements ✨
+      labels:
+        - enhancement
+    - title: User Interface 🎨
+      labels:
+        - user interface
+    - title: Dependency & Package Changes 📦
+      labels:
+        - dependencies
+    - title: Documentation 📚
+      labels:
+        - documentation
+    - title: Other Changes 🔧
+      labels:
+        - cleanup
+        - refactor
+        - actions
+        - "*"
