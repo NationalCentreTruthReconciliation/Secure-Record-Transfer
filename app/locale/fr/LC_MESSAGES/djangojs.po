@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-31 08:53-0500\n"
+"POT-Creation-Date: 2025-08-27 11:25-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: French Team <fr@example.com>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/customUppyPlugin.js:31
+#: app/recordtransfer/static/recordtransfer/js/submission_form/customUppyPlugin.js:31
 #, javascript-format
 msgid "Cannot add the duplicate file '%s', it already exists"
 msgstr "Impossible d’ajouter le fichier en double '%s', il existe déjà"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
+#: app/recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
 msgid "No description available"
 msgstr "Aucune description disponible"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:141
+#: app/recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:147
 msgid "You must upload at least one file."
 msgstr "Vous devez téléverser au moins un fichier."
 
-#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:150
+#: app/recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:156
 msgid "Remove the files with issues to proceed."
 msgstr "Supprimez les fichiers présentant des problèmes pour continuer."
