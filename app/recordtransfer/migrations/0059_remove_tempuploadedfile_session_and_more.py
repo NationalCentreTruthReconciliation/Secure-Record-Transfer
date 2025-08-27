@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     """Move UploadSession, PermUploadedFile, and TempUploadedFile to upload admin."""
 
     dependencies = [  # noqa: RUF012
-        ("recordtransfer", "0057_passwordhistory"),
+        ("recordtransfer", "0058_load_admin_theme"),
         ("upload", "0001_initial"),
     ]
 

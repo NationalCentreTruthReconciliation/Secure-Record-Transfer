@@ -244,10 +244,11 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         # Click on date input field
         date_input.click()
 
-        # Click on the datepicker title to open year/month selection view
-        WebDriverWait(driver, 10).until(
+        # Click on the datepicker title to open year/month selection view using JS
+        title_element = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.CLASS_NAME, "air-datepicker-nav--title"))
-        ).click()
+        )
+        driver.execute_script("arguments[0].click();", title_element)
 
         # Click on year selection title
         WebDriverWait(driver, 10).until(
@@ -357,7 +358,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
         )
 
         # Click the button to show the add new group dialog
-        driver.find_element(By.ID, "id_new_submission_group_button").click()
+        new_group_button = driver.find_element(By.ID, "id_new_submission_group_button")
+        driver.execute_script("arguments[0].click();", new_group_button)
 
         # Wait for the modal to appear
         WebDriverWait(driver, 10).until(

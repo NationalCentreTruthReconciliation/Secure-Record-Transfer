@@ -78,3 +78,5 @@ if settings.DEBUG and not settings.TESTING:
 
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns += [path("", include("upload.urls"))]
+elif not settings.FILE_UPLOAD_ENABLED:
+    urlpatterns += [path("", include("upload.urls_readonly"))]

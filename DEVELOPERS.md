@@ -29,7 +29,13 @@ These instructions apply to all operating systems. First, install the following 
 If developing on Mac or Linux, you'll need the following tools:
 
 1. **Node.js 22+** for Javascript dependency management and builds ([Download Node.js](https://nodejs.org/en/download/))
-2. **uv 0.8.8** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
+2. **pnpm** for Javascript package management ([pnpm.io](https://pnpm.io/)). Use the following command to install pnpm:
+
+```shell
+npm install -g pnpm@latest-10
+```
+
+3. **uv 0.8.8** for Python dependency management ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)). Use the following command to install uv:
 
 ```shell
 curl -LsSf https://astral.sh/uv/0.8.8/install.sh | sh
@@ -48,8 +54,16 @@ curl -LsSf https://astral.sh/uv/0.8.8/install.sh | sh
 ```
 
 3. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
-4. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
-5. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
+
+4. **pnpm** for Javascript package management ([pnpm.io](https://pnpm.io/)). After installing npm, use the following command to install pnpm:
+
+```shell
+# In your WSL terminal:
+npm install -g pnpm@latest-10
+```
+
+5. **Configure Docker Desktop with WSL 2**. Follow the instructions in the [Docker Desktop WSL 2](https://docs.docker.com/desktop/features/wsl/#turn-on-docker-desktop-wsl-2) documentation to enable WSL 2 integration with Docker. If using **Podman**, follow the instructions instead in [Podman Desktop WSL 2](https://podman-desktop.io/docs/installation/windows-install#use-wsl2-as-machine-provider).
+6. **VSCode Remote Development Extension Pack** ([VS Code Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack))
 
 ### Repository Setup
 
@@ -94,14 +108,14 @@ When VSCode prompts if you want to select the new environment for this workspace
 For JavaScript development, you need to install Node dependencies to gain access to the source code, build tools, and linting/formatting:
 
 ```shell
-npm install --include=dev
+pnpm install
 ```
 
-You can then use the provided npm scripts for various tasks:
+You can then use the provided pnpm scripts for various tasks:
 
-- `npm run build` - Build JavaScript files for production
-- `npm run watch` - Rebuild JavaScript files whenever they change (see [Re-build JS as Changes are Made](#re-build-js-as-changes-are-made))
-- `npm run lint` - Run ESLint to check JavaScript files
+- `pnpm run build` - Build JavaScript files for production
+- `pnpm run watch` - Rebuild JavaScript files whenever they change (see [Re-build JS as Changes are Made](#re-build-js-as-changes-are-made))
+- `pnpm run lint` - Run ESLint to check JavaScript files
 
 ## Running the Development Container
 
@@ -145,10 +159,10 @@ After you run the dev container (`compose.dev.yml`), you can automatically re-bu
 
 ```shell
 # Using Docker:
-docker compose -f compose.dev.yml exec app npm run watch
+docker compose -f compose.dev.yml exec app pnpm run watch
 
 # Using Podman:
-podman-compose -f compose.dev.yml exec app npm run watch
+podman-compose -f compose.dev.yml exec app pnpm run watch
 ```
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.

@@ -3,6 +3,7 @@ from typing import Union
 
 from django.test import TestCase
 
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.forms import MetadataForm
 from caais.models import Identifier, Metadata
 
@@ -153,7 +154,7 @@ class MetadataFormTest(TestCase):
 
         identifier = Identifier(
             metadata=metadata,
-            identifier_type="Accession Identifier",
+            identifier_type=ACCESSION_IDENTIFIER_TYPE,
             identifier_value="TEST-2021-001",
         )
         identifier.save()
@@ -174,8 +175,8 @@ class MetadataFormTest(TestCase):
         # Check if the identifier exists in the database
         identifier = Identifier.objects.filter(
             metadata=metadata,
-            identifier_type="Accession Identifier",
-            identifier_value="TEST-2020-001"
+            identifier_type=ACCESSION_IDENTIFIER_TYPE,
+            identifier_value="TEST-2020-001",
         ).first()
 
         self.assertIsNotNone(identifier)

@@ -28,18 +28,18 @@ def calver(version_string: str) -> str:
 def get_arg_parser() -> argparse.ArgumentParser:
     """Create an argument parser for this script."""
     parser = argparse.ArgumentParser(
-        description="Update version in package.json, package-lock.json, pyproject.toml, and uv.lock"
+        description="Update version in package.json, pnpm-lock.yaml, pyproject.toml, and uv.lock"
     )
     parser.add_argument("version", type=calver, help="Version string to set (e.g., '2025.07.07')")
     return parser
 
 
 def update_node_version_files(version: str) -> None:
-    """Update version in package.json and package-lock.json files."""
-    npm = shutil.which("npm") or "npm"
+    """Update version in package.json and pnpm-lock.yaml files."""
+    pnpm = shutil.which("pnpm") or "pnpm"
 
     result = subprocess.run(
-        args=[npm, "version", "--no-git-tag-version", version],
+        args=[pnpm, "version", "--no-git-tag-version", version],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -47,9 +47,9 @@ def update_node_version_files(version: str) -> None:
     changed = "Version not changed" not in result.stderr.decode()
 
     if changed:
-        logging.info("Updated package.json and package-lock.json version to %s", version)
+        logging.info("Updated package.json version to %s", version)
     else:
-        logging.info("Version in package.json and package-lock.json is already %s", version)
+        logging.info("Version in package.json is already %s", version)
 
 
 def update_python_version_files(version: str) -> None:

@@ -4,6 +4,7 @@ from datetime import datetime
 from django.test import TestCase
 from django.utils import timezone
 
+from caais.constants import ACCESSION_IDENTIFIER_TYPE
 from caais.export import ExportVersion
 from caais.models import (
     AcquisitionMethod,
@@ -89,7 +90,7 @@ class TestIdentifierManager(TestCase):
         )
         identifier_2 = Identifier(
             metadata=self.metadata,
-            identifier_type="Accession Identifier",
+            identifier_type=ACCESSION_IDENTIFIER_TYPE,
             identifier_value="A2023-001",
         )
         identifier_1.save()
@@ -99,7 +100,7 @@ class TestIdentifierManager(TestCase):
 
         self.assertTrue(accession_id)
         self.assertEqual(accession_id.identifier_value, "A2023-001")
-        self.assertEqual(accession_id.identifier_type, "Accession Identifier")
+        self.assertEqual(accession_id.identifier_type, ACCESSION_IDENTIFIER_TYPE)
 
         identifier_1.delete()
         identifier_2.delete()
@@ -234,7 +235,7 @@ class TestIdentifierManager(TestCase):
         )
         identifier_2 = Identifier(
             metadata=self.metadata,
-            identifier_type="Accession Identifier",
+            identifier_type=ACCESSION_IDENTIFIER_TYPE,
             identifier_value="A2023-001",
         )
         identifier_1.save()
