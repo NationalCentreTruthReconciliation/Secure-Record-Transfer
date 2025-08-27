@@ -4,13 +4,14 @@ from unittest.mock import MagicMock, patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
 from django.test import TestCase, override_settings
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.translation import gettext
 from freezegun import freeze_time
 
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import Job, TempUploadedFile, UploadSession, User
+from recordtransfer.views.media import readonly_uploaded_file
 
 
 class TestCreateUploadSessionView(TestCase):
@@ -340,6 +341,120 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(session.file_count, 0)
 
 
+# URL patterns to override default URL patterns when testing read-only file uploads
+urlpatterns = [
+    path(
+        "upload-session/<session_token>/files/<file_name>/",
+        readonly_uploaded_file,
+        name="uploaded_file",
+    ),
+]
+
+
+@override_settings(
+    FILE_UPLOAD_ENABLED=False,
+    ROOT_URLCONF=__name__,
+)
+class TestReadOnlyUploadedFileView(TestCase):
+    """Tests for uploaded_file view.
+
+    Since the default GET + DELETE uploaded_file view is included when testing, we override the URL
+    config in this class to include the read-only view.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Disable logging."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
+        cls.one_kib = bytearray([1] * 1024)
+        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
+        cls.admin_user = User.objects.create_user(
+            username="admin", password="3&SAjfTYZQ", is_staff=True
+        )
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session(user=self.test_user_1)
+
+        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
+        self.temp_file = self.session.add_temp_file(file_to_upload)
+        self.url = reverse("uploaded_file", args=[self.session.token, file_to_upload.name])
+
+    def test_readonly_uploaded_file_session_not_found(self) -> None:
+        """Invalid session token returns 404."""
+        response = self.client.get(
+            reverse("uploaded_file", args=["invalid_token", "testfile.txt"])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_readonly_uploaded_file_not_found(self) -> None:
+        """Invalid file name in a valid session."""
+        response = self.client.get(
+            reverse(
+                "uploaded_file",
+                args=[self.session.token, "invalid_file.txt"],
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_readonly_uploaded_file_invalid_user(self) -> None:
+        """Invalid user for the session."""
+        self.session.user = User.objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
+        self.session.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    @override_settings(DEBUG=True)
+    def test_get_readonly_uploaded_file_in_debug(self) -> None:
+        """Test getting the file in DEBUG mode."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.url, self.temp_file.get_file_media_url())
+
+    @override_settings(DEBUG=False)
+    def test_get_readonly_uploaded_file_in_production(self) -> None:
+        """Test getting the file in production mode."""
+        response = self.client.get(self.url)
+        self.assertIn("X-Accel-Redirect", response.headers)
+        self.assertEqual(response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url())
+
+    def test_admin_can_get_any_readonly_uploaded_file(self) -> None:
+        """Test that admin users can get uploaded files from any session."""
+        # Login as admin
+        self.client.logout()
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+
+        # Try to access the file from another user's session
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_not_allowed_for_uploader(self) -> None:
+        """Test that the user who uploaded the file cannot DELETE it."""
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_not_allowed_for_admin(self) -> None:
+        """Test that the admins cannot DELETE uploaded files."""
+        # Login as admin
+        self.client.logout()
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 405)
+
+    def tearDown(self) -> None:
+        """Tear down test environment."""
+        TempUploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
+
+
 class TestUploadedFileView(TestCase):
     """Tests for recordtransfer:uploaded_file view."""
 
@@ -420,13 +535,13 @@ class TestUploadedFileView(TestCase):
             response_json["error"], gettext("Invalid filename or upload session token")
         )
 
-    @patch("recordtransfer.views.media.settings.DEBUG", True)
+    @override_settings(DEBUG=True)
     def test_get_uploaded_file_in_debug(self) -> None:
         """Test getting the file in DEBUG mode."""
         response = self.client.get(self.url)
         self.assertEqual(response.url, self.temp_file.get_file_media_url())
 
-    @patch("recordtransfer.views.media.settings.DEBUG", False)
+    @override_settings(DEBUG=False)
     def test_get_uploaded_file_in_production(self) -> None:
         """Test getting the file in production mode."""
         response = self.client.get(self.url)
