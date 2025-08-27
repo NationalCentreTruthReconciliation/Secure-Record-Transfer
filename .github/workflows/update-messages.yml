@@ -39,10 +39,8 @@ jobs:
         run: |
           if [ ! -z "$(git status --porcelain=v1 2>/dev/null)" ]; then
             echo "changes_detected=true" >> "$GITHUB_OUTPUT"
-            echo "**Message files were changed**, need to make a pull request." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "changes_detected=false" >> "$GITHUB_OUTPUT"
-            echo "**Nothing changed**, nothing to do." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Get current date
