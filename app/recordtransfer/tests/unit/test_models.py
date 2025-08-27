@@ -202,7 +202,7 @@ class TestSubmission(TestCase):
         # Check that the Bag is removed after an error
         remove_bag_mock.assert_called_once()
 
-    @patch("upload.UploadSession.copy_session_uploads")
+    @patch("upload.models.UploadSession.copy_session_uploads")
     def test_create_new_bag(self, copy_uploads_mock: MagicMock) -> None:
         """Test creating a new Bag when one does not exist."""
         copy_uploads_mock.side_effect = self._create_new_files_OK

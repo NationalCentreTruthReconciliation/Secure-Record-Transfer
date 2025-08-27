@@ -4,7 +4,7 @@ import logging
 import shutil
 from itertools import chain
 from pathlib import Path
-from typing import Optional, Self
+from typing import Optional
 
 from django.conf import settings
 from django.core.files import File
@@ -80,7 +80,7 @@ class UploadSession(models.Model):
     objects = UploadSessionManager()
 
     @classmethod
-    def new_session(cls, user: Optional[User] = None) -> Self:
+    def new_session(cls, user: Optional[User] = None) -> UploadSession:
         """Start a new upload session."""
         return cls.objects.create(
             token=get_random_string(32), started_at=timezone.now(), user=user
