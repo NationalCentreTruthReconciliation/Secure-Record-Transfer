@@ -29,10 +29,10 @@ jobs:
         run: uv sync --locked
 
       - name: Make messages for django domain
-        run: uv run python app/manage.py makemessages --all -d django
+        run: cd app && uv run python manage.py makemessages --all -d django
 
       - name: Make messages for djangojs domain
-        run: uv run python app/manage.py makemessages --all -d djangojs
+        run: cd app && uv run python manage.py makemessages --all -d djangojs
 
       - name: Check for changes
         id: check_changes
