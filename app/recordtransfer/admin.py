@@ -554,7 +554,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         if not obj or not obj.upload_session:
             return super().get_form(request, obj, change, **kwargs)
 
-        upload_session_help = "Click link to view uploaded files"
+        upload_session_help = _("Click link to view uploaded files")
 
         if "help_texts" in kwargs:
             kwargs["help_texts"]["upload_session"] = upload_session_help
