@@ -4,18 +4,17 @@ from django.apps import AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-
 YYYY_MM_DD = re.compile(r"^[1-2]\d{3}-1[0-2]|0[1-9]-3[0-1]|[1-2][0-9]|0[1-9]$")
 
 
 class CaaisConfig(AppConfig):
-    """Application configuration for caais app"""
+    """Application configuration for caais app."""
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "caais"
 
-    # pylint: disable=consider-using-f-string
-    def ready(self):
+    def ready(self) -> None:
+        """Validate CAAIS settings."""
         try:
             if not YYYY_MM_DD.match(settings.CAAIS_UNKNOWN_START_DATE):
                 raise ImproperlyConfigured(
@@ -29,7 +28,7 @@ class CaaisConfig(AppConfig):
                     (
                         'CAAIS_UNKNOWN_END_DATE "{}" does not conform to a '
                         "yyyy-mm-dd format (like 2010-12-31)"
-                    ).format(settings.CAAIS_UNKNOWN_START_DATE)
+                    ).format(settings.CAAIS_UNKNOWN_END_DATE)
                 )
             if not settings.CAAIS_UNKNOWN_DATE_TEXT:
                 raise ImproperlyConfigured("CAAIS_UNKNOWN_DATE_TEXT setting is empty")
