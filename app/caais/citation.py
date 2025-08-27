@@ -4,7 +4,7 @@ CAAIS_DOC_LINK = "https://archivescanada.ca/wp-content/uploads/2022/12/CAAIS_201
 CAAIS_ANCHOR_TAG = f'<a href="{CAAIS_DOC_LINK}" target="_blank">CAAIS</a>'
 
 
-def cite_caais(text, section: tuple, html=True):
+def cite_caais(text: str, section: tuple, html: bool = True) -> str:
     """Add CAAIS citation to end of text, with link to CAAIS document."""
     section_str = ".".join(map(str, section))
     if html:
