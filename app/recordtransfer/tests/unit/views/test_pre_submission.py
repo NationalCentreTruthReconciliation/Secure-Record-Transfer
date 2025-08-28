@@ -148,7 +148,7 @@ class SubmissionFormWizardTests(TestCase):
         mock_thank_you: MagicMock,
         mock_creation_success: MagicMock,
     ) -> None:
-        """Test the SubmissionFormWizard view from start to finish. This test will fill out the =
+        """Test the SubmissionFormWizard view from start to finish. This test will fill out the
         form with the test data and submit it, making sure no errors are raised.
         """
         mock_thank_you.return_value = None
