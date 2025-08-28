@@ -24,11 +24,7 @@ class SubmissionFormWizardTests(TestCase):
         self.client.force_login(self.user)
         self.url = reverse("recordtransfer:submit")
 
-        self.mock_session_creation = patch(
-            "recordtransfer.views.pre_submission.UploadSession.new_session"
-        ).start()
-
-        self.mock_session_creation.return_value = UploadSession.objects.create(
+        self.session = UploadSession.objects.create(
             token="1234567890abcdef",
             started_at=timezone.now(),
             user=self.user,
@@ -146,10 +142,17 @@ class SubmissionFormWizardTests(TestCase):
     @override_settings(FILE_UPLOAD_ENABLED=True)
     @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
     @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
-    def test_wizard(self, mock_thank_you: MagicMock, mock_creation_success: MagicMock) -> None:
+    @patch("recordtransfer.views.pre_submission.UploadSession.new_session")
+    def test_wizard(
+        self,
+        mock_session_create: MagicMock,
+        mock_thank_you: MagicMock,
+        mock_creation_success: MagicMock,
+    ) -> None:
         """Test the SubmissionFormWizard view from start to finish. This test will fill out the
         form with the test data and submit it, making sure no errors are raised.
         """
+        mock_session_create.return_value = self.session
         mock_thank_you.return_value = None
         mock_creation_success.return_value = None
 

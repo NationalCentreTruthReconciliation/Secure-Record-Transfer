@@ -938,7 +938,7 @@ class UploadFilesFormTest(TestCase):
         self.upload_session = UploadSession.new_session()
         self.uploaded_file = TempUploadedFile.objects.create(
             session=self.upload_session,
-            file_upload=SimpleUploadedFile("test_file.txt", bytearray([1] * (1024**2))),
+            file_upload=SimpleUploadedFile("test_file.txt", bytearray(b"content")),
             name="test_file.txt",
         )
         self.uploaded_file.save()
@@ -949,7 +949,7 @@ class UploadFilesFormTest(TestCase):
             "session_token": self.upload_session.token,
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data)
+        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
         self.assertTrue(form.is_valid())
         self.assertEqual(
             form.cleaned_data["quantity_and_unit_of_measure"],
@@ -961,7 +961,7 @@ class UploadFilesFormTest(TestCase):
         form_data = {
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data)
+        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 
@@ -971,7 +971,7 @@ class UploadFilesFormTest(TestCase):
             "session_token": "invalidtoken",
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data)
+        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 
@@ -982,7 +982,7 @@ class UploadFilesFormTest(TestCase):
             "session_token": self.upload_session.token,
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data)
+        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 

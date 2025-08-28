@@ -788,7 +788,7 @@ class UploadFilesForm(SubmissionForm):
             LOGGER.warning(
                 "**SUSPICIOUS OPERATION**: hidden session_token input was changed by %(username)s "
                 "in the upload files form",
-                self.user.username,
+                self.user.username if self.user else "unknown user",
             )
             self.add_error("session_token", _("Invalid upload session state. Please try again."))
             return cleaned_data
