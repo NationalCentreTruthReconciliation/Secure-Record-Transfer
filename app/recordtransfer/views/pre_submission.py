@@ -374,6 +374,14 @@ class SubmissionFormWizard(SessionWizardView):
             self.storage.extra_data["save_contact_info_prompted"] = True
             return self.trigger_contact_info_save_prompt(form)
 
+        # Assign a new session token if one hasn't been created yet
+        if (
+            SubmissionStep(self.steps.next) == SubmissionStep.UPLOAD_FILES
+            and "session_token" not in self.storage.extra_data
+        ):
+            # TODO: Actually create a session here
+            self.storage.extra_data["session_token"] = "abc"
+
         # get the form instance based on the data from the storage backend
         # (if available).
         next_step = self.steps.next
@@ -726,6 +734,7 @@ class SubmissionFormWizard(SessionWizardView):
         elif step == SubmissionStep.UPLOAD_FILES:
             js_context.update(
                 {
+                    "SESSION_TOKEN": self.storage.extra_data.get("session_token", ""),
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
