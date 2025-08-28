@@ -244,7 +244,10 @@ class SubmissionFormWizard(SessionWizardView):
         if not self.in_progress_submission:
             raise ValueError("No in-progress submission to load")
 
-        self.storage.data = pickle.loads(self.in_progress_submission.step_data)["past"]
+        step_data = pickle.loads(self.in_progress_submission.step_data)
+
+        self.storage.data = step_data["past"]
+        self.storage.extra_data = step_data["extra"]
         self.storage.current_step = self.in_progress_submission.current_step
 
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
@@ -282,7 +285,11 @@ class SubmissionFormWizard(SessionWizardView):
         ### Gather information to save ###
 
         current_data = SubmissionFormWizard.format_step_data(self.current_step, request.POST)
-        form_data = {"past": self.storage.data, "current": current_data}
+        form_data = {
+            "past": self.storage.data,
+            "current": current_data,
+            "extra": self.storage.extra_data or {},
+        }
 
         title = None
         session_token = None
