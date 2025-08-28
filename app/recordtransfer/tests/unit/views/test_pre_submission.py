@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from recordtransfer.enums import SubmissionStep
@@ -138,14 +138,18 @@ class SubmissionFormWizardTests(TestCase):
 
         return submit_data
 
-    @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
+    @override_settings(FILE_UPLOAD_ENABLED=True)
     @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
     @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
+    @patch("recordtransfer.views.pre_submission.move_uploads_to_permanent_storage.delay")
     def test_wizard(
-        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock
+        self,
+        mock_move_files: MagicMock,
+        mock_thank_you: MagicMock,
+        mock_creation_success: MagicMock,
     ) -> None:
-        """Test the SubmissionFormWizard view from start to finish. This test will fill out the form
-        with the test data and submit it, making sure no errors are raised.
+        """Test the SubmissionFormWizard view from start to finish. This test will fill out the =
+        form with the test data and submit it, making sure no errors are raised.
         """
         mock_thank_you.return_value = None
         mock_creation_success.return_value = None
@@ -169,6 +173,10 @@ class SubmissionFormWizardTests(TestCase):
             # Follow the redirect to Submission Sent page
             response = self.client.get(hx_redirect, follow=True)
             self.assertEqual(200, response.status_code)
+
+        mock_move_files.assert_called_once()
+        mock_thank_you.assert_called_once()
+        mock_creation_success.assert_called_once()
 
     @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
     @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
