@@ -545,7 +545,7 @@ class SubmissionFormWizard(SessionWizardView):
         """Add data to inject when initializing the form."""
         kwargs = super().get_form_kwargs(step)
 
-        if step == SubmissionStep.GROUP_SUBMISSION.value:
+        if SubmissionStep(step) in (SubmissionStep.GROUP_SUBMISSION, SubmissionStep.UPLOAD_FILES):
             kwargs["user"] = self.request.user
 
         elif step == SubmissionStep.SOURCE_INFO.value:

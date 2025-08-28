@@ -741,6 +741,10 @@ class UploadFilesForm(SubmissionForm):
 
         submission_step = SubmissionStep.UPLOAD_FILES
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
     general_note = forms.CharField(
         required=False,
         min_length=4,
@@ -762,26 +766,23 @@ class UploadFilesForm(SubmissionForm):
         required=True,
         widget=forms.HiddenInput(),
         label="hidden",
-        error_messages={"required": "Upload session token is required"},
+        error_messages={"required": _("Upload session token is required")},
     )
 
     def clean(self) -> dict:
         """Check that the session token is valid and that at least one file has been uploaded."""
         cleaned_data = super().clean()
-        session_token = cleaned_data.get("session_token")
+        token = cleaned_data.get("session_token")
 
-        if not session_token:
-            self.add_error("session_token", "Invalid upload. Please try again.")
-            return cleaned_data
+        upload_session = UploadSession.objects.filter(token=token, user=self.user).first()
 
-        try:
-            upload_session = UploadSession.objects.get(token=session_token)
-        except UploadSession.DoesNotExist:
-            self.add_error("session_token", "Invalid upload. Please try again.")
+        if not upload_session:
+            self.add_error("session_token", _("Invalid upload. Please try again."))
             return cleaned_data
 
         if upload_session.file_count == 0:
-            self.add_error("session_token", "You must upload at least one file")
+            self.add_error("session_token", _("You must upload at least one file"))
+            return cleaned_data
 
         cleaned_data["quantity_and_unit_of_measure"] = (
             upload_session.get_quantity_and_unit_of_measure()
