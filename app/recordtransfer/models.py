@@ -814,9 +814,26 @@ class UploadSession(models.Model):
             len(files),
             self.token,
         )
+
+        # Track the temp directory path before moving files
+        temp_dir_path = None
+        if files:
+            temp_dir_path = Path(settings.TEMP_STORAGE_FOLDER) / self.token
+
         try:
             for uploaded_file in files:
+                LOGGER.info(
+                    'Moving file "%s" (size: %d bytes) to permanent storage...',
+                    uploaded_file.file_upload.name,
+                    uploaded_file.file_upload.size,
+                )
                 uploaded_file.move_to_permanent_storage()
+
+            # Remove the temporary directory after all files have been moved
+            if temp_dir_path and temp_dir_path.exists():
+                LOGGER.info("Removing temporary directory: %s", temp_dir_path)
+                shutil.rmtree(temp_dir_path)
+
         except Exception as e:
             LOGGER.error(
                 "An error occurred while moving uploaded files to permanent storage: %s", e
