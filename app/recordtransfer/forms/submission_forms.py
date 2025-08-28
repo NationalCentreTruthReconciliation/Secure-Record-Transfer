@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from datetime import datetime
 from typing import Any, Optional, OrderedDict, TypedDict, Union
@@ -21,6 +22,8 @@ from recordtransfer.constants import (
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.forms.mixins import ContactInfoFormMixin, HiddenCaptchaMixin
 from recordtransfer.models import SubmissionGroup, UploadSession, User
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ReviewFormItem(TypedDict):
@@ -743,6 +746,7 @@ class UploadFilesForm(SubmissionForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
+        self.correct_session_token = kwargs.pop("correct_session_token", None)
         super().__init__(*args, **kwargs)
 
     general_note = forms.CharField(
@@ -777,7 +781,16 @@ class UploadFilesForm(SubmissionForm):
         upload_session = UploadSession.objects.filter(token=token, user=self.user).first()
 
         if not upload_session:
-            self.add_error("session_token", _("Invalid upload. Please try again."))
+            self.add_error("session_token", _("Invalid upload session state. Please try again."))
+            return cleaned_data
+
+        if upload_session.token != self.correct_session_token:
+            LOGGER.warning(
+                "**SUSPICIOUS OPERATION**: hidden session_token input was changed by %(username)s "
+                "in the upload files form",
+                self.user.username,
+            )
+            self.add_error("session_token", _("Invalid upload session state. Please try again."))
             return cleaned_data
 
         if upload_session.file_count == 0:
