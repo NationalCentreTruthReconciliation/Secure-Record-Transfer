@@ -379,8 +379,8 @@ class SubmissionFormWizard(SessionWizardView):
             SubmissionStep(self.steps.next) == SubmissionStep.UPLOAD_FILES
             and "session_token" not in self.storage.extra_data
         ):
-            # TODO: Actually create a session here
-            self.storage.extra_data["session_token"] = "abc"
+            session = UploadSession.new_session(user=cast(User, self.request.user))
+            self.storage.extra_data["session_token"] = session.token
 
         # get the form instance based on the data from the storage backend
         # (if available).
@@ -535,6 +535,9 @@ class SubmissionFormWizard(SessionWizardView):
             initial["other_province_or_state"] = user.other_province_or_state or ""
             initial["postal_or_zip_code"] = user.postal_or_zip_code or ""
             initial["country"] = user.country or ""
+
+        if SubmissionStep(step) == SubmissionStep.UPLOAD_FILES:
+            initial["session_token"] = self.storage.extra_data.get("session_token", "")
 
         return initial
 

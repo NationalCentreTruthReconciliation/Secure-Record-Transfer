@@ -79,29 +79,6 @@ def serve_media_file(file_url: str) -> HttpResponse:
 
 
 @validate_upload_access
-@require_http_methods(["POST"])
-def create_upload_session(request: HttpRequest) -> JsonResponse:
-    """Create a new upload session and return the session token.
-
-    Args:
-        request: The POST request sent by the user.
-
-    Returns:
-        JsonResponse: The session token of the newly created upload session.
-    """
-    try:
-        user: User = cast(User, request.user)
-        session = UploadSession.new_session(user=user)
-        return JsonResponse({"uploadSessionToken": session.token}, status=201)
-    except Exception as exc:
-        LOGGER.error("Error creating upload session: %s", str(exc), exc_info=exc)
-        return JsonResponse(
-            {"error": gettext("There was an internal server error. Please try again.")},
-            status=500,
-        )
-
-
-@validate_upload_access
 @require_http_methods(["GET", "POST"])
 def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
     """Upload a single file to the server list the files uploaded in a given upload session. The
@@ -116,21 +93,14 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
         session_token: The upload session token from the URL
 
     Returns:
-        JsonResponse: If the list or upload operation was successful, the session token
-        `uploadSessionToken` is included in the response. If not successful, the error description
-        `error` is included.
+        JsonResponse: If the list or upload operation was successful, the status code is OK, and
+        there is no error. If not successful, there is an "error" key in the JSON response.
     """
     try:
         user: User = cast(User, request.user)
         session = UploadSession.objects.filter(token=session_token, user=user).first()
         if not session:
-            return JsonResponse(
-                {
-                    "uploadSessionToken": session_token,
-                    "error": gettext("Invalid upload session token"),
-                },
-                status=400,
-            )
+            return JsonResponse({"error": gettext("Invalid upload session token")}, status=400)
 
         if request.method == "GET":
             return _handle_list_files(session)
@@ -158,27 +128,15 @@ def _handle_list_files(session: UploadSession) -> JsonResponse:
 def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
     _file = request.FILES.get("file")
     if not _file:
-        return JsonResponse(
-            {
-                "uploadSessionToken": session.token,
-                "error": gettext("No file was uploaded"),
-            },
-            status=400,
-        )
+        return JsonResponse({"error": gettext("No file was uploaded")}, status=400)
 
     file_check = accept_file(_file.name, _file.size, _file)
     if not file_check["accepted"]:
-        return JsonResponse(
-            {"file": _file.name, "uploadSessionToken": session.token, **file_check},
-            status=400,
-        )
+        return JsonResponse({"file": _file.name, **file_check}, status=400)
 
     session_check = accept_session(_file.name, _file.size, session)
     if not session_check["accepted"]:
-        return JsonResponse(
-            {"file": _file.name, "uploadSessionToken": session.token, **session_check},
-            status=400,
-        )
+        return JsonResponse({"file": _file.name, **session_check}, status=400)
 
     try:
         check_for_malware(_file)
@@ -188,7 +146,6 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
             {
                 "file": _file.name,
                 "accepted": False,
-                "uploadSessionToken": session.token,
                 "error": gettext('Malware was detected in the file "%(name)s"')
                 % {"name": _file.name},
             },
@@ -200,7 +157,6 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
             {
                 "file": _file.name,
                 "accepted": False,
-                "uploadSessionToken": session.token,
                 "error": gettext('File "%(name)s" is too large to scan for malware')
                 % {"name": _file.name},
             },
@@ -212,7 +168,6 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
             {
                 "file": _file.name,
                 "accepted": False,
-                "uploadSessionToken": session.token,
                 "error": gettext("Unable to scan file for malware due to scanner error"),
             },
             status=500,
@@ -226,7 +181,6 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
             {
                 "file": _file.name,
                 "accepted": False,
-                "uploadSessionToken": session.token,
                 "error": gettext("There was an error uploading the file"),
             },
             status=500,
@@ -238,7 +192,6 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
         {
             "file": _file.name,
             "accepted": True,
-            "uploadSessionToken": session.token,
             "url": file_url,
         },
         status=200,
