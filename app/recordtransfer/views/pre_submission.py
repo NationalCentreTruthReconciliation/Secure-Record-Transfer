@@ -50,6 +50,7 @@ from recordtransfer.emails import (
     send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
+from recordtransfer.jobs import move_uploads_to_permanent_storage
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -766,16 +767,11 @@ class SubmissionFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.make_uploads_permanent()  # type: ignore
-            else:
-                LOGGER.info(
-                    (
-                        "No file upload session will be linked to submission due to "
-                        "FILE_UPLOAD_ENABLED=false"
-                    )
-                )
+                LOGGER.info("Moving uploads to permanent storage in a worker process")
+                move_uploads_to_permanent_storage.delay(upload_session)
 
-            submission.part_of_group = form_data.get("submission_group")
+            if submission_group := form_data.get("submission_group"):
+                submission.part_of_group = submission_group
 
             LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
             submission.save()

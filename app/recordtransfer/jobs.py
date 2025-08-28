@@ -92,6 +92,34 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
 
 
 @django_rq.job
+def move_uploads_to_permanent_storage(session: UploadSession) -> None:
+    """Move the temp files in the given session to the permanent storage space."""
+    LOGGER.info("Triggered moving files to permanent storage for session %s", session.token)
+
+    try:
+        session.make_uploads_permanent()
+
+        if session.status == UploadSession.SessionStatus.COPYING_FAILED:
+            LOGGER.error("Moving files to permanent storage failed! Trying one more time.")
+            session.status = UploadSession.SessionStatus.UPLOADING
+            session.save()
+            session.make_uploads_permanent()
+
+    except Exception as exc:
+        LOGGER.error("Caught exception while moving files to permanent storage.", exc_info=exc)
+
+    finally:
+        if session.status == UploadSession.SessionStatus.STORED:
+            LOGGER.info("All files in session %s are now in permanent storage.", session.token)
+        else:
+            LOGGER.error(
+                "Could not move files in session %s to permanent storage! Final session state is: %s",
+                session.token,
+                session.status,
+            )
+
+
+@django_rq.job
 def cleanup_expired_sessions() -> None:
     """Clean up UploadSession objects that are expirable. Upload sessions that are not associated
     with any InProgressSubmission objects are deleted, while those that are associated with
