@@ -116,11 +116,6 @@ if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
     urlpatterns.extend(
         [
             path(
-                "upload-session/",
-                login_required(views.media.create_upload_session),
-                name="create_upload_session",
-            ),
-            path(
                 "upload-session/<session_token>/files/",
                 login_required(views.media.upload_or_list_files),
                 name="upload_files",
