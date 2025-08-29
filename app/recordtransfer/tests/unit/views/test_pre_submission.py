@@ -3,8 +3,10 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TestCase
+from django.http import HttpResponse
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
@@ -21,6 +23,12 @@ class SubmissionFormWizardTests(TestCase):
         )
         self.client.force_login(self.user)
         self.url = reverse("recordtransfer:submit")
+
+        self.session = UploadSession.objects.create(
+            token="1234567890abcdef",
+            started_at=timezone.now(),
+            user=self.user,
+        )
 
         self.test_data = [
             (SubmissionStep.ACCEPT_LEGAL.value, {"agreement_accepted": "on"}),
@@ -91,6 +99,7 @@ class SubmissionFormWizardTests(TestCase):
                 SubmissionStep.UPLOAD_FILES.value,
                 {
                     "general_note": "Test General Note",
+                    "session_token": "1234567890abcdef",
                 },
             ),
             (
@@ -99,30 +108,22 @@ class SubmissionFormWizardTests(TestCase):
             ),
         ]
 
-    def _upload_test_file(self) -> str:
-        """Upload a test file to the server. Returns the upload session token used to upload the
-        file.
-        """
-        response = self.client.post(reverse("recordtransfer:create_upload_session"))
-        self.assertEqual(201, response.status_code)
-        session_token = response.json()["uploadSessionToken"]
-
-        test_file = SimpleUploadedFile("test_file.txt", b"file_content", content_type="text/plain")
+    def _upload_test_file(self) -> None:
+        """Upload a test file to the server using the provided session token."""
         response = self.client.post(
-            reverse("recordtransfer:upload_files", kwargs={"session_token": session_token}),
-            {"file": test_file},
+            reverse("recordtransfer:upload_files", kwargs={"session_token": "1234567890abcdef"}),
+            {"file": SimpleUploadedFile("test_file.txt", b"contents", content_type="text/plain")},
         )
         self.assertEqual(200, response.status_code)
 
-        return session_token
-
-    def _process_test_data(self, step: str, step_data: dict) -> dict:
+    def _process_test_data(
+        self, step: str, step_data: dict, response: HttpResponse | None = None
+    ) -> dict:
         """Process the test data for the given step for form submission."""
         submit_data = {"submission_form_wizard-current_step": step}
 
         if step == SubmissionStep.UPLOAD_FILES.value:
-            session_token = self._upload_test_file()
-            submit_data[f"{step}-session_token"] = session_token
+            self._upload_test_file()
 
         if type(step_data) is dict:
             submit_data.update(
@@ -138,20 +139,28 @@ class SubmissionFormWizardTests(TestCase):
 
         return submit_data
 
-    @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
+    @override_settings(FILE_UPLOAD_ENABLED=True)
     @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
     @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
+    @patch("recordtransfer.views.pre_submission.UploadSession.new_session")
     def test_wizard(
-        self, mock_thank_you: MagicMock, mock_creation_success: MagicMock
+        self,
+        mock_session_create: MagicMock,
+        mock_thank_you: MagicMock,
+        mock_creation_success: MagicMock,
     ) -> None:
-        """Test the SubmissionFormWizard view from start to finish. This test will fill out the form
-        with the test data and submit it, making sure no errors are raised.
+        """Test the SubmissionFormWizard view from start to finish. This test will fill out the
+        form with the test data and submit it, making sure no errors are raised.
         """
+        mock_session_create.return_value = self.session
         mock_thank_you.return_value = None
         mock_creation_success.return_value = None
+
         self.assertEqual(200, self.client.get(self.url).status_code)
         self.assertFalse(self.user.submission_set.exists())
+
         response = None
+
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
 
@@ -160,7 +169,9 @@ class SubmissionFormWizardTests(TestCase):
 
             if response.context and "form" in response.context:
                 self.assertFalse(response.context["form"].errors)
+
         self.assertTrue(self.user.submission_set.exists())
+
         if response:
             self.assertEqual(200, response.status_code)
             # Check that response tells HTMX on client side to redirect to Submission Sent page
@@ -170,8 +181,7 @@ class SubmissionFormWizardTests(TestCase):
             response = self.client.get(hx_redirect, follow=True)
             self.assertEqual(200, response.status_code)
 
-    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
-    @patch("django.conf.settings.FILE_UPLOAD_ENABLED", True)
+    @override_settings(FILE_UPLOAD_ENABLED=True, UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
     def test_saving_expirable_in_progress_submission(self) -> None:
         """Test that saving an expirable in-progress submission. Saves the form on the
         Upload Files step after uploading a file.
@@ -182,6 +192,7 @@ class SubmissionFormWizardTests(TestCase):
 
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
+
             if step == SubmissionStep.UPLOAD_FILES.value:
                 submit_data["save_form_step"] = step
                 response = self.client.post(self.url, submit_data, follow=True)
@@ -198,11 +209,12 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
                 self.assertFalse(self.user.inprogresssubmission_set.first().upload_session_expired)
                 break
+
             else:
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)
 
-    @patch("django.conf.settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES", 60)
+    @override_settings(UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
     def test_saving_unexpirable_in_progress_submission(self) -> None:
         """Test saving an unexpirable in-progress submission. Saves the form on the Rights step
         after filling out the form.
@@ -213,6 +225,7 @@ class SubmissionFormWizardTests(TestCase):
 
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
+
             if step == SubmissionStep.RIGHTS.value:
                 submit_data["save_form_step"] = step
                 response = self.client.post(self.url, submit_data, follow=True)
@@ -228,6 +241,7 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
                 self.assertFalse(self.user.inprogresssubmission_set.first().upload_session_expired)
                 break
+
             else:
                 response = self.client.post(self.url, submit_data, follow=True)
                 self.assertEqual(200, response.status_code)

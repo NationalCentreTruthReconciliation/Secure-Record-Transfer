@@ -7,22 +7,20 @@ import XHR from "@uppy/xhr-upload";
 import FileValidationPlugin from "./customUppyPlugin";
 import {
     getCookie,
-    getSessionToken,
-    setSessionToken,
     fetchUploadedFiles,
     makeMockBlob,
     sendDeleteRequestForFile,
     updateCapacityDisplay,
-    fetchNewSessionToken,
 } from "./utils";
 
 /**
  * Sets up the Uppy widget for uploading files.
- * @param {object} context - The configuration context containing upload settings
+ * @param {object} context - The configuration context containing upload settings and session token
  */
 export async function setupUppy(context) {
     const reviewButton = document.getElementById("form-review-button");
     const submissionForm = document.getElementById("submission-form");
+    const token = context["SESSION_TOKEN"];
     const issueFileIds = [];
 
     /**
@@ -72,6 +70,7 @@ export async function setupUppy(context) {
         })
         .use(XHR, {
             method: "POST",
+            endpoint: `/upload-session/${token}/files/`,
             formData: true,
             headers: { "X-CSRFToken": getCookie("csrftoken") },
             bundle: false,
@@ -88,14 +87,7 @@ export async function setupUppy(context) {
                 }
             },
             onAfterResponse: (xhr) => {
-                const {error, uploadSessionToken} = xhr.response;
-
-                // We expect the upload session token to be included unless the server had an error
-                if (xhr.status < 500 && uploadSessionToken) {
-                    setSessionToken(uploadSessionToken);
-                } else {
-                    console.error("No session token found in response:", xhr.response);
-                }
+                const {error} = xhr.response;
 
                 if (error) {
                     throw new Error(error);
@@ -111,7 +103,6 @@ export async function setupUppy(context) {
                     status === 429
                 );
             }
-
         })
         .use(FileValidationPlugin);
 
@@ -134,7 +125,7 @@ export async function setupUppy(context) {
             const index = issueFileIds.indexOf(file.id);
             issueFileIds.splice(index, 1);
         }
-        sendDeleteRequestForFile(file.name);
+        sendDeleteRequestForFile(file.name, token);
     });
 
     reviewButton.addEventListener("click", async (event) => {
@@ -165,23 +156,8 @@ export async function setupUppy(context) {
         submissionForm.requestSubmit();
     });
 
-    // Set the endpoint for file upload dynamically, based on the current upload session token
-    uppy.addPreProcessor(async () => {
-        let sessionToken = getSessionToken();
-        if (!sessionToken) {
-            sessionToken = await fetchNewSessionToken();
-            if (!sessionToken) {
-                throw new Error("Failed to fetch new session token");
-            }
-            setSessionToken(sessionToken);
-        }
-        uppy.getPlugin("XHRUpload").setOptions({
-            endpoint: `/upload-session/${sessionToken}/files/`
-        });
-    });
-
     // Add mock files to represent files that have already been uploaded to the upload session
-    const uploadedFiles = await fetchUploadedFiles();
+    const uploadedFiles = await fetchUploadedFiles(token);
 
     if (uploadedFiles) {
         uploadedFiles.forEach((file) => {

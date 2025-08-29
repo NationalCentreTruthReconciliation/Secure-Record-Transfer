@@ -14,60 +14,6 @@ from recordtransfer.models import Job, TempUploadedFile, UploadSession, User
 from recordtransfer.views.media import readonly_uploaded_file
 
 
-class TestCreateUploadSessionView(TestCase):
-    """Tests for recordtransfer:create_upload_session view."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Disable logging."""
-        super().setUpClass()
-        logging.disable(logging.CRITICAL)
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        """Create user accounts."""
-        cls.test_user = User.objects.create_user(username="testuser", password="1X<ISRUkw+tuK")
-
-    def setUp(self) -> None:
-        """Set up test environment."""
-        self.client.login(username="testuser", password="1X<ISRUkw+tuK")
-        self.url = reverse("recordtransfer:create_upload_session")
-
-        # Set up client session data
-        session = self.client.session
-        session["wizard_submission_form_wizard"] = {"step": SubmissionStep.UPLOAD_FILES.value}
-        session.save()
-
-    def tearDown(self) -> None:
-        """Tear down test environment."""
-        self.client.logout()
-
-    def test_create_upload_session_success(self) -> None:
-        """Test successful creation of an upload session."""
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 201)
-        response_json = response.json()
-        self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(
-            UploadSession.objects.filter(token=response_json["uploadSessionToken"]).exists()
-        )
-
-    def test_create_upload_session_logged_out(self) -> None:
-        """Test that a 302 is returned if the user is not logged in."""
-        self.client.logout()
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 302)
-
-    @patch("recordtransfer.views.media.UploadSession.new_session")
-    def test_create_upload_session_error(self, mock_new_session: MagicMock) -> None:
-        """Test that a 500 is returned if an error is raised."""
-        mock_new_session.side_effect = Exception("Error creating session")
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 500)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-
-
 @patch(
     "django.conf.settings.ACCEPTED_FILE_FORMATS",
     {"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
@@ -168,7 +114,7 @@ class TestUploadFilesView(TestCase):
 
     ## --- POST Request Tests --- ##
 
-    def test_logged_out_error(self):
+    def test_logged_out_error(self) -> None:
         """Test that a 302 is returned if the user is not logged in."""
         self.client.logout()
         response = self.client.post(self.url, {})
@@ -198,8 +144,6 @@ class TestUploadFilesView(TestCase):
         self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        self.assertEqual(response_json["uploadSessionToken"], self.token)
         self.assertEqual(self.session.file_count, 1)
         # Check that no error is raised if the uploaded file is looked up within the session
         self.session.get_file_by_name("File.pdf")
@@ -238,16 +182,12 @@ class TestUploadFilesView(TestCase):
         )
 
         response_json = response.json()
-
-        self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(response_json["uploadSessionToken"])
-
-        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+        self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(session.file_count, 0)
+        self.assertEqual(self.session.file_count, 0)
 
     def test_session_issue_flagged(self) -> None:
         """Test that an issue is flagged if the session is not accepted."""
@@ -259,16 +199,12 @@ class TestUploadFilesView(TestCase):
         )
 
         response_json = response.json()
-
-        self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(response_json["uploadSessionToken"])
-
-        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+        self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), "ISSUE")
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(session.file_count, 0)
+        self.assertEqual(self.session.file_count, 0)
 
     def test_malware_flagged(self) -> None:
         """Test that malware is flagged if the file contains malware."""
@@ -279,16 +215,12 @@ class TestUploadFilesView(TestCase):
         )
 
         response_json = response.json()
-
-        self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(response_json["uploadSessionToken"])
-
-        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+        self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(session.file_count, 0)
+        self.assertEqual(self.session.file_count, 0)
 
     def test_malware_scan_file_too_large(self) -> None:
         """Test that a ValueError from check_for_malware returns the correct error and status."""
@@ -301,18 +233,14 @@ class TestUploadFilesView(TestCase):
         )
 
         response_json = response.json()
-
-        self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(response_json["uploadSessionToken"])
-
-        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+        self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response_json.get("error"), 'File "File.PDF" is too large to scan for malware'
         )
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(session.file_count, 0)
+        self.assertEqual(self.session.file_count, 0)
 
     def test_malware_scan_connection_error(self) -> None:
         """Test that a ConnectionError from check_for_malware returns the correct error and
@@ -327,18 +255,14 @@ class TestUploadFilesView(TestCase):
         )
 
         response_json = response.json()
-
-        self.assertIn("uploadSessionToken", response_json)
-        self.assertTrue(response_json["uploadSessionToken"])
-
-        session = UploadSession.objects.filter(token=response_json["uploadSessionToken"]).first()
+        self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
             response_json.get("error"), "Unable to scan file for malware due to scanner error"
         )
         self.assertEqual(response_json.get("accepted"), False)
-        self.assertEqual(session.file_count, 0)
+        self.assertEqual(self.session.file_count, 0)
 
 
 # URL patterns to override default URL patterns when testing read-only file uploads
