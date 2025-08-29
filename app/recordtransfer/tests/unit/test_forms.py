@@ -988,7 +988,39 @@ class UploadFilesFormTest(TestCase):
             "session_token": self.upload_session.token,
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)
+
+    def test_form_tampered_session_token_different_user(self) -> None:
+        """Test case where another user's session token is sent in the form data."""
+        # Create another session by a different user
+        other_user = User.objects.create_user(username="altuser", password="#SP@4JEzf#")
+        other_session = UploadSession.new_session(user=other_user)
+        other_session.add_temp_file(SimpleUploadedFile("test.jpg", bytearray([1] * 64)))
+
+        form_data = {"session_token": other_session.token}
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)
+
+    def test_form_tampered_session_token_same_user(self) -> None:
+        """Test case where a different session token of the same user is sent in the form data."""
+        # Create another session by the same user
+        other_session = UploadSession.new_session(user=self.user)
+        other_session.add_temp_file(SimpleUploadedFile("test.jpg", bytearray([1] * 64)))
+
+        form_data = {"session_token": other_session.token}
+
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
+
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 
