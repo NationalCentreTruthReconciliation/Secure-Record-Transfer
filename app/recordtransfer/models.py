@@ -821,8 +821,7 @@ class UploadSession(models.Model):
             for uploaded_file in files:
                 # Get temp directory from first file
                 if temp_dir_path is None:
-                    temp_root = Path(uploaded_file.file_upload.storage.location)
-                    temp_dir_path = (temp_root / uploaded_file.file_upload.name).parent
+                    temp_dir_path = Path(uploaded_file.file_upload.path).parent
 
                 LOGGER.info(
                     'Moving file "%s" (size: %d bytes) to permanent storage...',
