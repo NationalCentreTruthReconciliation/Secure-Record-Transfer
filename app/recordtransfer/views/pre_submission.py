@@ -45,12 +45,10 @@ from recordtransfer.constants import (
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
-    send_submission_creation_success,
-    send_thank_you_for_your_submission,
     send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.jobs import move_uploads_to_permanent_storage
+from recordtransfer.jobs import move_uploads_and_send_emails
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -767,8 +765,6 @@ class SubmissionFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                LOGGER.info("Moving uploads to permanent storage in a worker process")
-                move_uploads_to_permanent_storage.delay(upload_session)
 
             if submission_group := form_data.get("submission_group"):
                 submission.part_of_group = submission_group
@@ -779,8 +775,8 @@ class SubmissionFormWizard(SessionWizardView):
             if self.in_progress_submission:
                 self.in_progress_submission.delete()
 
-            send_submission_creation_success.delay(form_data, submission)
-            send_thank_you_for_your_submission.delay(form_data, submission)
+            LOGGER.info("Finishing up submission in a worker process.")
+            move_uploads_and_send_emails.delay(submission, form_data)
 
             return HttpResponseClientRedirect(reverse("recordtransfer:submission_sent"))
 
