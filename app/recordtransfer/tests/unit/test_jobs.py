@@ -1,22 +1,23 @@
-import unittest
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
-from django.test import override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from freezegun import freeze_time
 
 from recordtransfer.jobs import (
     check_expiring_in_progress_submissions,
     cleanup_expired_sessions,
     create_downloadable_bag,
+    move_uploads_to_permanent_storage,
 )
-from recordtransfer.models import Job, Submission, User
+from recordtransfer.models import Job, Submission, UploadSession, User
 
 
-class TestCreateDownloadableBag(unittest.TestCase):
+class TestCreateDownloadableBag(TestCase):
     """Tests the functionality of the create_downloadable_bag job."""
 
     def setUp(self) -> None:
@@ -263,7 +264,101 @@ class TestCreateDownloadableBag(unittest.TestCase):
         self.assertEqual(self.mock_job.job_status, Job.JobStatus.FAILED)
 
 
-class TestCheckExpiringInProgressSubmissions(unittest.TestCase):
+class TestMoveUploadsJob(TestCase):
+    """Tests for the move_uploads_to_permanent_storage job."""
+
+    def test_move_one_upload(self) -> None:
+        """Test moving one file."""
+        upload_session = UploadSession.new_session()
+        upload_session.add_temp_file(SimpleUploadedFile("image.jpg", bytearray([1] * 1024)))
+
+        temp_dir = Path(settings.TEMP_STORAGE_FOLDER) / upload_session.token
+        perm_dir = Path(settings.UPLOAD_STORAGE_FOLDER) / upload_session.token
+
+        # Temp dir should have one file
+        self.assertEqual(1, sum(1 if item.is_file() else 0 for item in temp_dir.iterdir()))
+
+        move_uploads_to_permanent_storage(upload_session)
+
+        self.assertFalse(temp_dir.exists())
+        self.assertTrue(perm_dir.exists())
+        self.assertEqual(1, sum(1 if item.is_file() else 0 for item in perm_dir.iterdir()))
+        self.assertEqual(UploadSession.SessionStatus.STORED, upload_session.status)
+
+    def test_move_multiple_uploads(self) -> None:
+        """Test moving multiple files."""
+        upload_session = UploadSession.new_session()
+
+        for i in range(1, 11):
+            upload_session.add_temp_file(
+                SimpleUploadedFile(f"image-{i}.jpg", bytearray([1] * 1024))
+            )
+
+        temp_dir = Path(settings.TEMP_STORAGE_FOLDER) / upload_session.token
+        perm_dir = Path(settings.UPLOAD_STORAGE_FOLDER) / upload_session.token
+
+        # Temp dir should have ten files
+        self.assertEqual(10, sum(1 if item.is_file() else 0 for item in temp_dir.iterdir()))
+
+        move_uploads_to_permanent_storage(upload_session)
+
+        self.assertFalse(temp_dir.exists())
+        self.assertTrue(perm_dir.exists())
+        self.assertEqual(10, sum(1 if item.is_file() else 0 for item in perm_dir.iterdir()))
+        self.assertEqual(UploadSession.SessionStatus.STORED, upload_session.status)
+
+    @patch.object(UploadSession, "make_uploads_permanent")
+    def test_move_uploads_failure(self, mock_make_uploads_permanent: MagicMock) -> None:
+        """Test the case when uploads can't be moved."""
+        upload_session = UploadSession.new_session()
+
+        def copy_fail():
+            upload_session.status = UploadSession.SessionStatus.COPYING_FAILED
+            upload_session.save()
+
+        # Set up the mock to call copy_fail each time it's called
+        mock_make_uploads_permanent.side_effect = copy_fail
+
+        upload_session.add_temp_file(SimpleUploadedFile("image.jpg", bytearray([1] * 1024)))
+
+        move_uploads_to_permanent_storage(upload_session)
+
+        # The function should have been called twice
+        mock_make_uploads_permanent.assert_has_calls([call(), call()])
+        self.assertEqual(UploadSession.SessionStatus.COPYING_FAILED, upload_session.status)
+
+    @patch.object(UploadSession, "make_uploads_permanent")
+    def test_move_uploads_succeed_second_try(self, mock_make_uploads_permanent: MagicMock) -> None:
+        """Test the case when uploads can't be moved on first try but succeed on second try."""
+        upload_session = UploadSession.new_session()
+
+        call_count = 0
+
+        def mock_make_permanent():
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                # First call fails
+                upload_session.status = UploadSession.SessionStatus.COPYING_FAILED
+                upload_session.save()
+            else:
+                # Second call succeeds
+                upload_session.status = UploadSession.SessionStatus.STORED
+                upload_session.save()
+
+        # Set up the mock to use our counting function
+        mock_make_uploads_permanent.side_effect = mock_make_permanent
+
+        upload_session.add_temp_file(SimpleUploadedFile("image.jpg", bytearray([1] * 1024)))
+
+        move_uploads_to_permanent_storage(upload_session)
+
+        # The function should have been called twice
+        mock_make_uploads_permanent.assert_has_calls([call(), call()])
+        self.assertEqual(UploadSession.SessionStatus.STORED, upload_session.status)
+
+
+class TestCheckExpiringInProgressSubmissions(TestCase):
     """Tests for the check_expiring_in_progress_submissions job."""
 
     @patch("recordtransfer.jobs.send_user_in_progress_submission_expiring")
@@ -299,7 +394,7 @@ class TestCheckExpiringInProgressSubmissions(unittest.TestCase):
         self.assertTrue(mock_in_progress.reminder_email_sent)
 
 
-class TestCleanupExpiredSessions(unittest.TestCase):
+class TestCleanupExpiredSessions(TestCase):
     """Tests for the cleanup_expired_sessions job."""
 
     @patch("recordtransfer.models.UploadSession.objects.get_expirable")
