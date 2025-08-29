@@ -23,6 +23,8 @@ from recordtransfer.models import InProgressSubmission, Job, Submission, UploadS
 
 LOGGER = logging.getLogger(__name__)
 
+MAX_COPY_RETRIES = 2
+
 
 @django_rq.job
 def create_downloadable_bag(submission: Submission, user_triggered: User) -> None:
@@ -120,14 +122,12 @@ def move_uploads_and_send_emails(submission: Submission, form_data: dict) -> Non
     session = submission.upload_session
 
     try:
-        max_attempts = 2
-
-        for attempt in range(max_attempts):
+        for attempt in range(MAX_COPY_RETRIES):
             if attempt > 0:
                 LOGGER.error(
                     "Moving files to permanent storage failed! Trying again (try %d of %d).",
                     attempt + 1,
-                    max_attempts,
+                    MAX_COPY_RETRIES,
                 )
                 # Reset the state of the session
                 session.status = UploadSession.SessionStatus.UPLOADING
@@ -139,7 +139,7 @@ def move_uploads_and_send_emails(submission: Submission, form_data: dict) -> Non
                 break
 
         else:
-            LOGGER.error("Failed copying %d times.", max_attempts)
+            LOGGER.error("Failed copying %d times.", MAX_COPY_RETRIES)
 
     except Exception as exc:
         LOGGER.error("Caught exception while moving files to permanent storage.", exc_info=exc)
