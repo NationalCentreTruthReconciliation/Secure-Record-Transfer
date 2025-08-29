@@ -556,18 +556,9 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
                 element = self.driver.find_element(By.XPATH, xpath)
                 self.assertEqual(element.text, expected_value)
 
-    @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
-    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
-    def test_submit_form(
-        self,
-        mock_creation_success: MagicMock,
-        mock_thank_you: MagicMock,
-    ) -> None:
+    @patch("recordtransfer.views.pre_submission.move_uploads_and_send_emails.delay")
+    def test_submit_form(self, mock_move_uploads: MagicMock) -> None:
         """Test that the form can be submitted successfully."""
-        # Mock the email tasks to prevent them from running
-        mock_thank_you.return_value = None
-        mock_creation_success.return_value = None
-
         self.complete_form_till_review_step()
         driver = self.driver
 
@@ -584,6 +575,8 @@ class SubmissionFormWizardTest(SeleniumLiveServerTestCase):
 
         # Verify the submission success message is displayed
         self.assertIn("Thank you for your Submission", driver.page_source)
+
+        mock_move_uploads.assert_called_once()
 
     def test_previous_saves_form(self) -> None:
         """Test that the form data is saved when going to the previous step. Uses the Contact

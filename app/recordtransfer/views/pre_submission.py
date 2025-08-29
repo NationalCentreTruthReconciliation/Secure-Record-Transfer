@@ -45,11 +45,10 @@ from recordtransfer.constants import (
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
-    send_submission_creation_success,
-    send_thank_you_for_your_submission,
     send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
+from recordtransfer.jobs import move_uploads_and_send_emails
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -790,16 +789,9 @@ class SubmissionFormWizard(SessionWizardView):
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.make_uploads_permanent()  # type: ignore
-            else:
-                LOGGER.info(
-                    (
-                        "No file upload session will be linked to submission due to "
-                        "FILE_UPLOAD_ENABLED=false"
-                    )
-                )
 
-            submission.part_of_group = form_data.get("submission_group")
+            if submission_group := form_data.get("submission_group"):
+                submission.part_of_group = submission_group
 
             LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
             submission.save()
@@ -807,8 +799,8 @@ class SubmissionFormWizard(SessionWizardView):
             if self.in_progress_submission:
                 self.in_progress_submission.delete()
 
-            send_submission_creation_success.delay(form_data, submission)
-            send_thank_you_for_your_submission.delay(form_data, submission)
+            LOGGER.info("Finishing up submission in a worker process.")
+            move_uploads_and_send_emails.delay(submission, form_data)
 
             return HttpResponseClientRedirect(reverse("recordtransfer:submission_sent"))
 

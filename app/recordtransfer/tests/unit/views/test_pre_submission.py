@@ -140,21 +140,17 @@ class SubmissionFormWizardTests(TestCase):
         return submit_data
 
     @override_settings(FILE_UPLOAD_ENABLED=True)
-    @patch("recordtransfer.views.pre_submission.send_submission_creation_success.delay")
-    @patch("recordtransfer.views.pre_submission.send_thank_you_for_your_submission.delay")
+    @patch("recordtransfer.views.pre_submission.move_uploads_and_send_emails.delay")
     @patch("recordtransfer.views.pre_submission.UploadSession.new_session")
     def test_wizard(
         self,
         mock_session_create: MagicMock,
-        mock_thank_you: MagicMock,
-        mock_creation_success: MagicMock,
+        mock_move_files: MagicMock,
     ) -> None:
         """Test the SubmissionFormWizard view from start to finish. This test will fill out the
         form with the test data and submit it, making sure no errors are raised.
         """
         mock_session_create.return_value = self.session
-        mock_thank_you.return_value = None
-        mock_creation_success.return_value = None
 
         self.assertEqual(200, self.client.get(self.url).status_code)
         self.assertFalse(self.user.submission_set.exists())
@@ -180,6 +176,8 @@ class SubmissionFormWizardTests(TestCase):
             # Follow the redirect to Submission Sent page
             response = self.client.get(hx_redirect, follow=True)
             self.assertEqual(200, response.status_code)
+
+        mock_move_files.assert_called_once()
 
     @override_settings(FILE_UPLOAD_ENABLED=True, UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
     def test_saving_expirable_in_progress_submission(self) -> None:
