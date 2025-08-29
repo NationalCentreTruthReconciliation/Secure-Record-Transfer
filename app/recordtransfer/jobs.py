@@ -97,13 +97,26 @@ def move_uploads_to_permanent_storage(session: UploadSession) -> None:
     LOGGER.info("Triggered moving files to permanent storage for session %s", session.token)
 
     try:
-        session.make_uploads_permanent()
+        max_attempts = 2
 
-        if session.status == UploadSession.SessionStatus.COPYING_FAILED:
-            LOGGER.error("Moving files to permanent storage failed! Trying one more time.")
-            session.status = UploadSession.SessionStatus.UPLOADING
-            session.save()
+        for attempt in range(max_attempts):
+            if attempt > 0:
+                LOGGER.error(
+                    "Moving files to permanent storage failed! Trying again (try %d of %d).",
+                    attempt + 1,
+                    max_attempts,
+                )
+                # Reset the state of the session
+                session.status = UploadSession.SessionStatus.UPLOADING
+                session.save()
+
             session.make_uploads_permanent()
+
+            if session.status == UploadSession.SessionStatus.STORED:
+                break
+
+        else:
+            LOGGER.error("Failed copying %d times.", max_attempts)
 
     except Exception as exc:
         LOGGER.error("Caught exception while moving files to permanent storage.", exc_info=exc)
