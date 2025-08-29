@@ -935,13 +935,12 @@ class UploadFilesFormTest(TestCase):
 
     def setUp(self) -> None:
         """Create a test session and include one uploaded file as part of session."""
-        self.upload_session = UploadSession.new_session()
-        self.uploaded_file = TempUploadedFile.objects.create(
-            session=self.upload_session,
-            file_upload=SimpleUploadedFile("test_file.txt", bytearray(b"content")),
-            name="test_file.txt",
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="rdV4H$ssV#",
         )
-        self.uploaded_file.save()
+        self.upload_session = UploadSession.new_session(user=self.user)
+        self.upload_session.add_temp_file(SimpleUploadedFile("test_file.txt", b"content"))
 
     def test_form_valid(self) -> None:
         """Case where the form is valid."""
@@ -949,7 +948,9 @@ class UploadFilesFormTest(TestCase):
             "session_token": self.upload_session.token,
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
         self.assertTrue(form.is_valid())
         self.assertEqual(
             form.cleaned_data["quantity_and_unit_of_measure"],
@@ -961,7 +962,9 @@ class UploadFilesFormTest(TestCase):
         form_data = {
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 
@@ -971,18 +974,53 @@ class UploadFilesFormTest(TestCase):
             "session_token": "invalidtoken",
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 
     def test_form_no_files_uploaded(self) -> None:
         """Case where no files have been uploaded."""
-        self.uploaded_file.delete()
+        self.upload_session.remove_temp_file_by_name("test_file.txt")
+
         form_data = {
             "session_token": self.upload_session.token,
             "general_note": "Some general note",
         }
-        form = UploadFilesForm(data=form_data, correct_session_token=self.upload_session.token)
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)
+
+    def test_form_tampered_session_token_different_user(self) -> None:
+        """Test case where another user's session token is sent in the form data."""
+        # Create another session by a different user
+        other_user = User.objects.create_user(username="altuser", password="#SP@4JEzf#")
+        other_session = UploadSession.new_session(user=other_user)
+        other_session.add_temp_file(SimpleUploadedFile("test.jpg", bytearray([1] * 64)))
+
+        form_data = {"session_token": other_session.token}
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("session_token", form.errors)
+
+    def test_form_tampered_session_token_same_user(self) -> None:
+        """Test case where a different session token of the same user is sent in the form data."""
+        # Create another session by the same user
+        other_session = UploadSession.new_session(user=self.user)
+        other_session.add_temp_file(SimpleUploadedFile("test.jpg", bytearray([1] * 64)))
+
+        form_data = {"session_token": other_session.token}
+
+        form = UploadFilesForm(
+            data=form_data, user=self.user, correct_session_token=self.upload_session.token
+        )
+
         self.assertFalse(form.is_valid())
         self.assertIn("session_token", form.errors)
 
