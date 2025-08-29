@@ -815,13 +815,15 @@ class UploadSession(models.Model):
             self.token,
         )
 
-        # Track the temp directory path before moving files
-        temp_dir_path = None
-        if files:
-            temp_dir_path = Path(settings.TEMP_STORAGE_FOLDER) / self.token
-
         try:
+            temp_dir_path = None
+
             for uploaded_file in files:
+                # Get temp directory from first file
+                if temp_dir_path is None:
+                    temp_root = Path(uploaded_file.file_upload.storage.location)
+                    temp_dir_path = (temp_root / uploaded_file.file_upload.name).parent
+
                 LOGGER.info(
                     'Moving file "%s" (size: %d bytes) to permanent storage...',
                     uploaded_file.file_upload.name,
@@ -911,7 +913,7 @@ class UploadSession(models.Model):
             A human readable count and size of all files in this session.
         """
         if not settings.FILE_UPLOAD_ENABLED:
-            return
+            return ""
 
         if self.status not in (
             self.SessionStatus.CREATED,
