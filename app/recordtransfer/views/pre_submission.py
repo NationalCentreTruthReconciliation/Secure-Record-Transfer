@@ -786,7 +786,7 @@ class SubmissionFormWizard(SessionWizardView):
 
             if settings.FILE_UPLOAD_ENABLED and (
                 upload_session := UploadSession.objects.filter(
-                    token=form_data["session_token"]
+                    token=self.storage.extra_data.get("session_token"), user=self.request.user
                 ).first()
             ):
                 submission.upload_session = upload_session
