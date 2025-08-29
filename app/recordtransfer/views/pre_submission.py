@@ -285,6 +285,7 @@ class SubmissionFormWizard(SessionWizardView):
         ### Gather information to save ###
 
         current_data = SubmissionFormWizard.format_step_data(self.current_step, request.POST)
+
         form_data = {
             "past": self.storage.data,
             "current": current_data,
@@ -292,17 +293,13 @@ class SubmissionFormWizard(SessionWizardView):
         }
 
         title = None
-        session_token = None
         # See if the title and session token are in the current data
         if isinstance(current_data, dict):
             title = current_data.get("accession_title")
-            session_token = current_data.get("session_token")
 
         # Look in past data if not found in current data
         if not title:
             title = self.get_form_value(SubmissionStep.RECORD_DESCRIPTION, "accession_title")
-        if not session_token:
-            session_token = self.get_form_value(SubmissionStep.UPLOAD_FILES, "session_token")
 
         ### Save the information ###
 
@@ -312,7 +309,11 @@ class SubmissionFormWizard(SessionWizardView):
             self.in_progress_submission = InProgressSubmission()
 
         self.in_progress_submission.title = title
-        session = UploadSession.objects.filter(token=session_token, user=self.request.user).first()
+
+        session = UploadSession.objects.filter(
+            token=self.storage.extra_data.get("session_token"), user=self.request.user
+        ).first()
+
         if session:
             self.in_progress_submission.upload_session = session
 
