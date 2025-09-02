@@ -34,6 +34,7 @@ from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from formtools.wizard.views import SessionWizardView
+from utility import is_deployed_environment
 
 from recordtransfer import forms
 from recordtransfer.caais import map_form_to_metadata
@@ -55,7 +56,6 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
-from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 

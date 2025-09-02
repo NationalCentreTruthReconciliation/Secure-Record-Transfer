@@ -691,11 +691,53 @@ IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
 Storage Locations
 -----------------
 
+Files in this application are stored in two different places depending on the state of the
+submission. This chart follows the journey of the places a file is stored at while it's being
+uploaded:
+
+.. mermaid::
+    :caption: File upload flow
+
+    flowchart TD
+    A[User's Host] -. upload via HTTPS .-> B[TEMP_STORAGE_FOLDER]
+    B -. session expires .-> C[Delete Files]
+    B -. submit form .-> D[UPLOAD_STORAGE_FOLDER]
+
+
+TEMP_STORAGE_FOLDER
+^^^^^^^^^^^^^^^^^^^
+
+    *Choose storage location for files to initially be uploaded to*
+
+    .. table::
+
+        ===========================================   ===========================================  ======
+        Default in Dev                                Default in Prod                              Type
+        ===========================================   ===========================================  ======
+        /opt/secure-record-transfer/app/media/temp/   /opt/secure-record-transfer/app/media/temp/  string
+        ===========================================   ===========================================  ======
+
+    While files are being uploaded, but before a submission is made, files are uploaded to the temp
+    storage folder. This is a temporary space where files are uploaded before they are moved to
+    permanent storage, i.e., the :ref:`UPLOAD_STORAGE_FOLDER`.
+
+    Files in this space are subject to upload session expiry, so files in this location may be
+    deleted if a user uploads files and doesn't submit the form. See: :ref:`Upload Session Controls`.
+    This directory **must** be a sub-directory of the media directory so that NGINX can find these
+    files.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_STORAGE_FOLDER=/path/to/upload/folder
+
 
 UPLOAD_STORAGE_FOLDER
 ^^^^^^^^^^^^^^^^^^^^^
 
-    *Choose storage location for uploaded files*
+    *Choose storage location for "permanent" uploaded files*
 
     .. table::
 
@@ -705,9 +747,14 @@ UPLOAD_STORAGE_FOLDER
         /opt/secure-record-transfer/app/media/uploaded_files/   /opt/secure-record-transfer/app/media/uploaded_files/   string
         ======================================================  ======================================================  ======
 
-    The files users upload will be copied here after being uploaded with either of the Django
-    file upload handlers. Uploaded files will first be uploaded in memory or to a temporary file
-    before being moved to the UPLOAD_STORAGE_FOLDER.
+    After a submission is made, files from the :ref:`TEMP_STORAGE_FOLDER` are moved to this location.
+    This location is therefore where all the 'permanent' uploaded files are stored.
+
+    Unlike the temporary storage folder, files in this space are **not** subject to deletion,
+    unless an UploadSession is deleted from the admin site.
+
+    The word permanent is sometimes "quoted" because there are no controls that guarantee a file is
+    unchanged in this directory.
 
     **.env Example:**
 

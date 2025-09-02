@@ -5,6 +5,7 @@ from caais.models import SourceRole, SourceType
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from upload.models import TempUploadedFile, UploadSession
 
 from recordtransfer.forms import UserAccountInfoForm
 from recordtransfer.forms.submission_forms import (
@@ -15,7 +16,7 @@ from recordtransfer.forms.submission_forms import (
 )
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.forms.user_forms import SignUpForm, UserContactInfoForm
-from recordtransfer.models import SubmissionGroup, TempUploadedFile, UploadSession, User
+from recordtransfer.models import SubmissionGroup, User
 
 
 class SignUpFormTest(TestCase):

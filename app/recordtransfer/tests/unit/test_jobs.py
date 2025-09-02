@@ -60,7 +60,7 @@ class TestCreateDownloadableBag(TestCase):
             patch("zipfile.ZipFile"),
             patch("recordtransfer.jobs.JobLogHandler"),
             patch("recordtransfer.jobs.LOGGER"),
-            patch("recordtransfer.utils.zip_directory"),
+            patch("recordtransfer.jobs.zip_directory"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
@@ -105,7 +105,7 @@ class TestCreateDownloadableBag(TestCase):
             patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
             patch("recordtransfer.jobs.LOGGER"),
-            patch("recordtransfer.utils.zip_directory"),
+            patch("recordtransfer.jobs.zip_directory"),
             patch("tempfile.TemporaryFile"),
             patch("zipfile.ZipFile"),
         ):
@@ -140,7 +140,7 @@ class TestCreateDownloadableBag(TestCase):
             patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
             patch("recordtransfer.jobs.LOGGER"),
-            patch("recordtransfer.utils.zip_directory"),
+            patch("recordtransfer.jobs.zip_directory"),
             patch("tempfile.TemporaryFile"),
             patch("zipfile.ZipFile"),
         ):
@@ -160,7 +160,7 @@ class TestCreateDownloadableBag(TestCase):
     @override_settings(TEMP_STORAGE_FOLDER="/tmp")
     @patch("recordtransfer.jobs.Job")
     @patch("recordtransfer.jobs.File")
-    @patch("recordtransfer.utils.zip_directory")
+    @patch("recordtransfer.jobs.zip_directory")
     @patch("zipfile.ZipFile")
     @patch("tempfile.TemporaryFile")
     @patch("tempfile.TemporaryDirectory")
@@ -216,7 +216,7 @@ class TestCreateDownloadableBag(TestCase):
     @override_settings(TEMP_STORAGE_FOLDER="/tmp")
     @patch("recordtransfer.jobs.Job")
     @patch("recordtransfer.jobs.File")
-    @patch("recordtransfer.utils.zip_directory")
+    @patch("recordtransfer.jobs.zip_directory")
     @patch("zipfile.ZipFile")
     @patch("tempfile.TemporaryFile")
     @patch("tempfile.TemporaryDirectory")
@@ -474,8 +474,8 @@ class TestCheckExpiringInProgressSubmissions(TestCase):
 class TestCleanupExpiredSessions(TestCase):
     """Tests for the cleanup_expired_sessions job."""
 
-    @patch("recordtransfer.models.UploadSession.objects.get_expirable")
-    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
+    @patch("recordtransfer.jobs.get_deletable_upload_sessions")
+    @patch("recordtransfer.jobs.get_expirable_upload_sessions")
     def test_no_sessions_to_clean_up(
         self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock
     ) -> None:
@@ -483,11 +483,11 @@ class TestCleanupExpiredSessions(TestCase):
         # Set up mocks for empty querysets
         mock_expirable_queryset = MagicMock()
         mock_expirable_queryset.count.return_value = 0
-        mock_get_expirable.return_value.all.return_value = mock_expirable_queryset
+        mock_get_expirable.return_value = mock_expirable_queryset
 
         mock_deletable_queryset = MagicMock()
         mock_deletable_queryset.count.return_value = 0
-        mock_get_deletable.return_value.all.return_value = mock_deletable_queryset
+        mock_get_deletable.return_value = mock_deletable_queryset
 
         # Run the job
         cleanup_expired_sessions()
@@ -499,8 +499,8 @@ class TestCleanupExpiredSessions(TestCase):
         mock_expirable_queryset.__iter__.assert_not_called()
         mock_deletable_queryset.__iter__.assert_not_called()
 
-    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
-    @patch("recordtransfer.models.UploadSession.objects.get_expirable")
+    @patch("recordtransfer.jobs.get_deletable_upload_sessions")
+    @patch("recordtransfer.jobs.get_expirable_upload_sessions")
     def test_expirable_session(
         self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock
     ) -> None:
@@ -511,15 +511,15 @@ class TestCleanupExpiredSessions(TestCase):
         mock_expirable_queryset = MagicMock()
         mock_expirable_queryset.__iter__.return_value = [mock_session]
         mock_expirable_queryset.count.return_value = 1
-        mock_get_expirable.return_value.all.return_value = mock_expirable_queryset
+        mock_get_expirable.return_value = mock_expirable_queryset
 
         cleanup_expired_sessions()
 
         mock_session.expire.assert_called_once()
         mock_session.delete.assert_not_called()
 
-    @patch("recordtransfer.models.UploadSession.objects.get_deletable")
-    @patch("recordtransfer.models.UploadSession.objects.get_expirable")
+    @patch("recordtransfer.jobs.get_deletable_upload_sessions")
+    @patch("recordtransfer.jobs.get_expirable_upload_sessions")
     def test_deletable_session(
         self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock
     ) -> None:
@@ -530,14 +530,14 @@ class TestCleanupExpiredSessions(TestCase):
         mock_deletable_queryset = MagicMock()
         mock_deletable_queryset.__iter__.return_value = [mock_session]
         mock_deletable_queryset.count.return_value = 1
-        mock_get_deletable.return_value.all.return_value = mock_deletable_queryset
+        mock_get_deletable.return_value = mock_deletable_queryset
 
         cleanup_expired_sessions()
 
         mock_session.delete.assert_called_once()
         mock_session.expire.assert_not_called()
 
-    @patch("recordtransfer.models.UploadSession.objects.get_expirable")
+    @patch("recordtransfer.jobs.get_expirable_upload_sessions")
     def test_exception_handling(self, mock_get_expirable: MagicMock) -> None:
         """Test that exceptions are properly handled."""
         # Setup mock to raise an exception

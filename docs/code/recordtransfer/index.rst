@@ -10,7 +10,6 @@ The main Secure Record Transfer application is included in this app.
     caais
     constants
     context_processors
-    decorators
     emails
     enums
     forms
@@ -21,7 +20,6 @@ The main Secure Record Transfer application is included in this app.
     models
     storage
     tokens
-    utils
     validators
     views
     widgets

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from upload.models import UploadSession
 
 from recordtransfer.emails import (
     send_password_reset_email,
@@ -18,7 +19,7 @@ from recordtransfer.emails import (
     send_user_in_progress_submission_expiring,
     send_your_submission_did_not_go_through,
 )
-from recordtransfer.models import InProgressSubmission, Submission, UploadSession, User
+from recordtransfer.models import InProgressSubmission, Submission, User
 
 logger = logging.getLogger(__name__)
 

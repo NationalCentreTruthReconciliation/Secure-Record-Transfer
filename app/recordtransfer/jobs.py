@@ -8,8 +8,9 @@ from django.conf import settings
 from django.core.files.base import File
 from django.db.models.query import QuerySet
 from django.utils import timezone
+from upload.models import UploadSession
+from utility import zip_directory
 
-from recordtransfer import utils
 from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
@@ -19,7 +20,7 @@ from recordtransfer.emails import (
 )
 from recordtransfer.handlers import JobLogHandler
 from recordtransfer.models import LOGGER as RECORDTRANSFER_MODELS_LOGGER
-from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
+from recordtransfer.models import InProgressSubmission, Job, Submission, User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 "Zipping Bag to temp file on disk at %s ...",
                 f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
             )
-            utils.zip_directory(
+            zip_directory(
                 temp_dir,
                 zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
             )
@@ -97,6 +98,16 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
         LOGGER.removeHandler(job_handler)
         RECORDTRANSFER_MODELS_LOGGER.removeHandler(job_handler)
         job_handler.close()
+
+
+def get_expirable_upload_sessions() -> QuerySet[UploadSession]:
+    """Get upload sessions that can be expired, that have an in-progress submission attached."""
+    return UploadSession.objects.get_expirable().filter(in_progress_submission__isnull=False).all()
+
+
+def get_deletable_upload_sessions() -> QuerySet[UploadSession]:
+    """Get upload sessions that can be deleted, and do not have an in-progress submission."""
+    return UploadSession.objects.get_deletable().filter(in_progress_submission__isnull=True).all()
 
 
 @django_rq.job
@@ -168,8 +179,9 @@ def cleanup_expired_sessions() -> None:
     """
     LOGGER.info("Cleaning up upload sessions ...")
     try:
-        expirable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_expirable().all()
-        deletable_sessions: QuerySet[UploadSession] = UploadSession.objects.get_deletable().all()
+        expirable_sessions = get_expirable_upload_sessions()
+        deletable_sessions = get_deletable_upload_sessions()
+
         expirable_count = expirable_sessions.count()
         deletable_count = deletable_sessions.count()
         if expirable_count == 0 and deletable_count == 0:

@@ -15,13 +15,14 @@ from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseForm, BaseFormSet
 from django.utils.translation import gettext_lazy as _
+from upload.models import UploadSession
 
 from recordtransfer.constants import (
     HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.forms.mixins import ContactInfoFormMixin, HiddenCaptchaMixin
-from recordtransfer.models import SubmissionGroup, UploadSession, User
+from recordtransfer.models import SubmissionGroup, User
 
 LOGGER = logging.getLogger(__name__)
 

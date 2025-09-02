@@ -25,13 +25,13 @@ from django.utils.translation import get_language, gettext, gettext_lazy, ngette
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
+from utility import get_client_ip_address, is_deployed_environment
 
 from recordtransfer.emails import send_user_account_updated, send_user_activation_email
 from recordtransfer.forms import SignUpForm, SignUpFormRecaptcha
 from recordtransfer.forms.user_forms import AsyncPasswordResetForm
 from recordtransfer.models import User
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import get_client_ip_address, is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 

@@ -7,9 +7,10 @@ from django.http import HttpResponse
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from upload.models import UploadSession
 
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import InProgressSubmission, SubmissionGroup, UploadSession, User
+from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
 
 
 class SubmissionFormWizardTests(TestCase):
@@ -111,7 +112,7 @@ class SubmissionFormWizardTests(TestCase):
     def _upload_test_file(self) -> None:
         """Upload a test file to the server using the provided session token."""
         response = self.client.post(
-            reverse("recordtransfer:upload_files", kwargs={"session_token": "1234567890abcdef"}),
+            reverse("upload:upload_files", kwargs={"session_token": "1234567890abcdef"}),
             {"file": SimpleUploadedFile("test_file.txt", b"contents", content_type="text/plain")},
         )
         self.assertEqual(200, response.status_code)

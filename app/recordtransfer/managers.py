@@ -102,7 +102,7 @@ class InProgressSubmissionManager(models.Manager):
 
         # Avoiding circular import
         UploadSession = apps.get_model(
-            app_label="recordtransfer",
+            app_label="upload",
             model_name="UploadSession",
         )
 
