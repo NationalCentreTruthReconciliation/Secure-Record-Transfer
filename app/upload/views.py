@@ -22,8 +22,6 @@ User = settings.AUTH_USER_MODEL
 LOGGER = logging.getLogger(__name__)
 
 
-# TODO: Need to control when this is allowed to be called
-# @validate_upload_access
 @require_http_methods(["GET", "POST"])
 def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
     """Upload a single file to the server list the files uploaded in a given upload session. The
