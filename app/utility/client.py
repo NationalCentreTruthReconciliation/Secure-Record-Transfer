@@ -1,4 +1,4 @@
-"""Utility functions concerning client connection informatin."""
+"""Utility functions concerning client connection information."""
 
 from django.http import HttpRequest
 
