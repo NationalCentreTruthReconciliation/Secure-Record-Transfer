@@ -29,14 +29,14 @@ class MediaFileStorage(FileSystemStorage):
 
 
 class UploadedFileStorage(MediaFileStorage):
-    """Stores files in UPLOAD_STORAGE_FOLDER."""
+    """Stores files in :ref:`UPLOAD_STORAGE_FOLDER`."""
 
     def __init__(self, **kwargs):
         super().__init__(settings.UPLOAD_STORAGE_FOLDER, **kwargs)
 
 
 class TempFileStorage(MediaFileStorage):
-    """Stores files in TEMP_STORAGE_FOLDER."""
+    """Stores files in :ref:`TEMP_STORAGE_FOLDER`."""
 
     def __init__(self, **kwargs):
         super().__init__(settings.TEMP_STORAGE_FOLDER, **kwargs)

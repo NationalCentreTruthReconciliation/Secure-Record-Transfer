@@ -28,6 +28,7 @@ def accept_file(filename: str, filesize: int, file: UploadedFile) -> dict:
         file: The object containing the file data
 
     These checks are applied:
+
     - The file name is safe and not malicious
     - The file name is not empty
     - The file has an accepted extension
@@ -36,9 +37,9 @@ def accept_file(filename: str, filesize: int, file: UploadedFile) -> dict:
     - The file's size is less than or equal to the maximum allowed size for one file
 
     Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key if 'accepted' is False.
+        A dictionary containing an 'accepted' key that contains True if the session is valid, or
+        False if not. The dictionary also contains an 'error' and 'verboseError' key if 'accepted'
+        is False.
     """
     validators = [
         _validate_file_size,
@@ -68,8 +69,9 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
     """Determine if a new file should be accepted as part of the session.
 
     These checks are applied:
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_COUNT
-    - The session has room for more files according to the MAX_TOTAL_UPLOAD_SIZE_MB
+
+    - The session has room for more files according to the :ref:`MAX_TOTAL_UPLOAD_COUNT`
+    - The session has room for more files according to the :ref:`MAX_TOTAL_UPLOAD_SIZE_MB`
     - A file with the same name has not already been uploaded
 
     Args:
@@ -79,9 +81,9 @@ def accept_session(filename: str, filesize: Union[str, int], session: "UploadSes
         session (UploadSession): The session files are being uploaded to
 
     Returns:
-        (dict): A dictionary containing an 'accepted' key that contains True if
-            the session is valid, or False if not. The dictionary also contains
-            an 'error' and 'verboseError' key if 'accepted' is False.
+        A dictionary containing an 'accepted' key that contains True if the session is valid, or
+        False if not. The dictionary also contains an 'error' and 'verboseError' key if 'accepted'
+        is False.
     """
     if not session:
         return {"accepted": True}

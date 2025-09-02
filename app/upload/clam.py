@@ -31,7 +31,7 @@ def check_for_malware(file: File) -> None:
     Raises:
         ValidationError: If the file contains malware.
         ConnectionError: If the connection to ClamAV cannot be established or if there is a
-        communication error.
+            communication error.
         ValueError: If the file is too large to be scanned.
     """
     if not settings.CLAMAV_ENABLED:

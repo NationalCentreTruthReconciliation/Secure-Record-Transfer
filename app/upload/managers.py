@@ -12,7 +12,7 @@ class UploadSessionManager(models.Manager):
         """Return all expired upload sessions that can be set to EXPIRED.
 
         A session can be expired if it has not been interacted with in at least
-        UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES minutes.
+        :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES` minutes.
         """
         if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
             return self.none()
@@ -39,6 +39,7 @@ class UploadSessionManager(models.Manager):
         """Return all upload sessions that can be safely deleted.
 
         An upload session that can be safely deleted matches these criteria:
+
         - It has expired (either by checking the last_upload_interaction_time, or the status)
         - It is not linked to an in-progress submission.
 
