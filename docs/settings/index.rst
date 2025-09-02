@@ -692,7 +692,7 @@ Storage Locations
 -----------------
 
 Files in this application are stored in two different places depending on the state of the
-submission. The file upload process follows the journey of where a file is stored while it's being
+submission. This chart follows the journey of the places a file is stored at while it's being
 uploaded:
 
 .. mermaid::
