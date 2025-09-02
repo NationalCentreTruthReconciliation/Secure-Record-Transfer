@@ -1,7 +1,7 @@
-clamav.connection - Connect to ClamAV
+upload.models - Models for upload app
 =====================================
 
-.. automodule:: clamav.connection
+.. automodule:: upload.models
     :members:
     :undoc-members:
     :show-inheritance:

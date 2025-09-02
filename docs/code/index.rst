@@ -8,7 +8,9 @@ part of this application, organized by Django app.
     :maxdepth: 1
 
     recordtransfer/index
+    upload/index
     caais/index
-    clamav/index
+    nginx/index
+    utility/index
     commands
     configuration

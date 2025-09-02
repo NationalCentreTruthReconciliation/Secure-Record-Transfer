@@ -1,3 +1,5 @@
+"""Check for basic file information and limits."""
+
 import contextlib
 import urllib.parse
 from pathlib import Path
