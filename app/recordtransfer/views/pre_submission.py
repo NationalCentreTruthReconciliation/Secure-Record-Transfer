@@ -72,21 +72,6 @@ class InProgressSubmissionExpired(TemplateView):
     template_name = "recordtransfer/in_progress_submission_expired.html"
 
 
-class UploadSessionLimitReached(TemplateView):
-    """Show the user their current upload sessions when they've reached their limit."""
-
-    template_name = "recordtransfer/upload_session_limit_reached.html"
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        """Add the user's open sessions to the template context."""
-        context_data = super().get_context_data(**kwargs)
-        user = cast(User, self.request.user)
-        context_data["sessions"] = user.open_upload_sessions().order_by(
-            "-last_upload_interaction_time"
-        )
-        return context_data
-
-
 class SubmissionFormWizard(SessionWizardView):
     """A multi-page form for collecting user metadata and uploading files. Uses a form wizard. For
     more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
