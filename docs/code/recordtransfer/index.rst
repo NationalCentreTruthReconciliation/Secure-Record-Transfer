@@ -21,7 +21,6 @@ The main Secure Record Transfer application is included in this app.
     models
     storage
     tokens
-    utils
     validators
     views
     widgets

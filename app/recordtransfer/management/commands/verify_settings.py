@@ -7,9 +7,9 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand
+from utility import is_deployed_environment
 
 from recordtransfer.constants import FileExtensions
-from recordtransfer.utils import is_deployed_environment
 
 LOGGER = logging.getLogger(__name__)
 

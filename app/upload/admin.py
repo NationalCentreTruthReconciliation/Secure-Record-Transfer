@@ -10,9 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext_lazy as _
-
-# TODO: This module should not depend on recordtransfer!
-from recordtransfer.utils import get_human_readable_size
+from utility import get_human_readable_size
 
 from .models import BaseUploadedFile, PermUploadedFile, TempUploadedFile, UploadSession
 

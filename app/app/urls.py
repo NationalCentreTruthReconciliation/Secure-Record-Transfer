@@ -21,13 +21,13 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
-from recordtransfer.utils import get_js_translation_version
 from recordtransfer.views.account import (
     AsyncPasswordChangeView,
     AsyncPasswordResetConfirmView,
     AsyncPasswordResetView,
     Login,
 )
+from utility import get_js_translation_version
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),

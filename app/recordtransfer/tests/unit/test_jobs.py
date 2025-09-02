@@ -60,7 +60,7 @@ class TestCreateDownloadableBag(TestCase):
             patch("zipfile.ZipFile"),
             patch("recordtransfer.jobs.JobLogHandler"),
             patch("recordtransfer.jobs.LOGGER"),
-            patch("recordtransfer.utils.zip_directory"),
+            patch("recordtransfer.jobs.zip_directory"),
         ):
             create_downloadable_bag(self.mock_submission, self.mock_user)
 
@@ -105,7 +105,7 @@ class TestCreateDownloadableBag(TestCase):
             patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
             patch("recordtransfer.jobs.LOGGER"),
-            patch("recordtransfer.utils.zip_directory"),
+            patch("recordtransfer.jobs.zip_directory"),
             patch("tempfile.TemporaryFile"),
             patch("zipfile.ZipFile"),
         ):
@@ -140,7 +140,7 @@ class TestCreateDownloadableBag(TestCase):
             patch("os.path.exists", return_value=False),
             patch("recordtransfer.jobs.JobLogHandler"),
             patch("recordtransfer.jobs.LOGGER"),
-            patch("recordtransfer.utils.zip_directory"),
+            patch("recordtransfer.jobs.zip_directory"),
             patch("tempfile.TemporaryFile"),
             patch("zipfile.ZipFile"),
         ):
@@ -160,7 +160,7 @@ class TestCreateDownloadableBag(TestCase):
     @override_settings(TEMP_STORAGE_FOLDER="/tmp")
     @patch("recordtransfer.jobs.Job")
     @patch("recordtransfer.jobs.File")
-    @patch("recordtransfer.utils.zip_directory")
+    @patch("recordtransfer.jobs.zip_directory")
     @patch("zipfile.ZipFile")
     @patch("tempfile.TemporaryFile")
     @patch("tempfile.TemporaryDirectory")
@@ -216,7 +216,7 @@ class TestCreateDownloadableBag(TestCase):
     @override_settings(TEMP_STORAGE_FOLDER="/tmp")
     @patch("recordtransfer.jobs.Job")
     @patch("recordtransfer.jobs.File")
-    @patch("recordtransfer.utils.zip_directory")
+    @patch("recordtransfer.jobs.zip_directory")
     @patch("zipfile.ZipFile")
     @patch("tempfile.TemporaryFile")
     @patch("tempfile.TemporaryDirectory")

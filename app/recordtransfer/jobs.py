@@ -9,8 +9,8 @@ from django.core.files.base import File
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from upload.models import UploadSession
+from utility import zip_directory
 
-from recordtransfer import utils
 from recordtransfer.emails import (
     send_submission_creation_failure,
     send_submission_creation_success,
@@ -72,7 +72,7 @@ def create_downloadable_bag(submission: Submission, user_triggered: User) -> Non
                 "Zipping Bag to temp file on disk at %s ...",
                 f"{settings.TEMP_STORAGE_FOLDER}/{temp_zip_file.name}.zip",
             )
-            utils.zip_directory(
+            zip_directory(
                 temp_dir,
                 zipfile.ZipFile(temp_zip_file, "w", zipfile.ZIP_DEFLATED, False),
             )

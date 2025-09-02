@@ -7,9 +7,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext, ngettext_lazy
 from django.utils.translation import gettext_lazy as _
-
-# TODO: This module should not depend on recordtransfer!
-from recordtransfer.utils import bytes_to_mb, mb_to_bytes
+from utility import bytes_to_mb, mb_to_bytes
 
 from upload.constants import WindowsFileRestrictions
 from upload.mime import MAGIC_AVAILABLE, mime

@@ -18,9 +18,7 @@ from django.utils.crypto import get_random_string
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
-
-# TODO: This module should not depend on recordtransfer!
-from recordtransfer.utils import get_human_readable_file_count, get_human_readable_size
+from utility import get_human_readable_file_count, get_human_readable_size
 
 from .managers import UploadSessionManager
 from .storage import TempFileStorage, UploadedFileStorage

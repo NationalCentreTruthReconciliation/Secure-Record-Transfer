@@ -1,13 +1,10 @@
-import functools
+"""Utility functions concerning file manipulation and file counting."""
+
 import os
 from collections import defaultdict
-from pathlib import Path
 from typing import List
 from zipfile import ZipFile
 
-from django.conf import settings
-from django.http import HttpRequest
-from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext_lazy, pgettext_lazy
 
@@ -35,56 +32,9 @@ def zip_directory(directory: str, zipf: ZipFile) -> None:
                 zipf.write(filename, arcname)
 
 
-def snake_to_camel_case(string: str) -> str:
-    """Convert a snake_case string to camelCase."""
-    string_split = string.split("_")
-    return string_split[0] + "".join([x.capitalize() for x in string_split[1:]])
-
-
-def html_to_text(html: str) -> str:
-    """Convert HTML content to plain text by stripping tags and whitespace."""
-    no_tags_split = strip_tags(html).split("\n")
-    plain_text_split = filter(None, map(str.strip, no_tags_split))
-    return "\n".join(plain_text_split)
-
-
-def get_human_readable_size(size_bytes: float, base: int = 1024, precision: int = 2) -> str:
-    """Convert bytes into a human-readable size.
-
-    Args:
-        size_bytes: The number of bytes to convert
-        base: Either of 1024 or 1000. 1024 for sizes like MiB, 1000 for sizes
-            like MB
-        precision: The number of decimals on the returned size
-
-    Returns:
-        (str): The bytes converted to a human readable size
-    """
-    if base not in (1000, 1024):
-        raise ValueError("base may only be 1000 or 1024")
-    if size_bytes < 0:
-        raise ValueError("size_bytes cannot be negative")
-
-    suffixes = {
-        1000: ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"),
-        1024: ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"),
-    }
-
-    if size_bytes < base:
-        return "%d %s" % (size_bytes, suffixes[base][0])
-
-    suffix_list = suffixes[base]
-    idx = 0
-    while size_bytes >= base and idx < len(suffix_list) - 1:
-        size_bytes /= float(base)
-        idx += 1
-
-    return "%.*f %s" % (precision, size_bytes, suffix_list[idx])
-
-
 def get_human_readable_file_count(file_names: list, accepted_file_groups: dict) -> str:
-    """Count the number of files falling into the ACCEPTED_FILE_FORMATS groups, and report the
-    number of files in each group.
+    """Count the number of files falling into the accepted file groups, and report the number of
+    files in each group.
 
     Args:
         file_names (list): A list of file paths or names with extension intact
@@ -177,76 +127,3 @@ def count_file_types(file_names: list, accepted_file_groups: dict[str, List[str]
         counts[name] += 1
 
     return dict(counts)
-
-
-def mb_to_bytes(m: int) -> int:
-    """Convert MB to bytes.
-
-    Args:
-        m (int): Size in MB.
-
-    Returns:
-        int: Size in bytes.
-    """
-    return m * 1000**2
-
-
-def bytes_to_mb(b: int) -> float:
-    """Convert bytes to MB.
-
-    Args:
-        b (int): Size in bytes.
-
-    Returns:
-        float: Size in MB.
-    """
-    return b / 1000**2
-
-
-def get_js_translation_version() -> str:
-    """Return the latest modification time of all djangojs.mo files in the locale directory.
-
-    This changes whenever compiled JS translations are updated.
-    """
-    return str(
-        max(
-            [
-                item.stat().st_mtime
-                for locale_dir in settings.LOCALE_PATHS
-                for item in Path(locale_dir).rglob("djangojs.mo")
-            ]
-            or [0]
-        )
-    )
-
-
-@functools.lru_cache(maxsize=1)
-def is_deployed_environment() -> bool:
-    """Detect if the app is running in a deployed production environment.
-
-    Returns True if ALLOWED_HOSTS contains any non-localhost/non-127.0.0.1 hosts,
-    indicating this is a deployed production environment.
-    """
-    allowed_hosts = settings.ALLOWED_HOSTS
-
-    # If ALLOWED_HOSTS is ['*'], consider it production
-    if "*" in allowed_hosts:
-        return True
-
-    # Check if any host is not localhost/127.0.0.1
-    for host in allowed_hosts:
-        host = host.strip().lower()
-        if host not in ["localhost", "127.0.0.1", ""]:
-            return True
-
-    return False
-
-
-def get_client_ip_address(request: HttpRequest) -> str:
-    """Get the client's IP address from the request."""
-    x_forwarded_for = request.headers.get("x-forwarded-for")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-    else:
-        ip = request.META.get("REMOTE_ADDR", "unknown")
-    return ip

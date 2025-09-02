@@ -15,11 +15,11 @@ from django.utils import timezone, translation
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
+from utility import html_to_text
 
 from recordtransfer.enums import SiteSettingKey
 from recordtransfer.models import InProgressSubmission, SiteSetting, Submission, User
 from recordtransfer.tokens import account_activation_token
-from recordtransfer.utils import html_to_text
 
 LOGGER = logging.getLogger(__name__)
 
