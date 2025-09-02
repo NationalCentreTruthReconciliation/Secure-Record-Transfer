@@ -1,58 +1,81 @@
-import csv
-from io import StringIO
-from typing import Optional
-
-from caais.export import ExportVersion
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import query
-from django.http import HttpResponse
+from django.db.models import Q, query
 from django.utils import timezone
 
 
-class SubmissionQuerySet(query.QuerySet):
-    """Adds the ability to export a queryset as a CSV."""
+class UploadSessionManager(models.Manager):
+    """Custom manager for UploadSession model."""
 
-    def export_csv(
-        self,
-        version: ExportVersion = ExportVersion.CAAIS_1_0,
-        filename_prefix: Optional[str] = None,
-    ) -> HttpResponse:
-        """Create an HttpResponse that contains a CSV representation of all submissions in the
-        queryset.
+    def get_expirable(self) -> query.QuerySet:
+        """Return all expired upload sessions that can be set to EXPIRED.
 
-        Args:
-            version (ExportVersion): The type/version of the CSV to export
-            filename_prefix (str, optional): Prefix for the generated CSV filename.
-                If not provided, a default is used.
+        A session can be expired if it has not been interacted with in at least
+        UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES minutes. Additionally, the session must be
+        linked to an existing InProgressSubmission.
+
+        If a session is *not* linked to an InProgressSubmission, and matches the same last
+        interaction criteria above, then it will be returned by get_deletable instead.
         """
-        csv_file = StringIO()
-        writer = csv.writer(csv_file)
-        first_row = True
+        if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
+            return self.none()
 
-        for submission in self:
-            row = submission.metadata.create_flat_representation(version)
-            if first_row:
-                writer.writerow(row.keys())
-                first_row = False
-            writer.writerow(row.values())
+        cutoff_time = timezone.now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
 
-        csv_file.seek(0)
+        # Avoiding circular import
+        UploadSession = apps.get_model(
+            app_label="recordtransfer",
+            model_name="UploadSession",
+        )
 
-        response = HttpResponse(csv_file, content_type="text/csv")
+        return self.filter(
+            last_upload_interaction_time__lt=cutoff_time,
+            status__in=[
+                UploadSession.SessionStatus.CREATED,
+                UploadSession.SessionStatus.UPLOADING,
+            ],
+            in_progress_submission__isnull=False,
+        )
 
-        local_time = timezone.localtime(timezone.now()).strftime(r"%Y%m%d_%H%M%S")
-        if not filename_prefix:
-            version_bits = str(version).split("_")
-            filename_prefix = "{0}_v{1}_".format(
-                version_bits[0], ".".join([str(x) for x in version_bits[1:]])
+    def get_deletable(self) -> query.QuerySet:
+        """Return all upload sessions that can be safely deleted.
+
+        An upload session that can be safely deleted matches these criteria:
+        - It has expired (either by checking the last_upload_interaction_time, or the status)
+        - It is not linked to an in-progress submission.
+
+        If a session *is* linked to an InProgressSubmission, and matches the same last interaction
+        criteria above, then it will be returned by get_expirable instead.
+        """
+        if settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1:
+            return self.none()
+
+        cutoff_time = timezone.now() - timezone.timedelta(
+            minutes=settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
+        )
+
+        # Avoiding circular import
+        UploadSession = apps.get_model(
+            app_label="recordtransfer",
+            model_name="UploadSession",
+        )
+
+        return self.filter(
+            (
+                Q(last_upload_interaction_time__lt=cutoff_time)
+                & Q(
+                    status__in=[
+                        UploadSession.SessionStatus.CREATED,
+                        UploadSession.SessionStatus.UPLOADING,
+                    ]
+                )
             )
-
-        filename = f"{filename_prefix}{local_time}.csv"
-        response["Content-Disposition"] = f"attachment; filename={filename}"
-        csv_file.close()
-        return response
+            | Q(status=UploadSession.SessionStatus.EXPIRED),
+            in_progress_submission__isnull=True,
+        )
 
 
 class InProgressSubmissionManager(models.Manager):

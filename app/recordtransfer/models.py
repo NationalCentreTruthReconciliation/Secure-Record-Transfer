@@ -23,10 +23,7 @@ from django.utils.translation import gettext_lazy as _
 from upload.models import UploadSession
 
 from recordtransfer.enums import SiteSettingKey, SiteSettingType, SubmissionStep
-from recordtransfer.managers import (
-    InProgressSubmissionManager,
-    SubmissionQuerySet,
-)
+from recordtransfer.managers import InProgressSubmissionManager
 from recordtransfer.storage import OverwriteStorage
 
 LOGGER = logging.getLogger(__name__)
@@ -147,6 +144,10 @@ def add_previous_password_to_history(instance: User, **kwargs) -> None:
     if not instance.pk:  # New user, no password history needed
         return
 
+    # Skip password history during fixture loading to avoid race conditions
+    if kwargs.get("raw", False):
+        return
+
     try:
         # Get the old password from the database
         old_instance = User.objects.get(pk=instance.pk)
@@ -162,6 +163,8 @@ def add_previous_password_to_history(instance: User, **kwargs) -> None:
                 instance.pk,
             )
 
+    except User.DoesNotExist:
+        LOGGER.debug("User %s does not exist yet, skipping password history", instance.pk)
     except Exception as e:
         LOGGER.error("Error creating password history for user %s: %s", instance.pk, str(e))
 
@@ -510,8 +513,6 @@ class Submission(models.Model):
     )
     upload_session = models.ForeignKey(UploadSession, null=True, on_delete=models.SET_NULL)
     uuid = models.UUIDField(default=uuid.uuid4)
-
-    objects = SubmissionQuerySet.as_manager()
 
     @property
     def bag_name(self) -> str:

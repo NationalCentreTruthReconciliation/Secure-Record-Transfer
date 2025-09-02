@@ -20,77 +20,20 @@ export const getCookie = (name) => {
 };
 
 /**
- * Retrieves the upload session token from the DOM.
- * Looks for an input element with an ID ending in "session_token", which should exist on the
- * upload step of the submission form.
- * @returns {?string} The value of the session token if found, null otherwise
- */
-export const getSessionToken = () => {
-    const sessionToken = document.querySelector("[id$=\"session_token\"]")?.getAttribute("value");
-    return sessionToken || null;
-};
-
-/**
- * Fetches a new session token from the backend.
- * This function sends a POST request to the server to create a new upload session and retrieve
- * the session token.
- * @returns {Promise<string|null>} - A promise that resolves to the new session token, or null if
- * the request fails.
- */
-export const fetchNewSessionToken = async () => {
-    try {
-        const response = await fetch("/upload-session/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-        });
-
-        if (response.ok) {
-            const responseJson = await response.json();
-            return responseJson.uploadSessionToken || null;
-        } else {
-            console.error("Failed to fetch new session token:", response.statusText);
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching new session token:", error);
-        return null;
-    }
-};
-
-/**
- * Sets the upload session token in the DOM.
- * Looks for an input element with an ID ending in "session_token", which should exist on the
- * upload step of the submission form.
- * @param {string} token - The session token to set
- */
-export const setSessionToken = (token) => {
-    const sessionTokenElement = document.querySelector("[id$=\"session_token\"]");
-    if (sessionTokenElement) {
-        sessionTokenElement.setAttribute("value", token);
-    }
-};
-
-/**
  * Fetches the list of uploaded files for the current upload session.
  * This function sends a GET request to the server to retrieve the list of uploaded files.
  * Uses exponential backoff to retry a total of 3 times if getting a 500 or more status.
+ * @param {string} token - The upload session token
  * @returns {Promise<object|null>} - A promise that resolves to the JSON response containing the
  * list of uploaded files, or null if the request fails or the session token is not available.
  */
-export const fetchUploadedFiles = async () => {
-    const sessionToken = getSessionToken();
-    if (!sessionToken) {
-        return null;
-    }
-
+export const fetchUploadedFiles = async (token) => {
     const maxRetries = 3;
     let attempt = 0;
     let response;
 
     while (attempt < maxRetries) {
-        response = await fetch(`/upload-session/${sessionToken}/files/`, {
+        response = await fetch(`/upload-session/${token}/files/`, {
             method: "GET",
         });
 
@@ -130,16 +73,12 @@ export const makeMockBlob = (size) => {
 /**
  * Sends a DELETE request to remove an uploaded file from the server.
  * @param {string} filename - The name of the file to delete.
+ * @param {string} token - The upload session token
  * @returns {Promise<Response|null>} - A promise that resolves to the response of the request or
  * null if the session token was not found.
  */
-export const sendDeleteRequestForFile = async (filename) => {
-    const sessionToken = getSessionToken();
-    if (!sessionToken) {
-        console.error("Cannot delete file without a session token");
-        return null;
-    }
-    const response = await fetch(`/upload-session/${sessionToken}/files/${filename}/`, {
+export const sendDeleteRequestForFile = async (filename, token) => {
+    const response = await fetch(`/upload-session/${token}/files/${filename}/`, {
         method: "DELETE",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"),

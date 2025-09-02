@@ -1,13 +1,22 @@
+from typing import Any, Dict, Optional
+
 from django.conf import settings
+from django.forms.renderers import BaseRenderer
 from django.forms.widgets import CheckboxInput, TextInput
 from django.utils.safestring import SafeText, mark_safe
 from django_countries.widgets import CountrySelectWidget
 
 
 class DateOfMaterialsWidget(TextInput):
-    """Custom widget for date_of_materials field of the MetadataForm."""
+    """Custom widget for date_of_materials field for use in the MetadataForm."""
 
-    def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+    def render(
+        self,
+        name: str,
+        value: str | None,
+        attrs: Optional[Dict[str, Any]] = None,
+        renderer: Optional[BaseRenderer] = None,
+    ) -> SafeText:
         """Render the widget with additional HTML elements."""
         original_html = super().render(name, value, attrs, renderer)
 
@@ -23,9 +32,15 @@ class DateOfMaterialsWidget(TextInput):
 
 
 class DateIsApproximateWidget(CheckboxInput):
-    """Custom widget for date_is_approximate field of the MetadataForm."""
+    """Custom widget for date_is_approximate field for use in the MetadataForm."""
 
-    def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+    def render(
+        self,
+        name: str,
+        value: Any,
+        attrs: Optional[Dict[str, Any]] = None,
+        renderer: Optional[BaseRenderer] = None,
+    ) -> SafeText:
         """Render the widget with additional HTML elements."""
         original_html = super().render(name, value, attrs, renderer)
         return mark_safe(f'<div class="date-is-approximate-wrapper">{original_html}</div>')
@@ -36,7 +51,13 @@ class CustomCountrySelectWidget(CountrySelectWidget):
     the select field and the flag show side by side.
     """
 
-    def render(self, name, value, attrs=None, renderer=None) -> SafeText:
+    def render(
+        self,
+        name: str,
+        value: Any,
+        attrs: Optional[Dict[str, Any]] = None,
+        renderer: Optional[BaseRenderer] = None,
+    ) -> SafeText:
         """Render the widget with a container div around it."""
         rendered = super().render(name, value, attrs, renderer)
         return SafeText(f'<div class="country-select-container">{rendered}</div>')

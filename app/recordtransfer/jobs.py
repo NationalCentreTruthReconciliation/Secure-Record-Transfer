@@ -11,12 +11,20 @@ from django.utils import timezone
 from upload.models import UploadSession
 
 from recordtransfer import utils
-from recordtransfer.emails import send_user_in_progress_submission_expiring
+from recordtransfer.emails import (
+    send_submission_creation_failure,
+    send_submission_creation_success,
+    send_thank_you_for_your_submission,
+    send_user_in_progress_submission_expiring,
+    send_your_submission_did_not_go_through,
+)
 from recordtransfer.handlers import JobLogHandler
 from recordtransfer.models import LOGGER as RECORDTRANSFER_MODELS_LOGGER
 from recordtransfer.models import InProgressSubmission, Job, Submission, User
 
 LOGGER = logging.getLogger(__name__)
+
+MAX_COPY_RETRIES = 2
 
 
 @django_rq.job
@@ -100,6 +108,67 @@ def get_expirable_upload_sessions() -> QuerySet[UploadSession]:
 def get_deletable_upload_sessions() -> QuerySet[UploadSession]:
     """Get upload sessions that can be deleted, and do not have an in-progress submission."""
     return UploadSession.objects.get_deletable().filter(in_progress_submission__isnull=True).all()
+
+
+@django_rq.job
+def move_uploads_and_send_emails(submission: Submission, form_data: dict) -> None:
+    """Move the temp files in the given session to the permanent storage space and send emails.
+
+    If there is no upload session, just send emails.
+    """
+    if not submission.user:
+        LOGGER.error("There is no user associated with the submission %s!", submission)
+        return
+
+    if not submission.upload_session:
+        send_thank_you_for_your_submission(form_data, submission)
+        send_submission_creation_success(form_data, submission)
+        return
+
+    LOGGER.info(
+        "Triggered moving files to permanent storage for session %s",
+        submission.upload_session.token,
+    )
+
+    session = submission.upload_session
+
+    try:
+        for attempt in range(MAX_COPY_RETRIES):
+            if attempt > 0:
+                LOGGER.error(
+                    "Moving files to permanent storage failed! Trying again (try %d of %d).",
+                    attempt + 1,
+                    MAX_COPY_RETRIES,
+                )
+                # Reset the state of the session
+                session.status = UploadSession.SessionStatus.UPLOADING
+                session.save()
+
+            session.make_uploads_permanent()
+
+            if session.status == UploadSession.SessionStatus.STORED:
+                break
+
+        else:
+            LOGGER.error("Failed copying %d times.", MAX_COPY_RETRIES)
+
+    except Exception as exc:
+        LOGGER.error("Caught exception while moving files to permanent storage.", exc_info=exc)
+
+    finally:
+        if session.status == UploadSession.SessionStatus.STORED:
+            LOGGER.info("All files in session %s are now in permanent storage.", session.token)
+            send_thank_you_for_your_submission(form_data, submission)
+            send_submission_creation_success(form_data, submission)
+
+        else:
+            LOGGER.error(
+                "Could not move files in session %s to permanent storage! Final session state is: %s",
+                session.token,
+                session.status,
+            )
+            send_your_submission_did_not_go_through(form_data, submission.user)
+            send_submission_creation_failure(form_data, submission.user)
 
 
 @django_rq.job

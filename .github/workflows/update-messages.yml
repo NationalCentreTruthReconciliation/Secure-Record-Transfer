@@ -1,0 +1,61 @@
+name: Update gettext message files
+
+on:
+  schedule:
+    - cron: "0 0 * * 3" # Runs every Wednesday
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Install gettext
+        run: sudo apt-get update && sudo apt-get install -y gettext
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.8"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Make messages for django domain
+        run: cd app && uv run python manage.py makemessages --all -d django
+
+      - name: Make messages for djangojs domain
+        run: cd app && uv run python manage.py makemessages --all -d djangojs
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [ ! -z "$(git status --porcelain=v1 2>/dev/null)" ]; then
+            echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes_detected=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get current date
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        id: date
+        run: echo "today=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "Run makemessages for all languages and domains"
+          branch: "chore/${{ steps.date.outputs.today }}-update-message-files"
+          delete-branch: true
+          title: "Update gettext message files"
+          body: "Automatically updated the message files in the app/locale directory with the latest changes on master."
+          base: master
+          author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"

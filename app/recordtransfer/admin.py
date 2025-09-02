@@ -4,6 +4,7 @@ import logging
 from typing import Any, Callable, Sequence, cast
 
 from caais.export import ExportVersion
+from caais.models import Metadata
 from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.options import InlineModelAdmin
@@ -217,7 +218,9 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
                 messages.WARNING,
             )
             return None
-        return related_submissions.export_csv(version=version)
+
+        metadata_queryset = Metadata.objects.filter(submission__in=related_submissions)
+        return metadata_queryset.export_csv(version=version)
 
     @admin.action(description=_("Export CAAIS 1.0 CSV for Submissions in Selected"))
     def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
@@ -349,6 +352,19 @@ class SubmissionAdmin(admin.ModelAdmin):
             *super().get_urls(),
         ]
 
+    def get_form(
+        self, request: HttpRequest, obj: Submission | None = None, change: bool = False, **kwargs
+    ) -> type[ModelForm]:
+        """Conditionally add help_text to upload_session if one exists."""
+        if not obj or not obj.upload_session:
+            return super().get_form(request, obj, change, **kwargs)
+
+        upload_session_help = _("Click link to view uploaded files")
+
+        kwargs.setdefault("help_texts", {})["upload_session"] = upload_session_help
+
+        return super().get_form(request, obj, **kwargs)
+
     def create_zipped_bag(self, request: HttpRequest, object_id: str) -> HttpResponseRedirect:
         """Start a background job to create a downloadable bag.
 
@@ -395,38 +411,40 @@ class SubmissionAdmin(admin.ModelAdmin):
         admin_url = reverse("admin:index", current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
 
-    @admin.action(description=_("Export CAAIS 1.0 CSV for Submissions in Selected"))
-    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponseRedirect:
+    @admin.action(description=_("Export CAAIS 1.0 CSV for Metadata in Selected"))
+    def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
-        return queryset.export_csv(version=ExportVersion.CAAIS_1_0)
+        return Metadata.objects.filter(submission__in=queryset).export_csv(
+            version=ExportVersion.CAAIS_1_0
+        )
 
-    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
-    def export_atom_2_6_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Metadata in Selected"))
+    def export_atom_2_6_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
-        return queryset.export_csv(version=ExportVersion.ATOM_2_6)
+        return Metadata.objects.filter(submission__in=queryset).export_csv(
+            version=ExportVersion.ATOM_2_6
+        )
 
-    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
-    def export_atom_2_3_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Metadata in Selected"))
+    def export_atom_2_3_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
-        return queryset.export_csv(version=ExportVersion.ATOM_2_3)
+        return Metadata.objects.filter(submission__in=queryset).export_csv(
+            version=ExportVersion.ATOM_2_3
+        )
 
-    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
-    def export_atom_2_2_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Metadata in Selected"))
+    def export_atom_2_2_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
-        return queryset.export_csv(version=ExportVersion.ATOM_2_2)
+        return Metadata.objects.filter(submission__in=queryset).export_csv(
+            version=ExportVersion.ATOM_2_2
+        )
 
-    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
-    def export_atom_2_1_csv(
-        self, request: HttpRequest, queryset: QuerySet
-    ) -> HttpResponseRedirect:
+    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Metadata in Selected"))
+    def export_atom_2_1_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
-        return queryset.export_csv(version=ExportVersion.ATOM_2_1)
+        return Metadata.objects.filter(submission__in=queryset).export_csv(
+            version=ExportVersion.ATOM_2_1
+        )
 
 
 @admin.register(Job)

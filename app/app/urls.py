@@ -28,7 +28,6 @@ from recordtransfer.views.account import (
     AsyncPasswordResetView,
     Login,
 )
-from upload.urls import urlpatterns as upload_urlpatterns
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),

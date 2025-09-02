@@ -22,27 +22,6 @@ User = settings.AUTH_USER_MODEL
 LOGGER = logging.getLogger(__name__)
 
 
-@require_http_methods(["POST"])
-def create_upload_session(request: HttpRequest) -> JsonResponse:
-    """Create a new upload session and return the session token.
-
-    Args:
-        request: The POST request sent by the user.
-
-    Returns:
-        JsonResponse: The session token of the newly created upload session.
-    """
-    try:
-        session = UploadSession.new_session(user=request.user)
-        return JsonResponse({"uploadSessionToken": session.token}, status=201)
-    except Exception as exc:
-        LOGGER.error("Error creating upload session: %s", str(exc), exc_info=exc)
-        return JsonResponse(
-            {"error": gettext("There was an internal server error. Please try again.")},
-            status=500,
-        )
-
-
 # TODO: Need to control when this is allowed to be called
 # @validate_upload_access
 @require_http_methods(["GET", "POST"])

@@ -45,11 +45,10 @@ from recordtransfer.constants import (
 )
 from recordtransfer.emails import (
     send_submission_creation_failure,
-    send_submission_creation_success,
-    send_thank_you_for_your_submission,
     send_your_submission_did_not_go_through,
 )
 from recordtransfer.enums import SubmissionStep
+from recordtransfer.jobs import move_uploads_and_send_emails
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
@@ -148,6 +147,11 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_groupsubmission.html",
             title=gettext("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
+            info_message=gettext(
+                "You may assign this submission to a group to keep your records organized. "
+                "<b>This step is optional</b>. If you do not wish to assign a group, you can "
+                "proceed to the next step."
+            ),
         ),
         **(
             {
@@ -239,7 +243,10 @@ class SubmissionFormWizard(SessionWizardView):
         if not self.in_progress_submission:
             raise ValueError("No in-progress submission to load")
 
-        self.storage.data = pickle.loads(self.in_progress_submission.step_data)["past"]
+        step_data = pickle.loads(self.in_progress_submission.step_data)
+
+        self.storage.data = step_data["past"]
+        self.storage.extra_data = step_data["extra"]
         self.storage.current_step = self.in_progress_submission.current_step
 
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
@@ -277,20 +284,21 @@ class SubmissionFormWizard(SessionWizardView):
         ### Gather information to save ###
 
         current_data = SubmissionFormWizard.format_step_data(self.current_step, request.POST)
-        form_data = {"past": self.storage.data, "current": current_data}
+
+        form_data = {
+            "past": self.storage.data,
+            "current": current_data,
+            "extra": self.storage.extra_data or {},
+        }
 
         title = None
-        session_token = None
         # See if the title and session token are in the current data
         if isinstance(current_data, dict):
             title = current_data.get("accession_title")
-            session_token = current_data.get("session_token")
 
         # Look in past data if not found in current data
         if not title:
             title = self.get_form_value(SubmissionStep.RECORD_DESCRIPTION, "accession_title")
-        if not session_token:
-            session_token = self.get_form_value(SubmissionStep.UPLOAD_FILES, "session_token")
 
         ### Save the information ###
 
@@ -300,7 +308,11 @@ class SubmissionFormWizard(SessionWizardView):
             self.in_progress_submission = InProgressSubmission()
 
         self.in_progress_submission.title = title
-        session = UploadSession.objects.filter(token=session_token, user=self.request.user).first()
+
+        session = UploadSession.objects.filter(
+            token=self.storage.extra_data.get("session_token"), user=self.request.user
+        ).first()
+
         if session:
             self.in_progress_submission.upload_session = session
 
@@ -368,6 +380,14 @@ class SubmissionFormWizard(SessionWizardView):
             form = cast(forms.ContactInfoForm, form)
             self.storage.extra_data["save_contact_info_prompted"] = True
             return self.trigger_contact_info_save_prompt(form)
+
+        # Assign a new session token if one hasn't been created yet
+        if (
+            SubmissionStep(self.steps.next) == SubmissionStep.UPLOAD_FILES
+            and "session_token" not in self.storage.extra_data
+        ):
+            session = UploadSession.new_session(user=cast(User, self.request.user))
+            self.storage.extra_data["session_token"] = session.token
 
         # get the form instance based on the data from the storage backend
         # (if available).
@@ -523,6 +543,9 @@ class SubmissionFormWizard(SessionWizardView):
             initial["postal_or_zip_code"] = user.postal_or_zip_code or ""
             initial["country"] = user.country or ""
 
+        if SubmissionStep(step) == SubmissionStep.UPLOAD_FILES:
+            initial["session_token"] = self.storage.extra_data.get("session_token", "")
+
         return initial
 
     def get_form_kwargs(self, step: Optional[str] = None) -> dict:
@@ -531,6 +554,10 @@ class SubmissionFormWizard(SessionWizardView):
 
         if step == SubmissionStep.GROUP_SUBMISSION.value:
             kwargs["user"] = self.request.user
+
+        elif step == SubmissionStep.UPLOAD_FILES.value:
+            kwargs["user"] = self.request.user
+            kwargs["correct_session_token"] = self.storage.extra_data["session_token"]
 
         elif step == SubmissionStep.SOURCE_INFO.value:
             source_type, _ = SourceType.objects.get_or_create(name="Individual")
@@ -721,6 +748,7 @@ class SubmissionFormWizard(SessionWizardView):
         elif step == SubmissionStep.UPLOAD_FILES:
             js_context.update(
                 {
+                    "SESSION_TOKEN": self.storage.extra_data.get("session_token", ""),
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
@@ -757,20 +785,13 @@ class SubmissionFormWizard(SessionWizardView):
 
             if settings.FILE_UPLOAD_ENABLED and (
                 upload_session := UploadSession.objects.filter(
-                    token=form_data["session_token"]
+                    token=self.storage.extra_data.get("session_token"), user=self.request.user
                 ).first()
             ):
                 submission.upload_session = upload_session
-                submission.upload_session.make_uploads_permanent()  # type: ignore
-            else:
-                LOGGER.info(
-                    (
-                        "No file upload session will be linked to submission due to "
-                        "FILE_UPLOAD_ENABLED=false"
-                    )
-                )
 
-            submission.part_of_group = form_data.get("submission_group")
+            if submission_group := form_data.get("submission_group"):
+                submission.part_of_group = submission_group
 
             LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
             submission.save()
@@ -778,8 +799,8 @@ class SubmissionFormWizard(SessionWizardView):
             if self.in_progress_submission:
                 self.in_progress_submission.delete()
 
-            send_submission_creation_success.delay(form_data, submission)
-            send_thank_you_for_your_submission.delay(form_data, submission)
+            LOGGER.info("Finishing up submission in a worker process.")
+            move_uploads_and_send_emails.delay(submission, form_data)
 
             return HttpResponseClientRedirect(reverse("recordtransfer:submission_sent"))
 

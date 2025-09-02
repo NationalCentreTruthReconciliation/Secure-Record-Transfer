@@ -1,22 +1,23 @@
-import unittest
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
-from django.test import override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from freezegun import freeze_time
 
 from recordtransfer.jobs import (
     check_expiring_in_progress_submissions,
     cleanup_expired_sessions,
     create_downloadable_bag,
+    move_uploads_and_send_emails,
 )
-from recordtransfer.models import Job, Submission, User
+from recordtransfer.models import Job, Submission, UploadSession, User
 
 
-class TestCreateDownloadableBag(unittest.TestCase):
+class TestCreateDownloadableBag(TestCase):
     """Tests the functionality of the create_downloadable_bag job."""
 
     def setUp(self) -> None:
@@ -263,7 +264,178 @@ class TestCreateDownloadableBag(unittest.TestCase):
         self.assertEqual(self.mock_job.job_status, Job.JobStatus.FAILED)
 
 
-class TestCheckExpiringInProgressSubmissions(unittest.TestCase):
+class TestMoveUploadsAndSendEmailsJob(TestCase):
+    """Tests for the move_uploads_and_send_emails job."""
+
+    def setUp(self) -> None:
+        """Create test data."""
+        self.user = User.objects.create(username="testuser", password="svaE95EQW^")
+        self.upload_session = UploadSession.new_session(user=self.user)
+        self.submission = Submission.objects.create(
+            user=self.user,
+            upload_session=self.upload_session,
+        )
+        return super().setUp()
+
+    @patch("recordtransfer.jobs.send_your_submission_did_not_go_through")
+    @patch("recordtransfer.jobs.send_thank_you_for_your_submission")
+    @patch("recordtransfer.jobs.send_submission_creation_failure")
+    @patch("recordtransfer.jobs.send_submission_creation_success")
+    def test_move_one_upload(
+        self,
+        mock_creation_success: MagicMock,
+        mock_creation_failure: MagicMock,
+        mock_submit_success: MagicMock,
+        mock_submit_failure: MagicMock,
+    ) -> None:
+        """Test moving one file."""
+        self.upload_session.add_temp_file(SimpleUploadedFile("image.jpg", bytearray([1] * 1024)))
+
+        temp_dir = Path(settings.TEMP_STORAGE_FOLDER) / self.upload_session.token
+        perm_dir = Path(settings.UPLOAD_STORAGE_FOLDER) / self.upload_session.token
+
+        # Temp dir should have one file
+        self.assertEqual(1, sum(1 if item.is_file() else 0 for item in temp_dir.iterdir()))
+
+        move_uploads_and_send_emails(self.submission, {})
+
+        self.assertFalse(temp_dir.exists())
+        self.assertTrue(perm_dir.exists())
+        self.assertEqual(1, sum(1 if item.is_file() else 0 for item in perm_dir.iterdir()))
+        self.assertEqual(UploadSession.SessionStatus.STORED, self.upload_session.status)
+        mock_creation_success.assert_called_once()
+        mock_submit_success.assert_called_once()
+
+    @patch("recordtransfer.jobs.send_your_submission_did_not_go_through")
+    @patch("recordtransfer.jobs.send_thank_you_for_your_submission")
+    @patch("recordtransfer.jobs.send_submission_creation_failure")
+    @patch("recordtransfer.jobs.send_submission_creation_success")
+    def test_move_multiple_uploads(
+        self,
+        mock_creation_success: MagicMock,
+        mock_creation_failure: MagicMock,
+        mock_submit_success: MagicMock,
+        mock_submit_failure: MagicMock,
+    ) -> None:
+        """Test moving multiple files."""
+        for i in range(1, 11):
+            self.upload_session.add_temp_file(
+                SimpleUploadedFile(f"image-{i}.jpg", bytearray([1] * 1024))
+            )
+
+        temp_dir = Path(settings.TEMP_STORAGE_FOLDER) / self.upload_session.token
+        perm_dir = Path(settings.UPLOAD_STORAGE_FOLDER) / self.upload_session.token
+
+        # Temp dir should have ten files
+        self.assertEqual(10, sum(1 if item.is_file() else 0 for item in temp_dir.iterdir()))
+
+        move_uploads_and_send_emails(self.submission, {})
+
+        self.assertFalse(temp_dir.exists())
+        self.assertTrue(perm_dir.exists())
+        self.assertEqual(10, sum(1 if item.is_file() else 0 for item in perm_dir.iterdir()))
+        self.assertEqual(UploadSession.SessionStatus.STORED, self.upload_session.status)
+        mock_creation_success.assert_called_once()
+        mock_submit_success.assert_called_once()
+
+    @patch("recordtransfer.jobs.send_your_submission_did_not_go_through")
+    @patch("recordtransfer.jobs.send_thank_you_for_your_submission")
+    @patch("recordtransfer.jobs.send_submission_creation_failure")
+    @patch("recordtransfer.jobs.send_submission_creation_success")
+    @patch.object(UploadSession, "make_uploads_permanent")
+    def test_move_uploads_failure(
+        self,
+        mock_make_uploads_permanent: MagicMock,
+        mock_creation_success: MagicMock,
+        mock_creation_failure: MagicMock,
+        mock_submit_success: MagicMock,
+        mock_submit_failure: MagicMock,
+    ) -> None:
+        """Test the case when uploads can't be moved."""
+
+        def copy_fail():
+            self.upload_session.status = UploadSession.SessionStatus.COPYING_FAILED
+            self.upload_session.save()
+
+        # Set up the mock to call copy_fail each time it's called
+        mock_make_uploads_permanent.side_effect = copy_fail
+
+        self.upload_session.add_temp_file(SimpleUploadedFile("image.jpg", bytearray([1] * 1024)))
+
+        move_uploads_and_send_emails(self.submission, {})
+
+        # The function should have been called twice
+        mock_make_uploads_permanent.assert_has_calls([call(), call()])
+        self.assertEqual(UploadSession.SessionStatus.COPYING_FAILED, self.upload_session.status)
+        mock_creation_failure.assert_called_once()
+        mock_submit_failure.assert_called_once()
+
+    @patch("recordtransfer.jobs.send_your_submission_did_not_go_through")
+    @patch("recordtransfer.jobs.send_thank_you_for_your_submission")
+    @patch("recordtransfer.jobs.send_submission_creation_failure")
+    @patch("recordtransfer.jobs.send_submission_creation_success")
+    @patch.object(UploadSession, "make_uploads_permanent")
+    def test_move_uploads_succeed_second_try(
+        self,
+        mock_make_uploads_permanent: MagicMock,
+        mock_creation_success: MagicMock,
+        mock_creation_failure: MagicMock,
+        mock_submit_success: MagicMock,
+        mock_submit_failure: MagicMock,
+    ) -> None:
+        """Test the case when uploads can't be moved on first try but succeed on second try."""
+        call_count = 0
+
+        def mock_make_permanent():
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                # First call fails
+                self.upload_session.status = UploadSession.SessionStatus.COPYING_FAILED
+                self.upload_session.save()
+            else:
+                # Second call succeeds
+                self.upload_session.status = UploadSession.SessionStatus.STORED
+                self.upload_session.save()
+
+        # Set up the mock to use our counting function
+        mock_make_uploads_permanent.side_effect = mock_make_permanent
+
+        self.upload_session.add_temp_file(SimpleUploadedFile("image.jpg", bytearray([1] * 1024)))
+
+        move_uploads_and_send_emails(self.submission, {})
+
+        # The function should have been called twice
+        mock_make_uploads_permanent.assert_has_calls([call(), call()])
+        self.assertEqual(UploadSession.SessionStatus.STORED, self.upload_session.status)
+        mock_creation_success.assert_called_once()
+        mock_submit_success.assert_called_once()
+
+    @patch("recordtransfer.jobs.send_your_submission_did_not_go_through")
+    @patch("recordtransfer.jobs.send_thank_you_for_your_submission")
+    @patch("recordtransfer.jobs.send_submission_creation_failure")
+    @patch("recordtransfer.jobs.send_submission_creation_success")
+    @patch.object(UploadSession, "make_uploads_permanent")
+    def test_no_uploads_to_move(
+        self,
+        mock_make_uploads_permanent: MagicMock,
+        mock_creation_success: MagicMock,
+        mock_creation_failure: MagicMock,
+        mock_submit_success: MagicMock,
+        mock_submit_failure: MagicMock,
+    ) -> None:
+        """Test that only the emails are sent when there are no uploads."""
+        self.submission.upload_session = None
+        self.submission.save()
+
+        move_uploads_and_send_emails(self.submission, {})
+
+        mock_make_uploads_permanent.assert_not_called()
+        mock_creation_success.assert_called_once()
+        mock_submit_success.assert_called_once()
+
+
+class TestCheckExpiringInProgressSubmissions(TestCase):
     """Tests for the check_expiring_in_progress_submissions job."""
 
     @patch("recordtransfer.jobs.send_user_in_progress_submission_expiring")
@@ -299,7 +471,7 @@ class TestCheckExpiringInProgressSubmissions(unittest.TestCase):
         self.assertTrue(mock_in_progress.reminder_email_sent)
 
 
-class TestCleanupExpiredSessions(unittest.TestCase):
+class TestCleanupExpiredSessions(TestCase):
     """Tests for the cleanup_expired_sessions job."""
 
     @patch("recordtransfer.jobs.get_deletable_upload_sessions")

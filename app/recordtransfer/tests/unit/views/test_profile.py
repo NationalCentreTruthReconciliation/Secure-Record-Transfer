@@ -7,13 +7,13 @@ from typing import Optional, cast
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
+from caais.models import Metadata
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from freezegun import freeze_time
 
-from caais.models import Metadata
 from recordtransfer.constants import FormFieldNames, QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import (
@@ -277,12 +277,6 @@ class TestInProgressSubmissionTableView(TestCase):
         self.htmx_headers = {
             "HX-Request": "true",
         }
-
-    def tearDown(self) -> None:
-        """Clean up after each test."""
-        UploadSession.objects.all().delete()
-        InProgressSubmission.objects.all().delete()
-        User.objects.all().delete()
 
     def _create_in_progress_submission(
         self,

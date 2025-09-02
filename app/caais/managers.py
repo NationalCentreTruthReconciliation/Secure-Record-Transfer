@@ -1,47 +1,84 @@
-from abc import ABC, abstractmethod
+import csv
 import re
+from abc import ABC, abstractmethod
+from io import StringIO
 
 from django.db import models
-from django.db.models import Q, CharField, Value, Case, When, Value, F
+from django.db.models import Case, CharField, F, Q, Value, When
 from django.db.models.functions import Concat
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
+from django.utils import timezone
 
 from caais.constants import ACCESSION_IDENTIFIER_TYPE
-from caais.db import DefaultConcat, GroupConcat, CharFieldOrDefault
+from caais.db import CharFieldOrDefault, DefaultConcat, GroupConcat
 from caais.export import ExportVersion
 
+PUNCTUATION_END = re.compile(r"(?:\?|!|\.|,|;)\s*$")
 
-PUNCTUATION_END = re.compile(r'(?:\?|!|\.|,|;)\s*$')
 
+class MetadataQuerySet(models.QuerySet):
+    """Custom queryset for Metadata objects that has an export_csv method to convert all objects
+    to a CSV.
+    """
 
-class MetadataManager(models.Manager):
-    def flatten(self, version=ExportVersion.CAAIS_1_0) -> dict:
-        ''' Convert this model and all related models into a flat dictionary
-        suitable to be written to a CSV or used as the metadata fields for a
-        BagIt bag.
-        '''
-        return [
-            metadata.create_flat_representation(version) for metadata in self.get_queryset()
-        ]
+    def export_csv(
+        self,
+        version: ExportVersion = ExportVersion.CAAIS_1_0,
+        filename_prefix: str | None = None,
+    ) -> HttpResponse:
+        """Create an HttpResponse that contains a CSV representation of all metadata objects in the
+        queryset.
+
+        Args:
+            version: The type/version of the CSV to export
+            filename_prefix:
+                Prefix for the generated CSV filename. If not provided, a default is used.
+
+        Returns:
+            An HTTP response to download the CSV.
+        """
+        csv_file = StringIO()
+        writer = csv.writer(csv_file)
+        first_row = True
+
+        for metadata in self:
+            row = metadata.create_flat_representation(version)
+            if first_row:
+                writer.writerow(row.keys())
+                first_row = False
+            writer.writerow(row.values())
+
+        csv_file.seek(0)
+
+        response = HttpResponse(csv_file, content_type="text/csv")
+
+        local_time = timezone.localtime(timezone.now()).strftime(r"%Y%m%d_%H%M%S")
+        if not filename_prefix:
+            version_bits = str(version).split("_")
+            filename_prefix = "{0}_v{1}_".format(
+                version_bits[0], ".".join([str(x) for x in version_bits[1:]])
+            )
+
+        filename = f"{filename_prefix}{local_time}.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        csv_file.close()
+        return response
 
 
 class CaaisModelManager(models.Manager, ABC):
-    ''' Custom manager for CAAIS models that require the flatten() function.
-    '''
+    """Custom manager for CAAIS models that require the flatten() function."""
 
     @abstractmethod
     def flatten_atom(self, version: ExportVersion) -> dict:
-        ''' Flatten metadata to be used for AtoM
-        '''
+        """Flatten metadata to be used for AtoM."""
 
     @abstractmethod
     def flatten_caais(self, version: ExportVersion) -> dict:
-        ''' Flatten metadata to be used for CAAIS
-        '''
+        """Flatten metadata to be used for CAAIS."""
 
     def flatten(self, version: ExportVersion = ExportVersion.CAAIS_1_0) -> dict:
-        ''' Flatten metadata to be used in BagIt metadata or CSV file
-        '''
+        """Flatten metadata to be used in BagIt metadata or CSV file."""
         data = None
         if version == ExportVersion.CAAIS_1_0:
             data = self.flatten_caais(version)
@@ -53,6 +90,8 @@ class CaaisModelManager(models.Manager, ABC):
 
 
 class IdentifierManager(CaaisModelManager):
+    """Custom manager for Identifier model."""
+
     def accession_identifier(self) -> str | None:
         """Get the first identifier with the ACCESSION_IDENTIFIER_TYPE type, or None if an
         identifier like this does not exist.
@@ -60,6 +99,7 @@ class IdentifierManager(CaaisModelManager):
         return self.get_queryset().filter(identifier_type=ACCESSION_IDENTIFIER_TYPE).first()
 
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # alternativeIdentifiers were added in AtoM v2.6
         if version in (ExportVersion.ATOM_2_1, ExportVersion.ATOM_2_2, ExportVersion.ATOM_2_3):
             return {}
@@ -75,6 +115,7 @@ class IdentifierManager(CaaisModelManager):
         )
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
             identifierTypes=DefaultConcat(CharFieldOrDefault("identifier_type")),
             identifierValues=DefaultConcat(CharFieldOrDefault("identifier_value")),
@@ -83,514 +124,568 @@ class IdentifierManager(CaaisModelManager):
 
 
 class ArchivalUnitManager(CaaisModelManager):
+    """Custom manager for Archival Unit model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # No equivalent for archival unit in AtoM
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
-        return self.get_queryset().aggregate(
-            archivalUnits=DefaultConcat('archival_unit')
-        )
+        """Flatten metadata to be used for CAAIS."""
+        return self.get_queryset().aggregate(archivalUnits=DefaultConcat("archival_unit"))
 
 
 class DispositionAuthorityManager(CaaisModelManager):
+    """Custom manager for DispositionAuthority model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # No equivalent for disposition authority in AtoM
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            dispositionAuthorities=DefaultConcat('disposition_authority')
+            dispositionAuthorities=DefaultConcat("disposition_authority")
         )
 
 
 class SourceOfMaterialManager(CaaisModelManager):
+    """Custom manager for SourceOfMaterial model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # AtoM only supports one "donor"
-        first_donor = self.get_queryset().order_by('id').first()
+        first_donor = self.get_queryset().order_by("id").first()
 
         if not first_donor:
             return {}
 
-        address = ', '.join(l for l in [
-            first_donor.address_line_1,
-            first_donor.address_line_2,
-        ] if l)
+        address = ", ".join(
+            line
+            for line in [
+                first_donor.address_line_1,
+                first_donor.address_line_2,
+            ]
+            if line
+        )
 
         flat = {
-            'donorName': first_donor.source_name or '',
-            'donorStreetAddress': address,
-            'donorCity': first_donor.city or '',
-            'donorRegion': first_donor.region or '',
-            'donorPostalCode': first_donor.postal_or_zip_code or '',
-            'donorCountry': first_donor.country.code if first_donor.country else '',
-            'donorTelephone': first_donor.phone_number or '',
-            'donorEmail': first_donor.email_address or '',
+            "donorName": first_donor.source_name or "",
+            "donorStreetAddress": address,
+            "donorCity": first_donor.city or "",
+            "donorRegion": first_donor.region or "",
+            "donorPostalCode": first_donor.postal_or_zip_code or "",
+            "donorCountry": first_donor.country.code if first_donor.country else "",
+            "donorTelephone": first_donor.phone_number or "",
+            "donorEmail": first_donor.email_address or "",
         }
 
         # donorNote added in AtoM 2.6
         # donorFax added in AtoM 2.6
         # donorContactPerson added in AtoM 2.6
         if version == ExportVersion.ATOM_2_6:
-            flat['donorFax'] = ''
-            flat['donorContactPerson'] = first_donor.contact_name
+            flat["donorFax"] = ""
+            flat["donorContactPerson"] = first_donor.contact_name
 
             note = first_donor.source_note
-            role = first_donor.source_role.name if first_donor.source_role else ''
-            type_ = first_donor.source_type.name if first_donor.source_type else ''
-            confidentiality = first_donor.source_confidentiality.name if first_donor.source_confidentiality else ''
+            role = first_donor.source_role.name if first_donor.source_role else ""
+            type_ = first_donor.source_type.name if first_donor.source_type else ""
+            confidentiality = (
+                first_donor.source_confidentiality.name
+                if first_donor.source_confidentiality
+                else ""
+            )
 
             # Create narrative for donor note
             if any([note, role, type_, confidentiality]):
                 donor_narrative = []
                 if type_:
-                    if type_[0].lower() in ('a', 'e', 'i', 'o', 'u'):
-                        donor_narrative.append(f'The donor is an {type_}')
+                    if type_[0].lower() in ("a", "e", "i", "o", "u"):
+                        donor_narrative.append(f"The donor is an {type_}")
                     else:
-                        donor_narrative.append(f'The donor is a {type_}')
+                        donor_narrative.append(f"The donor is a {type_}")
                 if role:
-                    donor_narrative.append(
-                        f"The donor's relationship to the records is: {role}"
-                    )
+                    donor_narrative.append(f"The donor's relationship to the records is: {role}")
                 if confidentiality:
                     donor_narrative.append(
-                        f'The donor\'s confidentiality has been noted as: {confidentiality}'
+                        f"The donor's confidentiality has been noted as: {confidentiality}"
                     )
                 if note:
                     donor_narrative.append(note)
 
-                flat['donorNote'] = '. '.join(donor_narrative)
+                flat["donorNote"] = ". ".join(donor_narrative)
 
         return flat
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         sources = self.get_queryset()
         return {
             # Countries don't behave in the query, so concatenate them separately
-            'sourceCountry': '|'.join([
-                source.country.code if source.country else 'NULL' \
-                for source in sources]
+            "sourceCountry": "|".join(
+                [source.country.code if source.country else "NULL" for source in sources]
             ),
             **sources.annotate(
                 # Join address line 1 and address line 2
                 address=Case(
-                    When((~Q(address_line_1='')) & (~Q(address_line_2='')),
-                         then=Concat(
-                            F('address_line_1'),
-                            Value(', '),
-                            F('address_line_2')
-                        )
+                    When(
+                        (~Q(address_line_1="")) & (~Q(address_line_2="")),
+                        then=Concat(F("address_line_1"), Value(", "), F("address_line_2")),
                     ),
-                    When(~Q(address_line_1=''), then=F('address_line_1')),
-                    When(~Q(address_line_2=''), then=F('address_line_2')),
-                    default=Value('NULL'),
+                    When(~Q(address_line_1=""), then=F("address_line_1")),
+                    When(~Q(address_line_2=""), then=F("address_line_2")),
+                    default=Value("NULL"),
                     output_field=CharField(),
                 )
             ).aggregate(
-                sourceType=DefaultConcat(Case(
-                    When(Q(source_type__isnull=False), then=F('source_type__name')),
-                    default=Value('NULL'),
-                    output_field=CharField(),
-                )),
-                sourceName=DefaultConcat(
-                    CharFieldOrDefault('source_name')
+                sourceType=DefaultConcat(
+                    Case(
+                        When(Q(source_type__isnull=False), then=F("source_type__name")),
+                        default=Value("NULL"),
+                        output_field=CharField(),
+                    )
                 ),
-                sourceContactPerson=DefaultConcat(
-                    CharFieldOrDefault(field_name='contact_name')
-                ),
-                sourceJobTitle=DefaultConcat(
-                    CharFieldOrDefault(field_name='job_title')
-                ),
-                sourceOrganization=DefaultConcat(
-                    CharFieldOrDefault(field_name='organization')
-                ),
+                sourceName=DefaultConcat(CharFieldOrDefault("source_name")),
+                sourceContactPerson=DefaultConcat(CharFieldOrDefault(field_name="contact_name")),
+                sourceJobTitle=DefaultConcat(CharFieldOrDefault(field_name="job_title")),
+                sourceOrganization=DefaultConcat(CharFieldOrDefault(field_name="organization")),
                 sourceStreetAddress=DefaultConcat(
                     # Address is already sanitized
-                    F('address'),
+                    F("address"),
                 ),
-                sourceCity=DefaultConcat(
-                    CharFieldOrDefault(field_name='city')
-                ),
-                sourceRegion=DefaultConcat(
-                    CharFieldOrDefault(field_name='region')
-                ),
+                sourceCity=DefaultConcat(CharFieldOrDefault(field_name="city")),
+                sourceRegion=DefaultConcat(CharFieldOrDefault(field_name="region")),
                 sourcePostalCode=DefaultConcat(
-                    CharFieldOrDefault(field_name='postal_or_zip_code')
+                    CharFieldOrDefault(field_name="postal_or_zip_code")
                 ),
-                sourcePhoneNumber=DefaultConcat(
-                    CharFieldOrDefault(field_name='phone_number')
+                sourcePhoneNumber=DefaultConcat(CharFieldOrDefault(field_name="phone_number")),
+                sourceEmail=DefaultConcat(CharFieldOrDefault(field_name="email_address")),
+                sourceRole=DefaultConcat(
+                    Case(
+                        When(Q(source_role__isnull=False), then=F("source_role__name")),
+                        default=Value("NULL"),
+                        output_field=CharField(),
+                    )
                 ),
-                sourceEmail=DefaultConcat(
-                    CharFieldOrDefault(field_name='email_address')
+                sourceNote=DefaultConcat(CharFieldOrDefault(field_name="source_note")),
+                sourceConfidentiality=DefaultConcat(
+                    Case(
+                        When(
+                            Q(source_confidentiality__isnull=False),
+                            then=F("source_confidentiality__name"),
+                        ),
+                        default=Value("NULL"),
+                        output_field=CharField(),
+                    )
                 ),
-                sourceRole=DefaultConcat(Case(
-                    When(Q(source_role__isnull=False), then=F('source_role__name')),
-                    default=Value('NULL'),
-                    output_field=CharField(),
-                )),
-                sourceNote=DefaultConcat(
-                    CharFieldOrDefault(field_name='source_note')
-                ),
-                sourceConfidentiality=DefaultConcat(Case(
-                    When(Q(source_confidentiality__isnull=False), then=F('source_confidentiality__name')),
-                    default=Value('NULL'),
-                    output_field=CharField(),
-                )),
-            )
+            ),
         }
 
 
 class PreliminaryCustodialHistoryManager(CaaisModelManager):
+    """Custom manager for PreliminaryCustodialHistory model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
-        ''' Include single custodial history if there is only one, otherwise
+        """Include single custodial history if there is only one, otherwise
         create a bullet point list of all received extents.
-        '''
-        histories = self.get_queryset()\
-                        .values_list('preliminary_custodial_history', flat=True)
+        """
+        histories = self.get_queryset().values_list("preliminary_custodial_history", flat=True)
 
         if len(histories) == 1:
             archival_history = histories[0]
         elif len(histories) > 1:
-            archival_history = '\n'.join(f'* {h}' for h in histories)
+            archival_history = "\n".join(f"* {h}" for h in histories)
         else:
-            archival_history = ''
+            archival_history = ""
 
         if archival_history:
-            return {'archivalHistory': archival_history}
+            return {"archivalHistory": archival_history}
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            preliminaryCustodialHistory=DefaultConcat('preliminary_custodial_history')
+            preliminaryCustodialHistory=DefaultConcat("preliminary_custodial_history")
         )
 
 
 class ExtentStatementManager(CaaisModelManager):
+    """Custom manager for ExtentStatement model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
-        ''' Include single extent if there is only one, otherwise create a
+        """Include single extent if there is only one, otherwise create a
         bullet point list of all received extents.
-        '''
-        extents = self.get_queryset()\
-                      .exclude(quantity_and_unit_of_measure='')\
-                      .values_list('quantity_and_unit_of_measure', flat=True)
+        """
+        extents = (
+            self.get_queryset()
+            .exclude(quantity_and_unit_of_measure="")
+            .values_list("quantity_and_unit_of_measure", flat=True)
+        )
 
         if len(extents) == 1:
             received_extent = extents[0]
         elif len(extents) > 1:
-            received_extent = '\n'.join(f'* {e}' for e in extents)
+            received_extent = "\n".join(f"* {e}" for e in extents)
         else:
-            received_extent = ''
+            received_extent = ""
 
         if received_extent:
-            return {'receivedExtentUnits': received_extent}
+            return {"receivedExtentUnits": received_extent}
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            extentTypes=DefaultConcat(Case(
-                When(Q(extent_type__isnull=False), then=F('extent_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
+            extentTypes=DefaultConcat(
+                Case(
+                    When(Q(extent_type__isnull=False), then=F("extent_type__name")),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
+            ),
             quantityAndUnitOfMeasure=DefaultConcat(
-                CharFieldOrDefault(field_name='quantity_and_unit_of_measure'),
+                CharFieldOrDefault(field_name="quantity_and_unit_of_measure"),
             ),
-            contentTypes=DefaultConcat(Case(
-                When(Q(content_type__isnull=False), then=F('content_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
-            carrierTypes=DefaultConcat(Case(
-                When(Q(carrier_type__isnull=False), then=F('carrier_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
-            extentNotes=DefaultConcat(
-                CharFieldOrDefault(field_name='extent_note')
+            contentTypes=DefaultConcat(
+                Case(
+                    When(Q(content_type__isnull=False), then=F("content_type__name")),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
             ),
+            carrierTypes=DefaultConcat(
+                Case(
+                    When(Q(carrier_type__isnull=False), then=F("carrier_type__name")),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
+            ),
+            extentNotes=DefaultConcat(CharFieldOrDefault(field_name="extent_note")),
         )
 
 
 class PreliminaryScopeAndContentManager(CaaisModelManager):
+    """Custom manager for PreliminaryScopeAndContent model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         return self.get_queryset().aggregate(
-            scopeAndContent=GroupConcat('preliminary_scope_and_content', separator='; ')
+            scopeAndContent=GroupConcat("preliminary_scope_and_content", separator="; ")
         )
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            preliminaryScopeAndContent=DefaultConcat('preliminary_scope_and_content'),
+            preliminaryScopeAndContent=DefaultConcat("preliminary_scope_and_content"),
         )
 
 
 class LanguageOfMaterialManager(CaaisModelManager):
+    """Custom manager for LanguageOfMaterial model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         queryset = self.get_queryset()
         if queryset.count() == 0:
             return {}
         return self.get_queryset().aggregate(
             scopeAndContent=Concat(
-                Value('Language(s) of materials: '),
-                GroupConcat('language_of_material', separator='; '),
+                Value("Language(s) of materials: "),
+                GroupConcat("language_of_material", separator="; "),
             )
         )
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            languageOfMaterials=DefaultConcat('language_of_material')
+            languageOfMaterials=DefaultConcat("language_of_material")
         )
 
 
 class StorageLocationManager(CaaisModelManager):
+    """Custom manager for StorageLocation model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
-        ''' Include single location if there is only one, otherwise create a
+        """Include single location if there is only one, otherwise create a
         bullet point list of all location values.
-        '''
-        locations = self.get_queryset()\
-                      .values_list('storage_location', flat=True)
+        """
+        locations = self.get_queryset().values_list("storage_location", flat=True)
 
         if len(locations) == 1:
             location = locations[0]
         elif len(locations) > 1:
-            location = '\n'.join(f'* {l}' for l in locations)
+            location = "\n".join(f"* {location_item}" for location_item in locations)
         else:
-            location = ''
+            location = ""
 
         if location:
-            return {'locationInformation': location}
+            return {"locationInformation": location}
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
-        return self.get_queryset().aggregate(
-            storageLocation=DefaultConcat('storage_location')
-        )
+        """Flatten metadata to be used for CAAIS."""
+        return self.get_queryset().aggregate(storageLocation=DefaultConcat("storage_location"))
 
 
 class RightsManager(CaaisModelManager):
+    """Custom manager for Rights model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # There is no equivalent field in AtoM for rights
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            rightsTypes=DefaultConcat(Case(
-                When(Q(rights_type__isnull=False), then=F('rights_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
+            rightsTypes=DefaultConcat(
+                Case(
+                    When(Q(rights_type__isnull=False), then=F("rights_type__name")),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
+            ),
             rightsValues=DefaultConcat(
-                CharFieldOrDefault('rights_value'),
+                CharFieldOrDefault("rights_value"),
             ),
             rightsNotes=DefaultConcat(
-                CharFieldOrDefault('rights_note'),
+                CharFieldOrDefault("rights_note"),
             ),
         )
 
 
+def build_value_note(value: str, note: str) -> str:
+    """Create a combined value + note string for display."""
+    if value and note:
+        if not PUNCTUATION_END.search(value):
+            return f"{value}. {note}"
+        else:
+            return f"{value} {note}"
+    elif value:
+        return value
+    elif note:
+        return note
+    return ""
+
+
 class PreservationRequirementsManager(CaaisModelManager):
+    """Custom manager for PreservationRequirements model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
-        ''' Include first value + note if there is only one, otherwise include
+        """Include first value + note if there is only one, otherwise include
         every value + note in a bullet point list.
-        '''
-        processing_notes = []
-        for req in self.get_queryset():
-            value = req.preservation_requirements_value
-            note = req.preservation_requirements_note
-
-            if value and note:
-                if not PUNCTUATION_END.search(value):
-                    list_item = f'{value}. {note}'
-                else:
-                    list_item = f'{value} {note}'
-            elif value:
-                list_item = value
-            elif note:
-                list_item = note
-            else:
-                list_item = ''
-
-            if list_item:
-                processing_notes.append(list_item)
+        """
+        processing_notes = [
+            build_value_note(
+                req.preservation_requirements_value, req.preservation_requirements_note
+            )
+            for req in self.get_queryset()
+        ]
+        processing_notes = [n for n in processing_notes if n]
 
         if len(processing_notes) == 1:
             note = processing_notes[0]
         elif len(processing_notes) > 1:
-            note = '\n'.join(f'* {n}' for n in processing_notes)
+            note = "\n".join(f"* {n}" for n in processing_notes)
         else:
-            note = ''
+            note = ""
 
         if note:
-            return {'processingNotes': note}
+            return {"processingNotes": note}
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            preservationRequirementsTypes=DefaultConcat(Case(
-                When(Q(preservation_requirements_type__isnull=False), then=F('preservation_requirements_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
+            preservationRequirementsTypes=DefaultConcat(
+                Case(
+                    When(
+                        Q(preservation_requirements_type__isnull=False),
+                        then=F("preservation_requirements_type__name"),
+                    ),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
+            ),
             preservationRequirementsValues=DefaultConcat(
-                CharFieldOrDefault('preservation_requirements_value'),
+                CharFieldOrDefault("preservation_requirements_value"),
             ),
             preservationRequirementsNotes=DefaultConcat(
-                CharFieldOrDefault('preservation_requirements_note'),
+                CharFieldOrDefault("preservation_requirements_note"),
             ),
         )
 
 
 class AppraisalManager(CaaisModelManager):
+    """Custom manager for Appraisal model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
-        ''' Include single appraisal value + note if there is only one,
+        """Include single appraisal value + note if there is only one,
         otherwise create a bullet point list of all appraisals' value + note.
-        '''
-        appraisals = []
-        for app in self.get_queryset():
-            value = app.appraisal_value
-            note = app.appraisal_note
-
-            if value and note:
-                if not PUNCTUATION_END.search(value):
-                    list_item = f'{value}. {note}'
-                else:
-                    list_item = f'{value} {note}'
-            elif value:
-                list_item = value
-            elif note:
-                list_item = note
-            else:
-                list_item = ''
-
-            if list_item:
-                appraisals.append(list_item)
+        """
+        appraisals = [
+            build_value_note(app.appraisal_value, app.appraisal_note)
+            for app in self.get_queryset()
+        ]
+        appraisals = [item for item in appraisals if item]
 
         if len(appraisals) == 1:
             appraisal = appraisals[0]
         elif len(appraisals) > 1:
-            appraisal = '\n'.join(f'* {n}' for n in appraisals)
+            appraisal = "\n".join(f"* {n}" for n in appraisals)
         else:
-            appraisal = ''
+            appraisal = ""
 
         if appraisal:
-            return {'appraisal': appraisal}
+            return {"appraisal": appraisal}
         return {}
 
-
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            appraisalTypes=DefaultConcat(Case(
-                When(Q(appraisal_type__isnull=False), then=F('appraisal_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
+            appraisalTypes=DefaultConcat(
+                Case(
+                    When(Q(appraisal_type__isnull=False), then=F("appraisal_type__name")),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
+            ),
             appraisalValues=DefaultConcat(
-                CharFieldOrDefault('appraisal_value'),
+                CharFieldOrDefault("appraisal_value"),
             ),
             appraisalNotes=DefaultConcat(
-                CharFieldOrDefault('appraisal_note'),
+                CharFieldOrDefault("appraisal_note"),
             ),
         )
 
 
 class AssociatedDocumentationManager(CaaisModelManager):
+    """Custom manager for AssociatedDocumentation model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # There is no equivalent field in AtoM for associated documentation
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         return self.get_queryset().aggregate(
-            associatedDocumentationTypes=DefaultConcat(Case(
-                When(Q(associated_documentation_type__isnull=False), then=F('associated_documentation_type__name')),
-                default=Value('NULL'),
-                output_field=CharField(),
-            )),
+            associatedDocumentationTypes=DefaultConcat(
+                Case(
+                    When(
+                        Q(associated_documentation_type__isnull=False),
+                        then=F("associated_documentation_type__name"),
+                    ),
+                    default=Value("NULL"),
+                    output_field=CharField(),
+                )
+            ),
             associatedDocumentationTitles=DefaultConcat(
-                CharFieldOrDefault('associated_documentation_title'),
+                CharFieldOrDefault("associated_documentation_title"),
             ),
             associatedDocumentationNotes=DefaultConcat(
-                CharFieldOrDefault('associated_documentation_note'),
-            )
+                CharFieldOrDefault("associated_documentation_note"),
+            ),
         )
 
 
 class EventManager(CaaisModelManager):
+    """Custom manager for Event model."""
+
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().order_by('event_date')
+        """Return the queryset for events."""
+        return super().get_queryset().order_by("event_date")
 
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # There is no equivalent field in AtoM for non-Creation events
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         events = self.get_queryset()
         return {
             # We use Python to convert dates to strings
-            'eventDates': '|'.join(
-                e.event_date.strftime(r'%Y-%m-%d') if e.event_date else 'NULL' \
-                for e in events
+            "eventDates": "|".join(
+                e.event_date.strftime(r"%Y-%m-%d") if e.event_date else "NULL" for e in events
             ),
             # And the database is used to do the rest of the work
             **events.aggregate(
-                eventTypes=DefaultConcat(Case(
-                    When(Q(event_type__isnull=False), then=F('event_type__name')),
-                    default=Value('NULL'),
-                    output_field=CharField(),
-                )),
+                eventTypes=DefaultConcat(
+                    Case(
+                        When(Q(event_type__isnull=False), then=F("event_type__name")),
+                        default=Value("NULL"),
+                        output_field=CharField(),
+                    )
+                ),
                 eventAgents=DefaultConcat(
-                    CharFieldOrDefault('event_agent'),
+                    CharFieldOrDefault("event_agent"),
                 ),
                 eventNotes=DefaultConcat(
-                    CharFieldOrDefault('event_note'),
-                )
-            )
+                    CharFieldOrDefault("event_note"),
+                ),
+            ),
         }
 
 
 class GeneralNoteManager(CaaisModelManager):
+    """Custom manager for GeneralNote model."""
+
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # There is no equivalent for general notes in AtoM
         return {}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
-        return self.get_queryset().aggregate(
-            generalNotes=DefaultConcat('general_note')
-        )
+        """Flatten metadata to be used for CAAIS."""
+        return self.get_queryset().aggregate(generalNotes=DefaultConcat("general_note"))
 
 
 class DateOfCreationOrRevisionManager(CaaisModelManager):
+    """Custom manager for DateOfCreationOrRevision model."""
+
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().order_by('creation_or_revision_date')
+        """Return the queryset for dates of creation or revision."""
+        return super().get_queryset().order_by("creation_or_revision_date")
 
     def flatten_atom(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for AtoM."""
         # Take only the first date, and treat as a date of acquisition
         date = self.get_queryset().first()
         if not date:
             return {}
-        return {
-            'acquisitionDate': date.creation_or_revision_date.strftime(r'%Y-%m-%d')
-        }
+        return {"acquisitionDate": date.creation_or_revision_date.strftime(r"%Y-%m-%d")}
 
     def flatten_caais(self, version: ExportVersion) -> dict:
+        """Flatten metadata to be used for CAAIS."""
         dates = self.get_queryset()
 
         return {
             # We use Python to convert dates to strings
-            'creationOrRevisionDates': '|'.join(
-                d.creation_or_revision_date.strftime(r'%Y-%m-%d') \
-                if d.creation_or_revision_date else 'NULL' \
+            "creationOrRevisionDates": "|".join(
+                d.creation_or_revision_date.strftime(r"%Y-%m-%d")
+                if d.creation_or_revision_date
+                else "NULL"
                 for d in dates
             ),
             **dates.aggregate(
-                creationOrRevisionTypes=DefaultConcat(Case(
-                    When(Q(creation_or_revision_type__isnull=False), then=F('creation_or_revision_type__name')),
-                    default=Value('NULL'),
-                    output_field=CharField(),
-                )),
+                creationOrRevisionTypes=DefaultConcat(
+                    Case(
+                        When(
+                            Q(creation_or_revision_type__isnull=False),
+                            then=F("creation_or_revision_type__name"),
+                        ),
+                        default=Value("NULL"),
+                        output_field=CharField(),
+                    )
+                ),
                 creationOrRevisionAgents=DefaultConcat(
-                    CharFieldOrDefault('creation_or_revision_agent')
+                    CharFieldOrDefault("creation_or_revision_agent")
                 ),
                 creationOrRevisionNotes=DefaultConcat(
-                    CharFieldOrDefault('creation_or_revision_note')
+                    CharFieldOrDefault("creation_or_revision_note")
                 ),
-            )
+            ),
         }
