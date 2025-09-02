@@ -124,6 +124,27 @@ class User(AbstractUser):
 
         return True
 
+    def open_upload_sessions(self) -> models.QuerySet[UploadSession]:
+        """Get the upload sessions this user has open.
+
+        An "open" upload session is one in any of these states:
+
+        - CREATED
+        - UPLOADING
+        - COPYING_IN_PROGRESS
+
+        Returns:
+            The open upload sessions for this user, in no particular order.
+        """
+        return UploadSession.objects.filter(
+            user=self,
+            status__in=[
+                UploadSession.SessionStatus.CREATED,
+                UploadSession.SessionStatus.UPLOADING,
+                UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            ],
+        )
+
     def past_password_hashes(self, limit: int = 5) -> list:
         """Get the past N hashes of this user's previous password."""
         hashes = self.password_history.order_by("-changed_at")[:limit]
