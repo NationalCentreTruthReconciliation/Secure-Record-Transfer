@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -924,6 +924,15 @@ class InProgressSubmission(models.Model):
         title = self.title or "None"
         session = self.upload_session.token if self.upload_session else "None"
         return f"In-Progress Submission by {self.user} (Title: {title} | Session: {session})"
+
+
+@receiver(pre_delete, sender=InProgressSubmission)
+def delete_upload_session_on_delete(
+    sender: InProgressSubmission, instance: InProgressSubmission, **kwargs
+) -> None:
+    """Delete the upload session for a given in progress submission when it's deleted."""
+    if instance.upload_session:
+        instance.upload_session.delete()
 
 
 @receiver(pre_save, sender=InProgressSubmission)
