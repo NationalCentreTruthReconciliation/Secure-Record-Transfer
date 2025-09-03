@@ -25,6 +25,7 @@ import {
     setupLoginFormValidation,
     setupPasswordResetFormValidation,
 } from "./registration/form-validation";
+import { initializeSessionLimitPage } from "./session_limit/index";
 import { initializeSubmissionForm } from "./submission_form/index";
 import { initializeSubmissionGroup } from "./submission_group/index";
 import { setupBaseHtmxEventListeners } from "./utils/htmx";
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeProfile();
     initializeSubmissionForm();
     initializeSubmissionGroup();
+    initializeSessionLimitPage();
 });
 
 window.addEventListener("load", () => {
