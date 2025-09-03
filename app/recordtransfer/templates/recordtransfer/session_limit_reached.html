@@ -1,0 +1,80 @@
+{% extends "recordtransfer/base.html" %}
+{% load i18n %}
+{% load static %}
+{% block title %}
+    {% if max_open_sessions != -1 and total_open_sessions < max_open_sessions %}
+        {% blocktrans with max_open_sessions=max_open_sessions total_open_sessions=total_open_sessions %}
+            {{ total_open_sessions }} / {{ max_open_sessions }} Sessions Used
+        {% endblocktrans %}
+    {% elif max_open_session == -1 %}
+        {% trans "Unlimited Sessions Allowed" %}
+    {% else %}
+        {% trans "Session Limit Reached" %}
+    {% endif %}
+{% endblock title %}
+{% block javascript %}
+    {{ block.super }}
+    {{ js_context|json_script:"py_context_session_limit_reached" }}
+{% endblock javascript %}
+{% block content %}
+    {% include "includes/messages.html" %}
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        {% if max_open_sessions != -1 and total_open_sessions >= max_open_sessions %}
+            <div class="mb-2 text-4xl text-primary">{% trans "Session Limit Reached" %}</div>
+            <div class="card">
+                <div class="card-body p-6">
+                    <p class="text-lg leading-relaxed text-base-content">
+                        {% trans "<b>You have reached the maximum number of concurrent sessions allowed!</b> To start a new submission, you'll need to wait for one of your current sessions to expire or complete an existing submission." %}
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <div class="mb-2 text-4xl text-primary">{% trans "You are Within the Session Limit" %}</div>
+            <div class="card">
+                <div class="card-body p-6">
+                    {% if max_sessions == -1 %}
+                        <p class="text-lg leading-relaxed text-base-content">
+                            {% trans "You are allowed to have as many concurrent sessions as you would like." %}
+                        </p>
+                    {% else %}
+                        <p class="text-lg leading-relaxed text-base-content">
+                            {% blocktrans with max_open_sessions=max_open_sessions %}
+                                You are within the total concurrent session limit of {{ max_open_sessions }}.
+                            {% endblocktrans %}
+                        </p>
+                    {% endif %}
+                    <div class="flex justify-left mt-4">
+                        <a href="{% url 'recordtransfer:submit' %}"
+                           class="btn btn-outline btn-primary inline-flex items-center gap-2 px-6 py-3">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-5 w-5"
+                                 viewBox="0 0 20 20"
+                                 fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            {% trans "New submission" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        <div class="text-2xl text-primary mb-4 mt-8">{% trans "Your Current Sessions" %}</div>
+        <p class="text-sm mb-6">
+            {% blocktrans %}
+                Below are your current active and expired sessions. Sessions will automatically
+                expire after a period of inactivity. Expired sessions that are not part of a saved
+                submission are automatically cleaned up on a schedule. To create space, you may
+                delete or complete submissions that you have saved. See the <b>Actions</b> column
+                below to resume or delete a saved submission.
+            {% endblocktrans %}
+        </p>
+        <div hx-get="{% url 'recordtransfer:open_session_table' %}"
+             hx-trigger="load"
+             id="{{ ID_OPEN_SESSION_TABLE }}">
+            <div class="flex flex-col w-full items-center gap-4">
+                <div class="skeleton h-32 w-full"></div>
+            </div>
+        </div>
+    </div>
+    {% include "includes/base_modal.html" %}
+{% endblock content %}
