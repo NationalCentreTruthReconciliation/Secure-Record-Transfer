@@ -80,7 +80,7 @@ class OpenSessions(TemplateView):
     template_name = "recordtransfer/open_sessions.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        """Add the user's open sessions to the template context."""
+        """Add context required by template and Javascript."""
         user = cast(User, self.request.user)
         context_data = super().get_context_data(**kwargs)
         context_data["js_context"] = {
