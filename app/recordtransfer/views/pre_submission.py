@@ -11,6 +11,7 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
+from django.db.models import Case, Count, Value, When
 from django.forms import (
     BaseForm,
     BaseFormSet,
@@ -97,15 +98,13 @@ def open_session_table(request: HttpRequest) -> HttpResponse:
     sort_options = {
         "date_last_changed": gettext("Date Last Changed"),
         "date_started": gettext("Date Started"),
-        "upload_size": gettext("Total Upload Size"),
         "file_count": gettext("Files Uploaded"),
     }
 
     allowed_sorts = {
         "date_last_changed": "last_upload_interaction_time",
         "date_started": "started_at",
-        "upload_size": "upload_size",
-        "file_count": "file_count",
+        "file_count": "calculated_file_count",
     }
 
     default_sort = "date_last_changed"
@@ -124,7 +123,19 @@ def open_session_table(request: HttpRequest) -> HttpResponse:
         order_field = f"-{order_field}"
 
     user = cast(User, request.user)
-    queryset = user.open_upload_sessions().order_by(order_field)
+    queryset = (
+        user.open_upload_sessions()
+        .annotate(
+            calculated_file_count=Case(
+                When(status=UploadSession.SessionStatus.EXPIRED, then=Value(0)),
+                default=(
+                    Count("tempuploadedfile", distinct=True)
+                    + Count("permuploadedfile", distinct=True)
+                ),
+            ),
+        )
+        .order_by(order_field)
+    )
 
     return paginated_table_view(
         request,

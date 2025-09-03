@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from upload.models import UploadSession
 
+from recordtransfer.constants import QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
 
@@ -62,6 +63,180 @@ class OpenSessionsTests(TestCase):
         self.assertContains(
             response, "You are allowed to have as many concurrent sessions as you would like."
         )
+
+
+class OpenSessionTableTests(TestCase):
+    """Tests for the open_session_table view."""
+
+    def setUp(self) -> None:
+        """Set up the test case with a user."""
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpassword"
+        )
+        self.client.force_login(self.user)
+        self.open_session_table_url = reverse("recordtransfer:open_session_table")
+        self.htmx_headers = {
+            "HX-Request": "true",
+        }
+
+    def tearDown(self) -> None:
+        """Clean up after each test."""
+        UploadSession.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_table_requires_htmx_request(self) -> None:
+        """Test that the table view requires HTMX headers."""
+        response = self.client.get(self.open_session_table_url)  # No HTMX headers
+        self.assertEqual(response.status_code, 400)
+
+    def test_open_session_table_empty(self) -> None:
+        """Test that the open session table works with no sessions."""
+        response = self.client.get(self.open_session_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "includes/open_session_table.html")
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_display(self, mock_get_value_int: MagicMock) -> None:
+        """Test that the open session table displays upload sessions correctly."""
+        # Create upload sessions
+        for _ in range(3):
+            UploadSession.new_session(user=self.user)
+
+        response = self.client.get(self.open_session_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that context data includes expected values
+        context = response.context
+        self.assertEqual(context["total_open_sessions"], 3)
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=2)
+    def test_open_session_table_pagination(self, mock_get_value_int: MagicMock) -> None:
+        """Test pagination for the open session table."""
+        # Create upload sessions
+        for _ in range(3):
+            UploadSession.new_session(user=self.user)
+
+        # Test first page
+        response = self.client.get(self.open_session_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Should only show 2 sessions on first page (page size = 2)
+        # Check that we got a valid response with sessions
+        self.assertIn("page", response.context)
+        page = response.context["page"]
+        self.assertLessEqual(len(page.object_list), 2)
+
+        # Test second page
+        response = self.client.get(
+            f"{self.open_session_table_url}?{QueryParameters.PAGINATE_QUERY_NAME}=2",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_sorting_functionality(self, mock_get_value_int: MagicMock) -> None:
+        """Test that the open session table includes sorting functionality."""
+        response = self.client.get(self.open_session_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that sorting controls and context are present
+        context = response.context
+        self.assertIn("sort_options", context)
+        self.assertIn("Date Last Changed", context["sort_options"].values())
+        self.assertIn("Date Started", context["sort_options"].values())
+        self.assertIn("Files Uploaded", context["sort_options"].values())
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_default_sorting(self, mock_get_value_int: MagicMock) -> None:
+        """Test that the open session table has default sorting applied."""
+        response = self.client.get(self.open_session_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that default sort context is provided
+        context = response.context
+        self.assertEqual(context["current_sort"], "date_last_changed")
+        self.assertEqual(context["current_direction"], "desc")
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_custom_sorting_by_date_started(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that custom sorting by date started works correctly."""
+        # Test sorting by date started in ascending order
+        response = self.client.get(
+            f"{self.open_session_table_url}?sort=date_started&direction=asc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "date_started")
+        self.assertEqual(context["current_direction"], "asc")
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_custom_sorting_by_upload_size_invalid(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that custom sorting by upload size falls back to default (not supported)."""
+        # Note: upload_size sorting is not currently supported due to FileField limitations
+        response = self.client.get(
+            f"{self.open_session_table_url}?sort=upload_size&direction=desc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Should fall back to default sorting when invalid sort is requested
+        context = response.context
+        self.assertEqual(context["current_sort"], "date_last_changed")
+        self.assertEqual(context["current_direction"], "desc")
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_custom_sorting_by_file_count(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Test that custom sorting by file count works correctly."""
+        # Test sorting by file count in ascending order
+        response = self.client.get(
+            f"{self.open_session_table_url}?sort=file_count&direction=asc",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertEqual(context["current_sort"], "file_count")
+        self.assertEqual(context["current_direction"], "asc")
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    def test_open_session_table_invalid_params_fallback_to_defaults(
+        self, mock_get_value_int: MagicMock
+    ) -> None:
+        """Invalid sort field and direction should fall back to defaults."""
+        response = self.client.get(
+            f"{self.open_session_table_url}?sort=invalid_field&direction=invalid_direction",
+            headers=self.htmx_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        # Defaults for open session table
+        self.assertEqual(context["current_sort"], "date_last_changed")
+        self.assertEqual(context["current_direction"], "desc")
+
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=8)
+    def test_open_session_table_context_data(self, mock_get_value_int: MagicMock) -> None:
+        """Test that the open session table context includes expected data."""
+        for _ in range(2):
+            UploadSession.new_session(user=self.user)
+
+        response = self.client.get(self.open_session_table_url, headers=self.htmx_headers)
+        self.assertEqual(response.status_code, 200)
+
+        context = response.context
+        self.assertIn("total_open_sessions", context)
+        self.assertIn("max_open_sessions", context)
+        self.assertEqual(context["total_open_sessions"], 2)
+        self.assertEqual(context["max_open_sessions"], 8)
 
 
 class SubmissionFormWizardTests(TestCase):
