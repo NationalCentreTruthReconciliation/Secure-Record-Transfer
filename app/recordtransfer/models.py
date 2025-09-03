@@ -145,6 +145,29 @@ class User(AbstractUser):
             ],
         )
 
+    def open_sessions_within_limit(self, will_add_new: bool = False) -> bool:
+        """Determine if this user's total upload session count is within the limit set.
+
+        The upload session limit is set by :ref:`UPLOAD_SESSION_MAX_CONCURRENT_OPEN`.
+
+        Args:
+            will_add_new:
+                Find whether the current session count PLUS a new one would put the count over the
+                limit. Defaults to False.
+
+        Returns:
+            True if less than or equal to the limit, False if over the limit.
+        """
+        # If feature is disabled, always return True
+        if settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN == -1:
+            return True
+
+        count = self.open_upload_sessions().count()
+        if will_add_new:
+            count += 1
+
+        return count <= settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN
+
     def past_password_hashes(self, limit: int = 5) -> list:
         """Get the past N hashes of this user's previous password."""
         hashes = self.password_history.order_by("-changed_at")[:limit]
