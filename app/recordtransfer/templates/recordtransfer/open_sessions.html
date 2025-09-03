@@ -6,7 +6,7 @@
         {% blocktrans with max_open_sessions=max_open_sessions total_open_sessions=total_open_sessions %}
             {{ total_open_sessions }} / {{ max_open_sessions }} Sessions Used
         {% endblocktrans %}
-    {% elif max_open_session == -1 %}
+    {% elif max_open_sessions == -1 %}
         {% trans "Unlimited Sessions Allowed" %}
     {% else %}
         {% trans "Session Limit Reached" %}
