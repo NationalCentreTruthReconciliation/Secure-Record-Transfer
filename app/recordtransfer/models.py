@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
@@ -123,6 +123,50 @@ class User(AbstractUser):
             return bool(self.other_province_or_state)
 
         return True
+
+    def open_upload_sessions(self) -> models.QuerySet[UploadSession]:
+        """Get the upload sessions this user has open.
+
+        An "open" upload session is one in any of these states:
+
+        - CREATED
+        - UPLOADING
+        - COPYING_IN_PROGRESS
+
+        Returns:
+            The open upload sessions for this user, in no particular order.
+        """
+        return UploadSession.objects.filter(
+            user=self,
+            status__in=[
+                UploadSession.SessionStatus.CREATED,
+                UploadSession.SessionStatus.UPLOADING,
+                UploadSession.SessionStatus.COPYING_IN_PROGRESS,
+            ],
+        )
+
+    def open_sessions_within_limit(self, will_add_new: bool = False) -> bool:
+        """Determine if this user's total upload session count is within the limit set.
+
+        The upload session limit is set by :ref:`UPLOAD_SESSION_MAX_CONCURRENT_OPEN`.
+
+        Args:
+            will_add_new:
+                Find whether the current session count PLUS a new one would put the count over the
+                limit. Defaults to False.
+
+        Returns:
+            True if less than or equal to the limit, False if over the limit.
+        """
+        # If feature is disabled, always return True
+        if settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN == -1:
+            return True
+
+        count = self.open_upload_sessions().count()
+        if will_add_new:
+            count += 1
+
+        return count <= settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN
 
     def past_password_hashes(self, limit: int = 5) -> list:
         """Get the past N hashes of this user's previous password."""
@@ -880,6 +924,15 @@ class InProgressSubmission(models.Model):
         title = self.title or "None"
         session = self.upload_session.token if self.upload_session else "None"
         return f"In-Progress Submission by {self.user} (Title: {title} | Session: {session})"
+
+
+@receiver(pre_delete, sender=InProgressSubmission)
+def delete_upload_session_on_delete(
+    sender: InProgressSubmission, instance: InProgressSubmission, **kwargs
+) -> None:
+    """Delete the upload session for a given in progress submission when it's deleted."""
+    if instance.upload_session:
+        instance.upload_session.delete()
 
 
 @receiver(pre_save, sender=InProgressSubmission)

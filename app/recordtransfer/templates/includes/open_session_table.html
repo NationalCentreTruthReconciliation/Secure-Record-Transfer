@@ -1,0 +1,103 @@
+{% extends "includes/base_table.html" %}
+{% load i18n %}
+{% load custom_filters %}
+{% block table_headers %}
+    <th>{% trans "Started" %}</th>
+    <th>{% trans "Last Changed" %}</th>
+    <th>{% trans "Files" %}</th>
+    <th>{% trans "Total Size" %}</th>
+    <th>{% trans "Status" %}</th>
+    <th>{% trans "Expires" %}</th>
+    <th>{% trans "Actions" %}</th>
+{% endblock table_headers %}
+{% block table_content %}
+    {% for session in page %}
+        <tr class="hover:bg-base-300">
+            <td>{{ session.started_at|date:"M j, Y g:i A" }}</td>
+            <td>{{ session.last_upload_interaction_time|date:"M j, Y g:i A" }}</td>
+            <td>{{ session.file_count }}</td>
+            <td>{{ session.upload_size|filesizeformat }}</td>
+            <td>{{ session.get_status_display }}</td>
+            <td>
+                {% if session.expires_at %}
+                    {{ session.expires_at|date:"M j, Y g:i A" }}
+                    {% if session.is_expired %}
+                        <span class="badge badge-error badge-xs ml-2">{% trans "Expired" %}</span>
+                    {% elif session.expires_soon %}
+                        <span class="badge badge-warning badge-xs ml-2">{% trans "Expires Soon" %}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="text-gray-500">{% trans "N/A" %}</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="flex flex-row gap-4">
+                    {% if session.in_progress_submission %}
+                        {% if not session.in_progress_submission.upload_session_expired %}
+                            <a href="{{ session.in_progress_submission.get_resume_url }}"
+                               class="link link-success tooltip tooltip-left"
+                               data-tip="{% trans "Resume submission" %}"
+                               id="resume_session_{{ forloop.counter }}">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        {% endif %}
+                        <a hx-get="{% url "recordtransfer:delete_in_progress_submission_modal" uuid=session.in_progress_submission.uuid %}"
+                           hx-target="#modal-content-container"
+                           hx-swap="innerHTML"
+                           hx-select="#modal-content"
+                           hx-trigger="click"
+                           class="link link-error tooltip tooltip-left"
+                           data-tip="{% trans "Delete submission" %}"
+                           id="delete_session_{{ forloop.counter }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    {% else %}
+                        <span class="text-gray-400 text-sm">{% trans "No actions available" %}</span>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="7" class="text-center p-4">{% trans "No open sessions found." %}</td>
+        </tr>
+    {% endfor %}
+{% endblock table_content %}
+{% block aftertable %}
+    {% if max_open_sessions != -1 %}
+        <div class="mt-4 p-4 bg-base-200 rounded-box">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="text-sm font-medium">
+                    {% trans "Session Usage:" %}
+                    <span class="font-bold">{{ total_open_sessions }} / {{ max_open_sessions }}</span>
+                </div>
+                <div class="flex-grow sm:max-w-md">
+                    {% if total_open_sessions == max_open_sessions %}
+                        <progress class="progress text-red-600 w-full"
+                                  value="{{ total_open_sessions }}"
+                                  max="{{ max_open_sessions }}"></progress>
+                        <div class="text-xs font-bold text-red-600 mt-1 text-center">{% trans "Maximum sessions reached" %}</div>
+                    {% elif total_open_sessions|add:"1" == max_open_sessions %}
+                        <progress class="progress text-yellow-500 w-full"
+                                  value="{{ total_open_sessions }}"
+                                  max="{{ max_open_sessions }}"></progress>
+                        <div class="text-xs font-bold text-yellow-500 mt-1 text-center">{% trans "Almost at limit" %}</div>
+                    {% else %}
+                        <progress class="progress text-blue-500 w-full"
+                                  value="{{ total_open_sessions }}"
+                                  max="{{ max_open_sessions }}"></progress>
+                        <div class="text-xs font-medium text-blue-500 mt-1 text-center">
+                            {% with remaining=max_open_sessions|subtract:total_open_sessions %}
+                                {% if remaining == 1 %}
+                                    {{ remaining }} {% trans "session remaining" %}
+                                {% else %}
+                                    {{ remaining }} {% trans "sessions remaining" %}
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock aftertable %}

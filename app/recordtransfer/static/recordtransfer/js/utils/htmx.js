@@ -10,18 +10,17 @@ import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./uti
  * @param {CustomEvent} e - The event object containing the request result in
  * `e.detail.successful`.
  * @param {object} context - Context object with URLs and element IDs for table refresh.
- * @param {string} context.IN_PROGRESS_SUBMISSION_TABLE_URL - The URL to refresh the in-progress
- * submissions table.
- * @param {string} context.PAGINATE_QUERY_NAME - The query parameter name for pagination
- * (e.g., "p").
- * @param {string} context.ID_IN_PROGRESS_SUBMISSION_TABLE - The DOM element ID of the in-progress
- * submissions table to update.
  */
 export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
     closeModal();
 
     if (e.detail.successful) {
-        refreshIPSubmissionTable(context);
+        if (context["ID_OPEN_SESSION_TABLE"]) {
+            refreshOpenSessionTable(context);
+        }
+        else {
+            refreshIPSubmissionTable(context);
+        }
     }
 };
 
@@ -140,5 +139,13 @@ const refreshSubmissionTable = (context) => {
         context["SUBMISSION_TABLE_URL"],
         context["PAGINATE_QUERY_NAME"],
         context["ID_SUBMISSION_TABLE"]
+    );
+};
+
+const refreshOpenSessionTable = (context) => {
+    refreshTable(
+        context["OPEN_SESSION_TABLE_URL"],
+        context["PAGINATE_QUERY_NAME"],
+        context["ID_OPEN_SESSION_TABLE"],
     );
 };

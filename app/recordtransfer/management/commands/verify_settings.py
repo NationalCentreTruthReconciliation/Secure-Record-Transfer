@@ -29,7 +29,7 @@ class Command(BaseCommand):
             verify_storage_folder_settings()
             verify_max_upload_size()
             verify_accepted_file_formats()
-            verify_upload_session_expiry_settings()
+            verify_upload_session_settings()
             verify_site_id()
             if is_deployed_environment():
                 verify_security_settings()
@@ -372,17 +372,28 @@ def _validate_cron(cron_str: str) -> None:
             raise ValueError(f"Invalid value '{value}' for field '{field}'")
 
 
-def verify_upload_session_expiry_settings() -> None:
+def verify_upload_session_settings() -> None:
     """Verify the settings.
 
-    - UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
-    - UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
-    - UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES
+    - :ref:`UPLOAD_SESSION_MAX_CONCURRENT_OPEN`
+    - :ref:`UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE`
+    - :ref:`UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES`
+    - :ref:`UPLOAD_SESSION_EXPIRING_REMINDER_MINUTES`
 
     Raises:
-        ImproperlyConfigured: If the expiry schedule is not a valid cron string, or if the
-        expiry settings are invalid.
+        ImproperlyConfigured:
+            If the expiry schedule is not a valid cron string, or if the expiry settings are
+            invalid.
     """
+    if (
+        settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN <= 0
+        and settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN != -1
+    ):
+        raise ImproperlyConfigured(
+            "UPLOAD_SESSION_MAX_CONCURRENT_OPEN must be greater than zero or -1 "
+            f"(got: {settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN})"
+        )
+
     try:
         cleanup_schedule = settings.UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
         if cleanup_schedule:

@@ -4,7 +4,6 @@ import logging
 from typing import Any, Optional, cast
 
 from django.conf import settings
-from django.core.paginator import Paginator
 from django.db.models import Count, DateTimeField, ExpressionWrapper, F, QuerySet
 from django.forms import BaseModelForm
 from django.http import Http404, HttpRequest, HttpResponse
@@ -19,7 +18,6 @@ from django.views.generic import CreateView, UpdateView
 from django_htmx.http import trigger_client_event
 
 from recordtransfer.constants import FormFieldNames, HtmlIds, OtherValues, QueryParameters
-from recordtransfer.enums import SiteSettingKey
 from recordtransfer.forms import (
     SubmissionGroupForm,
     UserAccountInfoForm,
@@ -27,11 +25,11 @@ from recordtransfer.forms import (
 )
 from recordtransfer.models import (
     InProgressSubmission,
-    SiteSetting,
     Submission,
     SubmissionGroup,
     User,
 )
+from recordtransfer.views.table import paginated_table_view
 
 LOGGER = logging.getLogger(__name__)
 
@@ -169,44 +167,6 @@ def delete_in_progress_submission(request: HttpRequest, uuid: str) -> HttpRespon
         )
 
 
-def _paginated_table_view(
-    request: HttpRequest,
-    queryset: QuerySet,
-    template_name: str,
-    target_id: str,
-    paginate_url: str,
-    extra_context: Optional[dict[str, Any]] = None,
-) -> HttpResponse:
-    """Define a generic function to render paginated tables. Request must be made by HTMX, or else
-    a 400 Error is returned.
-    """
-    if not request.htmx:
-        return HttpResponse(status=400)
-
-    paginator = Paginator(queryset, SiteSetting.get_value_int(SiteSettingKey.PAGINATE_BY))
-    page_num = request.GET.get(QueryParameters.PAGINATE_QUERY_NAME, 1)
-
-    try:
-        page_num = int(page_num)
-    except (TypeError, ValueError):
-        page_num = 1
-
-    if page_num < 1:
-        page_num = 1
-    elif page_num > paginator.num_pages:
-        page_num = paginator.num_pages
-
-    context = {
-        "page": paginator.get_page(page_num),
-        "page_num": page_num,
-        "target_id": target_id,
-        "paginate_url": paginate_url,
-        **(extra_context or {}),
-    }
-
-    return render(request, template_name, context)
-
-
 def submission_group_table(request: HttpRequest) -> HttpResponse:
     """Render the submission group table with pagination and sorting."""
     sort_options = {
@@ -240,7 +200,7 @@ def submission_group_table(request: HttpRequest) -> HttpResponse:
         .annotate(submission_count=Count("submission"))
         .order_by(order_field)
     )
-    return _paginated_table_view(
+    return paginated_table_view(
         request,
         queryset,
         "includes/submission_group_table.html",
@@ -308,7 +268,7 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
         order_field = f"-{order_field}"
 
     queryset = queryset.order_by(order_field)
-    return _paginated_table_view(
+    return paginated_table_view(
         request,
         queryset,
         "includes/in_progress_submission_table.html",
@@ -367,7 +327,7 @@ def submission_table(request: HttpRequest) -> HttpResponse:
 
     queryset = queryset.order_by(order_field)
 
-    return _paginated_table_view(
+    return paginated_table_view(
         request,
         queryset,
         "includes/submission_table.html",

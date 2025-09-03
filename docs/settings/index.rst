@@ -581,6 +581,32 @@ Upload Session Controls
 
 These settings have no effect if :ref:`FILE_UPLOAD_ENABLED` is False.
 
+UPLOAD_SESSION_MAX_CONCURRENT_OPEN
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Number of upload sessions a user is allowed to have open at one time*
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        8             int
+        ============  =========
+
+    Sets the maximum number of upload sessions a user is allowed to have open at one time. If a
+    user wants to start a new submission but already has too many upload sessions open, they are
+    re-directed to a page that says why they are not allowed to make another session.
+
+    This feature can be deactivated by setting the value to -1.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        UPLOAD_SESSION_MAX_CONCURRENT_OPEN=1440
+
 UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

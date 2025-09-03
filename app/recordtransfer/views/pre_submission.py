@@ -11,6 +11,7 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
+from django.db.models import Case, Count, Value, When
 from django.forms import (
     BaseForm,
     BaseFormSet,
@@ -56,6 +57,7 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
+from recordtransfer.views.table import paginated_table_view
 
 LOGGER = logging.getLogger(__name__)
 
@@ -70,6 +72,86 @@ class InProgressSubmissionExpired(TemplateView):
     """The page a user sees when they try to access an expired submission."""
 
     template_name = "recordtransfer/in_progress_submission_expired.html"
+
+
+class OpenSessions(TemplateView):
+    """Show the user their current upload sessions."""
+
+    template_name = "recordtransfer/open_sessions.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        """Add context required by template and Javascript."""
+        user = cast(User, self.request.user)
+        context_data = super().get_context_data(**kwargs)
+        context_data["js_context"] = {
+            "OPEN_SESSION_TABLE_URL": reverse("recordtransfer:open_session_table"),
+            "ID_OPEN_SESSION_TABLE": HtmlIds.ID_OPEN_SESSION_TABLE,
+            "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
+        }
+        context_data["total_open_sessions"] = user.open_upload_sessions().count()
+        context_data["max_open_sessions"] = settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN
+        return context_data
+
+
+def open_session_table(request: HttpRequest) -> HttpResponse:
+    """Render the open session table with pagination and sorting."""
+    sort_options = {
+        "date_last_changed": gettext("Date Last Changed"),
+        "date_started": gettext("Date Started"),
+        "file_count": gettext("Files Uploaded"),
+    }
+
+    allowed_sorts = {
+        "date_last_changed": "last_upload_interaction_time",
+        "date_started": "started_at",
+        "file_count": "calculated_file_count",
+    }
+
+    default_sort = "date_last_changed"
+    default_direction = "desc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
+    user = cast(User, request.user)
+    queryset = (
+        user.open_upload_sessions()
+        .annotate(
+            calculated_file_count=Case(
+                When(status=UploadSession.SessionStatus.EXPIRED, then=Value(0)),
+                default=(
+                    Count("tempuploadedfile", distinct=True)
+                    + Count("permuploadedfile", distinct=True)
+                ),
+            ),
+        )
+        .order_by(order_field)
+    )
+
+    return paginated_table_view(
+        request,
+        queryset,
+        "includes/open_session_table.html",
+        HtmlIds.ID_OPEN_SESSION_TABLE,
+        reverse("recordtransfer:open_session_table"),
+        extra_context={
+            "current_sort": sort,
+            "current_direction": direction,
+            "sort_options": sort_options,
+            "target_id": HtmlIds.ID_OPEN_SESSION_TABLE,
+            "total_open_sessions": queryset.count(),
+            "max_open_sessions": settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN,
+        },
+    )
 
 
 class SubmissionFormWizard(SessionWizardView):
@@ -234,7 +316,38 @@ class SubmissionFormWizard(SessionWizardView):
         """Handle GET request to load a submission."""
         if self.in_progress_submission:
             self.load_form_data()
+
+        would_assign_token = not bool(self.storage.extra_data.get("session_token", None))
+
+        # The limit may be exceeded if a new session token had to be assigned
+        # Tokens are only assigned if file uploading is enabled
+        user = cast(User, request.user)
+        limit_reached = settings.FILE_UPLOAD_ENABLED and not user.open_sessions_within_limit(
+            will_add_new=would_assign_token
+        )
+
+        if self.in_progress_submission and not limit_reached:
             return self.render(self.get_form())
+
+        elif self.in_progress_submission and limit_reached:
+            messages.error(
+                request,
+                message=gettext(
+                    "Can't load this in-progress submission because it will put you over the "
+                    "maximum concurrent session limit."
+                ),
+            )
+            return redirect("recordtransfer:open_sessions")
+
+        elif limit_reached:
+            messages.error(
+                request,
+                message=gettext(
+                    "Can't create a new submission because it will put you over the maximum "
+                    "concurrent session limit."
+                ),
+            )
+            return redirect("recordtransfer:open_sessions")
 
         return super().get(request, *args, **kwargs)
 
@@ -251,14 +364,58 @@ class SubmissionFormWizard(SessionWizardView):
 
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle POST request to save a submission."""
-        # User is not saving the form, so continue with the normal form submission
-        if not request.POST.get("save_form_step", None):
+        """Handle POST request to save a submission.
+
+        If the session limit is reached, save the current submission, and re-direct to the session
+        limit page.
+        """
+        would_assign_token = not bool(self.storage.extra_data.get("session_token", None))
+
+        # The limit may be exceeded if a new session token had to be assigned
+        # Tokens are only assigned if file uploading is enabled
+        user = cast(User, request.user)
+        limit_reached = settings.FILE_UPLOAD_ENABLED and not user.open_sessions_within_limit(
+            will_add_new=would_assign_token
+        )
+
+        save_form = False
+        redirect_to = None
+        base_message = ""
+
+        # Save form if session limit would be exceeded
+        user = cast(User, request.user)
+        if limit_reached:
+            # Just redirect if the form hasn't been started, since there isn't any data yet
+            if not self.form_started:
+                return HttpResponseClientRedirect(reverse("recordtransfer:open_sessions"))
+
+            # Otherwise, save their form for them before redirecting
+            save_form = True
+            redirect_to = reverse("recordtransfer:open_sessions")
+            base_message = gettext(
+                "Your submission was saved, but you have reached your session limit. Go to "
+                '<a href="%(link)s">your profile</a> to see your saved submissions.'
+            ) % {
+                "link": reverse("recordtransfer:user_profile"),
+            }
+
+        # Or, save form if explicit save request is received
+        elif request.POST.get("save_form_step", None):
+            save_form = True
+            redirect_to = reverse("recordtransfer:user_profile")
+            base_message = gettext("Submission saved successfully.")
+
+        # The form is not being saved, so continue with the normal form submission
+        if not save_form or not redirect_to:
             return super().post(request, *args, **kwargs)
 
         try:
             self.save_form_data(request)
-            message = gettext("Submission saved successfully.")
+            self.storage.reset()
+
+            message = base_message
+
+            # Add expiry information if needed
             if (
                 expires_at := self.in_progress_submission.upload_session_expires_at
                 if self.in_progress_submission
@@ -268,12 +425,14 @@ class SubmissionFormWizard(SessionWizardView):
                     "This submission will expire on %(date)s. Please be sure to complete your "
                     "submission before then."
                 ) % {"date": timezone.localtime(expires_at).strftime(r"%a %b %-d, %Y @ %H:%M")}
-                message = message + " " + expiry_message
+                message = base_message + " " + expiry_message
 
-            messages.success(request, gettext(message))
+            messages.success(request, message)
+
         except Exception:
             messages.error(request, gettext("There was an error saving the submission."))
-        return HttpResponseClientRedirect(reverse("recordtransfer:user_profile"))
+
+        return HttpResponseClientRedirect(redirect_to)
 
     def save_form_data(self, request: HttpRequest) -> None:
         """Save the current state of the form to the database.

@@ -33,6 +33,7 @@ class HtmlIds:
     ID_SUBMISSION_GROUP_TABLE: str = "submission-group-table-container"
     ID_IN_PROGRESS_SUBMISSION_TABLE: str = "in-progress-submission-table-container"
     ID_SUBMISSION_TABLE: str = "submission-table-container"
+    ID_OPEN_SESSION_TABLE: str = "open-session-table-container"
 
     def asdict(self) -> dict[str, str]:
         """Return the dataclass as a dictionary."""

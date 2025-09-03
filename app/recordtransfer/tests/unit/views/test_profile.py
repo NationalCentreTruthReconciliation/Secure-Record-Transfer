@@ -402,7 +402,7 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertNotIn("fa-exclamation-circle text-warning", content)
         self.assertNotIn("Submission is expiring soon", content)
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_display(self, mock_get_value_int: MagicMock) -> None:
         """Test that the in-progress submission table displays in-progress submissions
         correctly.
@@ -416,7 +416,7 @@ class TestInProgressSubmissionTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=2)
     def test_in_progress_submission_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the in-progress submission table."""
         # Create in-progress submissions
@@ -442,7 +442,7 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertNotIn("Test In-Progress Submission 2", response.content.decode())
         self.assertNotIn("Test In-Progress Submission 1", response.content.decode())
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_sorting_functionality(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -458,7 +458,7 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertIn("Submission Title", content)
         self.assertIn("Expires At", content)
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_default_sorting(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -473,7 +473,7 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertIn("sort_options", context)
         self.assertIn("last_updated", context["sort_options"])
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_custom_sorting(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -489,7 +489,7 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertEqual(context["current_sort"], "submission_title")
         self.assertEqual(context["current_direction"], "asc")
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_sorting_by_expires_at(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -505,7 +505,7 @@ class TestInProgressSubmissionTableView(TestCase):
         self.assertEqual(context["current_sort"], "expires_at")
         self.assertEqual(context["current_direction"], "desc")
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_sorting_without_expiry(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -520,7 +520,7 @@ class TestInProgressSubmissionTableView(TestCase):
             self.assertIn("last_updated", context["sort_options"])
             self.assertIn("submission_title", context["sort_options"])
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_in_progress_submission_table_invalid_params_fallback_to_defaults(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -569,7 +569,7 @@ class TestSubmissionGroupTableView(TestCase):
         content = response.content.decode()
         self.assertIn(_("You have not made any submission groups."), content)
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_group_table_display(self, mock_get_value_int: MagicMock) -> None:
         """Test that the submission group table displays submission groups correctly."""
         # Create submission groups
@@ -585,7 +585,7 @@ class TestSubmissionGroupTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test Group {i}", response.content.decode())
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=2)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=2)
     def test_submission_group_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the submission group table."""
         # Create submission groups
@@ -613,7 +613,7 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertNotIn("Test Group 0", response.content.decode())
         self.assertNotIn("Test Group 1", response.content.decode())
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_group_table_sorting_functionality(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -629,7 +629,7 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertIn("Group Description", content)
         self.assertIn("Submissions in Group", content)
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_group_table_default_sorting(self, mock_get_value_int: MagicMock) -> None:
         """Test that the submission group table has default sorting applied."""
         response = self.client.get(self.submission_group_table_url, headers=self.htmx_headers)
@@ -642,7 +642,7 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertIn("sort_options", context)
         self.assertIn("name", context["sort_options"])
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_group_table_custom_sorting(self, mock_get_value_int: MagicMock) -> None:
         """Test that custom sorting parameters work correctly."""
         # Test sorting by description in descending order
@@ -656,7 +656,7 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertEqual(context["current_sort"], "description")
         self.assertEqual(context["current_direction"], "desc")
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_group_table_sorting_by_submissions_count(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -684,7 +684,7 @@ class TestSubmissionGroupTableView(TestCase):
         self.assertEqual(context["current_sort"], "submissions")
         self.assertEqual(context["current_direction"], "desc")
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_group_table_invalid_params_fallback_to_defaults(
         self, mock_get_value_int: MagicMock
     ) -> None:
@@ -786,7 +786,7 @@ class TestSubmissionTableView(TestCase):
         self.assertEqual(context["current_direction"], "desc")
         self.assertTrue(context.get("IN_GROUP", False))
 
-    @patch("recordtransfer.views.profile.SiteSetting.get_value_int", return_value=3)
+    @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=3)
     def test_submission_table_invalid_params_fallback_to_defaults(
         self, mock_get_value_int: MagicMock
     ) -> None:

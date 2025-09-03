@@ -23,6 +23,11 @@ urlpatterns = [
         name="submit",
     ),
     path(
+        "submission/open-sessions/",
+        login_required(views.pre_submission.OpenSessions.as_view()),
+        name="open_sessions",
+    ),
+    path(
         "submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"
     ),
     path(
@@ -84,6 +89,11 @@ urlpatterns = [
         "submission-table/",
         login_required(views.profile.submission_table),
         name="submission_table",
+    ),
+    path(
+        "open-session-table/",
+        login_required(views.pre_submission.open_session_table),
+        name="open_session_table",
     ),
     path(
         "create-submission-group-modal",
