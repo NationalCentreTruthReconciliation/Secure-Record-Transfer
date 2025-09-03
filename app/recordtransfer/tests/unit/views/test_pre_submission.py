@@ -1,3 +1,4 @@
+import pickle
 from typing import cast
 from unittest.mock import MagicMock, PropertyMock, patch
 
@@ -525,7 +526,7 @@ class SubmissionFormWizardTests(TestCase):
 
             # Create sessions so that count is one over the limit
             if step == SubmissionStep.RECORD_DESCRIPTION.value:
-                while self.user.open_upload_sessions().count() < (4 + 1):
+                while self.user.open_sessions_within_limit():
                     UploadSession.new_session(user=self.user)
 
             response = self.client.post(self.url, submit_data, follow=True)
@@ -546,3 +547,69 @@ class SubmissionFormWizardTests(TestCase):
                 # There should now be a saved submission
                 self.assertEqual(1, self.user.inprogresssubmission_set.count())  # type: ignore
                 break
+
+    @override_settings(
+        FILE_UPLOAD_ENABLED=True,
+        UPLOAD_SESSION_MAX_CONCURRENT_OPEN=4,
+    )
+    def test_resume_submission_without_session_at_max(self) -> None:
+        """Test that resuming a submission without a session when the user has the max sessions
+        already redirects to the open sessions page.
+        """
+        # Create sessions up to the max
+        while self.user.open_upload_sessions().count() < 4:
+            UploadSession.new_session(user=self.user)
+
+        # Create an in-progress submission *without* a session linked
+        in_progress = InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=SubmissionStep.RECORD_DESCRIPTION.value,
+            step_data=pickle.dumps(
+                {
+                    "past": {},
+                    "current": {},
+                    "extra": {},
+                }
+            ),
+        )
+
+        response = self.client.get(self.url, {"resume": in_progress.uuid}, follow=True)
+        self.assertRedirects(response, reverse("recordtransfer:open_sessions"))
+
+    @override_settings(
+        FILE_UPLOAD_ENABLED=True,
+        UPLOAD_SESSION_MAX_CONCURRENT_OPEN=4,
+    )
+    def test_resume_submission_with_session_at_max(self) -> None:
+        """Test that resuming a submission with a session when the user has the max sessions allows
+        a user to continue with the form.
+        """
+        # Create up to the max MINUS one
+        while self.user.open_upload_sessions().count() < 3:
+            UploadSession.new_session(user=self.user)
+
+        # And create one more to take it to the max, except this one will be linked to the
+        # in-progress submission
+        session = UploadSession.new_session(user=self.user)
+
+        # Create an in-progress submission *without* a session linked
+        in_progress = InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=SubmissionStep.RECORD_DESCRIPTION.value,
+            upload_session=session,
+            step_data=pickle.dumps(
+                {
+                    "past": {},
+                    "current": {},
+                    "extra": {
+                        "session_token": session.token,
+                    },
+                }
+            ),
+        )
+
+        response = self.client.get(self.url, {"resume": in_progress.uuid}, follow=True)
+
+        self.assertEqual(200, response.status_code)
+        # Assert that we're on the proper page
+        self.assertContains(response, "Record Description")
