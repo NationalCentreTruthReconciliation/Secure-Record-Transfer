@@ -75,6 +75,15 @@
                 <div class="skeleton h-32 w-full"></div>
             </div>
         </div>
+        <div class="text-sm mt-6">
+            <i>
+                {% blocktrans %}
+                Note that some of your saved in-progress submissions may not be here! Only the
+                submissions that you started uploading files in have a session that counts towards
+                the max.
+                {% endblocktrans %}
+            </i>
+        </div>
     </div>
     {% include "includes/base_modal.html" %}
 {% endblock content %}
