@@ -24,7 +24,8 @@ urlpatterns = [
     ),
     path(
         "submission/session-limit-reached/",
-        login_required(views.pre_submission.UploadSessionLimitReached.as_view()),
+        login_required(views.pre_submission.SessionLimitReached.as_view()),
+        name="session_limit_reached",
     ),
     path(
         "submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"

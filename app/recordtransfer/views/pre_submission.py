@@ -72,7 +72,7 @@ class InProgressSubmissionExpired(TemplateView):
     template_name = "recordtransfer/in_progress_submission_expired.html"
 
 
-class UploadSessionLimitReached(TemplateView):
+class SessionLimitReached(TemplateView):
     """Show the user their current upload sessions when they've reached their limit."""
 
     template_name = "recordtransfer/upload_session_limit_reached.html"
@@ -249,7 +249,38 @@ class SubmissionFormWizard(SessionWizardView):
         """Handle GET request to load a submission."""
         if self.in_progress_submission:
             self.load_form_data()
+
+        would_assign_token = not bool(self.storage.extra_data.get("session_token", None))
+
+        # The limit may be exceeded if a new session token had to be assigned
+        # Tokens are only assigned if file uploading is enabled
+        user = cast(User, request.user)
+        limit_reached = settings.FILE_UPLOAD_ENABLED and not user.open_sessions_within_limit(
+            will_add_new=would_assign_token
+        )
+
+        if self.in_progress_submission and not limit_reached:
             return self.render(self.get_form())
+
+        elif self.in_progress_submission and limit_reached:
+            messages.error(
+                request,
+                message=gettext(
+                    "Can't load this in-progress submission because it will put you over the "
+                    "maximum concurrent session limit."
+                ),
+            )
+            return redirect("recordtransfer:session_limit_reached")
+
+        elif limit_reached:
+            messages.error(
+                request,
+                message=gettext(
+                    "Can't create a new submission because it will put you over the maximum "
+                    "concurrent session limit."
+                ),
+            )
+            return redirect("recordtransfer:session_limit_reached")
 
         return super().get(request, *args, **kwargs)
 
@@ -266,14 +297,58 @@ class SubmissionFormWizard(SessionWizardView):
 
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle POST request to save a submission."""
-        # User is not saving the form, so continue with the normal form submission
-        if not request.POST.get("save_form_step", None):
+        """Handle POST request to save a submission.
+
+        If the session limit is reached, save the current submission, and re-direct to the session
+        limit page.
+        """
+        would_assign_token = not bool(self.storage.extra_data.get("session_token", None))
+
+        # The limit may be exceeded if a new session token had to be assigned
+        # Tokens are only assigned if file uploading is enabled
+        user = cast(User, request.user)
+        limit_reached = settings.FILE_UPLOAD_ENABLED and not user.open_sessions_within_limit(
+            will_add_new=would_assign_token
+        )
+
+        save_form = False
+        redirect_to = None
+        base_message = ""
+
+        # Save form if session limit would be exceeded
+        user = cast(User, request.user)
+        if limit_reached:
+            # Just redirect if the form hasn't been started, since there isn't any data yet
+            if not self.form_started:
+                return HttpResponseClientRedirect(reverse("recordtransfer:session_limit_reached"))
+
+            # Otherwise, save their form for them before redirecting
+            save_form = True
+            redirect_to = reverse("recordtransfer:session_limit_reached")
+            base_message = gettext(
+                "Your submission was saved, but you have reached your session limit. Go to "
+                '<a href="%(link)s">your profile</a> to see your saved submissions.'
+            ) % {
+                "link": reverse("recordtransfer:user_profile"),
+            }
+
+        # Or, save form if explicit save request is received
+        elif request.POST.get("save_form_step", None):
+            save_form = True
+            redirect_to = reverse("recordtransfer:user_profile")
+            base_message = gettext("Submission saved successfully.")
+
+        # The form is not being saved, so continue with the normal form submission
+        if not save_form or not redirect_to:
             return super().post(request, *args, **kwargs)
 
         try:
             self.save_form_data(request)
-            message = gettext("Submission saved successfully.")
+            self.storage.reset()
+
+            message = base_message
+
+            # Add expiry information if needed
             if (
                 expires_at := self.in_progress_submission.upload_session_expires_at
                 if self.in_progress_submission
@@ -283,12 +358,14 @@ class SubmissionFormWizard(SessionWizardView):
                     "This submission will expire on %(date)s. Please be sure to complete your "
                     "submission before then."
                 ) % {"date": timezone.localtime(expires_at).strftime(r"%a %b %-d, %Y @ %H:%M")}
-                message = message + " " + expiry_message
+                message = base_message + " " + expiry_message
 
-            messages.success(request, gettext(message))
+            messages.success(request, message)
+
         except Exception:
             messages.error(request, gettext("There was an error saving the submission."))
-        return HttpResponseClientRedirect(reverse("recordtransfer:user_profile"))
+
+        return HttpResponseClientRedirect(redirect_to)
 
     def save_form_data(self, request: HttpRequest) -> None:
         """Save the current state of the form to the database.

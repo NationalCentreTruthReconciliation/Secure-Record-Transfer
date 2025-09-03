@@ -109,6 +109,12 @@ class SubmissionFormWizardTests(TestCase):
             ),
         ]
 
+    def tearDown(self) -> None:
+        """Remove upload sessions and in-progress submissions."""
+        UploadSession.objects.all().delete()
+        InProgressSubmission.objects.all().delete()
+        return super().tearDown()
+
     def _upload_test_file(self) -> None:
         """Upload a test file to the server using the provided session token."""
         response = self.client.post(
@@ -262,3 +268,55 @@ class SubmissionFormWizardTests(TestCase):
         mock_expired.return_value = True
         response = self.client.get(self.url, {"resume": in_progress.uuid}, follow=True)
         self.assertRedirects(response, reverse("recordtransfer:in_progress_submission_expired"))
+
+    @override_settings(
+        FILE_UPLOAD_ENABLED=True,
+        UPLOAD_SESSION_MAX_CONCURRENT_OPEN=4,
+    )
+    def test_session_limit_reached_get(self) -> None:
+        """Test that the user is redirected to the session limit page with a GET request."""
+        while self.user.open_upload_sessions().count() < 4:
+            UploadSession.new_session(user=self.user)
+
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("recordtransfer:session_limit_reached"))
+
+    @override_settings(
+        FILE_UPLOAD_ENABLED=True,
+        UPLOAD_SESSION_MAX_CONCURRENT_OPEN=4,
+    )
+    def test_session_limit_reached_mid_form(self) -> None:
+        """Test that the session limit is reached during a POST request, i.e., mid-form."""
+        response = self.client.get(self.url)
+        self.assertEqual(200, response.status_code)
+
+        self.assertEqual(0, self.user.inprogresssubmission_set.count())  # type: ignore
+
+        response = None
+
+        for step, step_data in self.test_data:
+            submit_data = self._process_test_data(step, step_data)
+
+            # Create sessions so that count is one over the limit
+            if step == SubmissionStep.RECORD_DESCRIPTION.value:
+                while self.user.open_upload_sessions().count() < (4 + 1):
+                    UploadSession.new_session(user=self.user)
+
+            response = self.client.post(self.url, submit_data, follow=True)
+
+            if step == SubmissionStep.RECORD_DESCRIPTION.value:
+                hx_redirect = response.headers.get("HX-Redirect") or ""
+                self.assertEqual(hx_redirect, reverse("recordtransfer:session_limit_reached"))
+
+                # Follow the redirect
+                redirected_response = self.client.get(hx_redirect, follow=True)
+                self.assertEqual(200, redirected_response.status_code)
+
+                self.assertContains(
+                    redirected_response,
+                    "Your submission was saved, but you have reached your session limit.",
+                )
+
+                # There should now be a saved submission
+                self.assertEqual(1, self.user.inprogresssubmission_set.count())  # type: ignore
+                break
