@@ -73,10 +73,10 @@ class InProgressSubmissionExpired(TemplateView):
     template_name = "recordtransfer/in_progress_submission_expired.html"
 
 
-class SessionLimitReached(TemplateView):
-    """Show the user their current upload sessions when they've reached their limit."""
+class OpenSessions(TemplateView):
+    """Show the user their current upload sessions."""
 
-    template_name = "recordtransfer/session_limit_reached.html"
+    template_name = "recordtransfer/open_sessions.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add the user's open sessions to the template context."""
@@ -326,7 +326,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "maximum concurrent session limit."
                 ),
             )
-            return redirect("recordtransfer:session_limit_reached")
+            return redirect("recordtransfer:open_sessions")
 
         elif limit_reached:
             messages.error(
@@ -336,7 +336,7 @@ class SubmissionFormWizard(SessionWizardView):
                     "concurrent session limit."
                 ),
             )
-            return redirect("recordtransfer:session_limit_reached")
+            return redirect("recordtransfer:open_sessions")
 
         return super().get(request, *args, **kwargs)
 
@@ -376,11 +376,11 @@ class SubmissionFormWizard(SessionWizardView):
         if limit_reached:
             # Just redirect if the form hasn't been started, since there isn't any data yet
             if not self.form_started:
-                return HttpResponseClientRedirect(reverse("recordtransfer:session_limit_reached"))
+                return HttpResponseClientRedirect(reverse("recordtransfer:open_sessions"))
 
             # Otherwise, save their form for them before redirecting
             save_form = True
-            redirect_to = reverse("recordtransfer:session_limit_reached")
+            redirect_to = reverse("recordtransfer:open_sessions")
             base_message = gettext(
                 "Your submission was saved, but you have reached your session limit. Go to "
                 '<a href="%(link)s">your profile</a> to see your saved submissions.'

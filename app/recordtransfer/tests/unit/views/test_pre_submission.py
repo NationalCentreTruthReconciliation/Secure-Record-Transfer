@@ -279,7 +279,7 @@ class SubmissionFormWizardTests(TestCase):
             UploadSession.new_session(user=self.user)
 
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse("recordtransfer:session_limit_reached"))
+        self.assertRedirects(response, reverse("recordtransfer:open_sessions"))
 
     @override_settings(
         FILE_UPLOAD_ENABLED=True,
@@ -306,7 +306,7 @@ class SubmissionFormWizardTests(TestCase):
 
             if step == SubmissionStep.RECORD_DESCRIPTION.value:
                 hx_redirect = response.headers.get("HX-Redirect") or ""
-                self.assertEqual(hx_redirect, reverse("recordtransfer:session_limit_reached"))
+                self.assertEqual(hx_redirect, reverse("recordtransfer:open_sessions"))
 
                 # Follow the redirect
                 redirected_response = self.client.get(hx_redirect, follow=True)

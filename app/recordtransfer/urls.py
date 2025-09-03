@@ -23,9 +23,9 @@ urlpatterns = [
         name="submit",
     ),
     path(
-        "submission/session-limit-reached/",
-        login_required(views.pre_submission.SessionLimitReached.as_view()),
-        name="session_limit_reached",
+        "submission/open-sessions/",
+        login_required(views.pre_submission.OpenSessions.as_view()),
+        name="open_sessions",
     ),
     path(
         "submission/sent/", views.pre_submission.SubmissionSent.as_view(), name="submission_sent"
