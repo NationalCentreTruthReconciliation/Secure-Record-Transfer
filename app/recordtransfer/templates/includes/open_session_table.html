@@ -11,7 +11,7 @@
     <th>{% trans "Actions" %}</th>
 {% endblock table_headers %}
 {% block table_content %}
-    {% for session in sessions %}
+    {% for session in page %}
         <tr class="hover:bg-base-300">
             <td>{{ session.started_at|date:"M j, Y g:i A" }}</td>
             <td>{{ session.last_upload_interaction_time|date:"M j, Y g:i A" }}</td>
@@ -59,7 +59,45 @@
         </tr>
     {% empty %}
         <tr>
-            <td colspan="6" class="text-center p-4">{% trans "No upload sessions found." %}</td>
+            <td colspan="7" class="text-center p-4">{% trans "No open sessions found." %}</td>
         </tr>
     {% endfor %}
 {% endblock table_content %}
+{% block aftertable %}
+    {% if max_open_sessions != -1 %}
+        <div class="mt-4 p-4 bg-base-200 rounded-box">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="text-sm font-medium">
+                    {% trans "Session Usage:" %}
+                    <span class="font-bold">{{ total_open_sessions }} / {{ max_open_sessions }}</span>
+                </div>
+                <div class="flex-grow sm:max-w-md">
+                    {% if total_open_sessions == max_open_sessions %}
+                        <progress class="progress text-red-600 w-full"
+                                  value="{{ total_open_sessions }}"
+                                  max="{{ max_open_sessions }}"></progress>
+                        <div class="text-xs font-bold text-red-600 mt-1 text-center">{% trans "Maximum sessions reached" %}</div>
+                    {% elif total_open_sessions|add:"1" == max_open_sessions %}
+                        <progress class="progress text-yellow-500 w-full"
+                                  value="{{ total_open_sessions }}"
+                                  max="{{ max_open_sessions }}"></progress>
+                        <div class="text-xs font-bold text-yellow-500 mt-1 text-center">{% trans "Almost at limit" %}</div>
+                    {% else %}
+                        <progress class="progress text-blue-500 w-full"
+                                  value="{{ total_open_sessions }}"
+                                  max="{{ max_open_sessions }}"></progress>
+                        <div class="text-xs font-medium text-blue-500 mt-1 text-center">
+                            {% with remaining=max_open_sessions|subtract:total_open_sessions %}
+                                {% if remaining == 1 %}
+                                    {{ remaining }} {% trans "session remaining" %}
+                                {% else %}
+                                    {{ remaining }} {% trans "sessions remaining" %}
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock aftertable %}

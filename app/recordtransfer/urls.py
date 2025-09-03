@@ -91,6 +91,11 @@ urlpatterns = [
         name="submission_table",
     ),
     path(
+        "open-session-table/",
+        login_required(views.pre_submission.open_session_table),
+        name="open_session_table",
+    ),
+    path(
         "create-submission-group-modal",
         login_required(views.profile.SubmissionGroupModalCreateView.as_view()),
         name="create_submission_group_modal",

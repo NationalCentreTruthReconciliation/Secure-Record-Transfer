@@ -81,4 +81,6 @@
             {% include "includes/pagination.html" with page=page target_id=target_id paginate_url=paginate_url %}
         </div>
     {% endif %}
+    {% block aftertable %}
+    {% endblock aftertable %}
 </div>

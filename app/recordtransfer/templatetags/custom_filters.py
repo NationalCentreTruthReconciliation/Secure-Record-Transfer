@@ -18,3 +18,9 @@ def filesizeformat(size_bytes: int) -> str:
     if size_bytes is None:
         return "0 B"
     return get_human_readable_size(size_bytes, base=1024, precision=1)
+
+
+@register.filter
+def subtract(value: int, arg: int) -> int:
+    """Subtract one number from another."""
+    return value - arg

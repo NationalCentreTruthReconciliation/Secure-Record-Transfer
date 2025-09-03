@@ -56,6 +56,7 @@ from recordtransfer.models import (
     UploadSession,
     User,
 )
+from recordtransfer.views.table import paginated_table_view
 
 LOGGER = logging.getLogger(__name__)
 
@@ -75,16 +76,71 @@ class InProgressSubmissionExpired(TemplateView):
 class SessionLimitReached(TemplateView):
     """Show the user their current upload sessions when they've reached their limit."""
 
-    template_name = "recordtransfer/upload_session_limit_reached.html"
+    template_name = "recordtransfer/session_limit_reached.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """Add the user's open sessions to the template context."""
-        context_data = super().get_context_data(**kwargs)
         user = cast(User, self.request.user)
-        context_data["sessions"] = user.open_upload_sessions().order_by(
-            "-last_upload_interaction_time"
-        )
+        context_data = super().get_context_data(**kwargs)
+        context_data["js_context"] = {
+            "OPEN_SESSION_TABLE_URL": reverse("recordtransfer:open_session_table"),
+            "ID_OPEN_SESSION_TABLE": HtmlIds.ID_OPEN_SESSION_TABLE,
+            "PAGINATE_QUERY_NAME": QueryParameters.PAGINATE_QUERY_NAME,
+        }
+        context_data["total_open_sessions"] = user.open_upload_sessions().count()
+        context_data["max_open_sessions"] = settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN
         return context_data
+
+
+def open_session_table(request: HttpRequest) -> HttpResponse:
+    """Render the open session table with pagination and sorting."""
+    sort_options = {
+        "date_last_changed": gettext("Date Last Changed"),
+        "date_started": gettext("Date Started"),
+        "upload_size": gettext("Total Upload Size"),
+        "file_count": gettext("Files Uploaded"),
+    }
+
+    allowed_sorts = {
+        "date_last_changed": "last_upload_interaction_time",
+        "date_started": "started_at",
+        "upload_size": "upload_size",
+        "file_count": "file_count",
+    }
+
+    default_sort = "date_last_changed"
+    default_direction = "desc"
+
+    sort = request.GET.get("sort", default_sort)
+    if sort not in allowed_sorts:
+        sort = default_sort
+
+    direction = request.GET.get("direction", default_direction)
+    if direction not in {"asc", "desc"}:
+        direction = default_direction
+
+    order_field = allowed_sorts[sort]
+    if direction == "desc":
+        order_field = f"-{order_field}"
+
+    user = cast(User, request.user)
+    queryset = user.open_upload_sessions().order_by(order_field)
+
+    return paginated_table_view(
+        request,
+        queryset,
+        "includes/open_session_table.html",
+        HtmlIds.ID_OPEN_SESSION_TABLE,
+        reverse("recordtransfer:open_session_table"),
+        extra_context={
+            "current_sort": sort,
+            "current_direction": direction,
+            "sort_options": sort_options,
+            "target_id": HtmlIds.ID_OPEN_SESSION_TABLE,
+            "total_open_sessions": queryset.count(),
+            "max_open_sessions": settings.UPLOAD_SESSION_MAX_CONCURRENT_OPEN,
+        },
+    )
 
 
 class SubmissionFormWizard(SessionWizardView):
