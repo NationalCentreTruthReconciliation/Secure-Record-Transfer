@@ -13,6 +13,57 @@ from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
 
 
+class OpenSessionsTests(TestCase):
+    """Tests for the OpenSession view."""
+
+    def setUp(self) -> None:
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="testuser1", email="user@example.com", password="zCNAD5&@Uy"
+        )
+        self.client.login(username="testuser1", password="zCNAD5&@Uy")
+
+    def tearDown(self) -> None:
+        """Tear down test data."""
+        UploadSession.objects.filter(user=self.user).delete()
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=8)
+    def test_no_sessions_in_context(self) -> None:
+        """Test when the user has no open sessions."""
+        response = self.client.get(reverse("recordtransfer:open_sessions"))
+        self.assertContains(response, "You are Within the Session Limit")
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=8)
+    def test_limit_almost_reached(self) -> None:
+        """Test when the user has one fewer open session than the max."""
+        for _ in range(7):
+            UploadSession.new_session(user=self.user)
+
+        response = self.client.get(reverse("recordtransfer:open_sessions"))
+        self.assertContains(response, "You are Within the Session Limit")
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=8)
+    def test_limit_reached(self) -> None:
+        """Test when the user has reached the max."""
+        for _ in range(8):
+            UploadSession.new_session(user=self.user)
+
+        response = self.client.get(reverse("recordtransfer:open_sessions"))
+        self.assertContains(response, "Session Limit Reached")
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=-1)
+    def test_no_limit(self) -> None:
+        """Test when the user has reached the max default limit, but no limit is set."""
+        for _ in range(8):
+            UploadSession.new_session(user=self.user)
+
+        response = self.client.get(reverse("recordtransfer:open_sessions"))
+        self.assertContains(response, "You are Within the Session Limit")
+        self.assertContains(
+            response, "You are allowed to have as many concurrent sessions as you would like."
+        )
+
+
 class SubmissionFormWizardTests(TestCase):
     """Tests for the SubmissionFormWizard view."""
 

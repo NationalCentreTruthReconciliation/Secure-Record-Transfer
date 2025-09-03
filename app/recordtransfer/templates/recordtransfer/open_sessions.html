@@ -32,7 +32,7 @@
             <div class="mb-2 text-4xl text-primary">{% trans "You are Within the Session Limit" %}</div>
             <div class="card">
                 <div class="card-body p-6">
-                    {% if max_sessions == -1 %}
+                    {% if max_open_sessions == -1 %}
                         <p class="text-lg leading-relaxed text-base-content">
                             {% trans "You are allowed to have as many concurrent sessions as you would like." %}
                         </p>
