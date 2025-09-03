@@ -1,10 +1,9 @@
-from typing import Any, NamedTuple, Optional
+from typing import Any, Optional
 
 from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.constants import QueryParameters
 from recordtransfer.enums import SiteSettingKey
