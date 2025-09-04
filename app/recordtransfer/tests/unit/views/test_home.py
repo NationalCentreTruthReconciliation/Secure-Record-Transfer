@@ -19,7 +19,7 @@ class TestHomepage(TestCase):
         """Test that the index page loads successfully."""
         response = self.client.get(reverse("recordtransfer:index"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "NCTR Record Transfer")
+        self.assertContains(response, "Secure Record Transfer")
 
 
 @patch(

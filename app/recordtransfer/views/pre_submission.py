@@ -8,8 +8,6 @@ import pickle
 import re
 from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
-from django.utils.safestring import mark_safe
-
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
@@ -32,6 +30,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
