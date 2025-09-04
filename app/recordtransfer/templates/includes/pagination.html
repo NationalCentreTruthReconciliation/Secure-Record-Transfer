@@ -10,9 +10,7 @@
     {% endif %}
     <button class="join-item btn btn-xs p-3 pointer-events-none page-info-btn"
             data-current-page="{{ page.number }}">
-        {% blocktrans with curr_page=page.number total_pages=page.paginator.num_pages %}
-            Page {{ curr_page }} of {{ total_pages }}
-        {% endblocktrans %}
+        {% blocktrans with curr_page=page.number total_pages=page.paginator.num_pages %}Page {{ curr_page }} of {{ total_pages }}{% endblocktrans %}
     </button>
     {% if page.has_next %}
         <button hx-get="{{ paginate_url }}?{{ PAGINATE_QUERY_NAME }}={{ page.next_page_number }}"

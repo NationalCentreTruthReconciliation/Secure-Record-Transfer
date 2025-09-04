@@ -8,6 +8,8 @@ import pickle
 import re
 from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
+from django.utils.safestring import mark_safe
+
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
@@ -206,11 +208,19 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_formset.html",
             title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
-            info_message=gettext(
-                "Depending on the records you are submitting, there may be specific rights that govern "
-                "the access of your records. <br> <br>"
-                " Need help understanding rights types? "
-                '<a class="non-nav-link link-primary font-semibold underline" target="_blank" href="/help#rights-types">View our guide</a> for detailed explanations.'
+            info_message=mark_safe(
+                gettext(
+                    "Depending on the records you are submitting, there may be specific rights that govern "
+                    "the access of your records. <br> <br>"
+                    "Need help understanding rights types? %(link_start)sView our guide%(link_end)s for "
+                    "detailed explanations."
+                )
+                % {
+                    "link_start": mark_safe(
+                        '<a class="non-nav-link link-primary font-semibold underline" target="_blank" href="/help#rights-types">'
+                    ),
+                    "link_end": mark_safe("</a>"),
+                }
             ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
@@ -393,12 +403,19 @@ class SubmissionFormWizard(SessionWizardView):
             # Otherwise, save their form for them before redirecting
             save_form = True
             redirect_to = reverse("recordtransfer:open_sessions")
-            base_message = gettext(
-                "Your submission was saved, but you have reached your session limit. Go to "
-                '<a href="%(link)s">your profile</a> to see your saved submissions.'
-            ) % {
-                "link": reverse("recordtransfer:user_profile"),
-            }
+            profile_url = reverse("recordtransfer:user_profile")
+            base_message = mark_safe(
+                gettext(
+                    "Your submission was saved, but you have reached your session limit. Go to "
+                    "%(link_start)syour profile%(link_end)s to see your saved submissions."
+                )
+                % {
+                    "link_start": mark_safe(
+                        f'<a class="link-primary font-semibold underline" href="{profile_url}">'
+                    ),
+                    "link_end": mark_safe("</a>"),
+                }
+            )
 
         # Or, save form if explicit save request is received
         elif request.POST.get("save_form_step", None):

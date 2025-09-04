@@ -377,13 +377,19 @@ class SubmissionAdmin(admin.ModelAdmin):
         if submission and submission.upload_session:
             create_downloadable_bag.delay(submission, User.objects.get(pk=request.user.pk))
 
+            job_page_url = reverse("admin:recordtransfer_job_changelist")
+
             self.message_user(
                 request,
                 mark_safe(
                     _(
-                        'A downloadable bag is being generated. Visit the <a href="{url}">jobs page</a> for '
+                        "A downloadable bag is being generated. Visit the %(link_start)sjobs page%(link_end)s for "
                         "the status of the bag generation, or check the Submission page for a download link"
-                    ).format(url=reverse("admin:recordtransfer_job_changelist"))
+                    )
+                    % {
+                        "link_start": mark_safe(f'<a href="{job_page_url}">'),
+                        "link_end": mark_safe("</a>"),
+                    }
                 ),
             )
 

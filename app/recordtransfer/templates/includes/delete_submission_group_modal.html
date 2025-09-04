@@ -4,7 +4,7 @@
     <h3 class="text-lg font-bold mb-5">{% trans "Are you sure you want to delete this submission group?" %}</h3>
     <p class="mb-5">
         {% blocktrans with name=submission_group.name|escape submission_count=submission_group.number_of_submissions_in_group|escape %}
-            This will delete the submission group <span class="italic">{{ name }}</span>, which has {{ submission_count }} submissions.
+        This will delete the submission group <i>{{ name }}</i>, which has {{ submission_count }} submissions.
         {% endblocktrans %}
     </p>
     <div role="alert" class="alert p-5">
