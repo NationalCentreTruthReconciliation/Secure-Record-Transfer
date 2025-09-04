@@ -184,13 +184,13 @@ class ContactInfoFormMixin(forms.Form):
         if not region:
             self.add_error(
                 "province_or_state",
-                'You must select a province or state, use "Other" to enter a custom location',
+                _('You must select a province or state, use "Other" to enter a custom location'),
             )
         elif region == "other":
             if not other_region:
                 self.add_error(
                     "other_province_or_state",
-                    'This field must be filled out if "Other" province or state is selected',
+                    _('This field must be filled out if "Other" province or state is selected'),
                 )
         else:
             cleaned_data["other_province_or_state"] = ""
